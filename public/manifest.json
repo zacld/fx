@@ -1,0 +1,9 @@
+{
+  "name": "UP FX Alerts Demo",
+  "short_name": "UP Alerts",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0056d6",
+  "icons": []
+}
