@@ -567,6 +567,58 @@ body{
 }
 .empty-sub code{color:rgba(16,185,129,0.5)}
 
+/* ── TODAY'S BRIEFING ── */
+.briefing-date{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(255,255,255,0.2);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.briefing-date::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06)}
+.event-briefing-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+  gap:12px;margin-bottom:36px;
+}
+@media(max-width:600px){.event-briefing-grid{grid-template-columns:1fr}}
+.event-briefing-card{
+  position:relative;overflow:hidden;
+  background:rgba(255,255,255,0.025);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px;cursor:pointer;transition:all 0.2s;
+}
+.event-briefing-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--uc);opacity:0.8;
+}
+.event-briefing-card:hover{
+  background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.13);
+  transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+.ebc-header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 0;gap:10px}
+.ebc-type{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--uc);
+  padding:3px 8px;border-radius:5px;background:var(--ucbg);border:1px solid var(--ucborder);white-space:nowrap;
+}
+.ebc-urgency{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--uc)}
+.ebc-urgency-bar{width:40px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
+.ebc-urgency-fill{height:100%;background:var(--uc);border-radius:2px}
+.ebc-body{padding:14px 20px 18px}
+.ebc-headline{font-size:15px;font-weight:700;line-height:1.4;color:#F8FAFC;margin-bottom:8px;letter-spacing:-0.01em}
+.ebc-summary{font-size:12px;line-height:1.65;color:rgba(255,255,255,0.4);margin-bottom:12px}
+.ebc-impact{
+  padding:9px 12px;background:rgba(16,185,129,0.04);
+  border:1px solid rgba(16,185,129,0.1);border-radius:7px;margin-bottom:14px;
+}
+.ebc-impact-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#10B981;margin-bottom:3px}
+.ebc-impact-text{font-size:12px;line-height:1.55;color:rgba(255,255,255,0.55)}
+.ebc-footer{display:flex;justify-content:space-between;align-items:center}
+.ebc-pairs{display:flex;gap:4px}
+.ebc-pair{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.18);color:#10B981}
+.ebc-cta{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--uc);opacity:0.7;transition:opacity 0.15s}
+.event-briefing-card:hover .ebc-cta{opacity:1}
+.ebc-lead-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.25)}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
   .hero-title{font-size:28px}
@@ -929,103 +981,121 @@ function CompaniesView({ event, industry, leads, onBack }) {
 }
 
 // ── MAIN DASHBOARD VIEW ────────────────────────────────────────────
+function EventBriefingCard({ event, leadCount, onSelect }) {
+  const uc = urgencyColor(event.urgency_score || 0);
+  const ucbg = `${uc}12`;
+  const ucborder = `${uc}35`;
+  return (
+    <div
+      className="event-briefing-card"
+      style={{"--uc":uc,"--ucbg":ucbg,"--ucborder":ucborder}}
+      onClick={() => onSelect(event)}
+    >
+      <div className="ebc-header">
+        <span className="ebc-type">{event.event_type || "Event"}</span>
+        <div className="ebc-urgency">
+          <div className="ebc-urgency-bar">
+            <div className="ebc-urgency-fill" style={{width:`${(event.urgency_score||0)*10}%`}} />
+          </div>
+          {event.urgency_score}/10
+        </div>
+      </div>
+      <div className="ebc-body">
+        <div className="ebc-headline">{event.headline}</div>
+        <div className="ebc-summary">{event.summary?.slice(0,140)}{event.summary?.length > 140 ? "…" : ""}</div>
+        {event.fx_payment_logic && (
+          <div className="ebc-impact">
+            <div className="ebc-impact-label">Why businesses pay FX</div>
+            <div className="ebc-impact-text">{event.fx_payment_logic}</div>
+          </div>
+        )}
+        <div className="ebc-footer">
+          <div className="ebc-pairs">
+            {(event.currency_pairs||[]).map(p => <span key={p} className="ebc-pair">{p}</span>)}
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            {leadCount > 0 && <span className="ebc-lead-count">{leadCount} companies</span>}
+            <div className="ebc-cta">Find affected businesses →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DashboardView({ events, leads, onSelectEvent }) {
-  const [priorityFilter, setPriorityFilter] = useState("ALL");
-  const [selectedEventId, setSelectedEventId] = useState(null);
-
-  const filtered = useMemo(() => {
-    let base = selectedEventId ? leads.filter(l => l.event_id === selectedEventId) : leads;
-    if (priorityFilter !== "ALL") base = base.filter(l => l.priority === priorityFilter);
-    return base;
-  }, [leads, selectedEventId, priorityFilter]);
-
   const hot  = leads.filter(l => l.priority==="HOT").length;
   const warm = leads.filter(l => l.priority==="WARM").length;
+  const today = new Date().toLocaleDateString("en-GB", {weekday:"long",day:"numeric",month:"long",year:"numeric"});
 
   return (
     <>
       {/* STATS */}
-      <div className="stats-row" style={{marginBottom:28}}>
+      <div className="stats-row" style={{marginBottom:32}}>
         {[
-          {num:events.length, label:"Events detected",  color:"#10B981", delta:"Today"},
-          {num:hot,           label:"Hot leads",         color:"#10B981", delta:"Score 80+"},
-          {num:warm,          label:"Warm leads",        color:"#F59E0B", delta:"Score 60+"},
-          {num:leads.length,  label:"Total companies",   color:"#6366F1", delta:"All events"},
+          {num:events.length, label:"Events today",    color:"#10B981", delta:"Detected"},
+          {num:hot,           label:"Hot companies",   color:"#10B981", delta:"Score 80+"},
+          {num:warm,          label:"Warm companies",  color:"#F59E0B", delta:"Score 60+"},
+          {num:leads.length,  label:"Total leads",     color:"#6366F1", delta:"All events"},
         ].map(({num,label,color,delta}) => (
           <div className="stat-card" key={label}>
             <div className="stat-card-num" style={{color}}>{num}</div>
             <div className="stat-card-label">{label}</div>
-            <div className="stat-card-delta" style={{background:`${color}15`,color}}>
-              {delta}
-            </div>
+            <div className="stat-card-delta" style={{background:`${color}15`,color}}>{delta}</div>
           </div>
         ))}
       </div>
 
-      {/* EVENT FILTER PILLS */}
-      {events.length > 0 && (
-        <>
-          <div className="section-header" style={{marginBottom:10}}>
-            <div className="section-title">Filter by event</div>
-            <div className="section-divider" />
-          </div>
-          <EventPills
-            events={events}
-            selectedId={selectedEventId}
-            onSelect={setSelectedEventId}
-          />
-        </>
-      )}
-
-      {/* PRIORITY FILTER + LEADS */}
-      <div className="section-header" style={{marginBottom:12}}>
-        <div className="section-title">Lead cards</div>
+      {/* TODAY'S BRIEFING */}
+      <div className="section-header" style={{marginBottom:16}}>
+        <div className="section-title">Today's briefing</div>
         <div className="section-divider" />
+        <div className="briefing-date" style={{marginBottom:0,flex:"none"}}>
+          {today}
+        </div>
       </div>
 
-      <div className="filter-bar">
-        <span className="filter-label">Priority</span>
-        {["ALL","HOT","WARM","QUEUE"].map(f => (
-          <button
-            key={f}
-            className={`filter-btn${priorityFilter===f?" active":""}`}
-            onClick={() => setPriorityFilter(f)}
-          >
-            {f}
-          </button>
-        ))}
-        <span className="filter-sep" />
-        {events.length > 0 && (
-          <>
-            <span className="filter-label" style={{marginLeft:8}}>Drill into event</span>
-            {events.slice(0,3).map(ev => (
-              <button
-                key={ev.id}
-                className="filter-btn"
-                onClick={() => onSelectEvent(ev)}
-                style={{maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}
-              >
-                {ev.event_type} ↗
-              </button>
-            ))}
-          </>
-        )}
-        <span className="filter-count">{filtered.length} leads</span>
-      </div>
-
-      {filtered.length === 0 ? (
+      {events.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">📡</div>
-          <div className="empty-title">No leads yet</div>
+          <div className="empty-title">No events detected yet</div>
           <div className="empty-sub">
-            Run <code>python3 scripts/ingest.py</code> then <code>python3 scripts/discover.py</code><br/>
-            to populate the dashboard with real market-driven leads
+            Run <code>python3 scripts/ingest.py</code> to pull today's market events
           </div>
         </div>
       ) : (
-        <div className="lead-grid">
-          {filtered.map(lead => <LeadCard key={lead.id} lead={lead} />)}
-        </div>
+        <>
+          <p style={{fontSize:13,color:"rgba(255,255,255,0.35)",marginBottom:20,lineHeight:1.6}}>
+            {events.length} market event{events.length!==1?"s":""} detected today that may create FX exposure for UK businesses.
+            Click any event to find the companies affected and why they need foreign currency.
+          </p>
+          <div className="event-briefing-grid">
+            {events.map(ev => (
+              <EventBriefingCard
+                key={ev.id}
+                event={ev}
+                leadCount={leads.filter(l => l.event_id === ev.id).length}
+                onSelect={onSelectEvent}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ALL LEADS BELOW */}
+      {leads.length > 0 && (
+        <>
+          <div className="section-header" style={{marginBottom:12,marginTop:8}}>
+            <div className="section-title">All company leads</div>
+            <div className="section-divider" />
+            <div style={{fontSize:11,color:"rgba(255,255,255,0.25)",fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>
+              Sorted by FX relevance score · {leads.length} total
+            </div>
+          </div>
+          <div className="lead-grid">
+            {leads.map(lead => <LeadCard key={lead.id} lead={lead} />)}
+          </div>
+        </>
       )}
     </>
   );
@@ -1093,29 +1163,29 @@ export default function App() {
         <div className="hero">
           <div className="wrap">
             <div className="hero-eyebrow">
-              <span>●</span> Event-driven FX sales intelligence
+              <span>●</span> Live market intelligence · {new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}
             </div>
             <h1 className="hero-title">
-              Find UK businesses with<br/>
-              <span>real FX exposure</span>
+              What happened today —<br/>
+              <span>and who you should call</span>
             </h1>
             <p className="hero-sub">
-              Any world event — tariffs, rate decisions, currency moves, geopolitical shocks — 
-              mapped to the specific UK companies writing cheques in foreign currency. 
-              Every lead comes with a reason to call.
+              Every market event, tariff announcement, rate decision or geopolitical shock mapped 
+              to the specific UK businesses writing cheques in foreign currency.
+              Click an event below to find the companies affected.
             </p>
             <div className="hero-ctas">
               <button
                 className="btn-lg primary"
-                onClick={() => { /* trigger discovery */ }}
+                onClick={() => loadData()}
               >
-                ⚡ Run Discovery
+                ⚡ Refresh Intelligence
               </button>
               <button
                 className="btn-lg secondary"
                 onClick={() => document.querySelector('.lead-grid')?.scrollIntoView({behavior:'smooth'})}
               >
-                View {hot + warm} Priority Leads →
+                {hot + warm > 0 ? `View ${hot + warm} Priority Leads →` : "View All Leads →"}
               </button>
             </div>
           </div>
