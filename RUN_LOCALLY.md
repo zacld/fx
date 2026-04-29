@@ -1,22 +1,18 @@
-# Running the FX Discovery Pipeline Locally
+# Running the FX Discovery Pipeline
 
-## One-time setup
+## Setup (one-time)
 
 ```bash
-cd ~/Downloads
-unzip fx-discovery-v2-final.zip   # or wherever the zip is
-cd fx-discovery-v2
-
-# Copy env file and add your keys
+cd ~/Downloads/fx-discovery-v2
 cp .env.example .env
 ```
 
-Edit `.env`:
+Edit `.env` — add your keys:
 ```
 GEMINI_API_KEY=AIzaSyBzleXGK9JzNWVxGsy74HFpIC--fS_m7tw
 GEMINI_MODEL=gemini-2.0-flash
 COMPANIES_HOUSE_API_KEY=bf190544-f3dd-4dd3-b60b-d897c8ffebf8
-DISCOVERY_MAX_EVENTS=12
+DISCOVERY_MAX_EVENTS=2
 DISCOVERY_MAX_COMPANIES_PER_TERM=20
 ```
 
@@ -24,42 +20,65 @@ DISCOVERY_MAX_COMPANIES_PER_TERM=20
 python3 -m pip install -r requirements.txt
 ```
 
-## Run the full pipeline
+---
+
+## Run the pipeline
 
 ```bash
 python3 scripts/run_pipeline.py
 ```
 
-This runs in order:
-1. `ingest.py` — pulls live RSS feeds, analyses with Gemini, maps financial exposures
-2. `discover.py` — searches Companies House, scrapes websites, scores by FX exposure
-3. `linkedin_assist.py` — generates LinkedIn search links
-4. `outreach.py` — drafts event-led messages
-
-Then copies `data/events.json` and `data/leads.json` to `public/data/` for the dashboard.
-
-## View the dashboard
-
+Or step by step:
 ```bash
-npm install
-npm run dev
+python3 scripts/ingest.py       # pulls events, analyses with Gemini
+python3 scripts/discover.py     # finds companies via Companies House
 ```
-Open http://localhost:5173
 
-## How many companies will it find?
+---
 
-With the correct search strategy:
-- Each event generates 8-12 Companies House search terms
-- Each term returns up to 20 companies
-- After filtering: expect 15-40 real leads per event
-- 5 events = 75-200 total leads in the dashboard
+## Hitting 429 rate limits?
 
-## Push to GitHub (updates the live dashboard)
+**This is a Gemini free-tier issue. Fix:**
+
+**Option 1 — Run less at once (recommended):**
+```bash
+# In .env:
+DISCOVERY_MAX_EVENTS=1
+```
+Then wait 60 seconds between runs.
+
+**Option 2 — The pipeline now has a fallback:**
+If Gemini returns 429, the system automatically creates a basic event
+from the headline using keyword rules instead of failing.
+So even with a rate limit, companies will still be discovered.
+
+**Option 3 — Check what's already cached:**
+```bash
+python3 -c "import json; d=json.load(open('data/events.json')); [print(k[:20], v.get('status'), v.get('urgency_score')) for k,v in d.items()]"
+```
+If events show `status: ready`, run discover.py directly — no Gemini needed:
+```bash
+python3 scripts/discover.py
+```
+
+---
+
+## Push updated data to live dashboard
 
 ```bash
 git add data/ public/data/
-git commit -m "data: manual pipeline run $(date)"
+git commit -m "data: pipeline run $(date +%Y-%m-%d)"
 git push
 ```
 
-The live dashboard at https://zacld.github.io/fx updates automatically.
+Live dashboard updates at: https://zacld.github.io/fx
+
+---
+
+## Expected output
+
+With correct setup:
+- 2-5 events per run
+- 15-40 companies per event  
+- 75-200 total leads after a full run
+- Each lead has: exposure thesis, LinkedIn links, outreach drafts

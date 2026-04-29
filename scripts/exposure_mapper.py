@@ -158,7 +158,7 @@ def map_exposures(event: dict) -> dict:
 def enrich_event_with_exposure_map(event: dict) -> dict:
     """
     Runs the exposure mapper on an event and merges results back into the event dict.
-    Returns the enriched event.
+    Returns the enriched event. Fails gracefully on rate limits.
     """
     try:
         exposure_map = map_exposures(event)
@@ -183,8 +183,11 @@ def enrich_event_with_exposure_map(event: dict) -> dict:
                  event["target_segments"][0]["exposure_level"] if event["target_segments"] else "—")
 
     except Exception as exc:
+        msg = str(exc).lower()
+        if "429" in msg or "quota" in msg or "rate" in msg or "resource_exhausted" in msg:
+            log.warning("  Exposure Mapper rate limited (429) — will use fallback segments")
+            raise  # Re-raise so ingest.py can catch and apply fallback
         log.error("  Exposure mapper failed: %s", exc)
-        # Fallback: use existing niche data if available
         event["target_segments"]  = []
         event["exposure_types"]   = []
         event["exposure_map"]     = {}
