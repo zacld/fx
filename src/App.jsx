@@ -597,7 +597,7 @@ export default function App() {
       {/* TOPBAR */}
       <div className="tb">
         <div className="tb-l">
-          <div className="tb-logo"><div className="tb-mark">FX</div>Universal Partners</div>
+          <div className="tb-logo"><div className="tb-mark">FX</div>Discovery Engine</div>
           <div className="tb-sep"/>
           <div className="tb-tag">Discovery Engine</div>
         </div>
