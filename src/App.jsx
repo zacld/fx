@@ -7,8 +7,8 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 
 async function fetchData() {
   const [evRes, ldRes] = await Promise.all([
-    fetch(`/fx/data/events.json?t=${Date.now()}`),
-    fetch(`/fx/data/leads.json?t=${Date.now()}`),
+    fetch(`${import.meta.env.BASE_URL}data/events.json?t=${Date.now()}`),
+    fetch(`${import.meta.env.BASE_URL}data/leads.json?t=${Date.now()}`),
   ]);
 
   const evObj = evRes.ok ? await evRes.json() : {};
