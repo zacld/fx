@@ -17,6 +17,7 @@ PUBLIC  = ROOT / "public" / "data"
 PIPELINE = [
     ("ingest.py",         "Event Radar — pulling live market events"),
     ("discover.py",       "Company Discovery — finding affected businesses"),
+    ("rescore.py",        "Score Enrichment — ranking leads without Gemini"),
     ("linkedin_assist.py","LinkedIn Assist — generating search links"),
     ("outreach.py",       "Outreach Generator — drafting messages"),
 ]
