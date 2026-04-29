@@ -231,47 +231,93 @@ EXPOSURE_LEVEL_BOOST = {
     "Low":       0,
 }
 
+NAME_TRADE_WORDS  = ["trading","international","imports","import","export","exports",
+                     "wholesale","distribution","distributor","global","worldwide","overseas"]
+NAME_ORIGIN_WORDS = ["italian","french","spanish","german","chinese","mediterranean",
+                     "atlantic","pacific","european","nordic","scandinavian","oriental","african"]
+
+def sic_tier_boost(sic_codes):
+    """Return (boost, tier_label) based on how FX-relevant the SIC code is."""
+    tier1 = {"4671","4672","4673","4674","4675","4676","4677",
+              "4631","4632","4633","4634","4635","4636","4637","4638","4639",
+              "4641","4642","4643","4644","4645","4646","4647","4648","4649",
+              "4610","4620","4630","4650","4660","4669","5010","5020","5110","5121","5122"}
+    for code in sic_codes:
+        c = code.replace(" ","")
+        if any(c.startswith(t) or t.startswith(c[:4]) for t in tier1):
+            return 15, "core trade/wholesale"
+    if has_fx_sic(sic_codes):
+        return 10, "manufacturing/logistics"
+    return 0, ""
+
+def name_signal_score(name):
+    n = name.lower()
+    trade  = sum(1 for w in NAME_TRADE_WORDS  if w in n)
+    origin = sum(1 for w in NAME_ORIGIN_WORDS if w in n)
+    return min(8, trade * 3 + origin * 4)
+
+def company_age_score(incorporated):
+    if not incorporated: return 0
+    try:
+        age = datetime.now(timezone.utc).year - int(str(incorporated)[:4])
+        if age >= 20: return 8
+        if age >= 10: return 5
+        if age >= 5:  return 2
+        if age >= 2:  return 0
+        return -5
+    except Exception: return 0
+
 def score_lead(item, profile, event, web, sic_codes, segment=None):
-    """
-    Score by exposure intensity, not keyword similarity.
-    """
+    """Score by exposure intensity, not keyword similarity."""
     score   = 0
     reasons = []
 
-    # 1. Direct FX payment signals on website (0-30) — most important
+    # 1. Direct FX payment signals on website (0-30)
     fx_sigs = web.get("fx_signals", [])
     if fx_sigs:
         s = min(30, 8 + len(fx_sigs) * 4)
         score += s
-        reasons.append(f"Direct FX payment language on website: {', '.join(fx_sigs[:4])}")
+        reasons.append(f"Direct FX payment signals: {', '.join(fx_sigs[:3])}")
 
     # 2. Segment-specific validation signals (0-15)
     seg_sigs = web.get("segment_signals", [])
     if seg_sigs:
         s = min(15, len(seg_sigs) * 5)
         score += s
-        reasons.append(f"Matches target segment signals: {', '.join(seg_sigs[:3])}")
+        reasons.append(f"Segment-specific signals: {', '.join(seg_sigs[:3])}")
 
     # 3. Secondary international signals (0-10)
     sec_sigs = web.get("secondary_signals", [])
     if sec_sigs:
         s = min(10, len(sec_sigs) * 2)
         score += s
-        reasons.append(f"International activity signals: {', '.join(sec_sigs[:3])}")
 
-    # 4. FX-relevant SIC code (0-15)
-    if has_fx_sic(sic_codes):
-        score += 15
-        reasons.append(f"SIC code indicates import/wholesale/manufacturing: {', '.join(sic_codes[:2])}")
+    # 4. SIC code — tiered (0-15)
+    sb, tier_label = sic_tier_boost(sic_codes)
+    if sb:
+        score += sb
+        reasons.append(f"FX-relevant SIC ({tier_label}): {', '.join(sic_codes[:2])}")
 
     # 5. Segment exposure level boost (0-20)
     if segment:
         boost = EXPOSURE_LEVEL_BOOST.get(segment.get("exposure_level",""), 0)
-        if boost > 0:
+        if boost:
             score += boost
-            reasons.append(f"Target segment exposure: {segment.get('exposure_level','?')} — {segment.get('exposure_type','')}")
+            reasons.append(f"Segment exposure: {segment.get('exposure_level')} — {segment.get('exposure_type','')[:40]}")
 
-    # 6. Event urgency (0-10)
+    # 6. Company name trade signals (0-8)
+    ns = name_signal_score(item.get("title",""))
+    if ns:
+        score += ns
+        reasons.append(f"Company name trade signals (+{ns})")
+
+    # 7. Company age (−5 to +8)
+    a = company_age_score((profile or {}).get("date_of_creation") or item.get("date_of_creation"))
+    score += a
+    if a > 0:
+        reasons.append(f"Established company (inc. {str(item.get('date_of_creation',''))[:4]})")
+
+    # 8. Event urgency (0-10)
     urgency = int(event.get("urgency_score") or 0)
     if urgency >= 7:
         score += 10
@@ -279,20 +325,23 @@ def score_lead(item, profile, event, web, sic_codes, segment=None):
     elif urgency >= 4:
         score += 5
 
-    # 7. Company active (0-5) + contact available (0-5)
+    # 9. Director found (+5)
+    # (director is passed in separately — scored after this function returns)
+
+    # 10. Active status (+5) + website active (+3)
     if (item.get("company_status","")).lower() == "active":
         score += 5
         reasons.append("Active on Companies House")
     if web.get("snippet"):
-        score += 5
-        reasons.append("Website confirmed active")
+        score += 3
+        reasons.append("Website confirmed")
 
     score = min(score, 100)
 
-    # GATE: no FX evidence at all → cap at QUEUE
+    # Gate: no FX evidence → cap at SKIP threshold
     if not web.get("pays_fx") and not has_fx_sic(sic_codes):
         score = min(score, 39)
-        reasons.append("⚠ No direct FX payment evidence found")
+        reasons.append("⚠ No direct FX payment evidence")
 
     if   score >= 80: priority = "HOT"
     elif score >= 60: priority = "WARM"
