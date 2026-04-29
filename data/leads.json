@@ -1,0 +1,495 @@
+{
+  "lead_00305634_001": {
+    "id": "lead_00305634_001",
+    "event_id": "evt_opec_uae_001",
+    "created_at": "2026-04-29T10:16:36.539681+00:00",
+    "company_name": "Brenntag UK & Ireland Ltd",
+    "company_number": "00305634",
+    "company_status": "active",
+    "address": "Lockfield Avenue, Enfield, EN3 7PX",
+    "incorporated": "1935-07-22",
+    "sic_codes": [
+      "20130",
+      "46750"
+    ],
+    "website": "https://brenntag.com/uk",
+    "director_name": "Priya Kaur",
+    "director_role": "director",
+    "sector": "UK importers buying petroleum products in USD",
+    "trigger_headline": "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms. Currency exposure: GBP/USD. Website confirms: imported from, we source, overseas supplier.",
+    "fx_payment_logic": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms.",
+    "fx_payment_signals": [
+      "imported from",
+      "we source",
+      "overseas supplier",
+      "international supplier",
+      "procured from"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "worldwide",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: imported from, we source, overseas supplier, international supplier",
+      "International activity signals: international, global, worldwide, distribution",
+      "SIC code indicates import/trade/manufacturing: 20130, 46750",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for Priya Kaur (director). Oil just spiked \u2014 UK businesses paying USD for fuel or chemicals are seeing their next invoice cost more in GBP. Lock in a rate now before it moves further.",
+    "status": "new"
+  },
+  "lead_01716639_001": {
+    "id": "lead_01716639_001",
+    "event_id": "evt_opec_uae_001",
+    "created_at": "2026-04-29T10:16:36.539847+00:00",
+    "company_name": "Univar Solutions UK Ltd",
+    "company_number": "01716639",
+    "company_status": "active",
+    "address": "Oil Sites Road, Ellesmere Port, CH65 4EY",
+    "incorporated": "1983-06-01",
+    "sic_codes": [
+      "46750",
+      "20110"
+    ],
+    "website": "https://univarsolutions.com",
+    "director_name": "Mark Harrison",
+    "director_role": "finance-director",
+    "sector": "UK importers buying petroleum products in USD",
+    "trigger_headline": "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms. Currency exposure: GBP/USD. Website confirms: we import, sourced from, direct from.",
+    "fx_payment_logic": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms.",
+    "fx_payment_signals": [
+      "we import",
+      "sourced from",
+      "direct from",
+      "overseas supplier",
+      "foreign currency"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "wholesale",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, sourced from, direct from, overseas supplier",
+      "International activity signals: international, global, wholesale, distribution",
+      "SIC code indicates import/trade/manufacturing: 46750, 20110",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for Mark Harrison (finance-director). Oil just spiked \u2014 UK businesses paying USD for fuel or chemicals are seeing their next invoice cost more in GBP. Lock in a rate now before it moves further.",
+    "status": "new"
+  },
+  "lead_01800417_002": {
+    "id": "lead_01800417_002",
+    "event_id": "evt_gbp_record_short_002",
+    "created_at": "2026-04-29T10:16:36.539993+00:00",
+    "company_name": "Enotria & Coe Ltd",
+    "company_number": "01800417",
+    "company_status": "active",
+    "address": "119-121 Scrubs Lane, London, NW10 6QU",
+    "incorporated": "1971-09-01",
+    "sic_codes": [
+      "46341",
+      "46342"
+    ],
+    "website": "https://enotriacoe.com",
+    "director_name": "Tim Chase",
+    "director_role": "director",
+    "sector": "UK wine importers paying EUR to French and Italian producers",
+    "trigger_headline": "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
+    "fx_exposure": "GBP/EUR",
+    "fx_reason": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens. Currency exposure: GBP/EUR. Website confirms: we import, sourced from, from italy.",
+    "fx_payment_logic": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens.",
+    "fx_payment_signals": [
+      "we import",
+      "sourced from",
+      "from italy",
+      "from france",
+      "from spain",
+      "direct from",
+      "exclusive importer",
+      "uk importer"
+    ],
+    "secondary_signals": [
+      "european",
+      "wholesale",
+      "distribution",
+      "europe"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, sourced from, from italy, from france",
+      "International activity signals: european, wholesale, distribution, europe",
+      "SIC code indicates import/trade/manufacturing: 46341, 46342",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for Tim Chase (director). GBP is heading lower \u2014 UK businesses paying European suppliers in EUR are about to see every invoice cost more. Forward contract now locks in today's rate.",
+    "status": "new"
+  },
+  "lead_03592261_002": {
+    "id": "lead_03592261_002",
+    "event_id": "evt_gbp_record_short_002",
+    "created_at": "2026-04-29T10:16:36.540135+00:00",
+    "company_name": "Delicatessen Foods Ltd",
+    "company_number": "03592261",
+    "company_status": "active",
+    "address": "Unit 7 Kingsway Business Park, Oldham, OL1 3JZ",
+    "incorporated": "1998-04-20",
+    "sic_codes": [
+      "46310",
+      "46320"
+    ],
+    "website": "https://delicatessenfoods.co.uk",
+    "director_name": "Paul Wrigley",
+    "director_role": "managing-director",
+    "sector": "UK wine importers paying EUR to French and Italian producers",
+    "trigger_headline": "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
+    "fx_exposure": "GBP/EUR",
+    "fx_reason": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens. Currency exposure: GBP/EUR. Website confirms: we import, from italy, from france.",
+    "fx_payment_logic": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens.",
+    "fx_payment_signals": [
+      "we import",
+      "from italy",
+      "from france",
+      "from spain",
+      "from germany",
+      "overseas supplier",
+      "importer"
+    ],
+    "secondary_signals": [
+      "european",
+      "wholesale",
+      "distribution",
+      "europe"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, from italy, from france, from spain",
+      "International activity signals: european, wholesale, distribution, europe",
+      "SIC code indicates import/trade/manufacturing: 46310, 46320",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for Paul Wrigley (managing-director). GBP is heading lower \u2014 UK businesses paying European suppliers in EUR are about to see every invoice cost more. Forward contract now locks in today's rate.",
+    "status": "new"
+  },
+  "lead_02026530_002": {
+    "id": "lead_02026530_002",
+    "event_id": "evt_gbp_record_short_002",
+    "created_at": "2026-04-29T10:16:36.540228+00:00",
+    "company_name": "Brindisa Ltd",
+    "company_number": "02026530",
+    "company_status": "active",
+    "address": "32 Exmouth Market, London, EC1R 4QE",
+    "incorporated": "1988-06-15",
+    "sic_codes": [
+      "46310"
+    ],
+    "website": "https://brindisa.com",
+    "director_name": "Monika Hart",
+    "director_role": "director",
+    "sector": "UK wine importers paying EUR to French and Italian producers",
+    "trigger_headline": "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
+    "fx_exposure": "GBP/EUR",
+    "fx_reason": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens. Currency exposure: GBP/EUR. Website confirms: we import, direct from, from spain.",
+    "fx_payment_logic": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens.",
+    "fx_payment_signals": [
+      "we import",
+      "direct from",
+      "from spain",
+      "sourced from",
+      "exclusive importer",
+      "overseas supplier"
+    ],
+    "secondary_signals": [
+      "european",
+      "wholesale",
+      "spain",
+      "europe"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, direct from, from spain, sourced from",
+      "International activity signals: european, wholesale, spain, europe",
+      "SIC code indicates import/trade/manufacturing: 46310",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for Monika Hart (director). GBP is heading lower \u2014 UK businesses paying European suppliers in EUR are about to see every invoice cost more. Forward contract now locks in today's rate.",
+    "status": "new"
+  },
+  "lead_SC123456_003": {
+    "id": "lead_SC123456_003",
+    "event_id": "evt_fed_boe_003",
+    "created_at": "2026-04-29T10:16:36.540385+00:00",
+    "company_name": "Scottish Seafood Importers Ltd",
+    "company_number": "SC123456",
+    "company_status": "active",
+    "address": "Harbour Road, Aberdeen, AB11 5PQ",
+    "incorporated": "2002-03-14",
+    "sic_codes": [
+      "46380",
+      "10200"
+    ],
+    "website": "https://scottishseafood.co.uk",
+    "director_name": "Fiona Mcgregor",
+    "director_role": "director",
+    "sector": "UK importers with USD payments due this week",
+    "trigger_headline": "Fed and BoE both announce rate decisions this week \u2014 maximum GBP/USD volatility expected",
+    "fx_exposure": "GBP/USD, GBP/EUR",
+    "fx_reason": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets. Currency exposure: GBP/USD, GBP/EUR. Website confirms: we import, imported from, from norway.",
+    "fx_payment_logic": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets.",
+    "fx_payment_signals": [
+      "we import",
+      "imported from",
+      "from norway",
+      "from iceland",
+      "overseas supplier",
+      "direct from"
+    ],
+    "secondary_signals": [
+      "international",
+      "wholesale",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 94,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, imported from, from norway, from iceland",
+      "International activity signals: international, wholesale, distribution",
+      "SIC code indicates import/trade/manufacturing: 46380, 10200",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for Fiona Mcgregor (director). Both the Fed and BoE decide rates this week \u2014 GBP/USD will move sharply on any surprise. If you have a USD payment due, locking in now avoids the volatility.",
+    "status": "new"
+  },
+  "lead_04567890_003": {
+    "id": "lead_04567890_003",
+    "event_id": "evt_fed_boe_003",
+    "created_at": "2026-04-29T10:16:36.540480+00:00",
+    "company_name": "Fresh Atlantic Foods Ltd",
+    "company_number": "04567890",
+    "company_status": "active",
+    "address": "Unit 4 Fish Dock, Grimsby, DN31 3SG",
+    "incorporated": "2008-07-22",
+    "sic_codes": [
+      "10200",
+      "46380"
+    ],
+    "website": "https://freshatlanticfoods.co.uk",
+    "director_name": "James Robert Smith",
+    "director_role": "director",
+    "sector": "UK importers with USD payments due this week",
+    "trigger_headline": "Fed and BoE both announce rate decisions this week \u2014 maximum GBP/USD volatility expected",
+    "fx_exposure": "GBP/USD, GBP/EUR",
+    "fx_reason": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets. Currency exposure: GBP/USD, GBP/EUR. Website confirms: we import, imported from, from norway.",
+    "fx_payment_logic": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets.",
+    "fx_payment_signals": [
+      "we import",
+      "imported from",
+      "from norway",
+      "from iceland",
+      "overseas supplier",
+      "foreign currency"
+    ],
+    "secondary_signals": [
+      "international",
+      "wholesale",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 94,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, imported from, from norway, from iceland",
+      "International activity signals: international, wholesale, distribution",
+      "SIC code indicates import/trade/manufacturing: 10200, 46380",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for James Robert Smith (director). Both the Fed and BoE decide rates this week \u2014 GBP/USD will move sharply on any surprise. If you have a USD payment due, locking in now avoids the volatility.",
+    "status": "new"
+  },
+  "lead_00329016_004": {
+    "id": "lead_00329016_004",
+    "event_id": "evt_iran_usd_004",
+    "created_at": "2026-04-29T10:16:36.540563+00:00",
+    "company_name": "Associated British Foods plc",
+    "company_number": "00329016",
+    "company_status": "active",
+    "address": "Weston Centre, 10 Grosvenor Street, London, W1K 4QY",
+    "incorporated": "1935-01-01",
+    "sic_codes": [
+      "10610",
+      "10810",
+      "46310"
+    ],
+    "website": "https://abfoods.com",
+    "director_name": "George Weston",
+    "director_role": "chief-executive",
+    "sector": "UK importers with USD-denominated invoices",
+    "trigger_headline": "US-Iran tensions escalate \u2014 USD strengthens as safe-haven demand rises",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "When USD strengthens against GBP, every UK business paying a USD invoice needs more pounds to cover the same cost \u2014 this is direct margin erosion for importers. Currency exposure: GBP/USD. Website confirms: we source, sourced from, imported from.",
+    "fx_payment_logic": "When USD strengthens against GBP, every UK business paying a USD invoice needs more pounds to cover the same cost \u2014 this is direct margin erosion for importers.",
+    "fx_payment_signals": [
+      "we source",
+      "sourced from",
+      "imported from",
+      "overseas supplier",
+      "international supplier",
+      "from usa",
+      "foreign currency",
+      "currency risk"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "worldwide"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 94,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we source, sourced from, imported from, overseas supplier",
+      "International activity signals: international, global, worldwide",
+      "SIC code indicates import/trade/manufacturing: 10610, 10810",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for George Weston (chief-executive). USD is strengthening on Iran tensions \u2014 UK businesses paying USD supplier invoices are losing margin on every transaction right now.",
+    "status": "new"
+  },
+  "lead_SC012453_005": {
+    "id": "lead_SC012453_005",
+    "event_id": "evt_tariff_whisky_005",
+    "created_at": "2026-04-29T10:16:36.540632+00:00",
+    "company_name": "Edrington Group Ltd",
+    "company_number": "SC012453",
+    "company_status": "active",
+    "address": "100 Queen Street, Glasgow, G1 3DN",
+    "incorporated": "1961-11-08",
+    "sic_codes": [
+      "11010",
+      "46341"
+    ],
+    "website": "https://edrington.com",
+    "director_name": "Scott Mccallum",
+    "director_role": "director",
+    "sector": "UK exporters receiving USD revenue from US customers",
+    "trigger_headline": "US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income. Currency exposure: GBP/USD. Website confirms: export, from usa, international.",
+    "fx_payment_logic": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income.",
+    "fx_payment_signals": [
+      "export",
+      "from usa",
+      "international",
+      "overseas",
+      "worldwide",
+      "global",
+      "currency risk",
+      "exchange rate"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "worldwide",
+      "export",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 100,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: export, from usa, international, overseas",
+      "International activity signals: international, global, worldwide, export",
+      "SIC code indicates import/trade/manufacturing: 11010, 46341",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for Scott Mccallum (director). US tariff uncertainty is real and GBP/USD is moving \u2014 UK exporters with USD revenue should review how they're converting their US income before the rate moves against them.",
+    "status": "new"
+  },
+  "lead_SC016567_005": {
+    "id": "lead_SC016567_005",
+    "event_id": "evt_tariff_whisky_005",
+    "created_at": "2026-04-29T10:16:36.540724+00:00",
+    "company_name": "Chivas Brothers Ltd",
+    "company_number": "SC016567",
+    "company_status": "active",
+    "address": "111-113 Renfrew Road, Paisley, PA3 4DY",
+    "incorporated": "1857-01-01",
+    "sic_codes": [
+      "11010"
+    ],
+    "website": "https://chivasbrothers.com",
+    "director_name": "Jean Barrie",
+    "director_role": "director",
+    "sector": "UK exporters receiving USD revenue from US customers",
+    "trigger_headline": "US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income. Currency exposure: GBP/USD. Website confirms: export, from usa, international.",
+    "fx_payment_logic": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income.",
+    "fx_payment_signals": [
+      "export",
+      "from usa",
+      "international",
+      "currency risk",
+      "overseas",
+      "worldwide"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "export",
+      "distribution",
+      "worldwide"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 100,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: export, from usa, international, currency risk",
+      "International activity signals: international, global, export, distribution",
+      "SIC code indicates import/trade/manufacturing: 11010",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "Call switchboard \u2014 ask for Jean Barrie (director). US tariff uncertainty is real and GBP/USD is moving \u2014 UK exporters with USD revenue should review how they're converting their US income before the rate moves against them.",
+    "status": "new"
+  }
+}
