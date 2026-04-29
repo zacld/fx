@@ -13,6 +13,7 @@ Run after discover.py to rank the flat-50 QUEUE leads.
 import json, logging, re
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)s  %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
@@ -92,6 +93,41 @@ def age_score(incorporated):
         return -5                 # incorporated last year
     except Exception:
         return 0
+
+def extract_domain(website):
+    if not website: return None
+    try:
+        netloc = urlparse(website).netloc.lower().replace("www.", "")
+        return netloc if netloc else None
+    except Exception:
+        return None
+
+def guess_emails(director_name, website):
+    """
+    Generate the 4 most common UK SME email patterns.
+    Returns list of dicts with {pattern, email} or empty list.
+    """
+    domain = extract_domain(website)
+    if not domain or not director_name:
+        return []
+
+    # Parse first / last from cleaned name ("Priya Kaur", "Tim Chase")
+    parts = re.sub(r"[^a-zA-Z\s\-]", "", director_name).split()
+    parts = [p for p in parts if len(p) > 1]   # strip initials
+    if len(parts) < 2:
+        return []
+
+    first = parts[0].lower()
+    last  = parts[-1].lower()
+    f     = first[0]
+
+    return [
+        {"pattern": "firstname@",           "email": f"{first}@{domain}"},
+        {"pattern": "firstname.lastname@",   "email": f"{first}.{last}@{domain}"},
+        {"pattern": "f.lastname@",           "email": f"{f}.{last}@{domain}"},
+        {"pattern": "flastname@",            "email": f"{f}{last}@{domain}"},
+    ]
+
 
 def rescore(lead, urgency_map):
     score   = 0
@@ -196,6 +232,9 @@ def main():
         lead["priority"]         = new_priority
         lead["scoring_reasons"]  = reasons
         lead["rescored_at"]      = datetime.now(timezone.utc).isoformat()
+        lead["guessed_emails"]   = guess_emails(
+            lead.get("director_name",""), lead.get("website","")
+        )
 
         if new_priority != old_priority:
             log.info("  %s → %s  (score %d → %d)  %s",

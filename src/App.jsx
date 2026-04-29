@@ -286,6 +286,17 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .copy-btn:hover{background:rgba(255,255,255,.1);color:#fff}
 .copy-btn.copied{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:#10B981}
 
+/* EMAIL PATTERNS */
+.email-section{margin-bottom:14px}
+.email-patterns{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.email-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:6px}
+.email-pattern{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.2);width:120px;flex-shrink:0}
+.email-addr{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.55);flex:1;word-break:break-all}
+.email-copy{padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:10px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.email-copy:hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.6)}
+.email-copy.copied{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.25);color:#10B981}
+.email-note{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.15);margin-top:5px;line-height:1.5}
+
 /* LINKEDIN LINKS */
 .li-section{margin-bottom:14px}
 .li-company-btn{display:flex;align-items:center;gap:6px;width:100%;padding:9px 12px;border-radius:7px;background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.18);color:#38BDF8;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;text-decoration:none;margin-bottom:8px}
@@ -438,6 +449,39 @@ function OutreachPanel({ outreach }) {
   );
 }
 
+// ─── EMAIL PATTERNS ──────────────────────────────────────────────
+function EmailPatterns({ emails }) {
+  const [copied, setCopied] = useState(null);
+  if (!emails?.length) return null;
+
+  function doCopy(email, idx) {
+    copy(email);
+    setCopied(idx);
+    setTimeout(() => setCopied(null), 2000);
+  }
+
+  return (
+    <div className="email-section">
+      <div className="xl" style={{marginBottom:4}}>Email patterns — try in order</div>
+      <div className="email-patterns">
+        {emails.map((e, i) => (
+          <div key={i} className="email-row">
+            <span className="email-pattern">{e.pattern}</span>
+            <span className="email-addr">{e.email}</span>
+            <button
+              className={`email-copy${copied===i?" copied":""}`}
+              onClick={() => doCopy(e.email, i)}
+            >
+              {copied === i ? "✓" : "Copy"}
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="email-note">Guessed from director name + domain · verify before sending</div>
+    </div>
+  );
+}
+
 // ─── COMPANY CARD ────────────────────────────────────────────────
 function CompanyCard({ lead, crmStatus, onCrmSet }) {
   const [open, setOpen] = useState(false);
@@ -523,6 +567,8 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
               </div>
             )}
           </div>
+
+          <EmailPatterns emails={lead.guessed_emails} />
 
           {li && (
             <div className="li-section">
