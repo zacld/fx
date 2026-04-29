@@ -38,7 +38,7 @@
     "who_benefits": [
       "UK oil producers and North Sea operators"
     ],
-    "status": "ready",
+    "status": "discovered",
     "exposure_map": {
       "exposure_types": [
         "Import cost exposure",
@@ -242,7 +242,7 @@
     "who_benefits": [
       "UK exporters billing European customers in EUR"
     ],
-    "status": "ready",
+    "status": "discovered",
     "exposure_map": {
       "exposure_types": [
         "EUR supplier payment exposure",
@@ -459,7 +459,7 @@
     "who_benefits": [
       "UK USD earners and exporters to the US"
     ],
-    "status": "ready",
+    "status": "discovered",
     "exposure_map": {
       "exposure_types": [
         "Rate decision volatility",
@@ -597,7 +597,7 @@
     "who_benefits": [
       "UK exporters billing in USD"
     ],
-    "status": "ready",
+    "status": "discovered",
     "exposure_map": {
       "exposure_types": [
         "USD strengthening",
@@ -726,7 +726,7 @@
     "who_benefits": [
       "UK importers of US goods if tariffs reduce trade"
     ],
-    "status": "ready",
+    "status": "discovered",
     "exposure_map": {
       "exposure_types": [
         "USD revenue exposure",
