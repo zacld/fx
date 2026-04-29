@@ -341,48 +341,116 @@ const STYLES = `
   /* INDUSTRY VIEW */
   .industry-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 8px;
   }
   .industry-card {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 16px;
-    padding: 20px 22px;
-    cursor: pointer;
-    transition: all 0.18s;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.18s;
+  }
+  .industry-card:hover { border-color: rgba(78,205,196,0.25); }
+  .industry-card.expanded { border-color: rgba(78,205,196,0.35); background: rgba(78,205,196,0.03); }
+
+  .industry-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
   }
-  .industry-card:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(78,205,196,0.3);
-    transform: translateX(4px);
-  }
-  .industry-card-left {}
-  .industry-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: #F0F0E8;
-    margin-bottom: 4px;
-    line-height: 1.3;
-  }
-  .industry-meta {
+  .industry-card-header:hover { background: rgba(255,255,255,0.025); }
+
+  .industry-card-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .industry-index {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
-    color: rgba(255,255,255,0.25);
-    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    width: 16px;
   }
-  .industry-arrow {
+  .industry-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #F0F0E8;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .industry-card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .industry-count-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(78,205,196,0.1);
+    border: 1px solid rgba(78,205,196,0.2);
     color: #4ECDC4;
-    font-size: 18px;
-    opacity: 0.5;
-    transition: all 0.15s;
+  }
+  .industry-chevron {
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    transition: transform 0.2s;
     flex-shrink: 0;
   }
-  .industry-card:hover .industry-arrow { opacity: 1; transform: translateX(2px); }
+  .industry-card.expanded .industry-chevron { transform: rotate(180deg); color: #4ECDC4; }
+
+  .industry-card-body {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .idb-row { display: flex; flex-direction: column; gap: 4px; }
+  .idb-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+  }
+  .idb-value {
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.55);
+  }
+  .idb-pairs { display: flex; gap: 5px; flex-wrap: wrap; }
+  .idb-hurt-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .idb-hurt-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(255,60,60,0.06);
+    border: 1px solid rgba(255,60,60,0.15);
+    color: rgba(255,100,100,0.7);
+  }
+  .industry-find-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    background: rgba(78,205,196,0.08);
+    border: 1px solid rgba(78,205,196,0.25);
+    border-radius: 8px;
+    color: #4ECDC4;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.15s;
+    width: 100%;
+  }
+  .industry-find-btn:hover { background: rgba(78,205,196,0.15); }
 
   /* EVENT CONTEXT BANNER */
   .event-context {
@@ -702,9 +770,24 @@ function EventsView({ events, leads, onSelectEvent }) {
 function IndustriesView({ event, leads, onSelectIndustry, onBack }) {
   const sectors = event.who_pays_fx || event.affected_sectors || [];
   const accent = urgencyColor(event.urgency_score || 0);
-
-  // Count leads per sector
   const leadsForEvent = leads.filter(l => l.event_id === event.id);
+  const [expandedIndex, setExpandedIndex] = useState(null);
+
+  // Build per-sector context from event data
+  const sectorDetails = sectors.map((sector, i) => {
+    const sectorLeads = leadsForEvent.filter(l =>
+      (l.sector || "").toLowerCase().includes(sector.toLowerCase().slice(0, 12)) ||
+      sector.toLowerCase().includes((l.sector || "").toLowerCase().slice(0, 12))
+    );
+    // Why this specific sector pays FX — derive from event context
+    const pairs = event.currency_pairs || [];
+    const whyPaysFX = event.fx_payment_logic || event.sales_angle || "";
+    const hurtSectors = (event.who_is_hurt || []).filter(h =>
+      h.toLowerCase().includes(sector.toLowerCase().slice(0, 8)) ||
+      sector.toLowerCase().includes(h.toLowerCase().slice(0, 8))
+    );
+    return { sector, sectorLeads, pairs, whyPaysFX, hurtSectors, i };
+  });
 
   return (
     <>
@@ -720,7 +803,7 @@ function IndustriesView({ event, leads, onSelectIndustry, onBack }) {
 
       {/* Event context banner */}
       <div className="event-context">
-        <div className="context-block" style={{ flex: 2, minWidth: 220 }}>
+        <div className="context-block" style={{ flex: 2, minWidth: 200 }}>
           <div className="context-label">Event</div>
           <div className="context-value">{event.headline}</div>
         </div>
@@ -729,23 +812,23 @@ function IndustriesView({ event, leads, onSelectIndustry, onBack }) {
           <div className="context-value" style={{ color: accent }}>{event.urgency_score}/10</div>
         </div>
         <div className="context-block">
-          <div className="context-label">Currency pairs</div>
+          <div className="context-label">FX pairs</div>
           <div className="context-pairs">
             {(event.currency_pairs || []).map(p => <span key={p} className="pair-tag">{p}</span>)}
           </div>
         </div>
-        {event.fx_payment_logic && (
-          <div className="context-block" style={{ flex: 3, minWidth: 240 }}>
-            <div className="context-label">Why these businesses pay FX</div>
-            <div className="context-value" style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
-              {event.fx_payment_logic}
+        {event.sales_angle && (
+          <div className="context-block" style={{ flex: 3, minWidth: 220 }}>
+            <div className="context-label">Sales angle today</div>
+            <div className="context-value" style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontStyle: "italic" }}>
+              "{event.sales_angle}"
             </div>
           </div>
         )}
       </div>
 
-      <div className="view-label" style={{ marginBottom: 16 }}>
-        Select an industry to find companies
+      <div className="view-label" style={{ marginBottom: 12 }}>
+        {sectors.length} industries affected — expand for detail, click Find Companies to drill in
       </div>
 
       {sectors.length === 0 ? (
@@ -756,27 +839,73 @@ function IndustriesView({ event, leads, onSelectIndustry, onBack }) {
         </div>
       ) : (
         <div className="industry-grid">
-          {sectors.map((sector, i) => {
-            const sectorLeads = leadsForEvent.filter(l =>
-              (l.sector || "").toLowerCase().includes(sector.toLowerCase().slice(0, 12)) ||
-              sector.toLowerCase().includes((l.sector || "").toLowerCase().slice(0, 12))
-            );
+          {sectorDetails.map(({ sector, sectorLeads, pairs, whyPaysFX, hurtSectors, i }) => {
+            const isExpanded = expandedIndex === i;
             return (
               <div
                 key={sector}
-                className="industry-card"
-                onClick={() => onSelectIndustry(sector)}
-                style={{ animationDelay: `${i * 40}ms` }}
+                className={`industry-card${isExpanded ? " expanded" : ""}`}
               >
-                <div className="industry-card-left">
-                  <div className="industry-name">{sector}</div>
-                  <div className="industry-meta">
-                    {sectorLeads.length > 0
-                      ? `${sectorLeads.length} companies found`
-                      : "Click to find companies"}
+                {/* HEADER ROW — always visible, click to expand */}
+                <div
+                  className="industry-card-header"
+                  onClick={() => setExpandedIndex(isExpanded ? null : i)}
+                >
+                  <div className="industry-card-left">
+                    <span className="industry-index">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="industry-name">{sector}</span>
+                  </div>
+                  <div className="industry-card-right">
+                    {sectorLeads.length > 0 && (
+                      <span className="industry-count-badge">{sectorLeads.length} found</span>
+                    )}
+                    <span className="industry-chevron">▼</span>
                   </div>
                 </div>
-                <div className="industry-arrow">→</div>
+
+                {/* EXPANDED BODY */}
+                {isExpanded && (
+                  <div className="industry-card-body">
+                    {whyPaysFX && (
+                      <div className="idb-row">
+                        <div className="idb-label">Why they pay FX</div>
+                        <div className="idb-value">{whyPaysFX}</div>
+                      </div>
+                    )}
+
+                    <div className="idb-row">
+                      <div className="idb-label">Currency exposure</div>
+                      <div className="idb-pairs">
+                        {pairs.map(p => <span key={p} className="pair-tag">{p}</span>)}
+                      </div>
+                    </div>
+
+                    {event.summary && (
+                      <div className="idb-row">
+                        <div className="idb-label">Event impact</div>
+                        <div className="idb-value">{event.summary}</div>
+                      </div>
+                    )}
+
+                    {(event.who_is_hurt || []).length > 0 && (
+                      <div className="idb-row">
+                        <div className="idb-label">Who is hurt</div>
+                        <div className="idb-hurt-chips">
+                          {(event.who_is_hurt || []).slice(0, 4).map(h => (
+                            <span key={h} className="idb-hurt-chip">{h}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      className="industry-find-btn"
+                      onClick={() => onSelectIndustry(sector)}
+                    >
+                      Find companies in this sector →
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
