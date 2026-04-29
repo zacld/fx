@@ -190,3 +190,37 @@ def enrich_event_with_exposure_map(event: dict) -> dict:
         event["exposure_map"]     = {}
 
     return event
+
+
+def build_ch_search_terms(event: dict) -> list:
+    """
+    Builds Companies House search terms that will actually find companies.
+    CH searches match company NAMES — not SIC codes or activity descriptions.
+    Most importers don't have "import" in their name.
+    Uses broad product/trade terms that appear in real UK company names.
+    """
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from ch_search_strategy import get_search_terms_for_segment
+
+    all_terms = []
+    segments = event.get("target_segments", [])
+
+    for seg in segments:
+        seg_terms = get_search_terms_for_segment(
+            seg.get("segment_name",""),
+            seg.get("exposure_type",""),
+        )
+        all_terms.extend(seg_terms)
+
+        # Also keep any specific CH terms from the Gemini output
+        all_terms.extend(seg.get("companies_house_terms", []))
+
+    # Dedupe, keep top 15
+    seen = set()
+    result = []
+    for t in all_terms:
+        if t.lower() not in seen:
+            seen.add(t.lower())
+            result.append(t)
+    return result[:15]

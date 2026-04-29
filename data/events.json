@@ -18,12 +18,16 @@
     ],
     "urgency_score": 9,
     "companies_house_terms": [
-      "chemical wholesale",
-      "chemical import",
-      "chemical distributor",
+      "chemicals wholesale",
+      "chemical supplies",
+      "chemical trading",
+      "chemicals distribution",
+      "industrial chemicals",
       "petroleum wholesale",
-      "fuel import",
-      "oil wholesale"
+      "fuel trading",
+      "oil trading",
+      "lubricants wholesale",
+      "petroleum distribution"
     ],
     "sales_angle": "Oil just spiked \u2014 UK businesses paying USD for fuel or chemicals are seeing their next invoice cost more in GBP. Lock in a rate now before it moves further.",
     "who_pays_fx": [
@@ -215,12 +219,19 @@
     ],
     "urgency_score": 8,
     "companies_house_terms": [
-      "wine import",
-      "spirits import",
-      "wine wholesale",
-      "food import",
+      "wines wholesale",
+      "wine merchant",
+      "fine wines",
+      "wine trading",
+      "spirits wholesale",
+      "wines international",
+      "wine distribution",
+      "food international",
+      "foods wholesale",
+      "food trading",
       "Italian food",
-      "European food"
+      "speciality foods",
+      "continental foods"
     ],
     "sales_angle": "GBP is heading lower \u2014 UK businesses paying European suppliers in EUR are about to see every invoice cost more. Forward contract now locks in today's rate.",
     "who_pays_fx": [
@@ -428,9 +439,16 @@
     ],
     "urgency_score": 9,
     "companies_house_terms": [
-      "seafood import",
+      "seafood wholesale",
+      "seafood trading",
       "fish wholesale",
-      "seafood wholesale"
+      "fish trading",
+      "seafood international",
+      "fish merchants",
+      "seafood merchants",
+      "seafood supplies",
+      "food international",
+      "foods trading"
     ],
     "sales_angle": "Both the Fed and BoE decide rates this week \u2014 GBP/USD will move sharply on any surprise. If you have a USD payment due, locking in now avoids the volatility.",
     "who_pays_fx": [
@@ -560,9 +578,15 @@
     ],
     "urgency_score": 8,
     "companies_house_terms": [
-      "food manufacture",
-      "food production",
-      "food processing"
+      "food international",
+      "foods international",
+      "food trading",
+      "food wholesale",
+      "foods wholesale",
+      "food distribution",
+      "speciality foods",
+      "food manufacturing",
+      "food production"
     ],
     "sales_angle": "USD is strengthening on Iran tensions \u2014 UK businesses paying USD supplier invoices are losing margin on every transaction right now.",
     "who_pays_fx": [
@@ -684,9 +708,14 @@
     ],
     "urgency_score": 7,
     "companies_house_terms": [
-      "whisky distillery",
-      "spirits manufacture",
-      "gin distillery"
+      "whisky trading",
+      "distillery export",
+      "spirits wholesale",
+      "spirits international",
+      "fine wines",
+      "wine agencies",
+      "gin distillery",
+      "spirits trading"
     ],
     "sales_angle": "US tariff uncertainty is real and GBP/USD is moving \u2014 UK exporters with USD revenue should review how they're converting their US income before the rate moves against them.",
     "who_pays_fx": [

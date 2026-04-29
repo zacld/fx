@@ -32,7 +32,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-8s  %(
 log = logging.getLogger(__name__)
 
 COMPANIES_HOUSE_API_KEY = os.environ["COMPANIES_HOUSE_API_KEY"]
-MAX_COMPANIES_PER_TERM  = int(os.getenv("DISCOVERY_MAX_COMPANIES_PER_TERM", "8"))
+MAX_COMPANIES_PER_TERM  = int(os.getenv("DISCOVERY_MAX_COMPANIES_PER_TERM", "20"))
 
 DATA_DIR    = Path(__file__).parent.parent / "data"
 EVENTS_FILE = DATA_DIR / "events.json"
@@ -158,6 +158,31 @@ def has_fx_sic(sic_codes):
     return False
 
 # ── WEBSITE SCRAPING ─────────────────────────────────────────────────────
+
+
+def find_website_google(company_name, company_number):
+    """Try to find a company website via Google when CH doesn't have one."""
+    try:
+        query = f'"{company_name}" UK official site'
+        url   = f"https://www.google.com/search?q={requests.utils.quote(query)}&num=5"
+        res   = requests.get(url, headers=SCRAPE_HEADERS, timeout=8)
+        if res.status_code != 200: return None
+        soup  = BeautifulSoup(res.text, "html.parser")
+        skip  = ["google","facebook","linkedin","twitter","instagram","youtube",
+                 "gov.uk","companieshouse","wikipedia","yelp","yell.com",
+                 "trustpilot","companies.house","cylex","endole","duedil"]
+        for link in soup.find_all("a", href=True):
+            href = link.get("href","")
+            if href.startswith("/url?q="):
+                actual = href.split("/url?q=")[1].split("&")[0]
+                from urllib.parse import urlparse
+                parsed = urlparse(actual)
+                domain = parsed.netloc.lower().replace("www.","")
+                if domain and not any(s in domain for s in skip) and parsed.scheme in ("http","https"):
+                    return actual
+    except Exception as exc:
+        log.debug("Google website search failed for %s: %s", company_name, exc)
+    return None
 
 def scrape_website(url, validation_signals=None):
     """
@@ -352,7 +377,7 @@ def process_event(event, leads):
         for term in seg.get("companies_house_terms", []):
             term_to_segment[term.lower()] = seg
 
-    for term in ch_terms[:8]:
+    for term in ch_terms[:12]:
         try:
             results = ch_search(term, n=MAX_COMPANIES_PER_TERM)
             log.info("  CH '%-28s' → %d results", term[:28], len(results))
@@ -376,8 +401,11 @@ def process_event(event, leads):
                     director = extract_director(officers)
                     sic_codes= sic_codes_from_profile(profile)
 
-                    # Get website
+                    # Get website — try CH first, then Google if not found
                     website = (profile or {}).get("website")
+                    if not website:
+                        time.sleep(0.4)
+                        website = find_website_google(item.get("title",""), cn)
 
                     # Scrape with segment-specific validation signals
                     validation_signals = (segment or {}).get("website_validation_signals", [])
