@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 
 async function fetchData() {
   const [evRes, ldRes] = await Promise.all([
@@ -33,15 +33,39 @@ function copy(text) { navigator.clipboard.writeText(text).catch(()=>{}); }
 
 const PRIORITY_COLORS = { HOT:"#10B981", WARM:"#F59E0B", COLD:"#475569", QUEUE:"#6366F1" };
 
+// ─── CRM STATE ───────────────────────────────────────────────────
+const CRM_KEY = "fx_crm_state";
+const CRM_STATUSES = ["new","reviewed","contacted","saved","not_relevant"];
+const CRM_LABELS   = { new:"New", reviewed:"Reviewed", contacted:"Contacted", saved:"Saved", not_relevant:"Not relevant" };
+const CRM_COLORS   = { new:"#6366F1", reviewed:"#F59E0B", contacted:"#38BDF8", saved:"#10B981", not_relevant:"#475569" };
+
+function useCrmState() {
+  const [state, setState] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(CRM_KEY) || "{}"); }
+    catch { return {}; }
+  });
+  const setStatus = useCallback((leadId, status) => {
+    setState(prev => {
+      const next = { ...prev, [leadId]: status };
+      try { localStorage.setItem(CRM_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+  const getStatus = useCallback((lead) => {
+    return state[lead.id] || lead.status || "new";
+  }, [state]);
+  return { getStatus, setStatus, state };
+}
+
 const DEFAULT_FILTERS = {
-  hotView: true,
-  priorities: [],      // empty = all
+  hotView: false,
+  priorities: [],
   hasDirector: false,
   hasWebsite: false,
   minScore: 0,
   eventId: "all",
   exposureLevel: "all",
-  newOnly: false,
+  statuses: [],        // empty = all
 };
 
 const HOT_VIEW_FILTERS = {
@@ -52,10 +76,10 @@ const HOT_VIEW_FILTERS = {
   minScore: 0,
   eventId: "all",
   exposureLevel: "all",
-  newOnly: false,
+  statuses: [],
 };
 
-function applyFilters(leads, filters) {
+function applyFilters(leads, filters, getCrmStatus) {
   return leads.filter(l => {
     if (filters.priorities.length && !filters.priorities.includes(l.priority)) return false;
     if (filters.hasDirector && !l.director_name) return false;
@@ -63,9 +87,9 @@ function applyFilters(leads, filters) {
     if (filters.minScore > 0 && (l.score||0) < filters.minScore) return false;
     if (filters.eventId !== "all" && l.event_id !== filters.eventId) return false;
     if (filters.exposureLevel !== "all" && l.exposure_level !== filters.exposureLevel) return false;
-    if (filters.newOnly) {
-      const age = Date.now() - new Date(l.created_at||0);
-      if (age > 86400000) return false;
+    if (filters.statuses.length) {
+      const s = getCrmStatus(l);
+      if (!filters.statuses.includes(s)) return false;
     }
     return true;
   });
@@ -312,6 +336,15 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .why-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#F59E0B;margin-bottom:3px}
 .why-text{font-size:12px;line-height:1.6;color:rgba(255,255,255,.5)}
 
+/* CRM STATUS */
+.crm-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap;user-select:none;position:relative}
+.crm-badge:hover{filter:brightness(1.15)}
+.crm-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:50;background:#111827;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:4px;display:flex;flex-direction:column;gap:1px;min-width:130px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.crm-opt{padding:6px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;transition:background .1s;display:flex;align-items:center;gap:6px}
+.crm-opt:hover{background:rgba(255,255,255,.06)}
+.crm-opt.active{background:rgba(255,255,255,.04)}
+.crm-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
 /* EMPTY */
 .empty{text-align:center;padding:64px 24px;color:rgba(255,255,255,.2)}
 .empty-i{font-size:36px;margin-bottom:12px}
@@ -319,6 +352,47 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .empty-s{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:rgba(255,255,255,.15)}
 .empty-s code{color:rgba(16,185,129,.5)}
 `;
+
+// ─── CRM BADGE ───────────────────────────────────────────────────
+function CrmBadge({ leadId, status, onSet }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const color = CRM_COLORS[status] || "#6366F1";
+
+  useEffect(() => {
+    if (!open) return;
+    function close(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{position:"relative",display:"inline-flex"}}>
+      <span
+        className="crm-badge"
+        style={{color, borderColor:`${color}40`, background:`${color}12`}}
+        onClick={e => { e.stopPropagation(); setOpen(o=>!o); }}
+        title="Change status"
+      >
+        ● {CRM_LABELS[status] || status}
+      </span>
+      {open && (
+        <div className="crm-menu" onClick={e=>e.stopPropagation()}>
+          {CRM_STATUSES.map(s => (
+            <div
+              key={s}
+              className={`crm-opt${s===status?" active":""}`}
+              onClick={() => { onSet(leadId, s); setOpen(false); }}
+            >
+              <span className="crm-dot" style={{background:CRM_COLORS[s]}}/>
+              <span style={{color:CRM_COLORS[s]}}>{CRM_LABELS[s]}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── COPY BUTTON ─────────────────────────────────────────────────
 function CopyBtn({ text }) {
@@ -365,7 +439,7 @@ function OutreachPanel({ outreach }) {
 }
 
 // ─── COMPANY CARD ────────────────────────────────────────────────
-function CompanyCard({ lead }) {
+function CompanyCard({ lead, crmStatus, onCrmSet }) {
   const [open, setOpen] = useState(false);
   const color = pri(lead.priority);
   const initials = (lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
@@ -407,6 +481,7 @@ function CompanyCard({ lead }) {
           <div className="cc-sn">{lead.score}</div>
           <div className="cc-sl">Score</div>
           <div className="cc-chev">{open?"▲":"▼"}</div>
+          <CrmBadge leadId={lead.id} status={crmStatus} onSet={onCrmSet}/>
         </div>
       </div>
 
@@ -482,7 +557,7 @@ function CompanyCard({ lead }) {
 }
 
 // ─── FILTER BAR ──────────────────────────────────────────────────
-function FilterBar({ filters, setFilters, leads, events, filteredCount }) {
+function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState }) {
   const priorities = useMemo(()=>[...new Set(leads.map(l=>l.priority))].sort(),[leads]);
   const exposureLevels = useMemo(()=>[...new Set(leads.map(l=>l.exposure_level).filter(Boolean))],[leads]);
 
@@ -503,13 +578,31 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount }) {
     setFilters(f => ({...f, hotView:false, [key]:!f[key]}));
   }
 
+  function toggleStatus(s) {
+    setFilters(f => {
+      const next = f.statuses.includes(s)
+        ? f.statuses.filter(x=>x!==s)
+        : [...f.statuses, s];
+      return {...f, hotView:false, statuses:next};
+    });
+  }
+
   function setSelect(key, val) {
     setFilters(f => ({...f, hotView:false, [key]:val}));
   }
 
+  const statusCounts = useMemo(() => {
+    const counts = {};
+    leads.forEach(l => {
+      const s = crmState[l.id] || l.status || "new";
+      counts[s] = (counts[s]||0) + 1;
+    });
+    return counts;
+  }, [leads, crmState]);
+
   const isActive = f => !f.hotView && (
     f.priorities.length || f.hasDirector || f.hasWebsite ||
-    f.minScore > 0 || f.eventId !== "all" || f.exposureLevel !== "all" || f.newOnly
+    f.minScore > 0 || f.eventId !== "all" || f.exposureLevel !== "all" || f.statuses.length
   );
 
   const priChipClass = p => {
@@ -596,6 +689,23 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount }) {
         </select>
       </div>
 
+      <div className="fb-sep"/>
+
+      {/* Status */}
+      <div className="fb-group">
+        <span className="fb-label">Status</span>
+        {CRM_STATUSES.filter(s=>statusCounts[s]>0).map(s=>(
+          <button
+            key={s}
+            className={`chip${filters.statuses.includes(s)?" on":""}`}
+            style={filters.statuses.includes(s)?{background:`${CRM_COLORS[s]}15`,borderColor:`${CRM_COLORS[s]}55`,color:CRM_COLORS[s]}:{}}
+            onClick={()=>toggleStatus(s)}
+          >
+            {CRM_LABELS[s]} <span style={{opacity:.55,fontSize:9}}>({statusCounts[s]})</span>
+          </button>
+        ))}
+      </div>
+
       {/* Count + reset */}
       <span className="fb-count">{filteredCount} showing</span>
       {isActive(filters) && (
@@ -608,7 +718,7 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount }) {
 }
 
 // ─── EVENT ITEM ──────────────────────────────────────────────────
-function EventItem({ event, leads, allLeads, index }) {
+function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet }) {
   const [open, setOpen]          = useState(false);
   const [showCompanies, setShow] = useState(false);
   const color = urg(event.urgency_score||0);
@@ -751,7 +861,7 @@ function EventItem({ event, leads, allLeads, index }) {
                 </div>
               </div>
               {eventLeads.length > 0
-                ? <div className="co-list">{eventLeads.map(l=><CompanyCard key={l.id} lead={l}/>)}</div>
+                ? <div className="co-list">{eventLeads.map(l=><CompanyCard key={l.id} lead={l} crmStatus={getCrmStatus(l)} onCrmSet={onCrmSet}/>)}</div>
                 : <div style={{padding:"20px 0",textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"rgba(255,255,255,.2)"}}>All companies hidden by active filters</div>
               }
             </div>
@@ -769,6 +879,7 @@ export default function App() {
   const [loading,     setLoading] = useState(true);
   const [lastRefresh, setLast]    = useState(null);
   const [filters,     setFilters] = useState(HOT_VIEW_FILTERS);
+  const { getStatus: getCrmStatus, setStatus: onCrmSet, state: crmState } = useCrmState();
 
   const load = useCallback(async()=>{
     setLoading(true);
@@ -782,12 +893,13 @@ export default function App() {
 
   useEffect(()=>{ load(); },[load]);
 
-  const filteredLeads = useMemo(()=>applyFilters(leads, filters),[leads, filters]);
+  const filteredLeads = useMemo(()=>applyFilters(leads, filters, getCrmStatus),[leads, filters, getCrmStatus]);
 
   const hot      = leads.filter(l=>l.priority==="HOT").length;
-  const warm     = leads.filter(l=>l.priority==="WARM").length;
-  const fHot     = filteredLeads.filter(l=>l.priority==="HOT").length;
-  const fVisible = filteredLeads.length;
+  const contacted = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="contacted").length,[leads,getCrmStatus]);
+  const saved     = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="saved").length,[leads,getCrmStatus]);
+  const fHot      = filteredLeads.filter(l=>l.priority==="HOT").length;
+  const fVisible  = filteredLeads.length;
 
   return (
     <>
@@ -826,10 +938,11 @@ export default function App() {
       {/* STATS */}
       <div className="stats">
         {[
-          {n:events.length, l:"Events",         s:"Detected",                     c:"#10B981"},
-          {n:hot,           l:"HOT leads",       s:"Scored + verified",            c:"#10B981"},
-          {n:warm,          l:"Warm leads",      s:"Score 60+",                    c:"#F59E0B"},
-          {n:leads.length,  l:"Total pipeline",  s:"All events",                   c:"#6366F1"},
+          {n:events.length, l:"Events",         s:"Detected",               c:"#10B981"},
+          {n:hot,           l:"HOT leads",       s:"Scored + verified",      c:"#10B981"},
+          {n:contacted,     l:"Contacted",       s:"CRM state",              c:"#38BDF8"},
+          {n:saved,         l:"Saved",           s:"Worth following up",     c:"#10B981"},
+          {n:leads.length,  l:"Total pipeline",  s:"All events",             c:"#6366F1"},
           {n:fVisible,      l:"Showing",         s:filters.hotView?"HOT view":"Filtered", c: filters.hotView?"#10B981":"#F59E0B"},
         ].map(({n,l,s,c})=>(
           <div className="stat" key={l}>
@@ -846,6 +959,7 @@ export default function App() {
         leads={leads}
         events={events}
         filteredCount={fVisible}
+        crmState={crmState}
       />
 
       {/* HOT VIEW BANNER */}
@@ -880,6 +994,8 @@ export default function App() {
                   leads={filteredLeads}
                   allLeads={leads}
                   index={i}
+                  getCrmStatus={getCrmStatus}
+                  onCrmSet={onCrmSet}
                 />
               ))}
             </div>
@@ -892,9 +1008,10 @@ export default function App() {
             <div className="sb-h">Pipeline summary</div>
             {[
               {l:"HOT leads",        v:hot,           c:"#10B981"},
+              {l:"Contacted",        v:contacted,     c:"#38BDF8"},
+              {l:"Saved",            v:saved,         c:"#10B981"},
               {l:"Showing now",      v:fVisible,      c: filters.hotView?"#10B981":"#F59E0B"},
               {l:"Total pipeline",   v:leads.length,  c:"#6366F1"},
-              {l:"Events tracked",   v:events.length, c:"#10B981"},
             ].map(({l,v,c})=>(
               <div className="sb-row" key={l}>
                 <span className="sb-l">{l}</span>
