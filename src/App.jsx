@@ -515,17 +515,19 @@ function EventItem({ event, leads, index }) {
               </div>
               <div className="niches">
                 {niches.map((n,i)=>{
-                  const nl = eventLeads.filter(l=>(l.sector||"").toLowerCase().includes(n.toLowerCase().slice(0,12))||n.toLowerCase().includes((l.sector||"").toLowerCase().slice(0,12)));
+                  const nStr = typeof n === "object" ? (n.segment_name||"") : (n||"");
+                  const nExp = typeof n === "object" ? n.exposure_level : null;
+                  const nl = eventLeads.filter(l=>(l.sector||"").toLowerCase().includes(nStr.toLowerCase().slice(0,12))||nStr.toLowerCase().includes((l.sector||"").toLowerCase().slice(0,12)));
                   return (
-                    <div key={n} className="niche-row" onClick={e=>{e.stopPropagation();setShow(true)}}>
+                    <div key={i} className="niche-row" onClick={e=>{e.stopPropagation();setShow(true)}}>
                       <div className="niche-left">
                         <span className="niche-idx">{String(i+1).padStart(2,"0")}</span>
-                        <span className="niche-name">{typeof n === "object" ? n.segment_name||"Segment" : n}</span>
+                        <span className="niche-name">{nStr}</span>
                       </div>
                       <div className="niche-right">
-                        {typeof n === "object" && n.exposure_level && (
-                          <span className={`exp-level ${expClass(n.exposure_level)}`} style={{fontSize:9,padding:"1px 6px"}}>
-                            {n.exposure_level}
+                        {nExp && (
+                          <span className={`exp-level ${expClass(nExp)}`} style={{fontSize:9,padding:"1px 6px"}}>
+                            {nExp}
                           </span>
                         )}
                         {nl.length>0 && <span className="niche-badge">{nl.length} found</span>}
