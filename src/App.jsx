@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 async function fetchData() {
   const [evRes, ldRes] = await Promise.all([
@@ -8,1218 +8,714 @@ async function fetchData() {
   const evObj = evRes.ok ? await evRes.json() : {};
   const ldObj = ldRes.ok ? await ldRes.json() : {};
   return {
-    events: Object.values(evObj).sort((a,b) => new Date(b.detected_at||0) - new Date(a.detected_at||0)),
-    leads:  Object.values(ldObj).sort((a,b) => (b.score||0) - (a.score||0)),
+    events: Object.values(evObj).sort((a,b)=>new Date(b.detected_at||0)-new Date(a.detected_at||0)),
+    leads:  Object.values(ldObj).sort((a,b)=>(b.score||0)-(a.score||0)),
   };
 }
 
-function timeAgo(iso) {
-  if (!iso) return "";
-  const s = Math.floor((Date.now() - new Date(iso)) / 1000);
-  if (s < 60)   return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s/60)}m ago`;
-  if (s < 86400)return `${Math.floor(s/3600)}h ago`;
-  return `${Math.floor(s/86400)}d ago`;
+function timeAgo(iso){
+  if(!iso)return"";
+  const s=Math.floor((Date.now()-new Date(iso))/1000);
+  if(s<60)return`${s}s ago`;
+  if(s<3600)return`${Math.floor(s/60)}m ago`;
+  if(s<86400)return`${Math.floor(s/3600)}h ago`;
+  return`${Math.floor(s/86400)}d ago`;
 }
+const uc=s=>s>=8?"#10B981":s>=6?"#F59E0B":s>=4?"#6366F1":"#475569";
+const pc=p=>p==="HOT"?"#10B981":p==="WARM"?"#F59E0B":"#6366F1";
+const pcbg=p=>p==="HOT"?"rgba(16,185,129,0.1)":p==="WARM"?"rgba(245,158,11,0.1)":"rgba(99,102,241,0.1)";
 
-const urgencyColor = s => s>=8?"#10B981":s>=6?"#F59E0B":s>=4?"#6366F1":"#64748B";
-const priorityColor = p => p==="HOT"?"#10B981":p==="WARM"?"#F59E0B":"#6366F1";
-const priorityBg    = p => p==="HOT"?"rgba(16,185,129,0.1)":p==="WARM"?"rgba(245,158,11,0.1)":"rgba(99,102,241,0.1)";
-
-// ── STYLES ────────────────────────────────────────────────────────
-const STYLES = `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
+// ─── STYLES ──────────────────────────────────────────────────────
+const S=`
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  background:#080C14;
-  color:#E2E8F0;
-  font-family:'Inter',sans-serif;
-  font-size:14px;
-  line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:rgba(255,255,255,0.02)}
-::-webkit-scrollbar-thumb{background:rgba(16,185,129,0.3);border-radius:3px}
+body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;font-size:14px}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(16,185,129,0.25);border-radius:2px}
 
-/* ── LAYOUT ── */
-.wrap{max-width:1440px;margin:0 auto;padding:0 24px}
-@media(max-width:768px){.wrap{padding:0 16px}}
-
-/* ── TOP BAR ── */
+/* TOP BAR */
 .topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 0;
-  border-bottom:1px solid rgba(255,255,255,0.05);
   position:sticky;top:0;z-index:100;
-  background:rgba(8,12,20,0.92);
-  backdrop-filter:blur(20px);
-}
-.topbar-left{display:flex;align-items:center;gap:10px}
-.topbar-logo{
-  display:flex;align-items:center;gap:8px;
-  font-size:13px;font-weight:700;letter-spacing:0.04em;color:#F8FAFC;
-}
-.topbar-logo-mark{
-  width:28px;height:28px;border-radius:7px;
-  background:linear-gradient(135deg,#10B981,#059669);
-  display:grid;place-items:center;
-  font-size:13px;font-weight:800;color:#fff;
-}
-.topbar-divider{width:1px;height:16px;background:rgba(255,255,255,0.1)}
-.topbar-subtitle{
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;letter-spacing:0.1em;
-  color:rgba(255,255,255,0.3);text-transform:uppercase;
-}
-.topbar-right{display:flex;align-items:center;gap:8px}
-.live-badge{
-  display:flex;align-items:center;gap:5px;
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  color:#10B981;letter-spacing:0.08em;
-}
-.live-dot{
-  width:6px;height:6px;border-radius:50%;background:#10B981;
-  animation:livepulse 2s ease-in-out infinite;
-  box-shadow:0 0 6px #10B981;
-}
-@keyframes livepulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.btn-sm{
-  padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;
-  cursor:pointer;transition:all 0.15s;border:none;font-family:'Inter',sans-serif;
-}
-.btn-primary{background:#10B981;color:#fff}
-.btn-primary:hover{background:#059669;transform:translateY(-1px)}
-.btn-ghost{
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.1)!important;
-  color:rgba(255,255,255,0.6);
-}
-.btn-ghost:hover{background:rgba(255,255,255,0.08);color:#fff}
-
-/* ── HERO ── */
-.hero{
-  padding:52px 0 44px;
+  background:rgba(7,9,15,0.9);backdrop-filter:blur(20px);
   border-bottom:1px solid rgba(255,255,255,0.05);
+  padding:0 32px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.tbl-logo{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#F8FAFC}
+.tbl-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#10B981,#059669);display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff}
+.tbl-sep{width:1px;height:14px;background:rgba(255,255,255,0.1)}
+.tbl-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.25);text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.live{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:#10B981}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#10B981;box-shadow:0 0 6px #10B981;animation:lp 2s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
+.tbr-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.2)}
+.btn-refresh{padding:6px 14px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-refresh:hover{background:rgba(255,255,255,.08);color:#fff}
+
+/* HERO BANNER */
+.hero{
+  padding:56px 32px 48px;
+  border-bottom:1px solid rgba(255,255,255,.05);
   position:relative;overflow:hidden;
 }
-.hero::before{
-  content:'';position:absolute;top:-80px;right:-80px;
-  width:400px;height:400px;border-radius:50%;
-  background:radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%);
+.hero::after{
+  content:'';position:absolute;top:-120px;right:-60px;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(16,185,129,.06) 0%,transparent 70%);
   pointer-events:none;
 }
 .hero-eyebrow{
   display:inline-flex;align-items:center;gap:6px;
   font-family:'JetBrains Mono',monospace;font-size:10px;
-  letter-spacing:0.14em;text-transform:uppercase;
-  color:#10B981;margin-bottom:16px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:#10B981;margin-bottom:18px;
   padding:4px 10px;border-radius:20px;
-  background:rgba(16,185,129,0.08);
-  border:1px solid rgba(16,185,129,0.2);
+  background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);
 }
-.hero-title{
-  font-size:clamp(28px,4vw,44px);font-weight:800;
-  letter-spacing:-0.03em;line-height:1.1;
-  color:#F8FAFC;margin-bottom:12px;
-}
-.hero-title span{
-  background:linear-gradient(135deg,#10B981,#34D399);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-}
-.hero-sub{
-  font-size:15px;line-height:1.7;
-  color:rgba(255,255,255,0.45);
-  max-width:560px;margin-bottom:28px;
-}
-.hero-ctas{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:36px}
-.btn-lg{
-  padding:11px 22px;border-radius:9px;font-size:14px;font-weight:600;
-  cursor:pointer;transition:all 0.18s;border:none;font-family:'Inter',sans-serif;
-  display:inline-flex;align-items:center;gap:7px;
-}
-.btn-lg.primary{
+.hero-date{color:rgba(255,255,255,.35);margin-left:4px}
+.hero-h1{font-size:clamp(32px,5vw,52px);font-weight:900;letter-spacing:-.04em;line-height:1.05;color:#F8FAFC;margin-bottom:14px}
+.hero-h1 em{font-style:normal;background:linear-gradient(135deg,#10B981,#34D399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:16px;line-height:1.7;color:rgba(255,255,255,.4);max-width:580px;margin-bottom:32px}
+.hero-ctas{display:flex;gap:10px;flex-wrap:wrap}
+.cta-primary{
+  padding:12px 24px;border-radius:10px;
   background:linear-gradient(135deg,#10B981,#059669);
-  color:#fff;box-shadow:0 4px 20px rgba(16,185,129,0.3);
+  color:#fff;font-size:14px;font-weight:700;
+  border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  display:inline-flex;align-items:center;gap:7px;
+  box-shadow:0 4px 24px rgba(16,185,129,.3);
+  transition:all .2s;
 }
-.btn-lg.primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(16,185,129,0.4)}
-.btn-lg.secondary{
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.1)!important;
-  color:rgba(255,255,255,0.7);
+.cta-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(16,185,129,.4)}
+.cta-secondary{
+  padding:12px 24px;border-radius:10px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.65);font-size:14px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:all .2s;
 }
-.btn-lg.secondary:hover{background:rgba(255,255,255,0.08);color:#fff}
+.cta-secondary:hover{background:rgba(255,255,255,.08);color:#fff}
 
-/* ── STAT CARDS ── */
-.stats-row{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
+/* STATS BAR */
+.stats-bar{
+  display:flex;gap:0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  padding:0 32px;
 }
-@media(max-width:640px){.stats-row{grid-template-columns:repeat(2,1fr)}}
-.stat-card{
-  background:rgba(255,255,255,0.025);
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:12px;padding:16px 18px;
+.stat-item{
+  padding:14px 24px 14px 0;margin-right:24px;
+  border-right:1px solid rgba(255,255,255,.05);
+  display:flex;align-items:center;gap:10px;
 }
-.stat-card-num{
-  font-size:28px;font-weight:800;line-height:1;
-  margin-bottom:4px;
-}
-.stat-card-label{
-  font-size:11px;font-weight:500;
-  color:rgba(255,255,255,0.35);letter-spacing:0.04em;text-transform:uppercase;
-}
-.stat-card-delta{
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;margin-top:6px;
-  display:inline-flex;align-items:center;gap:3px;
-  padding:2px 6px;border-radius:4px;
-}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:22px;font-weight:800;line-height:1}
+.stat-info{}
+.stat-label{font-size:11px;font-weight:500;color:rgba(255,255,255,.3);letter-spacing:.04em;text-transform:uppercase;display:block}
+.stat-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.15);letter-spacing:.06em;margin-top:1px;display:block}
 
-/* ── SECTION ── */
-.section{padding:32px 0}
-.section-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:20px;gap:12px;flex-wrap:wrap;
-}
-.section-title{
-  font-size:13px;font-weight:700;
-  letter-spacing:0.06em;text-transform:uppercase;
-  color:rgba(255,255,255,0.5);
-}
-.section-divider{
-  height:1px;background:rgba(255,255,255,0.05);
-  flex:1;min-width:20px;
-}
+/* MAIN LAYOUT */
+.main{max-width:1440px;margin:0 auto;padding:0 32px 80px;display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
+@media(max-width:1100px){.main{grid-template-columns:1fr}}
+@media(max-width:600px){.main{padding:0 16px 60px}}
 
-/* ── FILTER BAR ── */
-.filter-bar{
-  display:flex;gap:8px;flex-wrap:wrap;
-  padding:16px 20px;
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:12px;margin-bottom:20px;
-  align-items:center;
+/* EVENT FEED */
+.feed-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:28px 0 18px;
 }
-.filter-label{
-  font-size:11px;font-weight:600;
-  color:rgba(255,255,255,0.3);
-  letter-spacing:0.06em;text-transform:uppercase;
-  margin-right:4px;white-space:nowrap;
+.feed-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.feed-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.2)}
+.feed-list{display:flex;flex-direction:column;gap:0}
+
+/* EVENT ITEM */
+.ev-item{border-bottom:1px solid rgba(255,255,255,.05)}
+.ev-item:last-child{border-bottom:none}
+.ev-collapsed{
+  padding:20px 0;cursor:pointer;
+  display:grid;grid-template-columns:auto 1fr auto;
+  gap:16px;align-items:start;
+  transition:opacity .15s;
 }
-.filter-btn{
-  padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;
-  cursor:pointer;transition:all 0.13s;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  color:rgba(255,255,255,0.45);
-  font-family:'Inter',sans-serif;
-}
-.filter-btn:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7)}
-.filter-btn.active{
-  background:rgba(16,185,129,0.12);
-  border-color:rgba(16,185,129,0.35);
-  color:#10B981;
-}
-.filter-sep{width:1px;height:18px;background:rgba(255,255,255,0.07)}
-.filter-count{
-  margin-left:auto;
+.ev-collapsed:hover{opacity:.85}
+.ev-num{
   font-family:'JetBrains Mono',monospace;font-size:11px;
-  color:rgba(255,255,255,0.25);
+  color:rgba(255,255,255,.15);padding-top:3px;
+  width:20px;flex-shrink:0;
 }
-
-/* ── EVENT PILLS ── */
-.event-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
-.event-pill{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 12px;border-radius:8px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.07);
-  cursor:pointer;transition:all 0.15s;font-size:12px;font-weight:500;
-  color:rgba(255,255,255,0.5);
-}
-.event-pill:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.8)}
-.event-pill.active{
-  background:rgba(16,185,129,0.1);
-  border-color:rgba(16,185,129,0.3);
-  color:#10B981;
-}
-.event-pill-dot{
-  width:5px;height:5px;border-radius:50%;
-  background:currentColor;flex-shrink:0;
-}
-.event-pill-urgency{
+.ev-main{}
+.ev-meta-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.ev-type{
   font-family:'JetBrains Mono',monospace;font-size:9px;
-  opacity:0.6;
-}
-
-/* ── LEAD CARD ── */
-.lead-grid{display:flex;flex-direction:column;gap:10px}
-.lead-card{
-  background:rgba(255,255,255,0.025);
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:14px;
-  overflow:hidden;
-  transition:border-color 0.2s,box-shadow 0.2s;
-  position:relative;
-}
-.lead-card::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;
-  width:3px;background:var(--pc);border-radius:14px 0 0 14px;
-}
-.lead-card:hover{
-  border-color:rgba(255,255,255,0.1);
-  box-shadow:0 4px 24px rgba(0,0,0,0.3);
-}
-.lead-card-main{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:16px;
-  padding:18px 20px 18px 22px;
-  cursor:pointer;
-}
-.lc-left{}
-.lc-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;flex-wrap:wrap}
-.lc-name{
-  font-size:16px;font-weight:700;
-  color:#F8FAFC;letter-spacing:-0.01em;
-  line-height:1.3;
-}
-.lc-type{
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  color:rgba(255,255,255,0.25);margin-top:3px;letter-spacing:0.04em;
-}
-.lc-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.badge{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:3px 9px;border-radius:5px;
-  font-size:11px;font-weight:500;letter-spacing:0.02em;
-  border:1px solid transparent;
-}
-.badge-priority{color:var(--pc);background:var(--pb);border-color:color-mix(in srgb,var(--pc) 30%,transparent)}
-.badge-type{
-  color:rgba(255,255,255,0.45);
-  background:rgba(255,255,255,0.05);
-  border-color:rgba(255,255,255,0.08);
-}
-.badge-fx{
-  color:#818CF8;
-  background:rgba(129,140,248,0.08);
-  border-color:rgba(129,140,248,0.2);
-}
-.lc-meta{
-  display:flex;gap:16px;flex-wrap:wrap;
-  font-size:12px;color:rgba(255,255,255,0.35);
-  margin-bottom:10px;
-}
-.lc-meta-item{display:flex;align-items:center;gap:4px}
-.lc-meta-icon{font-size:11px}
-.lc-hook{
-  font-size:12px;line-height:1.6;
-  color:rgba(255,255,255,0.5);
-  padding:8px 12px;
-  background:rgba(16,185,129,0.04);
-  border:1px solid rgba(16,185,129,0.1);
-  border-radius:7px;
-  margin-bottom:0;
-}
-.lc-hook-label{
-  font-family:'JetBrains Mono',monospace;font-size:9px;
-  letter-spacing:0.12em;text-transform:uppercase;
-  color:#10B981;margin-bottom:3px;
-}
-
-.lc-right{
-  display:flex;flex-direction:column;align-items:flex-end;
-  justify-content:space-between;gap:10px;flex-shrink:0;
-}
-.score-ring{
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  min-width:52px;
-}
-.score-ring-num{
-  font-size:26px;font-weight:800;line-height:1;
-  color:var(--pc);
-}
-.score-ring-label{
-  font-family:'JetBrains Mono',monospace;font-size:8px;
-  letter-spacing:0.12em;text-transform:uppercase;
-  color:var(--pc);opacity:0.7;
-}
-.lc-expand-hint{
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  color:rgba(255,255,255,0.2);
-  transition:color 0.15s;
-}
-.lead-card:hover .lc-expand-hint{color:rgba(255,255,255,0.4)}
-
-/* ── LEAD EXPANDED ── */
-.lead-card-expanded{
-  border-top:1px solid rgba(255,255,255,0.05);
-  padding:18px 20px 20px 22px;
-  background:rgba(0,0,0,0.15);
-}
-.lce-grid{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:16px;margin-bottom:16px;
-}
-@media(max-width:600px){.lce-grid{grid-template-columns:1fr}}
-.lce-block{}
-.lce-label{
-  font-family:'JetBrains Mono',monospace;font-size:9px;
-  letter-spacing:0.14em;text-transform:uppercase;
-  color:rgba(255,255,255,0.2);margin-bottom:5px;
-}
-.lce-value{
-  font-size:13px;line-height:1.6;
-  color:rgba(255,255,255,0.6);
-}
-.lce-director{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:7px 12px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.07);
-  border-radius:8px;
-}
-.lce-dir-avatar{
-  width:26px;height:26px;border-radius:50%;
-  background:linear-gradient(135deg,rgba(16,185,129,0.3),rgba(99,102,241,0.3));
-  border:1px solid rgba(16,185,129,0.2);
-  display:grid;place-items:center;
-  font-size:11px;font-weight:700;color:#10B981;flex-shrink:0;
-}
-.lce-dir-name{font-size:13px;font-weight:600;color:#F8FAFC}
-.lce-dir-role{
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  color:#10B981;letter-spacing:0.04em;
-}
-.signal-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
-.signal-tag{
-  font-family:'JetBrains Mono',monospace;font-size:9px;
-  padding:2px 7px;border-radius:4px;
-  background:rgba(99,102,241,0.07);
-  border:1px solid rgba(99,102,241,0.15);
-  color:rgba(129,140,248,0.7);
-  letter-spacing:0.04em;
-}
-.opener-box{
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.06);
-  border-left:3px solid #10B981;
-  border-radius:0 8px 8px 0;
-  padding:12px 14px;margin-bottom:16px;
-}
-.opener-label{
-  font-family:'JetBrains Mono',monospace;font-size:9px;
-  letter-spacing:0.14em;text-transform:uppercase;
-  color:#10B981;margin-bottom:5px;
-}
-.opener-text{
-  font-size:13px;line-height:1.65;
-  color:rgba(255,255,255,0.55);font-style:italic;
-}
-.action-row{display:flex;gap:8px;flex-wrap:wrap}
-.action-btn{
-  flex:1;min-width:100px;
-  padding:9px 14px;border-radius:8px;
-  font-size:12px;font-weight:600;
-  cursor:pointer;transition:all 0.15s;
-  font-family:'Inter',sans-serif;
-  display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  border:none;
-}
-.action-call{background:rgba(16,185,129,0.12);color:#10B981;border:1px solid rgba(16,185,129,0.25)!important}
-.action-call:hover{background:rgba(16,185,129,0.2)}
-.action-email{background:rgba(99,102,241,0.1);color:#818CF8;border:1px solid rgba(99,102,241,0.2)!important}
-.action-email:hover{background:rgba(99,102,241,0.18)}
-.action-linkedin{background:rgba(14,165,233,0.1);color:#38BDF8;border:1px solid rgba(14,165,233,0.2)!important}
-.action-linkedin:hover{background:rgba(14,165,233,0.18)}
-.action-ch{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.08)!important}
-.action-ch:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6)}
-
-/* ── EVENT DETAIL PANEL ── */
-.event-panel{
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:12px;
-  padding:16px 20px;
-  margin-bottom:20px;
-}
-.ep-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;flex-wrap:wrap}
-@media(max-width:640px){.ep-grid{grid-template-columns:1fr}}
-.ep-block{}
-.ep-label{
-  font-family:'JetBrains Mono',monospace;font-size:9px;
-  letter-spacing:0.14em;text-transform:uppercase;
-  color:rgba(255,255,255,0.2);margin-bottom:4px;
-}
-.ep-value{font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);line-height:1.45}
-.ep-pairs{display:flex;gap:5px;flex-wrap:wrap}
-.ep-pair{
-  font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;
   padding:3px 8px;border-radius:5px;
-  background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);
-  color:#10B981;
+  background:var(--ec-bg);border:1px solid var(--ec-border);
+  color:var(--ec-color);
 }
-
-/* ── INDUSTRY ROWS ── */
-.ind-list{display:flex;flex-direction:column;gap:6px}
-.ind-row{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;border-radius:9px;
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.05);
-  cursor:pointer;transition:all 0.15s;
-}
-.ind-row:hover{background:rgba(255,255,255,0.045);border-color:rgba(16,185,129,0.2)}
-.ind-row.expanded{background:rgba(16,185,129,0.05);border-color:rgba(16,185,129,0.25)}
-.ind-num{
+.ev-urgency-chip{
+  display:flex;align-items:center;gap:5px;
   font-family:'JetBrains Mono',monospace;font-size:10px;
-  color:rgba(255,255,255,0.15);width:18px;flex-shrink:0;
+  color:var(--ec-color);
 }
-.ind-name{flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,0.75)}
-.ind-badge{
-  font-family:'JetBrains Mono',monospace;font-size:9px;
+.ev-urgency-track{width:36px;height:2px;background:rgba(255,255,255,.08);border-radius:1px;overflow:hidden}
+.ev-urgency-fill{height:100%;background:var(--ec-color)}
+.ev-time{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.15);letter-spacing:.04em}
+.ev-headline{font-size:17px;font-weight:700;line-height:1.4;color:#F8FAFC;letter-spacing:-.02em;margin-bottom:6px}
+.ev-hook{font-size:13px;line-height:1.6;color:rgba(255,255,255,.4)}
+.ev-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+.ev-pairs{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.ev-pair{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
   padding:2px 7px;border-radius:4px;
-  background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);
-  color:#10B981;flex-shrink:0;
+  background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#10B981;
 }
-.ind-chevron{
-  font-size:10px;color:rgba(255,255,255,0.2);
-  transition:transform 0.2s,color 0.15s;flex-shrink:0;
-}
-.ind-row.expanded .ind-chevron{transform:rotate(180deg);color:#10B981}
-
-.ind-detail{
-  margin:0 14px 8px;
-  padding:12px 14px;
-  background:rgba(0,0,0,0.2);
-  border:1px solid rgba(255,255,255,0.05);
-  border-top:none;
-  border-radius:0 0 9px 9px;
-}
-.ind-detail-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;
-  margin-bottom:12px;
-}
-@media(max-width:480px){.ind-detail-grid{grid-template-columns:1fr}}
-.idd-label{
+.ev-lead-count{
   font-family:'JetBrains Mono',monospace;font-size:9px;
-  letter-spacing:0.12em;text-transform:uppercase;
-  color:rgba(255,255,255,0.2);margin-bottom:3px;
+  color:rgba(255,255,255,.2);text-align:right;
 }
-.idd-value{font-size:12px;line-height:1.55;color:rgba(255,255,255,0.5)}
-.ind-find-btn{
-  width:100%;padding:8px;border-radius:7px;
-  background:rgba(16,185,129,0.08);
-  border:1px solid rgba(16,185,129,0.2);
-  color:#10B981;font-size:12px;font-weight:600;
-  cursor:pointer;transition:all 0.15s;font-family:'Inter',sans-serif;
-  display:flex;align-items:center;justify-content:center;gap:6px;
+.ev-expand-hint{
+  font-size:11px;color:rgba(255,255,255,.2);
+  display:flex;align-items:center;gap:4px;
+  transition:color .15s;
 }
-.ind-find-btn:hover{background:rgba(16,185,129,0.15)}
+.ev-item:hover .ev-expand-hint{color:#10B981}
 
-/* ── NAV TABS ── */
-.nav-tabs{display:flex;gap:2px;margin-bottom:24px}
-.nav-tab{
-  padding:7px 16px;border-radius:8px;font-size:13px;font-weight:500;
-  cursor:pointer;transition:all 0.15s;
-  background:transparent;border:none;
-  color:rgba(255,255,255,0.35);font-family:'Inter',sans-serif;
+/* EVENT EXPANDED SECTION */
+.ev-expanded{
+  padding:0 0 28px 36px;
+  animation:fadeIn .2s ease;
 }
-.nav-tab:hover{color:rgba(255,255,255,0.6)}
-.nav-tab.active{
-  background:rgba(255,255,255,0.06);
-  color:#F8FAFC;
-}
-
-/* ── BREADCRUMB ── */
-.breadcrumb{
-  display:flex;align-items:center;gap:6px;
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  color:rgba(255,255,255,0.2);letter-spacing:0.06em;
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.ev-detail-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
   margin-bottom:20px;
 }
-.breadcrumb .active{color:#10B981}
-.breadcrumb-sep{color:rgba(255,255,255,0.1)}
-.back-link{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:12px;color:rgba(255,255,255,0.35);
-  background:none;border:none;cursor:pointer;
-  font-family:'Inter',sans-serif;padding:0;
-  transition:color 0.15s;margin-bottom:16px;
+@media(max-width:700px){.ev-detail-grid{grid-template-columns:1fr}}
+.ev-detail-block{}
+.ev-detail-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);margin-bottom:5px;
 }
-.back-link:hover{color:#10B981}
+.ev-detail-value{font-size:13px;line-height:1.65;color:rgba(255,255,255,.55)}
+.ev-impact-box{
+  background:rgba(16,185,129,.04);
+  border:1px solid rgba(16,185,129,.1);
+  border-left:3px solid rgba(16,185,129,.4);
+  border-radius:0 8px 8px 0;
+  padding:12px 14px;margin-bottom:20px;
+}
+.ev-impact-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:#10B981;margin-bottom:4px;
+}
+.ev-impact-text{font-size:13px;line-height:1.65;color:rgba(255,255,255,.55)}
+.ev-sectors-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);margin-bottom:10px;
+}
+.ev-sectors-list{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.ev-sector-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 14px;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:8px;
+  cursor:pointer;transition:all .15s;
+}
+.ev-sector-row:hover{background:rgba(255,255,255,.04);border-color:rgba(16,185,129,.2)}
+.ev-sector-name{font-size:13px;font-weight:500;color:rgba(255,255,255,.7)}
+.ev-sector-right{display:flex;align-items:center;gap:8px}
+.ev-sector-count{font-family:'JetBrains Mono',monospace;font-size:9px;color:#10B981;padding:1px 6px;border-radius:3px;background:rgba(16,185,129,.1)}
+.ev-sector-arrow{font-size:11px;color:rgba(255,255,255,.2);transition:color .15s}
+.ev-sector-row:hover .ev-sector-arrow{color:#10B981}
+.ev-companies-btn{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;padding:11px;border-radius:9px;
+  background:rgba(16,185,129,.1);
+  border:1px solid rgba(16,185,129,.25);
+  color:#10B981;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;
+}
+.ev-companies-btn:hover{background:rgba(16,185,129,.18)}
 
-/* ── EMPTY STATE ── */
-.empty-state{
-  text-align:center;padding:64px 24px;
-  color:rgba(255,255,255,0.2);
+/* COMPANY DRAWER */
+.company-drawer{
+  border-top:1px solid rgba(255,255,255,.05);
+  padding:16px 0 24px;
+  animation:fadeIn .2s ease;
 }
-.empty-icon{font-size:36px;margin-bottom:12px}
-.empty-title{font-size:16px;font-weight:600;color:rgba(255,255,255,0.3);margin-bottom:6px}
-.empty-sub{
-  font-family:'JetBrains Mono',monospace;font-size:11px;
-  line-height:1.7;color:rgba(255,255,255,0.15);
-}
-.empty-sub code{color:rgba(16,185,129,0.5)}
+.cd-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cd-title{font-size:12px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.04em}
+.cd-back{font-size:11px;color:rgba(255,255,255,.25);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:color .15s}
+.cd-back:hover{color:#10B981}
+.cd-list{display:flex;flex-direction:column;gap:8px}
 
-/* ── TODAY'S BRIEFING ── */
-.briefing-date{
-  font-family:'JetBrains Mono',monospace;font-size:11px;
-  letter-spacing:0.1em;text-transform:uppercase;
-  color:rgba(255,255,255,0.2);margin-bottom:20px;
-  display:flex;align-items:center;gap:10px;
+/* COMPANY CARD */
+.cc{
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  border-left:3px solid var(--cc-pc);
+  border-radius:10px;overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;
 }
-.briefing-date::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06)}
-.event-briefing-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
-  gap:12px;margin-bottom:36px;
+.cc:hover{border-color:rgba(255,255,255,.1);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.cc-main{padding:14px 16px 14px 14px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+.cc-name{font-size:14px;font-weight:700;color:#F8FAFC;letter-spacing:-.01em;margin-bottom:4px}
+.cc-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.2);margin-bottom:8px;letter-spacing:.04em}
+.cc-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;border:1px solid transparent}
+.badge-p{color:var(--cc-pc);background:rgba(0,0,0,.2);border-color:color-mix(in srgb,var(--cc-pc) 30%,transparent)}
+.badge-sector{color:rgba(255,255,255,.4);background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.07)}
+.badge-fx{color:#818CF8;background:rgba(129,140,248,.07);border-color:rgba(129,140,248,.18)}
+.cc-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:rgba(255,255,255,.3);margin-bottom:8px}
+.cc-dir{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.cc-dir-name{font-weight:600;color:rgba(255,255,255,.6)}
+.cc-dir-role{color:rgba(255,255,255,.25)}
+.cc-angle{font-size:11px;line-height:1.55;color:rgba(255,255,255,.4);padding:6px 10px;background:rgba(16,185,129,.03);border:1px solid rgba(16,185,129,.08);border-radius:6px}
+.cc-score{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}
+.cc-score-num{font-size:22px;font-weight:800;line-height:1;color:var(--cc-pc)}
+.cc-score-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--cc-pc);opacity:.6}
+.cc-chevron{font-size:10px;color:rgba(255,255,255,.2);margin-top:4px;transition:color .15s}
+.cc:hover .cc-chevron{color:rgba(255,255,255,.4)}
+
+/* COMPANY EXPANDED */
+.cc-expanded{
+  border-top:1px solid rgba(255,255,255,.05);
+  padding:14px 16px 16px;
+  background:rgba(0,0,0,.15);
+  animation:fadeIn .15s ease;
 }
-@media(max-width:600px){.event-briefing-grid{grid-template-columns:1fr}}
-.event-briefing-card{
-  position:relative;overflow:hidden;
-  background:rgba(255,255,255,0.025);
-  border:1px solid rgba(255,255,255,0.07);
-  border-radius:14px;cursor:pointer;transition:all 0.2s;
+.cce-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:600px){.cce-grid{grid-template-columns:1fr}}
+.cce-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:4px}
+.cce-value{font-size:12px;line-height:1.6;color:rgba(255,255,255,.5)}
+.cce-dir-card{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:7px}
+.cce-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,rgba(16,185,129,.3),rgba(99,102,241,.3));border:1px solid rgba(16,185,129,.2);display:grid;place-items:center;font-size:10px;font-weight:700;color:#10B981;flex-shrink:0}
+.cce-dname{font-size:13px;font-weight:600;color:#F8FAFC}
+.cce-drole{font-family:'JetBrains Mono',monospace;font-size:10px;color:#10B981}
+.opener-box{padding:10px 12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-left:3px solid #10B981;border-radius:0 7px 7px 0;margin-bottom:12px}
+.opener-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#10B981;margin-bottom:3px}
+.opener-text{font-size:12px;line-height:1.6;color:rgba(255,255,255,.45);font-style:italic}
+.signal-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.sig{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.15);color:rgba(129,140,248,.7)}
+.action-row{display:flex;gap:6px;flex-wrap:wrap}
+.act{flex:1;min-width:80px;padding:8px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;border:none;text-decoration:none}
+.act-call{background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)!important}
+.act-call:hover{background:rgba(16,185,129,.18)}
+.act-email{background:rgba(99,102,241,.1);color:#818CF8;border:1px solid rgba(99,102,241,.2)!important}
+.act-email:hover{background:rgba(99,102,241,.18)}
+.act-li{background:rgba(14,165,233,.1);color:#38BDF8;border:1px solid rgba(14,165,233,.2)!important}
+.act-li:hover{background:rgba(14,165,233,.18)}
+.act-web{background:rgba(255,255,255,.04);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.08)!important}
+.act-web:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7)}
+
+/* SIDEBAR */
+.sidebar{padding-top:28px}
+.sidebar-block{
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;margin-bottom:14px;overflow:hidden;
 }
-.event-briefing-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--uc);opacity:0.8;
-}
-.event-briefing-card:hover{
-  background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.13);
-  transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);
-}
-.ebc-header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 0;gap:10px}
-.ebc-type{
+.sb-title{
+  padding:12px 16px;
   font-family:'JetBrains Mono',monospace;font-size:10px;
-  letter-spacing:0.1em;text-transform:uppercase;color:var(--uc);
-  padding:3px 8px;border-radius:5px;background:var(--ucbg);border:1px solid var(--ucborder);white-space:nowrap;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.3);
+  border-bottom:1px solid rgba(255,255,255,.05);
 }
-.ebc-urgency{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--uc)}
-.ebc-urgency-bar{width:40px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
-.ebc-urgency-fill{height:100%;background:var(--uc);border-radius:2px}
-.ebc-body{padding:14px 20px 18px}
-.ebc-headline{font-size:15px;font-weight:700;line-height:1.4;color:#F8FAFC;margin-bottom:8px;letter-spacing:-0.01em}
-.ebc-summary{font-size:12px;line-height:1.65;color:rgba(255,255,255,0.4);margin-bottom:12px}
-.ebc-impact{
-  padding:9px 12px;background:rgba(16,185,129,0.04);
-  border:1px solid rgba(16,185,129,0.1);border-radius:7px;margin-bottom:14px;
+.sb-stat-row{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.04)}
+.sb-stat-row:last-child{border-bottom:none}
+.sb-stat-label{font-size:12px;color:rgba(255,255,255,.4)}
+.sb-stat-val{font-size:14px;font-weight:700}
+.sb-event-item{
+  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);
+  cursor:pointer;transition:background .15s;
 }
-.ebc-impact-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#10B981;margin-bottom:3px}
-.ebc-impact-text{font-size:12px;line-height:1.55;color:rgba(255,255,255,0.55)}
-.ebc-footer{display:flex;justify-content:space-between;align-items:center}
-.ebc-pairs{display:flex;gap:4px}
-.ebc-pair{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.18);color:#10B981}
-.ebc-cta{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--uc);opacity:0.7;transition:opacity 0.15s}
-.event-briefing-card:hover .ebc-cta{opacity:1}
-.ebc-lead-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.25)}
+.sb-event-item:last-child{border-bottom:none}
+.sb-event-item:hover{background:rgba(255,255,255,.03)}
+.sb-ev-type{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--suc);margin-bottom:3px}
+.sb-ev-headline{font-size:12px;font-weight:600;color:rgba(255,255,255,.65);line-height:1.4;margin-bottom:4px}
+.sb-ev-meta{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.2)}
 
-/* ── RESPONSIVE ── */
+/* EMPTY */
+.empty{text-align:center;padding:60px 24px;color:rgba(255,255,255,.2)}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.empty-title{font-size:15px;font-weight:600;color:rgba(255,255,255,.3);margin-bottom:6px}
+.empty-sub{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:rgba(255,255,255,.15)}
+.empty-sub code{color:rgba(16,185,129,.5)}
+
 @media(max-width:768px){
-  .hero-title{font-size:28px}
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .lce-grid{grid-template-columns:1fr}
-  .ep-grid{grid-template-columns:1fr}
-  .topbar-subtitle{display:none}
-}
-@media(max-width:480px){
-  .hero-ctas{flex-direction:column}
-  .btn-lg{width:100%;justify-content:center}
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .action-row{flex-direction:column}
-  .action-btn{min-width:unset}
+  .hero{padding:36px 16px 32px}
+  .stats-bar{padding:0 16px;flex-wrap:wrap}
+  .stat-item{padding:12px 16px 12px 0;margin-right:16px}
+  .hero-h1{font-size:30px}
+  .topbar{padding:0 16px}
 }
 `;
 
-// ── LEAD CARD COMPONENT ────────────────────────────────────────────
-function LeadCard({ lead }) {
-  const [expanded, setExpanded] = useState(false);
-  const pc = priorityColor(lead.priority);
-  const pb = priorityBg(lead.priority);
-
-  const initials = (lead.director_name || "")
-    .split(" ").slice(0,2).map(w => w[0]||"").join("").toUpperCase() || "?";
-
-  const callOpener = lead.suggested_next_step || "";
-
-  return (
-    <div className="lead-card" style={{ "--pc": pc, "--pb": pb }}>
-      {/* MAIN ROW */}
-      <div className="lead-card-main" onClick={() => setExpanded(e => !e)}>
-        <div className="lc-left">
-          <div className="lc-top">
-            <div>
-              <div className="lc-name">{lead.company_name}</div>
-              <div className="lc-type">
-                {lead.company_type && `${lead.company_type.toUpperCase()} `}
-                {lead.company_number && `· CH ${lead.company_number}`}
-                {lead.incorporated && ` · Est. ${lead.incorporated.slice(0,4)}`}
-              </div>
-            </div>
+// ─── COMPANY CARD ───────────────────────────────────────────────
+function CompanyCard({lead}){
+  const [open,setOpen]=useState(false);
+  const color=pc(lead.priority);
+  const initials=(lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
+  return(
+    <div className="cc" style={{"--cc-pc":color}}>
+      <div className="cc-main" onClick={()=>setOpen(o=>!o)}>
+        <div>
+          <div className="cc-name">{lead.company_name}</div>
+          <div className="cc-sub">
+            {[lead.company_type?.toUpperCase(),lead.company_number&&`CH ${lead.company_number}`,lead.incorporated&&`Est. ${lead.incorporated.slice(0,4)}`].filter(Boolean).join(" · ")}
           </div>
-
-          <div className="lc-badges">
-            <span className="badge badge-priority" style={{"--pc":pc,"--pb":pb}}>
-              ● {lead.priority}
-            </span>
-            {lead.sector && <span className="badge badge-type">{lead.sector.slice(0,40)}</span>}
-            {lead.fx_exposure && <span className="badge badge-fx">{lead.fx_exposure}</span>}
+          <div className="cc-badges">
+            <span className="badge badge-p">● {lead.priority}</span>
+            {lead.sector&&<span className="badge badge-sector">{lead.sector.slice(0,35)}</span>}
+            {lead.fx_exposure&&<span className="badge badge-fx">{lead.fx_exposure}</span>}
           </div>
-
-          <div className="lc-meta">
-            {lead.address && (
-              <span className="lc-meta-item">
-                <span className="lc-meta-icon">📍</span>{lead.address.split(",").slice(-2).join(",").trim()}
-              </span>
-            )}
-            {lead.director_name && (
-              <span className="lc-meta-item">
-                <span className="lc-meta-icon">👤</span>
-                <strong style={{color:"rgba(255,255,255,0.55)"}}>{lead.director_name}</strong>
-                <span style={{color:"rgba(255,255,255,0.25)"}}>· {lead.director_role}</span>
-              </span>
-            )}
+          <div className="cc-meta">
+            {lead.address&&<span>📍 {lead.address.split(",").slice(-2).join(",").trim()}</span>}
+            {lead.company_status&&<span style={{color:lead.company_status==="active"?"#10B981":"#F59E0B"}}>● {lead.company_status}</span>}
           </div>
-
-          {lead.fx_reason && (
-            <div className="lc-hook">
-              <div className="lc-hook-label">FX angle</div>
-              {lead.fx_reason.slice(0,160)}{lead.fx_reason.length > 160 ? "…" : ""}
+          {lead.director_name&&(
+            <div className="cc-dir" style={{marginBottom:8}}>
+              <span style={{fontSize:11,color:"rgba(255,255,255,.2)"}}>👤</span>
+              <span className="cc-dir-name">{lead.director_name}</span>
+              <span className="cc-dir-role">· {lead.director_role}</span>
             </div>
           )}
+          {lead.fx_reason&&<div className="cc-angle">{lead.fx_reason.slice(0,120)}{lead.fx_reason.length>120?"…":""}</div>}
         </div>
-
-        <div className="lc-right">
-          <div className="score-ring">
-            <div className="score-ring-num">{lead.score}</div>
-            <div className="score-ring-label">Score</div>
-          </div>
-          <div className="lc-expand-hint">{expanded ? "▲" : "▼"}</div>
+        <div className="cc-score">
+          <div className="cc-score-num">{lead.score}</div>
+          <div className="cc-score-lbl">Score</div>
+          <div className="cc-chevron">{open?"▲":"▼"}</div>
         </div>
       </div>
-
-      {/* EXPANDED */}
-      {expanded && (
-        <div className="lead-card-expanded">
-          <div className="lce-grid">
-            {lead.director_name && (
-              <div className="lce-block">
-                <div className="lce-label">Decision maker</div>
-                <div className="lce-director">
-                  <div className="lce-dir-avatar">{initials}</div>
+      {open&&(
+        <div className="cc-expanded">
+          <div className="cce-grid">
+            {lead.director_name&&(
+              <div>
+                <div className="cce-label">Decision maker</div>
+                <div className="cce-dir-card">
+                  <div className="cce-avatar">{initials}</div>
                   <div>
-                    <div className="lce-dir-name">{lead.director_name}</div>
-                    <div className="lce-dir-role">{lead.director_role}</div>
+                    <div className="cce-dname">{lead.director_name}</div>
+                    <div className="cce-drole">{lead.director_role}</div>
                   </div>
                 </div>
               </div>
             )}
-
-            <div className="lce-block">
-              <div className="lce-label">FX exposure</div>
-              <div className="lce-value">{lead.fx_payment_logic || lead.fx_reason || "—"}</div>
+            <div>
+              <div className="cce-label">FX exposure</div>
+              <div className="cce-value">{lead.fx_payment_logic||lead.fx_reason||"—"}</div>
             </div>
-
-            {(lead.fx_payment_signals||lead.import_export_signals||[]).length > 0 && (
-              <div className="lce-block">
-                <div className="lce-label">Website signals</div>
+            {(lead.fx_payment_signals||lead.import_export_signals||[]).length>0&&(
+              <div>
+                <div className="cce-label">Website signals</div>
                 <div className="signal-list">
-                  {(lead.fx_payment_signals||lead.import_export_signals||[]).slice(0,8).map(s => (
-                    <span key={s} className="signal-tag">{s}</span>
+                  {(lead.fx_payment_signals||lead.import_export_signals||[]).slice(0,8).map(s=>(
+                    <span key={s} className="sig">{s}</span>
                   ))}
                 </div>
               </div>
             )}
-
-            {(lead.scoring_reasons||[]).length > 0 && (
-              <div className="lce-block">
-                <div className="lce-label">Scoring rationale</div>
-                <div className="lce-value" style={{fontSize:11,lineHeight:1.7}}>
-                  {lead.scoring_reasons.slice(0,3).map((r,i) => (
-                    <div key={i}>· {r}</div>
-                  ))}
+            {(lead.scoring_reasons||[]).length>0&&(
+              <div>
+                <div className="cce-label">Why this score</div>
+                <div className="cce-value" style={{fontSize:11,lineHeight:1.7}}>
+                  {lead.scoring_reasons.slice(0,3).map((r,i)=><div key={i}>· {r}</div>)}
                 </div>
               </div>
             )}
           </div>
-
-          {callOpener && (
+          {lead.suggested_next_step&&(
             <div className="opener-box">
               <div className="opener-label">Suggested opener</div>
-              <div className="opener-text">{callOpener}</div>
+              <div className="opener-text">{lead.suggested_next_step}</div>
+            </div>
+          )}
+          <div className="action-row">
+            <button className="act act-call">📞 Call</button>
+            <button className="act act-email">✉ Email</button>
+            <button className="act act-li">💼 LinkedIn</button>
+            {lead.website&&<a href={lead.website} target="_blank" rel="noreferrer" className="act act-web">🌐 Web</a>}
+            {lead.company_number&&(
+              <a href={`https://find-and-update.company-information.service.gov.uk/company/${lead.company_number}`} target="_blank" rel="noreferrer" className="act act-web">🏛 CH</a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── EVENT ITEM ─────────────────────────────────────────────────
+function EventItem({event, leads, index}){
+  const [open,setOpen]=useState(false);
+  const [showCompanies,setShowCompanies]=useState(false);
+  const color=uc(event.urgency_score||0);
+  const eventLeads=leads.filter(l=>l.event_id===event.id);
+  const sectors=event.who_pays_fx||event.affected_sectors||[];
+
+  return(
+    <div className="ev-item">
+      {/* COLLAPSED ROW — always visible */}
+      <div
+        className="ev-collapsed"
+        style={{"--ec-color":color,"--ec-bg":`${color}12`,"--ec-border":`${color}35`}}
+        onClick={()=>{setOpen(o=>!o);if(open)setShowCompanies(false)}}
+      >
+        <div className="ev-num">{String(index+1).padStart(2,"0")}</div>
+        <div className="ev-main">
+          <div className="ev-meta-row">
+            <span className="ev-type">{event.event_type||"Event"}</span>
+            <div className="ev-urgency-chip">
+              <div className="ev-urgency-track"><div className="ev-urgency-fill" style={{width:`${(event.urgency_score||0)*10}%`}}/></div>
+              {event.urgency_score}/10
+            </div>
+            {event.detected_at&&<span className="ev-time">{timeAgo(event.detected_at)}</span>}
+          </div>
+          <div className="ev-headline">{event.headline}</div>
+          <div className="ev-hook">{event.summary?.slice(0,120)}{(event.summary?.length||0)>120?"…":""}</div>
+        </div>
+        <div className="ev-right">
+          <div className="ev-pairs">{(event.currency_pairs||[]).map(p=><span key={p} className="ev-pair">{p}</span>)}</div>
+          {eventLeads.length>0&&<div className="ev-lead-count">{eventLeads.length} companies found</div>}
+          <div className="ev-expand-hint">{open?"▲ less":"▼ more"}</div>
+        </div>
+      </div>
+
+      {/* EXPANDED DETAIL */}
+      {open&&(
+        <div className="ev-expanded">
+          {/* Full summary */}
+          <div className="ev-detail-grid">
+            {event.summary&&(
+              <div className="ev-detail-block" style={{gridColumn:"1/-1"}}>
+                <div className="ev-detail-label">What happened</div>
+                <div className="ev-detail-value">{event.summary}</div>
+              </div>
+            )}
+            {event.sales_angle&&(
+              <div className="ev-detail-block">
+                <div className="ev-detail-label">Sales angle</div>
+                <div className="ev-detail-value" style={{fontStyle:"italic",color:"rgba(255,255,255,.4)"}}>"{event.sales_angle}"</div>
+              </div>
+            )}
+            {(event.who_is_hurt||[]).length>0&&(
+              <div className="ev-detail-block">
+                <div className="ev-detail-label">Who is hurt</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:4}}>
+                  {(event.who_is_hurt||[]).slice(0,4).map(h=>(
+                    <span key={h} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,padding:"2px 7px",borderRadius:4,background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.15)",color:"rgba(252,165,165,.7)"}}>▼ {h}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* FX impact box */}
+          {event.fx_payment_logic&&(
+            <div className="ev-impact-box">
+              <div className="ev-impact-label">Why businesses pay FX because of this</div>
+              <div className="ev-impact-text">{event.fx_payment_logic}</div>
             </div>
           )}
 
-          <div className="action-row">
-            <button className="action-btn action-call">📞 Call</button>
-            <button className="action-btn action-email">✉ Email</button>
-            <button className="action-btn action-linkedin">💼 LinkedIn</button>
-            {lead.website && (
-              <a href={lead.website} target="_blank" rel="noreferrer"
-                className="action-btn action-ch" style={{textDecoration:"none"}}>
-                🌐 Website
-              </a>
-            )}
-            {lead.company_number && (
-              <a
-                href={`https://find-and-update.company-information.service.gov.uk/company/${lead.company_number}`}
-                target="_blank" rel="noreferrer"
-                className="action-btn action-ch" style={{textDecoration:"none"}}>
-                🏛 CH
-              </a>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── EVENT PILL LIST ───────────────────────────────────────────────
-function EventPills({ events, selectedId, onSelect }) {
-  return (
-    <div className="event-pills">
-      <div
-        className={`event-pill${!selectedId?" active":""}`}
-        onClick={() => onSelect(null)}
-      >
-        <span className="event-pill-dot" />
-        All events
-      </div>
-      {events.map(ev => (
-        <div
-          key={ev.id}
-          className={`event-pill${selectedId===ev.id?" active":""}`}
-          onClick={() => onSelect(selectedId===ev.id?null:ev.id)}
-        >
-          <span className="event-pill-dot" style={{color: urgencyColor(ev.urgency_score)}} />
-          <span style={{maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-            {ev.event_type||"Event"} · {ev.headline.slice(0,40)}…
-          </span>
-          <span className="event-pill-urgency">{ev.urgency_score}/10</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── INDUSTRIES VIEW ───────────────────────────────────────────────
-function IndustriesView({ event, leads, onSelectIndustry, onBack }) {
-  const [expandedIdx, setExpandedIdx] = useState(null);
-  const sectors = event.who_pays_fx || event.affected_sectors || [];
-  const leadsForEvent = leads.filter(l => l.event_id === event.id);
-
-  return (
-    <>
-      <button className="back-link" onClick={onBack}>← Back to dashboard</button>
-      <div className="breadcrumb">
-        <span>Events</span><span className="breadcrumb-sep">›</span>
-        <span className="active">Affected Industries</span><span className="breadcrumb-sep">›</span>
-        <span>Companies</span>
-      </div>
-
-      <div className="event-panel">
-        <div className="ep-grid">
-          <div className="ep-block">
-            <div className="ep-label">Trigger event</div>
-            <div className="ep-value" style={{fontSize:14,fontWeight:600,color:"#F8FAFC"}}>{event.headline}</div>
-          </div>
-          <div className="ep-block">
-            <div className="ep-label">Urgency</div>
-            <div className="ep-value" style={{color:urgencyColor(event.urgency_score),fontWeight:700,fontSize:18}}>
-              {event.urgency_score}<span style={{fontSize:12,opacity:0.5}}>/10</span>
-            </div>
-          </div>
-          <div className="ep-block">
-            <div className="ep-label">FX pairs</div>
-            <div className="ep-pairs">
-              {(event.currency_pairs||[]).map(p => <span key={p} className="ep-pair">{p}</span>)}
-            </div>
-          </div>
-        </div>
-        {event.fx_payment_logic && (
-          <div style={{marginTop:12,paddingTop:12,borderTop:"1px solid rgba(255,255,255,0.05)"}}>
-            <div className="ep-label">Why these businesses pay FX</div>
-            <div className="ep-value" style={{fontStyle:"italic",color:"rgba(255,255,255,0.4)"}}>
-              {event.fx_payment_logic}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="section-header">
-        <div className="section-title">{sectors.length} industries affected</div>
-        <div className="section-divider" />
-        <div style={{fontSize:11,color:"rgba(255,255,255,0.25)",fontFamily:"'JetBrains Mono',monospace"}}>
-          Expand for detail · click Find to see companies
-        </div>
-      </div>
-
-      <div className="ind-list">
-        {sectors.map((sector, i) => {
-          const sectorLeads = leadsForEvent.filter(l =>
-            (l.sector||"").toLowerCase().includes(sector.toLowerCase().slice(0,12))||
-            sector.toLowerCase().includes((l.sector||"").toLowerCase().slice(0,12))
-          );
-          const isOpen = expandedIdx === i;
-          return (
-            <div key={sector}>
-              <div
-                className={`ind-row${isOpen?" expanded":""}`}
-                onClick={() => setExpandedIdx(isOpen ? null : i)}
-              >
-                <span className="ind-num">{String(i+1).padStart(2,"0")}</span>
-                <span className="ind-name">{sector}</span>
-                {sectorLeads.length > 0 && (
-                  <span className="ind-badge">{sectorLeads.length} found</span>
-                )}
-                <span className="ind-chevron">▼</span>
-              </div>
-              {isOpen && (
-                <div className="ind-detail">
-                  <div className="ind-detail-grid">
-                    {event.fx_payment_logic && (
-                      <div>
-                        <div className="idd-label">Why they pay FX</div>
-                        <div className="idd-value">{event.fx_payment_logic}</div>
+          {/* Sectors list */}
+          {sectors.length>0&&!showCompanies&&(
+            <>
+              <div className="ev-sectors-label">{sectors.length} types of business affected — click to see companies</div>
+              <div className="ev-sectors-list">
+                {sectors.map((s,i)=>{
+                  const sLeads=eventLeads.filter(l=>(l.sector||"").toLowerCase().includes(s.toLowerCase().slice(0,12))||s.toLowerCase().includes((l.sector||"").toLowerCase().slice(0,12)));
+                  return(
+                    <div key={s} className="ev-sector-row" onClick={e=>{e.stopPropagation();setShowCompanies(true)}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"rgba(255,255,255,.15)",width:18}}>{String(i+1).padStart(2,"0")}</span>
+                        <span className="ev-sector-name">{s}</span>
                       </div>
-                    )}
-                    <div>
-                      <div className="idd-label">Currency pairs</div>
-                      <div className="ep-pairs" style={{marginTop:4}}>
-                        {(event.currency_pairs||[]).map(p => <span key={p} className="ep-pair">{p}</span>)}
+                      <div className="ev-sector-right">
+                        {sLeads.length>0&&<span className="ev-sector-count">{sLeads.length} found</span>}
+                        <span className="ev-sector-arrow">→</span>
                       </div>
                     </div>
-                    {event.summary && (
-                      <div style={{gridColumn:"1/-1"}}>
-                        <div className="idd-label">Event context</div>
-                        <div className="idd-value">{event.summary}</div>
-                      </div>
-                    )}
-                    {event.sales_angle && (
-                      <div style={{gridColumn:"1/-1"}}>
-                        <div className="idd-label">Sales angle</div>
-                        <div className="idd-value" style={{fontStyle:"italic",color:"rgba(255,255,255,0.4)"}}>
-                          "{event.sales_angle}"
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <button className="ind-find-btn" onClick={() => onSelectIndustry(sector)}>
-                    Find companies in this sector →
-                  </button>
+                  );
+                })}
+              </div>
+              {eventLeads.length>0&&(
+                <button className="ev-companies-btn" onClick={e=>{e.stopPropagation();setShowCompanies(true)}}>
+                  View all {eventLeads.length} affected companies →
+                </button>
+              )}
+              {eventLeads.length===0&&(
+                <div style={{padding:"12px 0",textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"rgba(255,255,255,.2)"}}>
+                  No companies found yet · run <code style={{color:"rgba(16,185,129,.5)"}}>discover.py</code> to populate
                 </div>
               )}
+            </>
+          )}
+
+          {/* Companies drawer */}
+          {showCompanies&&eventLeads.length>0&&(
+            <div className="company-drawer" onClick={e=>e.stopPropagation()}>
+              <div className="cd-header">
+                <div className="cd-title">{eventLeads.length} companies with FX exposure · sorted by score</div>
+                <button className="cd-back" onClick={e=>{e.stopPropagation();setShowCompanies(false)}}>← Back to sectors</button>
+              </div>
+              <div className="cd-list">
+                {eventLeads.map(lead=><CompanyCard key={lead.id} lead={lead}/>)}
+              </div>
             </div>
-          );
-        })}
-      </div>
-    </>
-  );
-}
-
-// ── COMPANIES VIEW ────────────────────────────────────────────────
-function CompaniesView({ event, industry, leads, onBack }) {
-  const companies = leads.filter(l => l.event_id === event.id);
-  return (
-    <>
-      <button className="back-link" onClick={onBack}>← Back to industries</button>
-      <div className="breadcrumb">
-        <span>Events</span><span className="breadcrumb-sep">›</span>
-        <span>Industries</span><span className="breadcrumb-sep">›</span>
-        <span className="active">{industry.slice(0,50)}</span>
-      </div>
-
-      <div className="event-panel" style={{marginBottom:20}}>
-        <div className="ep-grid">
-          <div className="ep-block">
-            <div className="ep-label">Trigger event</div>
-            <div className="ep-value" style={{fontSize:13}}>{event.headline}</div>
-          </div>
-          <div className="ep-block">
-            <div className="ep-label">Industry</div>
-            <div className="ep-value" style={{fontWeight:600,color:"#F8FAFC"}}>{industry.slice(0,50)}</div>
-          </div>
-          <div className="ep-block">
-            <div className="ep-label">FX exposure</div>
-            <div className="ep-pairs">
-              {(event.currency_pairs||[]).map(p => <span key={p} className="ep-pair">{p}</span>)}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="section-header">
-        <div className="section-title">{companies.length} companies</div>
-        <div className="section-divider" />
-        <div style={{fontSize:11,color:"rgba(255,255,255,0.25)",fontFamily:"'JetBrains Mono',monospace"}}>
-          Sorted by FX relevance score
-        </div>
-      </div>
-
-      {companies.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🏢</div>
-          <div className="empty-title">No companies found yet</div>
-          <div className="empty-sub">
-            Run <code>python3 scripts/discover.py</code><br/>
-            to search Companies House and find businesses in this sector
-          </div>
-        </div>
-      ) : (
-        <div className="lead-grid">
-          {companies.map(lead => <LeadCard key={lead.id} lead={lead} />)}
+          )}
         </div>
       )}
-    </>
-  );
-}
-
-// ── MAIN DASHBOARD VIEW ────────────────────────────────────────────
-function EventBriefingCard({ event, leadCount, onSelect }) {
-  const uc = urgencyColor(event.urgency_score || 0);
-  const ucbg = `${uc}12`;
-  const ucborder = `${uc}35`;
-  return (
-    <div
-      className="event-briefing-card"
-      style={{"--uc":uc,"--ucbg":ucbg,"--ucborder":ucborder}}
-      onClick={() => onSelect(event)}
-    >
-      <div className="ebc-header">
-        <span className="ebc-type">{event.event_type || "Event"}</span>
-        <div className="ebc-urgency">
-          <div className="ebc-urgency-bar">
-            <div className="ebc-urgency-fill" style={{width:`${(event.urgency_score||0)*10}%`}} />
-          </div>
-          {event.urgency_score}/10
-        </div>
-      </div>
-      <div className="ebc-body">
-        <div className="ebc-headline">{event.headline}</div>
-        <div className="ebc-summary">{event.summary?.slice(0,140)}{event.summary?.length > 140 ? "…" : ""}</div>
-        {event.fx_payment_logic && (
-          <div className="ebc-impact">
-            <div className="ebc-impact-label">Why businesses pay FX</div>
-            <div className="ebc-impact-text">{event.fx_payment_logic}</div>
-          </div>
-        )}
-        <div className="ebc-footer">
-          <div className="ebc-pairs">
-            {(event.currency_pairs||[]).map(p => <span key={p} className="ebc-pair">{p}</span>)}
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            {leadCount > 0 && <span className="ebc-lead-count">{leadCount} companies</span>}
-            <div className="ebc-cta">Find affected businesses →</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
 
-function DashboardView({ events, leads, onSelectEvent }) {
-  const hot  = leads.filter(l => l.priority==="HOT").length;
-  const warm = leads.filter(l => l.priority==="WARM").length;
-  const today = new Date().toLocaleDateString("en-GB", {weekday:"long",day:"numeric",month:"long",year:"numeric"});
+// ─── ROOT APP ───────────────────────────────────────────────────
+export default function App(){
+  const [events,setEvents]=useState([]);
+  const [leads,setLeads]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [lastRefresh,setLastRefresh]=useState(null);
 
-  return (
-    <>
-      {/* STATS */}
-      <div className="stats-row" style={{marginBottom:32}}>
-        {[
-          {num:events.length, label:"Events today",    color:"#10B981", delta:"Detected"},
-          {num:hot,           label:"Hot companies",   color:"#10B981", delta:"Score 80+"},
-          {num:warm,          label:"Warm companies",  color:"#F59E0B", delta:"Score 60+"},
-          {num:leads.length,  label:"Total leads",     color:"#6366F1", delta:"All events"},
-        ].map(({num,label,color,delta}) => (
-          <div className="stat-card" key={label}>
-            <div className="stat-card-num" style={{color}}>{num}</div>
-            <div className="stat-card-label">{label}</div>
-            <div className="stat-card-delta" style={{background:`${color}15`,color}}>{delta}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* TODAY'S BRIEFING */}
-      <div className="section-header" style={{marginBottom:16}}>
-        <div className="section-title">Today's briefing</div>
-        <div className="section-divider" />
-        <div className="briefing-date" style={{marginBottom:0,flex:"none"}}>
-          {today}
-        </div>
-      </div>
-
-      {events.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">📡</div>
-          <div className="empty-title">No events detected yet</div>
-          <div className="empty-sub">
-            Run <code>python3 scripts/ingest.py</code> to pull today's market events
-          </div>
-        </div>
-      ) : (
-        <>
-          <p style={{fontSize:13,color:"rgba(255,255,255,0.35)",marginBottom:20,lineHeight:1.6}}>
-            {events.length} market event{events.length!==1?"s":""} detected today that may create FX exposure for UK businesses.
-            Click any event to find the companies affected and why they need foreign currency.
-          </p>
-          <div className="event-briefing-grid">
-            {events.map(ev => (
-              <EventBriefingCard
-                key={ev.id}
-                event={ev}
-                leadCount={leads.filter(l => l.event_id === ev.id).length}
-                onSelect={onSelectEvent}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* ALL LEADS BELOW */}
-      {leads.length > 0 && (
-        <>
-          <div className="section-header" style={{marginBottom:12,marginTop:8}}>
-            <div className="section-title">All company leads</div>
-            <div className="section-divider" />
-            <div style={{fontSize:11,color:"rgba(255,255,255,0.25)",fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>
-              Sorted by FX relevance score · {leads.length} total
-            </div>
-          </div>
-          <div className="lead-grid">
-            {leads.map(lead => <LeadCard key={lead.id} lead={lead} />)}
-          </div>
-        </>
-      )}
-    </>
-  );
-}
-
-// ── ROOT APP ──────────────────────────────────────────────────────
-export default function App() {
-  const [events, setEvents]  = useState([]);
-  const [leads,  setLeads]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [lastRefresh, setLastRefresh] = useState(null);
-  const [view, setView]      = useState("dashboard");
-  const [selEvent, setSelEvent]    = useState(null);
-  const [selIndustry, setSelIndustry] = useState(null);
-
-  const loadData = useCallback(async () => {
+  const loadData=useCallback(async()=>{
     setLoading(true);
-    try {
-      const d = await fetchData();
-      setEvents(d.events); setLeads(d.leads);
+    try{
+      const d=await fetchData();
+      setEvents(d.events);setLeads(d.leads);
       setLastRefresh(new Date());
-    } catch(e) { console.error(e); }
-    finally { setLoading(false); }
-  }, []);
+    }catch(e){console.error(e);}
+    finally{setLoading(false);}
+  },[]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(()=>{loadData();},[loadData]);
 
-  const hot  = leads.filter(l => l.priority==="HOT").length;
-  const warm = leads.filter(l => l.priority==="WARM").length;
+  const hot=leads.filter(l=>l.priority==="HOT").length;
+  const warm=leads.filter(l=>l.priority==="WARM").length;
+  const today=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 
-  return (
+  return(
     <>
-      <style>{STYLES}</style>
+      <style>{S}</style>
 
       {/* TOP BAR */}
       <div className="topbar">
-        <div className="wrap" style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%"}}>
-          <div className="topbar-left">
-            <div className="topbar-logo">
-              <div className="topbar-logo-mark">FX</div>
-              Universal Partners
-            </div>
-            <div className="topbar-divider" />
-            <div className="topbar-subtitle">FX Discovery Engine</div>
-          </div>
-          <div className="topbar-right">
-            <div className="live-badge">
-              <div className="live-dot" />
-              LIVE
-            </div>
-            {lastRefresh && (
-              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.2)"}}>
-                {timeAgo(lastRefresh)}
-              </span>
-            )}
-            <button className="btn-sm btn-ghost" onClick={loadData} disabled={loading}>
-              {loading?"…":"↻ Refresh"}
-            </button>
-          </div>
+        <div className="topbar-left">
+          <div className="tbl-logo"><div className="tbl-mark">FX</div>Universal Partners</div>
+          <div className="tbl-sep"/>
+          <div className="tbl-tag">Discovery Engine</div>
+        </div>
+        <div className="topbar-right">
+          <div className="live"><div className="live-dot"/>LIVE</div>
+          {lastRefresh&&<span className="tbr-time">{timeAgo(lastRefresh)}</span>}
+          <button className="btn-refresh" onClick={loadData} disabled={loading}>{loading?"…":"↻ Refresh"}</button>
         </div>
       </div>
 
       {/* HERO */}
-      {view === "dashboard" && (
-        <div className="hero">
-          <div className="wrap">
-            <div className="hero-eyebrow">
-              <span>●</span> Live market intelligence · {new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}
-            </div>
-            <h1 className="hero-title">
-              What happened today —<br/>
-              <span>and who you should call</span>
-            </h1>
-            <p className="hero-sub">
-              Every market event, tariff announcement, rate decision or geopolitical shock mapped 
-              to the specific UK businesses writing cheques in foreign currency.
-              Click an event below to find the companies affected.
-            </p>
-            <div className="hero-ctas">
-              <button
-                className="btn-lg primary"
-                onClick={() => loadData()}
-              >
-                ⚡ Refresh Intelligence
-              </button>
-              <button
-                className="btn-lg secondary"
-                onClick={() => document.querySelector('.lead-grid')?.scrollIntoView({behavior:'smooth'})}
-              >
-                {hot + warm > 0 ? `View ${hot + warm} Priority Leads →` : "View All Leads →"}
-              </button>
+      <div className="hero">
+        <div className="hero-eyebrow">
+          <span>●</span> Live market intelligence
+          <span className="hero-date">· {new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}</span>
+        </div>
+        <h1 className="hero-h1">What happened today —<br/><em>and who you should call</em></h1>
+        <p className="hero-sub">Every market event, tariff, rate decision and geopolitical shock mapped to the exact UK businesses writing cheques in foreign currency. Click any event to see the full picture.</p>
+        <div className="hero-ctas">
+          <button className="cta-primary" onClick={loadData}>⚡ Refresh Intelligence</button>
+          <button className="cta-secondary" onClick={()=>document.querySelector(".feed-list")?.scrollIntoView({behavior:"smooth"})}>
+            {events.length>0?`↓ ${events.length} events today`:"↓ View events"}
+          </button>
+        </div>
+      </div>
+
+      {/* STATS BAR */}
+      <div className="stats-bar">
+        {[
+          {num:events.length,label:"Events today",sub:"Detected",color:"#10B981"},
+          {num:hot,label:"Hot companies",sub:"Score 80+",color:"#10B981"},
+          {num:warm,label:"Warm companies",sub:"Score 60+",color:"#F59E0B"},
+          {num:leads.length,label:"Total leads",sub:"All events",color:"#6366F1"},
+        ].map(({num,label,sub,color})=>(
+          <div className="stat-item" key={label}>
+            <div className="stat-num" style={{color}}>{num}</div>
+            <div className="stat-info">
+              <span className="stat-label">{label}</span>
+              <span className="stat-sub">{sub}</span>
             </div>
           </div>
+        ))}
+      </div>
+
+      {/* MAIN */}
+      <div className="main">
+        {/* FEED */}
+        <div>
+          <div className="feed-header">
+            <div className="feed-title">Today's market events</div>
+            <div className="feed-count">{today}</div>
+          </div>
+
+          {events.length===0?(
+            <div className="empty">
+              <div className="empty-icon">📡</div>
+              <div className="empty-title">No events detected yet</div>
+              <div className="empty-sub">Run <code>python3 scripts/ingest.py</code> to pull today's market events<br/>then <code>python3 scripts/discover.py</code> to find affected companies</div>
+            </div>
+          ):(
+            <div className="feed-list">
+              {events.map((ev,i)=>(
+                <EventItem key={ev.id} event={ev} leads={leads} index={i}/>
+              ))}
+            </div>
+          )}
         </div>
-      )}
 
-      {/* MAIN CONTENT */}
-      <div className="wrap" style={{paddingTop:32,paddingBottom:80}}>
+        {/* SIDEBAR */}
+        <div className="sidebar">
+          <div className="sidebar-block">
+            <div className="sb-title">Intelligence summary</div>
+            {[
+              {label:"Events detected",val:events.length,color:"#10B981"},
+              {label:"Hot leads",val:hot,color:"#10B981"},
+              {label:"Warm leads",val:warm,color:"#F59E0B"},
+              {label:"Total companies",val:leads.length,color:"#6366F1"},
+            ].map(({label,val,color})=>(
+              <div className="sb-stat-row" key={label}>
+                <span className="sb-stat-label">{label}</span>
+                <span className="sb-stat-val" style={{color}}>{val}</span>
+              </div>
+            ))}
+          </div>
 
-        {view === "dashboard" && (
-          <DashboardView
-            events={events}
-            leads={leads}
-            onSelectEvent={ev => { setSelEvent(ev); setView("industries"); }}
-          />
-        )}
-
-        {view === "industries" && selEvent && (
-          <IndustriesView
-            event={selEvent}
-            leads={leads}
-            onSelectIndustry={ind => { setSelIndustry(ind); setView("companies"); }}
-            onBack={() => { setView("dashboard"); setSelEvent(null); }}
-          />
-        )}
-
-        {view === "companies" && selEvent && selIndustry && (
-          <CompaniesView
-            event={selEvent}
-            industry={selIndustry}
-            leads={leads}
-            onBack={() => setView("industries")}
-          />
-        )}
+          {events.length>0&&(
+            <div className="sidebar-block">
+              <div className="sb-title">Event index</div>
+              {events.map(ev=>(
+                <div
+                  key={ev.id}
+                  className="sb-event-item"
+                  style={{"--suc":uc(ev.urgency_score||0)}}
+                  onClick={()=>{
+                    document.querySelector(\`[data-ev-id="${ev.id}"]\`)?.scrollIntoView({behavior:"smooth"});
+                  }}
+                >
+                  <div className="sb-ev-type">{ev.event_type} · {ev.urgency_score}/10</div>
+                  <div className="sb-ev-headline">{ev.headline.slice(0,60)}{ev.headline.length>60?"…":""}</div>
+                  <div className="sb-ev-meta">{(ev.currency_pairs||[]).join(" · ")} · {timeAgo(ev.detected_at)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
