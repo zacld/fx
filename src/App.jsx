@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
 async function fetchData() {
   const [evRes, ldRes] = await Promise.all([
@@ -23,15 +23,52 @@ const ago = iso => {
 const urg = s => s>=8?"#10B981":s>=6?"#F59E0B":s>=4?"#6366F1":"#475569";
 const pri = p => p==="HOT"?"#10B981":p==="WARM"?"#F59E0B":"#6366F1";
 
-
 const expClass = l => l==="Very High"?"exp-vh":l==="High"?"exp-h":l==="Medium"?"exp-m":"exp-l";
 const expLabel = l => l==="Very High"?"● Very High":l==="High"?"● High":l==="Medium"?"○ Medium":"○ Low";
 
 const today = new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 const dateShort = new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
 
-function copy(text) {
-  navigator.clipboard.writeText(text).catch(()=>{});
+function copy(text) { navigator.clipboard.writeText(text).catch(()=>{}); }
+
+const PRIORITY_COLORS = { HOT:"#10B981", WARM:"#F59E0B", COLD:"#475569", QUEUE:"#6366F1" };
+
+const DEFAULT_FILTERS = {
+  hotView: true,
+  priorities: [],      // empty = all
+  hasDirector: false,
+  hasWebsite: false,
+  minScore: 0,
+  eventId: "all",
+  exposureLevel: "all",
+  newOnly: false,
+};
+
+const HOT_VIEW_FILTERS = {
+  hotView: true,
+  priorities: ["HOT"],
+  hasDirector: false,
+  hasWebsite: false,
+  minScore: 0,
+  eventId: "all",
+  exposureLevel: "all",
+  newOnly: false,
+};
+
+function applyFilters(leads, filters) {
+  return leads.filter(l => {
+    if (filters.priorities.length && !filters.priorities.includes(l.priority)) return false;
+    if (filters.hasDirector && !l.director_name) return false;
+    if (filters.hasWebsite && !l.website) return false;
+    if (filters.minScore > 0 && (l.score||0) < filters.minScore) return false;
+    if (filters.eventId !== "all" && l.event_id !== filters.eventId) return false;
+    if (filters.exposureLevel !== "all" && l.exposure_level !== filters.exposureLevel) return false;
+    if (filters.newOnly) {
+      const age = Date.now() - new Date(l.created_at||0);
+      if (age > 86400000) return false;
+    }
+    return true;
+  });
 }
 
 // ─── STYLES ──────────────────────────────────────────────────────
@@ -81,6 +118,35 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .stat-s{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.15);letter-spacing:.06em;display:block;margin-top:1px}
 @media(max-width:600px){.stats{padding:0 16px}}
 
+/* FILTER BAR */
+.fb{padding:12px 40px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(255,255,255,.015)}
+.fb-group{display:flex;align-items:center;gap:5px}
+.fb-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.18);white-space:nowrap;margin-right:3px}
+.fb-sep{width:1px;height:20px;background:rgba(255,255,255,.07);flex-shrink:0}
+.chip{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(255,255,255,.3);transition:all .15s;font-family:'Inter',sans-serif;white-space:nowrap;user-select:none}
+.chip:hover{border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.6)}
+.chip.on{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35);color:#10B981}
+.chip.hot-on{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35);color:#10B981}
+.chip.warm-on{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35);color:#F59E0B}
+.chip.queue-on{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.35);color:#818CF8}
+.chip.hv{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:#10B981;font-weight:700}
+.chip.hv.on{background:rgba(16,185,129,.18);border-color:#10B981;box-shadow:0 0 0 1px rgba(16,185,129,.3)}
+.fb-select{padding:4px 8px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.35);font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;outline:none;transition:all .15s}
+.fb-select:focus,.fb-select:hover{border-color:rgba(16,185,129,.25);color:rgba(255,255,255,.6)}
+.fb-select option{background:#111}
+.fb-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(16,185,129,.8);background:rgba(16,185,129,.07);padding:3px 9px;border-radius:4px;border:1px solid rgba(16,185,129,.15);margin-left:auto;white-space:nowrap}
+.fb-reset{padding:4px 10px;border-radius:7px;background:none;border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.2);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.fb-reset:hover{border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.5)}
+@media(max-width:600px){.fb{padding:10px 16px}.fb-sep{display:none}}
+
+/* HOT VIEW BANNER */
+.hv-bar{padding:8px 40px;background:rgba(16,185,129,.04);border-bottom:1px solid rgba(16,185,129,.1);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hv-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#10B981;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);padding:2px 8px;border-radius:4px;flex-shrink:0}
+.hv-desc{font-size:12px;color:rgba(255,255,255,.3)}
+.hv-clear{margin-left:auto;padding:3px 10px;border-radius:5px;background:none;border:1px solid rgba(16,185,129,.2);color:rgba(16,185,129,.6);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.hv-clear:hover{background:rgba(16,185,129,.08);color:#10B981}
+@media(max-width:600px){.hv-bar{padding:8px 16px}}
+
 /* LAYOUT */
 .layout{max-width:1500px;margin:0 auto;padding:0 40px 80px;display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:start}
 @media(max-width:1080px){.layout{grid-template-columns:1fr}}
@@ -119,16 +185,13 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 /* EVENT EXPANDED */
 .ev-expanded{padding:0 0 28px 44px;animation:fi .2s ease}
 @keyframes fi{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-
 .ev-detail-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 @media(max-width:640px){.ev-detail-row{grid-template-columns:1fr}}
 .ev-dl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:5px}
 .ev-dv{font-size:13px;line-height:1.65;color:rgba(255,255,255,.5)}
-
 .ev-fx-box{background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.1);border-left:3px solid rgba(16,185,129,.4);border-radius:0 9px 9px 0;padding:14px 16px;margin-bottom:20px}
 .ev-fx-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#10B981;margin-bottom:5px}
 .ev-fx-text{font-size:13px;line-height:1.65;color:rgba(255,255,255,.6);font-weight:500}
-
 .niche-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .niche-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.2)}
 .niche-hint{font-size:11px;color:rgba(255,255,255,.2)}
@@ -142,17 +205,17 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .niche-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#10B981}
 .niche-arr{font-size:11px;color:rgba(255,255,255,.2);transition:color .15s}
 .niche-row:hover .niche-arr{color:#10B981}
-
 .show-companies-btn{width:100%;padding:10px;border-radius:8px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#10B981;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px}
 .show-companies-btn:hover{background:rgba(16,185,129,.18)}
 
 /* COMPANY DRAWER */
 .co-drawer{border-top:1px solid rgba(255,255,255,.05);padding:20px 0 4px;animation:fi .2s ease}
-.co-drawer-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.co-drawer-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
 .co-drawer-title{font-size:12px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.04em}
 .co-back{font-size:11px;color:rgba(255,255,255,.25);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:color .15s}
 .co-back:hover{color:#10B981}
 .co-list{display:flex;flex-direction:column;gap:8px}
+.co-filtered-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(16,185,129,.5);background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.1);padding:4px 10px;border-radius:5px}
 
 /* COMPANY CARD */
 .cc{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-left:3px solid var(--pc);border-radius:11px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
@@ -235,7 +298,6 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .sb-et{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
 .sb-eh{font-size:12px;font-weight:600;color:rgba(255,255,255,.6);line-height:1.4;margin-bottom:3px}
 .sb-em{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.2)}
-
 
 /* EXPOSURE */
 .exp-level{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;border:1px solid;font-family:'Inter',sans-serif}
@@ -350,7 +412,6 @@ function CompanyCard({ lead }) {
 
       {open && (
         <div className="cc-exp">
-          {/* Decision maker */}
           <div className="cc-exp-grid">
             {lead.director_name && (
               <div>
@@ -388,7 +449,6 @@ function CompanyCard({ lead }) {
             )}
           </div>
 
-          {/* LinkedIn */}
           {li && (
             <div className="li-section">
               <div className="xl" style={{marginBottom:8}}>LinkedIn — open manually, do not automate</div>
@@ -405,10 +465,8 @@ function CompanyCard({ lead }) {
             </div>
           )}
 
-          {/* Outreach */}
           <OutreachPanel outreach={lead.outreach} />
 
-          {/* Actions */}
           <div className="actions">
             <button className="act a-call">📞 Call</button>
             <button className="act a-email" onClick={()=>lead.outreach?.email_body&&copy(lead.outreach.email_body)}>✉ Copy Email</button>
@@ -423,23 +481,149 @@ function CompanyCard({ lead }) {
   );
 }
 
+// ─── FILTER BAR ──────────────────────────────────────────────────
+function FilterBar({ filters, setFilters, leads, events, filteredCount }) {
+  const priorities = useMemo(()=>[...new Set(leads.map(l=>l.priority))].sort(),[leads]);
+  const exposureLevels = useMemo(()=>[...new Set(leads.map(l=>l.exposure_level).filter(Boolean))],[leads]);
+
+  function toggleHotView() {
+    setFilters(f => f.hotView ? {...DEFAULT_FILTERS, hotView:false} : HOT_VIEW_FILTERS);
+  }
+
+  function togglePriority(p) {
+    setFilters(f => {
+      const next = f.priorities.includes(p)
+        ? f.priorities.filter(x=>x!==p)
+        : [...f.priorities, p];
+      return {...f, hotView:false, priorities:next};
+    });
+  }
+
+  function toggleBool(key) {
+    setFilters(f => ({...f, hotView:false, [key]:!f[key]}));
+  }
+
+  function setSelect(key, val) {
+    setFilters(f => ({...f, hotView:false, [key]:val}));
+  }
+
+  const isActive = f => !f.hotView && (
+    f.priorities.length || f.hasDirector || f.hasWebsite ||
+    f.minScore > 0 || f.eventId !== "all" || f.exposureLevel !== "all" || f.newOnly
+  );
+
+  const priChipClass = p => {
+    const on = filters.priorities.includes(p);
+    if (!on) return "chip";
+    if (p==="HOT") return "chip hot-on";
+    if (p==="WARM") return "chip warm-on";
+    if (p==="QUEUE") return "chip queue-on";
+    return "chip on";
+  };
+
+  return (
+    <div className="fb">
+      {/* HOT view toggle */}
+      <div className="fb-group">
+        <button
+          className={`chip hv${filters.hotView?" on":""}`}
+          onClick={toggleHotView}
+          title="Show HOT priority leads only"
+        >
+          ⚡ HOT view
+        </button>
+      </div>
+
+      <div className="fb-sep"/>
+
+      {/* Priority */}
+      <div className="fb-group">
+        <span className="fb-label">Priority</span>
+        {priorities.map(p=>(
+          <button key={p} className={priChipClass(p)} onClick={()=>togglePriority(p)}>{p}</button>
+        ))}
+      </div>
+
+      <div className="fb-sep"/>
+
+      {/* Toggle chips */}
+      <div className="fb-group">
+        <button className={`chip${filters.hasDirector?" on":""}`} onClick={()=>toggleBool("hasDirector")}>Has director</button>
+        <button className={`chip${filters.hasWebsite?" on":""}`} onClick={()=>toggleBool("hasWebsite")}>Has website</button>
+        <button className={`chip${filters.newOnly?" on":""}`} onClick={()=>toggleBool("newOnly")}>New (24h)</button>
+      </div>
+
+      <div className="fb-sep"/>
+
+      {/* Dropdowns */}
+      <div className="fb-group">
+        <select
+          className="fb-select"
+          value={filters.eventId}
+          onChange={e=>setSelect("eventId", e.target.value)}
+        >
+          <option value="all">All events</option>
+          {events.map(ev=>(
+            <option key={ev.id} value={ev.id}>{ev.headline.slice(0,45)}…</option>
+          ))}
+        </select>
+      </div>
+
+      {exposureLevels.length > 1 && (
+        <div className="fb-group">
+          <select
+            className="fb-select"
+            value={filters.exposureLevel}
+            onChange={e=>setSelect("exposureLevel", e.target.value)}
+          >
+            <option value="all">All exposure</option>
+            {exposureLevels.map(l=><option key={l} value={l}>{l}</option>)}
+          </select>
+        </div>
+      )}
+
+      <div className="fb-group">
+        <select
+          className="fb-select"
+          value={filters.minScore}
+          onChange={e=>setSelect("minScore", Number(e.target.value))}
+        >
+          <option value={0}>Any score</option>
+          <option value={60}>Score ≥ 60</option>
+          <option value={70}>Score ≥ 70</option>
+          <option value={80}>Score ≥ 80</option>
+          <option value={90}>Score ≥ 90</option>
+        </select>
+      </div>
+
+      {/* Count + reset */}
+      <span className="fb-count">{filteredCount} showing</span>
+      {isActive(filters) && (
+        <button className="fb-reset" onClick={()=>setFilters(DEFAULT_FILTERS)}>
+          Clear filters
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── EVENT ITEM ──────────────────────────────────────────────────
-function EventItem({ event, leads, index }) {
-  const [open, setOpen]             = useState(false);
-  const [showCompanies, setShow]    = useState(false);
+function EventItem({ event, leads, allLeads, index }) {
+  const [open, setOpen]          = useState(false);
+  const [showCompanies, setShow] = useState(false);
   const color = urg(event.urgency_score||0);
-  const eventLeads = leads.filter(l=>l.event_id===event.id);
+
+  const eventLeads    = leads.filter(l=>l.event_id===event.id);
+  const allEventLeads = allLeads.filter(l=>l.event_id===event.id);
+  const isFiltered    = eventLeads.length !== allEventLeads.length;
+
   const niches = event.target_segments?.length > 0
     ? event.target_segments
     : (event.affected_niches || event.who_pays_fx || event.affected_sectors || []);
 
   return (
     <div className="ev" id={event.id}>
-      {/* COLLAPSED */}
-      <div
-        className="ev-row"
-        onClick={()=>{ setOpen(o=>!o); if(open) setShow(false); }}
-      >
+      <div className="ev-row" onClick={()=>{ setOpen(o=>!o); if(open) setShow(false); }}>
         <div className="ev-num">{String(index+1).padStart(2,"0")}</div>
         <div className="ev-body">
           <div className="ev-tags">
@@ -456,23 +640,25 @@ function EventItem({ event, leads, index }) {
           <div className="ev-summary">{event.summary?.slice(0,150)}{(event.summary?.length||0)>150?"…":""}</div>
           <div className="ev-meta">
             <div className="ev-pairs">{(event.currency_pairs||[]).map(p=><span key={p} className="ev-pair">{p}</span>)}</div>
-            {eventLeads.length>0 && <span className="ev-lcount">{eventLeads.length} companies found</span>}
+            {allEventLeads.length>0 && (
+              <span className="ev-lcount">
+                {isFiltered ? `${eventLeads.length} of ${allEventLeads.length}` : allEventLeads.length} companies
+              </span>
+            )}
           </div>
         </div>
         <div className="ev-right">
           <span className="ev-hint">{open?"▲":"▼ more"}</span>
           {!open && eventLeads.length>0 && (
             <button className="ev-open-btn" onClick={e=>{e.stopPropagation();setOpen(true);setTimeout(()=>setShow(true),50)}}>
-              View {eventLeads.length} companies →
+              View {eventLeads.length} →
             </button>
           )}
         </div>
       </div>
 
-      {/* EXPANDED */}
       {open && (
         <div className="ev-expanded">
-          {/* Detail */}
           <div className="ev-detail-row">
             {event.summary && (
               <div style={{gridColumn:"1/-1"}}>
@@ -498,7 +684,6 @@ function EventItem({ event, leads, index }) {
             )}
           </div>
 
-          {/* FX impact */}
           {event.fx_payment_logic && (
             <div className="ev-fx-box">
               <div className="ev-fx-label">Why businesses pay FX because of this</div>
@@ -506,7 +691,6 @@ function EventItem({ event, leads, index }) {
             </div>
           )}
 
-          {/* Niches → companies */}
           {!showCompanies && (
             <>
               <div className="niche-header">
@@ -526,9 +710,7 @@ function EventItem({ event, leads, index }) {
                       </div>
                       <div className="niche-right">
                         {nExp && (
-                          <span className={`exp-level ${expClass(nExp)}`} style={{fontSize:9,padding:"1px 6px"}}>
-                            {nExp}
-                          </span>
+                          <span className={`exp-level ${expClass(nExp)}`} style={{fontSize:9,padding:"1px 6px"}}>{nExp}</span>
                         )}
                         {nl.length>0 && <span className="niche-badge">{nl.length} found</span>}
                         <span className="niche-arr">→</span>
@@ -539,27 +721,39 @@ function EventItem({ event, leads, index }) {
               </div>
               {eventLeads.length > 0 && (
                 <button className="show-companies-btn" onClick={e=>{e.stopPropagation();setShow(true)}}>
-                  View all {eventLeads.length} affected companies →
+                  View {eventLeads.length}{isFiltered?` filtered`:""} companies →
                 </button>
               )}
-              {eventLeads.length === 0 && (
+              {allEventLeads.length === 0 && (
                 <div style={{padding:"16px 0",textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"rgba(255,255,255,.2)"}}>
                   No companies found yet · run <code style={{color:"rgba(16,185,129,.5)"}}>discover.py</code>
+                </div>
+              )}
+              {allEventLeads.length > 0 && eventLeads.length === 0 && (
+                <div style={{padding:"16px 0",textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"rgba(255,255,255,.2)"}}>
+                  {allEventLeads.length} companies hidden by filters
                 </div>
               )}
             </>
           )}
 
-          {/* Companies */}
-          {showCompanies && eventLeads.length > 0 && (
+          {showCompanies && (
             <div className="co-drawer" onClick={e=>e.stopPropagation()}>
               <div className="co-drawer-hdr">
-                <div className="co-drawer-title">{eventLeads.length} companies · sorted by FX relevance score</div>
-                <button className="co-back" onClick={e=>{e.stopPropagation();setShow(false)}}>← Back to niches</button>
+                <div className="co-drawer-title">
+                  {eventLeads.length} companies · sorted by score
+                </div>
+                <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                  {isFiltered && (
+                    <span className="co-filtered-note">{allEventLeads.length - eventLeads.length} hidden by filters</span>
+                  )}
+                  <button className="co-back" onClick={e=>{e.stopPropagation();setShow(false)}}>← Back to niches</button>
+                </div>
               </div>
-              <div className="co-list">
-                {eventLeads.map(l=><CompanyCard key={l.id} lead={l}/>)}
-              </div>
+              {eventLeads.length > 0
+                ? <div className="co-list">{eventLeads.map(l=><CompanyCard key={l.id} lead={l}/>)}</div>
+                : <div style={{padding:"20px 0",textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"rgba(255,255,255,.2)"}}>All companies hidden by active filters</div>
+              }
             </div>
           )}
         </div>
@@ -570,10 +764,11 @@ function EventItem({ event, leads, index }) {
 
 // ─── ROOT APP ────────────────────────────────────────────────────
 export default function App() {
-  const [events, setEvents] = useState([]);
-  const [leads,  setLeads]  = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [lastRefresh, setLast] = useState(null);
+  const [events,      setEvents]  = useState([]);
+  const [leads,       setLeads]   = useState([]);
+  const [loading,     setLoading] = useState(true);
+  const [lastRefresh, setLast]    = useState(null);
+  const [filters,     setFilters] = useState(HOT_VIEW_FILTERS);
 
   const load = useCallback(async()=>{
     setLoading(true);
@@ -587,8 +782,12 @@ export default function App() {
 
   useEffect(()=>{ load(); },[load]);
 
-  const hot  = leads.filter(l=>l.priority==="HOT").length;
-  const warm = leads.filter(l=>l.priority==="WARM").length;
+  const filteredLeads = useMemo(()=>applyFilters(leads, filters),[leads, filters]);
+
+  const hot      = leads.filter(l=>l.priority==="HOT").length;
+  const warm     = leads.filter(l=>l.priority==="WARM").length;
+  const fHot     = filteredLeads.filter(l=>l.priority==="HOT").length;
+  const fVisible = filteredLeads.length;
 
   return (
     <>
@@ -599,7 +798,7 @@ export default function App() {
         <div className="tb-l">
           <div className="tb-logo"><div className="tb-mark">FX</div>Discovery Engine</div>
           <div className="tb-sep"/>
-          <div className="tb-tag">Discovery Engine</div>
+          <div className="tb-tag">Sales Intelligence</div>
         </div>
         <div className="tb-r">
           <div className="live"><div className="live-dot"/>LIVE</div>
@@ -627,10 +826,11 @@ export default function App() {
       {/* STATS */}
       <div className="stats">
         {[
-          {n:events.length, l:"Events today",    s:"Detected",  c:"#10B981"},
-          {n:hot,           l:"Hot companies",   s:"Score 80+", c:"#10B981"},
-          {n:warm,          l:"Warm companies",  s:"Score 60+", c:"#F59E0B"},
-          {n:leads.length,  l:"Total leads",     s:"All events",c:"#6366F1"},
+          {n:events.length, l:"Events",         s:"Detected",                     c:"#10B981"},
+          {n:hot,           l:"HOT leads",       s:"Scored + verified",            c:"#10B981"},
+          {n:warm,          l:"Warm leads",      s:"Score 60+",                    c:"#F59E0B"},
+          {n:leads.length,  l:"Total pipeline",  s:"All events",                   c:"#6366F1"},
+          {n:fVisible,      l:"Showing",         s:filters.hotView?"HOT view":"Filtered", c: filters.hotView?"#10B981":"#F59E0B"},
         ].map(({n,l,s,c})=>(
           <div className="stat" key={l}>
             <div className="stat-n" style={{color:c}}>{n}</div>
@@ -639,9 +839,26 @@ export default function App() {
         ))}
       </div>
 
+      {/* FILTER BAR */}
+      <FilterBar
+        filters={filters}
+        setFilters={setFilters}
+        leads={leads}
+        events={events}
+        filteredCount={fVisible}
+      />
+
+      {/* HOT VIEW BANNER */}
+      {filters.hotView && (
+        <div className="hv-bar">
+          <span className="hv-tag">⚡ HOT view active</span>
+          <span className="hv-desc">Showing HOT priority leads only — {fHot} companies ready to call</span>
+          <button className="hv-clear" onClick={()=>setFilters(DEFAULT_FILTERS)}>Show all leads</button>
+        </div>
+      )}
+
       {/* MAIN LAYOUT */}
       <div className="layout">
-        {/* FEED */}
         <div>
           <div className="feed-hdr">
             <div className="feed-title">Today's market events</div>
@@ -656,7 +873,15 @@ export default function App() {
             </div>
           ) : (
             <div className="feed">
-              {events.map((ev,i)=><EventItem key={ev.id} event={ev} leads={leads} index={i}/>)}
+              {events.map((ev,i)=>(
+                <EventItem
+                  key={ev.id}
+                  event={ev}
+                  leads={filteredLeads}
+                  allLeads={leads}
+                  index={i}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -664,12 +889,12 @@ export default function App() {
         {/* SIDEBAR */}
         <div className="sidebar">
           <div className="sb">
-            <div className="sb-h">Intelligence summary</div>
+            <div className="sb-h">Pipeline summary</div>
             {[
-              {l:"Events detected", v:events.length, c:"#10B981"},
-              {l:"Hot leads",       v:hot,           c:"#10B981"},
-              {l:"Warm leads",      v:warm,           c:"#F59E0B"},
-              {l:"Total companies", v:leads.length,  c:"#6366F1"},
+              {l:"HOT leads",        v:hot,           c:"#10B981"},
+              {l:"Showing now",      v:fVisible,      c: filters.hotView?"#10B981":"#F59E0B"},
+              {l:"Total pipeline",   v:leads.length,  c:"#6366F1"},
+              {l:"Events tracked",   v:events.length, c:"#10B981"},
             ].map(({l,v,c})=>(
               <div className="sb-row" key={l}>
                 <span className="sb-l">{l}</span>
