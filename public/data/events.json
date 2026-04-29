@@ -3,90 +3,798 @@
     "id": "evt_opec_uae_001",
     "source": "BBC News",
     "source_url": "https://bbc.co.uk",
-    "headline": "UAE quits OPEC+ — crude oil prices spike as supply outlook worsens",
+    "headline": "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens",
     "summary": "The UAE has announced its departure from OPEC+, triggering an immediate spike in crude oil prices. UK businesses that purchase oil, fuel or petrochemicals from overseas suppliers denominated in USD now face higher costs on every transaction.",
-    "fx_payment_logic": "UK fuel importers and petrochemical buyers purchase in USD — an oil price spike means their next USD invoice is more expensive in GBP terms.",
+    "fx_payment_logic": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms.",
     "detected_at": "2026-04-29T06:00:00+00:00",
     "event_type": "Commodity",
-    "affected_sectors": ["UK fuel and petroleum importers paying USD", "UK chemical importers with USD-denominated supplier invoices", "UK manufacturers buying USD-priced raw materials"],
-    "currency_pairs": ["GBP/USD"],
+    "affected_sectors": [
+      "UK fuel and petroleum importers paying USD",
+      "UK chemical importers with USD-denominated supplier invoices",
+      "UK manufacturers buying USD-priced raw materials"
+    ],
+    "currency_pairs": [
+      "GBP/USD"
+    ],
     "urgency_score": 9,
-    "companies_house_terms": ["petroleum import", "chemical wholesale", "fuel import", "oil wholesale"],
-    "sales_angle": "Oil just spiked — UK businesses paying USD for fuel or chemicals are seeing their next invoice cost more in GBP. Lock in a rate now before it moves further.",
-    "who_pays_fx": ["UK importers buying petroleum products in USD", "UK chemical distributors with USD supplier invoices", "UK manufacturers importing oil-based materials"],
-    "who_benefits": ["UK oil producers and North Sea operators"],
-    "status": "ready"
+    "companies_house_terms": [
+      "chemical wholesale",
+      "chemical import",
+      "chemical distributor",
+      "petroleum wholesale",
+      "fuel import",
+      "oil wholesale"
+    ],
+    "sales_angle": "Oil just spiked \u2014 UK businesses paying USD for fuel or chemicals are seeing their next invoice cost more in GBP. Lock in a rate now before it moves further.",
+    "who_pays_fx": [
+      "UK importers buying petroleum products in USD",
+      "UK chemical distributors with USD supplier invoices",
+      "UK manufacturers importing oil-based materials"
+    ],
+    "who_benefits": [
+      "UK oil producers and North Sea operators"
+    ],
+    "status": "ready",
+    "exposure_map": {
+      "exposure_types": [
+        "Import cost exposure",
+        "USD commodity price exposure",
+        "Margin compression"
+      ],
+      "overall_sales_angle": "Crude just spiked \u2014 UK businesses buying petroleum, chemicals, or fuel in USD are paying more on every transaction right now.",
+      "target_segments": [
+        {
+          "segment_name": "UK chemical distributors and importers",
+          "business_model": "UK distributor/wholesaler buying industrial or specialty chemicals from overseas suppliers in USD and selling domestically in GBP",
+          "exposure_level": "Very High",
+          "exposure_type": "Import cost exposure \u2014 USD commodity pricing",
+          "likely_currency_pairs": [
+            "GBP/USD"
+          ],
+          "why_affected": "Chemical prices are linked to crude oil. When crude spikes, USD-priced chemical invoices rise in both USD and GBP terms.",
+          "why_financially_exposed": "These businesses pay USD for every shipment. When crude spikes and USD strengthens simultaneously, margin is squeezed from both sides on every invoice.",
+          "ideal_company_profile": "UK SME chemical distributor or importer with US or Middle East suppliers, B2B customers in manufacturing or agriculture",
+          "high_intent_search_queries": [
+            "\"chemical importer\" UK",
+            "\"chemical distributor\" imports UK",
+            "\"specialty chemicals\" importer UK"
+          ],
+          "companies_house_terms": [
+            "chemical wholesale",
+            "chemical import",
+            "chemical distributor"
+          ],
+          "website_validation_signals": [
+            "we import",
+            "sourced from",
+            "international suppliers",
+            "from usa",
+            "from germany",
+            "chemical distribution"
+          ],
+          "avoid_segments": [
+            "retail chemists",
+            "local cleaning suppliers"
+          ],
+          "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
+          "exposure_thesis_template": "This company appears to distribute or import chemicals sourced from overseas suppliers in USD. A crude price spike raises their USD supplier costs while their GBP revenue base stays fixed, directly compressing margin on every shipment."
+        },
+        {
+          "segment_name": "UK petroleum and fuel importers",
+          "business_model": "UK importer or wholesaler buying oil, fuel or petroleum products from overseas suppliers priced in USD",
+          "exposure_level": "Very High",
+          "exposure_type": "USD commodity import exposure",
+          "likely_currency_pairs": [
+            "GBP/USD"
+          ],
+          "why_affected": "Oil price spike means their USD-priced invoices are immediately more expensive in GBP terms.",
+          "why_financially_exposed": "Direct USD payment obligation on a commodity that just moved sharply. Every tanker or shipment invoice costs more GBP today than last week.",
+          "ideal_company_profile": "UK fuel distributor, petroleum wholesaler, or industrial oil importer with USD-denominated supplier contracts",
+          "high_intent_search_queries": [
+            "\"petroleum importer\" UK",
+            "\"fuel wholesale\" UK",
+            "\"industrial oil\" importer UK"
+          ],
+          "companies_house_terms": [
+            "petroleum wholesale",
+            "fuel import",
+            "oil wholesale"
+          ],
+          "website_validation_signals": [
+            "petroleum",
+            "fuel distribution",
+            "industrial lubricants",
+            "imported fuel",
+            "oil products"
+          ],
+          "avoid_segments": [
+            "petrol stations",
+            "consumer fuel retailers"
+          ],
+          "sales_angle": "Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
+          "exposure_thesis_template": "This company appears to import or wholesale petroleum or fuel products priced in USD. The OPEC+ supply shock means their next USD invoice is materially more expensive in GBP than their last one."
+        }
+      ]
+    },
+    "target_segments": [
+      {
+        "segment_name": "UK chemical distributors and importers",
+        "business_model": "UK distributor/wholesaler buying industrial or specialty chemicals from overseas suppliers in USD and selling domestically in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure \u2014 USD commodity pricing",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "why_affected": "Chemical prices are linked to crude oil. When crude spikes, USD-priced chemical invoices rise in both USD and GBP terms.",
+        "why_financially_exposed": "These businesses pay USD for every shipment. When crude spikes and USD strengthens simultaneously, margin is squeezed from both sides on every invoice.",
+        "ideal_company_profile": "UK SME chemical distributor or importer with US or Middle East suppliers, B2B customers in manufacturing or agriculture",
+        "high_intent_search_queries": [
+          "\"chemical importer\" UK",
+          "\"chemical distributor\" imports UK",
+          "\"specialty chemicals\" importer UK"
+        ],
+        "companies_house_terms": [
+          "chemical wholesale",
+          "chemical import",
+          "chemical distributor"
+        ],
+        "website_validation_signals": [
+          "we import",
+          "sourced from",
+          "international suppliers",
+          "from usa",
+          "from germany",
+          "chemical distribution"
+        ],
+        "avoid_segments": [
+          "retail chemists",
+          "local cleaning suppliers"
+        ],
+        "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
+        "exposure_thesis_template": "This company appears to distribute or import chemicals sourced from overseas suppliers in USD. A crude price spike raises their USD supplier costs while their GBP revenue base stays fixed, directly compressing margin on every shipment."
+      },
+      {
+        "segment_name": "UK petroleum and fuel importers",
+        "business_model": "UK importer or wholesaler buying oil, fuel or petroleum products from overseas suppliers priced in USD",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity import exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "why_affected": "Oil price spike means their USD-priced invoices are immediately more expensive in GBP terms.",
+        "why_financially_exposed": "Direct USD payment obligation on a commodity that just moved sharply. Every tanker or shipment invoice costs more GBP today than last week.",
+        "ideal_company_profile": "UK fuel distributor, petroleum wholesaler, or industrial oil importer with USD-denominated supplier contracts",
+        "high_intent_search_queries": [
+          "\"petroleum importer\" UK",
+          "\"fuel wholesale\" UK",
+          "\"industrial oil\" importer UK"
+        ],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel import",
+          "oil wholesale"
+        ],
+        "website_validation_signals": [
+          "petroleum",
+          "fuel distribution",
+          "industrial lubricants",
+          "imported fuel",
+          "oil products"
+        ],
+        "avoid_segments": [
+          "petrol stations",
+          "consumer fuel retailers"
+        ],
+        "sales_angle": "Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
+        "exposure_thesis_template": "This company appears to import or wholesale petroleum or fuel products priced in USD. The OPEC+ supply shock means their next USD invoice is materially more expensive in GBP than their last one."
+      }
+    ],
+    "exposure_types": [
+      "Import cost exposure",
+      "USD commodity price exposure",
+      "Margin compression"
+    ],
+    "overall_sales_angle": "Crude just spiked \u2014 UK businesses buying petroleum, chemicals, or fuel in USD are paying more on every transaction right now."
   },
   "evt_gbp_record_short_002": {
     "id": "evt_gbp_record_short_002",
     "source": "Reuters",
     "source_url": "https://reuters.com",
-    "headline": "Institutional investors push GBP short positions to near-record — pound expected to weaken further",
+    "headline": "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
     "summary": "Asset managers have increased GBP short positions to 110,000 contracts, near an all-time record. This signals strong institutional conviction that sterling will fall. UK businesses paying European suppliers in EUR will see every invoice cost more as the pound weakens.",
-    "fx_payment_logic": "UK businesses paying EUR supplier invoices — wine merchants buying from French châteaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers — face rising GBP costs as sterling weakens.",
+    "fx_payment_logic": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens.",
     "detected_at": "2026-04-29T07:00:00+00:00",
     "event_type": "Currency move",
-    "affected_sectors": ["UK wine importers paying EUR to European producers", "UK food importers paying EUR to European suppliers", "UK furniture importers with EUR supplier invoices"],
-    "currency_pairs": ["GBP/EUR"],
+    "affected_sectors": [
+      "UK wine importers paying EUR to European producers",
+      "UK food importers paying EUR to European suppliers",
+      "UK furniture importers with EUR supplier invoices"
+    ],
+    "currency_pairs": [
+      "GBP/EUR"
+    ],
     "urgency_score": 8,
-    "companies_house_terms": ["wine import", "food import", "furniture wholesale", "Italian food", "European import"],
-    "sales_angle": "GBP is heading lower — UK businesses paying European suppliers in EUR are about to see every invoice cost more. Forward contract now locks in today's rate.",
-    "who_pays_fx": ["UK wine importers paying EUR to French and Italian producers", "UK food importers sourcing from Europe", "UK furniture and homeware importers with EUR invoices"],
-    "who_benefits": ["UK exporters billing European customers in EUR"],
-    "status": "ready"
+    "companies_house_terms": [
+      "wine import",
+      "spirits import",
+      "wine wholesale",
+      "food import",
+      "Italian food",
+      "European food"
+    ],
+    "sales_angle": "GBP is heading lower \u2014 UK businesses paying European suppliers in EUR are about to see every invoice cost more. Forward contract now locks in today's rate.",
+    "who_pays_fx": [
+      "UK wine importers paying EUR to French and Italian producers",
+      "UK food importers sourcing from Europe",
+      "UK furniture and homeware importers with EUR invoices"
+    ],
+    "who_benefits": [
+      "UK exporters billing European customers in EUR"
+    ],
+    "status": "ready",
+    "exposure_map": {
+      "exposure_types": [
+        "EUR supplier payment exposure",
+        "Import margin pressure",
+        "GBP revenue vs EUR cost mismatch"
+      ],
+      "overall_sales_angle": "GBP shorts at near-record levels signal institutional conviction that sterling weakens further. Every UK business paying EUR supplier invoices is seeing their costs rise in real time.",
+      "target_segments": [
+        {
+          "segment_name": "European wine and spirits importers",
+          "business_model": "UK importer buying wine and spirits direct from European producers in EUR, selling to UK trade at GBP prices",
+          "exposure_level": "Very High",
+          "exposure_type": "EUR supplier payment exposure",
+          "likely_currency_pairs": [
+            "GBP/EUR"
+          ],
+          "why_affected": "GBP weakness vs EUR means every EUR payment to a French, Italian or Spanish producer costs more in GBP terms, squeezing margin on every case.",
+          "why_financially_exposed": "Recurring EUR supplier invoices with GBP-priced sales to UK trade creates direct currency mismatch. Margin erodes every time GBP falls.",
+          "ideal_company_profile": "UK wine or spirits importer, wholesaler or agent with European producer relationships and UK trade customers",
+          "high_intent_search_queries": [
+            "\"wine importer\" UK",
+            "\"spirits importer\" UK",
+            "\"wine merchant\" imports UK",
+            "\"wine wholesale\" UK"
+          ],
+          "companies_house_terms": [
+            "wine import",
+            "spirits import",
+            "wine wholesale"
+          ],
+          "website_validation_signals": [
+            "imported from",
+            "direct from producer",
+            "European suppliers",
+            "from france",
+            "from italy",
+            "from spain",
+            "we import"
+          ],
+          "avoid_segments": [
+            "wine bars",
+            "restaurants",
+            "off-licences with no import"
+          ],
+          "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
+          "exposure_thesis_template": "This company appears to import wine or spirits from European producers, paying in EUR and selling in GBP to UK trade customers. GBP weakness directly squeezes margin on every shipment."
+        },
+        {
+          "segment_name": "European food and delicatessen importers",
+          "business_model": "UK importer sourcing specialty foods from European producers and selling to UK restaurants, retailers and wholesalers in GBP",
+          "exposure_level": "Very High",
+          "exposure_type": "EUR supplier import cost exposure",
+          "likely_currency_pairs": [
+            "GBP/EUR"
+          ],
+          "why_affected": "EUR supplier invoices cost more GBP when sterling weakens. Selling prices to UK customers are often contracted or slow to adjust, so margin is squeezed.",
+          "why_financially_exposed": "Consistent EUR outflows for stock purchases vs GBP inflows from UK customers. Every rate move creates a margin gap unless hedged.",
+          "ideal_company_profile": "UK importer of Italian, Spanish, French or other European specialty foods \u2014 cheese, cured meat, olive oil, pasta \u2014 selling to B2B customers in GBP",
+          "high_intent_search_queries": [
+            "\"food importer\" Europe UK",
+            "\"Italian food\" importer UK",
+            "\"delicatessen\" wholesale UK",
+            "\"European food\" distributor UK"
+          ],
+          "companies_house_terms": [
+            "food import",
+            "Italian food",
+            "European food"
+          ],
+          "website_validation_signals": [
+            "from italy",
+            "from spain",
+            "from france",
+            "european suppliers",
+            "imported",
+            "wholesale distribution",
+            "specialty food importer"
+          ],
+          "avoid_segments": [
+            "local delis",
+            "restaurants",
+            "recipe websites"
+          ],
+          "sales_angle": "With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
+          "exposure_thesis_template": "This company appears to import European specialty foods, paying EUR to producers in France, Italy or Spain and selling in GBP to UK trade customers. GBP/EUR weakness creates a widening gap between cost base and revenue."
+        }
+      ]
+    },
+    "target_segments": [
+      {
+        "segment_name": "European wine and spirits importers",
+        "business_model": "UK importer buying wine and spirits direct from European producers in EUR, selling to UK trade at GBP prices",
+        "exposure_level": "Very High",
+        "exposure_type": "EUR supplier payment exposure",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "why_affected": "GBP weakness vs EUR means every EUR payment to a French, Italian or Spanish producer costs more in GBP terms, squeezing margin on every case.",
+        "why_financially_exposed": "Recurring EUR supplier invoices with GBP-priced sales to UK trade creates direct currency mismatch. Margin erodes every time GBP falls.",
+        "ideal_company_profile": "UK wine or spirits importer, wholesaler or agent with European producer relationships and UK trade customers",
+        "high_intent_search_queries": [
+          "\"wine importer\" UK",
+          "\"spirits importer\" UK",
+          "\"wine merchant\" imports UK",
+          "\"wine wholesale\" UK"
+        ],
+        "companies_house_terms": [
+          "wine import",
+          "spirits import",
+          "wine wholesale"
+        ],
+        "website_validation_signals": [
+          "imported from",
+          "direct from producer",
+          "European suppliers",
+          "from france",
+          "from italy",
+          "from spain",
+          "we import"
+        ],
+        "avoid_segments": [
+          "wine bars",
+          "restaurants",
+          "off-licences with no import"
+        ],
+        "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
+        "exposure_thesis_template": "This company appears to import wine or spirits from European producers, paying in EUR and selling in GBP to UK trade customers. GBP weakness directly squeezes margin on every shipment."
+      },
+      {
+        "segment_name": "European food and delicatessen importers",
+        "business_model": "UK importer sourcing specialty foods from European producers and selling to UK restaurants, retailers and wholesalers in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "EUR supplier import cost exposure",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "why_affected": "EUR supplier invoices cost more GBP when sterling weakens. Selling prices to UK customers are often contracted or slow to adjust, so margin is squeezed.",
+        "why_financially_exposed": "Consistent EUR outflows for stock purchases vs GBP inflows from UK customers. Every rate move creates a margin gap unless hedged.",
+        "ideal_company_profile": "UK importer of Italian, Spanish, French or other European specialty foods \u2014 cheese, cured meat, olive oil, pasta \u2014 selling to B2B customers in GBP",
+        "high_intent_search_queries": [
+          "\"food importer\" Europe UK",
+          "\"Italian food\" importer UK",
+          "\"delicatessen\" wholesale UK",
+          "\"European food\" distributor UK"
+        ],
+        "companies_house_terms": [
+          "food import",
+          "Italian food",
+          "European food"
+        ],
+        "website_validation_signals": [
+          "from italy",
+          "from spain",
+          "from france",
+          "european suppliers",
+          "imported",
+          "wholesale distribution",
+          "specialty food importer"
+        ],
+        "avoid_segments": [
+          "local delis",
+          "restaurants",
+          "recipe websites"
+        ],
+        "sales_angle": "With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
+        "exposure_thesis_template": "This company appears to import European specialty foods, paying EUR to producers in France, Italy or Spain and selling in GBP to UK trade customers. GBP/EUR weakness creates a widening gap between cost base and revenue."
+      }
+    ],
+    "exposure_types": [
+      "EUR supplier payment exposure",
+      "Import margin pressure",
+      "GBP revenue vs EUR cost mismatch"
+    ],
+    "overall_sales_angle": "GBP shorts at near-record levels signal institutional conviction that sterling weakens further. Every UK business paying EUR supplier invoices is seeing their costs rise in real time."
   },
   "evt_fed_boe_003": {
     "id": "evt_fed_boe_003",
     "source": "FXStreet",
     "source_url": "https://fxstreet.com",
-    "headline": "Fed and BoE both announce rate decisions this week — maximum GBP/USD volatility expected",
-    "summary": "Both the Federal Reserve and Bank of England announce rate decisions within days of each other. GBP/USD is already volatile and any surprise will move rates sharply. UK businesses with upcoming USD payments — importers, overseas buyers, businesses with US suppliers — face real uncertainty.",
-    "fx_payment_logic": "Any UK business making a USD payment this week faces maximum uncertainty — the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets.",
+    "headline": "Fed and BoE both announce rate decisions this week \u2014 maximum GBP/USD volatility expected",
+    "summary": "Both the Federal Reserve and Bank of England announce rate decisions within days of each other. GBP/USD is already volatile and any surprise will move rates sharply. UK businesses with upcoming USD payments \u2014 importers, overseas buyers, businesses with US suppliers \u2014 face real uncertainty.",
+    "fx_payment_logic": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets.",
     "detected_at": "2026-04-29T07:30:00+00:00",
     "event_type": "Rate change",
-    "affected_sectors": ["UK importers with upcoming USD payments", "UK businesses sourcing from US suppliers", "UK technology buyers paying USD SaaS subscriptions", "UK seafood importers paying USD to Icelandic or Norwegian suppliers"],
-    "currency_pairs": ["GBP/USD", "GBP/EUR"],
+    "affected_sectors": [
+      "UK importers with upcoming USD payments",
+      "UK businesses sourcing from US suppliers",
+      "UK technology buyers paying USD SaaS subscriptions",
+      "UK seafood importers paying USD to Icelandic or Norwegian suppliers"
+    ],
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
     "urgency_score": 9,
-    "companies_house_terms": ["seafood import", "food import", "electronics wholesale", "wine import", "clothing import"],
-    "sales_angle": "Both the Fed and BoE decide rates this week — GBP/USD will move sharply on any surprise. If you have a USD payment due, locking in now avoids the volatility.",
-    "who_pays_fx": ["UK importers with USD payments due this week", "UK businesses with US dollar supplier invoices", "any UK company with upcoming international payments"],
-    "who_benefits": ["UK USD earners and exporters to the US"],
-    "status": "ready"
+    "companies_house_terms": [
+      "seafood import",
+      "fish wholesale",
+      "seafood wholesale"
+    ],
+    "sales_angle": "Both the Fed and BoE decide rates this week \u2014 GBP/USD will move sharply on any surprise. If you have a USD payment due, locking in now avoids the volatility.",
+    "who_pays_fx": [
+      "UK importers with USD payments due this week",
+      "UK businesses with US dollar supplier invoices",
+      "any UK company with upcoming international payments"
+    ],
+    "who_benefits": [
+      "UK USD earners and exporters to the US"
+    ],
+    "status": "ready",
+    "exposure_map": {
+      "exposure_types": [
+        "Rate decision volatility",
+        "USD payment timing risk",
+        "EUR payment timing risk"
+      ],
+      "overall_sales_angle": "Both the Fed and BoE announce rates this week. GBP/USD is at maximum volatility \u2014 any UK business with an international payment due this week faces real timing risk.",
+      "target_segments": [
+        {
+          "segment_name": "UK seafood and fish importers",
+          "business_model": "UK importer buying fresh or frozen seafood from Norwegian, Icelandic or Faroese suppliers, paying in USD or NOK, selling to UK trade in GBP",
+          "exposure_level": "Very High",
+          "exposure_type": "USD/NOK payment timing risk",
+          "likely_currency_pairs": [
+            "GBP/USD",
+            "GBP/NOK"
+          ],
+          "why_affected": "Regular supplier payment cycles mean these companies often have payments due mid-week. With both central banks announcing rates, the rate they get on Thursday could be materially different to Monday.",
+          "why_financially_exposed": "Frequent international payment obligations on perishable goods with thin margins \u2014 timing risk is acute this week.",
+          "ideal_company_profile": "UK seafood importer with Norwegian or Icelandic suppliers and regular payment cycles, selling to UK hospitality, retail or wholesale",
+          "high_intent_search_queries": [
+            "\"seafood importer\" UK",
+            "\"fish importer\" UK",
+            "\"seafood wholesaler\" Norway UK",
+            "\"frozen seafood\" importer UK"
+          ],
+          "companies_house_terms": [
+            "seafood import",
+            "fish wholesale",
+            "seafood wholesale"
+          ],
+          "website_validation_signals": [
+            "imported from norway",
+            "from iceland",
+            "norwegian",
+            "icelandic",
+            "seafood import",
+            "international suppliers",
+            "overseas suppliers"
+          ],
+          "avoid_segments": [
+            "fish and chip shops",
+            "restaurants",
+            "supermarkets"
+          ],
+          "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
+          "exposure_thesis_template": "This company appears to import seafood from Norwegian or Icelandic suppliers, paying in USD or NOK with regular payment cycles. With both the Fed and BoE announcing this week, timing risk on upcoming payments is acute."
+        }
+      ]
+    },
+    "target_segments": [
+      {
+        "segment_name": "UK seafood and fish importers",
+        "business_model": "UK importer buying fresh or frozen seafood from Norwegian, Icelandic or Faroese suppliers, paying in USD or NOK, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD/NOK payment timing risk",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/NOK"
+        ],
+        "why_affected": "Regular supplier payment cycles mean these companies often have payments due mid-week. With both central banks announcing rates, the rate they get on Thursday could be materially different to Monday.",
+        "why_financially_exposed": "Frequent international payment obligations on perishable goods with thin margins \u2014 timing risk is acute this week.",
+        "ideal_company_profile": "UK seafood importer with Norwegian or Icelandic suppliers and regular payment cycles, selling to UK hospitality, retail or wholesale",
+        "high_intent_search_queries": [
+          "\"seafood importer\" UK",
+          "\"fish importer\" UK",
+          "\"seafood wholesaler\" Norway UK",
+          "\"frozen seafood\" importer UK"
+        ],
+        "companies_house_terms": [
+          "seafood import",
+          "fish wholesale",
+          "seafood wholesale"
+        ],
+        "website_validation_signals": [
+          "imported from norway",
+          "from iceland",
+          "norwegian",
+          "icelandic",
+          "seafood import",
+          "international suppliers",
+          "overseas suppliers"
+        ],
+        "avoid_segments": [
+          "fish and chip shops",
+          "restaurants",
+          "supermarkets"
+        ],
+        "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
+        "exposure_thesis_template": "This company appears to import seafood from Norwegian or Icelandic suppliers, paying in USD or NOK with regular payment cycles. With both the Fed and BoE announcing this week, timing risk on upcoming payments is acute."
+      }
+    ],
+    "exposure_types": [
+      "Rate decision volatility",
+      "USD payment timing risk",
+      "EUR payment timing risk"
+    ],
+    "overall_sales_angle": "Both the Fed and BoE announce rates this week. GBP/USD is at maximum volatility \u2014 any UK business with an international payment due this week faces real timing risk."
   },
   "evt_iran_usd_004": {
     "id": "evt_iran_usd_004",
     "source": "BBC News",
     "source_url": "https://bbc.co.uk",
-    "headline": "US-Iran tensions escalate — USD strengthens as safe-haven demand rises",
-    "summary": "Escalating US-Iran tensions are driving safe-haven demand for USD, pushing GBP/USD lower. UK businesses that pay USD-denominated invoices — fuel buyers, chemical importers, food manufacturers sourcing from the Americas — face higher costs in GBP for every transaction.",
-    "fx_payment_logic": "When USD strengthens against GBP, every UK business paying a USD invoice needs more pounds to cover the same cost — this is direct margin erosion for importers.",
+    "headline": "US-Iran tensions escalate \u2014 USD strengthens as safe-haven demand rises",
+    "summary": "Escalating US-Iran tensions are driving safe-haven demand for USD, pushing GBP/USD lower. UK businesses that pay USD-denominated invoices \u2014 fuel buyers, chemical importers, food manufacturers sourcing from the Americas \u2014 face higher costs in GBP for every transaction.",
+    "fx_payment_logic": "When USD strengthens against GBP, every UK business paying a USD invoice needs more pounds to cover the same cost \u2014 this is direct margin erosion for importers.",
     "detected_at": "2026-04-29T08:00:00+00:00",
     "event_type": "Geopolitical",
-    "affected_sectors": ["UK importers of USD-priced goods", "UK food manufacturers sourcing USD-priced commodities", "UK pharmaceutical importers with USD supplier invoices"],
-    "currency_pairs": ["GBP/USD"],
+    "affected_sectors": [
+      "UK importers of USD-priced goods",
+      "UK food manufacturers sourcing USD-priced commodities",
+      "UK pharmaceutical importers with USD supplier invoices"
+    ],
+    "currency_pairs": [
+      "GBP/USD"
+    ],
     "urgency_score": 8,
-    "companies_house_terms": ["food manufacture", "pharmaceutical import", "commodity wholesale", "chemical import"],
-    "sales_angle": "USD is strengthening on Iran tensions — UK businesses paying USD supplier invoices are losing margin on every transaction right now.",
-    "who_pays_fx": ["UK importers with USD-denominated invoices", "UK food manufacturers buying USD-priced commodities", "UK pharmaceutical companies with US supplier payments"],
-    "who_benefits": ["UK exporters billing in USD"],
-    "status": "ready"
+    "companies_house_terms": [
+      "food manufacture",
+      "food production",
+      "food processing"
+    ],
+    "sales_angle": "USD is strengthening on Iran tensions \u2014 UK businesses paying USD supplier invoices are losing margin on every transaction right now.",
+    "who_pays_fx": [
+      "UK importers with USD-denominated invoices",
+      "UK food manufacturers buying USD-priced commodities",
+      "UK pharmaceutical companies with US supplier payments"
+    ],
+    "who_benefits": [
+      "UK exporters billing in USD"
+    ],
+    "status": "ready",
+    "exposure_map": {
+      "exposure_types": [
+        "USD strengthening",
+        "Safe-haven demand",
+        "Import cost exposure"
+      ],
+      "overall_sales_angle": "US-Iran tensions driving safe-haven USD demand \u2014 every UK business paying USD supplier invoices is seeing their costs rise in GBP terms right now.",
+      "target_segments": [
+        {
+          "segment_name": "UK food manufacturers sourcing USD commodities",
+          "business_model": "UK food manufacturer buying USD-priced agricultural commodities (grain, soy, cocoa, sugar) or packaging from overseas and selling finished goods in GBP",
+          "exposure_level": "Very High",
+          "exposure_type": "USD commodity import cost exposure",
+          "likely_currency_pairs": [
+            "GBP/USD"
+          ],
+          "why_affected": "USD strengthening on Iran tensions means their commodity procurement costs rise in GBP terms. For manufacturers with fixed-price contracts or retail customers, margin compression is immediate.",
+          "why_financially_exposed": "High-volume recurring USD payments for raw materials with GBP-denominated finished goods sales. Margin sensitivity is significant at scale.",
+          "ideal_company_profile": "UK food and drink manufacturer sourcing raw materials internationally, with US or global commodity suppliers and UK retail or foodservice customers",
+          "high_intent_search_queries": [
+            "\"food manufacturer\" imports UK",
+            "\"food production\" overseas sourcing UK",
+            "\"food manufacturer\" \"international\" UK"
+          ],
+          "companies_house_terms": [
+            "food manufacture",
+            "food production",
+            "food processing"
+          ],
+          "website_validation_signals": [
+            "international sourcing",
+            "overseas suppliers",
+            "imported ingredients",
+            "global supply chain",
+            "commodity purchasing"
+          ],
+          "avoid_segments": [
+            "local bakeries",
+            "restaurants",
+            "convenience stores"
+          ],
+          "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
+          "exposure_thesis_template": "This company appears to manufacture food products using internationally sourced commodities priced in USD. USD strengthening on Iran tensions means their next commodity purchase costs more in GBP, directly compressing margin."
+        }
+      ]
+    },
+    "target_segments": [
+      {
+        "segment_name": "UK food manufacturers sourcing USD commodities",
+        "business_model": "UK food manufacturer buying USD-priced agricultural commodities (grain, soy, cocoa, sugar) or packaging from overseas and selling finished goods in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity import cost exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "why_affected": "USD strengthening on Iran tensions means their commodity procurement costs rise in GBP terms. For manufacturers with fixed-price contracts or retail customers, margin compression is immediate.",
+        "why_financially_exposed": "High-volume recurring USD payments for raw materials with GBP-denominated finished goods sales. Margin sensitivity is significant at scale.",
+        "ideal_company_profile": "UK food and drink manufacturer sourcing raw materials internationally, with US or global commodity suppliers and UK retail or foodservice customers",
+        "high_intent_search_queries": [
+          "\"food manufacturer\" imports UK",
+          "\"food production\" overseas sourcing UK",
+          "\"food manufacturer\" \"international\" UK"
+        ],
+        "companies_house_terms": [
+          "food manufacture",
+          "food production",
+          "food processing"
+        ],
+        "website_validation_signals": [
+          "international sourcing",
+          "overseas suppliers",
+          "imported ingredients",
+          "global supply chain",
+          "commodity purchasing"
+        ],
+        "avoid_segments": [
+          "local bakeries",
+          "restaurants",
+          "convenience stores"
+        ],
+        "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
+        "exposure_thesis_template": "This company appears to manufacture food products using internationally sourced commodities priced in USD. USD strengthening on Iran tensions means their next commodity purchase costs more in GBP, directly compressing margin."
+      }
+    ],
+    "exposure_types": [
+      "USD strengthening",
+      "Safe-haven demand",
+      "Import cost exposure"
+    ],
+    "overall_sales_angle": "US-Iran tensions driving safe-haven USD demand \u2014 every UK business paying USD supplier invoices is seeing their costs rise in GBP terms right now."
   },
   "evt_tariff_whisky_005": {
     "id": "evt_tariff_whisky_005",
     "source": "GOV.UK Trade",
     "source_url": "https://gov.uk",
-    "headline": "US Section 338 tariff risk remains — UK exporters to America face ongoing pricing uncertainty",
-    "summary": "The threat of new US Section 338 tariffs on UK exports creates ongoing uncertainty for UK businesses selling to American customers. UK exporters billing in USD face both tariff risk and currency risk — if the USD weakens or tariffs land, their margin on US sales is squeezed from both sides.",
-    "fx_payment_logic": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue — tariff uncertainty compounds the FX risk on their US income.",
+    "headline": "US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "summary": "The threat of new US Section 338 tariffs on UK exports creates ongoing uncertainty for UK businesses selling to American customers. UK exporters billing in USD face both tariff risk and currency risk \u2014 if the USD weakens or tariffs land, their margin on US sales is squeezed from both sides.",
+    "fx_payment_logic": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income.",
     "detected_at": "2026-04-29T08:30:00+00:00",
     "event_type": "Trade policy",
-    "affected_sectors": ["UK Scotch whisky exporters receiving USD from US sales", "UK pharmaceutical exporters with USD revenue", "UK food and drink exporters billing US customers in USD"],
-    "currency_pairs": ["GBP/USD"],
+    "affected_sectors": [
+      "UK Scotch whisky exporters receiving USD from US sales",
+      "UK pharmaceutical exporters with USD revenue",
+      "UK food and drink exporters billing US customers in USD"
+    ],
+    "currency_pairs": [
+      "GBP/USD"
+    ],
     "urgency_score": 7,
-    "companies_house_terms": ["whisky distillery", "spirits manufacture", "food export", "pharmaceutical export"],
-    "sales_angle": "US tariff uncertainty is real and GBP/USD is moving — UK exporters with USD revenue should review how they're converting their US income before the rate moves against them.",
-    "who_pays_fx": ["UK exporters receiving USD revenue from US customers", "UK Scotch whisky producers with US sales", "UK manufacturers with American customers"],
-    "who_benefits": ["UK importers of US goods if tariffs reduce trade"],
-    "status": "ready"
+    "companies_house_terms": [
+      "whisky distillery",
+      "spirits manufacture",
+      "gin distillery"
+    ],
+    "sales_angle": "US tariff uncertainty is real and GBP/USD is moving \u2014 UK exporters with USD revenue should review how they're converting their US income before the rate moves against them.",
+    "who_pays_fx": [
+      "UK exporters receiving USD revenue from US customers",
+      "UK Scotch whisky producers with US sales",
+      "UK manufacturers with American customers"
+    ],
+    "who_benefits": [
+      "UK importers of US goods if tariffs reduce trade"
+    ],
+    "status": "ready",
+    "exposure_map": {
+      "exposure_types": [
+        "USD revenue exposure",
+        "Export tariff risk",
+        "Currency mismatch on export revenue"
+      ],
+      "overall_sales_angle": "US Section 338 tariff uncertainty creates a double exposure for UK exporters \u2014 tariff risk on trade AND currency risk on USD revenue when converting back to GBP.",
+      "target_segments": [
+        {
+          "segment_name": "Scotch whisky and premium spirits exporters",
+          "business_model": "UK spirits producer exporting to US and other global markets, billing in USD, converting revenue back to GBP",
+          "exposure_level": "Very High",
+          "exposure_type": "Export USD revenue exposure + tariff risk",
+          "likely_currency_pairs": [
+            "GBP/USD"
+          ],
+          "why_affected": "US tariff uncertainty means pricing pressure from two directions: tariff pass-through risk AND USD conversion risk when GBP/USD moves against them.",
+          "why_financially_exposed": "Large and recurring USD revenue streams that must be converted to GBP. If USD weakens while tariffs land, the margin impact compounds from both sides simultaneously.",
+          "ideal_company_profile": "UK Scotch whisky producer, premium gin distillery, or luxury spirits brand with significant US export revenue",
+          "high_intent_search_queries": [
+            "\"whisky distillery\" UK",
+            "\"scotch whisky\" producer UK",
+            "\"gin distillery\" exports UK",
+            "\"spirits producer\" exports UK"
+          ],
+          "companies_house_terms": [
+            "whisky distillery",
+            "spirits manufacture",
+            "gin distillery"
+          ],
+          "website_validation_signals": [
+            "export",
+            "us market",
+            "american market",
+            "international distribution",
+            "global brand",
+            "worldwide",
+            "overseas"
+          ],
+          "avoid_segments": [
+            "pubs",
+            "bars",
+            "whisky retailers",
+            "online bottle shops"
+          ],
+          "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
+          "exposure_thesis_template": "This company appears to export premium spirits to the US, receiving USD revenue that must be converted back to GBP. US tariff uncertainty compounds the currency conversion risk \u2014 if USD weakens while tariffs land, margin is squeezed from both sides."
+        }
+      ]
+    },
+    "target_segments": [
+      {
+        "segment_name": "Scotch whisky and premium spirits exporters",
+        "business_model": "UK spirits producer exporting to US and other global markets, billing in USD, converting revenue back to GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "Export USD revenue exposure + tariff risk",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "why_affected": "US tariff uncertainty means pricing pressure from two directions: tariff pass-through risk AND USD conversion risk when GBP/USD moves against them.",
+        "why_financially_exposed": "Large and recurring USD revenue streams that must be converted to GBP. If USD weakens while tariffs land, the margin impact compounds from both sides simultaneously.",
+        "ideal_company_profile": "UK Scotch whisky producer, premium gin distillery, or luxury spirits brand with significant US export revenue",
+        "high_intent_search_queries": [
+          "\"whisky distillery\" UK",
+          "\"scotch whisky\" producer UK",
+          "\"gin distillery\" exports UK",
+          "\"spirits producer\" exports UK"
+        ],
+        "companies_house_terms": [
+          "whisky distillery",
+          "spirits manufacture",
+          "gin distillery"
+        ],
+        "website_validation_signals": [
+          "export",
+          "us market",
+          "american market",
+          "international distribution",
+          "global brand",
+          "worldwide",
+          "overseas"
+        ],
+        "avoid_segments": [
+          "pubs",
+          "bars",
+          "whisky retailers",
+          "online bottle shops"
+        ],
+        "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
+        "exposure_thesis_template": "This company appears to export premium spirits to the US, receiving USD revenue that must be converted back to GBP. US tariff uncertainty compounds the currency conversion risk \u2014 if USD weakens while tariffs land, margin is squeezed from both sides."
+      }
+    ],
+    "exposure_types": [
+      "USD revenue exposure",
+      "Export tariff risk",
+      "Currency mismatch on export revenue"
+    ],
+    "overall_sales_angle": "US Section 338 tariff uncertainty creates a double exposure for UK exporters \u2014 tariff risk on trade AND currency risk on USD revenue when converting back to GBP."
   }
 }

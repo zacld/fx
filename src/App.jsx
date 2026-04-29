@@ -23,6 +23,10 @@ const ago = iso => {
 const urg = s => s>=8?"#10B981":s>=6?"#F59E0B":s>=4?"#6366F1":"#475569";
 const pri = p => p==="HOT"?"#10B981":p==="WARM"?"#F59E0B":"#6366F1";
 
+
+const expClass = l => l==="Very High"?"exp-vh":l==="High"?"exp-h":l==="Medium"?"exp-m":"exp-l";
+const expLabel = l => l==="Very High"?"● Very High":l==="High"?"● High":l==="Medium"?"○ Medium":"○ Low";
+
 const today = new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 const dateShort = new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
 
@@ -232,6 +236,20 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .sb-eh{font-size:12px;font-weight:600;color:rgba(255,255,255,.6);line-height:1.4;margin-bottom:3px}
 .sb-em{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.2)}
 
+
+/* EXPOSURE */
+.exp-level{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;border:1px solid;font-family:'Inter',sans-serif}
+.exp-vh{color:#10B981;background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3)}
+.exp-h{color:#F59E0B;background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3)}
+.exp-m{color:#6366F1;background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3)}
+.exp-l{color:#475569;background:rgba(71,85,105,.1);border-color:rgba(71,85,105,.3)}
+.thesis-box{padding:10px 14px;background:rgba(16,185,129,.03);border:1px solid rgba(16,185,129,.08);border-left:3px solid rgba(16,185,129,.4);border-radius:0 8px 8px 0;margin-bottom:12px}
+.thesis-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#10B981;margin-bottom:4px}
+.thesis-text{font-size:12px;line-height:1.65;color:rgba(255,255,255,.6)}
+.why-box{padding:8px 12px;background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.1);border-radius:7px;margin-bottom:10px}
+.why-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#F59E0B;margin-bottom:3px}
+.why-text{font-size:12px;line-height:1.6;color:rgba(255,255,255,.5)}
+
 /* EMPTY */
 .empty{text-align:center;padding:64px 24px;color:rgba(255,255,255,.2)}
 .empty-i{font-size:36px;margin-bottom:12px}
@@ -301,7 +319,8 @@ function CompanyCard({ lead }) {
           </div>
           <div className="cc-badges">
             <span className="b b-p">● {lead.priority}</span>
-            {lead.sector && <span className="b b-sec">{lead.sector.slice(0,36)}</span>}
+            {lead.exposure_level && <span className={`exp-level ${expClass(lead.exposure_level)}`}>{expLabel(lead.exposure_level)}</span>}
+            {lead.exposure_type && <span className="b b-sec" style={{color:"rgba(255,255,255,.4)"}}>{lead.exposure_type.slice(0,40)}</span>}
             {lead.fx_exposure && <span className="b b-fx">{lead.fx_exposure}</span>}
           </div>
           <div className="cc-info">
@@ -315,8 +334,11 @@ function CompanyCard({ lead }) {
               <span style={{color:"rgba(255,255,255,.25)"}}>· {lead.director_role}</span>
             </div>
           )}
-          {lead.fx_reason && (
-            <div className="cc-angle">{lead.fx_reason.slice(0,130)}{lead.fx_reason.length>130?"…":""}</div>
+          {(lead.exposure_thesis || lead.fx_reason) && (
+            <div className="cc-angle">
+              {(lead.exposure_thesis || lead.fx_reason).slice(0,150)}
+              {(lead.exposure_thesis || lead.fx_reason).length > 150 ? "…" : ""}
+            </div>
           )}
         </div>
         <div className="cc-score">
@@ -407,7 +429,9 @@ function EventItem({ event, leads, index }) {
   const [showCompanies, setShow]    = useState(false);
   const color = urg(event.urgency_score||0);
   const eventLeads = leads.filter(l=>l.event_id===event.id);
-  const niches = event.affected_niches || event.who_pays_fx || event.affected_sectors || [];
+  const niches = event.target_segments?.length > 0
+    ? event.target_segments
+    : (event.affected_niches || event.who_pays_fx || event.affected_sectors || []);
 
   return (
     <div className="ev" id={event.id}>
@@ -496,9 +520,14 @@ function EventItem({ event, leads, index }) {
                     <div key={n} className="niche-row" onClick={e=>{e.stopPropagation();setShow(true)}}>
                       <div className="niche-left">
                         <span className="niche-idx">{String(i+1).padStart(2,"0")}</span>
-                        <span className="niche-name">{n}</span>
+                        <span className="niche-name">{typeof n === "object" ? n.segment_name||"Segment" : n}</span>
                       </div>
                       <div className="niche-right">
+                        {typeof n === "object" && n.exposure_level && (
+                          <span className={`exp-level ${expClass(n.exposure_level)}`} style={{fontSize:9,padding:"1px 6px"}}>
+                            {n.exposure_level}
+                          </span>
+                        )}
                         {nl.length>0 && <span className="niche-badge">{nl.length} found</span>}
                         <span className="niche-arr">→</span>
                       </div>
