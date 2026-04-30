@@ -15,11 +15,12 @@ DATA    = ROOT / "data"
 PUBLIC  = ROOT / "public" / "data"
 
 PIPELINE = [
-    ("ingest.py",         "Event Radar — pulling live market events"),
-    ("discover.py",       "Company Discovery — finding affected businesses"),
-    ("rescore.py",        "Score Enrichment — ranking leads without Gemini"),
-    ("linkedin_assist.py","LinkedIn Assist — generating search links"),
-    ("outreach.py",       "Outreach Generator — drafting messages"),
+    ("ingest.py",           "Event Radar — pulling live market events"),
+    ("discover.py",         "Company Discovery — finding affected businesses"),
+    ("enrich_websites.py",  "Website Enrichment — domain guessing for missing websites"),
+    ("rescore.py",          "Score Enrichment — ranking leads"),
+    ("linkedin_assist.py",  "LinkedIn Assist — generating search links"),
+    ("outreach.py",         "Outreach Generator — drafting messages"),
 ]
 
 def run_script(script, description):

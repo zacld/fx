@@ -27,6 +27,8 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from website_finder import find_website_guess
+
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-8s  %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
@@ -160,29 +162,6 @@ def has_fx_sic(sic_codes):
 # ── WEBSITE SCRAPING ─────────────────────────────────────────────────────
 
 
-def find_website_google(company_name, company_number):
-    """Try to find a company website via Google when CH doesn't have one."""
-    try:
-        query = f'"{company_name}" UK official site'
-        url   = f"https://www.google.com/search?q={requests.utils.quote(query)}&num=5"
-        res   = requests.get(url, headers=SCRAPE_HEADERS, timeout=8)
-        if res.status_code != 200: return None
-        soup  = BeautifulSoup(res.text, "html.parser")
-        skip  = ["google","facebook","linkedin","twitter","instagram","youtube",
-                 "gov.uk","companieshouse","wikipedia","yelp","yell.com",
-                 "trustpilot","companies.house","cylex","endole","duedil"]
-        for link in soup.find_all("a", href=True):
-            href = link.get("href","")
-            if href.startswith("/url?q="):
-                actual = href.split("/url?q=")[1].split("&")[0]
-                from urllib.parse import urlparse
-                parsed = urlparse(actual)
-                domain = parsed.netloc.lower().replace("www.","")
-                if domain and not any(s in domain for s in skip) and parsed.scheme in ("http","https"):
-                    return actual
-    except Exception as exc:
-        log.debug("Google website search failed for %s: %s", company_name, exc)
-    return None
 
 def scrape_website(url, validation_signals=None):
     """
@@ -328,13 +307,30 @@ def score_lead(item, profile, event, web, sic_codes, segment=None):
     # 9. Director found (+5)
     # (director is passed in separately — scored after this function returns)
 
-    # 10. Active status (+5) + website active (+3)
+    # 10. Active status (+5)
     if (item.get("company_status","")).lower() == "active":
         score += 5
         reasons.append("Active on Companies House")
-    if web.get("snippet"):
-        score += 3
-        reasons.append("Website confirmed")
+
+    # 11. Website confidence — tiered (+25/+15/+8/−20)
+    conf = web.get("website_confidence")
+    src  = web.get("website_source", "")
+    if conf in ("high",):
+        score += 25
+        reasons.append(f"Website verified — strong name match ({src})")
+    elif conf in ("medium", "confirmed"):
+        score += 15
+        reasons.append(f"Website verified ({src})")
+    elif conf == "low":
+        score += 8
+        reasons.append(f"Website found — low confidence ({src})")
+    elif web.get("snippet"):
+        # CH-provided URL that loaded but has no confidence field
+        score += 15
+        reasons.append("Website confirmed (Companies House)")
+    else:
+        score -= 20
+        reasons.append("No website found (−20)")
 
     score = min(score, 100)
 
@@ -450,17 +446,23 @@ def process_event(event, leads):
                     director = extract_director(officers)
                     sic_codes= sic_codes_from_profile(profile)
 
-                    # Get website — try CH first, then Google if not found
+                    # Get website — try CH first, then domain guess + DDG
                     website = (profile or {}).get("website")
+                    website_confidence = "confirmed" if website else None
+                    website_source     = "companies_house" if website else None
                     if not website:
-                        time.sleep(0.4)
-                        website = find_website_google(item.get("title",""), cn)
+                        time.sleep(0.3)
+                        website, website_confidence, website_source = find_website_guess(
+                            item.get("title",""), cn
+                        )
 
                     # Scrape with segment-specific validation signals
                     validation_signals = (segment or {}).get("website_validation_signals", [])
                     web = scrape_website(website, validation_signals) if website else {
                         "fx_signals":[],"secondary_signals":[],"segment_signals":[],"snippet":"","pays_fx":False
                     }
+                    web["website_confidence"] = website_confidence
+                    web["website_source"]     = website_source
 
                     # Score by exposure intensity
                     scoring = score_lead(item, profile, event, web, sic_codes, segment)
@@ -518,6 +520,8 @@ def process_event(event, leads):
                         "fx_payment_logic":      event.get("fx_payment_logic",""),
 
                         # Website evidence
+                        "website_confidence":    website_confidence,
+                        "website_source":        website_source,
                         "fx_payment_signals":    web.get("fx_signals",[]),
                         "segment_signals":       web.get("segment_signals",[]),
                         "secondary_signals":     web.get("secondary_signals",[]),

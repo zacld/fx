@@ -189,10 +189,26 @@ def rescore(lead, urgency_map):
         score += 5
         reasons.append(f"Director found: {lead['director_name']}")
 
-    # 9. Website found (+3)
+    # 9. Website — tiered (+25/+15/+8/−20)
+    conf = lead.get("website_confidence")
+    src  = lead.get("website_source", "")
     if lead.get("website"):
-        score += 3
-        reasons.append("Website confirmed")
+        if conf == "high":
+            score += 25
+            reasons.append(f"Website verified — strong name match ({src})")
+        elif conf in ("medium", "confirmed"):
+            score += 15
+            reasons.append(f"Website verified ({src})")
+        elif conf == "low":
+            score += 8
+            reasons.append(f"Website found — low confidence ({src})")
+        else:
+            # CH-provided URL or legacy lead without confidence field
+            score += 15
+            reasons.append("Website confirmed")
+    else:
+        score -= 20
+        reasons.append("No website found (−20)")
 
     # 10. Active status (+5)
     if (lead.get("company_status") or "").lower() == "active":
