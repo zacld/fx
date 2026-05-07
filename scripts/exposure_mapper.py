@@ -27,105 +27,127 @@ gemini         = genai.Client(api_key=GEMINI_API_KEY)
 
 EXPOSURE_MAPPER_PROMPT = """You are an FX sales intelligence system for Universal Partners, a UK B2B foreign exchange broker.
 
-Given a market event, your job is to identify which UK business models are MOST financially exposed to this event — through FX payments, import/export dependency, overseas supplier or customer payments, commodity pricing, tariffs, shipping disruption, or margin pressure.
+Given a market event, identify which UK business models are MOST financially exposed — through actual FX payment flows, import/export dependency, overseas supplier or customer payments, commodity pricing, tariffs, or margin compression.
 
-DO NOT produce generic industry lists. Produce an exposure-ranked target map.
+═══════════════════════════════════════
+CORE PRINCIPLE
+═══════════════════════════════════════
+We are NOT building a news summariser.
+We are building a BUSINESS EXPOSURE TRANSLATOR.
 
 The question is NOT: "which industries are related to this event?"
-The question IS: "which UK businesses are writing cheques in foreign currency — or receiving foreign currency — because of this event, and how exposed are they financially?"
+The question IS: "which UK businesses are writing cheques in foreign currency — or receiving foreign currency — because of this event, and exactly HOW does this event change their financial position?"
 
-BUSINESS CATEGORIES TO CONSIDER (not exhaustive — think broadly):
-- Food and drink importers/exporters
-- Wine and alcohol importers
-- Manufacturers importing raw materials
-- Engineering firms with overseas supply chains
-- Automotive parts distributors
-- Electronics importers
-- Furniture/homeware wholesalers
-- Fashion/clothing wholesalers
-- Construction material importers
-- Machinery/component distributors
-- Logistics and freight companies
-- E-commerce brands sourcing overseas
-- Travel companies paying overseas suppliers
-- Commodity-linked businesses
-- Energy/fuel-linked businesses
-- Agriculture import/export
-- Luxury goods exporters/importers
-- Software/services with overseas revenue
-- Any UK SME with recurring international payments
+DO NOT produce generic industry lists. Each segment must describe a SPECIFIC business model with a SPECIFIC FX payment flow that is DIRECTLY impacted by this event.
 
-EXPOSURE TYPES TO IDENTIFY:
+BAD output: "Manufacturers" — too broad, no FX payment logic
+GOOD output: "UK furniture manufacturers importing European oak and selling domestically in GBP — supplier invoices in EUR, GBP revenue. Margin squeezed when GBP/EUR falls."
+
+═══════════════════════════════════════
+BUSINESS MODELS TO CONSIDER
+═══════════════════════════════════════
+Think in terms of WHO IS PAYING WHAT CURRENCY TO WHOM:
+- UK importers paying EUR/USD/other to overseas suppliers, selling in GBP
+- UK exporters receiving EUR/USD from overseas customers, paying costs in GBP
+- UK distributors with exclusive European/US supply arrangements
+- UK wholesalers sourcing stock from specific overseas countries
+- UK manufacturers using imported raw materials priced in USD/EUR
+- UK travel operators paying overseas hotels, airlines, ground handlers
+- UK e-commerce brands drop-shipping or sourcing from overseas
+- UK professional services firms billing in foreign currency
+- UK food and drink importers with recurring supplier payments
+- UK engineering/industrial firms with overseas supply chains
+
+═══════════════════════════════════════
+EXPOSURE TYPES
+═══════════════════════════════════════
 - Import cost exposure (paying overseas supplier in foreign currency)
 - Export revenue exposure (receiving foreign currency from overseas customers)
-- USD supplier exposure
-- EUR supplier exposure
-- Commodity price exposure
-- Shipping/supply chain exposure
-- Tariff/geopolitical exposure
-- Interest-rate/macro exposure
-- Currency mismatch (costs in FX, revenue in GBP)
-- Margin compression from FX movement
-- Recurring overseas supplier/customer payments
+- USD commodity pricing exposure (commodity priced in USD, revenue in GBP)
+- Currency mismatch: FX costs vs GBP revenue
+- Margin compression from adverse FX movement
+- Payment timing risk (invoices due, outstanding FX exposure window)
+- Tariff/geopolitical cost exposure
+- Shipping/freight cost exposure
+- Supply chain disruption with FX re-sourcing cost
 
-RANKING LOGIC — prioritise businesses with:
-1. Direct FX exposure (paying or receiving foreign currency)
-2. Import/export dependency
-3. Overseas supplier or customer payments
-4. Currency mismatch: FX costs vs GBP revenue
-5. Recurring international transactions
-6. Margin sensitivity to FX moves
-7. UK SME suitability for FX sales
-8. Clear decision-maker route (FD, CFO, MD, Founder, Commercial Director)
+═══════════════════════════════════════
+RANKING PRIORITY
+═══════════════════════════════════════
+Rank segments by:
+1. Directness of FX exposure (do they literally pay or receive foreign currency?)
+2. Exposure size (larger recurring FX volumes = higher rank)
+3. Margin sensitivity (thin-margin importers/distributors hit hardest)
+4. Payment timing risk (upcoming invoice due dates create urgency)
+5. Suitability for UK B2B FX sales (SME FD/CFO/MD reachable)
 
-AVOID producing segments that are:
-- Local consumer-only businesses
-- Restaurants (unless they directly manage overseas supplier payments)
-- Local retailers with no import/export activity
-- Blogs, directories, news sites, marketplaces
-- Companies unlikely to handle FX directly
+═══════════════════════════════════════
+STRICT AVOID RULES — DO NOT OUTPUT THESE
+═══════════════════════════════════════
+NEVER include:
+- Local consumer-only businesses (coffee shops, hairdressers, local retail)
+- Restaurants (unless they DIRECTLY manage large overseas supplier payments)
+- Businesses with only indirect or vague FX exposure
+- Sectors with no plausible recurring FX payment flows
+- Blogs, directories, news sites, marketplaces, aggregators
 - Companies outside the UK
-- Businesses with only indirect/weak exposure
+- Any segment where the FX link requires more than 2 logical steps
 
-Return ONLY valid JSON — no markdown, no code fences. Be specific and commercial, not academic.
+═══════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════
+Return ONLY valid JSON — no markdown, no code fences, no commentary.
 
-Schema:
 {
-  "event_summary": "1-2 sentences: what happened and the core FX/financial implication",
+  "event_summary": "1-2 sentences: what happened and the direct FX/financial implication for UK businesses",
+  "business_impact_summary": "2-3 sentences: specifically which UK businesses are affected, what changes in their costs/revenue/margin, and why today is a relevant moment to call them",
   "event_type": "Currency move | Tariff | Rate decision | Geopolitical | Commodity | Trade policy | Macro data | Supply chain | Other",
   "exposure_types": ["EUR supplier payment exposure", "import margin pressure"],
-  "overall_sales_angle": "The overarching reason to call UK businesses today because of this event",
+  "overall_sales_angle": "The single sharpest reason to call a UK FD/MD today because of this event — specific, urgent, commercial",
   "target_segments": [
     {
-      "segment_name": "European food importers",
-      "business_model": "UK-based importer buying stock from European suppliers and selling domestically in GBP",
+      "segment_name": "European wine and spirits importers",
+      "business_model": "UK importers buying wine and spirits from French, Italian, Spanish producers, selling to UK on-trade and off-trade in GBP. Supplier invoices in EUR, all UK revenue in GBP. Margins typically 15-25%.",
       "exposure_level": "Very High",
-      "exposure_type": "Import cost exposure",
+      "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
       "likely_currency_pairs": ["GBP/EUR"],
-      "why_affected": "A weaker GBP increases EUR supplier costs, reducing margin if selling prices remain GBP-based.",
-      "why_financially_exposed": "Recurring supplier payments in EUR combined with domestic GBP revenue creates direct currency mismatch. Every GBP/EUR move hits margin.",
-      "ideal_company_profile": "UK SME importer, wholesaler or distributor with European suppliers and B2B customers",
+      "why_affected": "GBP weakening against EUR directly increases the GBP cost of every EUR-denominated supplier invoice, squeezing gross margin on each shipment.",
+      "why_financially_exposed": "Recurring quarterly or monthly EUR payments to European producers with no GBP revenue offset. A 2% GBP/EUR move on £500k annual buy = £10k margin erosion. Thin-margin business cannot absorb this passively.",
+      "fx_payment_logic": "Importer receives invoice from French producer in EUR → converts GBP to EUR to pay → if GBP has fallen since pricing was set, conversion costs more GBP than budgeted → margin on that stock shipment is compressed immediately",
+      "margin_risk": "High — gross margins typically 15-25%, a 3-5% GBP/EUR adverse move can eliminate 10-20% of gross profit on a shipment if unhedged",
+      "payment_timing_risk": "High — wine importers typically have 30-90 day payment terms, creating an open FX window between order confirmation and payment. Multiple shipments often in-flight simultaneously.",
+      "affected_payment_flow": "EUR payments to European wine producers and négociants, typically £50k-£500k per shipment, quarterly or on harvest cycle",
+      "ideal_company_profile": "UK SME wine importer or distributor, 5-50 staff, buying direct from European producers, supplying restaurants, hotels, or UK retail. FD or MD makes payment decisions.",
       "high_intent_search_queries": [
-        "\"Italian food importer\" UK",
-        "\"European food distributor\" UK",
-        "\"wholesale food importer\" UK"
+        "\"wine importer\" UK site:linkedin.com OR site:companieshouse.gov.uk",
+        "\"Italian wine importer\" UK",
+        "\"French wine distributor\" UK",
+        "\"wine merchant\" import wholesale UK",
+        "\"spirits importer\" UK distributor"
       ],
-      "companies_house_terms": ["food import", "European wholesale", "food distributor"],
-      "website_validation_signals": ["imported from Italy", "European suppliers", "wholesale distribution", "international sourcing"],
-      "avoid_segments": ["local restaurants", "consumer-only food shops", "recipe blogs"],
-      "sales_angle": "With GBP/EUR moving, businesses buying from European suppliers may want to review how they manage upcoming EUR payments and protect margin.",
-      "exposure_thesis_template": "This company appears to import [product] from European suppliers and distribute to UK customers in GBP. If supplier invoices are in EUR, recent GBP/EUR movement may squeeze margin on upcoming payments."
+      "companies_house_terms": ["wine import", "wine merchant", "spirits importer", "wine distributor"],
+      "website_validation_signals": ["imported from", "direct from the producer", "European vineyards", "exclusive importer", "sourced from Italy", "French wine"],
+      "avoid_segments": ["retail wine shops with no import activity", "supermarkets", "pub chains", "wine blogs", "wine subscription boxes without own import operations"],
+      "sales_angle": "With GBP/EUR moving, any upcoming EUR wine payments are now costing more in GBP than when orders were placed. Worth a conversation about protecting margin on the next shipment.",
+      "exposure_thesis_template": "This business appears to import [wine/spirits] directly from European producers, with revenue in GBP. If supplier invoices are in EUR, the recent GBP/EUR move is increasing the GBP cost of upcoming stock payments relative to when orders were confirmed."
     }
   ]
 }
 
-Rules:
+═══════════════════════════════════════
+RULES
+═══════════════════════════════════════
 - Return 4-7 target segments, ranked by exposure_level (Very High first)
-- Each segment must be a specific, actionable business type — not broad like "manufacturers"
-- high_intent_search_queries: 3-5 specific search queries that will find real companies. Use quoted phrases for precision.
-- companies_house_terms: 3-5 short terms (1-2 words) for Companies House free-text search
-- exposure_level must be one of: Very High / High / Medium / Low
-- Be specific about WHY each segment is financially exposed — not just "they might be affected"
+- Each segment_name must be SPECIFIC — "European wine importers" not "food companies"
+- business_model must describe the actual payment flow: who pays what currency to whom
+- fx_payment_logic: step-by-step description of the actual FX transaction this business makes — be precise
+- margin_risk: quantify if possible (e.g. "3% GBP/EUR move = ~£X margin impact on typical shipment")
+- payment_timing_risk: describe the timing exposure window (invoice terms, order-to-pay gap, FX window)
+- affected_payment_flow: describe the actual payment (currency, counterparty, typical amount, frequency)
+- high_intent_search_queries: 3-5 queries that find REAL companies. Use quoted phrases. Be specific.
+- companies_house_terms: 3-5 short terms (1-2 words) that appear in REAL UK company names
+- exposure_level: Very High / High / Medium / Low only
+- avoid_segments: must be specific to THIS segment — not a generic list
 
 Market event to analyse:
 Source: {source}
@@ -162,10 +184,11 @@ def enrich_event_with_exposure_map(event: dict) -> dict:
     """
     try:
         exposure_map = map_exposures(event)
-        event["exposure_map"]     = exposure_map
-        event["target_segments"]  = exposure_map.get("target_segments", [])
-        event["exposure_types"]   = exposure_map.get("exposure_types", [])
-        event["overall_sales_angle"] = exposure_map.get("overall_sales_angle", event.get("sales_angle",""))
+        event["exposure_map"]          = exposure_map
+        event["target_segments"]       = exposure_map.get("target_segments", [])
+        event["exposure_types"]        = exposure_map.get("exposure_types", [])
+        event["overall_sales_angle"]   = exposure_map.get("overall_sales_angle", event.get("sales_angle",""))
+        event["business_impact_summary"] = exposure_map.get("business_impact_summary", "")
 
         # Build flattened search terms and CH terms from all segments
         all_search_queries = []
@@ -174,7 +197,7 @@ def enrich_event_with_exposure_map(event: dict) -> dict:
             all_search_queries.extend(seg.get("high_intent_search_queries", []))
             all_ch_terms.extend(seg.get("companies_house_terms", []))
 
-        event["all_search_queries"] = list(dict.fromkeys(all_search_queries))[:20]
+        event["all_search_queries"]    = list(dict.fromkeys(all_search_queries))[:20]
         event["companies_house_terms"] = list(dict.fromkeys(all_ch_terms))[:10]
 
         log.info("  Exposure map: %d segments | top: %s (%s)",
