@@ -6,17 +6,20 @@ Web-first company discovery: search → website signals → Companies House vali
 Why this matters over CH-only discovery:
   Companies House searches company NAMES, not trading activity.
   Most importers don't have "import" in their name.
-  "Thames Valley Drinks Ltd" won't appear in a "wine import" CH search —
-  but they will appear in Google/DuckDuckGo results.
+  "Thames Valley Drinks Ltd" won't appear in a CH "wine import" search —
+  but they will appear in DuckDuckGo results for "wine importer UK".
 
 Discovery flow:
   High-intent search query (from segment.high_intent_search_queries)
     ↓
   DuckDuckGo HTML search → company URLs
+  (Fallback → Companies House keyword search when DDG yields nothing)
     ↓
-  Filter out directories / news / social / marketplaces
+  Filter out directories / news / social / marketplaces / aggregators
     ↓
   Scrape website (homepage + /about) — extract FX/B2B/secondary/negative signals
+    ↓
+  Reject if domain-name coherence fails or page is a multi-company directory
     ↓
   If enough signals: Companies House validation (name match, active status, SIC)
     ↓
@@ -30,10 +33,11 @@ Environment variables (all optional — safe defaults):
   WEB_MAX_SEGMENTS_PER_EVENT=3        Max segments per event
   WEB_MAX_QUERIES_PER_SEGMENT=3       Max search queries per segment
   WEB_MAX_RESULTS_PER_QUERY=8         Max URLs to visit per query
-  WEB_REQUEST_DELAY_SECONDS=2.5       Politeness delay between requests
+  WEB_REQUEST_DELAY_SECONDS=3.0       Politeness delay between DDG requests
 """
 
-import os, re, time, logging, json, hashlib
+import os, re, time, random, logging, json, hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote, urlparse, parse_qs, unquote
 
@@ -63,83 +67,286 @@ WEB_MAX_EVENTS             = int(os.getenv("WEB_MAX_EVENTS", "5"))
 WEB_MAX_SEGMENTS_PER_EVENT = int(os.getenv("WEB_MAX_SEGMENTS_PER_EVENT", "3"))
 WEB_MAX_QUERIES_PER_SEGMENT= int(os.getenv("WEB_MAX_QUERIES_PER_SEGMENT", "3"))
 WEB_MAX_RESULTS_PER_QUERY  = int(os.getenv("WEB_MAX_RESULTS_PER_QUERY", "8"))
-WEB_REQUEST_DELAY          = float(os.getenv("WEB_REQUEST_DELAY_SECONDS", "2.5"))
+WEB_REQUEST_DELAY          = float(os.getenv("WEB_REQUEST_DELAY_SECONDS", "3.0"))
 
-SCRAPE_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36"
-    ),
-    "Accept-Language": "en-GB,en;q=0.9",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-}
-
-# ── DOMAINS TO SKIP ───────────────────────────────────────────────────────────
-# Directories, news, social, government, marketplaces — not company websites
-SKIP_DOMAINS = {
-    # UK trade directories
-    "yell.com", "yell.co.uk", "yelp.com", "yelp.co.uk",
-    "freeindex.co.uk", "freeindex.com",
-    "thomsonlocal.com", "scoot.co.uk",
-    "cylex.co.uk", "cylex-uk.co.uk",
-    "hotfrog.co.uk", "hotfrog.com",
-    "brownbook.net", "misterwhat.co.uk",
-    "kompass.com", "uk.kompass.com",
-    "checkatrade.com", "ratedpeople.com", "bark.com", "rated.co.uk",
-    "mybuilder.com", "trustatrader.com", "trustmark.org.uk",
-    # Business intelligence / credit
-    "companieshouse.gov.uk", "endole.co.uk", "duedil.com",
-    "find-and-update.company-information.service.gov.uk",
-    "companies.house.gov.uk", "beta.companieshouse.gov.uk",
-    "creditsafe.com", "experian.co.uk", "equifax.co.uk",
-    "crunchbase.com", "pitchbook.com", "dnb.com", "dnb.co.uk",
-    "opencorporates.com", "companieshouse.data.gov.uk",
-    "bizdb.co.uk", "companycheck.co.uk", "companydata.co.uk",
-    # Social media
-    "linkedin.com", "facebook.com", "instagram.com", "twitter.com",
-    "x.com", "tiktok.com", "youtube.com", "pinterest.com",
-    "reddit.com", "whatsapp.com", "telegram.org",
-    # News / media
-    "bbc.co.uk", "bbc.com", "reuters.com", "ft.com", "bloomberg.com",
-    "guardian.com", "theguardian.com", "telegraph.co.uk", "thetimes.co.uk",
-    "independent.co.uk", "dailymail.co.uk", "sky.com", "itv.com",
-    "forbes.com", "businessinsider.com", "techcrunch.com",
-    "cityam.com", "thisismoney.co.uk",
-    # Government / NGO
-    "gov.uk", "hmrc.gov.uk", "legislation.gov.uk", "parliament.uk",
-    "nhs.uk", "acas.org.uk", "ico.org.uk", "fca.org.uk",
-    # Search engines / tech
-    "google.com", "google.co.uk", "bing.com", "yahoo.com",
-    "duckduckgo.com", "ask.com",
-    "wikipedia.org", "wikimedia.org", "wikidata.org",
-    # Review sites
-    "trustpilot.com", "glassdoor.com", "reviews.co.uk",
-    "reevoo.com", "feefo.com", "which.co.uk",
-    # Marketplaces / retail
-    "amazon.co.uk", "amazon.com", "ebay.co.uk", "ebay.com",
-    "etsy.com", "notonthehighstreet.com", "wayfair.co.uk",
-    "asos.com", "next.co.uk", "argos.co.uk", "johnlewis.com",
-    "gumtree.com", "preloved.co.uk",
-    # Job boards / recruitment
-    "reed.co.uk", "indeed.com", "indeed.co.uk", "totaljobs.com",
-    "cv-library.co.uk", "monster.co.uk", "jobs.co.uk",
-    "glassdoor.co.uk", "seek.com",
-}
-
-# ── PATH PATTERNS TO SKIP ────────────────────────────────────────────────────
-# Even on otherwise OK domains, these paths are not company homepages
-SKIP_PATH_PATTERNS = [
-    r"/blog/", r"/news/", r"/press/", r"/article/", r"/articles/",
-    r"/forum/", r"/community/", r"/wiki/", r"/help/", r"/support/",
-    r"/jobs/", r"/careers/", r"/recruit",
-    r"/login", r"/signup", r"/register", r"/checkout",
-    r"/search\?", r"/results\?", r"/find\?",
+# Rotate user-agents to reduce fingerprinting
+_USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
 ]
+
+
+def _headers(referer: str = "") -> dict:
+    return {
+        "User-Agent":      random.choice(_USER_AGENTS),
+        "Accept-Language": "en-GB,en;q=0.9",
+        "Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        **({"Referer": referer} if referer else {}),
+    }
+
+
+# ── DOMAINS/PATTERNS TO SKIP ──────────────────────────────────────────────────
+# Comprehensive blocklist — directories, news, social, gov, marketplaces, aggregators
+
+SKIP_DOMAINS = {
+    # ── UK trade directories / business listings ─────────────────────────────
+    "yell.com", "yell.co.uk",
+    "yelp.com", "yelp.co.uk",
+    "freeindex.co.uk",
+    "thomsonlocal.com",
+    "scoot.co.uk",
+    "cylex.co.uk", "cylex-uk.co.uk",
+    "hotfrog.co.uk",
+    "brownbook.net",
+    "misterwhat.co.uk",
+    "kompass.com", "uk.kompass.com",
+    "checkatrade.com",
+    "ratedpeople.com",
+    "bark.com",
+    "rated.co.uk",
+    "mybuilder.com",
+    "trustatrader.com",
+    "trustmark.org.uk",
+    "getapp.co.uk",
+    "bizwiki.co.uk",
+    "192.com",
+    "ukbusinessdirectory.co.uk",
+
+    # ── Company intelligence / aggregators / registries ───────────────────────
+    "companieshouse.gov.uk",
+    "find-and-update.company-information.service.gov.uk",
+    "companies.house.gov.uk",
+    "beta.companieshouse.gov.uk",
+    "endole.co.uk",
+    "duedil.com",
+    "creditsafe.com",
+    "experian.co.uk",
+    "equifax.co.uk",
+    "crunchbase.com",
+    "pitchbook.com",
+    "dnb.com", "dnb.co.uk",
+    "opencorporates.com",
+    "companieshouse.data.gov.uk",
+    "bizdb.co.uk",
+    "companycheck.co.uk",
+    "companydata.co.uk",
+    "bizbuysell.com",
+    "globaldata.com",
+    "ibisworld.com",
+    "statista.com",
+    "marketresearch.com",
+    "mordorintelligence.com",
+    "grandviewresearch.com",
+
+    # ── Industry-specific aggregators / chemical directories ──────────────────
+    "chemeurope.com",        # chemical industry directory
+    "grokipedia.com",        # wiki/aggregator
+    "ensun.io",              # company aggregator
+    "europages.co.uk",       # European business directory
+    "europages.com",
+    "thomasnet.com",         # industrial components directory
+    "alibaba.com",           # marketplace
+    "made-in-china.com",
+    "globalsources.com",
+    "tradekey.com",
+    "eceurope.com",
+    "chemspider.com",        # chemical database
+    "sigmaaldrich.com",      # chemical supplier database
+    "icis.com",              # chemical market data
+    "chemanalyst.com",
+    "cheminfo.com",
+    "chemidplus.nlm.nih.gov",
+    "lookchem.com",
+    "molbase.com",
+
+    # ── Social media ─────────────────────────────────────────────────────────
+    "linkedin.com",
+    "facebook.com",
+    "instagram.com",
+    "twitter.com",
+    "x.com",
+    "tiktok.com",
+    "youtube.com",
+    "pinterest.com",
+    "reddit.com",
+    "whatsapp.com",
+    "telegram.org",
+
+    # ── News / media ─────────────────────────────────────────────────────────
+    "bbc.co.uk", "bbc.com",
+    "reuters.com",
+    "ft.com",
+    "bloomberg.com",
+    "guardian.com", "theguardian.com",
+    "telegraph.co.uk",
+    "thetimes.co.uk",
+    "independent.co.uk",
+    "dailymail.co.uk",
+    "sky.com",
+    "itv.com",
+    "forbes.com",
+    "businessinsider.com",
+    "techcrunch.com",
+    "cityam.com",
+    "thisismoney.co.uk",
+    "thegrocer.co.uk",
+    "foodmanufacture.co.uk",
+    "just-drinks.com",
+    "thedrinksbusiness.com",
+    "decanter.com",
+    "harpers.co.uk",
+    "foodnavigator.com",
+    "seafoodsource.com",
+    "undercurrentnews.com",
+    "chemweek.com",
+    "icis.com",
+
+    # ── Government / NGO / Trade associations ────────────────────────────────
+    "gov.uk",
+    "hmrc.gov.uk",
+    "legislation.gov.uk",
+    "parliament.uk",
+    "nhs.uk",
+    "acas.org.uk",
+    "ico.org.uk",
+    "fca.org.uk",
+    "cma.gov.uk",
+    "food.gov.uk",
+    "wsta.co.uk",          # Wine and Spirit Trade Association
+    "scotchwhisky.com",    # Scotch Whisky Association (editorial)
+    "swa.org.uk",
+    "fdf.org.uk",
+    "seafish.org",
+    "cefic.org",           # European Chemical Industry Council
+
+    # ── Search / tech ────────────────────────────────────────────────────────
+    "google.com", "google.co.uk",
+    "bing.com",
+    "yahoo.com",
+    "duckduckgo.com",
+    "wikipedia.org",
+    "wikimedia.org",
+    "wikidata.org",
+
+    # ── Review / comparison sites ─────────────────────────────────────────────
+    "trustpilot.com",
+    "glassdoor.com",
+    "reviews.co.uk",
+    "reevoo.com",
+    "feefo.com",
+    "which.co.uk",
+    "moneysavingexpert.com",
+    "comparethemarket.com",
+
+    # ── Marketplaces / B2C retail ─────────────────────────────────────────────
+    "amazon.co.uk", "amazon.com",
+    "ebay.co.uk", "ebay.com",
+    "etsy.com",
+    "notonthehighstreet.com",
+    "wayfair.co.uk",
+    "asos.com",
+    "next.co.uk",
+    "argos.co.uk",
+    "johnlewis.com",
+    "gumtree.com",
+    "preloved.co.uk",
+    "onbuy.com",
+    "manomano.co.uk",
+
+    # ── Job boards / HR ──────────────────────────────────────────────────────
+    "reed.co.uk",
+    "indeed.com", "indeed.co.uk",
+    "totaljobs.com",
+    "cv-library.co.uk",
+    "monster.co.uk",
+    "jobs.co.uk",
+    "glassdoor.co.uk",
+    "seek.com",
+    "linkedin.com",
+    "fish4.co.uk",
+    "workable.com",
+    "caterer.com",
+    "michaelpage.co.uk",
+    "hays.co.uk",
+    "robertwalters.co.uk",
+
+    # ── AI / lead-gen / generic aggregators ──────────────────────────────────
+    "clutch.co",
+    "goodfirms.co",
+    "g2.com",
+    "capterra.com",
+    "getapp.com",
+    "sortlist.co.uk",
+    "upcity.com",
+    "semrush.com",
+    "similarweb.com",
+    "craft.co",           # company aggregator
+    "zoominfo.com",
+    "apollo.io",
+    "leadiq.com",
+    "hunter.io",
+    "rocketreach.co",
+}
+
+# Path-level patterns: skip even on otherwise OK domains
+SKIP_PATH_PATTERNS = [
+    r"/blog/",
+    r"/news/",
+    r"/press-release",
+    r"/article/",
+    r"/articles/",
+    r"/forum/",
+    r"/community/",
+    r"/wiki/",
+    r"/help/",
+    r"/support/faq",
+    r"/jobs/",
+    r"/careers/",
+    r"/recruit",
+    r"/vacancies",
+    r"/login",
+    r"/signup",
+    r"/register",
+    r"/checkout",
+    r"/basket",
+    r"/cart",
+    r"/search\?",
+    r"/results\?",
+    r"/find\?",
+    r"/category/",
+    r"/tag/",
+    r"/author/",
+    r"\.pdf$",
+    r"\.doc$",
+]
+
+# Title patterns that indicate directory pages / aggregator results
+SKIP_TITLE_PATTERNS = [
+    r"^\d+\s+(companies|businesses|suppliers|importers|exporters|distributors|wholesalers)",
+    r"^(top|best|leading|largest|biggest)\s+\d+",
+    r"^list of\s",
+    r"directory\s*(of|for)",
+    r"\bsuppliers?\s+in\s+",
+    r"\bcompanies?\s+in\s+",
+    r"^search results",
+    r"trade show",
+    r"\bmarket report\b",
+    r"\bindustry report\b",
+    r"\bcompare\s+",
+    r"\breviews?\s+(of|for)\b",
+    r"^(find|discover)\s+(a|the|your)\s+",
+    r"\d+\s+importer",    # "50 importers in UK"
+    r"\d+\s+exporter",
+    r"\d+\s+supplier",
+    r"database of\s",
+    r"register of\s",
+]
+
 
 # ── SIGNAL LISTS ──────────────────────────────────────────────────────────────
 
-# High-conviction FX payment signals — company pays overseas suppliers / invoices in FX
 FX_PAYMENT_SIGNALS = [
     "we import","we source","sourced from","imported from","direct from",
     "importing from","we buy from","purchased from","procured from",
@@ -157,21 +364,19 @@ FX_PAYMENT_SIGNALS = [
     "international customers","us customers","american customers","european customers",
 ]
 
-# B2B / trade signals — this is a business-to-business company, not a consumer shop
 B2B_SIGNALS = [
     "wholesale","wholesaler","wholesale only","trade only","trade prices",
     "trade customers","trade enquiries","distributor","distribution",
     "minimum order","bulk order","bulk pricing","bulk discount",
     "b2b","business to business","business customers","corporate customers",
     "stockist","stockists","nationwide stockists","become a stockist",
-    "reseller","resellers","agent","agents","authorised dealer",
+    "reseller","resellers","agent","agents","authorised dealer","authorized dealer",
     "contract manufacturing","own label","private label","white label",
     "we supply","we manufacture and supply","supply chain",
     "catalogue available","brochure available","price list",
     "no vat","ex vat","plus vat","+vat",
 ]
 
-# Secondary signals — international / logistics activity (lower weight)
 SECONDARY_SIGNALS = [
     "international","global","worldwide","overseas","distribution",
     "logistics","freight","shipping","customs","clearance",
@@ -180,26 +385,25 @@ SECONDARY_SIGNALS = [
     "currency","forex","exchange","sterling","dollar","euro",
 ]
 
-# Negative signals — strongly suggests NOT a relevant lead
 NEGATIVE_SIGNALS = [
-    "restaurant","cafe","coffee shop","takeaway","food delivery",
-    "hair salon","nail salon","beauty salon","barber",
+    "restaurant","cafe","coffee shop","takeaway","food delivery","just eat",
+    "hair salon","nail salon","beauty salon","barber","hairdresser",
     "recruitment agency","job agency","staffing agency","we hire","submit your cv",
-    "estate agent","letting agent","property management","rental property",
-    "blog","personal blog","my thoughts","travel diary",
+    "estate agent","letting agent","property management","rental property","for sale",
+    "blog","personal blog","my thoughts","travel diary","lifestyle",
     "local delivery only","local area only","uk delivery only","mainland uk only",
     "dental","dentist","gp surgery","medical practice","clinic","pharmacy",
     "nursery","primary school","secondary school","sixth form","university",
-    "charity","not for profit","non profit","registered charity",
+    "charity","not for profit","non profit","registered charity","donate",
     "plumber","electrician","roofer","builder","handyman","decorator",
-    "personal trainer","fitness instructor","yoga","pilates","gym",
+    "personal trainer","fitness instructor","yoga","pilates","gym","crossfit",
+    "wedding","event planning","party planning","catering for weddings",
+    "under construction","coming soon","parked domain","placeholder",
 ]
-
 
 # ── UTILITIES ─────────────────────────────────────────────────────────────────
 
 def now_iso():
-    from datetime import datetime, timezone
     return datetime.now(timezone.utc).isoformat()
 
 def lead_id(identifier: str, event_id: str) -> str:
@@ -214,33 +418,32 @@ def domain_from_url(url: str) -> str | None:
         return None
 
 def jaccard_similarity(a: str, b: str) -> float:
-    """Token-level Jaccard similarity between two strings."""
     if not a or not b:
         return 0.0
-    tok_a = set(re.findall(r"[a-z]+", a.lower()))
-    tok_b = set(re.findall(r"[a-z]+", b.lower()))
-    # Remove stopwords that don't help name matching
     stops = {"ltd","limited","plc","llp","uk","the","and","of","co","company","group"}
-    tok_a -= stops
-    tok_b -= stops
+    tok_a = set(re.findall(r"[a-z]+", a.lower())) - stops
+    tok_b = set(re.findall(r"[a-z]+", b.lower())) - stops
     if not tok_a or not tok_b:
         return 0.0
     return len(tok_a & tok_b) / len(tok_a | tok_b)
 
 def name_tokens(name: str) -> set:
-    """Significant tokens from a company name."""
     stops = {"ltd","limited","plc","llp","uk","the","and","of","co","company","group",
-             "services","solutions","trading","enterprises","holdings"}
+             "services","solutions","trading","enterprises","holdings","international"}
     return set(re.findall(r"[a-z]+", name.lower())) - stops
 
+def _domain_tokens(domain: str) -> set:
+    """Extract meaningful tokens from a domain name."""
+    # Remove TLD and www, split on hyphens
+    base = domain.lower()
+    base = re.sub(r"\.(co\.uk|com|co|uk|net|org|io|biz)$", "", base)
+    return set(re.findall(r"[a-z]{3,}", base))
 
-# ── URL FILTERING ─────────────────────────────────────────────────────────────
+
+# ── URL / TITLE FILTERING ─────────────────────────────────────────────────────
 
 def should_skip_url(url: str) -> tuple[bool, str]:
-    """
-    Returns (skip, reason). True = skip this URL.
-    Checks domain blocklist and path patterns.
-    """
+    """Returns (skip, reason). True = skip this URL."""
     if not url or not url.startswith("http"):
         return True, "not a valid http URL"
 
@@ -248,35 +451,105 @@ def should_skip_url(url: str) -> tuple[bool, str]:
     if not domain:
         return True, "could not parse domain"
 
-    # Check exact domain and parent domains (e.g. "yell.com" blocks "www.yell.com")
+    # Check blocklist (exact + parent domain matching)
     for skip in SKIP_DOMAINS:
         if domain == skip or domain.endswith("." + skip):
-            return True, f"skip domain: {skip}"
+            return True, f"blocked domain: {skip}"
 
     parsed = urlparse(url)
     path = (parsed.path or "").lower()
     for pattern in SKIP_PATH_PATTERNS:
         if re.search(pattern, path):
-            return True, f"skip path pattern: {pattern}"
+            return True, f"blocked path: {pattern}"
 
     return False, ""
 
 
+def should_skip_title(title: str) -> tuple[bool, str]:
+    """Returns (skip, reason). True = skip this result (directory listing etc.)."""
+    if not title:
+        return False, ""
+    tl = title.lower()
+    for pattern in SKIP_TITLE_PATTERNS:
+        if re.search(pattern, tl):
+            return True, f"title pattern: {pattern}"
+    return False, ""
+
+
+def domain_coherent_with_name(domain: str, search_title: str) -> bool:
+    """
+    Check that the domain plausibly belongs to the company in the title.
+    Rejects: grokipedia.com for "AMSONS LTD", chemeurope.com for "KILCO CHEMICALS".
+    Passes:  resourcechemicals.co.uk for "RESOURCE CHEMICALS LIMITED".
+
+    Rule: domain tokens must share ≥1 meaningful token with company name,
+    OR the domain is a common company-website pattern (short brand name).
+    """
+    d_tok = _domain_tokens(domain)
+    n_tok = name_tokens(search_title)
+
+    if not n_tok:
+        return True  # can't check, give benefit of doubt
+
+    # If there's overlap → coherent
+    if d_tok & n_tok:
+        return True
+
+    # Allow short brand domains (≤10 chars base) — e.g. "pearl" for "Pearl Chemicals"
+    # Check if any name token appears in the full domain string
+    domain_str = domain.split(".")[0].lower()
+    for tok in n_tok:
+        if len(tok) >= 4 and tok in domain_str:
+            return True
+
+    # Allow if domain is very short/brand-like AND not a known aggregator
+    base = domain.split(".")[0]
+    if len(base) <= 8:
+        return True   # short brand domains are often valid
+
+    return False
+
+
 # ── DUCKDUCKGO SEARCH ─────────────────────────────────────────────────────────
+
+# Shared session with cookies for better DDG compatibility
+_ddg_session = requests.Session()
+_ddg_initialized = False
+
+
+def _init_ddg_session():
+    """Pre-warm DDG session with a homepage visit."""
+    global _ddg_initialized
+    if _ddg_initialized:
+        return
+    try:
+        _ddg_session.headers.update(_headers())
+        _ddg_session.get("https://duckduckgo.com/", timeout=10)
+        _ddg_initialized = True
+    except Exception:
+        pass
+
 
 def ddg_search(query: str, n: int = 10) -> list:
     """
     Search DuckDuckGo HTML interface.
-    Returns list of {url, title, snippet} dicts, filtered by SKIP_DOMAINS.
+    Returns list of {url, title, snippet} dicts filtered by SKIP_DOMAINS/SKIP_TITLES.
+    Falls back gracefully to empty list on block/rate-limit.
     """
+    _init_ddg_session()
     results = []
+
     try:
-        resp = requests.get(
-            "https://duckduckgo.com/html/",
+        _ddg_session.headers.update(_headers("https://duckduckgo.com/"))
+        resp = _ddg_session.get(
+            "https://html.duckduckgo.com/html/",
             params={"q": query},
-            headers=SCRAPE_HEADERS,
             timeout=15,
         )
+        # 202 = DDG soft-blocking (returns homepage HTML instead of results)
+        if resp.status_code == 202 or len(resp.text) < 5000:
+            log.debug("DDG soft-block for %r (status=%d, len=%d)", query, resp.status_code, len(resp.text))
+            return results
         resp.raise_for_status()
     except Exception as exc:
         log.debug("DDG request failed for %r: %s", query, exc)
@@ -288,24 +561,21 @@ def ddg_search(query: str, n: int = 10) -> list:
         if len(results) >= n:
             break
 
-        # DDG wraps result links as redirect URLs: //duckduckgo.com/l/?uddg=ENCODED_URL
         link_tag = result.select_one(".result__a")
         if not link_tag:
             continue
 
         href = link_tag.get("href", "")
-        # Extract real URL from uddg= parameter
+        url = None
+
+        # DDG redirect format: //duckduckgo.com/l/?uddg=ENCODED_URL
         if "uddg=" in href:
             try:
-                # href may be protocol-relative: //duckduckgo.com/l/?uddg=...
                 if href.startswith("//"):
                     href = "https:" + href
-                parsed = urlparse(href)
-                uddg = parse_qs(parsed.query).get("uddg", [None])[0]
+                uddg = parse_qs(urlparse(href).query).get("uddg", [None])[0]
                 if uddg:
                     url = unquote(uddg)
-                else:
-                    continue
             except Exception:
                 continue
         elif href.startswith("http"):
@@ -313,11 +583,20 @@ def ddg_search(query: str, n: int = 10) -> list:
         else:
             continue
 
-        skip, _ = should_skip_url(url)
-        if skip:
+        if not url:
+            continue
+
+        skip_url, reason = should_skip_url(url)
+        if skip_url:
+            log.debug("  Skip URL (%s): %s", reason, url[:60])
             continue
 
         title   = link_tag.get_text(strip=True)
+        skip_title, reason = should_skip_title(title)
+        if skip_title:
+            log.debug("  Skip title (%s): %s", reason, title[:60])
+            continue
+
         snippet_tag = result.select_one(".result__snippet")
         snippet = snippet_tag.get_text(strip=True) if snippet_tag else ""
 
@@ -327,78 +606,190 @@ def ddg_search(query: str, n: int = 10) -> list:
     return results
 
 
+# ── COMPANIES HOUSE KEYWORD SEARCH (fallback when DDG fails) ─────────────────
+
+def _extract_core_keyword(query: str) -> str:
+    """
+    Extract the most specific industry keyword from a search query for CH fallback.
+    "delicatessen wholesale UK" → "delicatessen"
+    '"wine importer" UK' → "wine importer"
+    '"chemical distributor" imports UK' → "chemical distributor"
+    """
+    # Remove quotes and strip generic terms
+    generic = {"uk", "british", "england", "london", "importer", "exporter",
+               "imports", "exports", "import", "export", "wholesale", "wholesaler",
+               "supplier", "distributor", "manufacturer", "company", "business"}
+    # Try to extract a quoted phrase first
+    quoted = re.findall(r'"([^"]+)"', query)
+    if quoted:
+        # Use quoted phrase directly (it's the most specific)
+        return quoted[0]
+    # Otherwise use the first meaningful token(s)
+    tokens = [t for t in query.split() if t.lower() not in generic and len(t) > 3]
+    return " ".join(tokens[:2]) if tokens else query.split()[0]
+
+
+def ch_keyword_search(query: str, max_results: int = 10) -> list:
+    """
+    Search Companies House by keyword. Returns active companies.
+    Used as fallback when DDG returns nothing.
+
+    Extracts the core industry keyword from the query to avoid false matches
+    (e.g. "delicatessen wholesale UK" → searches CH for "delicatessen", not "wholesale"
+    which would match unrelated companies like AIRSOFT WHOLESALE).
+
+    Each result: {url, title, snippet, from_ch: True}
+    """
+    if not COMPANIES_HOUSE_API_KEY:
+        return []
+
+    core_kw = _extract_core_keyword(query)
+    if not core_kw:
+        return []
+
+    results = []
+    try:
+        resp = requests.get(
+            "https://api.company-information.service.gov.uk/search/companies",
+            params={"q": core_kw, "items_per_page": max_results},
+            auth=(COMPANIES_HOUSE_API_KEY, ""),
+            timeout=15,
+        )
+        resp.raise_for_status()
+        items = resp.json().get("items", [])
+    except Exception as exc:
+        log.debug("CH keyword search failed for %r: %s", core_kw, exc)
+        return results
+
+    log.debug("CH fallback: %r → %r → %d items", query[:50], core_kw, len(items))
+
+    for item in items:
+        status = (item.get("company_status") or "").lower()
+        if status not in ("active", ""):
+            continue
+
+        name = item.get("title", "")
+        cn   = item.get("company_number", "")
+        if not name or not cn:
+            continue
+
+        results.append({
+            "url":       None,   # website guessed later
+            "title":     name,
+            "snippet":   f"Companies House: {cn} — {item.get('description','')}",
+            "from_ch":   True,
+            "ch_number": cn,
+        })
+
+    log.debug("CH fallback %r → %d active candidates", core_kw, len(results))
+    return results
+
+
 # ── WEBSITE VALIDATION ────────────────────────────────────────────────────────
 
-def _fetch_text(url: str, timeout: int = 10) -> str:
-    """Fetch a URL and return cleaned plain text. Empty string on failure."""
+def _fetch_text(url: str, timeout: int = 12) -> tuple[str, str]:
+    """Fetch a URL, return (clean_text, final_url_after_redirects). Empty string on failure."""
     try:
-        resp = requests.get(url, headers=SCRAPE_HEADERS, timeout=timeout, allow_redirects=True)
+        resp = requests.get(url, headers=_headers(), timeout=timeout, allow_redirects=True)
         resp.raise_for_status()
+        final_url = resp.url
         soup = BeautifulSoup(resp.text, "html.parser")
-        for tag in soup(["script","style","nav","footer","header","meta","link"]):
+        for tag in soup(["script", "style", "nav", "footer", "header", "meta", "link", "noscript"]):
             tag.decompose()
-        return soup.get_text(" ", strip=True)
+        return soup.get_text(" ", strip=True), final_url
     except Exception as exc:
         log.debug("Fetch failed %s: %s", url, exc)
-        return ""
+        return "", url
+
+
+def _count_company_references(text: str) -> int:
+    """
+    Count how many distinct company names are referenced on a page.
+    A high count suggests this is a directory / aggregator page.
+    """
+    # Look for patterns like "Ltd", "Limited", "PLC", "LLP" indicating company names
+    count = len(re.findall(r"\b(limited|ltd|plc|llp|inc|corp)\b", text, re.I))
+    return count
 
 
 def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> dict:
     """
-    Fetch homepage (and /about if homepage is sparse) and extract signals.
-    Returns a validation dict with:
-      fx_signals, b2b_signals, secondary_signals, negative_signals,
-      segment_signals_found, snippet, name_on_page, website_confidence,
-      pays_fx, is_b2b, text_length
+    Fetch homepage (and /about if sparse) and extract signals.
+    Includes quality gates:
+      - reject parked/placeholder pages
+      - reject multi-company directory pages
+      - check name coherence on the actual page content
+
+    Returns validation dict.
     """
     empty = {
         "fx_signals": [], "b2b_signals": [], "secondary_signals": [],
         "negative_signals": [], "segment_signals_found": [],
         "snippet": "", "name_on_page": False,
-        "website_confidence": "low", "pays_fx": False, "is_b2b": False,
-        "text_length": 0,
+        "website_confidence": "none", "pays_fx": False, "is_b2b": False,
+        "text_length": 0, "reject_reason": "",
     }
     if not url:
         return empty
 
-    text = _fetch_text(url)
+    text, final_url = _fetch_text(url)
 
-    # If homepage is sparse, also try /about
-    if len(text) < 400:
+    # If homepage is sparse, try /about
+    if len(text) < 300:
         parsed = urlparse(url)
         about_url = f"{parsed.scheme}://{parsed.netloc}/about"
-        about_text = _fetch_text(about_url)
+        about_text, _ = _fetch_text(about_url)
         text = text + " " + about_text
 
-    if not text.strip():
-        return empty
+    if len(text) < 100:
+        return {**empty, "reject_reason": "page too sparse / unreadable"}
 
     tlow = text.lower()
     snippet = re.sub(r"\s+", " ", text)[:800]
 
+    # ── Quality gate: parking / placeholder pages ───────────────────────────
+    parking_signals = [
+        "domain is for sale", "this domain is available", "buy this domain",
+        "parked by", "this site is coming soon", "under construction",
+        "website coming soon", "domain parking", "register this domain",
+        "404 not found", "page not found",
+    ]
+    if any(p in tlow for p in parking_signals):
+        return {**empty, "reject_reason": "parked or placeholder page"}
+
+    # ── Quality gate: multi-company directory / aggregator ──────────────────
+    company_ref_count = _count_company_references(text)
+    if company_ref_count > 15:
+        return {**empty, "reject_reason": f"appears to be a directory (company refs: {company_ref_count})"}
+
+    # ── Signal extraction ────────────────────────────────────────────────────
     fx_sigs  = sorted({s for s in FX_PAYMENT_SIGNALS if s in tlow})
     b2b_sigs = sorted({s for s in B2B_SIGNALS        if s in tlow})
     sec_sigs = sorted({s for s in SECONDARY_SIGNALS  if s in tlow})
     neg_sigs = sorted({s for s in NEGATIVE_SIGNALS   if s in tlow})
     seg_sigs = sorted({s for s in (segment_signals or []) if s.lower() in tlow})
 
-    # Check if company name tokens appear on their own page (reduces false positives)
+    # ── Name-on-page check ──────────────────────────────────────────────────
     words_on_page = set(re.findall(r"[a-z]+", tlow))
-    name_on_page  = len(name_tokens_set & words_on_page) >= max(1, len(name_tokens_set) * 0.5)
+    name_on_page  = bool(name_tokens_set) and (
+        len(name_tokens_set & words_on_page) >= max(1, len(name_tokens_set) * 0.5)
+    )
 
     pays_fx = len(fx_sigs) >= 1 or len(sec_sigs) >= 3
     is_b2b  = len(b2b_sigs) >= 1
 
-    # ── Website confidence ──
-    #   high:   FX signals found AND name tokens appear on site
-    #   medium: FX OR strong B2B signals (company is a trade business)
-    #   low:    only secondary signals
-    #   none:   no useful signals
+    # ── Website confidence ───────────────────────────────────────────────────
+    #   high:   FX/import signals found AND name tokens on page
+    #   medium: FX signals present (even without name match), OR strong B2B (3+)
+    #   low:    only secondary/B2B signals — some trade activity but weak evidence
+    #   none:   no positive signals
     if fx_sigs and name_on_page:
         confidence = "high"
-    elif fx_sigs or len(b2b_sigs) >= 2:
+    elif fx_sigs:
         confidence = "medium"
-    elif sec_sigs or b2b_sigs:
+    elif len(b2b_sigs) >= 3 and name_on_page:
+        confidence = "medium"
+    elif b2b_sigs or sec_sigs:
         confidence = "low"
     else:
         confidence = "none"
@@ -415,6 +806,7 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         "pays_fx":                pays_fx,
         "is_b2b":                 is_b2b,
         "text_length":            len(text),
+        "reject_reason":          "",
     }
 
 
@@ -464,40 +856,34 @@ def _ch_officers_api(cn: str) -> list:
     return [o for o in r.json().get("items", []) if not o.get("resigned_on")]
 
 
+def _format_officer(o: dict) -> dict:
+    name = o.get("name", "")
+    if "," in name:
+        parts = name.split(",", 1)
+        name = f"{parts[1].strip()} {parts[0].strip().title()}"
+    return {"name": name.strip(), "role": o.get("officer_role", "Director")}
+
+
 def _extract_director(officers: list) -> dict | None:
     priority = [
-        "finance-director","managing-director","chief-executive",
-        "chief-financial-officer","commercial-director","director","company-secretary",
+        "finance-director", "managing-director", "chief-executive",
+        "chief-financial-officer", "commercial-director", "director", "company-secretary",
     ]
     for role in priority:
         for o in officers:
-            if role in (o.get("officer_role","")).lower().replace(" ","-"):
+            if role in (o.get("officer_role", "")).lower().replace(" ", "-"):
                 return _format_officer(o)
     if officers:
         return _format_officer(officers[0])
     return None
 
 
-def _format_officer(o: dict) -> dict:
-    name = o.get("name","")
-    if "," in name:
-        parts = name.split(",", 1)
-        name = f"{parts[1].strip()} {parts[0].strip().title()}"
-    return {"name": name.strip(), "role": o.get("officer_role","Director")}
-
-
 def ch_validate(company_name: str, domain: str = None) -> dict | None:
     """
     Validate a company via Companies House.
-    Returns enriched dict or None if no confident match.
-
-    Matching strategy:
-      1. Search CH by company_name
-      2. Jaccard similarity ≥ 0.35 between search result name and our name
-      3. Fetch full profile + officers for best match
+    Fuzzy name match (Jaccard ≥ 0.35). Returns enriched dict or None.
     """
     if not COMPANIES_HOUSE_API_KEY:
-        log.debug("CH validation skipped — no API key")
         return None
 
     try:
@@ -509,63 +895,55 @@ def ch_validate(company_name: str, domain: str = None) -> dict | None:
     if not items:
         return None
 
-    # Find best name match
-    best_item = None
+    best_item  = None
     best_score = 0.0
     for item in items:
-        score = jaccard_similarity(company_name, item.get("title",""))
+        score = jaccard_similarity(company_name, item.get("title", ""))
         if score > best_score:
             best_score = score
-            best_item = item
+            best_item  = item
 
     if best_score < 0.35 or not best_item:
-        log.debug("CH name match too weak for %r (best=%.2f)", company_name, best_score)
+        log.debug("CH name match weak for %r (best=%.2f)", company_name, best_score)
         return None
 
-    cn = best_item.get("company_number","")
+    cn = best_item.get("company_number", "")
     if not cn:
         return None
 
-    # Fetch full profile
     try:
         profile = _ch_profile_api(cn)
     except Exception as exc:
         log.debug("CH profile failed %s: %s", cn, exc)
-        profile = None
+        return None
 
     if not profile:
         return None
 
-    status = (profile.get("company_status") or "").lower()
-    if status not in ("active", ""):
-        log.debug("Company %s is not active (%s)", cn, status)
-        # Still return but flag it
-        pass
-
-    sic_codes = [str(s) for s in profile.get("sic_codes", [])]
-    incorporated = profile.get("date_of_creation","")
-    address = profile.get("registered_office_address", {})
+    status      = (profile.get("company_status") or "").lower()
+    sic_codes   = [str(s) for s in profile.get("sic_codes", [])]
+    incorporated = profile.get("date_of_creation", "")
+    addr        = profile.get("registered_office_address", {})
     address_str = ", ".join(filter(None, [
-        address.get("address_line_1",""),
-        address.get("locality",""),
-        address.get("postal_code",""),
+        addr.get("address_line_1", ""),
+        addr.get("locality", ""),
+        addr.get("postal_code", ""),
     ]))
 
-    # Officers
     try:
-        officers = _ch_officers_api(cn)
+        officers  = _ch_officers_api(cn)
     except Exception:
-        officers = []
+        officers  = []
 
     director = _extract_director(officers)
 
     return {
         "company_number":    cn,
-        "company_name":      best_item.get("title",""),
+        "company_name":      best_item.get("title", ""),
         "company_status":    status,
         "sic_codes":         sic_codes,
         "incorporated":      incorporated,
-        "registered_address":address_str,
+        "registered_address": address_str,
         "director_name":     director["name"] if director else None,
         "director_role":     director["role"] if director else None,
         "ch_name_match":     round(best_score, 3),
@@ -573,82 +951,111 @@ def ch_validate(company_name: str, domain: str = None) -> dict | None:
     }
 
 
+# ── WEBSITE DISCOVERY FOR CH CANDIDATES ──────────────────────────────────────
+
+def _guess_website_for_ch(company_name: str, company_number: str) -> str | None:
+    """Try to find a website for a CH-discovered company via domain guessing."""
+    try:
+        # Import the existing website_finder
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from website_finder import find_website_guess
+        url, confidence, source = find_website_guess(company_name, company_number)
+        if url and confidence in ("high", "medium"):
+            return url
+    except Exception as exc:
+        log.debug("website_finder failed for %r: %s", company_name, exc)
+    return None
+
+
 # ── SCORING ───────────────────────────────────────────────────────────────────
 
 FX_SIC_PREFIXES = {
-    "46","47","10","11","12","13","14","15","16","17","18","19",
-    "20","21","22","23","24","25","26","27","28","29","30","31","32","33",
-    "49","50","51","52","53",
+    "46", "47",   # wholesale and retail trade
+    "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+    "20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+    "30", "31", "32", "33",  # manufacturing
+    "49", "50", "51", "52", "53",  # transport / logistics
 }
+
+EXPOSURE_LEVEL_BOOST = {"Very High": 20, "High": 12, "Medium": 6, "Low": 0}
+
 
 def _has_fx_sic(sic_codes: list) -> bool:
     for code in sic_codes:
-        clean = code.replace(" ","")
+        clean = code.replace(" ", "")
         for prefix in FX_SIC_PREFIXES:
             if clean.startswith(prefix):
                 return True
     return False
 
-EXPOSURE_LEVEL_BOOST = {"Very High": 20, "High": 12, "Medium": 6, "Low": 0}
 
-
-def score_web_lead(validation: dict, ch_data: dict | None, segment: dict, event: dict) -> tuple[int, str, list]:
+def score_web_lead(
+    validation: dict,
+    ch_data: dict | None,
+    segment: dict,
+    event: dict,
+) -> tuple[int, str, list]:
     """
-    Web-specific lead scoring.
-    Returns (score, priority, reasons).
+    Web-specific lead scoring with strict evidence gates.
+
+    HOT (≥80): must have direct FX/import/export/international evidence on website.
+    WARM (≥60): must have FX OR strong B2B + segment match.
+    QUEUE (≥40): some trade evidence but not conclusive.
+    SKIP (<40): no real evidence of FX exposure.
     """
     score   = 0
     reasons = []
-    fx_sigs  = validation.get("fx_signals", [])
+    fx_sigs  = validation.get("fx_signals",  [])
     b2b_sigs = validation.get("b2b_signals", [])
     sec_sigs = validation.get("secondary_signals", [])
     neg_sigs = validation.get("negative_signals", [])
     seg_sigs = validation.get("segment_signals_found", [])
     conf     = validation.get("website_confidence", "none")
 
-    # 1. Website confidence (+10 / +20 / +30)
+    # 1. Website confidence base score
     if conf == "high":
-        score += 30
-        reasons.append("Website verified — strong FX signal match with name on page (+30)")
+        score += 25
+        reasons.append("Strong FX signals on website, name confirmed (+25)")
     elif conf == "medium":
-        score += 20
-        reasons.append("Website shows FX/trade signals — medium confidence (+20)")
+        score += 15
+        reasons.append("FX/trade signals found on website (+15)")
     elif conf == "low":
-        score += 10
-        reasons.append("Website shows weak trade signals (+10)")
+        score += 8
+        reasons.append("Weak trade signals on website (+8)")
     else:
-        score -= 10
-        reasons.append("No useful website signals (−10)")
+        score -= 15
+        reasons.append("No useful website signals (−15)")
 
-    # 2. FX payment signals (+3 each, max 25)
+    # 2. FX payment signals (+4 each, max 28)
     if fx_sigs:
-        s = min(25, len(fx_sigs) * 3)
+        s = min(28, len(fx_sigs) * 4)
         score += s
-        reasons.append(f"Direct FX payment signals: {', '.join(fx_sigs[:3])} (+{s})")
+        reasons.append(f"Direct FX signals: {', '.join(fx_sigs[:3])} (+{s})")
 
-    # 3. B2B signals (+2 each, max 12)
+    # 3. B2B signals (+2 each, max 10) — only meaningful alongside FX evidence
     if b2b_sigs:
-        s = min(12, len(b2b_sigs) * 2)
+        s = min(10, len(b2b_sigs) * 2)
         score += s
         reasons.append(f"B2B/trade signals: {', '.join(b2b_sigs[:3])} (+{s})")
 
-    # 4. Secondary signals (+1 each, max 8)
+    # 4. Secondary signals (+1 each, max 6)
     if sec_sigs:
-        s = min(8, len(sec_sigs))
+        s = min(6, len(sec_sigs))
         score += s
-        reasons.append(f"International activity signals: {len(sec_sigs)} found (+{s})")
+        reasons.append(f"International activity signals ({len(sec_sigs)}) (+{s})")
 
-    # 5. Segment-specific signals (+4 each, max 12)
+    # 5. Segment-specific signals (+5 each, max 15)
     if seg_sigs:
-        s = min(12, len(seg_sigs) * 4)
+        s = min(15, len(seg_sigs) * 5)
         score += s
         reasons.append(f"Segment-specific signals: {', '.join(seg_sigs[:2])} (+{s})")
 
-    # 6. Negative signals (−5 each, floor at 0 for this component)
+    # 6. Negative signals (−5 each, removes up to all positive score from signals)
     if neg_sigs:
-        s = min(score, len(neg_sigs) * 5)
-        score -= s
-        reasons.append(f"⚠ Negative signals: {', '.join(neg_sigs[:2])} (−{s})")
+        penalty = min(score, len(neg_sigs) * 5)
+        score  -= penalty
+        reasons.append(f"⚠ Negative signals: {', '.join(neg_sigs[:2])} (−{penalty})")
 
     # 7. Exposure level boost (from segment)
     exp_level = segment.get("exposure_level", "")
@@ -657,34 +1064,70 @@ def score_web_lead(validation: dict, ch_data: dict | None, segment: dict, event:
         score += exp_boost
         reasons.append(f"Segment exposure: {exp_level} (+{exp_boost})")
 
-    # 8. Companies House validation
+    # 8. CH validation
     if ch_data:
-        status = ch_data.get("company_status","")
+        status = ch_data.get("company_status", "")
         if status == "active":
-            score += 15
-            reasons.append(f"Active on Companies House (+15)")
+            score += 12
+            reasons.append("Active on Companies House (+12)")
         else:
-            score += 5
-            reasons.append(f"Found on Companies House — status: {status} (+5)")
+            score += 4
+            reasons.append(f"Found on CH — status: {status} (+4)")
 
-        if _has_fx_sic(ch_data.get("sic_codes",[])):
+        if _has_fx_sic(ch_data.get("sic_codes", [])):
             score += 10
-            reasons.append(f"FX-relevant SIC code: {', '.join(ch_data.get('sic_codes',[])[:2])} (+10)")
+            reasons.append(f"FX-relevant SIC: {', '.join(ch_data.get('sic_codes',[])[:2])} (+10)")
 
         if ch_data.get("director_name"):
             score += 5
-            reasons.append(f"Director found: {ch_data['director_name']} (+5)")
+            reasons.append(f"Director: {ch_data['director_name']} (+5)")
+
+        if ch_data.get("ch_confidence") == "high":
+            score += 3
+            reasons.append("Strong CH name match (+3)")
     else:
-        score -= 5
-        reasons.append("Not validated on Companies House (−5)")
+        score -= 8
+        reasons.append("Not validated on CH (−8)")
 
     score = max(0, min(score, 100))
 
-    # Hard gate: no FX/B2B evidence at all → cap at SKIP
-    has_evidence = fx_sigs or len(b2b_sigs) >= 2 or len(sec_sigs) >= 3
-    if not has_evidence:
+    # ── Hard evidence gates ──────────────────────────────────────────────────
+
+    has_direct_fx  = bool(fx_sigs) or bool(seg_sigs)
+    has_intl       = bool(fx_sigs) or len(sec_sigs) >= 2 or bool(seg_sigs)
+    has_any_trade  = bool(fx_sigs) or len(b2b_sigs) >= 2 or len(sec_sigs) >= 2
+
+    # Gate 1: HOT requires direct FX/import/export/international evidence on website
+    # B2B-only without FX/international signals should never be HOT
+    if score >= 80 and not has_direct_fx:
+        score = 79
+        reasons.append("⚠ HOT capped → WARM: no direct FX/import signals on website")
+
+    # Gate 2: WARM requires at least some FX or international evidence
+    # B2B-only (no international signals) should be QUEUE at best
+    if score >= 60 and not has_intl:
+        score = 59
+        reasons.append("⚠ WARM capped → QUEUE: no FX/international signals, B2B-only")
+
+    # Gate 3: QUEUE minimum: some trade evidence required
+    if not has_any_trade:
         score = min(score, 39)
-        reasons.append("⚠ Insufficient trade evidence — capped at SKIP threshold")
+        reasons.append("⚠ Capped SKIP: no trade evidence (FX, B2B, or international)")
+
+    # Gate 4: low website confidence → cap at QUEUE (not WARM or HOT)
+    if conf == "low" and score >= 60:
+        score = 59
+        reasons.append("⚠ Capped QUEUE: low website confidence")
+
+    # Gate 5: website confidence none → SKIP
+    if conf == "none":
+        score = min(score, 35)
+        reasons.append("⚠ Capped SKIP: no useful website signals")
+
+    # Gate 6: negative signals dominate → cap at QUEUE
+    if neg_sigs and len(neg_sigs) >= len(fx_sigs) + 1:
+        score = min(score, 49)
+        reasons.append("⚠ Negative signals limit priority")
 
     if   score >= 80: priority = "HOT"
     elif score >= 60: priority = "WARM"
@@ -705,47 +1148,82 @@ def build_exposure_thesis(
     event: dict,
 ) -> str:
     """
-    Build a specific, evidence-backed exposure thesis for this company.
-    Uses segment template + website evidence rather than generic text.
+    Build a specific, evidence-backed exposure thesis.
+    Combines segment knowledge + website evidence + event linkage.
     """
     fx_sigs  = validation.get("fx_signals", [])
     b2b_sigs = validation.get("b2b_signals", [])
-    sec_sigs = validation.get("secondary_signals", [])
     seg_name = segment.get("segment_name", "")
     why_exposed = segment.get("why_financially_exposed", "")
     fx_logic    = segment.get("fx_payment_logic", "")
     margin_risk = segment.get("margin_risk", "")
+    event_headline = event.get("headline", event.get("title", ""))
+    sic_codes   = (ch_data or {}).get("sic_codes", [])
 
     parts = []
 
-    # Lead with segment thesis
-    if why_exposed:
-        parts.append(why_exposed)
-
-    # Add website evidence
+    # 1. Lead with what the website shows
     if fx_sigs:
         sample = fx_sigs[:2]
-        parts.append(f"Website signals confirm: {', '.join(sample)}.")
+        if "importer" in fx_sigs or "import" in " ".join(fx_sigs):
+            parts.append(f"Website identifies as an importer ({', '.join(sample)}).")
+        elif "exporter" in " ".join(fx_sigs) or "export" in " ".join(fx_sigs):
+            parts.append(f"Website identifies as an exporter ({', '.join(sample)}).")
+        else:
+            parts.append(f"Website shows: {', '.join(sample)}.")
     elif b2b_sigs:
-        parts.append(f"B2B trade signals found: {', '.join(b2b_sigs[:2])}.")
+        parts.append(f"B2B trade business ({', '.join(b2b_sigs[:2])}).")
 
-    # Add event linkage
-    event_headline = event.get("headline", event.get("title", ""))
-    if event_headline:
-        parts.append(f"This company is likely affected by: {event_headline}.")
-
-    # Add FX payment logic from segment
-    if fx_logic:
+    # 2. Add segment-specific exposure logic
+    if why_exposed:
+        parts.append(why_exposed)
+    elif fx_logic:
         parts.append(fx_logic)
 
-    # Add margin risk
+    # 3. Link to the event
+    if event_headline:
+        parts.append(f"Likely affected by: {event_headline}.")
+
+    # 4. Margin/timing risk
     if margin_risk:
         parts.append(f"Risk: {margin_risk}")
 
-    return " ".join(parts) if parts else f"{company_name} ({domain}) — identified as FX-exposed via web discovery."
+    # 5. Fallback if parts is very thin
+    if not parts or (len(parts) == 1 and not fx_sigs):
+        if seg_name:
+            parts.append(f"Identified as potential {seg_name} via web discovery.")
+
+    return " ".join(parts) if parts else (
+        f"{company_name} — identified via web search as a potential {seg_name or 'FX-exposed'} business."
+    )
 
 
 # ── LEAD CREATION ─────────────────────────────────────────────────────────────
+
+def _compute_exposure_confidence(validation: dict, segment: dict) -> str:
+    fx_sigs  = validation.get("fx_signals", [])
+    b2b_sigs = validation.get("b2b_signals", [])
+    sec_sigs = validation.get("secondary_signals", [])
+    wc       = validation.get("website_confidence", "none")
+    exp_lvl  = segment.get("exposure_level", "")
+    pays_fx  = validation.get("pays_fx", False)
+
+    ev = 0
+    if pays_fx:                        ev += 3
+    if len(fx_sigs) >= 2:              ev += 3
+    elif len(fx_sigs) == 1:            ev += 2
+    if len(b2b_sigs) >= 2:             ev += 1
+    if len(sec_sigs) >= 3:             ev += 1
+    if wc == "high":                   ev += 2
+    elif wc in ("medium","confirmed"): ev += 1
+    if exp_lvl == "Very High":         ev += 2
+    elif exp_lvl == "High":            ev += 1
+
+    if ev >= 7: return "high"
+    if ev >= 4: return "medium"
+    if ev >= 1: return "low"
+    return "none"
+
 
 def create_lead(
     url: str,
@@ -760,24 +1238,14 @@ def create_lead(
     priority: str,
     reasons: list,
 ) -> tuple[str, dict]:
-    """
-    Create a lead dict compatible with the existing leads.json format.
-    Returns (lead_id, lead_dict).
-    """
-    # Prefer CH-verified name, fall back to search title
     company_name = (ch_data or {}).get("company_name") or search_title or domain
-
-    # Derive a stable ID from domain + event_id
     lid = lead_id(domain, event_id)
 
     thesis = build_exposure_thesis(
         company_name, domain, validation, ch_data, segment, event
     )
 
-    seg_sigs = validation.get("segment_signals_found", [])
-
     lead = {
-        # ── Identity ──
         "company_name":       company_name,
         "company_number":     (ch_data or {}).get("company_number"),
         "company_status":     (ch_data or {}).get("company_status", "unknown"),
@@ -785,55 +1253,49 @@ def create_lead(
         "sic_codes":          (ch_data or {}).get("sic_codes", []),
         "incorporated":       (ch_data or {}).get("incorporated"),
         "registered_address": (ch_data or {}).get("registered_address"),
-        # ── Contact ──
         "director_name":      (ch_data or {}).get("director_name"),
         "director_role":      (ch_data or {}).get("director_role"),
-        # ── Website ──
         "website":            url,
         "website_domain":     domain,
         "website_confidence": validation.get("website_confidence", "low"),
         "website_source":     "ddg_search",
-        "website_snippet":    validation.get("snippet","")[:400],
-        # ── FX signals ──
+        "website_snippet":    validation.get("snippet", "")[:400],
         "fx_payment_signals": validation.get("fx_signals", []),
         "b2b_signals":        validation.get("b2b_signals", []),
         "secondary_signals":  validation.get("secondary_signals", []),
-        "segment_signals":    seg_sigs,
+        "segment_signals":    validation.get("segment_signals_found", []),
         "pays_fx_confirmed":  validation.get("pays_fx", False),
-        "signal_count":       (
-            len(validation.get("fx_signals",[]))
-            + len(validation.get("b2b_signals",[]))
-            + len(validation.get("secondary_signals",[]))
+        "signal_count": (
+            len(validation.get("fx_signals", []))
+            + len(validation.get("b2b_signals", []))
+            + len(validation.get("secondary_signals", []))
         ),
-        # ── Scoring ──
         "score":              score,
         "priority":           priority,
         "scoring_reasons":    reasons,
-        # ── Exposure ──
         "event_id":           event_id,
-        "event_headline":     event.get("headline", event.get("title","")),
-        "segment_name":       segment.get("segment_name",""),
-        "segment_business_model": segment.get("business_model",""),
-        "exposure_level":     segment.get("exposure_level",""),
-        "exposure_type":      segment.get("exposure_type",""),
-        "exposure_confidence":_compute_exposure_confidence(validation, segment),
+        "event_headline":     event.get("headline", event.get("title", "")),
+        "segment_name":       segment.get("segment_name", ""),
+        "segment_business_model": segment.get("business_model", ""),
+        "exposure_level":     segment.get("exposure_level", ""),
+        "exposure_type":      segment.get("exposure_type", ""),
+        "exposure_confidence": _compute_exposure_confidence(validation, segment),
         "why_affected":       thesis,
-        "why_financially_exposed": segment.get("why_financially_exposed",""),
-        "fx_payment_logic":   segment.get("fx_payment_logic",""),
-        "margin_risk":        segment.get("margin_risk",""),
-        "payment_timing_risk":segment.get("payment_timing_risk",""),
-        "affected_payment_flow":segment.get("affected_payment_flow",""),
-        "business_impact_summary":event.get("business_impact_summary",""),
-        "trigger_headline":   event.get("trigger_headline",""),
-        # ── Validation ──
+        "why_financially_exposed": segment.get("why_financially_exposed", ""),
+        "fx_payment_logic":   segment.get("fx_payment_logic", ""),
+        "margin_risk":        segment.get("margin_risk", ""),
+        "payment_timing_risk": segment.get("payment_timing_risk", ""),
+        "affected_payment_flow": segment.get("affected_payment_flow", ""),
+        "business_impact_summary": event.get("business_impact_summary", ""),
+        "trigger_headline":   event.get("trigger_headline", ""),
         "ch_name_match":      (ch_data or {}).get("ch_name_match"),
         "ch_confidence":      (ch_data or {}).get("ch_confidence"),
-        # ── Metadata ──
         "discovered_at":      now_iso(),
         "rescored_at":        now_iso(),
-        "multi_event_trigger":False,
+        "multi_event_trigger": False,
         "multi_event_count":  1,
-        "guessed_emails":     [],   # populated by rescore.py
+        "linked_event_ids":   [event_id],
+        "guessed_emails":     [],
         "linkedin_url":       None,
         "call_opener":        None,
         "email_draft":        None,
@@ -843,168 +1305,181 @@ def create_lead(
     return lid, lead
 
 
-def _compute_exposure_confidence(validation: dict, segment: dict) -> str:
-    """Derive exposure_confidence from website evidence + segment."""
-    fx_sigs  = validation.get("fx_signals", [])
-    b2b_sigs = validation.get("b2b_signals", [])
-    sec_sigs = validation.get("secondary_signals", [])
-    wc       = validation.get("website_confidence","none")
-    exp_lvl  = segment.get("exposure_level","")
-    pays_fx  = validation.get("pays_fx", False)
-
-    evidence = 0
-    if pays_fx:                          evidence += 3
-    if len(fx_sigs) >= 2:                evidence += 3
-    elif len(fx_sigs) == 1:              evidence += 2
-    if len(b2b_sigs) >= 2:               evidence += 1
-    if len(sec_sigs) >= 3:               evidence += 1
-    if wc == "high":                     evidence += 2
-    elif wc in ("medium","confirmed"):   evidence += 1
-    if exp_lvl == "Very High":           evidence += 2
-    elif exp_lvl == "High":              evidence += 1
-
-    if evidence >= 7: return "high"
-    if evidence >= 4: return "medium"
-    if evidence >= 1: return "low"
-    return "none"
-
-
 # ── EVENT PROCESSING ──────────────────────────────────────────────────────────
 
 def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
     """
-    Process one event: for each segment, run DDG search queries, validate results,
-    score and add to leads. Returns count of new leads added.
+    Process one event: search → validate → CH → score → add to leads.
     """
-    added   = 0
+    added    = 0
     segments = event.get("target_segments", [])[:WEB_MAX_SEGMENTS_PER_EVENT]
 
     if not segments:
-        log.info("  No target segments — skipping")
+        log.info("  No target segments — skipping event")
         return 0
 
-    # Build index of domains and company numbers already in leads
-    domain_index = {}
-    cn_index     = {}
+    # Build domain + company_number indices for dedup
+    domain_index: dict[str, str] = {}  # domain → lead_id
+    cn_index:     dict[str, list] = {}  # company_number → [lead_ids]
     for lid, lead in leads.items():
-        d = lead.get("website_domain") or domain_from_url(lead.get("website",""))
+        d  = lead.get("website_domain") or domain_from_url(lead.get("website", ""))
+        cn = lead.get("company_number")
         if d:
             domain_index[d] = lid
-        cn = lead.get("company_number")
         if cn:
-            if cn not in cn_index:
-                cn_index[cn] = []
-            cn_index[cn].append(lid)
+            cn_index.setdefault(cn, []).append(lid)
 
-    seen_domains_this_event: set = set()
+    seen_this_event: set = set()
 
     for seg in segments:
-        seg_name = seg.get("segment_name","(unnamed)")
-        queries  = seg.get("high_intent_search_queries", [])[:WEB_MAX_QUERIES_PER_SEGMENT]
+        seg_name    = seg.get("segment_name", "(unnamed)")
+        queries     = seg.get("high_intent_search_queries", [])[:WEB_MAX_QUERIES_PER_SEGMENT]
         seg_signals = seg.get("segment_signals", [])
 
         if not queries:
-            log.info("    Segment %r — no search queries", seg_name[:40])
             continue
 
-        log.info("    Segment: %s (%d queries)", seg_name[:50], len(queries))
+        log.info("    Segment: %s (%d queries)", seg_name[:55], len(queries))
 
         for query in queries:
-            log.info("      Query: %s", query[:70])
+            log.info("      Query: %s", query[:72])
             stats["queries_run"] += 1
 
+            # ── Primary: DDG search ─────────────────────────────────────────
             results = ddg_search(query, n=WEB_MAX_RESULTS_PER_QUERY)
-            time.sleep(WEB_REQUEST_DELAY)
+            ddg_delay = WEB_REQUEST_DELAY + random.uniform(0, 1.5)
+            time.sleep(ddg_delay)
+
+            # ── Fallback: CH keyword search when DDG yields nothing ─────────
+            if not results:
+                log.debug("      DDG empty → CH keyword fallback for %r", query)
+                ch_results = ch_keyword_search(query, max_results=WEB_MAX_RESULTS_PER_QUERY)
+                if ch_results:
+                    # For CH candidates without URLs, try domain guessing
+                    for r in ch_results:
+                        if not r.get("url"):
+                            url = _guess_website_for_ch(r["title"], r.get("ch_number",""))
+                            r["url"] = url
+                    # Only keep CH results that have a URL to visit
+                    results = [r for r in ch_results if r.get("url")]
+                    log.debug("      CH fallback → %d candidates with URLs", len(results))
+                    stats["ch_fallback_used"] = stats.get("ch_fallback_used", 0) + 1
+
+            if not results:
+                log.debug("      No results for query — skipping")
+                stats["queries_no_results"] = stats.get("queries_no_results", 0) + 1
+                continue
 
             for result in results:
-                url   = result["url"]
-                title = result.get("title","")
-                domain = domain_from_url(url)
+                url    = result.get("url", "")
+                title  = result.get("title", "")
+                domain = domain_from_url(url) if url else None
 
-                if not domain:
-                    stats["rejected_no_domain"] += 1
+                if not url or not domain:
+                    stats["rejected_no_domain"] = stats.get("rejected_no_domain",0)+1
                     continue
 
-                # Skip if we've already seen this domain for this event
-                if domain in seen_domains_this_event:
-                    stats["rejected_duplicate"] += 1
+                # Dedup by domain within this event
+                if domain in seen_this_event:
+                    stats["rejected_duplicate"] = stats.get("rejected_duplicate",0)+1
                     continue
 
-                # Skip if already a known lead for this event (same domain + event)
+                # Dedup by domain across all leads for THIS event
                 existing_lid = domain_index.get(domain)
                 if existing_lid and leads[existing_lid].get("event_id") == event_id:
-                    stats["rejected_duplicate"] += 1
-                    seen_domains_this_event.add(domain)
+                    stats["rejected_duplicate"] = stats.get("rejected_duplicate",0)+1
+                    seen_this_event.add(domain)
                     continue
 
-                seen_domains_this_event.add(domain)
+                seen_this_event.add(domain)
 
-                # ── Validate website ──
-                log.debug("      Validating %s", url)
+                # Domain–name coherence check
+                if not domain_coherent_with_name(domain, title):
+                    log.debug("      Skip: domain %s incoherent with %r", domain, title[:40])
+                    stats["rejected_incoherent"] = stats.get("rejected_incoherent",0)+1
+                    continue
+
+                # ── Validate website ────────────────────────────────────────
                 name_tok = name_tokens(title)
                 val = validate_website(url, name_tok, seg_signals)
-                time.sleep(WEB_REQUEST_DELAY * 0.4)  # shorter delay for secondary fetches
+                time.sleep(WEB_REQUEST_DELAY * 0.3 + random.uniform(0, 0.5))
+
+                if val.get("reject_reason"):
+                    log.debug("      Rejected (%s): %s", val["reject_reason"], url[:60])
+                    stats["rejected_validation"] = stats.get("rejected_validation",0)+1
+                    continue
 
                 # Reject if negative signals dominate
                 neg = val.get("negative_signals", [])
                 fx  = val.get("fx_signals", [])
                 b2b = val.get("b2b_signals", [])
-                if len(neg) > len(fx) + len(b2b):
-                    log.debug("        Rejected (negative signals): %s", url)
-                    stats["rejected_negative"] += 1
+                if len(neg) > max(len(fx), len(b2b)):
+                    log.debug("      Rejected (negatives dominate): %s", url[:60])
+                    stats["rejected_negative"] = stats.get("rejected_negative",0)+1
                     continue
 
-                # Reject if no signals at all
+                # Reject if zero positive signals
                 if not fx and not b2b and len(val.get("secondary_signals",[])) < 2:
-                    log.debug("        Rejected (no signals): %s", url)
-                    stats["rejected_no_signals"] += 1
+                    log.debug("      Rejected (no signals): %s", url[:60])
+                    stats["rejected_no_signals"] = stats.get("rejected_no_signals",0)+1
                     continue
 
                 conf = val.get("website_confidence","none")
-                stats[f"confidence_{conf}"] = stats.get(f"confidence_{conf}", 0) + 1
+                stats[f"conf_{conf}"] = stats.get(f"conf_{conf}",0)+1
 
-                # ── Companies House validation ──
+                # ── CH validation ───────────────────────────────────────────
                 ch_data = None
-                if conf in ("high","medium"):
-                    log.debug("        CH validate: %s", title[:50])
+                already_known_cn = False  # flag: this company already has a lead
+                if conf in ("high","medium") and COMPANIES_HOUSE_API_KEY:
                     ch_data = ch_validate(title, domain)
-                    time.sleep(WEB_REQUEST_DELAY * 0.6)
+                    time.sleep(WEB_REQUEST_DELAY * 0.4 + random.uniform(0, 0.3))
 
-                    # If we have a CH company number, check if already in leads for another event
-                    # (multi-event trigger — boost existing lead rather than duplicate)
+                    # Multi-event trigger: same company_number already exists
                     if ch_data and ch_data.get("company_number"):
                         cn = ch_data["company_number"]
                         if cn in cn_index:
-                            # Update existing leads with multi-event flag
-                            for existing_lid in cn_index[cn]:
-                                existing_lead = leads[existing_lid]
-                                if existing_lead.get("event_id") != event_id:
-                                    prev_count = existing_lead.get("multi_event_count", 1)
-                                    existing_lead["multi_event_trigger"] = True
-                                    existing_lead["multi_event_count"]   = prev_count + 1
-                                    boost = min(8, prev_count * 4)
-                                    existing_lead["score"] = min(100, existing_lead.get("score",0) + boost)
-                                    old_s = existing_lead["score"]
-                                    existing_lead["scoring_reasons"].append(
-                                        f"Multi-event trigger: also exposed via '{event.get('headline','')}' (+{boost})"
+                            already_known_cn = True
+                            for elid in cn_index[cn]:
+                                el = leads[elid]
+                                if event_id not in el.get("linked_event_ids",
+                                                          [el.get("event_id","")]):
+                                    prev  = el.get("multi_event_count", 1)
+                                    boost = min(8, prev * 4)
+                                    el["multi_event_trigger"] = True
+                                    el["multi_event_count"]   = prev + 1
+                                    el.setdefault("linked_event_ids",
+                                                  [el.get("event_id","")]).append(event_id)
+                                    el["score"] = min(100, el.get("score",0) + boost)
+                                    el["scoring_reasons"].append(
+                                        f"Multi-event: also exposed via "
+                                        f"'{event.get('headline','')}' (+{boost})"
                                     )
-                                    s = existing_lead["score"]
-                                    existing_lead["priority"] = (
-                                        "HOT" if s>=80 else "WARM" if s>=60 else "QUEUE" if s>=40 else "SKIP"
+                                    s = el["score"]
+                                    el["priority"] = (
+                                        "HOT" if s>=80 else "WARM" if s>=60
+                                        else "QUEUE" if s>=40 else "SKIP"
                                     )
-                                    log.info("        ↑ Multi-event boost for %s (+%d)",
-                                             existing_lead.get("company_name","")[:40], boost)
-                                    stats["multi_event_updates"] = stats.get("multi_event_updates",0) + 1
+                                    log.info("        ↑ Multi-event +%d: %s",
+                                             boost, el.get("company_name","")[:35])
+                                    stats["multi_event_updates"] = (
+                                        stats.get("multi_event_updates",0)+1)
 
-                # ── Score ──
+                # If company is already known (same CN, different event), don't
+                # create a duplicate lead — the multi-event boost is enough.
+                if already_known_cn:
+                    log.debug("      Skipping duplicate CN (multi-event updated): %s", title[:40])
+                    stats["rejected_duplicate"] = stats.get("rejected_duplicate",0)+1
+                    continue
+
+                # ── Score ───────────────────────────────────────────────────
                 s, priority, reasons = score_web_lead(val, ch_data, seg, event)
 
                 if priority == "SKIP":
-                    log.debug("        Scored SKIP (%d) — not adding: %s", s, url)
-                    stats["rejected_low_score"] += 1
+                    log.debug("      SKIP (%d): %s", s, url[:60])
+                    stats["rejected_low_score"] = stats.get("rejected_low_score",0)+1
                     continue
 
-                # ── Create lead ──
+                # ── Create lead ─────────────────────────────────────────────
                 lid, lead = create_lead(
                     url=url, domain=domain, search_title=title,
                     validation=val, ch_data=ch_data,
@@ -1012,18 +1487,16 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                     score=s, priority=priority, reasons=reasons,
                 )
 
-                # Update domain/cn indices
                 domain_index[domain] = lid
                 if ch_data and ch_data.get("company_number"):
-                    cn = ch_data["company_number"]
-                    cn_index.setdefault(cn,[]).append(lid)
+                    cn_index.setdefault(ch_data["company_number"],[]).append(lid)
 
                 leads[lid] = lead
                 added += 1
 
-                stats[f"priority_{priority}"] = stats.get(f"priority_{priority}",0) + 1
+                stats[f"p_{priority}"] = stats.get(f"p_{priority}",0)+1
                 log.info("        ✓ [%s %d] %s — %s", priority, s,
-                         lead["company_name"][:40], domain)
+                         lead["company_name"][:38], domain)
 
     return added
 
@@ -1031,52 +1504,48 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
 # ── QUALITY SUMMARY ───────────────────────────────────────────────────────────
 
 def print_quality_summary(stats: dict, leads: dict):
-    """Log a quality summary table after web discovery."""
-    total = stats.get("urls_visited", 0)
-    added = stats.get("leads_added", 0)
+    web_leads = [(lid, v) for lid, v in leads.items()
+                 if v.get("company_source") == "web_search"]
 
     log.info("")
     log.info("══════════════════════════════════════════")
     log.info("  Web Discovery Quality Summary")
     log.info("══════════════════════════════════════════")
-    log.info("  Queries run:          %d", stats.get("queries_run",0))
-    log.info("  URLs visited:         %d", total)
-    log.info("  Rejected (duplicate): %d", stats.get("rejected_duplicate",0))
-    log.info("  Rejected (negative):  %d", stats.get("rejected_negative",0))
-    log.info("  Rejected (no signal): %d", stats.get("rejected_no_signals",0))
-    log.info("  Rejected (low score): %d", stats.get("rejected_low_score",0))
-    log.info("  Multi-event updates:  %d", stats.get("multi_event_updates",0))
-    log.info("  ──────────────────────────────────────")
-    log.info("  Confidence — high:   %d", stats.get("confidence_high",0))
-    log.info("  Confidence — medium: %d", stats.get("confidence_medium",0))
-    log.info("  Confidence — low:    %d", stats.get("confidence_low",0))
-    log.info("  ──────────────────────────────────────")
-    log.info("  HOT leads added:  %d", stats.get("priority_HOT",0))
-    log.info("  WARM leads added: %d", stats.get("priority_WARM",0))
-    log.info("  QUEUE leads added:%d", stats.get("priority_QUEUE",0))
-    log.info("  Total leads added: %d", added)
+    log.info("  Queries run:             %d", stats.get("queries_run",0))
+    log.info("  Queries with no results: %d", stats.get("queries_no_results",0))
+    log.info("  CH fallback used:        %d", stats.get("ch_fallback_used",0))
+    log.info("  ────────────────────────────────────────")
+    log.info("  Rejected (duplicate):   %d", stats.get("rejected_duplicate",0))
+    log.info("  Rejected (incoherent):  %d", stats.get("rejected_incoherent",0))
+    log.info("  Rejected (validation):  %d", stats.get("rejected_validation",0))
+    log.info("  Rejected (negative):    %d", stats.get("rejected_negative",0))
+    log.info("  Rejected (no signal):   %d", stats.get("rejected_no_signals",0))
+    log.info("  Rejected (low score):   %d", stats.get("rejected_low_score",0))
+    log.info("  Multi-event updates:    %d", stats.get("multi_event_updates",0))
+    log.info("  ────────────────────────────────────────")
+    log.info("  Confidence — high:      %d", stats.get("conf_high",0))
+    log.info("  Confidence — medium:    %d", stats.get("conf_medium",0))
+    log.info("  Confidence — low:       %d", stats.get("conf_low",0))
+    log.info("  ────────────────────────────────────────")
+    log.info("  HOT added:   %d", stats.get("p_HOT",0))
+    log.info("  WARM added:  %d", stats.get("p_WARM",0))
+    log.info("  QUEUE added: %d", stats.get("p_QUEUE",0))
+    log.info("  Total web leads: %d", stats.get("leads_added",0))
     log.info("══════════════════════════════════════════")
 
-    # Top 10 web leads by score
-    web_leads = sorted(
-        [(lid, v) for lid, v in leads.items() if v.get("company_source") == "web_search"],
-        key=lambda x: x[1].get("score",0),
-        reverse=True,
-    )[:10]
-
-    if web_leads:
-        log.info("")
-        log.info("  Top web leads:")
-        for lid, lead in web_leads:
-            log.info("    [%s %d] %s — %s",
-                     lead.get("priority","?"),
-                     lead.get("score",0),
-                     lead.get("company_name","")[:35],
-                     lead.get("website_domain",""))
+    top = sorted(web_leads, key=lambda x: -x[1].get("score",0))[:10]
+    if top:
+        log.info("  Top web leads by score:")
+        for lid, l in top:
+            fx_n = len(l.get("fx_payment_signals",[]))
+            log.info("    [%s %d] %s — %s  (FX:%d, CH:%s)",
+                     l.get("priority","?"), l.get("score",0),
+                     l.get("company_name","")[:32], l.get("website_domain",""),
+                     fx_n, "✓" if l.get("company_number") else "—")
     log.info("")
 
 
-# ── MAIN ─────────────────────────────────────────────────────────────────────
+# ── MAIN ──────────────────────────────────────────────────────────────────────
 
 def main():
     if not WEB_DISCOVERY_ENABLED:
@@ -1084,14 +1553,13 @@ def main():
         return
 
     if not COMPANIES_HOUSE_API_KEY:
-        log.warning("COMPANIES_HOUSE_API_KEY not set — CH validation will be skipped")
+        log.warning("COMPANIES_HOUSE_API_KEY not set — CH validation skipped")
 
     log.info("=== Web-First Discovery ===")
-    log.info("Config: max_events=%d  max_segments=%d  max_queries=%d  max_results=%d  delay=%.1fs",
+    log.info("Config: events=%d  segs=%d  queries=%d  results=%d  delay=%.1fs",
              WEB_MAX_EVENTS, WEB_MAX_SEGMENTS_PER_EVENT,
              WEB_MAX_QUERIES_PER_SEGMENT, WEB_MAX_RESULTS_PER_QUERY, WEB_REQUEST_DELAY)
 
-    # Load data
     events = json.loads(EVENTS_FILE.read_text()) if EVENTS_FILE.exists() else {}
     leads  = json.loads(LEADS_FILE.read_text())  if LEADS_FILE.exists()  else {}
 
@@ -1099,52 +1567,35 @@ def main():
         log.warning("No events found in %s", EVENTS_FILE)
         return
 
-    # Select events to process — prefer those not yet web-discovered,
-    # fall back to all events up to WEB_MAX_EVENTS
-    ready_events = {
-        eid: ev for eid, ev in events.items()
-        if ev.get("target_segments") and not ev.get("web_discovery_done")
-    }
-    if not ready_events:
-        # Re-process all events if all already done
-        ready_events = {
-            eid: ev for eid, ev in events.items()
-            if ev.get("target_segments")
-        }
+    # Select events that have segments and haven't been web-discovered yet
+    ready = {eid: ev for eid, ev in events.items()
+             if ev.get("target_segments") and not ev.get("web_discovery_done")}
+    if not ready:
+        # Re-process all events if all are already done
+        ready = {eid: ev for eid, ev in events.items() if ev.get("target_segments")}
 
-    ready_events = dict(list(ready_events.items())[:WEB_MAX_EVENTS])
-    log.info("Events to process: %d / %d", len(ready_events), len(events))
+    ready = dict(list(ready.items())[:WEB_MAX_EVENTS])
+    log.info("Events to process: %d / %d", len(ready), len(events))
 
-    stats = {
-        "queries_run": 0,
-        "urls_visited": 0,
-        "rejected_duplicate": 0,
-        "rejected_negative": 0,
-        "rejected_no_signals": 0,
-        "rejected_no_domain": 0,
-        "rejected_low_score": 0,
-        "leads_added": 0,
-    }
+    stats = {"queries_run": 0, "leads_added": 0}
 
-    for event_id, event in ready_events.items():
-        headline = event.get("headline", event.get("title",""))[:60]
+    for event_id, event in ready.items():
+        headline = event.get("headline", event.get("title", ""))[:65]
         log.info("")
         log.info("── Event: %s", headline)
 
-        new_count = process_event(event, event_id, leads, stats)
-        stats["leads_added"] += new_count
+        n = process_event(event, event_id, leads, stats)
+        stats["leads_added"] += n
 
-        # Mark as web-discovered so we don't re-run unless forced
         events[event_id]["web_discovery_done"] = True
         events[event_id]["web_discovery_at"]   = now_iso()
 
-        log.info("  Event complete — %d leads added", new_count)
+        log.info("  └─ %d leads added", n)
 
-        # Save incrementally after each event
+        # Incremental save
         LEADS_FILE.write_text(json.dumps(leads, indent=2, default=str))
         EVENTS_FILE.write_text(json.dumps(events, indent=2, default=str))
 
-    # Final save + sync to public/data/
     LEADS_FILE.write_text(json.dumps(leads, indent=2, default=str))
     EVENTS_FILE.write_text(json.dumps(events, indent=2, default=str))
 
@@ -1153,8 +1604,7 @@ def main():
     (public / "leads.json").write_text(LEADS_FILE.read_text())
 
     print_quality_summary(stats, leads)
-    log.info("=== Web discovery complete — %d leads added, %d total in pipeline ===",
-             stats["leads_added"], len(leads))
+    log.info("=== Done — %d leads added, %d total ===", stats["leads_added"], len(leads))
 
 
 if __name__ == "__main__":

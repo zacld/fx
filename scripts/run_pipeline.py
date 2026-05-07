@@ -16,12 +16,13 @@ PUBLIC  = ROOT / "public" / "data"
 
 PIPELINE = [
     ("ingest.py",           "Event Radar — pulling live market events"),
-    ("discover_web.py",     "Web Discovery — web-first company search (set WEB_DISCOVERY_ENABLED=false to skip)"),
+    ("discover_web.py",     "Web Discovery — web-first company search (WEB_DISCOVERY_ENABLED controls this)"),
     ("discover.py",         "Company Discovery — Companies House search (complementary)"),
     ("enrich_websites.py",  "Website Enrichment — domain guessing for CH-discovered companies"),
     ("rescore.py",          "Score Enrichment — ranking leads"),
     ("linkedin_assist.py",  "LinkedIn Assist — generating search links"),
     ("outreach.py",         "Outreach Generator — drafting messages"),
+    ("qa_report.py",        "QA Report — pipeline quality summary"),
 ]
 
 def run_script(script, description):
