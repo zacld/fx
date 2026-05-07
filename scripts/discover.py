@@ -1,19 +1,21 @@
 """
 FX Discovery — discover.py
 
-Company Discovery: uses exposure-ranked target segments from the Exposure Mapper
-to find companies via Companies House, enrich them, score them by exposure intensity.
+Company Discovery: uses exposure-ranked target segments to find companies via
+Companies House, enrich them with website data, and score by FX exposure intensity.
 
-The scoring now prioritises financial exposure depth, not keyword similarity.
+Discovery flow (current):
+  Companies House search → company profile + directors → website discovery → score
 
-New scoring model:
-- Exposure thesis match: does the company match the target segment's ideal profile?
-- Direct FX signals: website language confirming import/export/overseas payments
-- FX SIC codes: trade, manufacturing, logistics, wholesale
-- Segment exposure level: Very High segments get score boost
-- Event urgency
-- Contact route availability
-- Company activity and establishment
+Intended future flow (architecture prepared, see discover_web.py stub):
+  High-intent web/directory search → company website → CH validation → score
+
+Each lead includes confidence metadata:
+  - company_source: where the company was found ("companies_house" currently)
+  - website_confidence: high / medium / low / confirmed / none
+  - website_source: domain_guess / ddg_search / companies_house / manual
+  - exposure_confidence: high / medium / low / none (derived from evidence)
+  - signal_count: total FX + secondary signal count
 """
 
 import os, re, json, time, hashlib, logging, sys
@@ -346,6 +348,29 @@ def score_lead(item, profile, event, web, sic_codes, segment=None):
 
     return {"score": score, "priority": priority, "reasons": reasons}
 
+def compute_exposure_confidence(exposure_level, website_confidence, fx_signals, secondary_signals, pays_fx):
+    """
+    Derive exposure_confidence from available evidence.
+    This is about HOW CERTAIN WE ARE that this company IS FX-exposed,
+    not about website quality alone.
+    """
+    evidence = 0
+    if pays_fx:                                        evidence += 3
+    if len(fx_signals) >= 2:                           evidence += 3
+    elif len(fx_signals) == 1:                         evidence += 2
+    if len(secondary_signals) >= 3:                    evidence += 1
+    if website_confidence in ("high",):                evidence += 2
+    elif website_confidence in ("medium","confirmed"):  evidence += 1
+    elif website_confidence == "low":                   evidence += 0
+    if exposure_level == "Very High":                  evidence += 2
+    elif exposure_level == "High":                     evidence += 1
+
+    if evidence >= 7: return "high"
+    if evidence >= 4: return "medium"
+    if evidence >= 1: return "low"
+    return "none"
+
+
 def build_exposure_thesis(company_name, event, web, segment, sic_codes):
     """
     Build a plain-English exposure thesis explaining WHY this specific company
@@ -480,6 +505,17 @@ def process_event(event, leads):
                         item.get("title","the company"), event, web, segment, sic_codes
                     )
 
+                    fx_sigs   = web.get("fx_signals",[])
+                    sec_sigs  = web.get("secondary_signals",[])
+                    pays_fx   = web.get("pays_fx", False)
+                    exp_conf  = compute_exposure_confidence(
+                        (segment or {}).get("exposure_level",""),
+                        website_confidence,
+                        fx_sigs,
+                        sec_sigs,
+                        pays_fx,
+                    )
+
                     lead = {
                         "id":                    lid,
                         "event_id":              event["id"],
@@ -495,16 +531,28 @@ def process_event(event, leads):
                         "director_name":         director["name"] if director else None,
                         "director_role":         director["role"] if director else None,
 
+                        # Source confidence metadata
+                        "company_source":        "companies_house",
+                        "website_confidence":    website_confidence,
+                        "website_source":        website_source,
+                        "exposure_confidence":   exp_conf,
+                        "signal_count":          len(fx_sigs) + len(sec_sigs),
+
                         # Segment context from Exposure Mapper
                         "segment_name":          (segment or {}).get("segment_name",""),
                         "segment_business_model":(segment or {}).get("business_model",""),
                         "exposure_level":        (segment or {}).get("exposure_level",""),
                         "exposure_type":         (segment or {}).get("exposure_type",""),
                         "why_affected":          (segment or {}).get("why_affected",""),
+                        "why_financially_exposed":(segment or {}).get("why_financially_exposed",""),
+                        "margin_risk":           (segment or {}).get("margin_risk") or event.get("margin_risk",""),
+                        "payment_timing_risk":   (segment or {}).get("payment_timing_risk") or event.get("payment_timing_risk",""),
+                        "affected_payment_flow": (segment or {}).get("affected_payment_flow") or event.get("affected_payment_flow",""),
 
                         # Event context
                         "trigger_headline":      event["headline"],
                         "event_type":            event.get("event_type",""),
+                        "business_impact_summary": event.get("business_impact_summary",""),
                         "fx_exposure":           ", ".join(
                             (segment or {}).get("likely_currency_pairs") or event.get("currency_pairs",[])
                         ),
@@ -514,18 +562,17 @@ def process_event(event, leads):
                         "priority":              scoring["priority"],
                         "scoring_reasons":       scoring["reasons"],
 
-                        # THE KEY NEW FIELD
+                        # Exposure thesis — hero field
                         "exposure_thesis":       exposure_thesis,
                         "fx_reason":             build_fx_reason(event, web, segment, sic_codes),
-                        "fx_payment_logic":      event.get("fx_payment_logic",""),
+                        "fx_payment_logic":      (segment or {}).get("fx_payment_logic") or event.get("fx_payment_logic",""),
 
                         # Website evidence
-                        "website_confidence":    website_confidence,
-                        "website_source":        website_source,
-                        "fx_payment_signals":    web.get("fx_signals",[]),
+                        "fx_payment_signals":    fx_sigs,
                         "segment_signals":       web.get("segment_signals",[]),
-                        "secondary_signals":     web.get("secondary_signals",[]),
-                        "pays_fx_confirmed":     web.get("pays_fx", False),
+                        "secondary_signals":     sec_sigs,
+                        "pays_fx_confirmed":     pays_fx,
+                        "website_snippet":       web.get("snippet","")[:400] if web.get("snippet") else "",
 
                         # Sales context
                         "sales_angle":           (segment or {}).get("sales_angle") or event.get("sales_angle",""),

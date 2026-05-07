@@ -114,8 +114,12 @@ def main():
             lead["fx_payment_signals"] = web["fx_signals"]
             lead["secondary_signals"]  = web["secondary_signals"]
             lead["pays_fx_confirmed"]  = web["pays_fx"]
+            lead["signal_count"]       = len(web["fx_signals"]) + len(web["secondary_signals"])
+            # Ensure company_source is set
+            if not lead.get("company_source"):
+                lead["company_source"] = "companies_house"
             if web["snippet"] and not lead.get("website_snippet"):
-                lead["website_snippet"] = web["snippet"]
+                lead["website_snippet"] = web["snippet"][:400]
             updated += 1
 
             if web["fx_signals"]:

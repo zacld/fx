@@ -232,6 +232,38 @@ def rescore(lead, urgency_map):
     return score, priority, reasons
 
 
+def compute_exposure_confidence(lead):
+    """
+    Derive exposure_confidence from available evidence on the lead.
+    HIGH: strong FX signals on a verified website + high exposure level
+    MEDIUM: some evidence (FX signals OR verified website + segment match)
+    LOW: mostly inferred (SIC code, segment only)
+    NONE: no evidence at all
+    """
+    fx_sigs  = lead.get("fx_payment_signals", [])
+    sec_sigs = lead.get("secondary_signals", [])
+    seg_sigs = lead.get("segment_signals", [])
+    wc       = lead.get("website_confidence")
+    exp_lvl  = lead.get("exposure_level", "")
+    pays_fx  = lead.get("pays_fx_confirmed", False)
+
+    evidence = 0
+    if pays_fx:                             evidence += 3
+    if len(fx_sigs) >= 2:                   evidence += 3
+    elif len(fx_sigs) == 1:                 evidence += 2
+    if len(seg_sigs) >= 1:                  evidence += 2
+    if len(sec_sigs) >= 3:                  evidence += 1
+    if wc in ("high",):                     evidence += 2
+    elif wc in ("medium", "confirmed"):     evidence += 1
+    if exp_lvl == "Very High":              evidence += 2
+    elif exp_lvl == "High":                 evidence += 1
+
+    if evidence >= 7: return "high"
+    if evidence >= 4: return "medium"
+    if evidence >= 1: return "low"
+    return "none"
+
+
 def main():
     leads  = json.loads(LEADS_FILE.read_text())
     events = json.loads(EVENTS_FILE.read_text()) if EVENTS_FILE.exists() else {}
@@ -244,13 +276,18 @@ def main():
         old_priority = lead.get("priority", "QUEUE")
         new_score, new_priority, reasons = rescore(lead, urgency_map)
 
-        lead["score"]            = new_score
-        lead["priority"]         = new_priority
-        lead["scoring_reasons"]  = reasons
-        lead["rescored_at"]      = datetime.now(timezone.utc).isoformat()
-        lead["guessed_emails"]   = guess_emails(
+        lead["score"]             = new_score
+        lead["priority"]          = new_priority
+        lead["scoring_reasons"]   = reasons
+        lead["rescored_at"]       = datetime.now(timezone.utc).isoformat()
+        lead["exposure_confidence"] = compute_exposure_confidence(lead)
+        lead["signal_count"]      = len(lead.get("fx_payment_signals",[])) + len(lead.get("secondary_signals",[]))
+        lead["guessed_emails"]    = guess_emails(
             lead.get("director_name",""), lead.get("website","")
         )
+        # Ensure company_source is set for all leads
+        if not lead.get("company_source"):
+            lead["company_source"] = "companies_house"
 
         if new_priority != old_priority:
             log.info("  %s → %s  (score %d → %d)  %s",
@@ -262,7 +299,42 @@ def main():
         elif new_priority == "QUEUE": queue += 1
         else:                         skip  += 1
 
-    # Remove SKIPped leads (they were already below threshold)
+    # ── DEDUPLICATION PASS ───────────────────────────────────────────────
+    # Detect companies appearing for multiple events (stronger exposure signal).
+    # Same company_number found for 2+ events → multi_event_trigger = True → score boost.
+    # We keep all leads (different events = different reasons to call).
+    from collections import defaultdict
+
+    cn_groups = defaultdict(list)
+    for lid, lead in leads.items():
+        cn = lead.get("company_number")
+        if cn:
+            cn_groups[cn].append(lid)
+
+    multi_count = 0
+    for cn, lids in cn_groups.items():
+        if len(lids) > 1:
+            for lid in lids:
+                leads[lid]["multi_event_count"]   = len(lids)
+                leads[lid]["multi_event_trigger"]  = True
+                # Boost: +4 per additional event trigger (capped at +8)
+                boost = min(8, (len(lids) - 1) * 4)
+                old_s = leads[lid]["score"]
+                leads[lid]["score"] = min(100, old_s + boost)
+                leads[lid]["scoring_reasons"].append(
+                    f"Multi-event trigger: {len(lids)} separate events flag this company (+{boost})"
+                )
+                # Re-derive priority after boost
+                s = leads[lid]["score"]
+                leads[lid]["priority"] = (
+                    "HOT" if s >= 80 else "WARM" if s >= 60 else "QUEUE" if s >= 40 else "SKIP"
+                )
+            multi_count += 1
+
+    if multi_count:
+        log.info("Multi-event triggers: %d companies flagged by 2+ events", multi_count)
+
+    # Remove SKIPped leads (below threshold — not worth working)
     leads = {k:v for k,v in leads.items() if v.get("priority") != "SKIP"}
 
     LEADS_FILE.write_text(json.dumps(leads, indent=2, default=str))

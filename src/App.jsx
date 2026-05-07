@@ -30,10 +30,28 @@ const dateShort= new Date().toLocaleDateString("en-GB",{weekday:"short",day:"num
 function copy(text) { navigator.clipboard.writeText(text).catch(()=>{}); }
 
 // ─── CRM ───────────────────────────────────────────────────────────
-const CRM_KEY     = "fx_crm_state";
-const CRM_STATUSES= ["new","reviewed","contacted","saved","not_relevant"];
-const CRM_LABELS  = { new:"New", reviewed:"Reviewed", contacted:"Contacted", saved:"Saved", not_relevant:"Not relevant" };
-const CRM_COLORS  = { new:"#6366F1", reviewed:"#F59E0B", contacted:"#38BDF8", saved:"#10B981", not_relevant:"#475569" };
+const CRM_KEY      = "fx_crm_state";
+const CRM_STATUSES = ["new","reviewed","saved","contacted","follow_up","meeting_booked","passed_to_closer","not_relevant"];
+const CRM_LABELS   = {
+  new:             "New",
+  reviewed:        "Reviewed",
+  saved:           "Saved",
+  contacted:       "Contacted",
+  follow_up:       "Follow up",
+  meeting_booked:  "Meeting booked",
+  passed_to_closer:"Passed to closer",
+  not_relevant:    "Not relevant",
+};
+const CRM_COLORS   = {
+  new:             "#6366F1",
+  reviewed:        "#F59E0B",
+  saved:           "#10B981",
+  contacted:       "#38BDF8",
+  follow_up:       "#F97316",
+  meeting_booked:  "#10B981",
+  passed_to_closer:"#A855F7",
+  not_relevant:    "#475569",
+};
 
 function useCrmState() {
   const [state, setState] = useState(() => {
@@ -378,6 +396,18 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 `;
 
 // ─── HELPERS ──────────────────────────────────────────────────────
+function expConfLabel(conf) {
+  if (conf === "high")   return "🔍 Exposure: High confidence";
+  if (conf === "medium") return "🔍 Exposure: Medium confidence";
+  if (conf === "low")    return "🔍 Exposure: Low confidence";
+  return null;
+}
+function expConfClass(conf) {
+  if (conf === "high")   return "b b-site-high";
+  if (conf === "medium") return "b b-site-med";
+  return "b b-site-low";
+}
+
 function siteConfLabel(conf, source) {
   if (!conf) return null;
   const srcAbbr = source === "domain_guess" ? "domain"
@@ -509,33 +539,45 @@ function EmailPatterns({ emails }) {
 // ─── COMPANY CARD ────────────────────────────────────────────────
 function CompanyCard({ lead, crmStatus, onCrmSet }) {
   const [open, setOpen] = useState(false);
-  const color    = pri(lead.priority);
-  const initials = (lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
-  const li       = lead.linkedin_assist;
-  const fxSigs   = lead.fx_payment_signals || [];
-  const confBadge= siteConfLabel(lead.website_confidence, lead.website_source);
-  const confCls  = siteConfClass(lead.website_confidence);
+  const color       = pri(lead.priority);
+  const initials    = (lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
+  const li          = lead.linkedin_assist;
+  const fxSigs      = lead.fx_payment_signals || [];
+  const segSigs     = lead.segment_signals || [];
+  const confBadge   = siteConfLabel(lead.website_confidence, lead.website_source);
+  const confCls     = siteConfClass(lead.website_confidence);
+  const expConf     = lead.exposure_confidence;
+  const thesis      = lead.exposure_thesis || lead.fx_reason || "";
+  const isMultiEvt  = lead.multi_event_trigger;
+  const allSigs     = [...new Set([...fxSigs, ...segSigs])];
 
   return (
     <div className="cc" style={{"--pc":color}}>
       <div className="cc-top" onClick={()=>setOpen(o=>!o)}>
         <div>
-          <div className="cc-name">{lead.company_name}</div>
+          <div className="cc-name">
+            {lead.company_name}
+            {isMultiEvt && <span style={{marginLeft:6,fontSize:10,padding:"1px 6px",borderRadius:4,background:"rgba(16,185,129,.12)",border:"1px solid rgba(16,185,129,.25)",color:"#10B981",fontFamily:"'JetBrains Mono',monospace",letterSpacing:".04em"}}>🔥 {lead.multi_event_count} events</span>}
+          </div>
           <div className="cc-meta">
             {[lead.company_type?.toUpperCase(), lead.company_number&&`CH ${lead.company_number}`, lead.incorporated&&`Est. ${lead.incorporated.slice(0,4)}`].filter(Boolean).join(" · ")}
           </div>
           <div className="cc-badges">
             <span className="b b-p">● {lead.priority}</span>
             {lead.exposure_level && <span className={`exp-level ${expClass(lead.exposure_level)}`}>{expLabel(lead.exposure_level)}</span>}
-            {fxSigs.length > 0 && (
-              <span className="b b-fx">{fxSigs.length} FX signal{fxSigs.length>1?"s":""}</span>
+            {allSigs.length > 0 && (
+              <span className="b b-fx">{allSigs.length} FX signal{allSigs.length>1?"s":""}</span>
             )}
             {confBadge && <span className={confCls}>{confBadge}</span>}
             {lead.fx_exposure && <span className="b b-sec">{lead.fx_exposure}</span>}
+            {expConf && expConf !== "none" && (
+              <span className={expConfClass(expConf)} title={expConfLabel(expConf)}>{expConf} conf</span>
+            )}
           </div>
           <div className="cc-info">
             {lead.address && <span>📍 {lead.address.split(",").slice(-2).join(",").trim()}</span>}
             {lead.company_status && <span style={{color:lead.company_status==="active"?"#10B981":"#F59E0B"}}>● {lead.company_status}</span>}
+            {lead.segment_name && <span style={{color:"rgba(255,255,255,.3)"}}>{lead.segment_name.slice(0,40)}</span>}
           </div>
           {lead.director_name && (
             <div className="cc-dir" style={{marginBottom:7}}>
@@ -544,10 +586,10 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
               <span style={{color:"rgba(255,255,255,.25)"}}>· {lead.director_role}</span>
             </div>
           )}
-          {(lead.exposure_thesis || lead.fx_reason) && (
+          {thesis && (
             <div className="cc-angle">
-              {(lead.exposure_thesis || lead.fx_reason).slice(0,140)}
-              {(lead.exposure_thesis || lead.fx_reason).length > 140 ? "…" : ""}
+              {thesis.slice(0,160)}
+              {thesis.length > 160 ? "…" : ""}
             </div>
           )}
         </div>
@@ -561,7 +603,17 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
 
       {open && (
         <div className="cc-exp">
+
+          {/* EXPOSURE THESIS — hero field */}
+          {thesis && (
+            <div className="thesis-box" style={{marginBottom:14}}>
+              <div className="thesis-label">Exposure thesis</div>
+              <div className="thesis-text">{thesis}</div>
+            </div>
+          )}
+
           <div className="cc-exp-grid">
+            {/* Decision maker */}
             {lead.director_name && (
               <div>
                 <div className="xl">Decision maker</div>
@@ -574,10 +626,42 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
                 </div>
               </div>
             )}
+
+            {/* Why pays FX */}
             <div>
               <div className="xl">Why they pay FX</div>
               <div className="xv">{lead.fx_payment_logic || lead.fx_reason || "—"}</div>
             </div>
+
+            {/* Business model */}
+            {lead.segment_business_model && (
+              <div>
+                <div className="xl">Business model</div>
+                <div className="xv">{lead.segment_business_model}</div>
+              </div>
+            )}
+
+            {/* Why affected */}
+            {(lead.why_affected || lead.why_financially_exposed) && (
+              <div>
+                <div className="xl">Why affected by this event</div>
+                <div className="xv">{lead.why_affected || lead.why_financially_exposed}</div>
+              </div>
+            )}
+
+            {/* Margin + timing risk */}
+            {(lead.margin_risk || lead.payment_timing_risk) && (
+              <div>
+                <div className="xl">Risk profile</div>
+                <div className="xv" style={{fontSize:11}}>
+                  {lead.margin_risk && <div>Margin risk: <span style={{color:lead.margin_risk==="High"?"#F87171":lead.margin_risk==="Medium"?"#F59E0B":"#10B981"}}>{lead.margin_risk}</span></div>}
+                  {lead.payment_timing_risk && <div>Payment timing risk: <span style={{color:lead.payment_timing_risk==="High"?"#F87171":lead.payment_timing_risk==="Medium"?"#F59E0B":"#10B981"}}>{lead.payment_timing_risk}</span></div>}
+                  {lead.affected_payment_flow && <div style={{marginTop:3,color:"rgba(255,255,255,.35)"}}>{lead.affected_payment_flow}</div>}
+                </div>
+              </div>
+            )}
+
+            {/* Website */}
             {lead.website && (
               <div>
                 <div className="xl">Website</div>
@@ -586,24 +670,36 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
                     {lead.website}
                   </a>
                 </div>
-                {confBadge && (
-                  <div className="site-detail">{confBadge}</div>
-                )}
+                {confBadge && <div className="site-detail">{confBadge}</div>}
+                {expConf && expConf !== "none" && <div className="site-detail">{expConfLabel(expConf)}</div>}
+                {lead.company_source && <div className="site-detail">Source: {lead.company_source.replace("_"," ")}</div>}
               </div>
             )}
-            {fxSigs.length > 0 && (
+
+            {/* FX signals */}
+            {allSigs.length > 0 && (
               <div>
-                <div className="xl">FX signals from website</div>
+                <div className="xl">FX signals on website</div>
                 <div className="sigs">
-                  {fxSigs.slice(0,8).map(s=><span key={s} className="sig">{s}</span>)}
+                  {allSigs.slice(0,10).map(s=><span key={s} className="sig">{s}</span>)}
                 </div>
               </div>
             )}
+
+            {/* Trigger event */}
+            {lead.trigger_headline && (
+              <div style={{gridColumn:"1/-1"}}>
+                <div className="xl">Trigger event</div>
+                <div className="xv" style={{fontSize:11,fontStyle:"italic",color:"rgba(255,255,255,.35)"}}>{lead.trigger_headline}</div>
+              </div>
+            )}
+
+            {/* Scoring rationale */}
             {(lead.scoring_reasons||[]).length > 0 && (
               <div style={{gridColumn:"1/-1"}}>
                 <div className="xl">Scoring rationale</div>
                 <div className="xv" style={{fontSize:11,lineHeight:1.7}}>
-                  {lead.scoring_reasons.slice(0,4).map((r,i)=><div key={i}>· {r}</div>)}
+                  {lead.scoring_reasons.slice(0,5).map((r,i)=><div key={i}>· {r}</div>)}
                 </div>
               </div>
             )}
@@ -615,10 +711,10 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
             <div className="li-section">
               <div className="xl" style={{marginBottom:7}}>LinkedIn — open manually, do not automate</div>
               <a href={li.company_search} target="_blank" rel="noreferrer" className="li-company-btn">
-                💼 Open Company on LinkedIn →
+                💼 Search Company on LinkedIn →
               </a>
               <div className="li-people">
-                {(li.people_searches||[]).slice(0,5).map(p=>(
+                {(li.people_searches||[]).slice(0,6).map(p=>(
                   <a key={p.role} href={p.url} target="_blank" rel="noreferrer" className="li-person-btn">{p.role} →</a>
                 ))}
               </div>
@@ -628,7 +724,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
           <OutreachPanel outreach={lead.outreach} />
 
           <div className="actions">
-            <button className="act a-call">📞 Call</button>
+            <button className="act a-call" onClick={()=>lead.outreach?.call_opener&&copy(lead.outreach.call_opener)}>📞 Copy Call Opener</button>
             <button className="act a-email" onClick={()=>lead.outreach?.email_body&&copy(lead.outreach.email_body)}>✉ Copy Email</button>
             {lead.website && <a href={lead.website} target="_blank" rel="noreferrer" className="act a-web">🌐 Website</a>}
             {lead.company_number && (
@@ -834,27 +930,52 @@ function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet }) {
 
       {open && (
         <div className="ev-expanded">
+          {/* Business impact — hero field for the event */}
+          {event.business_impact_summary && (
+            <div className="ev-fx-box" style={{marginBottom:14,borderLeftColor:"rgba(99,102,241,.5)"}}>
+              <div className="ev-fx-label" style={{color:"#818CF8"}}>Business impact today</div>
+              <div className="ev-fx-text">{event.business_impact_summary}</div>
+            </div>
+          )}
+
           <div className="ev-detail-row">
-            {event.summary && (
-              <div style={{gridColumn:"1/-1"}}>
+            {event.what_happened && (
+              <div>
                 <div className="ev-dl">What happened</div>
-                <div className="ev-dv">{event.summary}</div>
+                <div className="ev-dv">{event.what_happened}</div>
+              </div>
+            )}
+            {event.what_changed_financially && (
+              <div>
+                <div className="ev-dl">What changed financially</div>
+                <div className="ev-dv">{event.what_changed_financially}</div>
+              </div>
+            )}
+            {event.who_pays_more && (
+              <div>
+                <div className="ev-dl">Who pays more</div>
+                <div className="ev-dv" style={{color:"rgba(252,165,165,.7)"}}>{event.who_pays_more}</div>
+              </div>
+            )}
+            {event.who_receives_less && event.who_receives_less !== "none" && (
+              <div>
+                <div className="ev-dl">Who receives less</div>
+                <div className="ev-dv" style={{color:"rgba(252,165,165,.6)"}}>{event.who_receives_less}</div>
+              </div>
+            )}
+            {(event.margin_risk || event.payment_timing_risk) && (
+              <div>
+                <div className="ev-dl">Risk level</div>
+                <div className="ev-dv" style={{fontSize:11}}>
+                  {event.margin_risk && <span>Margin: <b style={{color:event.margin_risk==="High"?"#F87171":event.margin_risk==="Medium"?"#F59E0B":"#10B981"}}>{event.margin_risk}</b>{" "}</span>}
+                  {event.payment_timing_risk && <span>Timing: <b style={{color:event.payment_timing_risk==="High"?"#F87171":event.payment_timing_risk==="Medium"?"#F59E0B":"#10B981"}}>{event.payment_timing_risk}</b></span>}
+                </div>
               </div>
             )}
             {event.sales_angle && (
-              <div>
+              <div style={{gridColumn:"1/-1"}}>
                 <div className="ev-dl">Sales angle today</div>
-                <div className="ev-dv" style={{fontStyle:"italic",color:"rgba(255,255,255,.4)"}}>"{event.sales_angle}"</div>
-              </div>
-            )}
-            {(event.who_is_hurt||[]).length > 0 && (
-              <div>
-                <div className="ev-dl">Who is hurt</div>
-                <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:4}}>
-                  {(event.who_is_hurt||[]).slice(0,4).map(h=>(
-                    <span key={h} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,padding:"2px 7px",borderRadius:4,background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.14)",color:"rgba(252,165,165,.65)"}}>▼ {h}</span>
-                  ))}
-                </div>
+                <div className="ev-dv" style={{fontStyle:"italic",color:"rgba(255,255,255,.45)"}}>"{event.sales_angle}"</div>
               </div>
             )}
           </div>
@@ -955,8 +1076,9 @@ export default function App() {
 
   const hot       = leads.filter(l=>l.priority==="HOT").length;
   const warm      = leads.filter(l=>l.priority==="WARM").length;
-  const contacted = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="contacted").length,[leads,getCrmStatus]);
+  const contacted = useMemo(()=>leads.filter(l=>["contacted","follow_up","meeting_booked","passed_to_closer"].includes(getCrmStatus(l))).length,[leads,getCrmStatus]);
   const saved     = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="saved").length,[leads,getCrmStatus]);
+  const meetings  = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="meeting_booked").length,[leads,getCrmStatus]);
   const hasSite   = leads.filter(l=>l.website).length;
 
   const viewDesc = filters.view === "call_list"
@@ -1000,13 +1122,14 @@ export default function App() {
       {/* STATS */}
       <div className="stats">
         {[
-          {n:callListLeads.length, l:"Priority leads", s:"Call list today",     c:"#10B981"},
-          {n:hot,                  l:"HOT",            s:"Scored ≥ 80",         c:"#10B981"},
-          {n:warm,                 l:"WARM",           s:"Scored 60–79",        c:"#F59E0B"},
-          {n:hasSite,              l:"With website",   s:`${Math.round(hasSite/Math.max(leads.length,1)*100)}% coverage`, c:"#38BDF8"},
-          {n:contacted,            l:"Contacted",      s:"CRM state",           c:"#38BDF8"},
-          {n:saved,                l:"Saved",          s:"Worth following up",  c:"#10B981"},
-          {n:leads.length,         l:"Total pipeline", s:"All events",          c:"#6366F1"},
+          {n:callListLeads.length, l:"Priority leads",   s:"Call list today",     c:"#10B981"},
+          {n:hot,                  l:"HOT",              s:"Scored ≥ 80",         c:"#10B981"},
+          {n:warm,                 l:"WARM",             s:"Scored 60–79",        c:"#F59E0B"},
+          {n:hasSite,              l:"With website",     s:`${Math.round(hasSite/Math.max(leads.length,1)*100)}% coverage`, c:"#38BDF8"},
+          {n:contacted,            l:"In progress",      s:"Contacted/follow-up", c:"#38BDF8"},
+          {n:meetings,             l:"Meetings booked",  s:"CRM state",           c:"#10B981"},
+          {n:saved,                l:"Saved",            s:"Worth following up",  c:"#F59E0B"},
+          {n:leads.length,         l:"Total pipeline",   s:"All events",          c:"#6366F1"},
         ].map(({n,l,s,c})=>(
           <div className="stat" key={l}>
             <div className="stat-n" style={{color:c}}>{n}</div>

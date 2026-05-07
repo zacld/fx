@@ -1,8 +1,22 @@
-# FX Discovery Engine v1
+# FX Discovery Engine
+
+**Business exposure translator for UK B2B FX sales.**
+
+Market event → commercial relevance filter → business impact translation → exposure-ranked target segments → company discovery → website validation → lead scoring → LinkedIn/outreach assist.
 
 **Total API cost: ~£0.002/day**
 
-Market event → affected sectors → UK companies → FX score → lead cards
+---
+
+## What it does
+
+This is not a news summariser. It is a business exposure translator.
+
+It turns:
+> *"GBP/EUR fell after BoE comments"*
+
+into:
+> *"UK companies buying from European suppliers and selling in GBP face margin pressure. Target wine importers, European food distributors, furniture wholesalers, automotive parts distributors. Prioritise companies whose websites confirm import/export/European supplier activity."*
 
 ---
 
@@ -10,17 +24,18 @@ Market event → affected sectors → UK companies → FX score → lead cards
 
 | What | How | Cost |
 |---|---|---|
-| News ingestion | RSS feeds (FXStreet, BoE, BBC, Reuters, GOV.UK) | Free |
-| AI analysis | Anthropic Claude API (your key) | ~£0.002/day |
-| Company discovery | Companies House API (your key) | Free |
+| News ingestion | RSS feeds (BBC, Reuters, FXStreet, BoE, GOV.UK, Guardian, Sky) | Free |
+| AI analysis | Gemini 2.0 Flash (one call per event — combined triage + exposure map) | ~£0.002/day |
+| Company discovery | Companies House API | Free |
+| Website discovery | Domain guessing + GET verification + DuckDuckGo fallback | Free |
 | Website scraping | Direct HTTP + BeautifulSoup | Free |
 | Database | JSON files in this repo | Free |
 | Scheduler | GitHub Actions cron | Free |
-| Dashboard hosting | GitHub Pages | Free |
+| Dashboard | React SPA, GitHub Pages | Free |
 
 ---
 
-## Setup — do this once
+## Setup
 
 ### 1. Clone and install
 
@@ -28,7 +43,7 @@ Market event → affected sectors → UK companies → FX score → lead cards
 git clone https://github.com/zacld/fx.git
 cd fx
 cp .env.example .env
-# .env already has your Companies House key — just add your Anthropic key
+# Edit .env — add your own Gemini and Companies House keys
 ```
 
 ### 2. Install Python deps
@@ -43,48 +58,85 @@ Repo → Settings → Secrets and variables → Actions
 
 | Secret | Value |
 |---|---|
-| `ANTHROPIC_API_KEY` | Your Anthropic key |
-| `ANTHROPIC_MODEL` | `claude-3-5-sonnet-latest` |
-| `COMPANIES_HOUSE_API_KEY` | `bf190544-f3dd-4dd3-b60b-d897c8ffebf8` |
+| `GEMINI_API_KEY` | Your Gemini API key (from Google AI Studio) |
+| `GEMINI_MODEL` | `gemini-2.0-flash` |
+| `COMPANIES_HOUSE_API_KEY` | Your Companies House API key |
+
+> **Security:** Never put real API keys in this README, in any `.md` file, or in any committed file.  
+> The `.env` file is in `.gitignore` and must never be committed.
 
 ### 4. Test locally
 
 ```bash
-# Pull news + Claude analysis → data/events.json
-python scripts/ingest.py
-
-# Find companies + score → data/leads.json
-python scripts/discover.py
-
-# Run dashboard
-npm install
-npm run dev
+python3 scripts/ingest.py       # Pull news events + analyse with Gemini
+python3 scripts/discover.py     # Find companies via Companies House
+python3 scripts/enrich_websites.py  # Backfill websites for existing leads
+python3 scripts/rescore.py      # Re-score + deduplicate leads
+npm install && npm run dev       # Run dashboard locally
 ```
 
 ---
 
-## How it works
+## Pipeline
 
-**ingest.py** pulls 5 RSS feeds every morning, filters for FX-relevant headlines (tariffs, rate changes, currency moves, trade policy etc.), sends each to Claude API, gets back structured JSON with affected sectors, urgency score, and Companies House search terms. Writes to `data/events.json`.
-
-**discover.py** reads events with `status: ready`, searches Companies House for each generated term, fetches the full company profile and directors, scrapes the company website for import/export signals, scores each company 0-100, and writes lead cards to `data/leads.json`.
-
-**GitHub Actions** runs both scripts at 6am Mon-Fri and commits the updated JSON files back to the repo. The dashboard reads these files directly.
+```
+RSS feeds (7 sources)
+  ↓
+Commercial relevance pre-filter (rule-based, free, no API)
+  ↓
+Gemini 2.0 Flash — ONE call per event
+  · Commercial relevance score (1-10)
+  · Business impact translation (what changed, who pays more)
+  · Exposure-ranked target segments (4-6 specific business models)
+  ↓
+Companies House search + profile + director data
+  ↓
+Website discovery (domain guessing → GET verify → DuckDuckGo fallback)
+  ↓
+Website scraping — FX payment signals
+  ↓
+Lead scoring (exposure level + website confidence + FX signals + SIC code)
+  ↓
+Deduplication + multi-event trigger detection
+  ↓
+LinkedIn search link generation (manual — nothing auto-sent)
+  ↓
+Copy-ready outreach drafts (call opener, LinkedIn note, email)
+```
 
 ---
 
-## Scoring
+## Lead scoring
 
 | Signal | Points |
 |---|---|
-| High urgency event (7+/10) | 25 |
-| Import/export website signals | Up to 25 |
-| High-FX SIC code | 20 |
-| Company name suggests FX sector | 20 |
-| Website + address found | 15 |
-| Active on Companies House | 15 |
+| Direct FX payment signals on website | 8–30 |
+| Segment-specific website signals | up to 15 |
+| Secondary international signals | up to 10 |
+| Segment exposure level: Very High | +20 |
+| Segment exposure level: High | +12 |
+| Core trade/wholesale SIC code | +15 |
+| Manufacturing/logistics SIC code | +10 |
+| Website verified — high confidence | +25 |
+| Website verified — medium/confirmed | +15 |
+| Website guessed — low confidence | +8 |
+| No website found | −20 |
+| High urgency market event | +10 |
+| Director identified | +5 |
+| Active on Companies House | +5 |
+| Company age: 10+ years | +5–8 |
+| No FX evidence (gate) | cap at 39 |
+| Multi-event trigger (same company flagged by 2+ events) | +4–8 |
 
-**HOT** 80-100 · **WARM** 60-79 · **QUEUE** 40-59 · **SKIP** <40 (not saved)
+**HOT** ≥ 80 · **WARM** 60–79 · **QUEUE** 40–59 · **SKIP** < 40
+
+---
+
+## Dashboard views
+
+**Daily Call List** — HOT/WARM + verified website + at least 1 FX signal  
+**Research Queue** — Lower confidence leads needing manual review  
+**All Leads** — Full pipeline
 
 ---
 
@@ -93,27 +145,37 @@ npm run dev
 ```
 fx/
   scripts/
-    ingest.py          # RSS → Claude → data/events.json
-    discover.py        # Events → Companies House → data/leads.json
+    ingest.py            # RSS → Gemini (1 call) → events.json
+    exposure_mapper.py   # Standalone exposure mapper (also used as module)
+    discover.py          # Events → Companies House + website → leads.json
+    enrich_websites.py   # Backfill websites for leads without one
+    rescore.py           # Re-score + dedup + multi-event detection
+    website_finder.py    # Domain guessing + DuckDuckGo fallback
+    linkedin_assist.py   # Generate LinkedIn search links (no scraping)
+    outreach.py          # Copy-ready outreach drafts (Gemini)
+    ch_search_strategy.py # Companies House search term strategy
+    run_pipeline.py      # Run full pipeline in order
   src/
-    App.jsx            # React dashboard
+    App.jsx              # React dashboard
   data/
-    events.json        # Auto-updated by GitHub Actions
-    leads.json         # Auto-updated by GitHub Actions
+    events.json          # Updated by pipeline
+    leads.json           # Updated by pipeline
   public/
-    data/              # Copied here so dashboard can read them
+    data/                # Copied here for GitHub Pages
   .github/workflows/
-    discovery.yml      # Mon-Fri 6am cron
+    discovery.yml        # Mon–Fri 6am cron + manual trigger
+  .env.example           # Template — copy to .env and fill in your keys
   requirements.txt
-  .env.example
 ```
 
 ---
 
-## Phase 2 (after discovery is proven)
+## What this does NOT do
 
-- Hunter.io email discovery per director
-- LinkedIn search URL generation
-- Call opener generator (Claude API)
-- Email draft per lead
-- Pipeline status tracking
+- No LinkedIn scraping or automation
+- No auto-send of messages
+- No paid enrichment APIs (Hunter, Apollo, Clearbit etc.)
+- No automated email sending
+- No CRM sync (status tracked in browser localStorage)
+
+The system prepares research and copy-ready messages. The user manually opens LinkedIn, verifies the person, and sends.
