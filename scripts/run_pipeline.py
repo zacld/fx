@@ -16,8 +16,9 @@ PUBLIC  = ROOT / "public" / "data"
 
 PIPELINE = [
     ("ingest.py",           "Event Radar — pulling live market events"),
-    ("discover.py",         "Company Discovery — finding affected businesses"),
-    ("enrich_websites.py",  "Website Enrichment — domain guessing for missing websites"),
+    ("discover_web.py",     "Web Discovery — web-first company search (set WEB_DISCOVERY_ENABLED=false to skip)"),
+    ("discover.py",         "Company Discovery — Companies House search (complementary)"),
+    ("enrich_websites.py",  "Website Enrichment — domain guessing for CH-discovered companies"),
     ("rescore.py",          "Score Enrichment — ranking leads"),
     ("linkedin_assist.py",  "LinkedIn Assist — generating search links"),
     ("outreach.py",         "Outreach Generator — drafting messages"),
