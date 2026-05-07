@@ -10,6 +10,13 @@ commodity pricing, tariffs, shipping disruption, or margin pressure?"
 
 Output: exposure-ranked target segments with high-intent search queries,
 validation signals, and sales angles — not generic industry lists.
+
+Segment count targets by event breadth:
+  broad_currency  — GBP/EUR, GBP/USD, broad sterling/dollar moves → 8-12 segments
+  broad_macro     — rate decisions, inflation, quantitative easing  → 8-10 segments
+  commodity       — oil, gas, grain, metals price moves            → 6-10 segments
+  tariff          — tariff/trade policy shock                      → 6-9 segments
+  sector_specific — narrowly affects one sector                   → 4-7 segments
 """
 
 import os, json, logging
@@ -40,8 +47,55 @@ The question IS: "which UK businesses are writing cheques in foreign currency �
 
 DO NOT produce generic industry lists. Each segment must describe a SPECIFIC business model with a SPECIFIC FX payment flow that is DIRECTLY impacted by this event.
 
-BAD output: "Manufacturers" — too broad, no FX payment logic
-GOOD output: "UK furniture manufacturers importing European oak and selling domestically in GBP — supplier invoices in EUR, GBP revenue. Margin squeezed when GBP/EUR falls."
+BAD: "Manufacturers" — too broad, no FX payment logic
+GOOD: "UK furniture importers buying from Italian/German manufacturers, invoiced in EUR, selling in GBP — margin squeezed when GBP/EUR falls"
+
+═══════════════════════════════════════
+SEGMENT COUNT — CRITICAL RULE
+═══════════════════════════════════════
+First, classify the event breadth:
+  "broad_currency"  — broad sterling, dollar, or euro move (GBP/EUR, GBP/USD, USD strength, EUR move)
+  "broad_macro"     — rate decisions, inflation data, quantitative easing, central bank policy
+  "commodity"       — oil, gas, grain, metals, shipping rates
+  "tariff"          — tariff/trade policy shock (US tariffs, Brexit-related)
+  "sector_specific" — narrowly affects one sector (e.g., specific country sanction on one product)
+
+THEN produce:
+  broad_currency  → 10–12 target segments (UK has many import-heavy business models all affected)
+  broad_macro     → 8–10 target segments
+  commodity       → 7–10 target segments
+  tariff          → 6–9 target segments
+  sector_specific → 4–7 target segments
+
+For broad_currency events like "GBP/EUR weakness" or "GBP/USD weakness", you MUST cover the full
+range of UK import-heavy business models — not just food and wine. Think across ALL categories of
+UK businesses that pay EUR or USD supplier invoices:
+
+  ALWAYS include for GBP/EUR weakness:
+  01. European wine and spirits importers (classic, high exposure)
+  02. European food and delicatessen importers (Italian, French, Spanish etc.)
+  03. Furniture and interiors importers (Scandinavian, Italian, German sourcing)
+  04. Automotive parts distributors (German, French, Italian OEM parts)
+  05. Construction material importers (European stone, tile, timber, fittings)
+  06. Machinery and industrial equipment distributors (German, Italian plant)
+  07. Fashion, textile and apparel wholesalers (Italian, French, Spanish brands)
+  08. Medical device and laboratory equipment distributors (German, Dutch sourcing)
+  09. Packaging and raw material importers (European paper, plastic, glass)
+  10. Travel and DMC companies paying European hotel/supplier invoices
+  11. E-commerce/DTC brands sourcing stock from European manufacturers
+  12. Chemicals and specialty ingredients distributors (REACH-registered European)
+
+  ALWAYS include for GBP/USD weakness:
+  01. US technology and software licence payers (SaaS, enterprise software)
+  02. Petroleum and fuel traders (USD-priced commodity)
+  03. Electronics and semiconductor importers (USD-denominated supply chain)
+  04. Food raw material importers — grain, soy, sugar (USD commodity pricing)
+  05. Pharmaceutical and medical device importers (USD sourcing from US/Asia)
+  06. Scotch whisky and premium spirits exporters (USD export revenue)
+  07. UK freight and shipping brokers paying USD vessel fees
+  08. Aerospace and engineering parts importers (USD supply chain)
+  09. Financial services firms with USD settlements
+  10. UK exporters to USD markets (reduced GBP-equivalent revenue)
 
 ═══════════════════════════════════════
 BUSINESS MODELS TO CONSIDER
@@ -57,6 +111,11 @@ Think in terms of WHO IS PAYING WHAT CURRENCY TO WHOM:
 - UK professional services firms billing in foreign currency
 - UK food and drink importers with recurring supplier payments
 - UK engineering/industrial firms with overseas supply chains
+- UK packaging and materials companies with European raw material suppliers
+- UK construction sector importers (stone, tile, timber, fittings)
+- UK automotive parts distributors (German/French/Italian OEM supply chains)
+- UK fashion and apparel wholesalers (European brand/manufacturer sourcing)
+- UK medical and laboratory equipment distributors (European/US supply chains)
 
 ═══════════════════════════════════════
 EXPOSURE TYPES
@@ -102,6 +161,7 @@ Return ONLY valid JSON — no markdown, no code fences, no commentary.
   "event_summary": "1-2 sentences: what happened and the direct FX/financial implication for UK businesses",
   "business_impact_summary": "2-3 sentences: specifically which UK businesses are affected, what changes in their costs/revenue/margin, and why today is a relevant moment to call them",
   "event_type": "Currency move | Tariff | Rate decision | Geopolitical | Commodity | Trade policy | Macro data | Supply chain | Other",
+  "event_breadth": "broad_currency | broad_macro | commodity | tariff | sector_specific",
   "exposure_types": ["EUR supplier payment exposure", "import margin pressure"],
   "overall_sales_angle": "The single sharpest reason to call a UK FD/MD today because of this event — specific, urgent, commercial",
   "target_segments": [
@@ -137,12 +197,13 @@ Return ONLY valid JSON — no markdown, no code fences, no commentary.
 ═══════════════════════════════════════
 RULES
 ═══════════════════════════════════════
-- Return 4-7 target segments, ranked by exposure_level (Very High first)
+- Classify event_breadth first, then apply the correct segment count range
+- For broad_currency and broad_macro events, you MUST produce at least 8 segments
 - Each segment_name must be SPECIFIC — "European wine importers" not "food companies"
 - business_model must describe the actual payment flow: who pays what currency to whom
-- fx_payment_logic: step-by-step description of the actual FX transaction this business makes — be precise
-- margin_risk: quantify if possible (e.g. "3% GBP/EUR move = ~£X margin impact on typical shipment")
-- payment_timing_risk: describe the timing exposure window (invoice terms, order-to-pay gap, FX window)
+- fx_payment_logic: step-by-step description of the actual FX transaction — be precise
+- margin_risk: quantify if possible (e.g. "3% GBP/EUR move = ~£X margin impact")
+- payment_timing_risk: describe the timing exposure window (invoice terms, order-to-pay gap)
 - affected_payment_flow: describe the actual payment (currency, counterparty, typical amount, frequency)
 - high_intent_search_queries: 3-5 queries that find REAL companies. Use quoted phrases. Be specific.
 - companies_house_terms: 3-5 short terms (1-2 words) that appear in REAL UK company names
@@ -189,6 +250,7 @@ def enrich_event_with_exposure_map(event: dict) -> dict:
         event["exposure_types"]        = exposure_map.get("exposure_types", [])
         event["overall_sales_angle"]   = exposure_map.get("overall_sales_angle", event.get("sales_angle",""))
         event["business_impact_summary"] = exposure_map.get("business_impact_summary", "")
+        event["event_breadth"]         = exposure_map.get("event_breadth", "sector_specific")
 
         # Build flattened search terms and CH terms from all segments
         all_search_queries = []
@@ -197,11 +259,13 @@ def enrich_event_with_exposure_map(event: dict) -> dict:
             all_search_queries.extend(seg.get("high_intent_search_queries", []))
             all_ch_terms.extend(seg.get("companies_house_terms", []))
 
-        event["all_search_queries"]    = list(dict.fromkeys(all_search_queries))[:20]
-        event["companies_house_terms"] = list(dict.fromkeys(all_ch_terms))[:10]
+        event["all_search_queries"]    = list(dict.fromkeys(all_search_queries))[:30]
+        event["companies_house_terms"] = list(dict.fromkeys(all_ch_terms))[:20]
 
-        log.info("  Exposure map: %d segments | top: %s (%s)",
-                 len(event["target_segments"]),
+        n = len(event["target_segments"])
+        breadth = event["event_breadth"]
+        log.info("  Exposure map: %d segments [%s] | top: %s (%s)",
+                 n, breadth,
                  event["target_segments"][0]["segment_name"] if event["target_segments"] else "none",
                  event["target_segments"][0]["exposure_level"] if event["target_segments"] else "—")
 
@@ -214,6 +278,7 @@ def enrich_event_with_exposure_map(event: dict) -> dict:
         event["target_segments"]  = []
         event["exposure_types"]   = []
         event["exposure_map"]     = {}
+        event["event_breadth"]    = "sector_specific"
 
     return event
 
@@ -242,11 +307,11 @@ def build_ch_search_terms(event: dict) -> list:
         # Also keep any specific CH terms from the Gemini output
         all_terms.extend(seg.get("companies_house_terms", []))
 
-    # Dedupe, keep top 15
+    # Dedupe, keep top 25 (more for broad events)
     seen = set()
     result = []
     for t in all_terms:
         if t.lower() not in seen:
             seen.add(t.lower())
             result.append(t)
-    return result[:15]
+    return result[:25]

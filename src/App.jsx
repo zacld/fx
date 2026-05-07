@@ -317,6 +317,7 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 
 /* OUTREACH */
 .outreach{margin-bottom:12px}
+/* legacy out-* classes kept for backward compat */
 .out-tabs{display:flex;gap:2px;margin-bottom:0;border-bottom:1px solid rgba(255,255,255,.06)}
 .out-tab{padding:5px 11px;font-size:11px;font-weight:500;cursor:pointer;background:none;border:none;color:rgba(255,255,255,.3);font-family:'Inter',sans-serif;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
 .out-tab:hover{color:rgba(255,255,255,.6)}
@@ -324,7 +325,16 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .out-content{position:relative;margin-top:0}
 .out-text{font-size:12px;line-height:1.7;color:rgba(255,255,255,.5);padding:10px 14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-top:none;border-radius:0 0 8px 8px;white-space:pre-wrap;word-break:break-word;min-height:56px}
 .out-subject{font-family:'JetBrains Mono',monospace;font-size:10px;color:#10B981;padding:5px 14px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);border-bottom:none;border-radius:8px 8px 0 0}
-.copy-btn{position:absolute;top:7px;right:7px;padding:3px 9px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);font-size:10px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+/* message ammo panel */
+.ammo-grid{display:flex;flex-direction:column;gap:8px}
+.ammo-row{position:relative;border:1px solid rgba(255,255,255,.07);border-radius:8px;background:rgba(255,255,255,.02);padding:10px 12px 10px 12px}
+.ammo-header{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.ammo-icon{font-size:12px;opacity:.7}
+.ammo-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.05em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.ammo-help{font-size:10px;color:rgba(255,255,255,.2);font-family:'JetBrains Mono',monospace;margin-left:auto}
+.ammo-text{font-size:12px;line-height:1.65;color:rgba(255,255,255,.55);white-space:pre-wrap;word-break:break-word;padding-right:54px}
+/* copy button — inline inside ammo rows */
+.copy-btn{position:absolute;top:9px;right:9px;padding:3px 9px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);font-size:10px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
 .copy-btn:hover{background:rgba(255,255,255,.1);color:#fff}
 .copy-btn.copied{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:#10B981}
 
@@ -492,29 +502,65 @@ function CopyBtn({ text }) {
   );
 }
 
-// ─── OUTREACH PANEL ──────────────────────────────────────────────
-function OutreachPanel({ outreach }) {
-  const [tab, setTab] = useState("li_connect");
-  if (!outreach) return null;
-  const tabs = [
-    { id:"li_connect", label:"LI Connect",   text: outreach.linkedin_connection },
-    { id:"li_follow",  label:"LI Follow-up", text: outreach.linkedin_follow_up  },
-    { id:"call",       label:"Call opener",  text: outreach.call_opener         },
-    { id:"email",      label:"Email",        text: outreach.email_body, subject: outreach.email_subject },
-  ];
-  const current = tabs.find(t=>t.id===tab);
+// ─── MESSAGE AMMO PANEL ──────────────────────────────────────────
+function MessageAmmoPanel({ ingredients, outreach }) {
+  // Support both new message_ingredients field and legacy outreach field
+  const mi = ingredients || null;
+  if (!mi && !outreach) return null;
+
+  // If we only have legacy outreach (old format), show a simplified panel
+  if (!mi && outreach) {
+    return (
+      <div className="outreach">
+        <div className="xl" style={{marginBottom:7}}>Message notes — write in your own tone</div>
+        {outreach.call_opener && (
+          <div className="ammo-row">
+            <div className="ammo-label">Call opener</div>
+            <div className="ammo-text">{outreach.call_opener}</div>
+            <CopyBtn text={outreach.call_opener} />
+          </div>
+        )}
+        {outreach.linkedin_connection && (
+          <div className="ammo-row">
+            <div className="ammo-label">LinkedIn note</div>
+            <div className="ammo-text">{outreach.linkedin_connection}</div>
+            <CopyBtn text={outreach.linkedin_connection} />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const rows = [
+    { key:"event_hook",       label:"Event hook",        icon:"📡", help:"Open with this — then adapt" },
+    { key:"why_it_matters",   label:"Why it matters",    icon:"💡", help:"Their specific situation" },
+    { key:"likely_exposure",  label:"Likely exposure",   icon:"💱", help:"The payment/currency flow" },
+    { key:"pain_point",       label:"Pain point",        icon:"⚡", help:"The commercial issue" },
+    { key:"sales_angle",      label:"Suggested angle",   icon:"🎯", help:"How to approach it" },
+    { key:"opening_question", label:"Opening question",  icon:"❓", help:"Get them talking" },
+    { key:"soft_cta",         label:"Soft CTA options",  icon:"→",  help:"Low-pressure close" },
+    { key:"linkedin_note",    label:"LinkedIn note",     icon:"💼", help:"Connection request starter" },
+    { key:"call_opener",      label:"Call opener",       icon:"📞", help:"Phone approach" },
+  ].filter(r => mi[r.key]);
+
   return (
     <div className="outreach">
-      <div className="xl" style={{marginBottom:7}}>Outreach drafts — copy and send manually</div>
-      <div className="out-tabs">
-        {tabs.map(t=>(
-          <button key={t.id} className={`out-tab${tab===t.id?" active":""}`} onClick={()=>setTab(t.id)}>{t.label}</button>
-        ))}
+      <div className="xl" style={{marginBottom:3}}>Message ammo — write in your own tone</div>
+      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"rgba(255,255,255,.2)",marginBottom:12}}>
+        Sharp context for each channel · copy what's useful · discard the rest
       </div>
-      <div className="out-content">
-        {current?.subject && <div className="out-subject">Subject: {current.subject}</div>}
-        <div className="out-text">{current?.text || "—"}</div>
-        <CopyBtn text={current?.text || ""} />
+      <div className="ammo-grid">
+        {rows.map(({key,label,icon,help}) => (
+          <div key={key} className="ammo-row">
+            <div className="ammo-header">
+              <span className="ammo-icon">{icon}</span>
+              <span className="ammo-label">{label}</span>
+              <span className="ammo-help">{help}</span>
+            </div>
+            <div className="ammo-text">{mi[key]}</div>
+            <CopyBtn text={mi[key]} />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -729,11 +775,20 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
             </div>
           )}
 
-          <OutreachPanel outreach={lead.outreach} />
+          <MessageAmmoPanel
+            ingredients={lead.message_ingredients}
+            outreach={lead.outreach}
+          />
 
           <div className="actions">
-            <button className="act a-call" onClick={()=>lead.outreach?.call_opener&&copy(lead.outreach.call_opener)}>📞 Copy Call Opener</button>
-            <button className="act a-email" onClick={()=>lead.outreach?.email_body&&copy(lead.outreach.email_body)}>✉ Copy Email</button>
+            <button className="act a-call" onClick={()=>{
+              const t = lead.message_ingredients?.call_opener || lead.outreach?.call_opener;
+              if(t) copy(t);
+            }}>📞 Call opener</button>
+            <button className="act a-email" onClick={()=>{
+              const t = lead.message_ingredients?.linkedin_note || lead.outreach?.linkedin_connection;
+              if(t) copy(t);
+            }}>💼 LI note</button>
             {lead.website && <a href={lead.website} target="_blank" rel="noreferrer" className="act a-web">🌐 Website</a>}
             {lead.company_number && (
               <a href={`https://find-and-update.company-information.service.gov.uk/company/${lead.company_number}`} target="_blank" rel="noreferrer" className="act a-web">🏛 CH</a>
@@ -998,8 +1053,8 @@ function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet }) {
           {!showCompanies && (
             <>
               <div className="niche-header">
-                <div className="niche-label">{niches.length} types of business affected</div>
-                <div className="niche-hint">Click any to find companies</div>
+                <div className="niche-label">{niches.length} exposed segments mapped</div>
+                <div className="niche-hint">Click any to see discovered companies</div>
               </div>
               <div className="niches">
                 {niches.map((n,i)=>{
@@ -1130,14 +1185,14 @@ export default function App() {
       {/* STATS */}
       <div className="stats">
         {[
-          {n:callListLeads.length, l:"Priority leads",   s:"Call list today",     c:"#10B981"},
-          {n:hot,                  l:"HOT",              s:"Scored ≥ 80",         c:"#10B981"},
-          {n:warm,                 l:"WARM",             s:"Scored 60–79",        c:"#F59E0B"},
-          {n:hasSite,              l:"With website",     s:`${Math.round(hasSite/Math.max(leads.length,1)*100)}% coverage`, c:"#38BDF8"},
-          {n:contacted,            l:"In progress",      s:"Contacted/follow-up", c:"#38BDF8"},
-          {n:meetings,             l:"Meetings booked",  s:"CRM state",           c:"#10B981"},
-          {n:saved,                l:"Saved",            s:"Worth following up",  c:"#F59E0B"},
-          {n:leads.length,         l:"Total pipeline",   s:"All events",          c:"#6366F1"},
+          {n:callListLeads.length, l:"Call targets",      s:"HOT/WARM · FX confirmed",   c:"#10B981"},
+          {n:hot,                  l:"HOT leads",         s:"Score ≥ 80",                c:"#10B981"},
+          {n:warm,                 l:"WARM leads",        s:"Score 60–79",               c:"#F59E0B"},
+          {n:leads.length,         l:"Companies found",   s:"All events · all priority", c:"#6366F1"},
+          {n:hasSite,              l:"Website verified",  s:`${Math.round(hasSite/Math.max(leads.length,1)*100)}% of pipeline`, c:"#38BDF8"},
+          {n:contacted,            l:"In progress",       s:"Contacted/follow-up",       c:"#38BDF8"},
+          {n:meetings,             l:"Meetings booked",   s:"CRM tracked",               c:"#10B981"},
+          {n:saved,                l:"Saved",             s:"Worth revisiting",          c:"#F59E0B"},
         ].map(({n,l,s,c})=>(
           <div className="stat" key={l}>
             <div className="stat-n" style={{color:c}}>{n}</div>

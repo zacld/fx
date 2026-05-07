@@ -144,7 +144,18 @@
     "linked_event_headlines": [
       "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
       "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens"
-    ]
+    ],
+    "message_ingredients": {
+      "event_hook": "Did you see crude oil spiking after the UAE news? Commodity markets have been volatile \u2014 and with GBP still under some pressure, any USD-denominated oil payments are feeling the squeeze.",
+      "why_it_matters": "Veneto Importers appears to be sourcing Italian goods and distributing in the UK \u2014 if any of those supply chain costs are dollar or euro-denominated, the current volatility is directly affecting the GBP cost of each shipment.",
+      "likely_exposure": "GBP revenue / EUR or USD supplier invoices on imported goods.",
+      "pain_point": "Upcoming supplier payments may cost noticeably more GBP than when the orders were confirmed, squeezing margin on existing stock.",
+      "sales_angle": "Ask whether they have upcoming EUR or USD payments and whether those are just going through the bank at spot or whether there is any forward planning in place. Most SME importers rely entirely on their bank rate \u2014 which is where we can add value.",
+      "opening_question": "Do you currently manage your supplier FX payments through your bank, or do you use a specialist for the EUR or USD side?",
+      "soft_cta": "Worth a quick 10-minute call this week? / Happy to share what we are seeing on GBP/USD if it is useful. / No pressure \u2014 just thought it might be timely given the moves.",
+      "linkedin_note": "Hi Paul, noticed Veneto Importers works with Italian suppliers and GBP/EUR has been moving. I work with importers managing supplier payment exposure \u2014 thought it might be worth connecting.",
+      "call_opener": "Hi Paul, it is Zac from Universal Partners. I saw some volatility in commodity markets this week and noticed Veneto Importers sources from Italian suppliers. Do you currently have any upcoming EUR payments, or is that handled centrally by finance?"
+    }
   },
   "dcef2de7652b63a2": {
     "company_name": "AIRSOFT WHOLESALE (UK) LIMITED",

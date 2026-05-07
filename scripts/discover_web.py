@@ -1312,7 +1312,14 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
     Process one event: search → validate → CH → score → add to leads.
     """
     added    = 0
-    segments = event.get("target_segments", [])[:WEB_MAX_SEGMENTS_PER_EVENT]
+    # For broad currency/macro events use the full configured limit;
+    # for sector-specific events cap at half to focus effort.
+    breadth = event.get("event_breadth", "sector_specific")
+    if breadth in ("broad_currency", "broad_macro"):
+        seg_limit = WEB_MAX_SEGMENTS_PER_EVENT
+    else:
+        seg_limit = max(4, WEB_MAX_SEGMENTS_PER_EVENT // 2)
+    segments = event.get("target_segments", [])[:seg_limit]
 
     if not segments:
         log.info("  No target segments — skipping event")
