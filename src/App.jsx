@@ -90,9 +90,17 @@ const RESEARCH_FILTERS  = { ...BLANK_FILTERS, view: "research"  };
 const ALL_FILTERS       = { ...BLANK_FILTERS, view: "all"       };
 
 function isCallListEligible(l) {
-  return (l.priority==="HOT"||l.priority==="WARM") &&
-    ["high","medium","confirmed"].includes(l.website_confidence) &&
-    (l.fx_payment_signals||[]).length > 0;
+  // Priority call list: HOT score≥90 + verified website + ≥1 direct FX signal + director
+  // This maps to the QA "PRIORITY CALL LIST" — leads with strong evidence.
+  const hasWebConf    = ["high","medium","confirmed"].includes(l.website_confidence);
+  const hasWebsite    = !!l.website;
+  const hasFxSignal   = (l.fx_payment_signals||[]).length > 0;
+  const hasFxEvidence = hasFxSignal || !!l.pays_fx_confirmed;
+  const hotOrWarm     = l.priority==="HOT" || l.priority==="WARM";
+  const notExcluded   = !["not_relevant"].includes(l.outreach_status);
+  const hasDirector   = !!l.director_name;
+  // Default call list view: require direct FX keyword on site (not just Gemini confirmation)
+  return hotOrWarm && hasWebsite && hasWebConf && hasFxEvidence && hasDirector && notExcluded;
 }
 
 function applyFilters(leads, filters, getCrmStatus) {

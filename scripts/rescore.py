@@ -11,6 +11,7 @@ Run after discover.py to rank the flat-50 QUEUE leads.
 """
 
 import json, logging, re
+from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
@@ -101,6 +102,41 @@ def extract_domain(website):
         return netloc if netloc else None
     except Exception:
         return None
+
+# Websites that are industry news/trade publications or sector aggregators,
+# NOT the actual company's website. enrich_websites sometimes latches onto these.
+KNOWN_BAD_DOMAINS = {
+    # Trade publications / news
+    "foodmanufacture.co.uk", "foodnavigator.com", "fooddrinkeurope.eu",
+    "thegrocer.co.uk", "just-drinks.com", "just-food.com",
+    "meatinfo.co.uk", "fruitnet.com", "freshplaza.com",
+    "harpers.co.uk", "decanter.com", "thedrinksbusiness.com",
+    "morningadvertiser.co.uk", "barbob.co.uk",
+    "oilprice.com", "hydrocarbons-technology.com", "offshore-technology.com",
+    "gasworld.com", "icis.com", "chemicalwatch.com",
+    "chemeurope.com", "chemicalprocessing.com",
+    "seafoodsource.com", "undercurrentnews.com", "fishfocus.co.uk",
+    # News aggregators / directories with "italianfood", "seafood" etc in subdomain
+    "news.italianfood.net", "italianfood.net",
+    # Generic sector portals
+    "ukfoodanddrink.org", "fdf.org.uk", "seafish.org",
+    "gov.uk", "companieshouse.gov.uk",
+    # Known aggregators / data sites
+    "grokipedia.com", "ensun.io", "craft.co", "zoominfo.com",
+    "opencorporates.com", "companieshouse.gov.uk",
+    # Alberta/Canadian pallet company (wrong geography)
+    "albertapallet.ca",
+}
+
+def is_known_bad_domain(website: str) -> bool:
+    dom = extract_domain(website) or ""
+    if dom in KNOWN_BAD_DOMAINS:
+        return True
+    # Catch subdomains of bad roots
+    for bad in KNOWN_BAD_DOMAINS:
+        if dom.endswith("." + bad):
+            return True
+    return False
 
 def guess_emails(director_name, website):
     """
@@ -217,12 +253,49 @@ def rescore(lead, urgency_map):
 
     score = min(score, 100)
 
-    # Gate: no FX evidence and no FX SIC → cap at SKIP threshold
-    has_fx  = lead.get("pays_fx_confirmed") or len(fx_sigs) > 0
-    has_sic = sb > 0
-    if not has_fx and not has_sic:
-        score = min(score, 39)
-        reasons.append("⚠ No direct FX evidence")
+    # ── Evidence gates — these enforce conviction thresholds ──────────────
+    has_fx      = lead.get("pays_fx_confirmed") or len(fx_sigs) > 0
+    has_intl    = has_fx or len(sec_sigs) >= 3
+    has_sic     = sb > 0
+    has_website = bool(lead.get("website"))
+    wc          = lead.get("website_confidence", "")
+
+    # Gate 0: known-bad domain (trade publication / news site / sector portal)
+    # enrich_websites sometimes latches onto industry news rather than the company's own site.
+    if has_website and is_known_bad_domain(lead.get("website", "")):
+        score = min(score, 49)
+        dom = extract_domain(lead.get("website", ""))
+        reasons.append(f"⚠ Bad domain ({dom}) — trade publication/aggregator, not company site")
+        has_website = False   # treat same as no-website for subsequent gates
+
+    # Gate A: no website → hard cap at QUEUE
+    # A company with no website at all has zero direct evidence. Not callable.
+    if not has_website:
+        score = min(score, 49)
+        reasons.append("⚠ No website — QUEUE cap (no direct evidence)")
+
+    # Gate B: no FX signals + no secondary signals → cap at SKIP unless strong SIC
+    # A company with a website but no trade signals found is not call-worthy.
+    if has_website and not has_fx and not has_intl:
+        if has_sic:
+            score = min(score, 55)   # QUEUE, not WARM
+            reasons.append("⚠ No website FX signals — QUEUE cap (SIC only)")
+        else:
+            score = min(score, 39)
+            reasons.append("⚠ No trade evidence at all — SKIP")
+
+    # Gate C: HOT requires direct FX signal OR pays_fx_confirmed on website
+    # Having a good SIC code and a website is not enough for HOT.
+    if score >= 80 and not has_fx:
+        score = 79
+        reasons.append("⚠ HOT capped → WARM: no direct FX signal on website")
+
+    # Gate D: WARM requires at least some international evidence
+    # B2B-only domestic companies shouldn't be WARM without international signals.
+    if score >= 60 and not has_intl and has_website:
+        if wc not in ("high", "medium", "confirmed"):
+            score = 55
+            reasons.append("⚠ WARM capped → QUEUE: low website confidence, no FX signals")
 
     if   score >= 80: priority = "HOT"
     elif score >= 60: priority = "WARM"
@@ -300,39 +373,109 @@ def main():
         else:                         skip  += 1
 
     # ── DEDUPLICATION PASS ───────────────────────────────────────────────
-    # Detect companies appearing for multiple events (stronger exposure signal).
-    # Same company_number found for 2+ events → multi_event_trigger = True → score boost.
-    # We keep all leads (different events = different reasons to call).
-    from collections import defaultdict
-
+    # Collapse multiple leads for the same company_number into ONE lead.
+    # The highest-scoring lead is kept; others are merged into it.
+    # This eliminates the problem of "FINE WINES & SPIRITS LIMITED" appearing
+    # 3 times (once per matching event) in the dashboard / call list.
     cn_groups = defaultdict(list)
     for lid, lead in leads.items():
         cn = lead.get("company_number")
         if cn:
-            cn_groups[cn].append(lid)
+            cn_groups[cn].append((lid, lead.get("score", 0)))
 
+    duplicates_removed = 0
     multi_count = 0
-    for cn, lids in cn_groups.items():
-        if len(lids) > 1:
-            for lid in lids:
-                leads[lid]["multi_event_count"]   = len(lids)
-                leads[lid]["multi_event_trigger"]  = True
-                # Boost: +4 per additional event trigger (capped at +8)
-                boost = min(8, (len(lids) - 1) * 4)
-                old_s = leads[lid]["score"]
-                leads[lid]["score"] = min(100, old_s + boost)
-                leads[lid]["scoring_reasons"].append(
-                    f"Multi-event trigger: {len(lids)} separate events flag this company (+{boost})"
-                )
-                # Re-derive priority after boost
-                s = leads[lid]["score"]
-                leads[lid]["priority"] = (
-                    "HOT" if s >= 80 else "WARM" if s >= 60 else "QUEUE" if s >= 40 else "SKIP"
-                )
-            multi_count += 1
+
+    for cn, lid_score_pairs in cn_groups.items():
+        if len(lid_score_pairs) <= 1:
+            continue
+
+        multi_count += 1
+        # Sort by score descending — keep the best one
+        lid_score_pairs.sort(key=lambda x: -x[1])
+        best_lid  = lid_score_pairs[0][0]
+        other_lids = [p[0] for p in lid_score_pairs[1:]]
+
+        # Merge event context into the winning lead
+        best = leads[best_lid]
+        all_event_ids = list({
+            eid for lid in [best_lid] + other_lids
+            for eid in (leads[lid].get("linked_event_ids") or [leads[lid].get("event_id","")]) if eid
+        })
+        all_segments = list({
+            leads[lid].get("segment_name","") for lid in [best_lid] + other_lids
+            if leads[lid].get("segment_name","")
+        })
+        all_events_text = list({
+            leads[lid].get("event_headline","") or leads[lid].get("trigger_headline","")
+            for lid in [best_lid] + other_lids
+        } - {""})
+
+        best["multi_event_trigger"]  = True
+        best["multi_event_count"]    = len(lid_score_pairs)
+        best["linked_event_ids"]     = all_event_ids
+        best["linked_segments"]      = all_segments
+        best["linked_event_headlines"] = all_events_text
+
+        # Score boost for multi-event exposure
+        boost = min(8, (len(lid_score_pairs) - 1) * 4)
+        best["score"] = min(100, best["score"] + boost)
+        best["scoring_reasons"].append(
+            f"Multi-event trigger: {len(lid_score_pairs)} separate events flag this company (+{boost})"
+        )
+        s = best["score"]
+        best["priority"] = "HOT" if s>=80 else "WARM" if s>=60 else "QUEUE" if s>=40 else "SKIP"
+
+        # Remove the lower-scoring duplicates
+        for lid in other_lids:
+            leads.pop(lid, None)
+            duplicates_removed += 1
 
     if multi_count:
-        log.info("Multi-event triggers: %d companies flagged by 2+ events", multi_count)
+        log.info("Deduplication: %d companies merged (%d duplicate leads removed)",
+                 multi_count, duplicates_removed)
+
+    # ── DOMAIN DEDUPLICATION PASS ─────────────────────────────────────────────
+    # If two leads with DIFFERENT company_numbers share the same website domain,
+    # at least one has been assigned the wrong website by enrich_websites.
+    # Fix: strip the website from the lower-scoring lead (Gate A will then cap it).
+    dom_groups: dict[str, list] = defaultdict(list)
+    for lid, lead in leads.items():
+        dom = extract_domain(lead.get("website", ""))
+        if dom:
+            dom_groups[dom].append((lid, lead.get("score", 0)))
+
+    domain_collisions = 0
+    for dom, lid_score_pairs in dom_groups.items():
+        if len(lid_score_pairs) <= 1:
+            continue
+        # Check they're different company numbers (same-CN already handled above)
+        cns = {leads[p[0]].get("company_number","") for p in lid_score_pairs}
+        if len(cns) <= 1:
+            continue
+        # Keep the highest-scoring lead's website; strip it from the rest
+        lid_score_pairs.sort(key=lambda x: -x[1])
+        best_lid = lid_score_pairs[0][0]
+        for lid, _ in lid_score_pairs[1:]:
+            lead = leads[lid]
+            log.info("  Domain collision (%s): stripping website from %s (keeping for %s)",
+                     dom, lead.get("company_name","")[:35], leads[best_lid].get("company_name","")[:35])
+            lead["website"]            = None
+            lead["website_confidence"] = None
+            lead["website_source"]     = "collision_stripped"
+            # Re-apply Gate A — no website → QUEUE cap
+            s = lead.get("score", 0)
+            if s > 49:
+                lead["score"] = 49
+                p = "QUEUE"
+                lead["priority"] = p
+                lead["scoring_reasons"].append(
+                    f"⚠ Website collision ({dom}) — stripped, QUEUE cap"
+                )
+            domain_collisions += 1
+
+    if domain_collisions:
+        log.info("Domain dedup: %d leads had website stripped (duplicate domain)", domain_collisions)
 
     # Remove SKIPped leads (below threshold — not worth working)
     leads = {k:v for k,v in leads.items() if v.get("priority") != "SKIP"}
