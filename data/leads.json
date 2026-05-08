@@ -60,7 +60,7 @@
     "ch_name_match": 1.0,
     "ch_confidence": "high",
     "discovered_at": "2026-05-07T11:49:57.211531+00:00",
-    "rescored_at": "2026-05-07T15:28:20.541359+00:00",
+    "rescored_at": "2026-05-08T08:12:09.048276+00:00",
     "multi_event_trigger": true,
     "multi_event_count": 2,
     "linked_event_ids": [
@@ -219,7 +219,7 @@
     "ch_name_match": 1.0,
     "ch_confidence": "high",
     "discovered_at": "2026-05-07T11:53:44.672869+00:00",
-    "rescored_at": "2026-05-07T15:28:20.541521+00:00",
+    "rescored_at": "2026-05-08T08:12:09.048541+00:00",
     "multi_event_trigger": false,
     "multi_event_count": 1,
     "linked_event_ids": [
@@ -360,7 +360,7 @@
     "ch_name_match": 1.0,
     "ch_confidence": "high",
     "discovered_at": "2026-05-07T11:53:46.944034+00:00",
-    "rescored_at": "2026-05-07T15:28:20.541595+00:00",
+    "rescored_at": "2026-05-08T08:12:09.048673+00:00",
     "multi_event_trigger": false,
     "multi_event_count": 1,
     "linked_event_ids": [
@@ -494,7 +494,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Alan James Daley (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541629+00:00",
+    "rescored_at": "2026-05-08T08:12:09.048726+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -622,7 +622,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Alastair Perry (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541662+00:00",
+    "rescored_at": "2026-05-08T08:12:09.048778+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -747,7 +747,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Jane Liza Harvey (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541684+00:00",
+    "rescored_at": "2026-05-08T08:12:09.048820+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -872,7 +872,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Barry Leslie Clarke (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541717+00:00",
+    "rescored_at": "2026-05-08T08:12:09.048874+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -997,7 +997,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Lynne Gillian Cordice (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541778+00:00",
+    "rescored_at": "2026-05-08T08:12:09.049010+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -1123,7 +1123,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Md Showkat Hossain (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541806+00:00",
+    "rescored_at": "2026-05-08T08:12:09.049062+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -1253,7 +1253,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Andrea Cara Foley (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541868+00:00",
+    "rescored_at": "2026-05-08T08:12:09.049181+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -1383,7 +1383,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Conor Ash (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541896+00:00",
+    "rescored_at": "2026-05-08T08:12:09.049225+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -1508,7 +1508,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Brendan Kennelly (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541924+00:00",
+    "rescored_at": "2026-05-08T08:12:09.049265+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -1635,7 +1635,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Adam Graham Beard (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.541977+00:00",
+    "rescored_at": "2026-05-08T08:12:09.049312+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -1765,7 +1765,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Graham Denis Judd (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.542362+00:00",
+    "rescored_at": "2026-05-08T08:12:09.049868+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -1895,7 +1895,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Ramin, Dr Ghaffari Tabrizi (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.542578+00:00",
+    "rescored_at": "2026-05-08T08:12:09.049985+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -2024,7 +2024,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Richard Andrew Barratt (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.542638+00:00",
+    "rescored_at": "2026-05-08T08:12:09.050027+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -2152,7 +2152,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Andrew James Bolland (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.542732+00:00",
+    "rescored_at": "2026-05-08T08:12:09.050076+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -2278,7 +2278,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Dennis De Lord (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.542809+00:00",
+    "rescored_at": "2026-05-08T08:12:09.050186+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -2404,7 +2404,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Andrew James Bolland (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.542842+00:00",
+    "rescored_at": "2026-05-08T08:12:09.050228+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -2533,7 +2533,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Edward Cameron Singer (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.542875+00:00",
+    "rescored_at": "2026-05-08T08:12:09.050275+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -2664,7 +2664,7 @@
     "sales_angle": "Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
     "suggested_next_step": "Call Ahsan Hassan (director) \u2014 Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.543517+00:00",
+    "rescored_at": "2026-05-08T08:12:09.051332+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -2789,7 +2789,7 @@
     "sales_angle": "Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
     "suggested_next_step": "Call Kohol Shadrach, Prof Iornem (director) \u2014 Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.543821+00:00",
+    "rescored_at": "2026-05-08T08:12:09.051891+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -2914,7 +2914,7 @@
     "sales_angle": "Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
     "suggested_next_step": "Call Bukola Ezekiel Oladunjoye (director) \u2014 Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544114+00:00",
+    "rescored_at": "2026-05-08T08:12:09.052433+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -3043,7 +3043,7 @@
     "sales_angle": "Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
     "suggested_next_step": "Call Dimitrios Roumeliotis (director) \u2014 Oil spiked on UAE OPEC exit \u2014 fuel and petroleum importers paying in USD are seeing their cost base move immediately.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544141+00:00",
+    "rescored_at": "2026-05-08T08:12:09.052474+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -3169,7 +3169,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Marie Hutchinson (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544167+00:00",
+    "rescored_at": "2026-05-08T08:12:09.052523+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -3308,7 +3308,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Steven Row Irwin (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544195+00:00",
+    "rescored_at": "2026-05-08T08:12:09.052564+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -3436,7 +3436,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call switchboard, ask for Finance Director or MD \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544258+00:00",
+    "rescored_at": "2026-05-08T08:12:09.052675+00:00",
     "guessed_emails": [],
     "linkedin_assist": {
       "search_name": "NORTH SEA FUEL TRADING",
@@ -3550,7 +3550,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Steven Row Irwin (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544549+00:00",
+    "rescored_at": "2026-05-08T08:12:09.053208+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -3638,7 +3638,7 @@
     "website_confidence": "low",
     "website_source": "domain_guess",
     "exposure_confidence": "low",
-    "signal_count": 1,
+    "signal_count": 0,
     "segment_name": "UK chemical distributors and importers",
     "segment_business_model": "UK distributor/wholesaler buying industrial or specialty chemicals from overseas suppliers in USD and selling domestically in GBP",
     "exposure_level": "Very High",
@@ -3655,7 +3655,6 @@
     "score": 55,
     "priority": "QUEUE",
     "scoring_reasons": [
-      "International activity signals (1)",
       "SIC tier 1 (core trade/wholesale): 46760",
       "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD commodity pri",
       "High urgency event (score 9/10)",
@@ -3671,15 +3670,13 @@
     "fx_payment_logic": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms.",
     "fx_payment_signals": [],
     "segment_signals": [],
-    "secondary_signals": [
-      "supplier"
-    ],
+    "secondary_signals": [],
     "pays_fx_confirmed": false,
     "website_snippet": "EI Productions \u2013 An Event Management & Hospitality Production Business Skip to content Welcome to EI Productions We are an event management, brand experiential and hospitality production business with the ability to provide 360\u00b0 solutions across all areas of hospitality and entertainment. \u201cExcellent Service \u2013 highly recommend\u201d Hurlingham Polo Association I know it was a challenging one with regard",
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Ali Chalidovich Visaev (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544576+00:00",
+    "rescored_at": "2026-05-08T08:12:09.053324+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -3808,7 +3805,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Christopher John Simpson (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544612+00:00",
+    "rescored_at": "2026-05-08T08:12:09.053428+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -3937,7 +3934,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Tamir Meshulami (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544675+00:00",
+    "rescored_at": "2026-05-08T08:12:09.053562+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -4066,7 +4063,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Brian James Stalker (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544700+00:00",
+    "rescored_at": "2026-05-08T08:12:09.053606+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -4191,7 +4188,7 @@
     "sales_angle": "With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "suggested_next_step": "Call Robert James O'Donovan (director) \u2014 With crude up sharply, chemical importers paying in USD are seeing their next invoice cost more in GBP terms. Is that something you're managing?",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.544741+00:00",
+    "rescored_at": "2026-05-08T08:12:09.053652+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -4316,7 +4313,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Kuddusi Aslan (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.545288+00:00",
+    "rescored_at": "2026-05-08T08:12:09.054707+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -4441,7 +4438,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call John Barry Moseley (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.545834+00:00",
+    "rescored_at": "2026-05-08T08:12:09.055757+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -4573,7 +4570,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Xingqiong He (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.546120+00:00",
+    "rescored_at": "2026-05-08T08:12:09.056306+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -4698,7 +4695,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Richard James Mitchelmore (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.546149+00:00",
+    "rescored_at": "2026-05-08T08:12:09.056382+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -4834,7 +4831,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Manickavasagar Raj Rudran (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.546704+00:00",
+    "rescored_at": "2026-05-08T08:12:09.057440+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -4963,7 +4960,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Katherine Coxhead (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.547527+00:00",
+    "rescored_at": "2026-05-08T08:12:09.059002+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -5089,7 +5086,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Alekos Christofis (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.547550+00:00",
+    "rescored_at": "2026-05-08T08:12:09.059043+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -5219,7 +5216,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Douglas Pritchard Hill (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.547836+00:00",
+    "rescored_at": "2026-05-08T08:12:09.059597+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -5348,7 +5345,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Terence Peter Jackson (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.547857+00:00",
+    "rescored_at": "2026-05-08T08:12:09.059628+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -5477,7 +5474,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Robert Hammond (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.547878+00:00",
+    "rescored_at": "2026-05-08T08:12:09.059666+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -5603,7 +5600,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Emma Mary Roe (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.547895+00:00",
+    "rescored_at": "2026-05-08T08:12:09.059695+00:00",
     "guessed_emails": [],
     "linkedin_assist": {
       "search_name": "ISHERWOODS FISH WHOLESALERS",
@@ -5712,7 +5709,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Peter Blower (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.547908+00:00",
+    "rescored_at": "2026-05-08T08:12:09.059718+00:00",
     "guessed_emails": [],
     "linkedin_assist": {
       "search_name": "LAWRENCE & RAE WHOLESALE FISH",
@@ -5820,7 +5817,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Mohamed Shifan Ilyas (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.547925+00:00",
+    "rescored_at": "2026-05-08T08:12:09.059751+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -5948,7 +5945,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Leigh Geoffrey Head Genge (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548488+00:00",
+    "rescored_at": "2026-05-08T08:12:09.060852+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -6037,7 +6034,7 @@
     "website_confidence": null,
     "website_source": "collision_stripped",
     "exposure_confidence": "medium",
-    "signal_count": 0,
+    "signal_count": 1,
     "segment_name": "UK seafood and fish importers",
     "segment_business_model": "UK importer buying fresh or frozen seafood from Norwegian, Icelandic or Faroese suppliers, paying in USD or NOK, selling to UK trade in GBP",
     "exposure_level": "Very High",
@@ -6054,6 +6051,7 @@
     "score": 49,
     "priority": "QUEUE",
     "scoring_reasons": [
+      "International activity signals (1)",
       "SIC tier 1 (core trade/wholesale): 46380, 47230",
       "Segment exposure: Very High \u2014 USD/NOK payment timing risk",
       "High urgency event (score 9/10)",
@@ -6069,13 +6067,15 @@
     "fx_payment_logic": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets.",
     "fx_payment_signals": [],
     "segment_signals": [],
-    "secondary_signals": [],
+    "secondary_signals": [
+      "global"
+    ],
     "pays_fx_confirmed": false,
-    "website_snippet": "",
+    "website_snippet": "OCEANFISH.CO.UK - For Sale THIS DOMAIN NAME IS FOR SALE OCEANFISH.CO.UK Saw.com has successfully helped thousands of buyers acquire the perfect domain name. Interested in OCEANFISH.CO.UK? Let\u00e2\u0080\u0099s get started. Make an Offer Make an Offer Buy With Confidence Saw.com has assisted thousands of buyers in securely obtaining their ideal domain for their businesses. We would be pleased to help you with yo",
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Mohandoss Iyyappan (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548509+00:00",
+    "rescored_at": "2026-05-08T08:12:09.060889+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -6201,7 +6201,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Tony Petris (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548530+00:00",
+    "rescored_at": "2026-05-08T08:12:09.060927+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -6331,7 +6331,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Jimmy Lionel Raguenet (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548550+00:00",
+    "rescored_at": "2026-05-08T08:12:09.060967+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -6457,7 +6457,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Kathleen Anne Down (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548567+00:00",
+    "rescored_at": "2026-05-08T08:12:09.060995+00:00",
     "guessed_emails": [],
     "linkedin_assist": {
       "search_name": "REX DOWN WHOLESALE FISH MERCHANTS",
@@ -6566,7 +6566,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Daniel Thomas Aherne (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548591+00:00",
+    "rescored_at": "2026-05-08T08:12:09.061061+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -6693,7 +6693,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Pamela Douglas Macdougall (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548606+00:00",
+    "rescored_at": "2026-05-08T08:12:09.061078+00:00",
     "guessed_emails": [],
     "linkedin_assist": {
       "search_name": "SEAFOOD TRADERS INTERNATIONAL",
@@ -6810,7 +6810,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call David Yan Jun Jiang (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548660+00:00",
+    "rescored_at": "2026-05-08T08:12:09.061188+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -6939,7 +6939,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Jason Marcus Brewer (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.548682+00:00",
+    "rescored_at": "2026-05-08T08:12:09.061225+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -7064,7 +7064,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Craig Cameron (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.549235+00:00",
+    "rescored_at": "2026-05-08T08:12:09.062269+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -7195,7 +7195,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Grzegorz Pawel Purzycki (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.549256+00:00",
+    "rescored_at": "2026-05-08T08:12:09.062300+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -7344,7 +7344,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Sardar Shafquat Khan (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.549418+00:00",
+    "rescored_at": "2026-05-08T08:12:09.062412+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -7495,7 +7495,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Abosede Abiola Makinde (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.549483+00:00",
+    "rescored_at": "2026-05-08T08:12:09.062531+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -7637,7 +7637,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Alex John Nurse (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.549510+00:00",
+    "rescored_at": "2026-05-08T08:12:09.062563+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -7788,7 +7788,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Brian Mavurah (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.549563+00:00",
+    "rescored_at": "2026-05-08T08:12:09.062607+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -7935,7 +7935,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Gholam Abbas Merzai (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.549850+00:00",
+    "rescored_at": "2026-05-08T08:12:09.063160+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -8083,7 +8083,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Fathalla Ahmed Ibrahim Nassar (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.550400+00:00",
+    "rescored_at": "2026-05-08T08:12:09.064213+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -8208,7 +8208,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Jacqueline Mcnamee (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.550951+00:00",
+    "rescored_at": "2026-05-08T08:12:09.065263+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -8335,7 +8335,7 @@
     "sales_angle": "With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "suggested_next_step": "Call Muhammad Atiq (director) \u2014 With both the Fed and BoE announcing this week, GBP/USD is moving. If you have a supplier payment due, the rate you get Thursday could be quite different from today.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.551505+00:00",
+    "rescored_at": "2026-05-08T08:12:09.066336+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -8462,7 +8462,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call David Graham Dunne (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.551522+00:00",
+    "rescored_at": "2026-05-08T08:12:09.066363+00:00",
     "guessed_emails": [],
     "linkedin_assist": {
       "search_name": "ALEXANDER HADLEIGH WINE MERCHANTS AND IMPORTERS",
@@ -8574,7 +8574,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Robert Grant Harrison (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.551539+00:00",
+    "rescored_at": "2026-05-08T08:12:09.066388+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -8714,7 +8714,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call George Reynolds (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.552086+00:00",
+    "rescored_at": "2026-05-08T08:12:09.067445+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -8863,7 +8863,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Nigel O'Sullivan (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.552108+00:00",
+    "rescored_at": "2026-05-08T08:12:09.067481+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -9017,7 +9017,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Peter James Wass (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.552931+00:00",
+    "rescored_at": "2026-05-08T08:12:09.069067+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -9159,7 +9159,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Bethan Ceri Davies (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.553475+00:00",
+    "rescored_at": "2026-05-08T08:12:09.070264+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -9306,7 +9306,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Darpan Chawla (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.554020+00:00",
+    "rescored_at": "2026-05-08T08:12:09.071321+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -9438,7 +9438,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Philip Gearing (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.554306+00:00",
+    "rescored_at": "2026-05-08T08:12:09.071875+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -9564,7 +9564,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Jamie Ambrose Kirke Graham (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.554920+00:00",
+    "rescored_at": "2026-05-08T08:12:09.072928+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -9689,7 +9689,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Kenneth Coutts (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.555480+00:00",
+    "rescored_at": "2026-05-08T08:12:09.073975+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -9770,13 +9770,13 @@
     "sic_codes": [
       "46342"
     ],
-    "website": "https://www.finewine.co.uk/",
+    "website": "https://finewine.com/",
     "director_name": "George Mark Somerset Clowes",
     "director_role": "director",
     "company_source": "companies_house",
-    "website_confidence": "low",
+    "website_confidence": "high",
     "website_source": "domain_guess",
-    "exposure_confidence": "low",
+    "exposure_confidence": "medium",
     "signal_count": 0,
     "segment_name": "European wine and spirits importers",
     "segment_business_model": "UK importer buying wine and spirits direct from European producers in EUR, selling to UK trade at GBP prices",
@@ -9800,7 +9800,7 @@
       "Company name signals trade/international activity (+3)",
       "Established company (+8) \u2014 incorporated 1999",
       "Director found: George Mark Somerset Clowes",
-      "Website found \u2014 low confidence (domain_guess)",
+      "Website verified \u2014 strong name match (domain_guess)",
       "Active on Companies House",
       "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
     ],
@@ -9811,27 +9811,27 @@
     "segment_signals": [],
     "secondary_signals": [],
     "pays_fx_confirmed": false,
-    "website_snippet": "",
+    "website_snippet": "FineWine.com, Gaithersburg, MD, Gaithersburg, MD Jump to content Jump to search Our website will be back soon! FineWine.com, Gaithersburg, MD Map location 20 Grand Corner Avenue, Gaithersburg, MD 20878 Email support@finewine.com Phone (301) 987-5933",
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call George Mark Somerset Clowes (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.555502+00:00",
+    "rescored_at": "2026-05-08T08:12:09.074008+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
-        "email": "george@finewine.co.uk"
+        "email": "george@finewine.com"
       },
       {
         "pattern": "firstname.lastname@",
-        "email": "george.clowes@finewine.co.uk"
+        "email": "george.clowes@finewine.com"
       },
       {
         "pattern": "f.lastname@",
-        "email": "g.clowes@finewine.co.uk"
+        "email": "g.clowes@finewine.com"
       },
       {
         "pattern": "flastname@",
-        "email": "gclowes@finewine.co.uk"
+        "email": "gclowes@finewine.com"
       }
     ],
     "linkedin_assist": {
@@ -9944,7 +9944,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Abbey Abdul Kalanzi (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.555563+00:00",
+    "rescored_at": "2026-05-08T08:12:09.074121+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -10083,7 +10083,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Dennis Alan Hall (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.555583+00:00",
+    "rescored_at": "2026-05-08T08:12:09.074152+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -10222,7 +10222,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Adrian Simon Bones (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.556134+00:00",
+    "rescored_at": "2026-05-08T08:12:09.075207+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -10361,7 +10361,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Benjamin Sean Steyn (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.556194+00:00",
+    "rescored_at": "2026-05-08T08:12:09.075322+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -10501,7 +10501,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Beverley Asieduah Annan-Forson (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.556214+00:00",
+    "rescored_at": "2026-05-08T08:12:09.075353+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -10641,7 +10641,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Dhiren Lalit Kotecha (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.556230+00:00",
+    "rescored_at": "2026-05-08T08:12:09.075375+00:00",
     "guessed_emails": [],
     "linkedin_assist": {
       "search_name": "MYLIKO INTERNATIONAL (WINES)",
@@ -10750,7 +10750,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Savitri Maharaj (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.556780+00:00",
+    "rescored_at": "2026-05-08T08:12:09.076408+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -10875,7 +10875,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Giorgi Kinkladze (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.556801+00:00",
+    "rescored_at": "2026-05-08T08:12:09.076439+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -11000,7 +11000,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Solomon Pachtinger (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.556822+00:00",
+    "rescored_at": "2026-05-08T08:12:09.076470+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -11126,7 +11126,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Simon Nicholas Harrison (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557372+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077520+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -11256,7 +11256,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Abigail Ronke Thomas (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557432+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077637+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -11396,7 +11396,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Henry Donkor (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557453+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077680+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -11536,7 +11536,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Eliyaz Khan (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557473+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077712+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -11676,7 +11676,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Muhammad Hanif (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557532+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077824+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -11819,7 +11819,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Amran Ahmed (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557558+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077857+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -11962,7 +11962,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Charles Alexander Aikman (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557579+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077888+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -12105,7 +12105,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Godwin Efik (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557601+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077923+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -12246,7 +12246,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Richard Christopher Hughes (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557622+00:00",
+    "rescored_at": "2026-05-08T08:12:09.077961+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -12389,7 +12389,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Dylan Singh Sunner (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.557652+00:00",
+    "rescored_at": "2026-05-08T08:12:09.078034+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -12528,7 +12528,7 @@
     "sales_angle": "With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "suggested_next_step": "Call Francesco Marzano (director) \u2014 With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.558200+00:00",
+    "rescored_at": "2026-05-08T08:12:09.079091+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -12660,7 +12660,7 @@
     "sales_angle": "With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "suggested_next_step": "Call Fabrizio Conte (director) \u2014 With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.558263+00:00",
+    "rescored_at": "2026-05-08T08:12:09.079206+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -12800,7 +12800,7 @@
     "sales_angle": "With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "suggested_next_step": "Call Pier Giorgio Porretti (director) \u2014 With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.558561+00:00",
+    "rescored_at": "2026-05-08T08:12:09.079757+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -12928,7 +12928,7 @@
     "sales_angle": "With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "suggested_next_step": "Call Salvatore Borda (director) \u2014 With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.558667+00:00",
+    "rescored_at": "2026-05-08T08:12:09.079790+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -13059,7 +13059,7 @@
     "sales_angle": "With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "suggested_next_step": "Call Pietro Giovanni Mingolla (director) \u2014 With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.558986+00:00",
+    "rescored_at": "2026-05-08T08:12:09.080327+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -13187,7 +13187,7 @@
     "sales_angle": "With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "suggested_next_step": "Call Giorgio Valentino (director) \u2014 With GBP weakening vs EUR, UK food importers paying European suppliers are seeing their cost base rise on every shipment while GBP selling prices stay fixed.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.559018+00:00",
+    "rescored_at": "2026-05-08T08:12:09.080400+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -13314,7 +13314,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Andrew Douglas Simpson (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.559098+00:00",
+    "rescored_at": "2026-05-08T08:12:09.080471+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -13454,7 +13454,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Timothy Graham Garrett (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.559136+00:00",
+    "rescored_at": "2026-05-08T08:12:09.080505+00:00",
     "guessed_emails": [],
     "multi_event_count": 2,
     "multi_event_trigger": true,
@@ -13581,7 +13581,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Michael David Mcbrien (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.559170+00:00",
+    "rescored_at": "2026-05-08T08:12:09.080571+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -13720,7 +13720,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Daniel Parkinson (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.559198+00:00",
+    "rescored_at": "2026-05-08T08:12:09.080604+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -13860,7 +13860,7 @@
     "sales_angle": "With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "suggested_next_step": "Call Shaun Atkinson (director) \u2014 With GBP/EUR moving and institutional shorts near record, wine importers paying French and Italian producers in EUR are seeing every payment cost more in GBP.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.559231+00:00",
+    "rescored_at": "2026-05-08T08:12:09.080673+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -14009,7 +14009,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Aryan Mahmood Abdullah (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.560311+00:00",
+    "rescored_at": "2026-05-08T08:12:09.081727+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -14140,7 +14140,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Irina Gabriela Adeniyi (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.560433+00:00",
+    "rescored_at": "2026-05-08T08:12:09.081801+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -14269,7 +14269,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Ali Ahmet (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.560476+00:00",
+    "rescored_at": "2026-05-08T08:12:09.081834+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -14396,7 +14396,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Mumtaz Ahmed Khan (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.560499+00:00",
+    "rescored_at": "2026-05-08T08:12:09.081866+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -14522,7 +14522,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Mohammad Idrees (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.560520+00:00",
+    "rescored_at": "2026-05-08T08:12:09.081890+00:00",
     "guessed_emails": [],
     "linkedin_assist": {
       "search_name": "ADZ FOOD DISTRIBUTION",
@@ -14639,7 +14639,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Colin Jolliffe (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.561114+00:00",
+    "rescored_at": "2026-05-08T08:12:09.082949+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -14772,7 +14772,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Paul Michael O'Sullivan (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.561477+00:00",
+    "rescored_at": "2026-05-08T08:12:09.083484+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -14905,7 +14905,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call David Stevenson (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.561783+00:00",
+    "rescored_at": "2026-05-08T08:12:09.084026+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -15034,7 +15034,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Martin Howard Back (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.561829+00:00",
+    "rescored_at": "2026-05-08T08:12:09.084101+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -15159,7 +15159,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Honghong Zhang (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.561860+00:00",
+    "rescored_at": "2026-05-08T08:12:09.084171+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -15283,7 +15283,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Sarabjit Kaur (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.561890+00:00",
+    "rescored_at": "2026-05-08T08:12:09.084240+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -15407,7 +15407,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Mahmoud Moussa (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.561918+00:00",
+    "rescored_at": "2026-05-08T08:12:09.084311+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -15533,7 +15533,7 @@
     "sales_angle": "With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "suggested_next_step": "Call Maxim Gaidarji (director) \u2014 With USD strengthening on Iran tensions, UK food manufacturers buying commodity inputs in USD are seeing their raw material costs rise in GBP terms right now.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.561946+00:00",
+    "rescored_at": "2026-05-08T08:12:09.084380+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -15665,7 +15665,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Eamonn Fitzgerald Jones (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.562008+00:00",
+    "rescored_at": "2026-05-08T08:12:09.084504+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -15795,7 +15795,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Michael James Sharples (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.562585+00:00",
+    "rescored_at": "2026-05-08T08:12:09.085583+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -15923,7 +15923,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Blair Thomson Stewart (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.562607+00:00",
+    "rescored_at": "2026-05-08T08:12:09.085616+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -16048,7 +16048,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Michael Alexander Bain (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.562638+00:00",
+    "rescored_at": "2026-05-08T08:12:09.085667+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -16173,7 +16173,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Ioana Simona Ababei (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.562668+00:00",
+    "rescored_at": "2026-05-08T08:12:09.085715+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -16298,7 +16298,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Jordan Lee Morris (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.562703+00:00",
+    "rescored_at": "2026-05-08T08:12:09.085770+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -16433,7 +16433,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Leon Antony Phipps (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.562991+00:00",
+    "rescored_at": "2026-05-08T08:12:09.086304+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -16564,7 +16564,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Alexander Victor Bruce (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563061+00:00",
+    "rescored_at": "2026-05-08T08:12:09.086355+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -16696,7 +16696,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Alexander Victor Bruce (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563094+00:00",
+    "rescored_at": "2026-05-08T08:12:09.086403+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -16821,7 +16821,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Claire Byers (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563123+00:00",
+    "rescored_at": "2026-05-08T08:12:09.086568+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -16948,7 +16948,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Tom Martin (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563155+00:00",
+    "rescored_at": "2026-05-08T08:12:09.086655+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -17074,7 +17074,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call David Kaiserlich (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563718+00:00",
+    "rescored_at": "2026-05-08T08:12:09.087730+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -17202,7 +17202,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Robert John Tapster (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563748+00:00",
+    "rescored_at": "2026-05-08T08:12:09.087783+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -17328,7 +17328,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Angela Jones (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563777+00:00",
+    "rescored_at": "2026-05-08T08:12:09.087871+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -17455,7 +17455,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Roger Paul Barnes (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563836+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088018+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -17580,7 +17580,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Chun Fat So (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563857+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088051+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -17710,7 +17710,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Kirsty Blair Burns (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563877+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088084+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -17838,7 +17838,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Eric Arthur Jackson (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.563936+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088196+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -17962,7 +17962,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Eric Arthur Jackson (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564312+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088312+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -18087,7 +18087,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Craig Charles, Mr. Smith (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564403+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088428+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -18212,7 +18212,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Anthony William Bartlett (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564469+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088552+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -18341,7 +18341,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Harry Hunt (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564532+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088663+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -18473,7 +18473,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Graham Crawford (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564594+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088777+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -18602,7 +18602,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Henry James Ellis (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564616+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088808+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -18729,7 +18729,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Helen Louise Bona (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564648+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088858+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -18854,7 +18854,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Peter Howard Sceats (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564680+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088907+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -18992,7 +18992,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Kevin Fox (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564711+00:00",
+    "rescored_at": "2026-05-08T08:12:09.088960+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -19121,7 +19121,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Ewan John Henderson (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564741+00:00",
+    "rescored_at": "2026-05-08T08:12:09.089011+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -19249,7 +19249,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Ioana Simona Ababei (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564772+00:00",
+    "rescored_at": "2026-05-08T08:12:09.089061+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -19374,7 +19374,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Daniel James Connew (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.564792+00:00",
+    "rescored_at": "2026-05-08T08:12:09.089093+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -19504,7 +19504,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Surbeer Singh Kurana (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.565344+00:00",
+    "rescored_at": "2026-05-08T08:12:09.090213+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -19629,7 +19629,7 @@
     "sales_angle": "US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "suggested_next_step": "Call Pierre Schoeman (director) \u2014 US tariff uncertainty and GBP/USD volatility create a double risk for Scotch exporters \u2014 worth reviewing how you're converting USD export revenue given the current uncertainty.",
     "status": "new",
-    "rescored_at": "2026-05-07T15:28:20.565374+00:00",
+    "rescored_at": "2026-05-08T08:12:09.090271+00:00",
     "guessed_emails": [
       {
         "pattern": "firstname@",
@@ -19693,6 +19693,820 @@
         {
           "role": "Managing Director",
           "url": "https://www.google.com/search?q=site:linkedin.com/in+AGAINST%20THE%20GRAIN%20SPIRITS+Managing%20Director"
+        }
+      ]
+    }
+  },
+  "af5513d55e711da1": {
+    "company_name": "FARM CHEMICALS LIMITED",
+    "company_number": "NI015012",
+    "company_status": "active",
+    "company_source": "web_search",
+    "sic_codes": [
+      "46750"
+    ],
+    "incorporated": "1981-07-02",
+    "registered_address": "80a Charles Street, Co.Armagh, BT62 1DQ",
+    "director_name": "William Wesley Robin Hunniford",
+    "director_role": "director",
+    "website": "https://farm-chemicals.com/",
+    "website_domain": "farm-chemicals.com",
+    "website_confidence": "high",
+    "website_source": "ddg_search",
+    "website_snippet": "Farm Chemicals \u2013 Farm Chemicals is a Spanish company specialized in the formulation and commercialization of specialty fertilizer. Innovation at the service of agriculture Watch video Food and agriculture are part of the same entity Innovation We innovate every day to offer the most specialized fertilizers of the sector, favoring a better management of the natural resources. Passion We are passion",
+    "fx_payment_signals": [
+      "spanish"
+    ],
+    "b2b_signals": [],
+    "secondary_signals": [
+      "worldwide"
+    ],
+    "segment_signals": [],
+    "pays_fx_confirmed": true,
+    "signal_count": 2,
+    "score": 100,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment signals: spanish",
+      "International activity signals (1)",
+      "SIC tier 1 (core trade/wholesale): 46750",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD commodity pri",
+      "High urgency event (score 9/10)",
+      "Established company (+8) \u2014 incorporated 1981",
+      "Director found: William Wesley Robin Hunniford",
+      "Website verified \u2014 strong name match (ddg_search)",
+      "Active on Companies House"
+    ],
+    "event_id": "evt_opec_uae_001",
+    "event_headline": "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens",
+    "segment_name": "UK chemical distributors and importers",
+    "segment_business_model": "UK distributor/wholesaler buying industrial or specialty chemicals from overseas suppliers in USD and selling domestically in GBP",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD commodity pricing",
+    "exposure_confidence": "high",
+    "why_affected": "Website shows: spanish. These businesses pay USD for every shipment. When crude spikes and USD strengthens simultaneously, margin is squeezed from both sides on every invoice. Likely affected by: UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens.",
+    "why_financially_exposed": "These businesses pay USD for every shipment. When crude spikes and USD strengthens simultaneously, margin is squeezed from both sides on every invoice.",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "affected_payment_flow": "",
+    "business_impact_summary": "",
+    "trigger_headline": "",
+    "ch_name_match": 1.0,
+    "ch_confidence": "high",
+    "discovered_at": "2026-05-08T07:43:02.141585+00:00",
+    "rescored_at": "2026-05-08T08:12:09.090313+00:00",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "linked_event_ids": [
+      "evt_opec_uae_001"
+    ],
+    "guessed_emails": [
+      {
+        "pattern": "firstname@",
+        "email": "william@farm-chemicals.com"
+      },
+      {
+        "pattern": "firstname.lastname@",
+        "email": "william.hunniford@farm-chemicals.com"
+      },
+      {
+        "pattern": "f.lastname@",
+        "email": "w.hunniford@farm-chemicals.com"
+      },
+      {
+        "pattern": "flastname@",
+        "email": "whunniford@farm-chemicals.com"
+      }
+    ],
+    "linkedin_url": null,
+    "call_opener": null,
+    "email_draft": null,
+    "outreach_status": "new",
+    "linkedin_assist": {
+      "search_name": "FARM CHEMICALS",
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=FARM%20CHEMICALS",
+      "people_searches": [
+        {
+          "role": "William Wesley Robin Hunniford (direct search)",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=William%20Wesley%20Robin%20Hunniford"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=FARM%20CHEMICALS%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=FARM%20CHEMICALS%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=FARM%20CHEMICALS%20CFO"
+        },
+        {
+          "role": "Chief Financial Officer",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=FARM%20CHEMICALS%20Chief%20Financial%20Officer"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=FARM%20CHEMICALS%20Commercial%20Director"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Find William on LinkedIn",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+William%20Wesley%20Robin%20Hunniford"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+FARM%20CHEMICALS"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+FARM%20CHEMICALS+Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+FARM%20CHEMICALS+Managing%20Director"
+        }
+      ]
+    }
+  },
+  "148333ae8700b540": {
+    "company_name": "WINE IMPORTERS (EDINBURGH) LIMITED",
+    "company_number": "SC057340",
+    "company_status": "active",
+    "company_source": "web_search",
+    "sic_codes": [
+      "46342"
+    ],
+    "incorporated": "1975-03-12",
+    "registered_address": "25 Rutland Street, Edinburgh, EH1 2AE",
+    "director_name": "Graeme Thomas Broom",
+    "director_role": "director",
+    "website": "http://www.wine-importers.co.uk/",
+    "website_domain": "wine-importers.co.uk",
+    "website_confidence": "high",
+    "website_source": "ddg_search",
+    "website_snippet": "wine-importers.co.uk <body bgcolor=\"#ffffff\"> <p></p> </body> wine-importers.co.uk <body bgcolor=\"#ffffff\"> <p></p> </body>",
+    "fx_payment_signals": [
+      "importer"
+    ],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": true,
+    "signal_count": 1,
+    "score": 100,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment signals: importer",
+      "SIC tier 1 (core trade/wholesale): 46342",
+      "Segment exposure: Very High \u2014 EUR supplier payment exposure",
+      "High urgency event (score 8/10)",
+      "Company name signals trade/international activity (+3)",
+      "Established company (+8) \u2014 incorporated 1975",
+      "Director found: Graeme Thomas Broom",
+      "Website verified \u2014 strong name match (ddg_search)",
+      "Active on Companies House"
+    ],
+    "event_id": "evt_gbp_record_short_002",
+    "event_headline": "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
+    "segment_name": "European wine and spirits importers",
+    "segment_business_model": "UK importer buying wine and spirits direct from European producers in EUR, selling to UK trade at GBP prices",
+    "exposure_level": "Very High",
+    "exposure_type": "EUR supplier payment exposure",
+    "exposure_confidence": "high",
+    "why_affected": "Website identifies as an importer (importer). Recurring EUR supplier invoices with GBP-priced sales to UK trade creates direct currency mismatch. Margin erodes every time GBP falls. Likely affected by: Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further.",
+    "why_financially_exposed": "Recurring EUR supplier invoices with GBP-priced sales to UK trade creates direct currency mismatch. Margin erodes every time GBP falls.",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "affected_payment_flow": "",
+    "business_impact_summary": "",
+    "trigger_headline": "",
+    "ch_name_match": 1.0,
+    "ch_confidence": "high",
+    "discovered_at": "2026-05-08T07:47:38.328037+00:00",
+    "rescored_at": "2026-05-08T08:12:09.090345+00:00",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "linked_event_ids": [
+      "evt_gbp_record_short_002"
+    ],
+    "guessed_emails": [
+      {
+        "pattern": "firstname@",
+        "email": "graeme@wine-importers.co.uk"
+      },
+      {
+        "pattern": "firstname.lastname@",
+        "email": "graeme.broom@wine-importers.co.uk"
+      },
+      {
+        "pattern": "f.lastname@",
+        "email": "g.broom@wine-importers.co.uk"
+      },
+      {
+        "pattern": "flastname@",
+        "email": "gbroom@wine-importers.co.uk"
+      }
+    ],
+    "linkedin_url": null,
+    "call_opener": null,
+    "email_draft": null,
+    "outreach_status": "new",
+    "linkedin_assist": {
+      "search_name": "WINE IMPORTERS (EDINBURGH)",
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=WINE%20IMPORTERS%20%28EDINBURGH%29",
+      "people_searches": [
+        {
+          "role": "Graeme Thomas Broom (direct search)",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Graeme%20Thomas%20Broom"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=WINE%20IMPORTERS%20%28EDINBURGH%29%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=WINE%20IMPORTERS%20%28EDINBURGH%29%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=WINE%20IMPORTERS%20%28EDINBURGH%29%20CFO"
+        },
+        {
+          "role": "Chief Financial Officer",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=WINE%20IMPORTERS%20%28EDINBURGH%29%20Chief%20Financial%20Officer"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=WINE%20IMPORTERS%20%28EDINBURGH%29%20Commercial%20Director"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Find Graeme on LinkedIn",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+Graeme%20Thomas%20Broom"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+WINE%20IMPORTERS%20%28EDINBURGH%29"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+WINE%20IMPORTERS%20%28EDINBURGH%29+Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+WINE%20IMPORTERS%20%28EDINBURGH%29+Managing%20Director"
+        }
+      ]
+    }
+  },
+  "301fce9f8ebda81a": {
+    "company_name": "AA ELECTRICAL WHOLESALERS AND LIGHTING LIMITED",
+    "company_number": "04158693",
+    "company_status": "active",
+    "company_source": "web_search",
+    "sic_codes": [
+      "46130",
+      "46520"
+    ],
+    "incorporated": "2001-02-12",
+    "registered_address": "1 Sheaf Gardens, Sheffield, S2 4BB",
+    "director_name": "Andrew Michael Ashton",
+    "director_role": "director",
+    "website": "https://www.aaelectricalwholesalers.co.uk/",
+    "website_domain": "aaelectricalwholesalers.co.uk",
+    "website_confidence": "medium",
+    "website_source": "ddg_search",
+    "website_snippet": "Skip to content AA Electrical Wholesalers Providing Electrical Trade Supplies in Sheffield & Beyond Send a quick message We\u2019re open to commercial, industrial, and domestic contractors in the Sheffield area and nationwide. AA Electrical Wholesalers Products Quality, you can rely on See More A Comprehensive Range Of Wholesale Electrical Products Consumer Units Offering both traditional and smart eco",
+    "fx_payment_signals": [],
+    "b2b_signals": [
+      "distribution",
+      "stockist",
+      "stockists",
+      "wholesale",
+      "wholesaler"
+    ],
+    "secondary_signals": [
+      "distribution"
+    ],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 1,
+    "score": 55,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "International activity signals (1)",
+      "SIC tier 2 (manufacturing): 46130, 46520",
+      "Segment exposure: Very High \u2014 USD/NOK payment timing risk",
+      "High urgency event (score 9/10)",
+      "Company name signals trade/international activity (+3)",
+      "Established company (+8) \u2014 incorporated 2001",
+      "Director found: Andrew Michael Ashton",
+      "Website verified (ddg_search)",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+    ],
+    "event_id": "evt_fed_boe_003",
+    "event_headline": "Fed and BoE both announce rate decisions this week \u2014 maximum GBP/USD volatility expected",
+    "segment_name": "UK seafood and fish importers",
+    "segment_business_model": "UK importer buying fresh or frozen seafood from Norwegian, Icelandic or Faroese suppliers, paying in USD or NOK, selling to UK trade in GBP",
+    "exposure_level": "Very High",
+    "exposure_type": "USD/NOK payment timing risk",
+    "exposure_confidence": "low",
+    "why_affected": "B2B trade business (distribution, stockist). Frequent international payment obligations on perishable goods with thin margins \u2014 timing risk is acute this week. Likely affected by: Fed and BoE both announce rate decisions this week \u2014 maximum GBP/USD volatility expected.",
+    "why_financially_exposed": "Frequent international payment obligations on perishable goods with thin margins \u2014 timing risk is acute this week.",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "affected_payment_flow": "",
+    "business_impact_summary": "",
+    "trigger_headline": "",
+    "ch_name_match": 1.0,
+    "ch_confidence": "high",
+    "discovered_at": "2026-05-08T07:55:24.619918+00:00",
+    "rescored_at": "2026-05-08T08:12:09.090742+00:00",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "linked_event_ids": [
+      "evt_fed_boe_003"
+    ],
+    "guessed_emails": [
+      {
+        "pattern": "firstname@",
+        "email": "andrew@aaelectricalwholesalers.co.uk"
+      },
+      {
+        "pattern": "firstname.lastname@",
+        "email": "andrew.ashton@aaelectricalwholesalers.co.uk"
+      },
+      {
+        "pattern": "f.lastname@",
+        "email": "a.ashton@aaelectricalwholesalers.co.uk"
+      },
+      {
+        "pattern": "flastname@",
+        "email": "aashton@aaelectricalwholesalers.co.uk"
+      }
+    ],
+    "linkedin_url": null,
+    "call_opener": null,
+    "email_draft": null,
+    "outreach_status": "new",
+    "linkedin_assist": {
+      "search_name": "AA ELECTRICAL WHOLESALERS AND LIGHTING",
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING",
+      "people_searches": [
+        {
+          "role": "Andrew Michael Ashton (direct search)",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Andrew%20Michael%20Ashton"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING%20CFO"
+        },
+        {
+          "role": "Chief Financial Officer",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING%20Chief%20Financial%20Officer"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING%20Commercial%20Director"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Find Andrew on LinkedIn",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+Andrew%20Michael%20Ashton"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING+Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+AA%20ELECTRICAL%20WHOLESALERS%20AND%20LIGHTING+Managing%20Director"
+        }
+      ]
+    }
+  },
+  "12b1e808e181fb57": {
+    "company_name": "DARTMOOR WHISKY DISTILLERY LTD",
+    "company_number": "09440491",
+    "company_status": "active",
+    "company_source": "web_search",
+    "sic_codes": [
+      "11010"
+    ],
+    "incorporated": "2015-02-16",
+    "registered_address": "The Old Town Hall Town Hall Place, Newton Abbot, TQ13 9EG",
+    "director_name": "Alison Mary Arnold",
+    "director_role": "director",
+    "website": "https://dartmoorwhiskydistillery.co.uk/",
+    "website_domain": "dartmoorwhiskydistillery.co.uk",
+    "website_confidence": "high",
+    "website_source": "ddg_search",
+    "website_snippet": "Dartmoor Whisky Distillery, Devon | English Single Malt Whisky info@dartmoorwhiskydistillery.co.uk Facebook X Instagram Facebook X Instagram Whisky Whisky & Gin Tasting Experience Login Register My Account Basket 0 Items Fast and Secure UK Delivery Fast and Secure UK Delivery Dartmoor Honey Whisky Now Available! Crafted from wild Dartmoor honey and married with our 7-year ex-Bordeaux cask single m",
+    "fx_payment_signals": [
+      "american",
+      "french",
+      "sourced from"
+    ],
+    "b2b_signals": [
+      "stockist",
+      "stockists"
+    ],
+    "secondary_signals": [
+      "supplier"
+    ],
+    "segment_signals": [],
+    "pays_fx_confirmed": true,
+    "signal_count": 4,
+    "score": 100,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment signals: american, french, sourced from",
+      "International activity signals (1)",
+      "SIC tier 2 (manufacturing): 11010",
+      "Segment exposure: Very High \u2014 Export USD revenue exposure + tariff ris",
+      "High urgency event (score 7/10)",
+      "Established company (+5) \u2014 incorporated 2015",
+      "Director found: Alison Mary Arnold",
+      "Website verified \u2014 strong name match (ddg_search)",
+      "Active on Companies House"
+    ],
+    "event_id": "evt_tariff_whisky_005",
+    "event_headline": "US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "segment_name": "Scotch whisky and premium spirits exporters",
+    "segment_business_model": "UK spirits producer exporting to US and other global markets, billing in USD, converting revenue back to GBP",
+    "exposure_level": "Very High",
+    "exposure_type": "Export USD revenue exposure + tariff risk",
+    "exposure_confidence": "high",
+    "why_affected": "Website shows: american, french. Large and recurring USD revenue streams that must be converted to GBP. If USD weakens while tariffs land, the margin impact compounds from both sides simultaneously. Likely affected by: US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty.",
+    "why_financially_exposed": "Large and recurring USD revenue streams that must be converted to GBP. If USD weakens while tariffs land, the margin impact compounds from both sides simultaneously.",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "affected_payment_flow": "",
+    "business_impact_summary": "",
+    "trigger_headline": "",
+    "ch_name_match": 1.0,
+    "ch_confidence": "high",
+    "discovered_at": "2026-05-08T08:02:12.432385+00:00",
+    "rescored_at": "2026-05-08T08:12:09.090824+00:00",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "linked_event_ids": [
+      "evt_tariff_whisky_005"
+    ],
+    "guessed_emails": [
+      {
+        "pattern": "firstname@",
+        "email": "alison@dartmoorwhiskydistillery.co.uk"
+      },
+      {
+        "pattern": "firstname.lastname@",
+        "email": "alison.arnold@dartmoorwhiskydistillery.co.uk"
+      },
+      {
+        "pattern": "f.lastname@",
+        "email": "a.arnold@dartmoorwhiskydistillery.co.uk"
+      },
+      {
+        "pattern": "flastname@",
+        "email": "aarnold@dartmoorwhiskydistillery.co.uk"
+      }
+    ],
+    "linkedin_url": null,
+    "call_opener": null,
+    "email_draft": null,
+    "outreach_status": "new",
+    "linkedin_assist": {
+      "search_name": "DARTMOOR WHISKY DISTILLERY",
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=DARTMOOR%20WHISKY%20DISTILLERY",
+      "people_searches": [
+        {
+          "role": "Alison Mary Arnold (direct search)",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Alison%20Mary%20Arnold"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=DARTMOOR%20WHISKY%20DISTILLERY%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=DARTMOOR%20WHISKY%20DISTILLERY%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=DARTMOOR%20WHISKY%20DISTILLERY%20CFO"
+        },
+        {
+          "role": "Chief Financial Officer",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=DARTMOOR%20WHISKY%20DISTILLERY%20Chief%20Financial%20Officer"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=DARTMOOR%20WHISKY%20DISTILLERY%20Commercial%20Director"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Find Alison on LinkedIn",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+Alison%20Mary%20Arnold"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+DARTMOOR%20WHISKY%20DISTILLERY"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+DARTMOOR%20WHISKY%20DISTILLERY+Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+DARTMOOR%20WHISKY%20DISTILLERY+Managing%20Director"
+        }
+      ]
+    }
+  },
+  "159d3cda120d855d": {
+    "company_name": "SCOTCH WHISKY INTERNATIONAL LIMITED",
+    "company_number": "SC162403",
+    "company_status": "active",
+    "company_source": "web_search",
+    "sic_codes": [
+      "46342"
+    ],
+    "incorporated": "1995-12-28",
+    "registered_address": "Laverockdale Lodge, Edinburgh, EH13 0DB",
+    "director_name": "Alan Gordon Henry, Dr Macpherson",
+    "director_role": "director",
+    "website": "https://scotchwhiskyinternational.com/",
+    "website_domain": "scotchwhiskyinternational.com",
+    "website_confidence": "high",
+    "website_source": "ddg_search",
+    "website_snippet": "Scotch Whisky Investments | Home Investeer in een gouden toekomst Schotse single malt whisky staat al eeuwen voor klasse, kwaliteit en vakmanschap. In het afgelopen decennium heeft de beroemde drank een nieuw publiek aangetrokken: serieuze beleggers. Whitepaper aanvragen Bekijk de mogelijkheden Contact Versterk uw vermogen met vloeibaar goud Drie redenen om te investeren in Schotse single malt Gro",
+    "fx_payment_signals": [
+      "export"
+    ],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": true,
+    "signal_count": 1,
+    "score": 100,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment signals: export",
+      "SIC tier 1 (core trade/wholesale): 46342",
+      "Segment exposure: Very High \u2014 Export USD revenue exposure + tariff ris",
+      "High urgency event (score 7/10)",
+      "Company name signals trade/international activity (+3)",
+      "Established company (+8) \u2014 incorporated 1995",
+      "Director found: Alan Gordon Henry, Dr Macpherson",
+      "Website verified \u2014 strong name match (ddg_search)",
+      "Active on Companies House"
+    ],
+    "event_id": "evt_tariff_whisky_005",
+    "event_headline": "US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "segment_name": "Scotch whisky and premium spirits exporters",
+    "segment_business_model": "UK spirits producer exporting to US and other global markets, billing in USD, converting revenue back to GBP",
+    "exposure_level": "Very High",
+    "exposure_type": "Export USD revenue exposure + tariff risk",
+    "exposure_confidence": "high",
+    "why_affected": "Website identifies as an exporter (export). Large and recurring USD revenue streams that must be converted to GBP. If USD weakens while tariffs land, the margin impact compounds from both sides simultaneously. Likely affected by: US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty.",
+    "why_financially_exposed": "Large and recurring USD revenue streams that must be converted to GBP. If USD weakens while tariffs land, the margin impact compounds from both sides simultaneously.",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "affected_payment_flow": "",
+    "business_impact_summary": "",
+    "trigger_headline": "",
+    "ch_name_match": 1.0,
+    "ch_confidence": "high",
+    "discovered_at": "2026-05-08T08:03:02.254318+00:00",
+    "rescored_at": "2026-05-08T08:12:09.090857+00:00",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "linked_event_ids": [
+      "evt_tariff_whisky_005"
+    ],
+    "guessed_emails": [
+      {
+        "pattern": "firstname@",
+        "email": "alan@scotchwhiskyinternational.com"
+      },
+      {
+        "pattern": "firstname.lastname@",
+        "email": "alan.macpherson@scotchwhiskyinternational.com"
+      },
+      {
+        "pattern": "f.lastname@",
+        "email": "a.macpherson@scotchwhiskyinternational.com"
+      },
+      {
+        "pattern": "flastname@",
+        "email": "amacpherson@scotchwhiskyinternational.com"
+      }
+    ],
+    "linkedin_url": null,
+    "call_opener": null,
+    "email_draft": null,
+    "outreach_status": "new",
+    "linkedin_assist": {
+      "search_name": "SCOTCH WHISKY INTERNATIONAL",
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=SCOTCH%20WHISKY%20INTERNATIONAL",
+      "people_searches": [
+        {
+          "role": "Alan Gordon Henry, Dr Macpherson (direct search)",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Alan%20Gordon%20Henry%2C%20Dr%20Macpherson"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INTERNATIONAL%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INTERNATIONAL%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INTERNATIONAL%20CFO"
+        },
+        {
+          "role": "Chief Financial Officer",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INTERNATIONAL%20Chief%20Financial%20Officer"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INTERNATIONAL%20Commercial%20Director"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Find Alan on LinkedIn",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+Alan%20Gordon%20Henry%2C%20Dr%20Macpherson"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+SCOTCH%20WHISKY%20INTERNATIONAL"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+SCOTCH%20WHISKY%20INTERNATIONAL+Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+SCOTCH%20WHISKY%20INTERNATIONAL+Managing%20Director"
+        }
+      ]
+    }
+  },
+  "7ce7741835015684": {
+    "company_name": "SCOTCH WHISKY INVESTMENTS LTD",
+    "company_number": "SC687070",
+    "company_status": "active",
+    "company_source": "web_search",
+    "sic_codes": [
+      "11010"
+    ],
+    "incorporated": "2021-01-26",
+    "registered_address": "5 Station Road, Cupar, KY14 7DP",
+    "director_name": "Michel Kappen",
+    "director_role": "director",
+    "website": "https://scotchwhiskyinvestments.com/",
+    "website_domain": "scotchwhiskyinvestments.com",
+    "website_confidence": "high",
+    "website_source": "ddg_search",
+    "website_snippet": "Scotch Whisky Investments | Home Investeer in een gouden toekomst Schotse single malt whisky staat al eeuwen voor klasse, kwaliteit en vakmanschap. In het afgelopen decennium heeft de beroemde drank een nieuw publiek aangetrokken: serieuze beleggers. Whitepaper aanvragen Bekijk de mogelijkheden Contact Versterk uw vermogen met vloeibaar goud Drie redenen om te investeren in Schotse single malt Gro",
+    "fx_payment_signals": [
+      "export"
+    ],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": true,
+    "signal_count": 1,
+    "score": 89,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment signals: export",
+      "SIC tier 2 (manufacturing): 11010",
+      "Segment exposure: Very High \u2014 Export USD revenue exposure + tariff ris",
+      "High urgency event (score 7/10)",
+      "Established company (+2) \u2014 incorporated 2021",
+      "Director found: Michel Kappen",
+      "Website verified \u2014 strong name match (ddg_search)",
+      "Active on Companies House"
+    ],
+    "event_id": "evt_tariff_whisky_005",
+    "event_headline": "US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "segment_name": "Scotch whisky and premium spirits exporters",
+    "segment_business_model": "UK spirits producer exporting to US and other global markets, billing in USD, converting revenue back to GBP",
+    "exposure_level": "Very High",
+    "exposure_type": "Export USD revenue exposure + tariff risk",
+    "exposure_confidence": "high",
+    "why_affected": "Website identifies as an exporter (export). Large and recurring USD revenue streams that must be converted to GBP. If USD weakens while tariffs land, the margin impact compounds from both sides simultaneously. Likely affected by: US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty.",
+    "why_financially_exposed": "Large and recurring USD revenue streams that must be converted to GBP. If USD weakens while tariffs land, the margin impact compounds from both sides simultaneously.",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "affected_payment_flow": "",
+    "business_impact_summary": "",
+    "trigger_headline": "",
+    "ch_name_match": 1.0,
+    "ch_confidence": "high",
+    "discovered_at": "2026-05-08T08:03:06.400064+00:00",
+    "rescored_at": "2026-05-08T08:12:09.090997+00:00",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "linked_event_ids": [
+      "evt_tariff_whisky_005"
+    ],
+    "guessed_emails": [
+      {
+        "pattern": "firstname@",
+        "email": "michel@scotchwhiskyinvestments.com"
+      },
+      {
+        "pattern": "firstname.lastname@",
+        "email": "michel.kappen@scotchwhiskyinvestments.com"
+      },
+      {
+        "pattern": "f.lastname@",
+        "email": "m.kappen@scotchwhiskyinvestments.com"
+      },
+      {
+        "pattern": "flastname@",
+        "email": "mkappen@scotchwhiskyinvestments.com"
+      }
+    ],
+    "linkedin_url": null,
+    "call_opener": null,
+    "email_draft": null,
+    "outreach_status": "new",
+    "linkedin_assist": {
+      "search_name": "SCOTCH WHISKY INVESTMENTS",
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=SCOTCH%20WHISKY%20INVESTMENTS",
+      "people_searches": [
+        {
+          "role": "Michel Kappen (direct search)",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Michel%20Kappen"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INVESTMENTS%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INVESTMENTS%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INVESTMENTS%20CFO"
+        },
+        {
+          "role": "Chief Financial Officer",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INVESTMENTS%20Chief%20Financial%20Officer"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=SCOTCH%20WHISKY%20INVESTMENTS%20Commercial%20Director"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Find Michel on LinkedIn",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+Michel%20Kappen"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+SCOTCH%20WHISKY%20INVESTMENTS"
+        },
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+SCOTCH%20WHISKY%20INVESTMENTS+Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+SCOTCH%20WHISKY%20INVESTMENTS+Managing%20Director"
         }
       ]
     }
