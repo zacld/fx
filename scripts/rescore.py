@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
+import contacts as _contacts
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)s  %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
 
@@ -622,6 +624,10 @@ def main():
         lead["guessed_emails"]    = guess_emails(
             lead.get("director_name",""), lead.get("website","")
         )
+        # Ensure contact fields present on legacy leads, then suggest a contact route
+        for _cf in _contacts.CONTACT_FIELDS:
+            lead.setdefault(_cf, [] if _cf in ("contact_phones", "contact_emails_found") else None)
+        lead["best_contact_route"] = _contacts.best_contact_route(lead)
         # Ensure company_source is set for all leads
         if not lead.get("company_source"):
             lead["company_source"] = "companies_house"
@@ -729,6 +735,9 @@ def main():
             lead["website"]            = None
             lead["website_confidence"] = None
             lead["website_source"]     = "collision_stripped"
+            for _cf in _contacts.CONTACT_FIELDS:          # contact info came from the wrong site
+                lead[_cf] = [] if _cf in ("contact_phones", "contact_emails_found") else None
+            lead["best_contact_route"] = _contacts.best_contact_route(lead)
             # Re-apply Gate A — no website → QUEUE cap
             s = lead.get("score", 0)
             if s > 49:

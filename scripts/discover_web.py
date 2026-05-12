@@ -46,6 +46,8 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+import contacts as _contacts   # contact-route extraction from website HTML
+
 load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
@@ -1100,21 +1102,22 @@ def ch_keyword_search(query: str, max_results: int = 10) -> list:
 
 # ── WEBSITE VALIDATION ────────────────────────────────────────────────────────
 
-def _fetch_text(url: str, timeout: int = 12) -> tuple[str, str]:
-    """Fetch a URL, return (clean_text, final_url_after_redirects). Empty string on failure.
+def _fetch_text(url: str, timeout: int = 12):
+    """Fetch a URL, return (clean_text, raw_html, final_url_after_redirects). Empty strings on failure.
     Uses (connect_timeout=5, read_timeout) split to prevent silent TCP SYN hangs on
     unresponsive servers (e.g. Azure-hosted sites that drop SYN packets)."""
     try:
         resp = requests.get(url, headers=_headers(), timeout=(5, timeout), allow_redirects=True)
         resp.raise_for_status()
         final_url = resp.url
-        soup = BeautifulSoup(resp.text, "html.parser")
+        raw_html  = resp.text
+        soup = BeautifulSoup(raw_html, "html.parser")
         for tag in soup(["script", "style", "nav", "footer", "header", "meta", "link", "noscript"]):
             tag.decompose()
-        return soup.get_text(" ", strip=True), final_url
+        return soup.get_text(" ", strip=True), raw_html, final_url
     except Exception as exc:
         log.debug("Fetch failed %s: %s", url, exc)
-        return "", url
+        return "", "", url
 
 
 def _count_company_references(text: str) -> int:
@@ -1143,12 +1146,16 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         "snippet": "", "name_on_page": False,
         "website_confidence": "none", "pays_fx": False, "is_b2b": False,
         "text_length": 0, "reject_reason": "",
+        "contact_phone": None, "contact_phones": [], "contact_email": None,
+        "contact_emails_found": [], "contact_page": None, "about_page": None, "team_page": None,
     }
     if not url:
         return empty
 
-    text, final_url = _fetch_text(url)
+    text, raw_html, final_url = _fetch_text(url)
     pages_scraped   = 1
+    # Contact routes — pull from the *raw* homepage HTML (header/footer included)
+    contact = _contacts.extract_contact_info(raw_html, final_url)
 
     # Multi-page scraping: fetch extra pages when homepage is thin on signals.
     # Hard cap: 4 pages per domain. Early stop: once FX signal count reaches 3.
@@ -1167,7 +1174,7 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
             provisional_fx = sum(1 for s in FX_PAYMENT_SIGNALS if s in text.lower())
             if provisional_fx >= _EARLY_STOP_SIGS:
                 break
-            extra_text, _ = _fetch_text(base + path)
+            extra_text, _, _ = _fetch_text(base + path)
             if extra_text and extra_text not in text:
                 text          += " " + extra_text
                 pages_scraped += 1
@@ -1239,6 +1246,7 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         "text_length":            len(text),
         "pages_scraped":          pages_scraped,
         "reject_reason":          "",
+        **{k: contact.get(k) for k in _contacts.CONTACT_FIELDS},
     }
 
 
@@ -1700,6 +1708,14 @@ def create_lead(
         "segment_signals":    validation.get("segment_signals_found", []),
         "pays_fx_confirmed":  validation.get("pays_fx", False),
         "pages_scraped":      validation.get("pages_scraped", 1),
+        # contact routes (from website HTML)
+        "contact_phone":        validation.get("contact_phone"),
+        "contact_phones":       validation.get("contact_phones", []),
+        "contact_email":        validation.get("contact_email"),
+        "contact_emails_found": validation.get("contact_emails_found", []),
+        "contact_page":         validation.get("contact_page"),
+        "about_page":           validation.get("about_page"),
+        "team_page":            validation.get("team_page"),
         "signal_count": (
             len(validation.get("fx_signals", []))
             + len(validation.get("b2b_signals", []))

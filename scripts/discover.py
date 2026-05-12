@@ -30,6 +30,7 @@ from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from website_finder import find_website_guess
+import contacts as _contacts   # contact-route extraction from website HTML
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-8s  %(message)s", datefmt="%H:%M:%S")
@@ -177,16 +178,23 @@ def has_fx_sic(sic_codes):
 
 
 
+_EMPTY_WEB = {
+    "fx_signals": [], "secondary_signals": [], "segment_signals": [], "snippet": "", "pays_fx": False,
+    "contact_phone": None, "contact_phones": [], "contact_email": None,
+    "contact_emails_found": [], "contact_page": None, "about_page": None, "team_page": None,
+}
+
 def scrape_website(url, validation_signals=None):
     """
-    Scrape website, detect FX payment signals.
-    validation_signals: segment-specific signals from the Exposure Mapper.
+    Scrape website: detect FX payment signals + extract contact routes.
+    validation_signals: segment-specific signals from the exposure map.
     """
     if not url:
-        return {"fx_signals":[],"secondary_signals":[],"segment_signals":[],"snippet":"","pays_fx":False}
+        return dict(_EMPTY_WEB)
     try:
         res = requests.get(url, headers=SCRAPE_HEADERS, timeout=(5, 10), allow_redirects=True)
         res.raise_for_status()
+        contact = _contacts.extract_contact_info(res.text, res.url, urlparse(url).netloc)
         soup = BeautifulSoup(res.text, "html.parser")
         for tag in soup(["script","style","nav","footer","header","meta"]): tag.decompose()
         text = soup.get_text(" ", strip=True)
@@ -196,7 +204,7 @@ def scrape_website(url, validation_signals=None):
         fx_sigs  = sorted({s for s in FX_PAYMENT_SIGNALS if s in tlow})
         sec_sigs = sorted({s for s in SECONDARY_SIGNALS   if s in tlow})
 
-        # Check segment-specific validation signals from Exposure Mapper
+        # Check segment-specific validation signals from the exposure map
         seg_sigs = []
         if validation_signals:
             seg_sigs = sorted({s.lower() for s in validation_signals if s.lower() in tlow})
@@ -210,10 +218,11 @@ def scrape_website(url, validation_signals=None):
             "segment_signals": seg_sigs,
             "snippet": snippet,
             "pays_fx": pays_fx,
+            **{k: contact.get(k) for k in _contacts.CONTACT_FIELDS},
         }
     except Exception as exc:
         log.debug("Scrape failed %s: %s", url, exc)
-        return {"fx_signals":[],"secondary_signals":[],"segment_signals":[],"snippet":"","pays_fx":False}
+        return dict(_EMPTY_WEB)
 
 # ── EXPOSURE SCORING ─────────────────────────────────────────────────────
 
@@ -500,9 +509,7 @@ def process_event(event, leads):
 
                     # Scrape with segment-specific validation signals
                     validation_signals = (segment or {}).get("website_validation_signals", [])
-                    web = scrape_website(website, validation_signals) if website else {
-                        "fx_signals":[],"secondary_signals":[],"segment_signals":[],"snippet":"","pays_fx":False
-                    }
+                    web = scrape_website(website, validation_signals) if website else dict(_EMPTY_WEB)
                     web["website_confidence"] = website_confidence
                     web["website_source"]     = website_source
 
@@ -590,6 +597,15 @@ def process_event(event, leads):
                         "secondary_signals":     sec_sigs,
                         "pays_fx_confirmed":     pays_fx,
                         "website_snippet":       web.get("snippet","")[:400] if web.get("snippet") else "",
+
+                        # Contact routes (from website HTML)
+                        "contact_phone":         web.get("contact_phone"),
+                        "contact_phones":        web.get("contact_phones", []),
+                        "contact_email":         web.get("contact_email"),
+                        "contact_emails_found":  web.get("contact_emails_found", []),
+                        "contact_page":          web.get("contact_page"),
+                        "about_page":            web.get("about_page"),
+                        "team_page":             web.get("team_page"),
 
                         # Sales context
                         "sales_angle":           (segment or {}).get("sales_angle") or event.get("sales_angle",""),
