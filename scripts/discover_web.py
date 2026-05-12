@@ -245,6 +245,45 @@ SKIP_DOMAINS = {
     "moneysavingexpert.com",
     "comparethemarket.com",
 
+    # ── Reference / informational / encyclopaedia sites ──────────────────────
+    # These are never valid FX-prospect websites. Bing in particular returns
+    # them for queries like "italian wine importer UK" because they contain
+    # country or product names in article text.
+    "britannica.com", "britannica.co.uk", "britannicakids.com",
+    "merriam-webster.com",
+    "dictionary.com", "thesaurus.com",
+    "encyclopedia.com",
+    "thoughtco.com",
+    # Note: wikipedia.org already present in Search/tech section above
+
+    # ── Supermarkets / consumer grocery retailers ─────────────────────────────
+    # Retail grocery pages appear when queries contain product names and the
+    # product page text mentions import origin (e.g. "gin importer UK distributor"
+    # → Morrisons product page for an imported gin). None is a B2B FX prospect.
+    # Subdomain matching in should_skip_url() covers groceries.morrisons.com etc.
+    "morrisons.com",
+    "tesco.com",
+    "sainsburys.co.uk",
+    "asda.com",
+    "waitrose.com",
+    "marksandspencer.com",
+    "ocado.com",
+    "iceland.co.uk",
+    "aldi.co.uk",
+    "lidl.co.uk",
+    "costco.co.uk",
+
+    # ── Consumer wine / drinks retailers ─────────────────────────────────────
+    # These import wine/spirits but are B2C end-retailers, not trade FX
+    # prospects. The FX conversation belongs with the upstream importer/agent.
+    "majestic.co.uk",
+    "thedrinkshop.com",
+    "laithwaites.co.uk",
+    "thewinesociety.com",
+    "wineowners.com",
+    "virginwines.com",
+    "slurp.co.uk",
+
     # ── Marketplaces / B2C retail ─────────────────────────────────────────────
     "amazon.co.uk", "amazon.com",
     "ebay.co.uk", "ebay.com",
