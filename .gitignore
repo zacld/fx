@@ -7,3 +7,7 @@ dist/
 __pycache__/
 .DS_Store
 .vercel/
+# v2: SQLite (regenerable from data/leads.json|events.json via @fx/core db:import)
+*.db
+*.db-shm
+*.db-wal

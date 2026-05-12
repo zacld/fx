@@ -9,17 +9,25 @@
     ".": "./src/index.ts",
     "./schema": "./src/schema.ts",
     "./signals": "./src/signals.ts",
-    "./scoring": "./src/scoring.ts"
+    "./scoring": "./src/scoring.ts",
+    "./cache": "./src/cache.ts",
+    "./db": "./src/db/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:import": "tsx src/db/import-json.ts"
   },
   "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "drizzle-orm": "^0.33.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.19.19",
+    "tsx": "^4.21.0",
     "typescript": "^5.5.4",
     "vitest": "^2.1.1"
   }
