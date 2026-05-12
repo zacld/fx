@@ -17,6 +17,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import contacts as _contacts
+import signals as _sig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)s  %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
@@ -619,6 +620,15 @@ def main():
         # Backfill website_domain from website URL (some older leads are missing it)
         if lead.get("website") and not lead.get("website_domain"):
             lead["website_domain"] = extract_domain(lead["website"]) or ""
+        # Backfill is_large_org for legacy leads (field added after initial scrape).
+        # Only needs the company name + domain — no page text — which is enough
+        # to catch known PLCs, global corps, and large-org domains (COSCO, Hendricks, etc.)
+        if lead.get("is_large_org") is None:
+            lead["is_large_org"] = _sig.is_large_org(
+                lead.get("company_name", ""),
+                lead.get("website", "") or "",
+            )
+
         # Reclassify legacy leads: bare nationality adjectives are origin hints, not
         # FX evidence — move them out of fx_payment_signals into secondary_signals.
         # (Idempotent: fresh leads no longer contain these in fx_payment_signals.)
