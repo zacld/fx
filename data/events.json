@@ -200,7 +200,7 @@
     ],
     "overall_sales_angle": "Crude just spiked \u2014 UK businesses buying petroleum, chemicals, or fuel in USD are paying more on every transaction right now.",
     "web_discovery_done": true,
-    "web_discovery_at": "2026-05-07T11:51:11.517170+00:00"
+    "web_discovery_at": "2026-05-12T08:43:04.423015+00:00"
   },
   "evt_gbp_record_short_002": {
     "id": "evt_gbp_record_short_002",
@@ -420,7 +420,7 @@
     ],
     "overall_sales_angle": "GBP shorts at near-record levels signal institutional conviction that sterling weakens further. Every UK business paying EUR supplier invoices is seeing their costs rise in real time.",
     "web_discovery_done": true,
-    "web_discovery_at": "2026-05-07T11:53:46.944343+00:00"
+    "web_discovery_at": "2026-05-12T08:50:08.449563+00:00"
   },
   "evt_fed_boe_003": {
     "id": "evt_fed_boe_003",
@@ -563,7 +563,7 @@
     ],
     "overall_sales_angle": "Both the Fed and BoE announce rates this week. GBP/USD is at maximum volatility \u2014 any UK business with an international payment due this week faces real timing risk.",
     "web_discovery_done": true,
-    "web_discovery_at": "2026-05-07T11:54:48.107423+00:00"
+    "web_discovery_at": "2026-05-12T08:52:07.582502+00:00"
   },
   "evt_iran_usd_004": {
     "id": "evt_iran_usd_004",
@@ -695,7 +695,7 @@
     ],
     "overall_sales_angle": "US-Iran tensions driving safe-haven USD demand \u2014 every UK business paying USD supplier invoices is seeing their costs rise in GBP terms right now.",
     "web_discovery_done": true,
-    "web_discovery_at": "2026-05-07T11:56:16.081052+00:00"
+    "web_discovery_at": "2026-05-12T08:55:34.397904+00:00"
   },
   "evt_tariff_whisky_005": {
     "id": "evt_tariff_whisky_005",
@@ -834,6 +834,6 @@
     ],
     "overall_sales_angle": "US Section 338 tariff uncertainty creates a double exposure for UK exporters \u2014 tariff risk on trade AND currency risk on USD revenue when converting back to GBP.",
     "web_discovery_done": true,
-    "web_discovery_at": "2026-05-07T11:59:54.996588+00:00"
+    "web_discovery_at": "2026-05-12T08:59:27.230697+00:00"
   }
 }
