@@ -11,3 +11,6 @@ __pycache__/
 *.db
 *.db-shm
 *.db-wal
+# v2: per-run logs + HTTP/CH caches — local/CI artifacts, not committed
+data/runs/
+data/cache/
