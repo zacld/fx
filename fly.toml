@@ -1,0 +1,21 @@
+# Fly.io config for the FX Discovery dashboard (static Vite SPA served by nginx).
+# Deploy: flyctl deploy
+# This hosts the *dashboard*; the discovery pipeline still runs in GitHub Actions
+# and commits data/. To refresh the data shown here, redeploy (or wire a
+# `flyctl deploy` step into the GitHub Actions workflow after the data commit).
+
+app            = "fx-discovery-dashboard"
+primary_region = "lhr"
+
+[build]
+
+[http_service]
+  internal_port        = 8080
+  force_https          = true
+  auto_stop_machines   = true
+  auto_start_machines  = true
+  min_machines_running = 0
+
+[[vm]]
+  size   = "shared-cpu-1x"
+  memory = "256mb"
