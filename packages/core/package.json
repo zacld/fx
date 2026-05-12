@@ -1,0 +1,26 @@
+{
+  "name": "@fx/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared domain core for the FX Discovery pipeline & dashboard: schema, signals, scoring.",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./signals": "./src/signals.ts",
+    "./scoring": "./src/scoring.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.1"
+  }
+}
