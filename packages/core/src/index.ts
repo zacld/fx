@@ -1,6 +1,7 @@
 export * from "./schema.js";
 export * from "./signals.js";
 export * from "./scoring.js";
+export * from "./contacts.js";
 export * from "./cache.js";
 export { importJson } from "./db/import-json.js";
 export type { ImportResult, ImportOptions } from "./db/import-json.js";

@@ -10,10 +10,12 @@
     "score": "tsx src/stages/score.ts",
     "dedup": "tsx src/stages/dedup.ts",
     "rescore": "tsx src/stages/score.ts && tsx src/stages/dedup.ts",
+    "enrich-contacts": "tsx src/stages/enrich-contacts.ts",
     "compare-scores": "tsx src/dev/compare-scores.ts"
   },
   "dependencies": {
-    "@fx/core": "file:../core"
+    "@fx/core": "file:../core",
+    "p-limit": "^6.2.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

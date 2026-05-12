@@ -22,7 +22,7 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { LeadSchema, type Lead } from "@fx/core";
+import { LeadSchema, clearContactFields, bestContactRoute, type Lead } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 
@@ -95,6 +95,8 @@ export function dedupLeads(leads: Record<string, Lead>): Omit<DedupResult, "runI
       l.website = null;
       l.website_confidence = null;
       l.website_source = "collision_stripped";
+      clearContactFields(l as unknown as Record<string, unknown>);   // contact info came from the wrong site
+      l.best_contact_route = bestContactRoute(l);
       if ((l.score ?? 0) > 49) {
         l.score = 49;
         l.priority = "QUEUE";

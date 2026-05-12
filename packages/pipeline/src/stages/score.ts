@@ -26,7 +26,10 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { scoreLead, exposureConfidence, isLargeOrg, WEAK_ORIGIN_TOKENS, LeadSchema, type Lead } from "@fx/core";
+import {
+  scoreLead, exposureConfidence, isLargeOrg, bestContactRoute, ensureContactFields,
+  WEAK_ORIGIN_TOKENS, LeadSchema, type Lead,
+} from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 
@@ -85,6 +88,9 @@ export function scoreAndClassify(lead: Lead, event: EventInfo | undefined): { ch
   lead.signal_count = (lead.fx_payment_signals ?? []).length + (lead.secondary_signals ?? []).length;
   lead.rescored_at = new Date().toISOString();
   classifyLead(lead, event);
+  // contact-route field (matches rescore.py: setdefault contact fields, then recompute)
+  ensureContactFields(lead as unknown as Record<string, unknown>);
+  lead.best_contact_route = bestContactRoute(lead);
   return { changedPriority, reclassified };
 }
 
