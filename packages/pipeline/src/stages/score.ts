@@ -26,7 +26,7 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { scoreLead, exposureConfidence, WEAK_ORIGIN_TOKENS, LeadSchema, type Lead } from "@fx/core";
+import { scoreLead, exposureConfidence, isLargeOrg, WEAK_ORIGIN_TOKENS, LeadSchema, type Lead } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 
@@ -74,6 +74,8 @@ export function classifyLead(lead: Lead, event: EventInfo | undefined): void {
 /** Score & classify a single lead in place (no I/O). Exported for tests / reuse. */
 export function scoreAndClassify(lead: Lead, event: EventInfo | undefined): { changedPriority: boolean; reclassified: boolean } {
   const reclassified = reclassifyOriginTokens(lead);
+  // backfill is_large_org from name/website/snippet (mirrors rescore.py's backfill) — Gate I reads it
+  lead.is_large_org = isLargeOrg(lead.company_name ?? "", lead.website ?? "", lead.website_snippet ?? "");
   const { score, priority, reasons } = scoreLead(lead, event?.urgency ?? 0);
   const changedPriority = priority !== lead.priority;
   lead.score = score;

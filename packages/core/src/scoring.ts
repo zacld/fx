@@ -64,9 +64,12 @@ const NAME_TRADE_WORDS = [
   "trading", "international", "imports", "import", "export", "exports", "wholesale",
   "distribution", "distributor", "global", "worldwide", "overseas",
 ];
+// NOTE: "nordic" and "iberian" appear twice — this mirrors scripts/rescore.py's
+// NAME_ORIGIN_WORDS exactly (a duplication there). Kept for bit-for-bit parity:
+// a name containing "iberian" therefore scores origin=2 (≈ +8, then 100-capped).
 const NAME_ORIGIN_WORDS = [
   "italian", "french", "spanish", "german", "chinese", "mediterranean", "atlantic",
-  "pacific", "european", "nordic", "iberian", "scandinavian",
+  "pacific", "european", "nordic", "iberian", "nordic", "iberian", "scandinavian",
   "oriental", "asian", "american", "african",
 ];
 function nameSignalScore(name: string): number {

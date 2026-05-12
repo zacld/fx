@@ -8,6 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "score": "tsx src/stages/score.ts",
+    "dedup": "tsx src/stages/dedup.ts",
+    "rescore": "tsx src/stages/score.ts && tsx src/stages/dedup.ts",
     "compare-scores": "tsx src/dev/compare-scores.ts"
   },
   "dependencies": {
