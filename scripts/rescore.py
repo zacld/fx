@@ -389,11 +389,11 @@ def rescore(lead, urgency_map):
         reasons.append(f"⚠ Bad domain ({dom}) — trade publication/aggregator, not company site")
         has_website = False   # treat same as no-website for subsequent gates
 
-    # Gate A: no website → hard cap at QUEUE
+    # Gate A: no website → hard cap at SKIP
     # A company with no website at all has zero direct evidence. Not callable.
     if not has_website:
-        score = min(score, 49)
-        reasons.append("⚠ No website — QUEUE cap (no direct evidence)")
+        score = min(score, 39)
+        reasons.append("⚠ No website — SKIP cap (no direct evidence)")
 
     # Gate B: no FX signals + no secondary signals → cap at SKIP unless strong SIC
     # A company with a website but no trade signals found is not call-worthy.
@@ -474,6 +474,24 @@ def rescore(lead, urgency_map):
             reasons.append(
                 "⚠ No B2B/trade evidence on website — capped below WARM"
             )
+
+    # ── Gate H: empty exposure thesis → cap at QUEUE ─────────────────────
+    # If neither why_affected nor exposure_thesis provides a meaningful
+    # explanation (< 40 chars each), the lead lacks a credible call reason.
+    # Cap at QUEUE so Zac can research before calling.
+    if score >= 60:
+        thesis_a = (lead.get("why_affected") or "").strip()
+        thesis_b = (lead.get("exposure_thesis") or "").strip()
+        if len(thesis_a) < 40 and len(thesis_b) < 40:
+            score = min(score, 59)
+            reasons.append("⚠ No exposure thesis — capped at QUEUE (why_affected/exposure_thesis both thin)")
+
+    # ── Gate I: large / unreachable organisation → cap at QUEUE ──────────
+    # PLCs, state-owned firms, and global corporations are not realistic
+    # SME cold-call targets for outbound FX sales.
+    if lead.get("is_large_org"):
+        score = min(score, 49)
+        reasons.append("⚠ Large/unreachable organisation — capped at QUEUE")
 
     if   score >= 80: priority = "HOT"
     elif score >= 60: priority = "WARM"
@@ -738,14 +756,13 @@ def main():
             for _cf in _contacts.CONTACT_FIELDS:          # contact info came from the wrong site
                 lead[_cf] = [] if _cf in ("contact_phones", "contact_emails_found") else None
             lead["best_contact_route"] = _contacts.best_contact_route(lead)
-            # Re-apply Gate A — no website → QUEUE cap
+            # Re-apply Gate A — no website → SKIP cap
             s = lead.get("score", 0)
-            if s > 49:
-                lead["score"] = 49
-                p = "QUEUE"
-                lead["priority"] = p
+            if s > 39:
+                lead["score"] = 39
+                lead["priority"] = "SKIP"
                 lead["scoring_reasons"].append(
-                    f"⚠ Website collision ({dom}) — stripped, QUEUE cap"
+                    f"⚠ Website collision ({dom}) — stripped, SKIP cap (no verified website)"
                 )
             domain_collisions += 1
 

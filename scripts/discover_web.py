@@ -37,6 +37,7 @@ Environment variables (all optional — safe defaults):
 """
 
 import os, re, time, random, logging, json, hashlib
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote, urlparse, parse_qs, unquote
@@ -45,6 +46,8 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential
+
+import signals as _sig   # centralised signal definitions
 
 load_dotenv()
 logging.basicConfig(
@@ -73,6 +76,7 @@ WEB_REQUEST_DELAY                    = float(os.getenv("WEB_REQUEST_DELAY_SECOND
 # Category Priority Engine (Brain 1 scores each segment 0-100; Brain 2 only scrapes above threshold)
 WEB_MAX_CATEGORIES_TO_SCRAPE         = int(os.getenv("WEB_MAX_CATEGORIES_TO_SCRAPE", "6"))
 CATEGORY_MIN_SCORE_TO_SCRAPE         = int(os.getenv("CATEGORY_MIN_SCORE_TO_SCRAPE", "65"))
+WEB_VALIDATION_WORKERS               = int(os.getenv("WEB_VALIDATION_WORKERS", "6"))  # parallel page fetchers
 
 # Rotate user-agents to reduce fingerprinting
 _USER_AGENTS = [
@@ -529,64 +533,15 @@ SKIP_TITLE_PATTERNS = [
 ]
 
 
-# ── SIGNAL LISTS ──────────────────────────────────────────────────────────────
+# ── SIGNAL LISTS — imported from signals.py ───────────────────────────────────
+# Single source of truth. Bare nationality adjectives (italian, french, german…)
+# are NOT in FX_PAYMENT_SIGNALS or SECONDARY_SIGNALS — they live in
+# _sig.ORIGIN_ADJECTIVES and are stored as fx_origin_hints only.
 
-FX_PAYMENT_SIGNALS = [
-    "we import","we source","sourced from","imported from","direct from",
-    "importing from","we buy from","purchased from","procured from",
-    "overseas supplier","european supplier","international supplier","foreign supplier",
-    "global supplier","worldwide supplier",
-    "from italy","from france","from spain","from germany","from china","from usa",
-    "from america","from japan","from india","from norway","from australia",
-    "from new zealand","from south africa","from denmark","from netherlands",
-    "foreign currency","currency risk","exchange rate","fx exposure",
-    "international payments","overseas payments","currency hedging","fx risk",
-    "importer","import company","import business","exclusive importer",
-    "uk importer","sole importer","we distribute","import and distribute",
-    "export","exports","exporting","we export","overseas customers","global customers",
-    "international customers","us customers","american customers","european customers",
-]
-
-B2B_SIGNALS = [
-    "wholesale","wholesaler","wholesale only","trade only","trade prices",
-    "trade customers","trade enquiries","distributor","distribution",
-    "minimum order","bulk order","bulk pricing","bulk discount",
-    "b2b","business to business","business customers","corporate customers",
-    "stockist","stockists","nationwide stockists","become a stockist",
-    "reseller","resellers","agent","agents","authorised dealer","authorized dealer",
-    "contract manufacturing","own label","private label","white label",
-    "we supply","we manufacture and supply","supply chain",
-    "catalogue available","brochure available","price list",
-    "no vat","ex vat","plus vat","+vat",
-]
-
-SECONDARY_SIGNALS = [
-    "international","global","worldwide","overseas","distribution",
-    "logistics","freight","shipping","customs","clearance",
-    "europe","european","asia","asian","north america","south america",
-    "supply chain","supplier","sourcing","procurement",
-    "currency","forex","exchange","sterling","dollar","euro",
-    # Country adjectives — demoted from FX signals: indicate international links
-    # but fire too broadly on service businesses mentioning destinations/nationalities
-    "french","german","italian","american","chinese","japanese","spanish",
-    "norwegian","australian","danish","dutch","indian",
-]
-
-NEGATIVE_SIGNALS = [
-    "restaurant","cafe","coffee shop","takeaway","food delivery","just eat",
-    "hair salon","nail salon","beauty salon","barber","hairdresser",
-    "recruitment agency","job agency","staffing agency","we hire","submit your cv",
-    "estate agent","letting agent","property management","rental property","for sale",
-    "blog","personal blog","my thoughts","travel diary","lifestyle",
-    "local delivery only","local area only","uk delivery only","mainland uk only",
-    "dental","dentist","gp surgery","medical practice","clinic","pharmacy",
-    "nursery","primary school","secondary school","sixth form","university",
-    "charity","not for profit","non profit","registered charity","donate",
-    "plumber","electrician","roofer","builder","handyman","decorator",
-    "personal trainer","fitness instructor","yoga","pilates","gym","crossfit",
-    "wedding","event planning","party planning","catering for weddings",
-    "under construction","coming soon","parked domain","placeholder",
-]
+FX_PAYMENT_SIGNALS = _sig.FX_PAYMENT_SIGNALS
+B2B_SIGNALS        = _sig.B2B_SIGNALS
+SECONDARY_SIGNALS  = _sig.SECONDARY_SIGNALS
+NEGATIVE_SIGNALS   = _sig.NEGATIVE_SIGNALS
 
 # ── UTILITIES ─────────────────────────────────────────────────────────────────
 
@@ -1232,6 +1187,8 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
     empty = {
         "fx_signals": [], "b2b_signals": [], "secondary_signals": [],
         "negative_signals": [], "segment_signals_found": [],
+        "fx_origin_hints": [],   # bare nationality adjectives — not scored, info only
+        "is_large_org": False,   # PLC / state-owned / global corp detection
         "snippet": "", "name_on_page": False,
         "website_confidence": "none", "pays_fx": False, "is_b2b": False,
         "text_length": 0, "reject_reason": "",
@@ -1293,11 +1250,30 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         return {**empty, "reject_reason": f"appears to be a directory (company refs: {company_ref_count})"}
 
     # ── Signal extraction ────────────────────────────────────────────────────
-    fx_sigs  = sorted({s for s in FX_PAYMENT_SIGNALS if s in tlow})
-    b2b_sigs = sorted({s for s in B2B_SIGNALS        if s in tlow})
-    sec_sigs = sorted({s for s in SECONDARY_SIGNALS  if s in tlow})
-    neg_sigs = sorted({s for s in NEGATIVE_SIGNALS   if s in tlow})
+    # Direct FX payment signals — explicit sourcing / payment language
+    direct_fx = sorted({s for s in FX_PAYMENT_SIGNALS if s in tlow})
+
+    # Contextual FX matches — nationality adj + sourcing word (e.g. "French suppliers")
+    # These ARE real evidence; weaker than direct signals but stronger than bare adjectives.
+    contextual_fx = _sig.extract_contextual_fx(text)
+
+    # Combined fx_sigs: direct first, then contextual (no duplicates)
+    fx_sigs = list(dict.fromkeys(direct_fx + contextual_fx))
+
+    # Bare origin hints — nationality adjectives without sourcing context
+    # Stored in fx_origin_hints only — never contribute to fx_payment_signals or scoring.
+    origin_hints = _sig.extract_origin_hints(text)
+    # Exclude any that already appear as part of a contextual match
+    contextual_lower = " ".join(contextual_fx).lower()
+    origin_hints = [h for h in origin_hints if h not in contextual_lower]
+
+    b2b_sigs = sorted({s for s in B2B_SIGNALS       if s in tlow})
+    sec_sigs = sorted({s for s in SECONDARY_SIGNALS if s in tlow})
+    neg_sigs = sorted({s for s in NEGATIVE_SIGNALS  if s in tlow})
     seg_sigs = sorted({s for s in (segment_signals or []) if s.lower() in tlow})
+
+    # ── Large-org detection ──────────────────────────────────────────────────
+    large_org = _sig.is_large_org(company_name or "", final_url, text)
 
     # ── Name-on-page check ──────────────────────────────────────────────────
     words_on_page = set(re.findall(r"[a-z]+", tlow))
@@ -1305,14 +1281,16 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         len(name_tokens_set & words_on_page) >= max(1, len(name_tokens_set) * 0.5)
     )
 
-    pays_fx = len(fx_sigs) >= 1 or len(sec_sigs) >= 3
+    # pays_fx: requires at least 1 direct or contextual FX signal.
+    # Bare nationality adjectives alone do NOT trigger pays_fx.
+    pays_fx = len(fx_sigs) >= 1
     is_b2b  = len(b2b_sigs) >= 1
 
     # ── Website confidence ───────────────────────────────────────────────────
     #   high:   FX/import signals found AND name tokens on page
     #   medium: FX signals present (even without name match), OR strong B2B (3+)
     #   low:    only secondary/B2B signals — some trade activity but weak evidence
-    #   none:   no positive signals
+    #   none:   no positive signals at all
     if fx_sigs and name_on_page:
         confidence = "high"
     elif fx_sigs:
@@ -1330,6 +1308,8 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         "secondary_signals":      sec_sigs,
         "negative_signals":       neg_sigs,
         "segment_signals_found":  seg_sigs,
+        "fx_origin_hints":        origin_hints,
+        "is_large_org":           large_org,
         "snippet":                snippet,
         "name_on_page":           name_on_page,
         "website_confidence":     confidence,
@@ -1798,6 +1778,8 @@ def create_lead(
         "website_source":     website_source,
         "website_snippet":    validation.get("snippet", "")[:400],
         "fx_payment_signals": validation.get("fx_signals", []),
+        "fx_origin_hints":    validation.get("fx_origin_hints", []),  # bare adj — not scored
+        "is_large_org":       validation.get("is_large_org", False),
         "b2b_signals":        validation.get("b2b_signals", []),
         "secondary_signals":  validation.get("secondary_signals", []),
         "segment_signals":    validation.get("segment_signals_found", []),
@@ -2072,6 +2054,8 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                 stats["query_dead_end"] = stats.get("query_dead_end", 0) + 1
                 continue
 
+            # ── Phase 1: cheap pre-filter (sequential — touches shared state) ──
+            to_validate: list[tuple] = []
             for result in all_to_process:
                 stats["raw_candidates"] = stats.get("raw_candidates", 0) + 1
                 url    = result.get("url", "")
@@ -2102,11 +2086,34 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                     stats["rejected_incoherent"] = stats.get("rejected_incoherent",0)+1
                     continue
 
-                # ── Validate website ────────────────────────────────────────
-                name_tok = name_tokens(title)
-                val = validate_website(url, name_tok, seg_signals)
-                time.sleep(WEB_REQUEST_DELAY * 0.3 + random.uniform(0, 0.5))
+                to_validate.append((result, url, title, domain, name_tokens(title)))
 
+            # ── Phase 2: parallel website validation (pure I/O, no shared state) ─
+            def _validate_one(args):
+                result, url, title, domain, name_tok = args
+                val = validate_website(url, name_tok, seg_signals)
+                return result, url, title, domain, val
+
+            validated_results: list[tuple] = []
+            if to_validate:
+                workers = min(WEB_VALIDATION_WORKERS, len(to_validate))
+                with ThreadPoolExecutor(max_workers=workers) as _pool:
+                    futures = {
+                        _pool.submit(_validate_one, args): args
+                        for args in to_validate
+                    }
+                    for future in as_completed(futures):
+                        try:
+                            validated_results.append(future.result())
+                        except Exception as _ve:
+                            orig = futures[future]
+                            log.debug("      Validation error %s: %s",
+                                      orig[1][:50], _ve)
+                            stats["rejected_validation"] = (
+                                stats.get("rejected_validation", 0) + 1)
+
+            # ── Phase 3: signal gating + CH + lead creation (sequential) ────────
+            for result, url, title, domain, val in validated_results:
                 if val.get("reject_reason"):
                     log.debug("      Rejected (%s): %s", val["reject_reason"], url[:60])
                     stats["rejected_validation"] = stats.get("rejected_validation",0)+1
@@ -2132,7 +2139,7 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
 
                 # ── CH validation ───────────────────────────────────────────
                 ch_data = None
-                already_known_cn = False  # flag: this company already has a lead
+                already_known_cn = False
                 if conf in ("high","medium") and COMPANIES_HOUSE_API_KEY:
                     ch_data = ch_validate(title, domain)
                     time.sleep(WEB_REQUEST_DELAY * 0.4 + random.uniform(0, 0.3))
@@ -2167,8 +2174,6 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                                     stats["multi_event_updates"] = (
                                         stats.get("multi_event_updates",0)+1)
 
-                # If company is already known (same CN, different event), don't
-                # create a duplicate lead — the multi-event boost is enough.
                 if already_known_cn:
                     log.debug("      Skipping duplicate CN (multi-event updated): %s", title[:40])
                     stats["rejected_duplicate"] = stats.get("rejected_duplicate",0)+1
@@ -2185,7 +2190,6 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                     continue
 
                 # ── Create lead ─────────────────────────────────────────────
-                # Track which source method actually found this company
                 if result.get("from_ch"):
                     _website_source = "ch_fallback"
                 elif result.get("from_bing"):
