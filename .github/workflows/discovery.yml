@@ -1,9 +1,22 @@
 name: FX Discovery
 
+# Daily v2 pipeline (TypeScript monorepo). Imports the committed data/*.json into
+# a throwaway SQLite DB, runs every stage, exports the DB back out to data/*.json,
+# refreshes the dashboard snapshot, and commits the result. The deploy workflows
+# (GitHub Pages / Fly) redeploy the dashboard after this completes.
+#
+# Required repo secrets:
+#   GROQ_API_KEY              (the one AI provider — analyse stage; falls back to a
+#                              rule-based event on 429, so a missing key degrades
+#                              gracefully rather than failing the run)
+#   COMPANIES_HOUSE_API_KEY   (CH validation in discover; optional — discovery still
+#                              works from website evidence without it)
+# Optional: GROQ_MODEL, GEMINI_API_KEY, GEMINI_MODEL (only if AI_PROVIDER=gemini).
+
 on:
   schedule:
     - cron: '0 6 * * 1-5'   # 6am Mon–Fri UTC
-  workflow_dispatch:          # manual trigger from GitHub Actions UI
+  workflow_dispatch:          # manual trigger from the Actions UI
 
 jobs:
   discover:
@@ -14,27 +27,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          node-version: '20'
+          cache: npm
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install workspace deps
+        run: npm ci
 
-      - name: Run full discovery pipeline
+      - name: Run the v2 pipeline (import → analyse → discover → enrich → score → dedup → export)
         env:
-          GEMINI_API_KEY:            ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL:              ${{ secrets.GEMINI_MODEL }}
-          COMPANIES_HOUSE_API_KEY:   ${{ secrets.COMPANIES_HOUSE_API_KEY }}
-          DISCOVERY_MAX_EVENTS:      "12"
-          DISCOVERY_MAX_COMPANIES_PER_TERM: "20"
-        run: python scripts/run_pipeline.py
+          AI_PROVIDER:                  groq
+          GROQ_API_KEY:                 ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL:                   ${{ secrets.GROQ_MODEL }}
+          GEMINI_API_KEY:               ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL:                 ${{ secrets.GEMINI_MODEL }}
+          COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          DISCOVERY_MAX_EVENTS:         "12"
+          WEB_MAX_EVENTS:               "5"
+          WEB_MAX_CATEGORIES_TO_SCRAPE: "6"
+          CATEGORY_MIN_SCORE_TO_SCRAPE: "65"
+        run: npm run pipeline
+
+      - name: Refresh the dashboard data snapshot
+        run: npm run sync-web-data
 
       - name: Commit updated data
         run: |
           git config user.name  "FX Discovery Bot"
-          git config user.email "bot@github-actions[bot]"
-          git add data/ public/data/
+          git config user.email "bot@users.noreply.github.com"
+          git add data/events.json data/leads.json apps/web/public/data/
           git diff --staged --quiet || git commit -m "data: auto-update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git push

@@ -4,6 +4,41 @@ This file governs how Claude should build, extend, and maintain this project.
 
 ---
 
+## Implementation (v2 — TypeScript) — read this first
+
+The project is a **TypeScript npm-workspace monorepo**: `packages/core` (schema,
+signals, scoring, contacts, cache, SQLite/Drizzle, `db:import`/`db:export`),
+`packages/pipeline` (the CLI stages — `analyse · discover · enrich-contacts · score
+· dedup` — plus `sources/*`), and `apps/web` (the React + Vite dashboard). The data
+lives in `data/fx.db` (SQLite, gitignored), seeded each run from the committed
+`data/{events,leads}.json` and exported back at the end. Run it with `npm run pipeline`
+(or one stage at a time); the daily production run is `.github/workflows/discovery.yml`.
+See `ARCHITECTURE_V2.md`.
+
+The original Python pipeline (`scripts/*.py`) was ported 1:1 — **same Brain 1/2
+prompt, same scoring gates, same signal lists** (verified: `import → score → dedup`
+reproduces `rescore.py`'s `(score, priority)` for every lead) — and then removed.
+Throughout this document, references to `ingest.py`, `discover_web.py`, `discover.py`,
+`rescore.py`, `enrich_websites.py`, `linkedin_assist.py`, `outreach.py` etc. name the
+**behaviour** that now lives in the TS equivalents:
+
+| CLAUDE.md says | now lives in |
+|---|---|
+| `ingest.py` (Brain 1 + Brain 2, one LLM call) | `packages/pipeline/src/stages/analyse.ts` + `sources/ai.ts` + `sources/rss.ts` |
+| `exposure_mapper.py` | folded into `analyse.ts` |
+| `discover_web.py` + `discover.py` (Brain 3) | `packages/pipeline/src/stages/discover.ts` + `sources/{search,website,source-page-miner,companies-house,blocklists,fetch}.ts` |
+| `enrich_websites.py` (+ `website_finder.py`, `contacts.py`) | `packages/pipeline/src/stages/enrich-contacts.ts` + `@fx/core` `contacts.ts` |
+| `rescore.py` (score + dedup + classify) | `packages/pipeline/src/stages/score.ts` + `dedup.ts`, scoring rules in `@fx/core` `scoring.ts` |
+| `signals.py` | `@fx/core` `signals.ts` |
+| `linkedin_assist.py`, `outreach.py` | not yet ported (lower priority — generated on demand, see P13/P15) |
+| `run_pipeline.py` | `npm run pipeline` / `discovery.yml` |
+| AI provider: Gemini | **Groq** (`llama-3.3-70b-versatile`) by default; `AI_PROVIDER=gemini` still works. The "Gemini" mentions below mean "the one event-level LLM call". |
+
+Everything below this section — the three-brain architecture, the gates, the
+priorities — is still binding. Only the *file names* changed.
+
+---
+
 ## What this system is
 
 A **business exposure translator** for UK B2B FX sales.
