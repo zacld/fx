@@ -777,19 +777,37 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
 
           <EmailPatterns emails={lead.guessed_emails} />
 
-          {li && (
-            <div className="li-section">
-              <div className="xl" style={{marginBottom:7}}>LinkedIn — open manually, do not automate</div>
-              <a href={li.company_search} target="_blank" rel="noreferrer" className="li-company-btn">
-                💼 Search Company on LinkedIn →
-              </a>
-              <div className="li-people">
-                {(li.people_searches||[]).slice(0,6).map(p=>(
-                  <a key={p.role} href={p.url} target="_blank" rel="noreferrer" className="li-person-btn">{p.role} →</a>
-                ))}
+          {(li || lead.company_name) && (() => {
+            const co   = lead.company_name || li?.search_name || "";
+            const dir  = lead.director_name || "";
+            // Google site: searches are far more accurate than LinkedIn keyword search
+            const coUrl  = `https://www.google.com/search?q=site:linkedin.com/company+%22${encodeURIComponent(co)}%22`;
+            const dirUrl = dir ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dir)}%22` : null;
+            const dirCoUrl = dir ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dir)}%22+%22${encodeURIComponent(co.split(" ").slice(0,3).join(" "))}%22` : null;
+            return (
+              <div className="li-section">
+                <div className="xl" style={{marginBottom:7}}>LinkedIn — open manually, do not automate</div>
+                <a href={coUrl} target="_blank" rel="noreferrer" className="li-company-btn">
+                  💼 Find Company Page on LinkedIn →
+                </a>
+                <div className="li-people">
+                  {dir && (
+                    <a href={dirCoUrl} target="_blank" rel="noreferrer" className="li-person-btn">
+                      🔍 {dir} at {co.split(" ").slice(0,3).join(" ")} →
+                    </a>
+                  )}
+                  {dir && (
+                    <a href={dirUrl} target="_blank" rel="noreferrer" className="li-person-btn">
+                      👤 {dir} (name only) →
+                    </a>
+                  )}
+                  {(li?.people_searches||[]).filter(p=>!p.role.includes("direct search")).slice(0,3).map(p=>(
+                    <a key={p.role} href={`https://www.google.com/search?q=site:linkedin.com/in+${encodeURIComponent(co.split(" ").slice(0,3).join(" "))}+${encodeURIComponent(p.role.replace(/ →$/,""))}`} target="_blank" rel="noreferrer" className="li-person-btn">{p.role} →</a>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           <MessageAmmoPanel
             ingredients={lead.message_ingredients}
