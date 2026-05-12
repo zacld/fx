@@ -7,6 +7,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "discover": "tsx src/stages/discover.ts",
     "score": "tsx src/stages/score.ts",
     "dedup": "tsx src/stages/dedup.ts",
     "rescore": "tsx src/stages/score.ts && tsx src/stages/dedup.ts",
