@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@fx/core": "file:../core",
+    "cheerio": "^1.2.0",
     "p-limit": "^6.2.0"
   },
   "devDependencies": {
