@@ -1,0 +1,776 @@
+{
+  "f33f855211cf6e5f": {
+    "id": "f33f855211cf6e5f",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/us-news/2026/may/10/trump-tariff-refunds-small-business",
+    "headline": "Trump tariff refunds are happening \u2013 and businesses should pay attention",
+    "raw_summary": "<p>Business owners may have to wade through paperwork, but the US government is now actually processing refunds</p><p>When the <a href=\"https://www.theguardian.com/us-news/us-supreme-court\">supreme court</a> struck down <a href=\"https://www.theguardian.com/us-news/trump-tariffs\">Donald Trump\u2019s tariffs</a>, many small importers assumed any refunds would be tied up in bureaucracy for years. Surprisingly, that\u2019s not what\u2019s happening.</p><p>It\u2019s estimated that roughly <a href=\"https://thehill.com/business/5847938-tariff-refunds-first-round-who-qualifies/\">330,000 importers</a> paid more than $166b",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-05-12T10:35:16.577485+00:00",
+    "status": "low_relevance",
+    "urgency_score": 1,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Event concerns US tariff refunds for US importers, not direct actionable FX exposure for UK businesses.",
+    "ai_provider_used": "gemini",
+    "ai_model_used": "gemini-2.5-flash",
+    "ai_fallback_reason": null
+  },
+  "91f0328fec7671d2": {
+    "id": "91f0328fec7671d2",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/british-pound-declines-on-uk-political-uncertainty-as-dollar-gains-amid-iran-tensions-202605120920",
+    "headline": "British Pound declines on UK political uncertainty as Dollar gains amid Iran tensions",
+    "raw_summary": "GBP/USD falls to around 1.3530 on Tuesday at the time of writing, down 0.59% on the day, as renewed risk aversion supports the US Dollar (USD) against the British Pound (GBP).",
+    "pre_relevance_score": 3,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
+    "detected_at": "2026-05-12T10:43:21.464787+00:00",
+    "event_type": "Currency move",
+    "summary": "The British Pound has weakened against the US Dollar by 0.59% due to UK political uncertainty and global risk aversion. This means UK businesses making USD payments will find their costs higher in GBP, while those receiving USD will get less GBP for their revenue. Businesses with upcoming USD transactions should review their exposure immediately.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 9,
+    "commercial_relevance": 9,
+    "commercial_relevance_reason": "Direct GBP/USD currency move immediately impacts UK businesses with USD payment obligations or receipts.",
+    "what_happened": "The British Pound declined against the US Dollar, with GBP/USD falling by 0.59% to around 1.3530.",
+    "what_changed_financially": "The GBP/USD exchange rate fell, meaning 1 GBP now buys fewer USD, and 1 USD converts to more GBP.",
+    "who_pays_more": "UK businesses importing from the US, paying for US-based services (e.g., cloud, software, marketing), or with USD-denominated debt.",
+    "who_receives_less": "UK businesses exporting to the US, receiving USD-denominated revenue from sales, or with USD-denominated investments.",
+    "currency_mismatch_businesses": "UK businesses with GBP revenue and USD costs (importers, service users) or USD revenue and GBP costs (exporters, service providers).",
+    "margin_risk": "High",
+    "payment_timing_risk": "High",
+    "affected_payment_flow": "GBP revenue vs USD supplier costs, or USD revenue vs GBP costs.",
+    "fx_payment_logic": "When GBP weakens against USD, UK businesses buying goods or services from the US (or any supplier invoicing in USD) will need to convert more GBP to acquire the same amount of USD, directly increasing their landed costs or operational expenses. Conversely, UK businesses selling to the US (or receiving USD revenue) will convert their USD receipts into fewer GBP, reducing their effective revenue and compressing margins.",
+    "sales_angle": "Your upcoming USD payments or receipts are now worth significantly more/less in GBP than they were yesterday.",
+    "business_impact_summary": "UK importers of US goods, technology, and raw materials will see their GBP costs rise for USD-denominated invoices, directly squeezing margins. UK exporters to the US will receive less GBP for their USD sales, impacting profitability. Today is a critical moment for these businesses to assess and manage their immediate and future USD exposure.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue exposure",
+      "import margin pressure",
+      "export revenue pressure"
+    ],
+    "overall_sales_angle": "The recent GBP/USD decline means your upcoming USD transactions will have a direct and immediate impact on your profitability.",
+    "event_breadth": "broad_currency",
+    "target_segments": [
+      {
+        "segment_name": "UK Importers of US Technology & Software",
+        "category_priority_score": 95,
+        "business_model": "UK businesses purchasing software licenses, SaaS subscriptions, or hardware from US vendors, selling services/products in GBP. Often resellers, integrators, or end-users.",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure \u2014 USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK company receives USD invoice for software/hardware \u2192 converts GBP to USD \u2192 if GBP has fallen, more GBP is needed to cover the USD amount \u2192 increased operational cost or cost of goods sold.",
+        "margin_risk": "High \u2014 0.59% GBP/USD move on a \u00a3100k monthly SaaS bill is an extra \u00a3590 cost, eroding margins.",
+        "payment_timing_risk": "High \u2014 30-day payment terms for invoices or annual subscriptions create open FX exposure windows.",
+        "affected_payment_flow": "Regular USD payments for software licenses, cloud services, hardware, typically monthly/quarterly/annually, ranging from \u00a31k to \u00a3100k+.",
+        "website_validation_signals": [
+          "partnered with",
+          "distributor of",
+          "powered by",
+          "reseller of",
+          "US software"
+        ],
+        "avoid_segments": [
+          "purely domestic IT support",
+          "consumer electronics retailers without direct import"
+        ],
+        "sales_angle": "Your upcoming USD tech payments now cost more in GBP than when orders were placed.",
+        "exposure_thesis_template": "This company imports/uses US technology/software. GBP/USD move increases GBP cost of upcoming USD supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "SaaS Resellers & Integrators UK",
+            "why": "Pay USD for US SaaS licenses/subscriptions, sell to UK clients in GBP, directly exposed to GBP/USD fluctuations.",
+            "search_queries": [
+              "\"SaaS reseller\" UK",
+              "\"software integrator\" UK",
+              "\"cloud solutions partner\" UK"
+            ],
+            "companies_house_terms": [
+              "software solutions",
+              "cloud services",
+              "tech reseller"
+            ]
+          },
+          {
+            "name": "IT Hardware Distributors UK",
+            "why": "Import computer hardware and components from US manufacturers, pay in USD, sell to UK market in GBP.",
+            "search_queries": [
+              "\"IT hardware distributor\" UK",
+              "\"computer components importer\" UK",
+              "\"network equipment supplier\" UK"
+            ],
+            "companies_house_terms": [
+              "hardware distribution",
+              "IT equipment",
+              "computer parts"
+            ]
+          },
+          {
+            "name": "UK Businesses using US Cloud Services",
+            "why": "Pay monthly/annually in USD for essential cloud hosting (AWS, Azure, GCP), increasing operational costs in GBP.",
+            "search_queries": [
+              "\"AWS partner\" UK",
+              "\"Azure cloud services\" UK",
+              "\"Google Cloud platform\" UK"
+            ],
+            "companies_house_terms": [
+              "cloud hosting",
+              "data services",
+              "web infrastructure"
+            ]
+          }
+        ],
+        "direct_or_second_order": "second_order",
+        "sme_accessibility_score": 80,
+        "final_scrape_score": 90,
+        "why_sme_accessible": "[inferred] Many UK SMEs in this niche with reachable FDs/MDs and findable company websites."
+      },
+      {
+        "segment_name": "UK Exporters of Goods to the US",
+        "category_priority_score": 92,
+        "business_model": "UK manufacturers or distributors selling physical goods to US customers, invoicing in USD. Revenue is generated in USD and converted to GBP.",
+        "exposure_level": "Very High",
+        "exposure_type": "Export revenue exposure \u2014 USD receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK exporter invoices US customer in USD \u2192 receives USD payment \u2192 converts USD to GBP \u2192 if GBP has fallen, fewer GBP are received for the same USD amount \u2192 reduced revenue/margin.",
+        "margin_risk": "High \u2014 0.59% GBP/USD move on a \u00a3200k USD invoice means \u00a31,180 less GBP received, directly impacting profit.",
+        "payment_timing_risk": "High \u2014 30-90 day payment terms create open FX exposure between invoicing and receipt.",
+        "affected_payment_flow": "USD receipts from US customers, typically \u00a310k-\u00a3500k per order, monthly/quarterly.",
+        "website_validation_signals": [
+          "export to USA",
+          "shipping worldwide",
+          "US distribution",
+          "international sales"
+        ],
+        "avoid_segments": [
+          "UK-only retailers",
+          "service-only exporters without physical goods"
+        ],
+        "sales_angle": "Your upcoming USD export receipts will convert to less GBP than expected.",
+        "exposure_thesis_template": "This company exports goods to the US. GBP/USD move means less GBP received for USD sales.",
+        "micro_categories": [
+          {
+            "name": "UK Luxury Goods Exporters to US",
+            "why": "Sell high-value items like fashion, jewellery, or artisanal products to the US, receiving USD which now converts to less GBP.",
+            "search_queries": [
+              "\"luxury goods exporter\" UK USA",
+              "\"british fashion export\" US",
+              "\"fine jewellery export\" USA"
+            ],
+            "companies_house_terms": [
+              "luxury export",
+              "fashion UK",
+              "jewellery design"
+            ]
+          },
+          {
+            "name": "UK Specialty Food & Drink Exporters to US",
+            "why": "Export unique British food and beverage products to the US, with USD revenue now yielding less GBP.",
+            "search_queries": [
+              "\"british food export\" USA",
+              "\"craft beer export\" US",
+              "\"whisky exporter\" USA"
+            ],
+            "companies_house_terms": [
+              "food export",
+              "drink distribution",
+              "specialty foods"
+            ]
+          },
+          {
+            "name": "UK Industrial Equipment Exporters to US",
+            "why": "Manufacture and export machinery or components to US industrial clients, receiving USD payments that are now worth less in GBP.",
+            "search_queries": [
+              "\"industrial equipment export\" USA",
+              "\"engineering solutions export\" US",
+              "\"manufacturing export\" USA"
+            ],
+            "companies_house_terms": [
+              "engineering export",
+              "industrial machinery",
+              "manufacturing solutions"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 82,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Importers of US Raw Materials & Components",
+        "category_priority_score": 93,
+        "business_model": "UK manufacturers buying essential raw materials or components from US suppliers, invoicing in USD, selling finished products in GBP.",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure \u2014 USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK manufacturer receives USD invoice for raw materials \u2192 converts GBP to USD \u2192 if GBP has fallen, more GBP is needed \u2192 increased production cost, directly impacting COGS.",
+        "margin_risk": "Very High \u2014 Raw material costs are fundamental; a 0.59% move can significantly erode product margins.",
+        "payment_timing_risk": "High \u2014 Often 30-60 day payment terms, creating a substantial window for FX fluctuations.",
+        "affected_payment_flow": "Regular USD payments for bulk materials, components, typically \u00a35k-\u00a3200k per order, weekly/monthly.",
+        "website_validation_signals": [
+          "sourced from USA",
+          "US components",
+          "international supply chain",
+          "global suppliers"
+        ],
+        "avoid_segments": [
+          "retailers of finished goods without manufacturing",
+          "service-only businesses"
+        ],
+        "sales_angle": "Your upcoming USD raw material payments now cost more in GBP, impacting your production costs.",
+        "exposure_thesis_template": "This company imports raw materials/components from the US. GBP/USD move increases GBP cost of upcoming USD supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK Aerospace Component Manufacturers",
+            "why": "Rely on US suppliers for specialised components, paying in USD, making their production costs sensitive to GBP/USD.",
+            "search_queries": [
+              "\"aerospace components\" UK supplier",
+              "\"aircraft parts manufacturer\" UK",
+              "\"defence supply chain\" UK"
+            ],
+            "companies_house_terms": [
+              "aerospace manufacturing",
+              "precision engineering",
+              "defence components"
+            ]
+          },
+          {
+            "name": "UK Chemical & Pharmaceutical Manufacturers",
+            "why": "Import specific chemicals or active pharmaceutical ingredients (APIs) from US, with USD invoices directly affecting product cost.",
+            "search_queries": [
+              "\"chemical importer\" UK USA",
+              "\"API supplier\" UK",
+              "\"pharmaceutical raw materials\" UK"
+            ],
+            "companies_house_terms": [
+              "chemical manufacturing",
+              "pharma ingredients",
+              "biotech UK"
+            ]
+          },
+          {
+            "name": "UK Electronics Component Importers",
+            "why": "Source critical electronic components from US manufacturers, paying in USD, impacting the cost of their finished electronic products.",
+            "search_queries": [
+              "\"electronics components importer\" UK",
+              "\"semiconductor distributor\" UK",
+              "\"circuit board supplier\" UK"
+            ],
+            "companies_house_terms": [
+              "electronics manufacturing",
+              "component supply",
+              "semiconductor solutions"
+            ]
+          }
+        ],
+        "direct_or_second_order": "second_order",
+        "sme_accessibility_score": 80,
+        "final_scrape_score": 89,
+        "why_sme_accessible": "[inferred] Many UK SMEs in this niche with reachable FDs/MDs and findable company websites."
+      },
+      {
+        "segment_name": "UK E-commerce Businesses Selling to the US",
+        "category_priority_score": 89,
+        "business_model": "UK online retailers selling directly to US consumers, often receiving payments in USD via platforms (Shopify, Amazon, PayPal) or direct USD bank transfers.",
+        "exposure_level": "High",
+        "exposure_type": "Export revenue exposure \u2014 USD receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "US customer pays in USD \u2192 platform converts USD to GBP (often at unfavourable rates) or UK business converts USD receipts to GBP \u2192 if GBP has fallen, fewer GBP are received for the same USD amount \u2192 reduced revenue and profit.",
+        "margin_risk": "High \u2014 E-commerce margins can be tight, and even small FX moves can significantly impact profitability on high sales volumes.",
+        "payment_timing_risk": "Medium \u2014 Often daily/weekly payouts, but the cumulative effect of a sustained move is significant.",
+        "affected_payment_flow": "Regular USD receipts from online sales, typically daily/weekly payouts, ranging from \u00a31k-\u00a350k+ per month.",
+        "website_validation_signals": [
+          "ship to USA",
+          "international shipping",
+          "USD pricing option",
+          "global delivery"
+        ],
+        "avoid_segments": [
+          "UK-only e-commerce",
+          "marketplaces themselves (e.g., Amazon UK)"
+        ],
+        "sales_angle": "Your USD e-commerce sales are now converting to less GBP, impacting your bottom line.",
+        "exposure_thesis_template": "This company sells online to the US. GBP/USD move means less GBP received for USD sales.",
+        "micro_categories": [
+          {
+            "name": "UK Online Fashion Retailers (US Market)",
+            "why": "Sell clothing and accessories to US customers, receiving USD payments that now yield less GBP upon conversion.",
+            "search_queries": [
+              "\"fashion e-commerce\" UK USA",
+              "\"online clothing store\" ship to US",
+              "\"british apparel brand\" US"
+            ],
+            "companies_house_terms": [
+              "fashion retail",
+              "online clothing",
+              "apparel brand"
+            ]
+          },
+          {
+            "name": "UK Handmade & Artisan Goods Sellers (US Market)",
+            "why": "Export unique handmade products to the US, often via platforms like Etsy or own websites, receiving USD.",
+            "search_queries": [
+              "\"handmade goods\" UK export US",
+              "\"artisan products\" ship to USA",
+              "\"crafts online store\" US"
+            ],
+            "companies_house_terms": [
+              "handmade crafts",
+              "artisan products",
+              "design studio"
+            ]
+          },
+          {
+            "name": "UK Specialty Food E-tailers (US Market)",
+            "why": "Sell niche British food products online to US consumers, with USD revenue now converting to fewer GBP.",
+            "search_queries": [
+              "\"british food online\" US delivery",
+              "\"gourmet food export\" USA",
+              "\"tea coffee e-commerce\" US"
+            ],
+            "companies_house_terms": [
+              "food e-commerce",
+              "gourmet foods",
+              "specialty provisions"
+            ]
+          }
+        ],
+        "direct_or_second_order": "second_order",
+        "sme_accessibility_score": 80,
+        "final_scrape_score": 86,
+        "why_sme_accessible": "[inferred] Many UK SMEs in this niche with reachable FDs/MDs and findable company websites."
+      },
+      {
+        "segment_name": "UK Businesses Paying for US Marketing & Advertising Services",
+        "category_priority_score": 88,
+        "business_model": "UK companies using US-based agencies or platforms for digital marketing, PR, or advertising, invoiced in USD. Revenue is typically in GBP.",
+        "exposure_level": "High",
+        "exposure_type": "Operational cost exposure \u2014 USD service payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK company receives USD invoice for marketing services \u2192 converts GBP to USD \u2192 if GBP has fallen, more GBP is needed \u2192 increased operational cost for marketing budget.",
+        "margin_risk": "Medium to High \u2014 Marketing budgets are often significant, and increased costs can impact overall profitability.",
+        "payment_timing_risk": "High \u2014 Often monthly retainers or campaign-based payments, creating recurring exposure.",
+        "affected_payment_flow": "Monthly/quarterly USD payments for agency fees, ad spend, typically \u00a32k-\u00a350k+ per month.",
+        "website_validation_signals": [
+          "global campaigns",
+          "US market entry",
+          "international advertising",
+          "partnered with US agencies"
+        ],
+        "avoid_segments": [
+          "UK-only marketing agencies",
+          "businesses with purely domestic marketing spend"
+        ],
+        "sales_angle": "Your USD marketing spend now costs more in GBP, impacting your budget efficiency.",
+        "exposure_thesis_template": "This company pays for US marketing/advertising. GBP/USD move increases GBP cost of upcoming USD service invoices.",
+        "micro_categories": [
+          {
+            "name": "UK Tech Startups (US Market Entry)",
+            "why": "Invest heavily in US-focused digital marketing and PR to penetrate the US market, paying agencies/platforms in USD.",
+            "search_queries": [
+              "\"tech startup\" UK US market",
+              "\"SaaS marketing\" UK US",
+              "\"fintech growth\" US"
+            ],
+            "companies_house_terms": [
+              "tech startup",
+              "software development",
+              "fintech solutions"
+            ]
+          },
+          {
+            "name": "UK E-commerce Brands (US Ad Spend)",
+            "why": "Run extensive advertising campaigns on US platforms (e.g., Facebook, Google Ads targeting US) paid in USD, increasing their GBP costs.",
+            "search_queries": [
+              "\"e-commerce brand\" UK US ads",
+              "\"online retailer\" US marketing",
+              "\"digital advertising\" UK US"
+            ],
+            "companies_house_terms": [
+              "e-commerce retail",
+              "digital marketing",
+              "online brand"
+            ]
+          },
+          {
+            "name": "UK Global Consultancies (US Marketing)",
+            "why": "Market their services to US clients, using US-based marketing resources or agencies, incurring USD costs.",
+            "search_queries": [
+              "\"management consultancy\" UK US marketing",
+              "\"business advisory\" US outreach",
+              "\"global consulting firm\" US"
+            ],
+            "companies_house_terms": [
+              "consulting services",
+              "business strategy",
+              "advisory firm"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 80,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Businesses Paying for US Cloud Hosting & Data Services",
+        "category_priority_score": 90,
+        "business_model": "UK companies relying on US-based cloud providers (AWS, Azure, Google Cloud) or data services, typically invoiced in USD. These are essential, recurring operational costs.",
+        "exposure_level": "High",
+        "exposure_type": "Operational cost exposure \u2014 USD service payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK company receives USD invoice for cloud/data services \u2192 converts GBP to USD \u2192 if GBP has fallen, more GBP is needed \u2192 increased operational cost for critical infrastructure.",
+        "margin_risk": "Medium \u2014 While essential, these are recurring costs that can accumulate and impact profitability over time.",
+        "payment_timing_risk": "High \u2014 Typically monthly recurring payments, creating continuous exposure.",
+        "affected_payment_flow": "Monthly USD payments for cloud infrastructure, data storage, SaaS tools, typically \u00a3500-\u00a320k+ per month.",
+        "website_validation_signals": [
+          "powered by AWS",
+          "Azure cloud",
+          "Google Cloud Platform",
+          "data analytics partner"
+        ],
+        "avoid_segments": [
+          "businesses with purely on-premise IT",
+          "small local businesses without significant online presence"
+        ],
+        "sales_angle": "Your monthly USD cloud hosting bills now cost more in GBP, impacting your IT budget.",
+        "exposure_thesis_template": "This company uses US cloud/data services. GBP/USD move increases GBP cost of upcoming USD service invoices.",
+        "micro_categories": [
+          {
+            "name": "UK Software Development Companies",
+            "why": "Host their applications and data on US cloud platforms, incurring significant monthly USD costs for infrastructure.",
+            "search_queries": [
+              "\"software development\" UK AWS",
+              "\"web application hosting\" UK Azure",
+              "\"SaaS platform\" UK Google Cloud"
+            ],
+            "companies_house_terms": [
+              "software solutions",
+              "web development",
+              "digital platforms"
+            ]
+          },
+          {
+            "name": "UK Data Analytics & AI Firms",
+            "why": "Process and store large datasets using US-based data services and cloud infrastructure, leading to substantial USD payments.",
+            "search_queries": [
+              "\"data analytics\" UK cloud",
+              "\"AI development\" UK AWS",
+              "\"big data solutions\" UK Azure"
+            ],
+            "companies_house_terms": [
+              "data science",
+              "AI solutions",
+              "analytics services"
+            ]
+          },
+          {
+            "name": "UK Online Media Publishers",
+            "why": "Host websites, content delivery networks (CDNs), and user data on US cloud platforms to serve global audiences, paying in USD.",
+            "search_queries": [
+              "\"online publisher\" UK cloud hosting",
+              "\"digital media company\" AWS",
+              "\"content platform\" UK Azure"
+            ],
+            "companies_house_terms": [
+              "digital publishing",
+              "online media",
+              "content delivery"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 81,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Importers of US Consumer Goods",
+        "category_priority_score": 91,
+        "business_model": "UK distributors or retailers importing finished consumer products from US brands, invoicing in USD, selling in GBP. Margins are often competitive.",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure \u2014 USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK importer receives USD invoice for consumer goods \u2192 converts GBP to USD \u2192 if GBP has fallen, more GBP is needed \u2192 increased landed cost per unit, directly impacting retail margins.",
+        "margin_risk": "High \u2014 Consumer goods often have competitive pricing, making even small FX moves impactful on profitability.",
+        "payment_timing_risk": "High \u2014 30-90 day payment terms are common, creating open FX exposure between order and payment.",
+        "affected_payment_flow": "Regular USD payments for product shipments, typically \u00a310k-\u00a3200k per order, monthly/quarterly.",
+        "website_validation_signals": [
+          "exclusive distributor",
+          "imported from USA",
+          "US brands",
+          "sourced globally"
+        ],
+        "avoid_segments": [
+          "retailers without direct import operations",
+          "supermarket chains"
+        ],
+        "sales_angle": "Your upcoming USD payments for US consumer goods now cost more in GBP, squeezing your retail margins.",
+        "exposure_thesis_template": "This company imports consumer goods from the US. GBP/USD move increases GBP cost of upcoming USD supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK Fashion & Apparel Importers (US Brands)",
+            "why": "Import clothing, footwear, and accessories from US fashion brands, paying in USD, directly affecting their cost of goods.",
+            "search_queries": [
+              "\"fashion importer\" UK US brands",
+              "\"apparel distributor\" UK USA",
+              "\"clothing wholesale\" US brands UK"
+            ],
+            "companies_house_terms": [
+              "fashion import",
+              "apparel distribution",
+              "clothing wholesale"
+            ]
+          },
+          {
+            "name": "UK Home & Garden Product Importers (US Brands)",
+            "why": "Source home decor, furniture, or garden equipment from US manufacturers, with USD invoices impacting their landed costs.",
+            "search_queries": [
+              "\"home decor importer\" UK US",
+              "\"garden products distributor\" UK USA",
+              "\"furniture import\" US brands UK"
+            ],
+            "companies_house_terms": [
+              "home goods import",
+              "garden supplies",
+              "furniture distribution"
+            ]
+          },
+          {
+            "name": "UK Toy & Game Importers (US Brands)",
+            "why": "Import toys, games, and hobby items from US companies, paying in USD, which increases their cost of inventory.",
+            "search_queries": [
+              "\"toy importer\" UK US",
+              "\"game distributor\" UK USA",
+              "\"hobby products wholesale\" US brands UK"
+            ],
+            "companies_house_terms": [
+              "toy import",
+              "game distribution",
+              "hobby supplies"
+            ]
+          }
+        ],
+        "direct_or_second_order": "second_order",
+        "sme_accessibility_score": 80,
+        "final_scrape_score": 88,
+        "why_sme_accessible": "[inferred] Many UK SMEs in this niche with reachable FDs/MDs and findable company websites."
+      },
+      {
+        "segment_name": "UK Businesses with US Payroll or Contractors",
+        "category_priority_score": 87,
+        "business_model": "UK companies employing staff or engaging contractors based in the US, paying salaries or fees in USD. These are fixed operational costs.",
+        "exposure_level": "High",
+        "exposure_type": "Operational cost exposure \u2014 USD payroll/contractor payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK company needs to pay USD salaries/fees \u2192 converts GBP to USD \u2192 if GBP has fallen, more GBP is needed \u2192 increased operational cost for staffing.",
+        "margin_risk": "High \u2014 Payroll is a significant fixed cost, and increased GBP expenditure directly impacts profitability.",
+        "payment_timing_risk": "High \u2014 Typically monthly or bi-weekly payments, creating continuous and predictable exposure.",
+        "affected_payment_flow": "Regular USD payments for salaries, contractor fees, typically \u00a35k-\u00a3100k+ per month.",
+        "website_validation_signals": [
+          "US team",
+          "global workforce",
+          "remote US staff",
+          "international contractors"
+        ],
+        "avoid_segments": [
+          "businesses with purely UK-based staff",
+          "companies using payroll services that handle FX internally"
+        ],
+        "sales_angle": "Your USD payroll and contractor costs now require more GBP, impacting your operational budget.",
+        "exposure_thesis_template": "This company pays US staff/contractors. GBP/USD move increases GBP cost of upcoming USD payments.",
+        "micro_categories": [
+          {
+            "name": "UK Tech Companies with Remote US Staff",
+            "why": "Employ software developers, sales, or support staff in the US, paying their salaries in USD, increasing GBP costs.",
+            "search_queries": [
+              "\"tech company\" UK remote US staff",
+              "\"software firm\" US employees",
+              "\"SaaS company\" US payroll UK"
+            ],
+            "companies_house_terms": [
+              "software development",
+              "tech solutions",
+              "digital innovation"
+            ]
+          },
+          {
+            "name": "UK Consultancies with US Contractors",
+            "why": "Engage US-based consultants or freelancers for projects, paying their fees in USD, which now costs more in GBP.",
+            "search_queries": [
+              "\"consultancy\" UK US contractors",
+              "\"business advisory\" US freelancers",
+              "\"project management\" US talent"
+            ],
+            "companies_house_terms": [
+              "consulting services",
+              "advisory firm",
+              "management solutions"
+            ]
+          },
+          {
+            "name": "UK Media Companies with US Correspondents",
+            "why": "Employ journalists or content creators in the US, paying their salaries or fees in USD, increasing operational costs.",
+            "search_queries": [
+              "\"media company\" UK US correspondent",
+              "\"publishing house\" US writers",
+              "\"content creation\" US team"
+            ],
+            "companies_house_terms": [
+              "media production",
+              "publishing group",
+              "content agency"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 79,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      }
+    ],
+    "total_micro_categories": 24,
+    "companies_house_terms": [
+      "software solutions",
+      "cloud services",
+      "tech reseller",
+      "hardware distribution",
+      "IT equipment",
+      "computer parts",
+      "cloud hosting",
+      "data services",
+      "web infrastructure",
+      "luxury export",
+      "fashion UK",
+      "jewellery design",
+      "food export",
+      "drink distribution",
+      "specialty foods",
+      "engineering export",
+      "industrial machinery",
+      "manufacturing solutions",
+      "aerospace manufacturing",
+      "precision engineering",
+      "defence components",
+      "chemical manufacturing",
+      "pharma ingredients",
+      "biotech UK",
+      "electronics manufacturing",
+      "component supply",
+      "semiconductor solutions",
+      "fashion retail",
+      "online clothing",
+      "apparel brand"
+    ],
+    "all_search_queries": [
+      "\"SaaS reseller\" UK",
+      "\"software integrator\" UK",
+      "\"cloud solutions partner\" UK",
+      "\"IT hardware distributor\" UK",
+      "\"computer components importer\" UK",
+      "\"network equipment supplier\" UK",
+      "\"AWS partner\" UK",
+      "\"Azure cloud services\" UK",
+      "\"Google Cloud platform\" UK",
+      "\"luxury goods exporter\" UK USA",
+      "\"british fashion export\" US",
+      "\"fine jewellery export\" USA",
+      "\"british food export\" USA",
+      "\"craft beer export\" US",
+      "\"whisky exporter\" USA",
+      "\"industrial equipment export\" USA",
+      "\"engineering solutions export\" US",
+      "\"manufacturing export\" USA",
+      "\"aerospace components\" UK supplier",
+      "\"aircraft parts manufacturer\" UK",
+      "\"defence supply chain\" UK",
+      "\"chemical importer\" UK USA",
+      "\"API supplier\" UK",
+      "\"pharmaceutical raw materials\" UK",
+      "\"electronics components importer\" UK",
+      "\"semiconductor distributor\" UK",
+      "\"circuit board supplier\" UK",
+      "\"fashion e-commerce\" UK USA",
+      "\"online clothing store\" ship to US",
+      "\"british apparel brand\" US",
+      "\"handmade goods\" UK export US",
+      "\"artisan products\" ship to USA",
+      "\"crafts online store\" US",
+      "\"british food online\" US delivery",
+      "\"gourmet food export\" USA",
+      "\"tea coffee e-commerce\" US",
+      "\"tech startup\" UK US market",
+      "\"SaaS marketing\" UK US",
+      "\"fintech growth\" US",
+      "\"e-commerce brand\" UK US ads",
+      "\"online retailer\" US marketing",
+      "\"digital advertising\" UK US",
+      "\"management consultancy\" UK US marketing",
+      "\"business advisory\" US outreach",
+      "\"global consulting firm\" US",
+      "\"software development\" UK AWS",
+      "\"web application hosting\" UK Azure",
+      "\"SaaS platform\" UK Google Cloud",
+      "\"data analytics\" UK cloud",
+      "\"AI development\" UK AWS"
+    ],
+    "status": "discovered",
+    "ai_provider_used": "gemini",
+    "ai_model_used": "gemini-2.5-flash",
+    "ai_fallback_reason": null,
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-05-12T11:21:53.903211+00:00"
+  },
+  "725af87417ce4724": {
+    "id": "725af87417ce4724",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/live/2026/may/12/uk-bond-yields-borrowing-costs-pound-falls-oil-inflation-live-updates",
+    "headline": "UK long-term borrowing costs hit highest since 1998 as Starmer faces pressure to stand down \u2013 business live",
+    "raw_summary": "<p>Rolling coverage of the latest economic and financial news</p><ul><li><p><a href=\"https://www.theguardian.com/politics/live/2026/may/12/keir-starmer-prime-minister-resignation-labour-leadership-cabinet-meeting-yvette-cooper-shabana-mahmood-andy-burnham-wes-streeting-uk-politics-latest-news-updates\"><strong>Politics Live: Minister says Starmer is \u2018listening\u2019 but refuses to say if PM will stay on ahead of critical cabinet meeting</strong></a></p></li><li><p><a href=\"https://www.theguardian.com/politics/2026/may/11/more-than-60-labour-mps-call-on-starmer-to-set-timetable-to-quit\">Starmer on th",
+    "pre_relevance_score": 3,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
+    "detected_at": "2026-05-12T10:43:32.070200+00:00",
+    "status": "low_relevance",
+    "urgency_score": 1,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "The event describes rising UK domestic borrowing costs and political developments, which are not direct foreign exchange rate movements and do not create immediate, actionable FX exposure for identifiable UK businesses.",
+    "ai_provider_used": "gemini",
+    "ai_model_used": "gemini-2.5-flash",
+    "ai_fallback_reason": null
+  },
+  "13c79d92e623ab05": {
+    "id": "13c79d92e623ab05",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/2026/may/12/carillion-finance-directors-banned-frc",
+    "headline": "Five former Carillion executives banned by accountancy regulator",
+    "raw_summary": "<p>Richard Adam, Zafar Khan and three others are also fined by Financial Reporting Council</p><ul><li><p><a href=\"https://www.theguardian.com/business/live/2026/may/12/uk-bond-yields-borrowing-costs-pound-falls-oil-inflation-live-updates\">Business live \u2013 latest updates</a></p></li></ul><p>Five former executives at the collapsed government contractor Carillion have been banned by the UK\u2019s accountancy regulator, effectively ending the career of its former finance chief, after they \u201cacted recklessly\u201d.</p><p>Before <a href=\"https://www.theguardian.com/business/2018/jan/15/jobs-carillion-liquidatio",
+    "pre_relevance_score": 3,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
+    "detected_at": "2026-05-12T10:43:37.193159+00:00",
+    "status": "low_relevance",
+    "urgency_score": 1,
+    "commercial_relevance": 1,
+    "commercial_relevance_reason": "Corporate governance and regulatory news regarding past events, with no direct or indirect link to current UK business FX exposure.",
+    "ai_provider_used": "gemini",
+    "ai_model_used": "gemini-2.5-flash",
+    "ai_fallback_reason": null
+  }
+}
