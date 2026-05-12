@@ -59,7 +59,7 @@ def scrape_fx_signals(url: str) -> dict:
     if not url:
         return empty
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=10, allow_redirects=True)
+        resp = requests.get(url, headers=HEADERS, timeout=(5, 10), allow_redirects=True)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "html.parser")
         for tag in soup(["script","style","nav","footer","header","meta"]):

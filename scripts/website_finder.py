@@ -93,11 +93,28 @@ def clean_for_domain(company_name: str) -> list:
     return [w for w in n.split() if w.lower() not in stopwords]
 
 
+def _make_abbreviation(words: list) -> str:
+    """
+    Generate an abbreviation from the first letter of each significant word.
+    "MAJOR ENERGY USERS COUNCIL" → "meuc"
+    "BRITISH PLASTICS FEDERATION" → "bpf"
+    Ignores stop words and single-character words.
+    """
+    stops = {"and", "the", "of", "for", "uk", "ireland", "in", "at", "to",
+             "a", "an", "&", "with", "by"}
+    letters = [w[0].lower() for w in words if w.lower() not in stops and len(w) > 1]
+    return "".join(letters)
+
+
 def generate_domain_candidates(words: list) -> list:
     """Return (domain_with_tld, tld_preference) in priority order.
 
     Prioritised .co.uk first, limited to top candidates to keep
-    the request count reasonable (~10 max per company).
+    the request count reasonable (~14 max per company).
+
+    Adds abbreviation variants so companies like:
+      "MAJOR ENERGY USERS COUNCIL" → also tries meuc.co.uk, meuc.com
+      "BRITISH PLASTICS FEDERATION" → also tries bpf.co.uk, bpf.com
     """
     if not words:
         return []
@@ -131,6 +148,19 @@ def generate_domain_candidates(words: list) -> list:
         v = variants[0]
         candidates.append((v + ".net",    0.8))
         candidates.append((v + ".org.uk", 0.7))
+
+    # Abbreviation variants — lower priority than full-name guesses but useful
+    # for companies like "MAJOR ENERGY USERS COUNCIL" (meuc.co.uk) or
+    # "BRITISH INTERNATIONAL FREIGHT ASSOCIATION" (bifa.org)
+    abbrev = _make_abbreviation(words)
+    if abbrev and len(abbrev) >= 2 and abbrev not in seen:
+        seen.add(abbrev)
+        # .co.uk and .com for abbreviations
+        candidates.append((abbrev + ".co.uk", 1.1))
+        candidates.append((abbrev + ".com",   0.9))
+        # .org and .org.uk — many trade bodies use these with abbreviation domains
+        candidates.append((abbrev + ".org",    0.85))
+        candidates.append((abbrev + ".org.uk", 0.80))
 
     return candidates
 
@@ -184,6 +214,28 @@ def _fetch_and_score(url: str, tokens: list) -> tuple:
         if ".co.uk" in url:
             score += 10
         score += _match_score(title, body, tokens)
+
+        # UK nationality check: if this is a .com (not .co.uk) domain, verify it
+        # has UK signals. A US/foreign company on .com would otherwise get "high"
+        # confidence purely from name-token matching, creating false positives.
+        final_dom = urlparse(final).netloc.lower()
+        is_non_uk_tld = not any(uk in final_dom for uk in (".co.uk", ".org.uk", ".me.uk", ".ltd.uk"))
+        if is_non_uk_tld:
+            body_lower = body.lower()
+            uk_signals = (
+                "+44" in body_lower
+                or ".co.uk" in body_lower
+                or "united kingdom" in body_lower
+                or "england" in body_lower
+                or "scotland" in body_lower
+                or "wales" in body_lower
+                or "registered in england" in body_lower
+                or re.search(r"\b[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}\b", body)
+            )
+            if not uk_signals:
+                score -= 30  # penalise foreign/.com sites with no UK presence signals
+                log.debug("Non-UK site penalty applied: %s (score now %d)", final, score)
+
         return final, score, False
 
     except (requests.exceptions.ConnectionError,
@@ -214,11 +266,16 @@ def find_website_guess(company_name: str, company_number: str = None) -> tuple:
     best_url, best_score, best_conf = None, 0.0, None
 
     for domain, tld_pref in candidates:
-        for scheme in ("https://", "http://"):
-            url = f"{scheme}www.{domain}"
+        # Try www. first, then bare domain if www. fails to resolve.
+        # Some companies (especially those with older hosting) only resolve without www.
+        urls_to_try = [f"https://www.{domain}", f"https://{domain}"]
+        tried_http_www = False
+
+        for url in urls_to_try:
             final, raw, parked = _fetch_and_score(url, tokens)
             if parked:
-                break  # both schemes will be parked
+                break  # bare domain will also be parked
+
             if final and raw > 0:
                 adjusted = raw * tld_pref
                 if adjusted > best_score:
@@ -230,7 +287,24 @@ def find_website_guess(company_name: str, company_number: str = None) -> tuple:
                 if best_conf == "high":
                     log.debug("High-confidence hit early exit: %s → %s", company_name, final)
                     return best_url, best_conf, "domain_guess"
-                break  # https worked, skip http
+                break  # this domain resolved — skip http fallback
+
+            # Only try http:// for www. if https:// completely failed
+            if url.startswith("https://www.") and not tried_http_www:
+                tried_http_www = True
+                http_url = f"http://www.{domain}"
+                final, raw, parked = _fetch_and_score(http_url, tokens)
+                if parked:
+                    break
+                if final and raw > 0:
+                    adjusted = raw * tld_pref
+                    if adjusted > best_score:
+                        best_score = adjusted
+                        best_url   = final
+                        if   raw >= 45: best_conf = "high"
+                        elif raw >= 25: best_conf = "medium"
+                        else:           best_conf = "low"
+                    break  # http worked, move to next domain candidate
 
     THRESHOLD = 22
     if best_url and best_score >= THRESHOLD:

@@ -62,12 +62,17 @@ DATA_DIR.mkdir(exist_ok=True)
 COMPANIES_HOUSE_API_KEY = os.getenv("COMPANIES_HOUSE_API_KEY", "")
 
 # ── ENV CONTROLS ──────────────────────────────────────────────────────────────
-WEB_DISCOVERY_ENABLED      = os.getenv("WEB_DISCOVERY_ENABLED", "true").lower() == "true"
-WEB_MAX_EVENTS             = int(os.getenv("WEB_MAX_EVENTS", "5"))
-WEB_MAX_SEGMENTS_PER_EVENT = int(os.getenv("WEB_MAX_SEGMENTS_PER_EVENT", "3"))
-WEB_MAX_QUERIES_PER_SEGMENT= int(os.getenv("WEB_MAX_QUERIES_PER_SEGMENT", "3"))
-WEB_MAX_RESULTS_PER_QUERY  = int(os.getenv("WEB_MAX_RESULTS_PER_QUERY", "8"))
-WEB_REQUEST_DELAY          = float(os.getenv("WEB_REQUEST_DELAY_SECONDS", "3.0"))
+WEB_DISCOVERY_ENABLED                = os.getenv("WEB_DISCOVERY_ENABLED", "true").lower() == "true"
+WEB_MAX_EVENTS                       = int(os.getenv("WEB_MAX_EVENTS", "5"))
+WEB_MAX_SEGMENTS_PER_EVENT           = int(os.getenv("WEB_MAX_SEGMENTS_PER_EVENT", "3"))
+WEB_MAX_MICRO_CATEGORIES_PER_SEGMENT = int(os.getenv("WEB_MAX_MICRO_CATEGORIES_PER_SEGMENT", "3"))
+WEB_MAX_QUERIES_PER_MICRO_CATEGORY   = int(os.getenv("WEB_MAX_QUERIES_PER_MICRO_CATEGORY", "2"))
+WEB_MAX_QUERIES_PER_SEGMENT          = int(os.getenv("WEB_MAX_QUERIES_PER_SEGMENT", "3"))
+WEB_MAX_RESULTS_PER_QUERY            = int(os.getenv("WEB_MAX_RESULTS_PER_QUERY", "5"))
+WEB_REQUEST_DELAY                    = float(os.getenv("WEB_REQUEST_DELAY_SECONDS", "3.0"))
+# Category Priority Engine (Brain 1 scores each segment 0-100; Brain 2 only scrapes above threshold)
+WEB_MAX_CATEGORIES_TO_SCRAPE         = int(os.getenv("WEB_MAX_CATEGORIES_TO_SCRAPE", "6"))
+CATEGORY_MIN_SCORE_TO_SCRAPE         = int(os.getenv("CATEGORY_MIN_SCORE_TO_SCRAPE", "65"))
 
 # Rotate user-agents to reduce fingerprinting
 _USER_AGENTS = [
@@ -240,6 +245,45 @@ SKIP_DOMAINS = {
     "moneysavingexpert.com",
     "comparethemarket.com",
 
+    # ── Reference / informational / encyclopaedia sites ──────────────────────
+    # These are never valid FX-prospect websites. Bing in particular returns
+    # them for queries like "italian wine importer UK" because they contain
+    # country or product names in article text.
+    "britannica.com", "britannica.co.uk", "britannicakids.com",
+    "merriam-webster.com",
+    "dictionary.com", "thesaurus.com",
+    "encyclopedia.com",
+    "thoughtco.com",
+    # Note: wikipedia.org already present in Search/tech section above
+
+    # ── Supermarkets / consumer grocery retailers ─────────────────────────────
+    # Retail grocery pages appear when queries contain product names and the
+    # product page text mentions import origin (e.g. "gin importer UK distributor"
+    # → Morrisons product page for an imported gin). None is a B2B FX prospect.
+    # Subdomain matching in should_skip_url() covers groceries.morrisons.com etc.
+    "morrisons.com",
+    "tesco.com",
+    "sainsburys.co.uk",
+    "asda.com",
+    "waitrose.com",
+    "marksandspencer.com",
+    "ocado.com",
+    "iceland.co.uk",
+    "aldi.co.uk",
+    "lidl.co.uk",
+    "costco.co.uk",
+
+    # ── Consumer wine / drinks retailers ─────────────────────────────────────
+    # These import wine/spirits but are B2C end-retailers, not trade FX
+    # prospects. The FX conversation belongs with the upstream importer/agent.
+    "majestic.co.uk",
+    "thedrinkshop.com",
+    "laithwaites.co.uk",
+    "thewinesociety.com",
+    "wineowners.com",
+    "virginwines.com",
+    "slurp.co.uk",
+
     # ── Marketplaces / B2C retail ─────────────────────────────────────────────
     "amazon.co.uk", "amazon.com",
     "ebay.co.uk", "ebay.com",
@@ -289,6 +333,148 @@ SKIP_DOMAINS = {
     "hunter.io",
     "rocketreach.co",
 }
+
+# ── SOURCE-PAGE MINING INFRASTRUCTURE ────────────────────────────────────────
+# Mineable domains: trade associations / industry bodies whose MEMBER/DIRECTORY
+# pages are valuable discovery sources. These are NOT added as leads themselves —
+# they're fetched to extract company links.
+# Note: some of these also appear in SKIP_DOMAINS (e.g. wsta.co.uk, fdf.org.uk).
+# SKIP_DOMAINS governs whether a URL is treated as a LEAD.
+# MINEABLE_DOMAINS governs whether a page is MINED for company links.
+MINEABLE_DOMAINS = {
+    # Wine & spirits
+    "wsta.co.uk",           # Wine & Spirit Trade Association — /members
+    "swa.org.uk",           # Scotch Whisky Association — /members
+    # Food & drink
+    "fdf.org.uk",           # Food & Drink Federation — /members
+    "seafish.org",          # Seafish — /industry
+    "brc.org.uk",           # British Retail Consortium
+    # Manufacturing & materials
+    "bpf.co.uk",            # British Plastics Federation — /members
+    "makeuk.org",           # Make UK (manufacturers) — /members
+    "eef.org.uk",           # Make UK legacy domain
+    # Automotive & engineering
+    "smmt.co.uk",           # Society of Motor Manufacturers — /members
+    # Logistics & freight
+    "bifa.org",             # British International Freight Association — /members
+    "logistics.org.uk",     # Logistics UK — /members
+    # Coffee & beverages
+    "bca.org.uk",           # British Coffee Association — /members
+    # Travel
+    "abta.com",             # ABTA travel agents — /members
+    # Chemicals
+    "bcia.org.uk",          # British Chemical Importers Association
+    # Timber
+    "ttf.co.uk",            # Timber Trade Federation — /members
+    # General trade / importers
+    "bia.org.uk",           # British Importers Association
+    "exportuk.co.uk",
+}
+
+# Path patterns that identify member/directory pages on ANY domain
+MINEABLE_PATH_PATTERNS = [
+    r"/members?(/|$)",
+    r"/member-list",
+    r"/our-members",
+    r"/directory(/|$|\?)",
+    r"/find-a-member",
+    r"/find-a-supplier",
+    r"/approved-suppliers?",
+    r"/trade-list",
+    r"/supplier-directory",
+    r"/industry-directory",
+]
+
+
+def _is_mineable_source_page(url: str, title: str) -> bool:
+    """
+    Returns True if this URL is a mineable source page (trade association
+    member list, industry directory) rather than a direct lead candidate.
+    Source pages are fetched to extract company links — never scored as leads.
+    """
+    domain = domain_from_url(url) or ""
+    path   = urlparse(url).path.lower()
+
+    # Known mineable trade body domains
+    for md in MINEABLE_DOMAINS:
+        if domain == md or domain.endswith("." + md):
+            return True
+
+    # Path-based detection (any domain)
+    for pattern in MINEABLE_PATH_PATTERNS:
+        if re.search(pattern, path, re.I):
+            return True
+
+    return False
+
+
+def mine_source_page(url: str, max_links: int = 15) -> list:
+    """
+    Fetch a trade association member list or industry directory page and
+    extract company website links for downstream validation.
+
+    Rules:
+    - Never adds the source page itself as a lead.
+    - Applies SKIP_DOMAINS to extracted links.
+    - Caps at max_links per page.
+    - Only called when direct company candidates < 3 for a query.
+
+    Returns list of {url, title, snippet, from_source_page, source_page_url}.
+    """
+    # TODO: Wire this into the main query loop (Phase 2 of source-page rollout).
+    # Currently callable but not yet integrated into process_event().
+    # Integration requires routing mineable URLs out of the normal candidate pipeline
+    # and into this function when direct_candidates < 3.
+    extracted   = []
+    seen_domains: set = set()
+    source_domain = domain_from_url(url) or ""
+
+    try:
+        resp = requests.get(url, headers=_headers(), timeout=(5, 15), allow_redirects=True)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+    except Exception as exc:
+        log.debug("mine_source_page: fetch failed %s: %s", url, exc)
+        return extracted
+
+    from urllib.parse import urljoin
+
+    for link_tag in soup.find_all("a", href=True):
+        if len(extracted) >= max_links:
+            break
+
+        href = link_tag.get("href", "").strip()
+        if not href:
+            continue
+        if not href.startswith("http"):
+            href = urljoin(url, href)
+        if not href.startswith("http"):
+            continue
+
+        skip, _ = should_skip_url(href)
+        if skip:
+            continue
+
+        domain = domain_from_url(href)
+        if not domain or domain == source_domain or domain in seen_domains:
+            continue
+
+        title = link_tag.get_text(strip=True)
+        if not title or len(title) < 3 or len(title) > 120:
+            continue
+
+        seen_domains.add(domain)
+        extracted.append({
+            "url":             href,
+            "title":           title,
+            "snippet":         f"Extracted from source page: {url}",
+            "from_source_page": True,
+            "source_page_url": url,
+        })
+
+    log.debug("mine_source_page: %s → %d links extracted", url[:60], len(extracted))
+    return extracted
+
 
 # Path-level patterns: skip even on otherwise OK domains
 SKIP_PATH_PATTERNS = [
@@ -355,7 +541,6 @@ FX_PAYMENT_SIGNALS = [
     "from italy","from france","from spain","from germany","from china","from usa",
     "from america","from japan","from india","from norway","from australia",
     "from new zealand","from south africa","from denmark","from netherlands",
-    "italian","french","spanish","german","chinese","american","japanese",
     "foreign currency","currency risk","exchange rate","fx exposure",
     "international payments","overseas payments","currency hedging","fx risk",
     "importer","import company","import business","exclusive importer",
@@ -383,6 +568,10 @@ SECONDARY_SIGNALS = [
     "europe","european","asia","asian","north america","south america",
     "supply chain","supplier","sourcing","procurement",
     "currency","forex","exchange","sterling","dollar","euro",
+    # Country adjectives — demoted from FX signals: indicate international links
+    # but fire too broadly on service businesses mentioning destinations/nationalities
+    "french","german","italian","american","chinese","japanese","spanish",
+    "norwegian","australian","danish","dutch","indian",
 ]
 
 NEGATIVE_SIGNALS = [
@@ -524,36 +713,51 @@ def _init_ddg_session():
         return
     try:
         _ddg_session.headers.update(_headers())
-        _ddg_session.get("https://duckduckgo.com/", timeout=10)
+        _ddg_session.get("https://duckduckgo.com/", timeout=(5, 10))
         _ddg_initialized = True
     except Exception:
         pass
 
 
-def ddg_search(query: str, n: int = 10) -> list:
+def ddg_search(query: str, n: int = 10) -> tuple[list, dict]:
     """
     Search DuckDuckGo HTML interface.
-    Returns list of {url, title, snippet} dicts filtered by SKIP_DOMAINS/SKIP_TITLES.
-    Falls back gracefully to empty list on block/rate-limit.
+    Returns (results, meta) where:
+      results = list of {url, title, snippet} dicts filtered by SKIP_DOMAINS/SKIP_TITLES
+      meta    = {status, raw_count, filtered_count}
+        status: "blocked"  — DDG returned soft-block / short response
+                "timeout"  — request timed out or network error
+                "empty"    — DDG returned valid response but 0 results
+                "filtered" — DDG returned results but all blocked by SKIP_DOMAINS/SKIP_TITLES
+                "ok"       — at least 1 result passed filters
+    Falls back gracefully on block/rate-limit.
     """
     _init_ddg_session()
-    results = []
+    results  = []
+    raw_count = 0
+    meta = {"status": "ok", "raw_count": 0, "filtered_count": 0}
 
     try:
         _ddg_session.headers.update(_headers("https://duckduckgo.com/"))
         resp = _ddg_session.get(
             "https://html.duckduckgo.com/html/",
             params={"q": query},
-            timeout=15,
+            timeout=(5, 15),
         )
         # 202 = DDG soft-blocking (returns homepage HTML instead of results)
         if resp.status_code == 202 or len(resp.text) < 5000:
             log.debug("DDG soft-block for %r (status=%d, len=%d)", query, resp.status_code, len(resp.text))
-            return results
+            meta["status"] = "blocked"
+            return results, meta
         resp.raise_for_status()
+    except requests.exceptions.Timeout:
+        log.debug("DDG timeout for %r", query)
+        meta["status"] = "timeout"
+        return results, meta
     except Exception as exc:
         log.debug("DDG request failed for %r: %s", query, exc)
-        return results
+        meta["status"] = "timeout"
+        return results, meta
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -586,6 +790,8 @@ def ddg_search(query: str, n: int = 10) -> list:
         if not url:
             continue
 
+        raw_count += 1
+
         skip_url, reason = should_skip_url(url)
         if skip_url:
             log.debug("  Skip URL (%s): %s", reason, url[:60])
@@ -602,11 +808,218 @@ def ddg_search(query: str, n: int = 10) -> list:
 
         results.append({"url": url, "title": title, "snippet": snippet})
 
-    log.debug("DDG %r → %d results", query[:60], len(results))
-    return results
+    meta["raw_count"]      = raw_count
+    meta["filtered_count"] = len(results)
+    if raw_count == 0:
+        meta["status"] = "empty"
+    elif len(results) == 0:
+        meta["status"] = "filtered"  # DDG returned results but all blocked by SKIP lists
+
+    log.debug("DDG %r → %d/%d results (status=%s)", query[:60], len(results), raw_count, meta["status"])
+    return results, meta
+
+
+# ── BING HTML SEARCH (secondary source when DDG is blocked/timeout) ──────────
+
+# Separate session from DDG — different fingerprint, different cookie jar.
+# Using Edge user-agents: Bing is Microsoft's engine and Edge is Microsoft's browser,
+# which makes Edge UAs less likely to trigger bot detection on Bing.
+_BING_USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.2277.83",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.2277.83",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
+]
+
+_bing_session = requests.Session()
+_bing_initialized = False
+
+
+def _init_bing_session():
+    """
+    Initialise Bing session headers.
+
+    Deliberately does NOT visit the Bing homepage first.
+    A homepage warm-up visit causes Bing to set cookies that switch it to the
+    AI Copilot layout, which has no standard li.b_algo result elements.
+    A cold session with appropriate headers returns the classic HTML result page.
+    """
+    global _bing_initialized
+    if _bing_initialized:
+        return
+    _bing_session.headers.update({
+        "User-Agent":      random.choice(_BING_USER_AGENTS),
+        "Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-GB,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+    })
+    _bing_initialized = True
+
+
+def bing_search(query: str, n: int = 10) -> tuple[list, dict]:
+    """
+    Search Bing HTML interface. Secondary source when DDG is blocked or times out.
+
+    Returns (results, meta) with the same structure as ddg_search():
+      results = list of {url, title, snippet, from_bing: True}
+      meta    = {status, raw_count, filtered_count}
+        status: "blocked"  — Bing returned bot-detection / very short response
+                "timeout"  — request timed out
+                "empty"    — valid response but 0 results
+                "filtered" — results returned but all blocked by skip lists
+                "ok"       — at least 1 result passed filters
+    """
+    _init_bing_session()
+    results   = []
+    raw_count = 0
+    meta = {"status": "ok", "raw_count": 0, "filtered_count": 0}
+
+    try:
+        _bing_session.headers.update({"User-Agent": random.choice(_BING_USER_AGENTS)})
+        resp = _bing_session.get(
+            "https://www.bing.com/search",
+            params={
+                "q":       query,
+                "setlang": "en-GB",
+                "cc":      "GB",
+                "setmkt":  "en-GB",
+                # Note: do NOT pass count= here. Bing serves a different
+                # (often b_algo-free) page layout when count is forced low.
+            },
+            timeout=(5, 18),
+        )
+        # Bot-detection: Bing returns 200 but with a very short page (CAPTCHA/redirect)
+        if resp.status_code == 200 and len(resp.text) < 4000:
+            log.debug("Bing soft-block for %r (len=%d)", query[:50], len(resp.text))
+            meta["status"] = "blocked"
+            return results, meta
+        if resp.status_code in (429, 503):
+            meta["status"] = "blocked"
+            return results, meta
+        resp.raise_for_status()
+    except requests.exceptions.Timeout:
+        log.debug("Bing timeout for %r", query[:50])
+        meta["status"] = "timeout"
+        return results, meta
+    except Exception as exc:
+        log.debug("Bing request failed for %r: %s", query[:50], exc)
+        meta["status"] = "timeout"
+        return results, meta
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    # Bing result structure: <li class="b_algo"> → <h2><a href="..."> for title+URL
+    # Snippet: .b_caption > p  OR  p.b_algoSlug
+    #
+    # URL extraction: Bing wraps all hrefs in click-tracking redirects
+    # (https://www.bing.com/ck/a?...&u=a1<base64url>&ntb=1).
+    # The real destination URL is base64url-encoded after the "a1" prefix in the u= param.
+    # We decode it; if that fails, we extract the domain from the <cite> element.
+
+    import base64 as _b64
+
+    def _decode_bing_url(href: str) -> str | None:
+        """Extract the real destination URL from a Bing click-tracking redirect."""
+        if not href or "bing.com/ck/a" not in href:
+            return href if href and href.startswith("http") else None
+        try:
+            qs = parse_qs(urlparse(href).query)
+            u_val = qs.get("u", [None])[0]
+            if not u_val or not u_val.startswith("a1"):
+                return None
+            # Strip the 2-character "a1" magic prefix, then decode base64url
+            b64 = u_val[2:]
+            # Add padding if needed
+            padding = (4 - len(b64) % 4) % 4
+            decoded = _b64.urlsafe_b64decode(b64 + "=" * padding).decode("utf-8", errors="ignore")
+            if decoded.startswith("http"):
+                return decoded
+        except Exception:
+            pass
+        return None
+
+    def _cite_to_url(cite_tag) -> str | None:
+        """
+        Fallback: reconstruct a URL from Bing's <cite> display element.
+        cite text format: "https://www.example.co.uk › products › widgets"
+        """
+        if not cite_tag:
+            return None
+        text = cite_tag.get_text(" ", strip=True)
+        # Replace Bing's › separator with /
+        text = re.sub(r"\s*›\s*", "/", text).strip()
+        if text.startswith("http"):
+            return text
+        if "." in text.split("/")[0]:
+            return "https://" + text
+        return None
+
+    for item in soup.select("#b_results > li.b_algo"):
+        if len(results) >= n:
+            break
+
+        link_tag = item.select_one("h2 > a")
+        if not link_tag:
+            continue
+
+        # 1. Try to decode Bing's click-tracking redirect
+        raw_href = link_tag.get("href", "") or link_tag.get("data-url", "")
+        url = _decode_bing_url(raw_href)
+
+        # 2. Fall back to cite element if decode failed
+        if not url:
+            cite_tag = item.select_one("cite") or item.select_one(".b_attribution cite")
+            url = _cite_to_url(cite_tag)
+
+        if not url or not url.startswith("http"):
+            continue
+
+        raw_count += 1
+
+        skip_url, reason = should_skip_url(url)
+        if skip_url:
+            log.debug("  Bing skip URL (%s): %s", reason, url[:60])
+            continue
+
+        title = link_tag.get_text(strip=True)
+        skip_title, reason = should_skip_title(title)
+        if skip_title:
+            log.debug("  Bing skip title (%s): %s", reason, title[:60])
+            continue
+
+        snippet_tag = item.select_one(".b_caption > p") or item.select_one("p.b_algoSlug")
+        snippet = snippet_tag.get_text(strip=True) if snippet_tag else ""
+
+        results.append({
+            "url":       url,
+            "title":     title,
+            "snippet":   snippet,
+            "from_bing": True,
+        })
+
+    meta["raw_count"]      = raw_count
+    meta["filtered_count"] = len(results)
+    if raw_count == 0:
+        meta["status"] = "empty"
+    elif len(results) == 0:
+        meta["status"] = "filtered"
+
+    log.debug("Bing %r → %d/%d results (status=%s)", query[:60], len(results), raw_count, meta["status"])
+    return results, meta
 
 
 # ── COMPANIES HOUSE KEYWORD SEARCH (fallback when DDG fails) ─────────────────
+
+# Single-word generic terms that produce useless CH name matches.
+# e.g. "low cost air" → core="low" → CH returns "LOW COST BEER LTD", "LOW COST BALING LTD"
+# When the extracted core keyword is one of these, skip CH fallback entirely.
+_CH_FALLBACK_TOO_GENERIC = {
+    "low", "high", "budget", "cheap", "fast", "global", "local", "national",
+    "domestic", "regional", "specialist", "corporate", "group", "direct",
+    "international", "premier", "elite", "premium", "express", "rapid",
+    "online", "digital", "smart", "best", "top", "new", "old",
+}
+
 
 def _extract_core_keyword(query: str) -> str:
     """
@@ -625,7 +1038,7 @@ def _extract_core_keyword(query: str) -> str:
         # Use quoted phrase directly (it's the most specific)
         return quoted[0]
     # Otherwise use the first meaningful token(s)
-    tokens = [t for t in query.split() if t.lower() not in generic and len(t) > 3]
+    tokens = [t for t in query.split() if t.lower() not in generic and len(t) >= 3]
     return " ".join(tokens[:2]) if tokens else query.split()[0]
 
 
@@ -653,7 +1066,7 @@ def ch_keyword_search(query: str, max_results: int = 10) -> list:
             "https://api.company-information.service.gov.uk/search/companies",
             params={"q": core_kw, "items_per_page": max_results},
             auth=(COMPANIES_HOUSE_API_KEY, ""),
-            timeout=15,
+            timeout=(5, 15),
         )
         resp.raise_for_status()
         items = resp.json().get("items", [])
@@ -688,9 +1101,11 @@ def ch_keyword_search(query: str, max_results: int = 10) -> list:
 # ── WEBSITE VALIDATION ────────────────────────────────────────────────────────
 
 def _fetch_text(url: str, timeout: int = 12) -> tuple[str, str]:
-    """Fetch a URL, return (clean_text, final_url_after_redirects). Empty string on failure."""
+    """Fetch a URL, return (clean_text, final_url_after_redirects). Empty string on failure.
+    Uses (connect_timeout=5, read_timeout) split to prevent silent TCP SYN hangs on
+    unresponsive servers (e.g. Azure-hosted sites that drop SYN packets)."""
     try:
-        resp = requests.get(url, headers=_headers(), timeout=timeout, allow_redirects=True)
+        resp = requests.get(url, headers=_headers(), timeout=(5, timeout), allow_redirects=True)
         resp.raise_for_status()
         final_url = resp.url
         soup = BeautifulSoup(resp.text, "html.parser")
@@ -733,13 +1148,29 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         return empty
 
     text, final_url = _fetch_text(url)
+    pages_scraped   = 1
 
-    # If homepage is sparse, try /about
-    if len(text) < 300:
+    # Multi-page scraping: fetch extra pages when homepage is thin on signals.
+    # Hard cap: 4 pages per domain. Early stop: once FX signal count reaches 3.
+    _EXTRA_PATHS     = ["/about", "/about-us", "/products", "/services",
+                        "/distribution", "/what-we-do", "/our-products"]
+    _MAX_PAGES       = 4
+    _EARLY_STOP_SIGS = 3
+
+    if len(text) < 2000:  # homepage is sparse — try extra paths
         parsed = urlparse(url)
-        about_url = f"{parsed.scheme}://{parsed.netloc}/about"
-        about_text, _ = _fetch_text(about_url)
-        text = text + " " + about_text
+        base   = f"{parsed.scheme}://{parsed.netloc}"
+        for path in _EXTRA_PATHS:
+            if pages_scraped >= _MAX_PAGES:
+                break
+            # Early stop: check provisional FX signal count on combined text so far
+            provisional_fx = sum(1 for s in FX_PAYMENT_SIGNALS if s in text.lower())
+            if provisional_fx >= _EARLY_STOP_SIGS:
+                break
+            extra_text, _ = _fetch_text(base + path)
+            if extra_text and extra_text not in text:
+                text          += " " + extra_text
+                pages_scraped += 1
 
     if len(text) < 100:
         return {**empty, "reject_reason": "page too sparse / unreadable"}
@@ -806,6 +1237,7 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         "pays_fx":                pays_fx,
         "is_b2b":                 is_b2b,
         "text_length":            len(text),
+        "pages_scraped":          pages_scraped,
         "reject_reason":          "",
     }
 
@@ -820,7 +1252,7 @@ def _ch_search_api(query: str, n: int = 5) -> list:
         "https://api.company-information.service.gov.uk/search/companies",
         params={"q": query, "items_per_page": n},
         auth=(COMPANIES_HOUSE_API_KEY, ""),
-        timeout=15,
+        timeout=(5, 15),
     )
     r.raise_for_status()
     return r.json().get("items", [])
@@ -833,7 +1265,7 @@ def _ch_profile_api(cn: str) -> dict | None:
     r = requests.get(
         f"https://api.company-information.service.gov.uk/company/{cn}",
         auth=(COMPANIES_HOUSE_API_KEY, ""),
-        timeout=15,
+        timeout=(5, 15),
     )
     if r.status_code == 404:
         return None
@@ -848,7 +1280,7 @@ def _ch_officers_api(cn: str) -> list:
     r = requests.get(
         f"https://api.company-information.service.gov.uk/company/{cn}/officers",
         auth=(COMPANIES_HOUSE_API_KEY, ""),
-        timeout=15,
+        timeout=(5, 15),
     )
     if r.status_code == 404:
         return []
@@ -1237,6 +1669,7 @@ def create_lead(
     score: int,
     priority: str,
     reasons: list,
+    website_source: str = "ddg_search",
 ) -> tuple[str, dict]:
     company_name = (ch_data or {}).get("company_name") or search_title or domain
     lid = lead_id(domain, event_id)
@@ -1246,6 +1679,7 @@ def create_lead(
     )
 
     lead = {
+        "id":                 lid,
         "company_name":       company_name,
         "company_number":     (ch_data or {}).get("company_number"),
         "company_status":     (ch_data or {}).get("company_status", "unknown"),
@@ -1258,13 +1692,14 @@ def create_lead(
         "website":            url,
         "website_domain":     domain,
         "website_confidence": validation.get("website_confidence", "low"),
-        "website_source":     "ddg_search",
+        "website_source":     website_source,
         "website_snippet":    validation.get("snippet", "")[:400],
         "fx_payment_signals": validation.get("fx_signals", []),
         "b2b_signals":        validation.get("b2b_signals", []),
         "secondary_signals":  validation.get("secondary_signals", []),
         "segment_signals":    validation.get("segment_signals_found", []),
         "pays_fx_confirmed":  validation.get("pays_fx", False),
+        "pages_scraped":      validation.get("pages_scraped", 1),
         "signal_count": (
             len(validation.get("fx_signals", []))
             + len(validation.get("b2b_signals", []))
@@ -1312,14 +1747,53 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
     Process one event: search → validate → CH → score → add to leads.
     """
     added    = 0
-    # For broad currency/macro events use the full configured limit;
-    # for sector-specific events cap at half to focus effort.
-    breadth = event.get("event_breadth", "sector_specific")
-    if breadth in ("broad_currency", "broad_macro"):
-        seg_limit = WEB_MAX_SEGMENTS_PER_EVENT
+    breadth  = event.get("event_breadth", "sector_specific")
+    all_segs = event.get("target_segments", [])
+
+    # ── Category Priority Engine (Brain 1 → Brain 2 handoff) ──────────────────
+    # Brain 2 scores each segment 0-100 via final_scrape_score (preferred) or
+    # category_priority_score (backward compat). final_scrape_score blends
+    # commercial opportunity with SME accessibility.
+    # Only segments above CATEGORY_MIN_SCORE_TO_SCRAPE are passed to Brain 3,
+    # capped at WEB_MAX_CATEGORIES_TO_SCRAPE.
+
+    def _scrape_score(seg: dict) -> int:
+        """final_scrape_score when present, else category_priority_score."""
+        return int(seg.get("final_scrape_score") or seg.get("category_priority_score") or 0)
+
+    has_scores = any(s.get("category_priority_score") is not None for s in all_segs)
+
+    if has_scores:
+        above_threshold = [s for s in all_segs if _scrape_score(s) >= CATEGORY_MIN_SCORE_TO_SCRAPE]
+        segments = sorted(above_threshold, key=lambda s: -_scrape_score(s))[:WEB_MAX_CATEGORIES_TO_SCRAPE]
+
+        if not segments:
+            # Nothing above threshold — fall back to top N by score (don't skip the event)
+            log.warning("  No segments above threshold (%d) — using top %d by score",
+                        CATEGORY_MIN_SCORE_TO_SCRAPE, WEB_MAX_CATEGORIES_TO_SCRAPE)
+            segments = sorted(all_segs, key=lambda s: -_scrape_score(s))[:WEB_MAX_CATEGORIES_TO_SCRAPE]
+
+        # Show direct vs second_order breakdown
+        direct_count = sum(1 for s in segments if s.get("direct_or_second_order","direct") == "direct")
+        second_count = len(segments) - direct_count
+        score_label = "final_scrape_score" if any(s.get("final_scrape_score") for s in segments) else "category_priority_score"
+        log.info("  Category priority: %d/%d segments selected (threshold=%d, max=%d, score=%s, direct=%d, 2nd-order=%d)",
+                 len(segments), len(all_segs), CATEGORY_MIN_SCORE_TO_SCRAPE, WEB_MAX_CATEGORIES_TO_SCRAPE,
+                 score_label, direct_count, second_count)
+        for seg in segments:
+            fss = seg.get("final_scrape_score") or "—"
+            cps = seg.get("category_priority_score") or "—"
+            sme = seg.get("sme_accessibility_score") or "—"
+            d2  = seg.get("direct_or_second_order") or "?"
+            log.info("    [fss=%s cps=%s sme=%s %s] %s", fss, cps, sme, d2, seg.get("segment_name","?"))
     else:
-        seg_limit = max(4, WEB_MAX_SEGMENTS_PER_EVENT // 2)
-    segments = event.get("target_segments", [])[:seg_limit]
+        # Old format: position-based cap (backward compat)
+        if breadth in ("broad_currency", "broad_macro"):
+            seg_limit = WEB_MAX_SEGMENTS_PER_EVENT
+        else:
+            seg_limit = max(4, WEB_MAX_SEGMENTS_PER_EVENT // 2)
+        segments = all_segs[:seg_limit]
+        log.info("  No category scores — using position cap (%d segments)", len(segments))
 
     if not segments:
         log.info("  No target segments — skipping event")
@@ -1340,44 +1814,103 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
 
     for seg in segments:
         seg_name    = seg.get("segment_name", "(unnamed)")
-        queries     = seg.get("high_intent_search_queries", [])[:WEB_MAX_QUERIES_PER_SEGMENT]
         seg_signals = seg.get("segment_signals", [])
+        micro_cats  = seg.get("micro_categories", [])[:WEB_MAX_MICRO_CATEGORIES_PER_SEGMENT]
+
+        if micro_cats:
+            # New format: collect queries from all micro-categories
+            queries = []
+            for mc in micro_cats:
+                mc_queries = mc.get("search_queries", [])[:WEB_MAX_QUERIES_PER_MICRO_CATEGORY]
+                queries.extend(mc_queries)
+            log.info("    Segment: %s (%d micro-cats, %d queries)",
+                     seg_name[:55], len(micro_cats), len(queries))
+            stats["segments_searched"]    = stats.get("segments_searched", 0) + 1
+            stats["micro_cats_searched"]  = stats.get("micro_cats_searched", 0) + len(micro_cats)
+        else:
+            # Backward compat: flat query format (old events without micro_categories)
+            queries = seg.get("high_intent_search_queries", [])[:WEB_MAX_QUERIES_PER_SEGMENT]
+            log.info("    Segment: %s (%d queries)", seg_name[:55], len(queries))
+            stats["segments_searched"] = stats.get("segments_searched", 0) + 1
 
         if not queries:
             continue
-
-        log.info("    Segment: %s (%d queries)", seg_name[:55], len(queries))
 
         for query in queries:
             log.info("      Query: %s", query[:72])
             stats["queries_run"] += 1
 
             # ── Primary: DDG search ─────────────────────────────────────────
-            results = ddg_search(query, n=WEB_MAX_RESULTS_PER_QUERY)
-            ddg_delay = WEB_REQUEST_DELAY + random.uniform(0, 1.5)
-            time.sleep(ddg_delay)
+            results, ddg_meta = ddg_search(query, n=WEB_MAX_RESULTS_PER_QUERY)
+            ddg_status = ddg_meta["status"]
+            stats[f"ddg_{ddg_status}"] = stats.get(f"ddg_{ddg_status}", 0) + 1
+            time.sleep(WEB_REQUEST_DELAY + random.uniform(0, 1.5))
 
-            # ── Fallback: CH keyword search when DDG yields nothing ─────────
+            # ── Secondary: Bing HTML when DDG is blocked / timed out ────────
+            bing_status = "not_run"
+            if not results and ddg_status in ("blocked", "timeout", "empty"):
+                bing_results, bing_meta = bing_search(query, n=WEB_MAX_RESULTS_PER_QUERY)
+                bing_status = bing_meta["status"]
+                stats[f"bing_{bing_status}"] = stats.get(f"bing_{bing_status}", 0) + 1
+                if bing_results:
+                    results = bing_results
+                    stats["bing_candidates_kept"] = (
+                        stats.get("bing_candidates_kept", 0) + len(bing_results)
+                    )
+                    log.debug("      Bing fallback → %d results", len(bing_results))
+                # Conservative delay: Bing is the backup, don't hammer it
+                time.sleep(WEB_REQUEST_DELAY * 0.9 + random.uniform(0, 1.2))
+
+            # ── Tertiary: CH keyword search when DDG + Bing both fail ───────
+            ch_fallback_info = "not_run"
             if not results:
-                log.debug("      DDG empty → CH keyword fallback for %r", query)
-                ch_results = ch_keyword_search(query, max_results=WEB_MAX_RESULTS_PER_QUERY)
-                if ch_results:
-                    # For CH candidates without URLs, try domain guessing
-                    for r in ch_results:
-                        if not r.get("url"):
-                            url = _guess_website_for_ch(r["title"], r.get("ch_number",""))
-                            r["url"] = url
-                    # Only keep CH results that have a URL to visit
-                    results = [r for r in ch_results if r.get("url")]
-                    log.debug("      CH fallback → %d candidates with URLs", len(results))
+                core_kw = _extract_core_keyword(query)
+
+                # Skip CH fallback if extracted keyword is a single generic word
+                # that will produce irrelevant company name matches
+                is_too_generic = (
+                    core_kw.lower() in _CH_FALLBACK_TOO_GENERIC
+                    or (len(core_kw.split()) == 1 and len(core_kw) <= 4)
+                )
+                if is_too_generic:
+                    log.debug("      CH fallback skip: core keyword %r too generic", core_kw)
+                    stats["ch_fallback_skipped_generic"] = stats.get("ch_fallback_skipped_generic", 0) + 1
+                    ch_fallback_info = f"skipped(generic={core_kw!r})"
+                else:
+                    log.debug("      DDG=%s Bing=%s → CH fallback: %r → core=%r",
+                              ddg_status, bing_status, query[:35], core_kw)
+                    ch_results = ch_keyword_search(query, max_results=WEB_MAX_RESULTS_PER_QUERY)
                     stats["ch_fallback_used"] = stats.get("ch_fallback_used", 0) + 1
 
+                    if ch_results:
+                        # For CH candidates without URLs, try domain guessing
+                        for r in ch_results:
+                            if not r.get("url"):
+                                guessed = _guess_website_for_ch(r["title"], r.get("ch_number",""))
+                                r["url"] = guessed
+                        results = [r for r in ch_results if r.get("url")]
+                        no_url_count = len(ch_results) - len(results)
+                        ch_fallback_info = f"ch={len(ch_results)}_candidates,usable={len(results)},no_url={no_url_count}"
+                        log.debug("      CH fallback → %d/%d candidates with URLs", len(results), len(ch_results))
+                        if no_url_count:
+                            stats["ch_candidates_no_url"] = stats.get("ch_candidates_no_url", 0) + no_url_count
+                    else:
+                        ch_fallback_info = f"ch=0_candidates(core={core_kw!r})"
+                        stats["ch_zero_candidates"] = stats.get("ch_zero_candidates", 0) + 1
+
             if not results:
-                log.debug("      No results for query — skipping")
-                stats["queries_no_results"] = stats.get("queries_no_results", 0) + 1
+                # Build a compact source summary for the INFO log
+                _src_parts = [f"DDG={ddg_status}"]
+                if bing_status != "not_run":
+                    _src_parts.append(f"Bing={bing_status}")
+                if ch_fallback_info != "not_run":
+                    _src_parts.append(f"CH={ch_fallback_info}")
+                log.info("      ✗ 0 candidates: %s", " | ".join(_src_parts))
+                stats["query_dead_end"] = stats.get("query_dead_end", 0) + 1
                 continue
 
             for result in results:
+                stats["raw_candidates"] = stats.get("raw_candidates", 0) + 1
                 url    = result.get("url", "")
                 title  = result.get("title", "")
                 domain = domain_from_url(url) if url else None
@@ -1478,6 +2011,8 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                     stats["rejected_duplicate"] = stats.get("rejected_duplicate",0)+1
                     continue
 
+                stats["validated_companies"] = stats.get("validated_companies", 0) + 1
+
                 # ── Score ───────────────────────────────────────────────────
                 s, priority, reasons = score_web_lead(val, ch_data, seg, event)
 
@@ -1487,11 +2022,22 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                     continue
 
                 # ── Create lead ─────────────────────────────────────────────
+                # Track which source method actually found this company
+                if result.get("from_ch"):
+                    _website_source = "ch_fallback"
+                elif result.get("from_bing"):
+                    _website_source = "bing_search"
+                elif result.get("from_source_page"):
+                    _website_source = "source_page"
+                else:
+                    _website_source = "ddg_search"
+
                 lid, lead = create_lead(
                     url=url, domain=domain, search_title=title,
                     validation=val, ch_data=ch_data,
                     segment=seg, event=event, event_id=event_id,
                     score=s, priority=priority, reasons=reasons,
+                    website_source=_website_source,
                 )
 
                 domain_index[domain] = lid
@@ -1502,8 +2048,8 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                 added += 1
 
                 stats[f"p_{priority}"] = stats.get(f"p_{priority}",0)+1
-                log.info("        ✓ [%s %d] %s — %s", priority, s,
-                         lead["company_name"][:38], domain)
+                log.info("        ✓ [%s %d] %s — %s [src=%s]", priority, s,
+                         lead["company_name"][:35], domain, _website_source)
 
     return added
 
@@ -1514,13 +2060,41 @@ def print_quality_summary(stats: dict, leads: dict):
     web_leads = [(lid, v) for lid, v in leads.items()
                  if v.get("company_source") == "web_search"]
 
+    elapsed = time.time() - stats.get("start_time", time.time())
+    mins, secs = divmod(int(elapsed), 60)
+    call_ready = stats.get("p_HOT", 0) + stats.get("p_WARM", 0)
+
     log.info("")
     log.info("══════════════════════════════════════════")
-    log.info("  Web Discovery Quality Summary")
+    log.info("  RUN SUMMARY")
+    log.info("  Events processed:        %d", stats.get("events_processed", 0))
+    log.info("  Segments searched:       %d", stats.get("segments_searched", 0))
+    log.info("  Micro-categories:        %d", stats.get("micro_cats_searched", 0))
+    log.info("  Queries run:             %d", stats.get("queries_run", 0))
+    log.info("  Raw candidates seen:     %d", stats.get("raw_candidates", 0))
+    log.info("  Validated companies:     %d", stats.get("validated_companies", 0))
+    log.info("  Duplicates rejected:     %d", stats.get("rejected_duplicate", 0))
+    log.info("  Call-ready (HOT/WARM):   %d", call_ready)
+    log.info("  Runtime:                 %dm %ds", mins, secs)
     log.info("══════════════════════════════════════════")
-    log.info("  Queries run:             %d", stats.get("queries_run",0))
-    log.info("  Queries with no results: %d", stats.get("queries_no_results",0))
+    log.info("  Web Discovery Detail")
+    log.info("  ────────────────────────────────────────")
+    log.info("  Query dead-ends:         %d", stats.get("query_dead_end",0))
+    log.info("  DDG — ok:                %d", stats.get("ddg_ok",0))
+    log.info("  DDG — blocked/timeout:   %d", stats.get("ddg_blocked",0) + stats.get("ddg_timeout",0))
+    log.info("  DDG — empty (0 results): %d", stats.get("ddg_empty",0))
+    log.info("  DDG — filtered:          %d", stats.get("ddg_filtered",0))
+    log.info("  Bing — ok:               %d", stats.get("bing_ok",0))
+    log.info("  Bing — blocked/timeout:  %d", stats.get("bing_blocked",0) + stats.get("bing_timeout",0))
+    log.info("  Bing — empty:            %d", stats.get("bing_empty",0))
+    log.info("  Bing — filtered:         %d", stats.get("bing_filtered",0))
+    log.info("  Bing candidates kept:    %d", stats.get("bing_candidates_kept",0))
     log.info("  CH fallback used:        %d", stats.get("ch_fallback_used",0))
+    log.info("  CH fallback skipped (generic kw): %d", stats.get("ch_fallback_skipped_generic",0))
+    log.info("  CH zero candidates:      %d", stats.get("ch_zero_candidates",0))
+    log.info("  CH candidates, no URL:   %d", stats.get("ch_candidates_no_url",0))
+    log.info("  Source pages mined:      %d", stats.get("source_pages_mined",0))
+    log.info("  Source-page extracted:   %d", stats.get("source_page_extracted",0))
     log.info("  ────────────────────────────────────────")
     log.info("  Rejected (duplicate):   %d", stats.get("rejected_duplicate",0))
     log.info("  Rejected (incoherent):  %d", stats.get("rejected_incoherent",0))
@@ -1538,6 +2112,14 @@ def print_quality_summary(stats: dict, leads: dict):
     log.info("  WARM added:  %d", stats.get("p_WARM",0))
     log.info("  QUEUE added: %d", stats.get("p_QUEUE",0))
     log.info("  Total web leads: %d", stats.get("leads_added",0))
+    log.info("  ────────────────────────────────────────")
+    log.info("  Leads by source:")
+    _src_counts: dict = {}
+    for _, _l in web_leads:
+        _s = _l.get("website_source", "unknown")
+        _src_counts[_s] = _src_counts.get(_s, 0) + 1
+    for _src in ("ddg_search", "bing_search", "ch_fallback", "source_page"):
+        log.info("    %-22s %d", _src, _src_counts.get(_src, 0))
     log.info("══════════════════════════════════════════")
 
     top = sorted(web_leads, key=lambda x: -x[1].get("score",0))[:10]
@@ -1563,9 +2145,10 @@ def main():
         log.warning("COMPANIES_HOUSE_API_KEY not set — CH validation skipped")
 
     log.info("=== Web-First Discovery ===")
-    log.info("Config: events=%d  segs=%d  queries=%d  results=%d  delay=%.1fs",
+    log.info("Config: events=%d  segs=%d  micro-cats=%d  q/micro-cat=%d  results=%d  delay=%.1fs",
              WEB_MAX_EVENTS, WEB_MAX_SEGMENTS_PER_EVENT,
-             WEB_MAX_QUERIES_PER_SEGMENT, WEB_MAX_RESULTS_PER_QUERY, WEB_REQUEST_DELAY)
+             WEB_MAX_MICRO_CATEGORIES_PER_SEGMENT, WEB_MAX_QUERIES_PER_MICRO_CATEGORY,
+             WEB_MAX_RESULTS_PER_QUERY, WEB_REQUEST_DELAY)
 
     events = json.loads(EVENTS_FILE.read_text()) if EVENTS_FILE.exists() else {}
     leads  = json.loads(LEADS_FILE.read_text())  if LEADS_FILE.exists()  else {}
@@ -1584,7 +2167,16 @@ def main():
     ready = dict(list(ready.items())[:WEB_MAX_EVENTS])
     log.info("Events to process: %d / %d", len(ready), len(events))
 
-    stats = {"queries_run": 0, "leads_added": 0}
+    stats = {
+        "queries_run": 0,
+        "leads_added": 0,
+        "segments_searched": 0,
+        "micro_cats_searched": 0,
+        "raw_candidates": 0,
+        "validated_companies": 0,
+        "events_processed": 0,
+        "start_time": time.time(),
+    }
 
     for event_id, event in ready.items():
         headline = event.get("headline", event.get("title", ""))[:65]
@@ -1593,6 +2185,7 @@ def main():
 
         n = process_event(event, event_id, leads, stats)
         stats["leads_added"] += n
+        stats["events_processed"] += 1
 
         events[event_id]["web_discovery_done"] = True
         events[event_id]["web_discovery_at"]   = now_iso()

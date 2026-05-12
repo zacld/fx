@@ -21,24 +21,21 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import feedparser
-from google import genai
-from google.genai import errors as genai_errors
 from dotenv import load_dotenv
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-8s  %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
 
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-GEMINI_MODEL   = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-MAX_EVENTS     = int(os.getenv("DISCOVERY_MAX_EVENTS", "3"))
+# AI provider abstraction (Gemini → Grok → static playbook)
+from ai_provider import call_ai_for_event
+from exposure_mapper import _validate_and_infer_segments
+
+MAX_EVENTS  = int(os.getenv("DISCOVERY_MAX_EVENTS", "3"))
 
 DATA_DIR    = Path(__file__).parent.parent / "data"
 EVENTS_FILE = DATA_DIR / "events.json"
 DATA_DIR.mkdir(exist_ok=True)
-
-gemini = genai.Client(api_key=GEMINI_API_KEY)
 
 RSS_FEEDS = [
     {"source": "BBC Business",     "url": "http://feeds.bbci.co.uk/news/business/rss.xml"},
@@ -167,7 +164,10 @@ Only set is_fx_relevant: true if commercial_relevance >= 5 AND specific UK busin
 PART 2 — EXPOSURE MAPPING (if fx_relevant = true)
 ═══════════════════════════════════════
 
-Identify 4-6 UK business models MOST financially exposed to this event.
+Classify event_breadth first, then produce the correct number of segments:
+  broad_currency or broad_macro → 8-12 segments (many UK business models affected)
+  tariff or commodity           → 5-8 segments
+  sector_specific               → 3-5 segments
 
 The question is NOT "which industries are related?"
 The question IS "which UK businesses are writing cheques in foreign currency because of this event, and exactly HOW does their financial position change?"
@@ -179,6 +179,22 @@ For each segment:
 - margin_risk: quantify if possible ("3% GBP/EUR move ≈ £15k on £500k annual buy")
 - payment_timing_risk: describe the timing exposure window (invoice terms, order-to-pay gap)
 - affected_payment_flow: the actual payment (currency, counterparty, typical amount, frequency)
+- category_priority_score: integer 0-100 scoring commercial scraping priority for this segment. Score it on:
+    - direct payment-flow exposure (0-30): how directly do they pay/receive foreign currency?
+    - recurring FX payment likelihood (0-20): is this a regular payment flow, not one-off?
+    - margin sensitivity (0-15): are margins thin enough that FX moves cause pain?
+    - UK SME suitability (0-15): are these typically UK SMEs with FD/MD reachable?
+    - website evidence availability (0-10): will their website show import/export/international signals?
+    - contactability (0-10): is there a realistic contact route?
+  CRITICAL: every segment MUST include category_priority_score. Segments scoring < 65 will not be scraped.
+- micro_categories: 3-5 specific sub-niches within this segment. Each must have:
+    - name: specific sub-niche (e.g. "French wine importers UK", not just "wine importers")
+    - why: one sentence explaining the specific FX exposure logic for this sub-niche
+    - search_queries: 2-3 quoted search queries that find REAL UK companies in this sub-niche
+    - companies_house_terms: 2-3 short name terms that appear in CH company names for this sub-niche
+
+Do NOT include high_intent_search_queries or companies_house_terms at the segment level.
+All search terms live inside micro_categories only.
 
 STRICT AVOID RULES — never include:
 - Consumer-only local businesses (restaurants, coffee shops, hairdressers)
@@ -211,31 +227,43 @@ RETURN ONLY VALID JSON — no markdown, no code fences
   "business_impact_summary": "2-3 sentences: which specific UK business types are affected, what changes in their costs/revenue/margin, why today is a relevant moment to call them",
   "exposure_types": ["EUR supplier payment exposure", "import margin pressure"],
   "overall_sales_angle": "The sharpest single reason to call UK businesses today",
+  "event_breadth": "broad_currency",
   "target_segments": [
     {{
       "segment_name": "European wine and spirits importers",
+      "category_priority_score": 88,
       "business_model": "UK importer buying from French/Italian/Spanish producers, selling to UK trade in GBP. Supplier invoices in EUR. Margins 15-25%.",
       "exposure_level": "Very High",
       "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
       "likely_currency_pairs": ["GBP/EUR"],
-      "why_affected": "A weaker GBP increases the GBP cost of every EUR supplier invoice.",
-      "why_financially_exposed": "Recurring EUR supplier payments with GBP-only revenue creates direct currency mismatch. Every adverse GBP/EUR move compresses gross margin on each shipment.",
       "fx_payment_logic": "Importer receives invoice from French producer in EUR → converts GBP to EUR → if GBP has fallen since order was placed, the conversion costs more GBP → margin compressed",
       "margin_risk": "High — 3% GBP/EUR move on £500k annual buy ≈ £15k margin erosion if unhedged",
       "payment_timing_risk": "High — 30-90 day payment terms create open FX window between order and payment",
       "affected_payment_flow": "EUR payments to European producers, typically £50k-£500k per shipment, quarterly",
-      "ideal_company_profile": "UK SME importer/distributor, 5-50 staff, buying direct from European producers, supplying restaurants/hotels/retail",
-      "high_intent_search_queries": [
-        "\"wine importer\" UK",
-        "\"Italian wine importer\" UK",
-        "\"European wine distributor\" UK",
-        "\"spirits importer\" UK distributor"
-      ],
-      "companies_house_terms": ["wine import", "wine merchant", "spirits importer", "wine distributor"],
       "website_validation_signals": ["imported from", "direct from the producer", "European vineyards", "exclusive importer", "sourced from"],
       "avoid_segments": ["retail wine shops without own import operations", "supermarkets", "pub chains"],
-      "sales_angle": "Upcoming EUR wine payments now cost more in GBP than when orders were placed — worth a conversation about protecting margin.",
-      "exposure_thesis_template": "This company appears to import [wine/spirits] from European producers and sell in GBP. If supplier invoices are in EUR, the recent GBP/EUR movement is increasing the cost of upcoming payments relative to when orders were confirmed."
+      "sales_angle": "Upcoming EUR wine payments now cost more in GBP than when orders were placed.",
+      "exposure_thesis_template": "This company imports wine/spirits from European producers. GBP/EUR move increases GBP cost of upcoming EUR supplier invoices.",
+      "micro_categories": [
+        {{
+          "name": "French wine importers UK",
+          "why": "Pay EUR to French producers, sell GBP to UK trade — margin directly hit by GBP/EUR fall",
+          "search_queries": ["\"french wine importer\" UK", "\"bordeaux importer\" UK", "french wine distributor UK wholesale"],
+          "companies_house_terms": ["french wine", "bordeaux wines", "wine france"]
+        }},
+        {{
+          "name": "Italian wine and food importers UK",
+          "why": "EUR-invoiced Italian suppliers with GBP-only UK revenue creates direct currency mismatch",
+          "search_queries": ["\"italian wine importer\" UK", "\"italian food importer\" UK", "italian deli wholesale UK"],
+          "companies_house_terms": ["italian wine", "vino import", "italian foods"]
+        }},
+        {{
+          "name": "European spirits importers UK",
+          "why": "Premium spirits invoiced in EUR; GBP/EUR moves directly affect landed cost per case",
+          "search_queries": ["\"spirits importer\" UK", "\"gin importer\" UK distributor", "european spirits wholesale UK"],
+          "companies_house_terms": ["spirits import", "distillery uk", "spirits wholesale"]
+        }}
+      ]
     }}
   ]
 }}
@@ -263,12 +291,6 @@ def is_rate_limit_error(exc):
     msg = str(exc).lower()
     return "429" in msg or "quota" in msg or "rate" in msg or "resource_exhausted" in msg
 
-def extract_json(text):
-    text = text.strip().replace("```json", "").replace("```", "").strip()
-    s, e = text.find("{"), text.rfind("}")
-    if s == -1 or e == -1: raise ValueError("No JSON found")
-    return json.loads(text[s:e+1])
-
 
 def fetch_rss_items():
     """Fetch RSS, apply keyword gate and commercial relevance pre-score."""
@@ -287,8 +309,9 @@ def fetch_rss_items():
             if not _ENTRY_KEYWORDS.search(f"{title} {summary}"):
                 continue
             rel_score, rel_reason = score_commercial_relevance(title, summary)
-            if rel_score < 4:
-                log.debug("  Skip (relevance %d/10): %s", rel_score, title[:60])
+            _min_rel = int(os.getenv("DISCOVERY_MIN_RELEVANCE", "4"))
+            if rel_score < _min_rel:
+                log.debug("  Skip (relevance %d/10, threshold=%d): %s", rel_score, _min_rel, title[:60])
                 continue
             key = dedupe_id(feed["source"], title)
             if key not in seen:
@@ -306,33 +329,36 @@ def fetch_rss_items():
     return result
 
 
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=2, min=5, max=60),
-    retry=retry_if_exception_type(Exception),
-)
 def analyse_event_api(item):
-    """Single Gemini call: returns triage + exposure map combined."""
-    r = gemini.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=COMBINED_ANALYSIS_PROMPT.format(
-            headline=item["headline"],
-            summary=item.get("raw_summary", ""),
-        )
+    """
+    AI call for event triage + exposure map.
+    Uses call_ai_for_event() which tries Gemini → Grok → static playbook.
+    Returns (analysis_dict, ai_meta_dict).
+    """
+    prompt = COMBINED_ANALYSIS_PROMPT.format(
+        headline=item["headline"],
+        summary=item.get("raw_summary", ""),
     )
-    return extract_json(r.text)
+    result, ai_meta = call_ai_for_event(prompt, item.get("headline", ""))
+    return result, ai_meta
 
 
 def _extract_ch_terms(target_segments):
-    """Flatten CH terms and search queries from all segments."""
-    ch_terms        = []
-    search_queries  = []
+    """Flatten CH terms and search queries from micro_categories (new format)
+    with backward compat for old segment-level fields."""
+    ch_terms       = []
+    search_queries = []
     for seg in target_segments:
+        # New format: queries and terms live in micro_categories
+        for mc in seg.get("micro_categories", []):
+            ch_terms.extend(mc.get("companies_house_terms", []))
+            search_queries.extend(mc.get("search_queries", []))
+        # Backward compat: old events have these at segment level
         ch_terms.extend(seg.get("companies_house_terms", []))
         search_queries.extend(seg.get("high_intent_search_queries", []))
     return (
-        list(dict.fromkeys(ch_terms))[:12],
-        list(dict.fromkeys(search_queries))[:20],
+        list(dict.fromkeys(ch_terms))[:30],
+        list(dict.fromkeys(search_queries))[:50],
     )
 
 
@@ -592,7 +618,22 @@ def main():
             continue
 
         try:
-            analysis = analyse_event_api(item)
+            analysis, ai_meta = analyse_event_api(item)
+
+            # Empty result → ai_provider returned playbook fallback
+            if not analysis:
+                log.info("  AI returned empty (all providers failed or playbook) — using rule-based fallback")
+                event = build_fallback_event(item)
+                event.update({
+                    "ai_provider_used":   ai_meta.get("ai_provider_used"),
+                    "ai_model_used":      ai_meta.get("ai_model_used"),
+                    "ai_fallback_reason": ai_meta.get("ai_fallback_reason"),
+                })
+                existing[item["id"]] = event
+                fallback_used += 1
+                saved += 1
+                continue
+
             urgency  = int(analysis.get("urgency_score") or 0)
             comm_rel = int(analysis.get("commercial_relevance") or 0)
 
@@ -607,14 +648,24 @@ def main():
                     "urgency_score":                urgency,
                     "commercial_relevance":         comm_rel,
                     "commercial_relevance_reason":  analysis.get("commercial_relevance_reason", ""),
+                    "ai_provider_used":             ai_meta.get("ai_provider_used"),
+                    "ai_model_used":                ai_meta.get("ai_model_used"),
+                    "ai_fallback_reason":           ai_meta.get("ai_fallback_reason"),
                 }
                 continue
 
-            log.info("  ✓ Commercially relevant (score=%d/10, urgency=%d/10) — %s",
-                     comm_rel, urgency, analysis.get("commercial_relevance_reason", "")[:60])
+            log.info("  ✓ Commercially relevant (score=%d/10, urgency=%d/10) [%s] — %s",
+                     comm_rel, urgency, ai_meta.get("ai_provider_used", "?"),
+                     analysis.get("commercial_relevance_reason", "")[:60])
 
             # Extract CH terms and search queries from segments
             target_segments = analysis.get("target_segments", [])
+            # Validate Brain 2 required fields and apply rule-based inference for any missing
+            if target_segments:
+                target_segments = _validate_and_infer_segments(
+                    target_segments,
+                    ai_meta.get("ai_provider_used", "AI")
+                )
             ch_terms, search_queries = _extract_ch_terms(target_segments)
 
             event = {
@@ -641,23 +692,29 @@ def main():
                 "exposure_types":               analysis.get("exposure_types", []),
                 "overall_sales_angle":          analysis.get("overall_sales_angle", ""),
                 # Exposure mapping (now in same call)
+                "event_breadth":               analysis.get("event_breadth", "sector_specific"),
                 "target_segments":              target_segments,
+                "total_micro_categories":       sum(len(s.get("micro_categories", [])) for s in target_segments),
                 "companies_house_terms":        ch_terms,
                 "all_search_queries":           search_queries,
                 "status":                       "ready",
+                # AI provider metadata
+                "ai_provider_used":             ai_meta.get("ai_provider_used"),
+                "ai_model_used":                ai_meta.get("ai_model_used"),
+                "ai_fallback_reason":           ai_meta.get("ai_fallback_reason"),
             }
 
             existing[item["id"]] = event
             saved += 1
-            log.info("  ✓ Saved (urgency=%d, relevance=%d, %d segments)",
-                     urgency, comm_rel, len(target_segments))
+            log.info("  ✓ Saved (urgency=%d, relevance=%d, %d segments, provider=%s)",
+                     urgency, comm_rel, len(target_segments), ai_meta.get("ai_provider_used", "?"))
 
-            # Pause between events to avoid hitting rate limits
+            # Brief pause between events
             time.sleep(2)
 
         except Exception as exc:
             if is_rate_limit_error(exc):
-                log.warning("  429 Rate limit — switching to rule-based fallback for remaining items")
+                log.warning("  Rate limit — switching to rule-based fallback for remaining items")
                 rate_limit_hit = True
                 rate_limited += 1
                 event = build_fallback_event(item)

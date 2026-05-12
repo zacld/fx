@@ -105,7 +105,7 @@ def ch_search(query, n=10):
     r = requests.get(
         "https://api.company-information.service.gov.uk/search/companies",
         params={"q":query,"items_per_page":n},
-        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=15
+        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=(5, 15)
     )
     r.raise_for_status()
     return r.json().get("items", [])
@@ -114,7 +114,7 @@ def ch_search(query, n=10):
 def ch_profile(cn):
     r = requests.get(
         f"https://api.company-information.service.gov.uk/company/{cn}",
-        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=15
+        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=(5, 15)
     )
     if r.status_code == 404: return None
     r.raise_for_status()
@@ -124,7 +124,7 @@ def ch_profile(cn):
 def ch_officers(cn):
     r = requests.get(
         f"https://api.company-information.service.gov.uk/company/{cn}/officers",
-        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=15
+        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=(5, 15)
     )
     if r.status_code == 404: return []
     r.raise_for_status()
@@ -133,20 +133,27 @@ def ch_officers(cn):
 def extract_director(officers):
     priority = ["finance-director","managing-director","chief-executive",
                 "chief-financial-officer","commercial-director","director","company-secretary"]
+
+    def _clean_name(raw: str) -> str:
+        """CH returns names as 'SURNAME, Forename'. Normalise to 'Forename Surname'.
+        Defensive: strip any residual leading/trailing commas or whitespace."""
+        name = raw.strip()
+        if "," in name:
+            p = name.split(",", 1)
+            forename = p[1].strip()
+            surname  = p[0].strip().title()
+            # If surname is empty (e.g. CH returned ', Forename'), just use forename
+            name = f"{forename} {surname}".strip() if surname else forename
+        return name.strip(", ").strip()
+
     for role in priority:
         for o in officers:
             if role in (o.get("officer_role","")).lower().replace(" ","-"):
-                name = o.get("name","")
-                if "," in name:
-                    p = name.split(",",1)
-                    name = f"{p[1].strip()} {p[0].strip().title()}"
-                return {"name": name.strip(), "role": o.get("officer_role","Director")}
+                name = _clean_name(o.get("name",""))
+                return {"name": name, "role": o.get("officer_role","Director")}
     if officers:
-        name = officers[0].get("name","")
-        if "," in name:
-            p = name.split(",",1)
-            name = f"{p[1].strip()} {p[0].strip().title()}"
-        return {"name": name.strip(), "role": officers[0].get("officer_role","Officer")}
+        name = _clean_name(officers[0].get("name",""))
+        return {"name": name, "role": officers[0].get("officer_role","Officer")}
     return None
 
 def sic_codes_from_profile(profile):
@@ -173,7 +180,7 @@ def scrape_website(url, validation_signals=None):
     if not url:
         return {"fx_signals":[],"secondary_signals":[],"segment_signals":[],"snippet":"","pays_fx":False}
     try:
-        res = requests.get(url, headers=SCRAPE_HEADERS, timeout=10, allow_redirects=True)
+        res = requests.get(url, headers=SCRAPE_HEADERS, timeout=(5, 10), allow_redirects=True)
         res.raise_for_status()
         soup = BeautifulSoup(res.text, "html.parser")
         for tag in soup(["script","style","nav","footer","header","meta"]): tag.decompose()
@@ -426,13 +433,15 @@ def process_event(event, leads):
         log.warning("  No target segments for event: %s", event.get("headline","?")[:60])
         return 0
 
-    # Use CH terms from the exposure map
+    # Use CH terms from the exposure map (pre-flattened by exposure_mapper.py)
     ch_terms = event.get("companies_house_terms", [])
     if not ch_terms:
-        # Fallback: extract from segments
+        # Fallback: extract from segments and micro_categories
         for seg in target_segments:
             ch_terms.extend(seg.get("companies_house_terms", []))
-        ch_terms = list(dict.fromkeys(ch_terms))[:10]
+            for mc in seg.get("micro_categories", []):
+                ch_terms.extend(mc.get("companies_house_terms", []))
+        ch_terms = list(dict.fromkeys(ch_terms))[:20]
 
     seen  = set()
     saved = 0
@@ -446,6 +455,9 @@ def process_event(event, leads):
     for seg in target_segments:
         for term in seg.get("companies_house_terms", []):
             term_to_segment[term.lower()] = seg
+        for mc in seg.get("micro_categories", []):
+            for term in mc.get("companies_house_terms", []):
+                term_to_segment[term.lower()] = seg
 
     for term in ch_terms[:12]:
         try:

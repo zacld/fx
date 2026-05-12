@@ -52,6 +52,43 @@ EXPOSURE_LEVEL_BOOST = {
     "Low":        0,
 }
 
+# ── ASSOCIATION / TRADE BODY DETECTION ───────────────────────────────────────
+# These organisations are useful as source pages for mining member links, but
+# they are NOT FX prospects and must never appear as HOT or WARM leads.
+#
+# Two complementary signals:
+#   1. SIC code — 941xx / 9499x membership organisation codes
+#   2. Company name — contains association/council/federation/etc.
+#
+# Either signal alone is sufficient to cap at SKIP (score ≤ 39).
+ASSOCIATION_SICS = {
+    "94110",  # Activities of business and employers' membership organisations
+    "94120",  # Activities of professional membership organisations
+    "94910",  # Activities of religious organisations
+    "94920",  # Activities of political organisations
+    "94990",  # Activities of other membership organisations NEC
+}
+
+_ASSOC_PATTERN = re.compile(
+    r"\b(association|council|federation|institute|society|chamber|guild|"
+    r"consortium|forum|alliance|authority|union|bureau|agency)\b",
+    re.IGNORECASE,
+)
+
+# ── B2B / TRADE EVIDENCE ─────────────────────────────────────────────────────
+# Signals that confirm a company is a genuine trade/commercial prospect.
+# At least one must be present for a lead to reach WARM (score ≥ 65).
+# A single weak geographic/FX signal (e.g. "from italy" in page body) is not
+# enough to justify calling — there must also be evidence of commercial activity.
+_B2B_TRADE_SIGNALS = {
+    "wholesale", "wholesaler", "distributor", "distribution",
+    "importer", "importing", "imported", "exporter", "exporting",
+    "manufacturer", "manufacturing", "trade", "b2b",
+    "supply chain", "agent", "agents", "reseller",
+    "stockist", "supplier", "freight", "logistics",
+    "cargo", "shipper", "forwarder",
+}
+
 # Company name words that signal FX-paying business
 NAME_TRADE_WORDS = [
     "trading","international","imports","import","export","exports","wholesale",
@@ -105,6 +142,41 @@ def extract_domain(website):
 
 # Websites that are industry news/trade publications or sector aggregators,
 # NOT the actual company's website. enrich_websites sometimes latches onto these.
+# ── HARD-SKIP DOMAINS ────────────────────────────────────────────────────────
+# Content/retail sites that are NEVER valid FX prospects, even if they contain
+# import/country/product references in their page text.
+# These leads are capped at SKIP (score ≤ 39) regardless of other signals.
+# This is the rescore-time equivalent of SKIP_DOMAINS in discover_web.py,
+# catching leads already in the database from before the domain was blocked.
+HARD_SKIP_DOMAINS = {
+    # Reference / encyclopaedia
+    "britannica.com", "britannica.co.uk", "britannicakids.com",
+    "merriam-webster.com",
+    "dictionary.com", "thesaurus.com",
+    "encyclopedia.com",
+    "thoughtco.com",
+    "wikipedia.org",
+    # Supermarkets / consumer grocery
+    "morrisons.com",
+    "tesco.com",
+    "sainsburys.co.uk",
+    "asda.com",
+    "waitrose.com",
+    "marksandspencer.com",
+    "ocado.com",
+    "iceland.co.uk",
+    "aldi.co.uk",
+    "lidl.co.uk",
+    "costco.co.uk",
+    # Consumer wine / drinks retail
+    "majestic.co.uk",
+    "thedrinkshop.com",
+    "laithwaites.co.uk",
+    "thewinesociety.com",
+    "wineowners.com",
+    "virginwines.com",
+}
+
 KNOWN_BAD_DOMAINS = {
     # Trade publications / news
     "foodmanufacture.co.uk", "foodnavigator.com", "fooddrinkeurope.eu",
@@ -126,7 +198,33 @@ KNOWN_BAD_DOMAINS = {
     "opencorporates.com", "companieshouse.gov.uk",
     # Alberta/Canadian pallet company (wrong geography)
     "albertapallet.ca",
+    # Investment/marketplace sites masquerading as companies
+    "whiskyinvestdirect.com", "whiskyintelligence.com",
+    # Legal directories / firm aggregators
+    "thelawyer.com", "legalcheek.com", "chambers.com",
+    # Travel aggregators / booking engines
+    "kayak.co.uk", "kayak.com", "aito.com", "expedia.co.uk",
+    # Article/blog pages from wrong-domain companies
+    "luxurytribune.com", "luxurydaily.com", "womanandhome.com",
+    "shiptothemoon.com",
+    # Trade/supplier directories
+    "j5fashion.com", "gemimports.co.uk", "thewholesaler.co.uk",
+    "dinainternational.co.uk",
 }
+
+def _domain_in_set(website: str, domain_set: set) -> bool:
+    """Return True if the lead's website domain (or any parent) is in domain_set."""
+    dom = extract_domain(website) or ""
+    if dom in domain_set:
+        return True
+    for entry in domain_set:
+        if dom.endswith("." + entry):
+            return True
+    return False
+
+def is_hard_skip_domain(website: str) -> bool:
+    """True for content/retail sites that are never FX prospects."""
+    return _domain_in_set(website, HARD_SKIP_DOMAINS)
 
 def is_known_bad_domain(website: str) -> bool:
     dom = extract_domain(website) or ""
@@ -260,6 +358,16 @@ def rescore(lead, urgency_map):
     has_website = bool(lead.get("website"))
     wc          = lead.get("website_confidence", "")
 
+    # Gate -1: hard-skip content / retail domains → force SKIP regardless of signals
+    # Encyclopaedias, supermarkets, and consumer retailers are never FX prospects.
+    # They may have geographic/import text in their pages (product descriptions,
+    # country-of-origin info) but that does not make them callable businesses.
+    if has_website and is_hard_skip_domain(lead.get("website", "")):
+        score = min(score, 39)
+        dom = extract_domain(lead.get("website", ""))
+        reasons.append(f"⚠ Content/retail site ({dom}) — not a B2B prospect, capped at SKIP")
+        has_website = False
+
     # Gate 0: known-bad domain (trade publication / news site / sector portal)
     # enrich_websites sometimes latches onto industry news rather than the company's own site.
     if has_website and is_known_bad_domain(lead.get("website", "")):
@@ -296,6 +404,63 @@ def rescore(lead, urgency_map):
         if wc not in ("high", "medium", "confirmed"):
             score = 55
             reasons.append("⚠ WARM capped → QUEUE: low website confidence, no FX signals")
+
+    # ── Gate E: Association / trade body → force SKIP ─────────────────────
+    # Trade bodies and membership organisations are useful as source pages for
+    # mining member links, but they are NOT callable FX prospects.
+    # Either a membership-organisation SIC code OR an association-type name
+    # pattern is sufficient to cap at SKIP (score ≤ 39).
+    sic_codes = lead.get("sic_codes", [])
+    is_assoc_sic  = any(str(s).strip() in ASSOCIATION_SICS for s in sic_codes)
+    is_assoc_name = bool(_ASSOC_PATTERN.search(lead.get("company_name", "")))
+    if is_assoc_sic or is_assoc_name:
+        score = min(score, 39)
+        trigger = "SIC" if is_assoc_sic else "name pattern"
+        reasons.append(
+            f"⚠ Trade/membership organisation ({trigger}) — capped at SKIP"
+        )
+
+    # ── Gate F: Dissolved company → force SKIP ────────────────────────────
+    # A dissolved company has no active trading relationship to call on.
+    # Website signals may still be present (domain often stays live) but the
+    # company itself is not callable. Cap at SKIP regardless of other scores.
+    if (lead.get("company_status") or "").lower() == "dissolved":
+        score = min(score, 39)
+        reasons.append("⚠ Dissolved company — capped at SKIP")
+
+    # ── Gate G: WARM/HOT requires B2B / trade evidence ────────────────────
+    # A single weak geographic/FX signal (e.g. "from italy" appearing in body
+    # text) is not enough commercial conviction to justify a call. The company
+    # must also show at least one B2B / trade / commercial signal.
+    #
+    # Short-circuit order (any TRUE bypasses the cap):
+    #   1. Signal set match — fx/b2b/secondary signals contain a known B2B term
+    #   2. Any non-empty b2b_signals — even non-standard phrases like "trade
+    #      customers" or "minimum order" confirm commercial activity
+    #   3. pays_fx_confirmed — scraper confirmed FX payment activity on the site
+    #   4. Company name — contains a B2B/trade word as a substring
+    if score >= 65:
+        all_sigs = set(
+            (lead.get("fx_payment_signals") or [])
+            + (lead.get("b2b_signals") or [])
+            + (lead.get("secondary_signals") or [])
+        )
+        has_b2b_evidence = bool(all_sigs & _B2B_TRADE_SIGNALS)
+        # Any non-empty b2b_signals list proves commercial activity
+        if not has_b2b_evidence:
+            has_b2b_evidence = bool(lead.get("b2b_signals"))
+        # pays_fx_confirmed means the scraper found confirmed FX payment signals
+        if not has_b2b_evidence:
+            has_b2b_evidence = lead.get("pays_fx_confirmed", False)
+        # Company name substring match (e.g. "IMPORTS", "EXPORT", "WHOLESALE")
+        if not has_b2b_evidence:
+            name_lower = lead.get("company_name", "").lower()
+            has_b2b_evidence = any(w in name_lower for w in _B2B_TRADE_SIGNALS)
+        if not has_b2b_evidence:
+            score = min(score, 64)
+            reasons.append(
+                "⚠ No B2B/trade evidence on website — capped below WARM"
+            )
 
     if   score >= 80: priority = "HOT"
     elif score >= 60: priority = "WARM"
@@ -337,6 +502,77 @@ def compute_exposure_confidence(lead):
     return "none"
 
 
+def classify_lead(lead: dict, events: dict) -> dict:
+    """
+    Derives lead_type, awareness_level, and saving_opportunity from existing fields.
+    No API calls — pure logic.
+
+    lead_type:
+      trigger_exposed  — this specific event directly affects their payment flows
+      evergreen_saving — import/wholesale business likely paying FX through the bank
+      both             — multi-event trigger AND strong import signals
+      unknown          — insufficient data
+
+    awareness_level: how much does their website indicate FX awareness?
+      high   — fx_payment_signals ≥ 3 OR pays_fx_confirmed
+      medium — fx_payment_signals ≥ 1
+      low    — no visible FX signals
+
+    saving_opportunity: estimated value of a conversation
+      high   — score ≥ 85 with strong FX evidence
+      medium — score ≥ 65
+      low    — below threshold
+    """
+    score    = lead.get("score", 0)
+    multi    = lead.get("multi_event_trigger", False)
+    # SIC codes stored as a list ("sic_codes") — check all of them
+    sic_list = lead.get("sic_codes") or []
+    if not sic_list and lead.get("sic_code"):
+        sic_list = [str(lead["sic_code"])]
+    sic_list = [str(s).strip() for s in sic_list if s]
+    fx_sigs  = len(lead.get("fx_payment_signals") or [])
+    paid_fx  = lead.get("pays_fx_confirmed", False)
+    event_id = lead.get("event_id", "")
+    event    = events.get(event_id, {})
+    breadth  = event.get("event_breadth", "")
+
+    # is_trigger: True if this event type directly causes FX exposure.
+    # Fallback: if the lead has an event_id but that event is no longer in events.json
+    # (e.g. cleared between runs), treat it as trigger-type — the event_id proves it
+    # was discovered against a real event, so 'unknown' is wrong. is_evergreen below
+    # may also apply; the 'both' branch will handle that correctly.
+    stale_event  = bool(event_id and not event)
+    is_trigger   = bool(event_id and (breadth in ("broad_currency", "broad_macro", "tariff", "commodity") or stale_event))
+    # is_evergreen: three routes to qualification:
+    #   1. Import/wholesale SIC (46/47) + any FX evidence
+    #   2. Manufacturing SIC (10-33) + confirmed FX on website (pays_fx_confirmed)
+    #   3. Any SIC + strong FX signal count (3+ signals = clear recurring FX payer)
+    in_import_sic = any(s in SIC_TIER1 or s[:2] in {"46", "47"} for s in sic_list)
+    in_mfg_sic    = any(s[:2].isdigit() and 10 <= int(s[:2]) <= 33 for s in sic_list if len(s) >= 2)
+    is_evergreen  = (
+        (in_import_sic and (fx_sigs > 0 or paid_fx))
+        or (in_mfg_sic and paid_fx)
+        or (fx_sigs >= 3)   # 3+ FX signals on website = clear FX payer regardless of SIC
+    )
+
+    if multi or (is_trigger and is_evergreen):
+        lead_type = "both"
+    elif is_trigger:
+        lead_type = "trigger_exposed"
+    elif is_evergreen:
+        lead_type = "evergreen_saving"
+    else:
+        lead_type = "unknown"
+
+    awareness = "high" if (fx_sigs >= 3 or paid_fx) else ("medium" if fx_sigs >= 1 else "low")
+    saving    = "high" if (score >= 85 and (fx_sigs >= 2 or paid_fx)) else ("medium" if score >= 65 else "low")
+
+    lead["lead_type"]          = lead_type
+    lead["awareness_level"]    = awareness
+    lead["saving_opportunity"] = saving
+    return lead
+
+
 def main():
     leads  = json.loads(LEADS_FILE.read_text())
     events = json.loads(EVENTS_FILE.read_text()) if EVENTS_FILE.exists() else {}
@@ -345,6 +581,12 @@ def main():
 
     hot = warm = queue = skip = 0
     for k, lead in leads.items():
+        # Backfill id from dict key (old web-discovered leads may be missing it)
+        if not lead.get("id"):
+            lead["id"] = k
+        # Backfill website_domain from website URL (some older leads are missing it)
+        if lead.get("website") and not lead.get("website_domain"):
+            lead["website_domain"] = extract_domain(lead["website"]) or ""
         old_score    = lead.get("score", 0)
         old_priority = lead.get("priority", "QUEUE")
         new_score, new_priority, reasons = rescore(lead, urgency_map)
@@ -361,6 +603,8 @@ def main():
         # Ensure company_source is set for all leads
         if not lead.get("company_source"):
             lead["company_source"] = "companies_house"
+        # Classify lead_type, awareness_level, saving_opportunity
+        classify_lead(lead, events)
 
         if new_priority != old_priority:
             log.info("  %s → %s  (score %d → %d)  %s",

@@ -90,25 +90,37 @@ const RESEARCH_FILTERS  = { ...BLANK_FILTERS, view: "research"  };
 const ALL_FILTERS       = { ...BLANK_FILTERS, view: "all"       };
 
 function isCallListEligible(l) {
-  // Priority call list: HOT score≥90 + verified website + ≥1 direct FX signal + director
-  // This maps to the QA "PRIORITY CALL LIST" — leads with strong evidence.
+  // Daily Call List: 5-gate check per CLAUDE.md
+  // Gate 1: real company (director name as proxy — ensures CH registration found)
+  // Gate 2: FX evidence (direct FX signal on website OR pays_fx_confirmed)
+  // Gate 3: verified website (confidence high or medium)
+  // Gate 4: commercial fit (HOT or WARM score — means scoring passed B2B/segment filters)
+  // Gate 5: contact route (director name = CH-verified contact exists)
   const hasWebConf    = ["high","medium","confirmed"].includes(l.website_confidence);
   const hasWebsite    = !!l.website;
-  const hasFxSignal   = (l.fx_payment_signals||[]).length > 0;
-  const hasFxEvidence = hasFxSignal || !!l.pays_fx_confirmed;
+  const hasFxEvidence = (l.fx_payment_signals||[]).length > 0 || !!l.pays_fx_confirmed;
   const hotOrWarm     = l.priority==="HOT" || l.priority==="WARM";
   const notExcluded   = !["not_relevant"].includes(l.outreach_status);
   const hasDirector   = !!l.director_name;
-  // Default call list view: require direct FX keyword on site (not just Gemini confirmation)
   return hotOrWarm && hasWebsite && hasWebConf && hasFxEvidence && hasDirector && notExcluded;
 }
+
+const CALL_LIST_MAX = 25;
 
 function applyFilters(leads, filters, getCrmStatus) {
   let r = leads;
 
   // Primary view filter
-  if (filters.view === "call_list") r = r.filter(isCallListEligible);
-  else if (filters.view === "research") r = r.filter(l => !isCallListEligible(l));
+  // call_list = top CALL_LIST_MAX eligible leads sorted by score (already sorted from fetchData)
+  // research  = everything NOT in the top-25 call list (overflow HOT/WARM + QUEUE)
+  if (filters.view === "call_list") {
+    r = r.filter(isCallListEligible).slice(0, CALL_LIST_MAX);
+  } else if (filters.view === "research") {
+    const callListIds = new Set(
+      leads.filter(isCallListEligible).slice(0, CALL_LIST_MAX).map(l => l.website_domain || l.company_number)
+    );
+    r = r.filter(l => !callListIds.has(l.website_domain || l.company_number));
+  }
 
   // Additional filters
   if (filters.priorities.length)    r = r.filter(l => filters.priorities.includes(l.priority));
@@ -257,6 +269,10 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .niche-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .niche-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.2)}
 .niche-hint{font-size:11px;color:rgba(255,255,255,.2)}
+.niche-funnel-stats{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nf-stat{font-size:11px;color:rgba(255,255,255,.35)}
+.nf-stat strong{color:rgba(255,255,255,.65);font-weight:600}
+.nf-sep{font-size:11px;color:rgba(255,255,255,.15)}
 .niches{display:flex;flex-direction:column;gap:4px;margin-bottom:18px}
 .niche-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:8px;cursor:pointer;transition:all .15s}
 .niche-row:hover{background:rgba(255,255,255,.04);border-color:rgba(16,185,129,.2)}
@@ -1053,8 +1069,16 @@ function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet }) {
           {!showCompanies && (
             <>
               <div className="niche-header">
-                <div className="niche-label">{niches.length} exposed segments mapped</div>
-                <div className="niche-hint">Click any to see discovered companies</div>
+                <div className="niche-funnel-stats">
+                  <span className="nf-stat"><strong>{niches.length}</strong> segments mapped</span>
+                  <span className="nf-sep">·</span>
+                  <span className="nf-stat"><strong>{event.total_micro_categories || 0}</strong> micro-cats</span>
+                  <span className="nf-sep">·</span>
+                  <span className="nf-stat"><strong>{allEventLeads.length}</strong> companies found</span>
+                  <span className="nf-sep">·</span>
+                  <span className="nf-stat"><strong>{allEventLeads.filter(l=>l.priority==="HOT"||l.priority==="WARM").length}</strong> call targets</span>
+                </div>
+                <div className="niche-hint">Click any segment to see discovered companies</div>
               </div>
               <div className="niches">
                 {niches.map((n,i)=>{
@@ -1134,8 +1158,12 @@ export default function App() {
   useEffect(()=>{ load(); },[load]);
 
   const filteredLeads  = useMemo(()=>applyFilters(leads,filters,getCrmStatus),[leads,filters,getCrmStatus]);
-  const callListLeads  = useMemo(()=>leads.filter(isCallListEligible),[leads]);
-  const researchLeads  = useMemo(()=>leads.filter(l=>!isCallListEligible(l)),[leads]);
+  // callListLeads = top CALL_LIST_MAX eligible leads (same slice as applyFilters call_list view)
+  const callListLeads  = useMemo(()=>leads.filter(isCallListEligible).slice(0, CALL_LIST_MAX),[leads]);
+  const researchLeads  = useMemo(()=>{
+    const ids = new Set(callListLeads.map(l => l.website_domain || l.company_number));
+    return leads.filter(l => !ids.has(l.website_domain || l.company_number));
+  },[leads, callListLeads]);
 
   const hot       = leads.filter(l=>l.priority==="HOT").length;
   const warm      = leads.filter(l=>l.priority==="WARM").length;
@@ -1145,9 +1173,9 @@ export default function App() {
   const hasSite   = leads.filter(l=>l.website).length;
 
   const viewDesc = filters.view === "call_list"
-    ? "HOT & WARM · verified website · FX signals confirmed"
+    ? `Top ${CALL_LIST_MAX} leads · verified website · FX signals · contact route confirmed`
     : filters.view === "research"
-    ? "Low confidence or missing signals — needs manual review"
+    ? "Remaining leads — needs review before calling"
     : "All leads across all events";
 
   const viewCountCls = filters.view === "call_list" ? "view-count view-count-cl"
@@ -1208,7 +1236,7 @@ export default function App() {
             className={`view-tab${filters.view==="call_list"?" active-cl":""}`}
             onClick={()=>setFilters(CALL_LIST_FILTERS)}
           >
-            ⚡ Daily Call List
+            ⚡ Daily Call List {callListLeads.length > 0 && `(${callListLeads.length})`}
           </button>
           <button
             className={`view-tab${filters.view==="research"?" active-rq":""}`}
