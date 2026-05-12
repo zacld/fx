@@ -1,0 +1,1085 @@
+{
+  "lead_00305634_001": {
+    "id": "lead_00305634_001",
+    "event_id": "evt_opec_uae_001",
+    "created_at": "2026-04-29T10:16:36.539681+00:00",
+    "company_name": "Brenntag UK & Ireland Ltd",
+    "company_number": "00305634",
+    "company_status": "active",
+    "address": "Lockfield Avenue, Enfield, EN3 7PX",
+    "incorporated": "1935-07-22",
+    "sic_codes": [
+      "20130",
+      "46750"
+    ],
+    "website": "https://brenntag.com/uk",
+    "director_name": "Priya Kaur",
+    "director_role": "director",
+    "sector": "UK importers buying petroleum products in USD",
+    "trigger_headline": "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms. Currency exposure: GBP/USD. Website confirms: imported from, we source, overseas supplier.",
+    "fx_payment_logic": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms.",
+    "fx_payment_signals": [
+      "imported from",
+      "we source",
+      "overseas supplier",
+      "international supplier",
+      "procured from"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "worldwide",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: imported from, we source, overseas supplier, international supplier",
+      "International activity signals: international, global, worldwide, distribution",
+      "SIC code indicates import/trade/manufacturing: 20130, 46750",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Brenntag%20UK%20%26%20Ireland%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brenntag%20UK%20%26%20Ireland%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brenntag%20UK%20%26%20Ireland%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brenntag%20UK%20%26%20Ireland%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brenntag%20UK%20%26%20Ireland%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brenntag%20UK%20%26%20Ireland%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brenntag%20UK%20%26%20Ireland%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Brenntag%20UK%20%26%20Ireland%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Brenntag%20UK%20%26%20Ireland%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Brenntag%20UK%20%26%20Ireland%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Brenntag%20UK%20%26%20Ireland%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi Priya, with UAE leaving OPEC+ and crude spiking, UK businesses paying USD for fuel and chemicals are seeing costs move quickly. Noticed Brenntag operates in that space \u2014 thought it worth connecting.",
+      "linkedin_follow_up": "Thanks for connecting Priya. The reason I reached out \u2014 with crude up sharply, businesses importing petroleum and chemicals in USD are seeing their next invoice cost more in GBP.\n\nThis is exactly where Universal Partners helps \u2014 reviewing how businesses manage FX exposure on USD supplier payments so margin is protected when the market moves.\n\nWorth a 10-min conversation to see how you're currently handling this?",
+      "email_subject": "USD costs up on UAE OPEC exit",
+      "email_body": "Hi Priya,\n\nWith the UAE leaving OPEC+ and crude prices spiking, UK businesses buying fuel and chemicals in USD are seeing their next invoice cost more in GBP \u2014 sometimes significantly.\n\nI noticed Brenntag sits squarely in that space and thought it worth a quick note.\n\nAt Universal Partners we help businesses manage FX exposure on overseas supplier payments, so margin is protected when commodity prices and currency move together.\n\nWould it be worth 10 minutes to see how you're currently handling this?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi Priya, it's Zac from Universal Partners. With the UAE leaving OPEC+ this week and crude spiking, I'm calling businesses who buy petroleum or chemicals in USD \u2014 because when oil moves, the USD invoice cost moves with it. Is that something you're currently managing through your bank or a specialist?"
+    },
+    "segment_name": "UK chemical distributors and importers",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD commodity pricing",
+    "why_affected": "Chemical prices linked to crude oil. When crude spikes, USD-priced chemical invoices rise in both USD and GBP terms.",
+    "exposure_thesis": "Brenntag UK imports and distributes specialty chemicals sourced from international suppliers priced in USD. The UAE-driven crude spike raises their USD supplier costs while GBP revenue stays fixed, directly compressing margin on every shipment."
+  },
+  "lead_01716639_001": {
+    "id": "lead_01716639_001",
+    "event_id": "evt_opec_uae_001",
+    "created_at": "2026-04-29T10:16:36.539847+00:00",
+    "company_name": "Univar Solutions UK Ltd",
+    "company_number": "01716639",
+    "company_status": "active",
+    "address": "Oil Sites Road, Ellesmere Port, CH65 4EY",
+    "incorporated": "1983-06-01",
+    "sic_codes": [
+      "46750",
+      "20110"
+    ],
+    "website": "https://univarsolutions.com",
+    "director_name": "Mark Harrison",
+    "director_role": "finance-director",
+    "sector": "UK importers buying petroleum products in USD",
+    "trigger_headline": "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms. Currency exposure: GBP/USD. Website confirms: we import, sourced from, direct from.",
+    "fx_payment_logic": "UK fuel importers and petrochemical buyers purchase in USD \u2014 an oil price spike means their next USD invoice is more expensive in GBP terms.",
+    "fx_payment_signals": [
+      "we import",
+      "sourced from",
+      "direct from",
+      "overseas supplier",
+      "foreign currency"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "wholesale",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, sourced from, direct from, overseas supplier",
+      "International activity signals: international, global, wholesale, distribution",
+      "SIC code indicates import/trade/manufacturing: 46750, 20110",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Univar%20Solutions%20UK%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Univar%20Solutions%20UK%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Univar%20Solutions%20UK%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Univar%20Solutions%20UK%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Univar%20Solutions%20UK%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Univar%20Solutions%20UK%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Univar%20Solutions%20UK%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Univar%20Solutions%20UK%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Univar%20Solutions%20UK%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Univar%20Solutions%20UK%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Univar%20Solutions%20UK%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi Mark, with UAE leaving OPEC+ and crude spiking, UK businesses paying USD for fuel and chemicals are seeing costs move quickly. Noticed Brenntag operates in that space \u2014 thought it worth connecting.",
+      "linkedin_follow_up": "Thanks for connecting Mark. The reason I reached out \u2014 with crude up sharply, businesses importing petroleum and chemicals in USD are seeing their next invoice cost more in GBP.\n\nThis is exactly where Universal Partners helps \u2014 reviewing how businesses manage FX exposure on USD supplier payments so margin is protected when the market moves.\n\nWorth a 10-min conversation to see how you're currently handling this?",
+      "email_subject": "USD costs up on UAE OPEC exit",
+      "email_body": "Hi Mark,\n\nWith the UAE leaving OPEC+ and crude prices spiking, UK businesses buying fuel and chemicals in USD are seeing their next invoice cost more in GBP \u2014 sometimes significantly.\n\nI noticed Brenntag sits squarely in that space and thought it worth a quick note.\n\nAt Universal Partners we help businesses manage FX exposure on overseas supplier payments, so margin is protected when commodity prices and currency move together.\n\nWould it be worth 10 minutes to see how you're currently handling this?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi Mark, it's Zac from Universal Partners. With the UAE leaving OPEC+ this week and crude spiking, I'm calling businesses who buy petroleum or chemicals in USD \u2014 because when oil moves, the USD invoice cost moves with it. Is that something you're currently managing through your bank or a specialist?"
+    },
+    "segment_name": "UK chemical distributors and importers",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD commodity pricing",
+    "why_affected": "Chemical prices linked to crude oil. Univar imports globally at USD-linked prices.",
+    "exposure_thesis": "Univar Solutions imports industrial and specialty chemicals from global manufacturers at USD-linked prices. The crude price spike from UAE's OPEC exit means their next purchasing cycle costs materially more in GBP, with downstream margin pressure until they can pass on costs."
+  },
+  "lead_01800417_002": {
+    "id": "lead_01800417_002",
+    "event_id": "evt_gbp_record_short_002",
+    "created_at": "2026-04-29T10:16:36.539993+00:00",
+    "company_name": "Enotria & Coe Ltd",
+    "company_number": "01800417",
+    "company_status": "active",
+    "address": "119-121 Scrubs Lane, London, NW10 6QU",
+    "incorporated": "1971-09-01",
+    "sic_codes": [
+      "46341",
+      "46342"
+    ],
+    "website": "https://enotriacoe.com",
+    "director_name": "Tim Chase",
+    "director_role": "director",
+    "sector": "UK wine importers paying EUR to French and Italian producers",
+    "trigger_headline": "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
+    "fx_exposure": "GBP/EUR",
+    "fx_reason": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens. Currency exposure: GBP/EUR. Website confirms: we import, sourced from, from italy.",
+    "fx_payment_logic": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens.",
+    "fx_payment_signals": [
+      "we import",
+      "sourced from",
+      "from italy",
+      "from france",
+      "from spain",
+      "direct from",
+      "exclusive importer",
+      "uk importer"
+    ],
+    "secondary_signals": [
+      "european",
+      "wholesale",
+      "distribution",
+      "europe"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, sourced from, from italy, from france",
+      "International activity signals: european, wholesale, distribution, europe",
+      "SIC code indicates import/trade/manufacturing: 46341, 46342",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Enotria%20%26%20Coe%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Enotria%20%26%20Coe%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Enotria%20%26%20Coe%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Enotria%20%26%20Coe%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Enotria%20%26%20Coe%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Enotria%20%26%20Coe%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Enotria%20%26%20Coe%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Enotria%20%26%20Coe%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Enotria%20%26%20Coe%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Enotria%20%26%20Coe%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Enotria%20%26%20Coe%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi Tim, with GBP shorts near record levels, institutions are betting the pound weakens further. For UK businesses paying EUR to European suppliers, every invoice costs more in GBP. Noticed Enotria & Coe operates in that space.",
+      "linkedin_follow_up": "Thanks for connecting Tim. The GBP short positioning right now is near an all-time record \u2014 institutions are clearly betting on further sterling weakness.\n\nFor wine and food importers paying EUR to European producers, this directly hits the cost of every shipment in GBP terms.\n\nAt Universal Partners we help importers lock in rates before they move further. Worth a quick chat about how you're currently managing EUR supplier payments?",
+      "email_subject": "GBP shorts at record \u2014 EUR costs rising",
+      "email_body": "Hi Tim,\n\nGBP short positions are near a record 110,000 contracts right now \u2014 institutional traders are betting heavily on further sterling weakness.\n\nFor businesses paying EUR to European suppliers \u2014 wine producers, food importers \u2014 this means every invoice costs more in GBP when the rate moves against you.\n\nAt Universal Partners we help importers review their FX strategy and lock in rates before they move further.\n\nWould it be worth a quick conversation about how Enotria & Coe currently manages EUR supplier exposure?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi Tim, it's Zac from Universal Partners. With GBP at near-record short positions right now, institutions are betting hard on sterling weakness \u2014 and for businesses paying European suppliers in EUR, that directly hits margin on every shipment. Is that something you're actively managing at the moment?"
+    },
+    "segment_name": "European wine and spirits importers",
+    "exposure_level": "Very High",
+    "exposure_type": "EUR supplier payment exposure",
+    "why_affected": "Imports wine and spirits directly from European producers in EUR. GBP weakness vs EUR makes every shipment cost more in GBP while UK trade prices lag.",
+    "exposure_thesis": "Enotria & Coe is the UK's leading wine and spirits importer, paying EUR directly to French, Italian and Spanish producers. With GBP shorts at near-record levels signalling further sterling weakness, their EUR supplier invoices cost more GBP on every payment cycle \u2014 margin erodes unless hedged."
+  },
+  "lead_03592261_002": {
+    "id": "lead_03592261_002",
+    "event_id": "evt_gbp_record_short_002",
+    "created_at": "2026-04-29T10:16:36.540135+00:00",
+    "company_name": "Delicatessen Foods Ltd",
+    "company_number": "03592261",
+    "company_status": "active",
+    "address": "Unit 7 Kingsway Business Park, Oldham, OL1 3JZ",
+    "incorporated": "1998-04-20",
+    "sic_codes": [
+      "46310",
+      "46320"
+    ],
+    "website": "https://delicatessenfoods.co.uk",
+    "director_name": "Paul Wrigley",
+    "director_role": "managing-director",
+    "sector": "UK wine importers paying EUR to French and Italian producers",
+    "trigger_headline": "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
+    "fx_exposure": "GBP/EUR",
+    "fx_reason": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens. Currency exposure: GBP/EUR. Website confirms: we import, from italy, from france.",
+    "fx_payment_logic": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens.",
+    "fx_payment_signals": [
+      "we import",
+      "from italy",
+      "from france",
+      "from spain",
+      "from germany",
+      "overseas supplier",
+      "importer"
+    ],
+    "secondary_signals": [
+      "european",
+      "wholesale",
+      "distribution",
+      "europe"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, from italy, from france, from spain",
+      "International activity signals: european, wholesale, distribution, europe",
+      "SIC code indicates import/trade/manufacturing: 46310, 46320",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Delicatessen%20Foods%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Delicatessen%20Foods%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Delicatessen%20Foods%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Delicatessen%20Foods%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Delicatessen%20Foods%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Delicatessen%20Foods%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Delicatessen%20Foods%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Delicatessen%20Foods%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Delicatessen%20Foods%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Delicatessen%20Foods%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Delicatessen%20Foods%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi Paul, with GBP shorts near record levels, institutions are betting the pound weakens further. For UK businesses paying EUR to European suppliers, every invoice costs more in GBP. Noticed Enotria & Coe operates in that space.",
+      "linkedin_follow_up": "Thanks for connecting Paul. The GBP short positioning right now is near an all-time record \u2014 institutions are clearly betting on further sterling weakness.\n\nFor wine and food importers paying EUR to European producers, this directly hits the cost of every shipment in GBP terms.\n\nAt Universal Partners we help importers lock in rates before they move further. Worth a quick chat about how you're currently managing EUR supplier payments?",
+      "email_subject": "GBP shorts at record \u2014 EUR costs rising",
+      "email_body": "Hi Paul,\n\nGBP short positions are near a record 110,000 contracts right now \u2014 institutional traders are betting heavily on further sterling weakness.\n\nFor businesses paying EUR to European suppliers \u2014 wine producers, food importers \u2014 this means every invoice costs more in GBP when the rate moves against you.\n\nAt Universal Partners we help importers review their FX strategy and lock in rates before they move further.\n\nWould it be worth a quick conversation about how Enotria & Coe currently manages EUR supplier exposure?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi Paul, it's Zac from Universal Partners. With GBP at near-record short positions right now, institutions are betting hard on sterling weakness \u2014 and for businesses paying European suppliers in EUR, that directly hits margin on every shipment. Is that something you're actively managing at the moment?"
+    },
+    "segment_name": "European food and delicatessen importers",
+    "exposure_level": "Very High",
+    "exposure_type": "EUR supplier import cost exposure",
+    "why_affected": "Imports European specialty foods paying EUR to producers. GBP weakness creates widening gap between EUR cost base and GBP revenue.",
+    "exposure_thesis": "Delicatessen Foods imports specialty foods from Italian, French and Spanish producers, paying EUR and selling in GBP to UK trade customers. Institutional GBP selling near record levels signals further sterling weakness, meaning every upcoming EUR payment cycle costs more in GBP."
+  },
+  "lead_02026530_002": {
+    "id": "lead_02026530_002",
+    "event_id": "evt_gbp_record_short_002",
+    "created_at": "2026-04-29T10:16:36.540228+00:00",
+    "company_name": "Brindisa Ltd",
+    "company_number": "02026530",
+    "company_status": "active",
+    "address": "32 Exmouth Market, London, EC1R 4QE",
+    "incorporated": "1988-06-15",
+    "sic_codes": [
+      "46310"
+    ],
+    "website": "https://brindisa.com",
+    "director_name": "Monika Hart",
+    "director_role": "director",
+    "sector": "UK wine importers paying EUR to French and Italian producers",
+    "trigger_headline": "Institutional investors push GBP short positions to near-record \u2014 pound expected to weaken further",
+    "fx_exposure": "GBP/EUR",
+    "fx_reason": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens. Currency exposure: GBP/EUR. Website confirms: we import, direct from, from spain.",
+    "fx_payment_logic": "UK businesses paying EUR supplier invoices \u2014 wine merchants buying from French ch\u00e2teaux, food importers sourcing from Italian producers, furniture buyers paying German manufacturers \u2014 face rising GBP costs as sterling weakens.",
+    "fx_payment_signals": [
+      "we import",
+      "direct from",
+      "from spain",
+      "sourced from",
+      "exclusive importer",
+      "overseas supplier"
+    ],
+    "secondary_signals": [
+      "european",
+      "wholesale",
+      "spain",
+      "europe"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 97,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, direct from, from spain, sourced from",
+      "International activity signals: european, wholesale, spain, europe",
+      "SIC code indicates import/trade/manufacturing: 46310",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Brindisa%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brindisa%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brindisa%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brindisa%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brindisa%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brindisa%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Brindisa%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Brindisa%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Brindisa%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Brindisa%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Brindisa%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi Monika, with GBP shorts near record levels, institutions are betting the pound weakens further. For UK businesses paying EUR to European suppliers, every invoice costs more in GBP. Noticed Enotria & Coe operates in that space.",
+      "linkedin_follow_up": "Thanks for connecting Monika. The GBP short positioning right now is near an all-time record \u2014 institutions are clearly betting on further sterling weakness.\n\nFor wine and food importers paying EUR to European producers, this directly hits the cost of every shipment in GBP terms.\n\nAt Universal Partners we help importers lock in rates before they move further. Worth a quick chat about how you're currently managing EUR supplier payments?",
+      "email_subject": "GBP shorts at record \u2014 EUR costs rising",
+      "email_body": "Hi Monika,\n\nGBP short positions are near a record 110,000 contracts right now \u2014 institutional traders are betting heavily on further sterling weakness.\n\nFor businesses paying EUR to European suppliers \u2014 wine producers, food importers \u2014 this means every invoice costs more in GBP when the rate moves against you.\n\nAt Universal Partners we help importers review their FX strategy and lock in rates before they move further.\n\nWould it be worth a quick conversation about how Enotria & Coe currently manages EUR supplier exposure?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi Monika, it's Zac from Universal Partners. With GBP at near-record short positions right now, institutions are betting hard on sterling weakness \u2014 and for businesses paying European suppliers in EUR, that directly hits margin on every shipment. Is that something you're actively managing at the moment?"
+    },
+    "segment_name": "European food and delicatessen importers",
+    "exposure_level": "Very High",
+    "exposure_type": "EUR supplier import cost exposure",
+    "why_affected": "Direct importer from Spanish artisan producers. EUR invoices from Spanish suppliers rise in GBP cost as sterling weakens.",
+    "exposure_thesis": "Brindisa imports Spanish food directly from artisan producers in Spain, paying EUR and selling in GBP to UK restaurants, delis and retailers. With GBP at near-record short positioning, their EUR supplier payment costs are rising and selling prices are slow to adjust."
+  },
+  "lead_SC123456_003": {
+    "id": "lead_SC123456_003",
+    "event_id": "evt_fed_boe_003",
+    "created_at": "2026-04-29T10:16:36.540385+00:00",
+    "company_name": "Scottish Seafood Importers Ltd",
+    "company_number": "SC123456",
+    "company_status": "active",
+    "address": "Harbour Road, Aberdeen, AB11 5PQ",
+    "incorporated": "2002-03-14",
+    "sic_codes": [
+      "46380",
+      "10200"
+    ],
+    "website": "https://scottishseafood.co.uk",
+    "director_name": "Fiona Mcgregor",
+    "director_role": "director",
+    "sector": "UK importers with USD payments due this week",
+    "trigger_headline": "Fed and BoE both announce rate decisions this week \u2014 maximum GBP/USD volatility expected",
+    "fx_exposure": "GBP/USD, GBP/EUR",
+    "fx_reason": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets. Currency exposure: GBP/USD, GBP/EUR. Website confirms: we import, imported from, from norway.",
+    "fx_payment_logic": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets.",
+    "fx_payment_signals": [
+      "we import",
+      "imported from",
+      "from norway",
+      "from iceland",
+      "overseas supplier",
+      "direct from"
+    ],
+    "secondary_signals": [
+      "international",
+      "wholesale",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 94,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, imported from, from norway, from iceland",
+      "International activity signals: international, wholesale, distribution",
+      "SIC code indicates import/trade/manufacturing: 46380, 10200",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Scottish%20Seafood%20Importers%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Scottish%20Seafood%20Importers%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Scottish%20Seafood%20Importers%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Scottish%20Seafood%20Importers%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Scottish%20Seafood%20Importers%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Scottish%20Seafood%20Importers%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Scottish%20Seafood%20Importers%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Scottish%20Seafood%20Importers%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Scottish%20Seafood%20Importers%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Scottish%20Seafood%20Importers%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Scottish%20Seafood%20Importers%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi Fiona, with both the Fed and BoE announcing rates this week, GBP/USD is at maximum volatility. For businesses with USD payments due, locking in now vs waiting could make a meaningful difference. Thought it worth connecting.",
+      "linkedin_follow_up": "Thanks for connecting Fiona. This week is one of the most volatile for GBP/USD in a long time \u2014 both the Fed and BoE deciding rates within days of each other.\n\nFor businesses importing seafood from Norway or Iceland with upcoming USD or NOK payments, the rate you get Thursday could be materially worse than Monday.\n\nAt Universal Partners we help businesses manage this kind of timing risk. Worth a quick call this week while it's still relevant?",
+      "email_subject": "Fed + BoE this week \u2014 GBP/USD volatile",
+      "email_body": "Hi Fiona,\n\nWith both the Fed and BoE announcing this week, GBP/USD volatility is at its highest of the year. If you have upcoming supplier payments due, the rate you get at the end of the week could be meaningfully different to today.\n\nFor seafood importers paying Norwegian or Icelandic suppliers, this timing risk is very real.\n\nAt Universal Partners we help businesses lock in rates before central bank decisions move the market.\n\nWorth a quick conversation this week while it's still relevant?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi Fiona, it's Zac from Universal Partners. With both the Fed and Bank of England announcing rates this week, GBP/USD is about as volatile as it gets \u2014 and if you've got supplier payments due, the rate you get could be quite different depending on when you transact. Do you have USD or NOK payments coming up that you're thinking about?"
+    },
+    "segment_name": "UK seafood and fish importers",
+    "exposure_level": "Very High",
+    "exposure_type": "USD/NOK payment timing risk",
+    "why_affected": "Regular Norwegian/Icelandic supplier payments due this week \u2014 rate they get on Thursday could be materially worse than Monday.",
+    "exposure_thesis": "Scottish Seafood Importers sources premium seafood from Norwegian and Icelandic suppliers with regular payment cycles. With both the Fed and BoE announcing rates this week, GBP/USD and GBP/NOK volatility is at its highest \u2014 timing of any payment due this week carries real rate risk."
+  },
+  "lead_04567890_003": {
+    "id": "lead_04567890_003",
+    "event_id": "evt_fed_boe_003",
+    "created_at": "2026-04-29T10:16:36.540480+00:00",
+    "company_name": "Fresh Atlantic Foods Ltd",
+    "company_number": "04567890",
+    "company_status": "active",
+    "address": "Unit 4 Fish Dock, Grimsby, DN31 3SG",
+    "incorporated": "2008-07-22",
+    "sic_codes": [
+      "10200",
+      "46380"
+    ],
+    "website": "https://freshatlanticfoods.co.uk",
+    "director_name": "James Robert Smith",
+    "director_role": "director",
+    "sector": "UK importers with USD payments due this week",
+    "trigger_headline": "Fed and BoE both announce rate decisions this week \u2014 maximum GBP/USD volatility expected",
+    "fx_exposure": "GBP/USD, GBP/EUR",
+    "fx_reason": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets. Currency exposure: GBP/USD, GBP/EUR. Website confirms: we import, imported from, from norway.",
+    "fx_payment_logic": "Any UK business making a USD payment this week faces maximum uncertainty \u2014 the rate they get on Thursday could be meaningfully worse than Monday if either central bank surprises markets.",
+    "fx_payment_signals": [
+      "we import",
+      "imported from",
+      "from norway",
+      "from iceland",
+      "overseas supplier",
+      "foreign currency"
+    ],
+    "secondary_signals": [
+      "international",
+      "wholesale",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 94,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we import, imported from, from norway, from iceland",
+      "International activity signals: international, wholesale, distribution",
+      "SIC code indicates import/trade/manufacturing: 10200, 46380",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Fresh%20Atlantic%20Foods%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Fresh%20Atlantic%20Foods%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Fresh%20Atlantic%20Foods%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Fresh%20Atlantic%20Foods%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Fresh%20Atlantic%20Foods%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Fresh%20Atlantic%20Foods%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Fresh%20Atlantic%20Foods%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Fresh%20Atlantic%20Foods%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Fresh%20Atlantic%20Foods%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Fresh%20Atlantic%20Foods%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Fresh%20Atlantic%20Foods%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi James, with both the Fed and BoE announcing rates this week, GBP/USD is at maximum volatility. For businesses with USD payments due, locking in now vs waiting could make a meaningful difference. Thought it worth connecting.",
+      "linkedin_follow_up": "Thanks for connecting James. This week is one of the most volatile for GBP/USD in a long time \u2014 both the Fed and BoE deciding rates within days of each other.\n\nFor businesses importing seafood from Norway or Iceland with upcoming USD or NOK payments, the rate you get Thursday could be materially worse than Monday.\n\nAt Universal Partners we help businesses manage this kind of timing risk. Worth a quick call this week while it's still relevant?",
+      "email_subject": "Fed + BoE this week \u2014 GBP/USD volatile",
+      "email_body": "Hi James,\n\nWith both the Fed and BoE announcing this week, GBP/USD volatility is at its highest of the year. If you have upcoming supplier payments due, the rate you get at the end of the week could be meaningfully different to today.\n\nFor seafood importers paying Norwegian or Icelandic suppliers, this timing risk is very real.\n\nAt Universal Partners we help businesses lock in rates before central bank decisions move the market.\n\nWorth a quick conversation this week while it's still relevant?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi James, it's Zac from Universal Partners. With both the Fed and Bank of England announcing rates this week, GBP/USD is about as volatile as it gets \u2014 and if you've got supplier payments due, the rate you get could be quite different depending on when you transact. Do you have USD or NOK payments coming up that you're thinking about?"
+    },
+    "segment_name": "UK seafood and fish importers",
+    "exposure_level": "Very High",
+    "exposure_type": "USD/NOK payment timing risk",
+    "why_affected": "Imports from Norway and Iceland with payment obligations in NOK or USD that fall due within this week's rate decision window.",
+    "exposure_thesis": "Fresh Atlantic Foods imports premium seafood from Norway and Iceland, paying overseas suppliers in their local currency. With both the Fed and BoE deciding rates this week, the GBP rate available on Thursday could differ significantly from today's \u2014 creating real uncertainty on any payments falling due."
+  },
+  "lead_00329016_004": {
+    "id": "lead_00329016_004",
+    "event_id": "evt_iran_usd_004",
+    "created_at": "2026-04-29T10:16:36.540563+00:00",
+    "company_name": "Associated British Foods plc",
+    "company_number": "00329016",
+    "company_status": "active",
+    "address": "Weston Centre, 10 Grosvenor Street, London, W1K 4QY",
+    "incorporated": "1935-01-01",
+    "sic_codes": [
+      "10610",
+      "10810",
+      "46310"
+    ],
+    "website": "https://abfoods.com",
+    "director_name": "George Weston",
+    "director_role": "chief-executive",
+    "sector": "UK importers with USD-denominated invoices",
+    "trigger_headline": "US-Iran tensions escalate \u2014 USD strengthens as safe-haven demand rises",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "When USD strengthens against GBP, every UK business paying a USD invoice needs more pounds to cover the same cost \u2014 this is direct margin erosion for importers. Currency exposure: GBP/USD. Website confirms: we source, sourced from, imported from.",
+    "fx_payment_logic": "When USD strengthens against GBP, every UK business paying a USD invoice needs more pounds to cover the same cost \u2014 this is direct margin erosion for importers.",
+    "fx_payment_signals": [
+      "we source",
+      "sourced from",
+      "imported from",
+      "overseas supplier",
+      "international supplier",
+      "from usa",
+      "foreign currency",
+      "currency risk"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "worldwide"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 94,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: we source, sourced from, imported from, overseas supplier",
+      "International activity signals: international, global, worldwide",
+      "SIC code indicates import/trade/manufacturing: 10610, 10810",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Associated%20British%20Foods%20plc",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Associated%20British%20Foods%20plc%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Associated%20British%20Foods%20plc%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Associated%20British%20Foods%20plc%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Associated%20British%20Foods%20plc%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Associated%20British%20Foods%20plc%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Associated%20British%20Foods%20plc%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Associated%20British%20Foods%20plc%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Associated%20British%20Foods%20plc%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Associated%20British%20Foods%20plc%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Associated%20British%20Foods%20plc%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi George, with US-Iran tensions escalating, safe-haven USD demand is pushing GBP/USD lower. For businesses paying USD supplier invoices, every transaction costs more in GBP right now. Thought it worth connecting.",
+      "linkedin_follow_up": "Thanks for connecting George. USD has been strengthening as US-Iran tensions escalate \u2014 the safe-haven effect is pushing GBP/USD down.\n\nFor businesses like ABF that source ingredients or raw materials in USD, this is direct margin erosion on every supplier invoice.\n\nAt Universal Partners we work with food manufacturers to review USD payment exposure and protect margin when the dollar moves. Worth a brief call?",
+      "email_subject": "USD strengthening on Iran tensions",
+      "email_body": "Hi George,\n\nWith US-Iran tensions escalating, safe-haven demand is pushing USD higher against GBP. For businesses sourcing commodities or ingredients in USD, every invoice now costs more in GBP terms \u2014 this is direct margin pressure.\n\nGiven ABF's scale of international procurement, I thought this might be timely.\n\nAt Universal Partners we help food manufacturers manage USD payment exposure so margin is protected when the dollar moves.\n\nWould it be worth a quick conversation about how you're currently handling this?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi George, it's Zac from Universal Partners. With USD strengthening sharply on the Iran situation, businesses buying commodities or raw materials in USD are seeing their GBP costs go up on every transaction. Is that something you're managing actively at the moment or going through your bank?"
+    },
+    "segment_name": "UK food manufacturers sourcing USD commodities",
+    "exposure_level": "Very High",
+    "exposure_type": "USD commodity import cost exposure",
+    "why_affected": "Massive USD commodity procurement across multiple food businesses. USD strengthening on Iran tensions immediately raises raw material costs in GBP terms.",
+    "exposure_thesis": "ABF's food businesses source significant volumes of agricultural commodities priced in USD across multiple categories. Safe-haven USD demand from Iran tensions means their commodity procurement costs have risen in GBP terms \u2014 a direct hit to margin at scale across their UK manufacturing operations."
+  },
+  "lead_SC012453_005": {
+    "id": "lead_SC012453_005",
+    "event_id": "evt_tariff_whisky_005",
+    "created_at": "2026-04-29T10:16:36.540632+00:00",
+    "company_name": "Edrington Group Ltd",
+    "company_number": "SC012453",
+    "company_status": "active",
+    "address": "100 Queen Street, Glasgow, G1 3DN",
+    "incorporated": "1961-11-08",
+    "sic_codes": [
+      "11010",
+      "46341"
+    ],
+    "website": "https://edrington.com",
+    "director_name": "Scott Mccallum",
+    "director_role": "director",
+    "sector": "UK exporters receiving USD revenue from US customers",
+    "trigger_headline": "US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income. Currency exposure: GBP/USD. Website confirms: export, from usa, international.",
+    "fx_payment_logic": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income.",
+    "fx_payment_signals": [
+      "export",
+      "from usa",
+      "international",
+      "overseas",
+      "worldwide",
+      "global",
+      "currency risk",
+      "exchange rate"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "worldwide",
+      "export",
+      "distribution"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 100,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: export, from usa, international, overseas",
+      "International activity signals: international, global, worldwide, export",
+      "SIC code indicates import/trade/manufacturing: 11010, 46341",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Edrington%20Group%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Edrington%20Group%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Edrington%20Group%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Edrington%20Group%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Edrington%20Group%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Edrington%20Group%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Edrington%20Group%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Edrington%20Group%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Edrington%20Group%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Edrington%20Group%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Edrington%20Group%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi Scott, the Section 338 tariff uncertainty is creating both pricing and currency risk for UK whisky exporters billing US customers in USD. With GBP/USD moving, the revenue you convert matters. Thought it worth connecting.",
+      "linkedin_follow_up": "Thanks for connecting Scott. The ongoing US tariff uncertainty creates a double risk for Scotch whisky exporters \u2014 tariff risk on the trade side, and currency risk on the USD revenue you convert back to GBP.\n\nIf USD weakens while tariffs land, the margin impact compounds from both sides.\n\nAt Universal Partners we help exporters review how they convert USD revenue and whether there's a smarter strategy when there's this much uncertainty.\n\nWould it be worth 10 minutes?",
+      "email_subject": "Tariff risk + USD \u2014 double exposure for exporters",
+      "email_body": "Hi Scott,\n\nThe Section 338 tariff uncertainty creates a double exposure for Scotch whisky exporters \u2014 tariff risk on the trade side, and currency risk on the USD revenue side when you convert back to GBP.\n\nIf the dollar weakens at the same time tariffs land, the margin impact compounds from both directions.\n\nAt Universal Partners we work with UK exporters to review how they manage USD revenue and whether there's a more efficient conversion strategy given the current uncertainty.\n\nWorth a quick conversation?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi Scott, it's Zac from Universal Partners. With the Section 338 tariff uncertainty ongoing, UK whisky exporters are exposed on two fronts \u2014 the tariff side and the currency side when converting USD revenue back to GBP. Is that something you're thinking about actively at Edrington?"
+    },
+    "segment_name": "Scotch whisky and premium spirits exporters",
+    "exposure_level": "Very High",
+    "exposure_type": "Export USD revenue exposure + tariff risk",
+    "why_affected": "Exports Macallan and Highland Park to US market, receiving USD revenue. Tariff uncertainty plus GBP/USD volatility creates a double exposure.",
+    "exposure_thesis": "Edrington exports The Macallan and Highland Park to over 100 markets with the US as a major revenue source. USD revenue must be converted back to GBP \u2014 Section 338 tariff uncertainty means pricing pressure from both the trade side and the currency conversion side simultaneously."
+  },
+  "lead_SC016567_005": {
+    "id": "lead_SC016567_005",
+    "event_id": "evt_tariff_whisky_005",
+    "created_at": "2026-04-29T10:16:36.540724+00:00",
+    "company_name": "Chivas Brothers Ltd",
+    "company_number": "SC016567",
+    "company_status": "active",
+    "address": "111-113 Renfrew Road, Paisley, PA3 4DY",
+    "incorporated": "1857-01-01",
+    "sic_codes": [
+      "11010"
+    ],
+    "website": "https://chivasbrothers.com",
+    "director_name": "Jean Barrie",
+    "director_role": "director",
+    "sector": "UK exporters receiving USD revenue from US customers",
+    "trigger_headline": "US Section 338 tariff risk remains \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "fx_exposure": "GBP/USD",
+    "fx_reason": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income. Currency exposure: GBP/USD. Website confirms: export, from usa, international.",
+    "fx_payment_logic": "UK exporters billing US customers in USD receive fewer pounds when they convert their USD revenue \u2014 tariff uncertainty compounds the FX risk on their US income.",
+    "fx_payment_signals": [
+      "export",
+      "from usa",
+      "international",
+      "currency risk",
+      "overseas",
+      "worldwide"
+    ],
+    "secondary_signals": [
+      "international",
+      "global",
+      "export",
+      "distribution",
+      "worldwide"
+    ],
+    "pays_fx_confirmed": true,
+    "score": 100,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment language: export, from usa, international, currency risk",
+      "International activity signals: international, global, export, distribution",
+      "SIC code indicates import/trade/manufacturing: 11010",
+      "High urgency market event",
+      "Active on Companies House",
+      "Contact route available"
+    ],
+    "suggested_next_step": "1. Open LinkedIn company search\n2. Find Finance Director or MD\n3. Copy LinkedIn connection note\n4. Send manually \u2014 do not automate",
+    "status": "new",
+    "linkedin_assist": {
+      "company_search": "https://www.linkedin.com/search/results/companies/?keywords=Chivas%20Brothers%20Ltd",
+      "people_searches": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Chivas%20Brothers%20Ltd%20Finance%20Director"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Chivas%20Brothers%20Ltd%20Managing%20Director"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Chivas%20Brothers%20Ltd%20CFO"
+        },
+        {
+          "role": "Commercial Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Chivas%20Brothers%20Ltd%20Commercial%20Director"
+        },
+        {
+          "role": "Procurement Director",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Chivas%20Brothers%20Ltd%20Procurement%20Director"
+        },
+        {
+          "role": "Founder",
+          "url": "https://www.linkedin.com/search/results/people/?keywords=Chivas%20Brothers%20Ltd%20Founder"
+        }
+      ],
+      "google_fallbacks": [
+        {
+          "role": "Finance Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Chivas%20Brothers%20Ltd%22+%22Finance%20Director%22"
+        },
+        {
+          "role": "Managing Director",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Chivas%20Brothers%20Ltd%22+%22Managing%20Director%22"
+        },
+        {
+          "role": "CFO",
+          "url": "https://www.google.com/search?q=site:linkedin.com/in+%22Chivas%20Brothers%20Ltd%22+%22CFO%22"
+        },
+        {
+          "role": "Company page",
+          "url": "https://www.google.com/search?q=site:linkedin.com/company+%22Chivas%20Brothers%20Ltd%22"
+        }
+      ]
+    },
+    "outreach": {
+      "linkedin_connection": "Hi Jean, the Section 338 tariff uncertainty is creating both pricing and currency risk for UK whisky exporters billing US customers in USD. With GBP/USD moving, the revenue you convert matters. Thought it worth connecting.",
+      "linkedin_follow_up": "Thanks for connecting Jean. The ongoing US tariff uncertainty creates a double risk for Scotch whisky exporters \u2014 tariff risk on the trade side, and currency risk on the USD revenue you convert back to GBP.\n\nIf USD weakens while tariffs land, the margin impact compounds from both sides.\n\nAt Universal Partners we help exporters review how they convert USD revenue and whether there's a smarter strategy when there's this much uncertainty.\n\nWould it be worth 10 minutes?",
+      "email_subject": "Tariff risk + USD \u2014 double exposure for exporters",
+      "email_body": "Hi Jean,\n\nThe Section 338 tariff uncertainty creates a double exposure for Scotch whisky exporters \u2014 tariff risk on the trade side, and currency risk on the USD revenue side when you convert back to GBP.\n\nIf the dollar weakens at the same time tariffs land, the margin impact compounds from both directions.\n\nAt Universal Partners we work with UK exporters to review how they manage USD revenue and whether there's a more efficient conversion strategy given the current uncertainty.\n\nWorth a quick conversation?\n\nBest,\nZac, Universal Partners",
+      "call_opener": "Hi Jean, it's Zac from Universal Partners. With the Section 338 tariff uncertainty ongoing, UK whisky exporters are exposed on two fronts \u2014 the tariff side and the currency side when converting USD revenue back to GBP. Is that something you're thinking about actively at Edrington?"
+    },
+    "segment_name": "Scotch whisky and premium spirits exporters",
+    "exposure_level": "Very High",
+    "exposure_type": "Export USD revenue exposure + tariff risk",
+    "why_affected": "Exports Chivas Regal and Ballantine's globally with significant US USD revenue that must be converted back to GBP.",
+    "exposure_thesis": "Chivas Brothers exports to global markets including a major US business billed in USD. US Section 338 tariff uncertainty creates a compound risk: if tariffs land while USD weakens, both the trade margin and the GBP conversion rate move against them simultaneously."
+  }
+}

@@ -1,0 +1,40 @@
+name: FX Discovery
+
+on:
+  schedule:
+    - cron: '0 6 * * 1-5'   # 6am Mon–Fri UTC
+  workflow_dispatch:          # manual trigger from GitHub Actions UI
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full discovery pipeline
+        env:
+          GEMINI_API_KEY:            ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL:              ${{ secrets.GEMINI_MODEL }}
+          COMPANIES_HOUSE_API_KEY:   ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          DISCOVERY_MAX_EVENTS:      "12"
+          DISCOVERY_MAX_COMPANIES_PER_TERM: "20"
+        run: python scripts/run_pipeline.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "FX Discovery Bot"
+          git config user.email "bot@universalpartners.com"
+          git add data/ public/data/
+          git diff --staged --quiet || git commit -m "data: auto-update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
