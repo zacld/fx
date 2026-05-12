@@ -12,15 +12,14 @@
  *   3. recomputes exposure_confidence, signal_count, and lead_type / awareness_level
  *      / saving_opportunity (port of rescore.py classify_lead).
  * Writes updated leads back to the DB, exports a {id: lead} JSON map to --out
- * (default public/data/leads.json, so the dashboard keeps working), and records a
- * `runs` row.
+ * (default data/leads.json — the canonical file the dashboard reads), and records
+ * a `runs` row. The `dedup` stage runs after this and rewrites the same file.
  *
- * NOT yet ported here (later stages): CN/domain dedup + multi-event boost (→ a
- * `dedup` stage), contact-route recompute (→ `enrich-contacts`). So this stage ≈
- * rescore.py minus those passes. It does NOT touch data/leads.json (the v1 pipeline
- * still owns that during the transition).
+ * Companion passes live in other stages: CN/domain dedup + multi-event boost
+ * (`dedup`), contact-route recompute (`enrich-contacts`). score + dedup together
+ * = the bit-for-bit equivalent of scripts/rescore.py's rescore() + dedup passes.
  *
- * CLI:  tsx src/stages/score.ts [--db data/fx.db] [--out public/data/leads.json] [--runs data/runs]
+ * CLI:  tsx src/stages/score.ts [--db data/fx.db] [--out data/leads.json] [--runs data/runs]
  */
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -28,7 +27,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   scoreLead, exposureConfidence, isLargeOrg, bestContactRoute, ensureContactFields,
-  WEAK_ORIGIN_TOKENS, LeadSchema, type Lead,
+  WEAK_ORIGIN_TOKENS, LeadSchema, repoRoot, type Lead,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
@@ -101,9 +100,9 @@ export interface ScoreStageResult {
 }
 
 export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
-  const root = process.cwd();
+  const root = repoRoot();
   const dbPath = opts.dbPath ?? resolve(root, "data/fx.db");
-  const outPath = opts.outPath ?? resolve(root, "public/data/leads.json");
+  const outPath = opts.outPath ?? resolve(root, "data/leads.json");
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const persist = opts.persist ?? true;
 

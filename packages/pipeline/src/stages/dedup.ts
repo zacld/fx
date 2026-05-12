@@ -16,13 +16,13 @@
  * Writes survivors back to the DB, deletes the dropped ones, re-exports the
  * {id: lead} JSON map to --out, records a `runs` row.
  *
- * CLI:  tsx src/stages/dedup.ts [--db data/fx.db] [--out public/data/leads.json] [--runs data/runs]
+ * CLI:  tsx src/stages/dedup.ts [--db data/fx.db] [--out data/leads.json] [--runs data/runs]
  */
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { LeadSchema, clearContactFields, bestContactRoute, type Lead } from "@fx/core";
+import { LeadSchema, clearContactFields, bestContactRoute, repoRoot, type Lead } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 
@@ -116,9 +116,9 @@ export function dedupLeads(leads: Record<string, Lead>): Omit<DedupResult, "runI
 export interface DedupStageOptions { dbPath?: string; outPath?: string; runsDir?: string; persist?: boolean; }
 
 export function runDedupStage(opts: DedupStageOptions = {}): DedupResult {
-  const root = process.cwd();
+  const root = repoRoot();
   const dbPath = opts.dbPath ?? resolve(root, "data/fx.db");
-  const outPath = opts.outPath ?? resolve(root, "public/data/leads.json");
+  const outPath = opts.outPath ?? resolve(root, "data/leads.json");
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const persist = opts.persist ?? true;
 

@@ -8,14 +8,15 @@
  *   import { importJson } from "@fx/core/db";   // (after exports wiring)
  *   const stats = importJson({ dbPath: "data/fx.db" });
  *
- * CLI:  tsx src/db/import-json.ts            (run from packages/core)
- *       tsx src/db/import-json.ts --db ../../data/fx.db --events ../../data/events.json --leads ../../data/leads.json
+ * CLI:  tsx src/db/import-json.ts            (resolves data/… from the repo root)
+ *       tsx src/db/import-json.ts --db data/fx.db --events data/events.json --leads data/leads.json
  */
 import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { EventSchema, LeadSchema } from "../schema.js";
+import { repoRoot } from "../paths.js";
 import { getDb, schema } from "./index.js";
 
 export interface ImportResult {
@@ -41,7 +42,7 @@ function readJsonRecord(path: string): Record<string, unknown> {
 }
 
 export function importJson(opts: ImportOptions = {}): ImportResult {
-  const root = process.cwd();
+  const root = repoRoot();
   const dbPath = opts.dbPath ?? resolve(root, "data/fx.db");
   const eventsPath = opts.eventsPath ?? resolve(root, "data/events.json");
   const leadsPath = opts.leadsPath ?? resolve(root, "data/leads.json");

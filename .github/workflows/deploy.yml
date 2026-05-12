@@ -33,17 +33,17 @@ jobs:
           node-version: "20"
           cache: npm
 
-      - name: Install npm deps
-        run: npm install
+      - name: Install workspace deps
+        run: npm ci
 
-      - name: Build dashboard
-        run: npm run build
+      - name: Build dashboard (apps/web)
+        run: npm run build -w @fx/web
 
-      - name: Copy data files into build
+      - name: Copy live data snapshot into the build
         run: |
-          mkdir -p dist/data
-          cp data/events.json dist/data/events.json
-          cp data/leads.json  dist/data/leads.json
+          mkdir -p apps/web/dist/data
+          cp data/events.json apps/web/dist/data/events.json
+          cp data/leads.json  apps/web/dist/data/leads.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -51,7 +51,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: apps/web/dist
 
       - name: Deploy to GitHub Pages
         id: deployment

@@ -10,8 +10,8 @@
  *     outbound company links (gated); fetch + validate each candidate website
  *     (p-limit concurrency); Companies-House validate; build a `leads` row + a
  *     `lead_evidence` row (provisional score — the `score` stage re-scores).
- * Then records a `runs` row. Does NOT export public/data/leads.json (the `score`
- * stage does, after re-scoring) and does NOT touch data/leads.json (v1 owns it).
+ * Then records a `runs` row. Writes only to the DB — the `score` and `dedup`
+ * stages re-score the new leads and export data/leads.json afterwards.
  *
  * Live HTTP — not a broad crawl by default: capped via WEB_MAX_EVENTS /
  * WEB_MAX_SEGMENTS_PER_EVENT / WEB_MAX_MICRO_CATEGORIES_PER_SEGMENT /
@@ -25,7 +25,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import pLimit from "p-limit";
 
-import { LeadSchema, scoreLead, type Lead, type Segment } from "@fx/core";
+import { LeadSchema, scoreLead, repoRoot, type Lead, type Segment } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 import { ddgSearch, bingSearch } from "../sources/search.js";
@@ -108,7 +108,7 @@ function buildLead(args: {
 }
 
 export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<DiscoverResult> {
-  const root = process.cwd();
+  const root = repoRoot();
   const dbPath = opts.dbPath ?? resolve(root, "data/fx.db");
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const enabled = opts.enabled ?? flag(process.env.WEB_DISCOVERY_ENABLED, true);

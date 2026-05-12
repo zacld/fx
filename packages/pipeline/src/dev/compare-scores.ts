@@ -19,11 +19,11 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { LeadSchema, type Lead } from "@fx/core";
+import { LeadSchema, repoRoot, type Lead } from "@fx/core";
 import { scoreAndClassify } from "../stages/score.js";
 
 function main() {
-  const root = process.cwd();
+  const root = repoRoot();
   const leadsPath = resolve(root, process.argv[2] ?? "data/leads.json");
   const eventsPath = resolve(root, process.argv[3] ?? "data/events.json");
 

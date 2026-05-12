@@ -12,6 +12,7 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { repoRoot } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 import { fetchHtml as defaultFetchHtml, type HtmlFetcher } from "../sources/fetch.js";
@@ -219,7 +220,7 @@ export interface AnalyseResult {
 const n = (v: string | undefined, d: number) => { const x = Number(v); return Number.isFinite(x) && x > 0 ? x : d; };
 
 export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<AnalyseResult> {
-  const root = process.cwd();
+  const root = repoRoot();
   const dbPath = opts.dbPath ?? resolve(root, "data/fx.db");
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const maxEvents = opts.maxEvents ?? n(process.env.DISCOVERY_MAX_EVENTS, 3);

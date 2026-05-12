@@ -11,7 +11,7 @@
  */
 import { resolve } from "node:path";
 import { Buffer } from "node:buffer";
-import { FileCache } from "@fx/core";
+import { FileCache, repoRoot } from "@fx/core";
 
 const CH_BASE = "https://api.company-information.service.gov.uk";
 
@@ -78,7 +78,7 @@ export class ChClient {
 
   constructor(o: ChClientOptions = {}) {
     this.apiKey = o.apiKey ?? process.env.COMPANIES_HOUSE_API_KEY ?? "";
-    this.cache = new FileCache(o.cachePath ?? resolve(process.cwd(), "data/cache/companies_house.json"));
+    this.cache = new FileCache(o.cachePath ?? resolve(repoRoot(), "data/cache/companies_house.json"));
     this.maxCalls = o.maxCalls ?? Number(process.env.MAX_COMPANIES_HOUSE_CALLS ?? "50");
     this.timeoutMs = o.timeoutMs ?? Number(process.env.CH_READ_TIMEOUT_MS ?? "8000");
     this.slowMs = o.slowMs ?? Number(process.env.CH_SLOW_THRESHOLD_MS ?? "5000");

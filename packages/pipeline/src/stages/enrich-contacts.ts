@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 import pLimit from "p-limit";
 
 import {
-  extractContactInfo, bestContactRoute, LeadSchema, FileCache,
+  extractContactInfo, bestContactRoute, LeadSchema, FileCache, repoRoot,
   type Lead, type ContactInfo,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
@@ -53,9 +53,9 @@ function applyContactInfo(l: Lead, info: Partial<ContactInfo>): void {
 }
 
 export async function runEnrichContactsStage(opts: EnrichContactsOptions = {}): Promise<EnrichContactsResult> {
-  const root = process.cwd();
+  const root = repoRoot();
   const dbPath = opts.dbPath ?? resolve(root, "data/fx.db");
-  const outPath = opts.outPath ?? resolve(root, "public/data/leads.json");
+  const outPath = opts.outPath ?? resolve(root, "data/leads.json");
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const cachePath = opts.cachePath ?? resolve(root, "data/cache/website_html.json");
   const concurrency = opts.concurrency ?? 6;
