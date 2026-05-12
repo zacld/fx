@@ -24,10 +24,14 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 from website_finder import find_website_guess, HEADERS
+import contacts as _contacts
+from urllib.parse import urlparse
 
 DATA_DIR   = Path(__file__).parent.parent / "data"
 LEADS_FILE = DATA_DIR / "leads.json"
 
+# NOTE: bare nationality adjectives ("italian", "french", …) are NOT FX evidence —
+# they live in SECONDARY_SIGNALS. Matches discover_web.py / discover.py.
 FX_PAYMENT_SIGNALS = [
     "we import","we source","sourced from","imported from","direct from",
     "importing from","we buy from","purchased from","procured from",
@@ -36,7 +40,6 @@ FX_PAYMENT_SIGNALS = [
     "from italy","from france","from spain","from germany","from china","from usa",
     "from america","from japan","from india","from norway","from australia",
     "from new zealand","from south africa","from denmark","from netherlands",
-    "italian","french","spanish","german","chinese","american","japanese",
     "foreign currency","currency risk","exchange rate","fx exposure",
     "international payments","overseas payments","currency hedging","fx risk",
     "importer","import company","import business","exclusive importer",
@@ -50,17 +53,24 @@ SECONDARY_SIGNALS = [
     "wholesale","wholesaler","logistics","freight","shipping","customs",
     "europe","european","asia","asian","north america","south america",
     "supply chain","supplier","sourcing","procurement",
+    # Country adjectives — demoted from FX signals (see note above)
+    "french","german","italian","american","chinese","japanese","spanish",
+    "norwegian","australian","danish","dutch","indian",
 ]
 
 
+_EMPTY = {"fx_signals":[],"secondary_signals":[],"snippet":"","pays_fx":False,
+          "contact_phone":None,"contact_phones":[],"contact_email":None,
+          "contact_emails_found":[],"contact_page":None,"about_page":None,"team_page":None}
+
 def scrape_fx_signals(url: str) -> dict:
-    """Minimal scrape — returns fx_signals, secondary_signals, snippet, pays_fx."""
-    empty = {"fx_signals":[],"secondary_signals":[],"snippet":"","pays_fx":False}
+    """Minimal scrape — fx_signals, secondary_signals, snippet, pays_fx + contact routes."""
     if not url:
-        return empty
+        return dict(_EMPTY)
     try:
         resp = requests.get(url, headers=HEADERS, timeout=(5, 10), allow_redirects=True)
         resp.raise_for_status()
+        contact = _contacts.extract_contact_info(resp.text, resp.url, urlparse(url).netloc)
         soup = BeautifulSoup(resp.text, "html.parser")
         for tag in soup(["script","style","nav","footer","header","meta"]):
             tag.decompose()
@@ -71,17 +81,27 @@ def scrape_fx_signals(url: str) -> dict:
         sec_sigs = sorted({s for s in SECONDARY_SIGNALS   if s in tlow})
         pays_fx  = len(fx_sigs) >= 1 or len(sec_sigs) >= 3
         return {"fx_signals": fx_sigs, "secondary_signals": sec_sigs,
-                "snippet": snippet, "pays_fx": pays_fx}
+                "snippet": snippet, "pays_fx": pays_fx,
+                **{k: contact.get(k) for k in _contacts.CONTACT_FIELDS}}
     except Exception as exc:
         log.debug("Scrape failed %s: %s", url, exc)
-        return empty
+        return dict(_EMPTY)
 
 
 def should_try(lead: dict) -> bool:
-    """Try if no website, or previous attempt gave low confidence."""
+    """
+    Try only if the lead has no usable website yet. Don't overwrite a website found
+    by web search (DDG/Bing) or source-page mining — a domain guess would often be
+    worse than what's already there.
+    """
+    src = (lead.get("website_source") or "").lower()
+    if lead.get("website") and src in ("ddg_search", "bing_search", "source_page", "companies_house"):
+        return False
+    if lead.get("company_source") == "web_search" and lead.get("website"):
+        return False
     if not lead.get("website"):
         return True
-    if lead.get("website_confidence") == "low":
+    if lead.get("website_confidence") == "low" and src in ("domain_guess", "", "unknown"):
         return True
     return False
 
@@ -115,6 +135,8 @@ def main():
             lead["secondary_signals"]  = web["secondary_signals"]
             lead["pays_fx_confirmed"]  = web["pays_fx"]
             lead["signal_count"]       = len(web["fx_signals"]) + len(web["secondary_signals"])
+            for k in _contacts.CONTACT_FIELDS:
+                lead[k] = web.get(k)
             # Ensure company_source is set
             if not lead.get("company_source"):
                 lead["company_source"] = "companies_house"

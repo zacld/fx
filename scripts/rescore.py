@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
+import contacts as _contacts
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)s  %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
 
@@ -87,6 +89,17 @@ _B2B_TRADE_SIGNALS = {
     "supply chain", "agent", "agents", "reseller",
     "stockist", "supplier", "freight", "logistics",
     "cargo", "shipper", "forwarder",
+}
+
+# Bare nationality / region adjectives are NOT FX evidence on their own — they
+# fire too broadly (a wine shop saying "Italian wine"). On legacy leads that
+# stored them in fx_payment_signals, main() moves them into secondary_signals.
+WEAK_ORIGIN_TOKENS = {
+    "italian","french","spanish","german","chinese","american","japanese","portuguese",
+    "greek","dutch","belgian","swedish","danish","norwegian","finnish","swiss","austrian",
+    "polish","turkish","indian","thai","vietnamese","korean","mexican","brazilian",
+    "australian","scandinavian","mediterranean","european","continental","oriental","asian",
+    "iberian","nordic","african",
 }
 
 # Company name words that signal FX-paying business
@@ -580,6 +593,7 @@ def main():
     log.info("Rescoring %d leads…", len(leads))
 
     hot = warm = queue = skip = 0
+    reclassified = 0
     for k, lead in leads.items():
         # Backfill id from dict key (old web-discovered leads may be missing it)
         if not lead.get("id"):
@@ -587,6 +601,16 @@ def main():
         # Backfill website_domain from website URL (some older leads are missing it)
         if lead.get("website") and not lead.get("website_domain"):
             lead["website_domain"] = extract_domain(lead["website"]) or ""
+        # Reclassify legacy leads: bare nationality adjectives are origin hints, not
+        # FX evidence — move them out of fx_payment_signals into secondary_signals.
+        # (Idempotent: fresh leads no longer contain these in fx_payment_signals.)
+        raw_fx = lead.get("fx_payment_signals") or []
+        weak   = [s for s in raw_fx if str(s).lower() in WEAK_ORIGIN_TOKENS]
+        if weak:
+            lead["fx_payment_signals"] = [s for s in raw_fx if str(s).lower() not in WEAK_ORIGIN_TOKENS]
+            lead["secondary_signals"]  = list(dict.fromkeys(list(lead.get("secondary_signals") or []) + weak))
+            lead["fx_origin_hints"]    = list(dict.fromkeys(list(lead.get("fx_origin_hints") or []) + weak))
+            reclassified += 1
         old_score    = lead.get("score", 0)
         old_priority = lead.get("priority", "QUEUE")
         new_score, new_priority, reasons = rescore(lead, urgency_map)
@@ -600,6 +624,10 @@ def main():
         lead["guessed_emails"]    = guess_emails(
             lead.get("director_name",""), lead.get("website","")
         )
+        # Ensure contact fields present on legacy leads, then suggest a contact route
+        for _cf in _contacts.CONTACT_FIELDS:
+            lead.setdefault(_cf, [] if _cf in ("contact_phones", "contact_emails_found") else None)
+        lead["best_contact_route"] = _contacts.best_contact_route(lead)
         # Ensure company_source is set for all leads
         if not lead.get("company_source"):
             lead["company_source"] = "companies_house"
@@ -707,6 +735,9 @@ def main():
             lead["website"]            = None
             lead["website_confidence"] = None
             lead["website_source"]     = "collision_stripped"
+            for _cf in _contacts.CONTACT_FIELDS:          # contact info came from the wrong site
+                lead[_cf] = [] if _cf in ("contact_phones", "contact_emails_found") else None
+            lead["best_contact_route"] = _contacts.best_contact_route(lead)
             # Re-apply Gate A — no website → QUEUE cap
             s = lead.get("score", 0)
             if s > 49:
@@ -731,6 +762,8 @@ def main():
     public.mkdir(parents=True, exist_ok=True)
     (public / "leads.json").write_text(LEADS_FILE.read_text())
 
+    if reclassified:
+        log.info("Reclassified %d leads — moved bare nationality adjectives out of fx_payment_signals", reclassified)
     log.info("Done — HOT: %d  WARM: %d  QUEUE: %d  SKIP/removed: %d  Total: %d",
              hot, warm, queue, skip, len(leads))
 
