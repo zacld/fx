@@ -7,12 +7,14 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "analyse": "tsx src/stages/analyse.ts",
     "discover": "tsx src/stages/discover.ts",
     "score": "tsx src/stages/score.ts",
     "dedup": "tsx src/stages/dedup.ts",
     "rescore": "tsx src/stages/score.ts && tsx src/stages/dedup.ts",
     "enrich-contacts": "tsx src/stages/enrich-contacts.ts",
-    "compare-scores": "tsx src/dev/compare-scores.ts"
+    "compare-scores": "tsx src/dev/compare-scores.ts",
+    "all": "tsx src/stages/analyse.ts && tsx src/stages/discover.ts && tsx src/stages/enrich-contacts.ts && tsx src/stages/score.ts && tsx src/stages/dedup.ts"
   },
   "dependencies": {
     "@fx/core": "file:../core",
