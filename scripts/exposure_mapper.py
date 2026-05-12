@@ -83,16 +83,16 @@ UK businesses that pay EUR or USD supplier invoices:
   12. Chemicals and specialty ingredients distributors (REACH-registered European)
 
   ALWAYS include for GBP/USD weakness:
-  01. US technology and software licence payers (SaaS, enterprise software)
-  02. Petroleum and fuel traders (USD-priced commodity)
-  03. Electronics and semiconductor importers (USD-denominated supply chain)
-  04. Food raw material importers — grain, soy, sugar (USD commodity pricing)
-  05. Pharmaceutical and medical device importers (USD sourcing from US/Asia)
-  06. Scotch whisky and premium spirits exporters (USD export revenue)
-  07. UK freight and shipping brokers paying USD vessel fees
-  08. Aerospace and engineering parts importers (USD supply chain)
-  09. Financial services firms with USD settlements
-  10. UK exporters to USD markets (reduced GBP-equivalent revenue)
+  01. Petroleum and fuel traders (USD-priced commodity)
+  02. Electronics and semiconductor importers (USD-denominated supply chain)
+  03. Food raw material importers — grain, soy, sugar (USD commodity pricing)
+  04. Pharmaceutical and medical device importers (USD sourcing from US/Asia)
+  05. Scotch whisky and premium spirits exporters (USD export revenue)
+  06. UK freight and shipping brokers paying USD vessel fees
+  07. Aerospace and engineering parts importers (USD supply chain)
+  08. UK exporters to USD markets (reduced GBP-equivalent revenue)
+  09. US technology and software licence payers (SaaS, enterprise software) — LOWER PRIORITY:
+      include only if no higher-priority niches remain; set website_evidence_likelihood ≤ 30
 
 ═══════════════════════════════════════
 BUSINESS MODELS TO CONSIDER
@@ -179,11 +179,6 @@ Every segment must include sme_accessibility_score (0-100):
           Examples: UK commercial airlines (~10 operators), global shipping lines (non-UK multinationals)
           Avoid making these the ONLY categories — always pair with Level 2 segments.
 
-FINAL SCRAPE SCORE:
-  final_scrape_score = round(0.7 × category_priority_score + 0.3 × sme_accessibility_score)
-  This is what Brain 3 will actually use to select categories.
-  Compute and include it for every segment.
-
 SME accessibility rewards:
   - Many UK SMEs likely exist in this niche
   - Decision-makers (FD/MD/CFO) are reachable by outbound
@@ -198,6 +193,59 @@ SME accessibility penalises:
   - Sectors where the commercial buyer is not reachable by phone/email
 
 ═══════════════════════════════════════
+WEBSITE EVIDENCE LIKELIHOOD — REQUIRED FOR EVERY SEGMENT
+═══════════════════════════════════════
+Every segment must include website_evidence_likelihood (0-100).
+
+This scores how likely it is that a company's public website will show clear, findable
+evidence of FX exposure — import/export signals, overseas suppliers, international trade.
+Brain 3 can only validate a lead if the website shows this evidence.
+Low-evidence niches waste discovery cycles and produce unverifiable leads.
+
+  80-100: Company websites almost always show explicit FX/trade evidence.
+          Examples: wine importers (shows European vineyards, sourced from Italy),
+          food importers (shows imported ingredients, overseas producers), machinery
+          importers (shows European/US manufacturer partnerships), freight forwarders
+          (shows international shipping, global logistics), distributors (shows
+          exclusive European supply arrangements), wholesalers (shows trade terms,
+          international sourcing). Evidence is directly on homepage or products page.
+
+  60-79:  Websites usually show some trade evidence, but less explicit.
+          Examples: automotive parts distributors (shows OEM brands but may not say "imported"),
+          packaging manufacturers (shows materials but FX link is indirect),
+          e-commerce brands (shows product origins sometimes), construction materials
+          importers (shows stone/tile/timber ranges but sourcing not always stated).
+
+  40-59:  Websites exist but FX evidence is hard to find or implied only.
+          Examples: staffing/recruitment agencies paying overseas contractors,
+          specialist engineering firms with mixed supply chains,
+          professional services with some international billing.
+          Website validates the business exists, but FX exposure requires inference.
+
+  0-39:   FX exposure is real but company websites rarely show evidence.
+          Examples: SaaS/software licence payers (pay USD/EUR but website shows product only),
+          marketing agencies with international clients (FX exposure internal, not visible),
+          financial services firms with FX settlements (regulated, no website disclosure),
+          insurance firms, generic hospitality (hotel costs internal, not on website),
+          consulting firms (billing currency not on website).
+          These are real FX targets but Brain 3 cannot validate them from website scraping.
+
+FINAL SCRAPE SCORE:
+  final_scrape_score = round(0.6 × category_priority_score + 0.25 × sme_accessibility_score + 0.15 × website_evidence_likelihood)
+  This is what Brain 3 will actually use to select categories.
+  Compute and include it for every segment.
+
+  Example — SaaS licence payers:
+    category_priority_score=72  sme_accessibility_score=65  website_evidence_likelihood=25
+    final_scrape_score = round(0.6×72 + 0.25×65 + 0.15×25) = round(43.2+16.25+3.75) = 63
+    → Below threshold. Real FX exposure but Brain 3 cannot validate it from websites. Do not scrape.
+
+  Example — Wine importers:
+    category_priority_score=88  sme_accessibility_score=85  website_evidence_likelihood=92
+    final_scrape_score = round(0.6×88 + 0.25×85 + 0.15×92) = round(52.8+21.25+13.8) = 88
+    → High priority. Scrape first.
+
+═══════════════════════════════════════
 RANKING PRIORITY
 ═══════════════════════════════════════
 Rank segments by final_scrape_score (not just category_priority_score):
@@ -206,6 +254,53 @@ Rank segments by final_scrape_score (not just category_priority_score):
 3. Margin sensitivity (thin-margin importers/distributors hit hardest)
 4. Payment timing risk (upcoming invoice due dates create urgency)
 5. SME accessibility (are there many UK SMEs in this niche that Zac can actually call?)
+6. Website evidence likelihood (can Brain 3 actually validate FX exposure from company websites?)
+
+═══════════════════════════════════════
+SAAS, SOFTWARE AND PROFESSIONAL SERVICES — DEFAULT LOW PRIORITY
+═══════════════════════════════════════
+These niches have real FX exposure but low website_evidence_likelihood.
+Brain 3 cannot validate FX exposure from public websites for these categories.
+Apply these rules for every event unless the specific trigger conditions below are met.
+
+DEFAULT SCORING for SaaS / software / professional services / consulting / marketing agencies:
+  website_evidence_likelihood: 20–30 (rarely shows FX evidence on website)
+  category_priority_score: cap at 65 for generic FX events
+  final_scrape_score: typically 50–60 — below the scrape threshold
+  → Do NOT include these as default priority segments for generic currency, commodity,
+    tariff, or shipping events.
+
+WHY: SaaS company websites show products and pricing, not supplier currency. Cloud/software
+costs may be billed locally through resellers or in GBP. Customer revenue currency is not
+disclosed on public pages. Brain 3 cannot confirm FX exposure during website scraping —
+leads from these niches will fail validation and produce unverifiable results.
+
+EXCEPTION — raise website_evidence_likelihood to 50–65 ONLY if the event is SPECIFICALLY about:
+  1. USD cloud / software cost inflation (e.g. AWS, Azure, Microsoft pricing in USD rising due to GBP/USD weakness)
+  2. Cross-border SaaS billing exposure (e.g. UK SaaS companies billing EU customers in EUR)
+  3. International subscription revenue exposure (e.g. GBP/USD weakness reduces USD revenue in GBP terms)
+  4. Public USD/EUR pricing by software vendors (e.g. UK firms renewing annual licences priced in USD)
+  5. Tariff or sanction events directly affecting US software exports to UK
+
+Even under these exceptions, provable importers/distributors/manufacturers should still rank
+above software/SaaS in final_scrape_score.
+
+NICHES WHERE THIS RULE APPLIES:
+  - SaaS companies and software vendors
+  - Technology licence payers (any cloud, software, platform spend)
+  - Marketing agencies and advertising agencies
+  - Management consultancies and professional services firms
+  - Staffing and recruitment agencies
+  - Financial advisory and wealth management firms
+  - Insurance brokers and underwriters
+  - Legal services and law firms
+  - HR services and outsourced payroll providers
+
+PREFERRED ALTERNATIVES for the same event:
+  Instead of: "UK tech companies paying USD SaaS costs"
+  Prefer:      "Electronics importers with USD supply chains"
+               "US machinery and parts distributors"
+               "Pharmaceutical importers from US suppliers"
 
 ═══════════════════════════════════════
 STRICT AVOID RULES — DO NOT OUTPUT THESE
@@ -237,7 +332,8 @@ Return ONLY valid JSON — no markdown, no code fences, no commentary.
       "direct_or_second_order": "second_order",
       "category_priority_score": 88,
       "sme_accessibility_score": 85,
-      "final_scrape_score": 87,
+      "website_evidence_likelihood": 92,
+      "final_scrape_score": 88,
       "why_sme_accessible": "Thousands of UK wine importers registered at Companies House, most are SMEs with reachable FDs or MDs, company websites clearly show import activity.",
       "business_model": "UK importers buying wine and spirits from French, Italian, Spanish producers, selling to UK on-trade and off-trade in GBP. Supplier invoices in EUR, all UK revenue in GBP. Margins typically 15-25%.",
       "exposure_level": "Very High",
@@ -285,7 +381,7 @@ Return ONLY valid JSON — no markdown, no code fences, no commentary.
 }
 
 ═══════════════════════════════════════
-REQUIRED FIELDS — EVERY SEGMENT MUST INCLUDE ALL FOUR
+REQUIRED FIELDS — EVERY SEGMENT MUST INCLUDE ALL FIVE
 ═══════════════════════════════════════
 These fields are REQUIRED on every target_segment. A response missing any of them is invalid.
 
@@ -301,21 +397,37 @@ These fields are REQUIRED on every target_segment. A response missing any of the
    60–79: Mixed — some SMEs among larger players
    80–100: Many UK SMEs, reachable FDs/MDs, findable websites
 
-3. "final_scrape_score": integer 0–100
-   MUST equal: round(0.7 × category_priority_score + 0.3 × sme_accessibility_score)
-   This is the score Brain 3 uses to rank and filter categories.
-   A direct airline segment with category_priority_score=90 but sme_accessibility_score=25
-   gets final_scrape_score = round(0.7×90 + 0.3×25) = round(63+7.5) = 71
-   A food importer segment with category_priority_score=88 and sme_accessibility_score=85
-   gets final_scrape_score = round(0.7×88 + 0.3×85) = round(61.6+25.5) = 87
+3. "website_evidence_likelihood": integer 0–100
+   How likely is it that company websites in this niche will show explicit FX/trade evidence?
+   80–100: Importers, distributors, wholesalers, manufacturers, freight forwarders, wine/food/spirits importers
+           — websites clearly show international sourcing, supplier names, import signals
+   60–79:  Some websites show evidence, others do not — automotive, packaging, e-commerce brands
+   40–59:  Evidence present but indirect — staffing with overseas contractors, specialist engineering
+   0–39:   FX exposure is real but not visible on public websites — SaaS, marketing agencies,
+           professional services, financial services, insurance, generic hospitality
 
-4. "why_sme_accessible": string (1 sentence)
+4. "final_scrape_score": integer 0–100
+   MUST equal: round(0.6 × category_priority_score + 0.25 × sme_accessibility_score + 0.15 × website_evidence_likelihood)
+   This is the score Brain 3 uses to rank and filter categories.
+
+   Example — airline (direct, PLC-heavy, no website evidence of FX):
+     cps=90, sme=25, wel=30 → final_scrape_score = round(0.6×90 + 0.25×25 + 0.15×30) = round(54+6.25+4.5) = 65
+
+   Example — SaaS/tech licence payers (real FX cost but no website evidence):
+     cps=75, sme=65, wel=22 → final_scrape_score = round(0.6×75 + 0.25×65 + 0.15×22) = round(45+16.25+3.3) = 65
+
+   Example — wine importers (direct FX, SME-rich, high website evidence):
+     cps=88, sme=85, wel=92 → final_scrape_score = round(0.6×88 + 0.25×85 + 0.15×92) = round(52.8+21.25+13.8) = 88
+
+5. "why_sme_accessible": string (1 sentence)
    Why UK SMEs exist in this niche and why decision-makers are reachable by outbound sales.
 
 IMPORTANT: Do not omit these fields to save space. They are the primary mechanism by which
-second-order SME-rich categories outrank PLC-heavy direct categories in discovery.
-If you include airlines (sme_accessibility_score ~25) and food importers (sme_accessibility_score ~85),
-the food importers will correctly outrank the airlines in final_scrape_score.
+second-order SME-rich categories with strong website evidence outrank PLC-heavy or
+website-dark categories in discovery.
+If you include SaaS licence payers (website_evidence_likelihood ~20) and food importers
+(website_evidence_likelihood ~88), the food importers will correctly outrank the SaaS
+payers in final_scrape_score — even if both have similar category_priority_scores.
 
 ═══════════════════════════════════════
 RULES
@@ -349,12 +461,23 @@ RULES
       40-59:  Limited population or specialist/hard-to-reach
       0-39:   Oligopolistic, PLC-dominated, or fewer than 20 UK operators
 
-    final_scrape_score (0-100): round(0.7 × category_priority_score + 0.3 × sme_accessibility_score)
+    website_evidence_likelihood (0-100): how likely is it that company websites show FX evidence?
+      80-100: Importers, distributors, wholesalers, manufacturers, food/wine/spirits importers,
+              freight forwarders — websites clearly show international sourcing and import signals
+      60-79:  Some websites show evidence — automotive distributors, e-commerce brands, packaging
+      40-59:  Evidence indirect or requires inference — specialist engineering, mixed supply chains
+      0-39:   FX exposure real but invisible on public websites — SaaS, marketing agencies,
+              professional services, financial services, insurance, hospitality
+
+    final_scrape_score (0-100): round(0.6 × category_priority_score + 0.25 × sme_accessibility_score + 0.15 × website_evidence_likelihood)
       This is what Brain 3 uses to select which categories to scrape.
       Segments with final_scrape_score < 65 will not be scraped.
+      The website_evidence_likelihood component ensures that niches where Brain 3 cannot
+      validate FX exposure from public websites are ranked lower — even if commercially exposed.
 
 - Each segment MUST include:
     direct_or_second_order: "direct" | "second_order" | "both"
+    website_evidence_likelihood: integer 0-100 (see scoring above)
     why_sme_accessible: 1 sentence explaining why many reachable UK SMEs exist (or why they don't)
 
 Market event to analyse:
@@ -365,7 +488,8 @@ Summary: {summary}
 
 # ── Rule-based Brain 2 field inference ───────────────────────────────────────
 # Used when Gemini omits required segment fields (direct_or_second_order,
-# sme_accessibility_score, final_scrape_score, why_sme_accessible).
+# sme_accessibility_score, website_evidence_likelihood, final_scrape_score,
+# why_sme_accessible).
 # Applied defensively — does not override values Gemini DID provide.
 
 _DIRECT_TERMS = {
@@ -422,6 +546,49 @@ _HIGH_SME_TERMS = {
     "wine", "spirits",
 }
 
+# Website evidence likelihood — how likely public websites show FX/import signals
+_HIGH_WEB_EVIDENCE_TERMS = {
+    "importer", "importers", "importing",
+    "exporter", "exporters", "exporting",
+    "distributor", "distributors", "distribution",
+    "wholesaler", "wholesale",
+    "manufacturer", "manufacturers", "manufacturing",
+    "wine importer", "wine", "spirits", "food importer",
+    "coffee importer", "coffee roaster", "seafood", "fish importer",
+    "machinery importer", "component distributor", "machinery",
+    "freight", "freight forwarder", "logistics broker",
+    "trade supplier", "trade customer",
+    "chemical importer", "pharmaceutical importer", "medical device",
+    "construction importer", "stone importer", "tile importer", "timber importer",
+    "clothing wholesaler", "apparel", "textile",
+}
+
+_LOW_WEB_EVIDENCE_TERMS = {
+    # SaaS / software
+    "saas", "software licence", "software license", "software vendor",
+    "technology licence", "technology license", "cloud platform", "cloud services",
+    "software subscription", "software payer", "tech company", "tech companies",
+    "technology company", "technology companies",
+    # Marketing / creative / agency
+    "marketing agency", "marketing agencies", "marketing services",
+    "advertising agency", "creative agency", "digital agency",
+    "media agency", "pr agency", "public relations",
+    # Professional services
+    "professional services", "management consultancy", "management consulting",
+    "consulting firm", "consulting firms", "consultancy",
+    "business services", "outsourced services",
+    # Financial / legal
+    "financial services", "financial advisory", "wealth management",
+    "investment management", "asset management",
+    "insurance", "insurer", "insurance broker", "underwriting",
+    "law firm", "legal services", "solicitor", "barrister",
+    # HR / staffing
+    "staffing", "recruitment agency", "recruitment agencies",
+    "hr services", "payroll", "outsourced hr",
+    # Generic hospitality / tourism (where FX is internal)
+    "hotel group", "hotel chain", "accommodation provider",
+}
+
 
 def _infer_segment_fields(seg: dict) -> dict:
     """
@@ -462,15 +629,31 @@ def _infer_segment_fields(seg: dict) -> dict:
         seg["sme_accessibility_score"] = score
         inferred.append(f"sme_accessibility_score={score}")
 
-    # 3. final_scrape_score
+    # 3. website_evidence_likelihood
+    if seg.get("website_evidence_likelihood") is None:
+        is_high_ev = any(t in name for t in _HIGH_WEB_EVIDENCE_TERMS)
+        is_low_ev  = any(t in name for t in _LOW_WEB_EVIDENCE_TERMS)
+        if is_high_ev and not is_low_ev:
+            wel = 82
+        elif is_low_ev and not is_high_ev:
+            wel = 25
+        elif is_high_ev and is_low_ev:
+            wel = 55
+        else:
+            wel = 60   # neutral default
+        seg["website_evidence_likelihood"] = wel
+        inferred.append(f"website_evidence_likelihood={wel}")
+
+    # 4. final_scrape_score (now includes website_evidence_likelihood)
     if seg.get("final_scrape_score") is None:
         cps = seg.get("category_priority_score") or 0
         sme = seg.get("sme_accessibility_score") or 60
-        fss = round(0.7 * cps + 0.3 * sme)
+        wel = seg.get("website_evidence_likelihood") or 60
+        fss = round(0.6 * cps + 0.25 * sme + 0.15 * wel)
         seg["final_scrape_score"] = fss
         inferred.append(f"final_scrape_score={fss}")
 
-    # 4. why_sme_accessible
+    # 5. why_sme_accessible
     if not seg.get("why_sme_accessible"):
         sme = seg.get("sme_accessibility_score", 60)
         d2  = seg.get("direct_or_second_order", "direct")
@@ -498,6 +681,7 @@ def _validate_and_infer_segments(segments: list, ai_provider: str) -> list:
     required = [
         "direct_or_second_order",
         "sme_accessibility_score",
+        "website_evidence_likelihood",
         "final_scrape_score",
         "why_sme_accessible",
     ]
@@ -543,8 +727,9 @@ def _validate_and_infer_segments(segments: list, ai_provider: str) -> list:
     for name, fss in scores:
         cps = next((s.get("category_priority_score",0) for s in segments if s.get("segment_name","")[:35] == name), 0)
         sme = next((s.get("sme_accessibility_score",0) for s in segments if s.get("segment_name","")[:35] == name), 0)
+        wel = next((s.get("website_evidence_likelihood",0) for s in segments if s.get("segment_name","")[:35] == name), 0)
         d2  = next((s.get("direct_or_second_order","?") for s in segments if s.get("segment_name","")[:35] == name), "?")
-        log.info("    [fss=%3d cps=%3d sme=%3d %-12s] %s", fss, cps, sme, d2, name)
+        log.info("    [fss=%3d cps=%3d sme=%3d wel=%3d %-12s] %s", fss, cps, sme, wel, d2, name)
 
     return segments
 

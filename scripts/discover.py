@@ -35,8 +35,13 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-8s  %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
 
-COMPANIES_HOUSE_API_KEY = os.environ["COMPANIES_HOUSE_API_KEY"]
-MAX_COMPANIES_PER_TERM  = int(os.getenv("DISCOVERY_MAX_COMPANIES_PER_TERM", "20"))
+COMPANIES_HOUSE_API_KEY   = os.environ["COMPANIES_HOUSE_API_KEY"]
+MAX_COMPANIES_PER_TERM    = int(os.getenv("DISCOVERY_MAX_COMPANIES_PER_TERM", "20"))
+DISCOVER_MAX_CH_SEARCHES  = int(os.getenv("DISCOVER_MAX_CH_SEARCHES", "12"))  # cap per run
+DISCOVER_MAX_RUNTIME_MINS = int(os.getenv("DISCOVER_MAX_RUNTIME_MINS",  "20")) # hard wall clock cap
+# Per-request timeout: (connect_s, read_s) — deliberately tight.
+# CH API can silently stall; retries with 15s read = minutes of hang.
+_CH_TIMEOUT = (3, 8)
 
 DATA_DIR    = Path(__file__).parent.parent / "data"
 EVENTS_FILE = DATA_DIR / "events.json"
@@ -100,32 +105,44 @@ def lead_id(cn, eid): return hashlib.sha256(f"{cn}:{eid}".encode()).hexdigest()[
 
 # ── COMPANIES HOUSE ──────────────────────────────────────────────────────
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=8))
+@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=2, max=6))
 def ch_search(query, n=10):
+    t0 = time.time()
     r = requests.get(
         "https://api.company-information.service.gov.uk/search/companies",
         params={"q":query,"items_per_page":n},
-        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=(5, 15)
+        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=_CH_TIMEOUT,
     )
+    elapsed = time.time() - t0
+    if elapsed > 5:
+        log.warning("  SLOW CH search (%.1fs): %r", elapsed, query[:40])
     r.raise_for_status()
     return r.json().get("items", [])
 
-@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=1, max=5))
+@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=1, max=4))
 def ch_profile(cn):
+    t0 = time.time()
     r = requests.get(
         f"https://api.company-information.service.gov.uk/company/{cn}",
-        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=(5, 15)
+        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=_CH_TIMEOUT,
     )
+    elapsed = time.time() - t0
+    if elapsed > 5:
+        log.warning("  SLOW CH profile (%.1fs): %s", elapsed, cn)
     if r.status_code == 404: return None
     r.raise_for_status()
     return r.json()
 
-@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=1, max=5))
+@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=1, max=4))
 def ch_officers(cn):
+    t0 = time.time()
     r = requests.get(
         f"https://api.company-information.service.gov.uk/company/{cn}/officers",
-        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=(5, 15)
+        auth=(COMPANIES_HOUSE_API_KEY,""), timeout=_CH_TIMEOUT,
     )
+    elapsed = time.time() - t0
+    if elapsed > 5:
+        log.warning("  SLOW CH officers (%.1fs): %s", elapsed, cn)
     if r.status_code == 404: return []
     r.raise_for_status()
     return [o for o in r.json().get("items",[]) if not o.get("resigned_on")]
@@ -423,10 +440,16 @@ def build_fx_reason(event, web, segment, sic_codes):
 
 # ── MAIN DISCOVERY ───────────────────────────────────────────────────────
 
-def process_event(event, leads):
+def process_event(event, leads, run_start: float, existing_company_numbers: set):
     """
     For each event, use the Exposure Mapper's target segments to generate
     high-intent Companies House search queries, then enrich and score companies.
+
+    Skips:
+    - Companies already discovered by discover_web.py (company_number in existing_company_numbers)
+    - Leads that already exist for this event (lid in leads)
+    - Inactive companies
+    Stops early if DISCOVER_MAX_RUNTIME_MINS wall-clock budget is exceeded.
     """
     target_segments = event.get("target_segments", [])
     if not target_segments:
@@ -445,9 +468,10 @@ def process_event(event, leads):
 
     seen  = set()
     saved = 0
+    searches_done = 0
 
     log.info("Event: %s (urgency=%d, %d segments, %d CH terms)",
-             event["headline"][:60], event["urgency_score"],
+             event["headline"][:60], event.get("urgency_score", 0),
              len(target_segments), len(ch_terms))
 
     # Map CH terms back to their segments for scoring context
@@ -459,10 +483,20 @@ def process_event(event, leads):
             for term in mc.get("companies_house_terms", []):
                 term_to_segment[term.lower()] = seg
 
-    for term in ch_terms[:12]:
+    for term in ch_terms[:DISCOVER_MAX_CH_SEARCHES]:
+        # ── Runtime guard ──────────────────────────────────────────────────
+        elapsed_mins = (time.time() - run_start) / 60
+        if elapsed_mins >= DISCOVER_MAX_RUNTIME_MINS:
+            log.warning("  ⏱ Runtime cap reached (%.1f min ≥ %d min) — stopping CH searches",
+                        elapsed_mins, DISCOVER_MAX_RUNTIME_MINS)
+            break
+
         try:
             results = ch_search(term, n=MAX_COMPANIES_PER_TERM)
-            log.info("  CH '%-28s' → %d results", term[:28], len(results))
+            searches_done += 1
+            log.info("  CH '%-28s' → %d results  [search %d/%d, %.1f min elapsed]",
+                     term[:28], len(results), searches_done, DISCOVER_MAX_CH_SEARCHES,
+                     elapsed_mins)
 
             # Find best matching segment for this term
             segment = term_to_segment.get(term.lower(), target_segments[0] if target_segments else None)
@@ -473,8 +507,19 @@ def process_event(event, leads):
                 seen.add(cn)
                 if (item.get("company_status","")).lower() not in ("active",""): continue
 
+                # ── Skip: already discovered by discover_web.py ──────────
+                if cn in existing_company_numbers:
+                    log.debug("    Skip %s (already have CH number from web discovery)", cn)
+                    continue
+
                 lid = lead_id(cn, event["id"])
                 if lid in leads: continue
+
+                # ── Per-company runtime guard ────────────────────────────
+                elapsed_mins = (time.time() - run_start) / 60
+                if elapsed_mins >= DISCOVER_MAX_RUNTIME_MINS:
+                    log.warning("  ⏱ Runtime cap reached mid-term — stopping")
+                    return saved
 
                 try:
                     time.sleep(0.3)
@@ -612,9 +657,23 @@ def process_event(event, leads):
     return saved
 
 def main():
+    run_start = time.time()
     log.info("=== FX Discovery — Exposure-Ranked Company Discovery ===")
+    log.info("Config: max_searches=%d  max_runtime=%d min  timeout=%s",
+             DISCOVER_MAX_CH_SEARCHES, DISCOVER_MAX_RUNTIME_MINS, _CH_TIMEOUT)
+
     events = load_json(EVENTS_FILE)
     leads  = load_json(LEADS_FILE)
+
+    # Build index of company numbers already in the leads file (from discover_web.py).
+    # We skip these in CH enrichment to avoid duplicate work.
+    existing_company_numbers: set = {
+        str(l.get("company_number"))
+        for l in leads.values()
+        if l.get("company_number")
+    }
+    log.info("Existing leads: %d  (%d with CH number — will skip)",
+             len(leads), len(existing_company_numbers))
 
     ready = sorted(
         [e for e in events.values()
@@ -625,7 +684,13 @@ def main():
 
     total = 0
     for event in ready[:5]:
-        total += process_event(event, leads)
+        # Per-event runtime guard
+        elapsed_mins = (time.time() - run_start) / 60
+        if elapsed_mins >= DISCOVER_MAX_RUNTIME_MINS:
+            log.warning("⏱ Global runtime cap reached (%.1f min) — stopping", elapsed_mins)
+            break
+
+        total += process_event(event, leads, run_start, existing_company_numbers)
         events[event["id"]]["status"] = "discovered"
 
     save_json(LEADS_FILE,  leads)
@@ -637,7 +702,8 @@ def main():
     (public_dir / "leads.json").write_text(LEADS_FILE.read_text())
     (public_dir / "events.json").write_text(EVENTS_FILE.read_text())
 
-    log.info("=== Done: %d new leads (%d total) ===", total, len(leads))
+    elapsed_mins = (time.time() - run_start) / 60
+    log.info("=== Done: %d new leads (%d total) in %.1f min ===", total, len(leads), elapsed_mins)
 
 if __name__ == "__main__":
     main()

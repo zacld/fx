@@ -262,7 +262,7 @@ def main():
 
     print()
     print("═" * 68)
-    print(f"  Report complete — {total} leads, {len(call_worthy)} call-worthy")
+    print(f"  Report complete — {total} leads, {len(priority_list) + len(extended_list)} call-worthy")
     print("═" * 68)
     print()
 

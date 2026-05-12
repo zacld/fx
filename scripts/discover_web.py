@@ -421,10 +421,8 @@ def mine_source_page(url: str, max_links: int = 15) -> list:
 
     Returns list of {url, title, snippet, from_source_page, source_page_url}.
     """
-    # TODO: Wire this into the main query loop (Phase 2 of source-page rollout).
-    # Currently callable but not yet integrated into process_event().
-    # Integration requires routing mineable URLs out of the normal candidate pipeline
-    # and into this function when direct_candidates < 3.
+    # Wired into process_event(): called when direct company candidates < 3 for a query.
+    # Extracted links are processed through the normal validate_website() → CH → score pipeline.
     extracted   = []
     seen_domains: set = set()
     source_domain = domain_from_url(url) or ""
@@ -1100,6 +1098,81 @@ def ch_keyword_search(query: str, max_results: int = 10) -> list:
 
 # ── WEBSITE VALIDATION ────────────────────────────────────────────────────────
 
+# ── Contact extraction constants ──────────────────────────────────────────────
+# UK phone numbers — handles 020 (London), 01xxx, 07xxx, 08xx, +44 variants.
+# Approach: match prefix then 9-11 digits with flexible separators (space/dash/dot).
+# Each digit group is optional-separator-terminated. Stops greedily at 11 digits.
+_UK_PHONE_RE = re.compile(
+    r"(?:\+44[\s\-.]?|0)"          # prefix: +44 or leading 0
+    r"(?:\d[\s\-.]?){9,11}"        # 9-11 digits with optional separators between them
+)
+
+# Generic company email prefixes — never personal addresses
+_GENERIC_EMAIL_PREFIXES = (
+    "info", "sales", "hello", "enquiries", "enquiry", "contact", "accounts",
+    "admin", "office", "trade", "orders", "purchasing", "buy", "wholesale",
+    "mail", "general", "support", "reception", "welcome",
+)
+_EMAIL_RE = re.compile(r"[a-zA-Z][a-zA-Z0-9._%+\-]{0,30}@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,6}")
+
+# Paths that indicate a contact page
+_CONTACT_PATH_RE = re.compile(
+    r"/(contact|contact-us|get-in-touch|reach-us|find-us|talk-to-us|speak-to-us)",
+    re.IGNORECASE,
+)
+
+
+def _extract_contact_info(soup, base_url: str) -> dict:
+    """
+    Extract phone, generic company email, and contact page URL from a BeautifulSoup
+    object. Called on the raw (un-stripped) homepage soup.
+
+    Returns:
+        {phone, contact_email, contact_page_url}  — each is a str or None.
+    """
+    result: dict = {"phone": None, "contact_email": None, "contact_page_url": None}
+
+    # 1. Contact page URL — look for links matching contact path patterns
+    for a in soup.find_all("a", href=True):
+        href = (a.get("href") or "").strip()
+        if _CONTACT_PATH_RE.search(href):
+            if href.startswith("http"):
+                result["contact_page_url"] = href
+            elif href.startswith("/"):
+                parsed = urlparse(base_url)
+                result["contact_page_url"] = f"{parsed.scheme}://{parsed.netloc}{href}"
+            else:
+                result["contact_page_url"] = base_url.rstrip("/") + "/" + href.lstrip("/")
+            break  # first match is enough
+
+    # 2. Phone — search full page text (including footer)
+    full_text = soup.get_text(" ", strip=True)
+    phones = _UK_PHONE_RE.findall(full_text)
+    if phones:
+        # Clean up whitespace/dashes and take first match
+        result["phone"] = re.sub(r"[\s]", "", phones[0])[:20]
+
+    # 3. Generic company email — search for mailto links first, then text
+    for a in soup.find_all("a", href=True):
+        href = (a.get("href") or "").strip().lower()
+        if href.startswith("mailto:"):
+            addr = href[7:].split("?")[0].strip()
+            local = addr.split("@")[0] if "@" in addr else ""
+            if any(local.startswith(p) for p in _GENERIC_EMAIL_PREFIXES):
+                result["contact_email"] = addr
+                break  # prefer mailto link over text match
+
+    if not result["contact_email"]:
+        for m in _EMAIL_RE.finditer(full_text):
+            addr  = m.group(0).lower()
+            local = addr.split("@")[0]
+            if any(local.startswith(p) for p in _GENERIC_EMAIL_PREFIXES):
+                result["contact_email"] = addr
+                break
+
+    return result
+
+
 def _fetch_text(url: str, timeout: int = 12) -> tuple[str, str]:
     """Fetch a URL, return (clean_text, final_url_after_redirects). Empty string on failure.
     Uses (connect_timeout=5, read_timeout) split to prevent silent TCP SYN hangs on
@@ -1115,6 +1188,25 @@ def _fetch_text(url: str, timeout: int = 12) -> tuple[str, str]:
     except Exception as exc:
         log.debug("Fetch failed %s: %s", url, exc)
         return "", url
+
+
+def _fetch_page(url: str, timeout: int = 12) -> tuple[str, str, object]:
+    """Like _fetch_text but also returns the raw soup BEFORE stripping.
+    Used for the homepage fetch in validate_website() so contact info
+    can be extracted from footers/headers before they're decomposed.
+    Returns (clean_text, final_url, soup_or_None)."""
+    try:
+        resp = requests.get(url, headers=_headers(), timeout=(5, timeout), allow_redirects=True)
+        resp.raise_for_status()
+        final_url = resp.url
+        soup_raw  = BeautifulSoup(resp.text, "html.parser")
+        soup_clean = BeautifulSoup(resp.text, "html.parser")  # second parse for stripping
+        for tag in soup_clean(["script", "style", "nav", "footer", "header", "meta", "link", "noscript"]):
+            tag.decompose()
+        return soup_clean.get_text(" ", strip=True), final_url, soup_raw
+    except Exception as exc:
+        log.debug("Fetch failed %s: %s", url, exc)
+        return "", url, None
 
 
 def _count_company_references(text: str) -> int:
@@ -1143,12 +1235,19 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         "snippet": "", "name_on_page": False,
         "website_confidence": "none", "pays_fx": False, "is_b2b": False,
         "text_length": 0, "reject_reason": "",
+        # contact fields — always present even if empty
+        "phone": None, "contact_email": None, "contact_page_url": None,
     }
     if not url:
         return empty
 
-    text, final_url = _fetch_text(url)
-    pages_scraped   = 1
+    # Use _fetch_page for the homepage to get raw soup for contact extraction
+    text, final_url, homepage_soup = _fetch_page(url)
+    pages_scraped = 1
+
+    # Extract contact info from the raw homepage soup (before any stripping)
+    contact_info = _extract_contact_info(homepage_soup, final_url) if homepage_soup else {}
+
 
     # Multi-page scraping: fetch extra pages when homepage is thin on signals.
     # Hard cap: 4 pages per domain. Early stop: once FX signal count reaches 3.
@@ -1239,6 +1338,10 @@ def validate_website(url: str, name_tokens_set: set, segment_signals: list) -> d
         "text_length":            len(text),
         "pages_scraped":          pages_scraped,
         "reject_reason":          "",
+        # Contact extraction results (populated from homepage soup)
+        "phone":             contact_info.get("phone"),
+        "contact_email":     contact_info.get("contact_email"),
+        "contact_page_url":  contact_info.get("contact_page_url"),
     }
 
 
@@ -1700,6 +1803,10 @@ def create_lead(
         "segment_signals":    validation.get("segment_signals_found", []),
         "pays_fx_confirmed":  validation.get("pays_fx", False),
         "pages_scraped":      validation.get("pages_scraped", 1),
+        # Contact routes extracted from website
+        "phone":              validation.get("phone"),
+        "contact_email":      validation.get("contact_email"),
+        "contact_page_url":   validation.get("contact_page_url"),
         "signal_count": (
             len(validation.get("fx_signals", []))
             + len(validation.get("b2b_signals", []))
@@ -1819,9 +1926,13 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
 
         if micro_cats:
             # New format: collect queries from all micro-categories
-            queries = []
+            queries: list = []
+            query_to_mc: dict[str, str] = {}   # query text → micro-category name (for provenance)
             for mc in micro_cats:
+                mc_name    = mc.get("name", mc.get("micro_category_name", ""))
                 mc_queries = mc.get("search_queries", [])[:WEB_MAX_QUERIES_PER_MICRO_CATEGORY]
+                for q in mc_queries:
+                    query_to_mc[q] = mc_name
                 queries.extend(mc_queries)
             log.info("    Segment: %s (%d micro-cats, %d queries)",
                      seg_name[:55], len(micro_cats), len(queries))
@@ -1829,7 +1940,8 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
             stats["micro_cats_searched"]  = stats.get("micro_cats_searched", 0) + len(micro_cats)
         else:
             # Backward compat: flat query format (old events without micro_categories)
-            queries = seg.get("high_intent_search_queries", [])[:WEB_MAX_QUERIES_PER_SEGMENT]
+            queries     = seg.get("high_intent_search_queries", [])[:WEB_MAX_QUERIES_PER_SEGMENT]
+            query_to_mc = {}
             log.info("    Segment: %s (%d queries)", seg_name[:55], len(queries))
             stats["segments_searched"] = stats.get("segments_searched", 0) + 1
 
@@ -1898,7 +2010,58 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                         ch_fallback_info = f"ch=0_candidates(core={core_kw!r})"
                         stats["ch_zero_candidates"] = stats.get("ch_zero_candidates", 0) + 1
 
-            if not results:
+            # ── Split: separate direct leads from mineable source pages ────────
+            # Source pages (trade-body member lists, industry directories) are
+            # discovery SOURCES, not prospects. Detect them now, set aside for
+            # mining only if direct candidates are sparse.
+            direct_candidates      = []
+            source_page_candidates = []
+            for _r in results:
+                _ru = _r.get("url", "")
+                _rt = _r.get("title", "")
+                if _ru and _is_mineable_source_page(_ru, _rt):
+                    source_page_candidates.append(_r)
+                    stats["source_pages_detected"] = stats.get("source_pages_detected", 0) + 1
+                    log.debug("      [source-page] Detected: %s", _ru[:60])
+                else:
+                    direct_candidates.append(_r)
+
+            # ── Source-page mining: kick in when direct results are sparse ───
+            # Only mine when fewer than 3 direct candidates arrived for this
+            # query. Cap: 2 source pages per query, 15 links per source page.
+            mined_results: list = []
+            if len(direct_candidates) < 3 and source_page_candidates:
+                log.info(
+                    "      [source-page] %d direct candidate(s) — mining up to 2 source pages",
+                    len(direct_candidates),
+                )
+                for _sp in source_page_candidates[:2]:
+                    _sp_url = _sp.get("url", "")
+                    try:
+                        _mined = mine_source_page(_sp_url)
+                        stats["source_pages_mined"] = stats.get("source_pages_mined", 0) + 1
+                        stats["source_page_extracted"] = (
+                            stats.get("source_page_extracted", 0) + len(_mined)
+                        )
+                        log.info(
+                            "      [source-page] %d links extracted from %s",
+                            len(_mined), _sp_url[:60],
+                        )
+                        _mc_name = query_to_mc.get(query, "")
+                        for _link in _mined:
+                            _link["source_query"]          = query
+                            _link["source_segment"]        = seg_name
+                            _link["source_micro_category"] = _mc_name
+                        mined_results.extend(_mined)
+                    except Exception as _sp_exc:
+                        log.warning(
+                            "      [source-page] Mining failed %s: %s",
+                            _sp_url[:50], _sp_exc,
+                        )
+
+            all_to_process = direct_candidates + mined_results
+
+            if not all_to_process:
                 # Build a compact source summary for the INFO log
                 _src_parts = [f"DDG={ddg_status}"]
                 if bing_status != "not_run":
@@ -1909,7 +2072,7 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                 stats["query_dead_end"] = stats.get("query_dead_end", 0) + 1
                 continue
 
-            for result in results:
+            for result in all_to_process:
                 stats["raw_candidates"] = stats.get("raw_candidates", 0) + 1
                 url    = result.get("url", "")
                 title  = result.get("title", "")
@@ -2044,6 +2207,17 @@ def process_event(event: dict, event_id: str, leads: dict, stats: dict) -> int:
                 if ch_data and ch_data.get("company_number"):
                     cn_index.setdefault(ch_data["company_number"],[]).append(lid)
 
+                # Provenance: annotate leads that came via source-page mining
+                if result.get("from_source_page"):
+                    lead["discovery_path"]        = "source_page_mined"
+                    lead["source_page_url"]       = result.get("source_page_url")
+                    lead["source_query"]          = result.get("source_query")
+                    lead["source_segment"]        = result.get("source_segment")
+                    lead["source_micro_category"] = result.get("source_micro_category")
+                    stats["source_page_leads_created"] = (
+                        stats.get("source_page_leads_created", 0) + 1
+                    )
+
                 leads[lid] = lead
                 added += 1
 
@@ -2093,8 +2267,10 @@ def print_quality_summary(stats: dict, leads: dict):
     log.info("  CH fallback skipped (generic kw): %d", stats.get("ch_fallback_skipped_generic",0))
     log.info("  CH zero candidates:      %d", stats.get("ch_zero_candidates",0))
     log.info("  CH candidates, no URL:   %d", stats.get("ch_candidates_no_url",0))
+    log.info("  Source pages detected:   %d", stats.get("source_pages_detected",0))
     log.info("  Source pages mined:      %d", stats.get("source_pages_mined",0))
     log.info("  Source-page extracted:   %d", stats.get("source_page_extracted",0))
+    log.info("  Source-page leads:       %d", stats.get("source_page_leads_created",0))
     log.info("  ────────────────────────────────────────")
     log.info("  Rejected (duplicate):   %d", stats.get("rejected_duplicate",0))
     log.info("  Rejected (incoherent):  %d", stats.get("rejected_incoherent",0))
