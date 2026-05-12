@@ -28,6 +28,8 @@ from website_finder import find_website_guess, HEADERS
 DATA_DIR   = Path(__file__).parent.parent / "data"
 LEADS_FILE = DATA_DIR / "leads.json"
 
+# NOTE: bare nationality adjectives ("italian", "french", …) are NOT FX evidence —
+# they live in SECONDARY_SIGNALS. Matches discover_web.py / discover.py.
 FX_PAYMENT_SIGNALS = [
     "we import","we source","sourced from","imported from","direct from",
     "importing from","we buy from","purchased from","procured from",
@@ -36,7 +38,6 @@ FX_PAYMENT_SIGNALS = [
     "from italy","from france","from spain","from germany","from china","from usa",
     "from america","from japan","from india","from norway","from australia",
     "from new zealand","from south africa","from denmark","from netherlands",
-    "italian","french","spanish","german","chinese","american","japanese",
     "foreign currency","currency risk","exchange rate","fx exposure",
     "international payments","overseas payments","currency hedging","fx risk",
     "importer","import company","import business","exclusive importer",
@@ -50,6 +51,9 @@ SECONDARY_SIGNALS = [
     "wholesale","wholesaler","logistics","freight","shipping","customs",
     "europe","european","asia","asian","north america","south america",
     "supply chain","supplier","sourcing","procurement",
+    # Country adjectives — demoted from FX signals (see note above)
+    "french","german","italian","american","chinese","japanese","spanish",
+    "norwegian","australian","danish","dutch","indian",
 ]
 
 

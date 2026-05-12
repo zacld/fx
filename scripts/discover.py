@@ -46,6 +46,9 @@ DATA_DIR.mkdir(exist_ok=True)
 SCRAPE_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; FXDiscoveryBot/1.0)"}
 
 # ── DIRECT FX PAYMENT SIGNALS (high weight) ─────────────────────────────
+# NOTE: bare nationality adjectives ("italian", "french", …) are NOT FX evidence —
+# they fire too broadly (a wine shop saying "Italian wine"). They live in
+# SECONDARY_SIGNALS below. This matches discover_web.py.
 FX_PAYMENT_SIGNALS = [
     "we import","we source","sourced from","imported from","direct from",
     "importing from","we buy from","purchased from","procured from",
@@ -54,7 +57,6 @@ FX_PAYMENT_SIGNALS = [
     "from italy","from france","from spain","from germany","from china","from usa",
     "from america","from japan","from india","from norway","from australia",
     "from new zealand","from south africa","from denmark","from netherlands",
-    "italian","french","spanish","german","chinese","american","japanese",
     "foreign currency","currency risk","exchange rate","fx exposure",
     "international payments","overseas payments","currency hedging","fx risk",
     "importer","import company","import business","exclusive importer",
@@ -69,6 +71,9 @@ SECONDARY_SIGNALS = [
     "wholesale","wholesaler","logistics","freight","shipping","customs",
     "europe","european","asia","asian","north america","south america",
     "supply chain","supplier","sourcing","procurement",
+    # Country adjectives — demoted from FX signals (see note above)
+    "french","german","italian","american","chinese","japanese","spanish",
+    "norwegian","australian","danish","dutch","indian",
 ]
 
 # ── FX-RELEVANT SIC CODES ────────────────────────────────────────────────
