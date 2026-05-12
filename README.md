@@ -4,7 +4,7 @@
 
 Market event → commercial relevance filter → business impact translation → exposure-ranked target segments → company discovery → website validation → lead scoring → LinkedIn/outreach assist.
 
-**Total API cost: ~£0.002/day**
+**Total API cost: ~£0/day (free tiers — one LLM call per market event, no per-company AI)**
 
 ---
 
@@ -25,13 +25,17 @@ into:
 | What | How | Cost |
 |---|---|---|
 | News ingestion | RSS feeds (BBC, Reuters, FXStreet, BoE, GOV.UK, Guardian, Sky) | Free |
-| AI analysis | Gemini 2.0 Flash (one call per event — combined triage + exposure map) | ~£0.002/day |
+| AI analysis | Groq (`llama-3.3-70b-versatile`) — one call per event, combined triage + exposure map; rule-based fallback on rate limit | Free tier |
 | Company discovery | Companies House API | Free |
-| Website discovery | Domain guessing + GET verification + DuckDuckGo fallback | Free |
-| Website scraping | Direct HTTP + BeautifulSoup | Free |
-| Database | JSON files in this repo | Free |
+| Website discovery | Domain guessing + GET verification + DuckDuckGo / Bing fallback | Free |
+| Website scraping | Direct HTTP (`fetch`) + cheerio | Free |
+| Database | SQLite (`data/fx.db`, rebuilt each run from `data/*.json`) → JSON snapshot for the dashboard | Free |
 | Scheduler | GitHub Actions cron | Free |
-| Dashboard | React SPA, GitHub Pages | Free |
+| Dashboard | React + Vite SPA (`apps/web`), GitHub Pages + Fly.io | Free |
+
+Codebase: TypeScript npm-workspace monorepo — `packages/core` (schema, signals,
+scoring, contacts, cache, DB), `packages/pipeline` (the CLI stages + sources),
+`apps/web` (the dashboard). See `ARCHITECTURE_V2.md`.
 
 ---
 
@@ -42,38 +46,36 @@ into:
 ```bash
 git clone https://github.com/zacld/fx.git
 cd fx
+npm install                      # installs all workspaces
 cp .env.example .env
-# Edit .env — add your own Gemini and Companies House keys
+# Edit .env — add your own GROQ_API_KEY and COMPANIES_HOUSE_API_KEY
 ```
 
-### 2. Install Python deps
+Requires Node 20+. There is no Python.
 
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Add GitHub Secrets
+### 2. Add GitHub Secrets
 
 Repo → Settings → Secrets and variables → Actions
 
 | Secret | Value |
 |---|---|
-| `GEMINI_API_KEY` | Your Gemini API key (from Google AI Studio) |
-| `GEMINI_MODEL` | `gemini-2.0-flash` |
+| `GROQ_API_KEY` | Your Groq API key (from https://console.groq.com/keys) |
 | `COMPANIES_HOUSE_API_KEY` | Your Companies House API key |
+| `GROQ_MODEL` | *(optional)* defaults to `llama-3.3-70b-versatile` |
 
 > **Security:** Never put real API keys in this README, in any `.md` file, or in any committed file.  
 > The `.env` file is in `.gitignore` and must never be committed.
 
-### 4. Test locally
+### 3. Run locally
 
 ```bash
-python3 scripts/ingest.py       # Pull news events + analyse with Gemini
-python3 scripts/discover.py     # Find companies via Companies House
-python3 scripts/enrich_websites.py  # Backfill websites for existing leads
-python3 scripts/rescore.py      # Re-score + deduplicate leads
-npm install && npm run dev       # Run dashboard locally
+npm run pipeline                 # import → analyse → discover → enrich → score → dedup → export
+npm run sync-web-data            # refresh the dashboard's data snapshot
+npm run dev                      # run the dashboard locally
 ```
+
+Or a single stage: `npm run analyse` · `npm run discover` · `npm run enrich-contacts` · `npm run score` · `npm run dedup`.
+`npm test` / `npm run typecheck` cover `packages/core` + `packages/pipeline`.
 
 ---
 
@@ -84,7 +86,7 @@ RSS feeds (7 sources)
   ↓
 Commercial relevance pre-filter (rule-based, free, no API)
   ↓
-Gemini 2.0 Flash — ONE call per event
+Groq (llama-3.3-70b) — ONE call per event   [rule-based fallback on rate limit]
   · Commercial relevance score (1-10)
   · Business impact translation (what changed, who pays more)
   · Exposure-ranked target segments (4-6 specific business models)
@@ -144,28 +146,30 @@ Copy-ready outreach drafts (call opener, LinkedIn note, email)
 
 ```
 fx/
-  scripts/
-    ingest.py            # RSS → Gemini (1 call) → events.json
-    exposure_mapper.py   # Standalone exposure mapper (also used as module)
-    discover.py          # Events → Companies House + website → leads.json
-    enrich_websites.py   # Backfill websites for leads without one
-    rescore.py           # Re-score + dedup + multi-event detection
-    website_finder.py    # Domain guessing + DuckDuckGo fallback
-    linkedin_assist.py   # Generate LinkedIn search links (no scraping)
-    outreach.py          # Copy-ready outreach drafts (Gemini)
-    ch_search_strategy.py # Companies House search term strategy
-    run_pipeline.py      # Run full pipeline in order
-  src/
-    App.jsx              # React dashboard
+  packages/
+    core/                  # @fx/core — schema (zod), signals, scoring (gates A–I),
+      src/                 #   contacts, cache, SQLite/Drizzle (db/), repoRoot, db:import/export
+    pipeline/              # @fx/pipeline — the CLI stages + sources
+      src/
+        stages/            #   analyse · discover · enrich-contacts · score · dedup
+        sources/           #   rss · ai (Groq/Gemini) · search (DDG/Bing) · website ·
+                           #   source-page-miner · companies-house · fetch · blocklists
+        run.ts             #   per-run logging → runs table + data/runs/<id>.json
+  apps/
+    web/                   # @fx/web — React + Vite dashboard
+      src/App.jsx          #   reads ${BASE_URL}data/{events,leads}.json
+      public/data/         #   committed dashboard snapshot (refreshed by `npm run sync-web-data`)
   data/
-    events.json          # Updated by pipeline
-    leads.json           # Updated by pipeline
-  public/
-    data/                # Copied here for GitHub Pages
+    events.json leads.json # canonical pipeline output (committed; rebuilt into data/fx.db each run)
+    fx.db                  # SQLite working db (gitignored)
+    runs/  cache/          # run logs + HTTP/CH caches (gitignored)
   .github/workflows/
-    discovery.yml        # Mon–Fri 6am cron + manual trigger
-  .env.example           # Template — copy to .env and fill in your keys
-  requirements.txt
+    discovery.yml          # Mon–Fri 6am cron — runs the TS pipeline, commits data/
+    deploy.yml             # GitHub Pages   (build apps/web after a discovery run / push to main)
+    deploy-fly.yml         # Fly.io         (same trigger)
+  Dockerfile deploy/nginx.conf fly.toml   # Fly deployment of the dashboard
+  .env.example             # template — copy to .env and fill in your keys
+  ARCHITECTURE_V2.md       # monorepo layout + data model
 ```
 
 ---

@@ -1,9 +1,14 @@
 .git
 .github
 node_modules
+**/node_modules
 dist
+**/dist
 **/__pycache__
 *.pyc
+*.db
+*.db-shm
+*.db-wal
 .env
 .env.*
 !.env.example
@@ -11,3 +16,4 @@ dist
 .DS_Store
 REVIEW.md
 RUN_LOCALLY.md
+data/runs
