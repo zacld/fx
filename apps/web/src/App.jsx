@@ -24,6 +24,15 @@ const urg  = s => s>=8?"#10B981":s>=6?"#F59E0B":s>=4?"#6366F1":"#475569";
 const pri  = p => p==="HOT"?"#10B981":p==="WARM"?"#F59E0B":"#6366F1";
 const expClass = l => l==="Very High"?"exp-vh":l==="High"?"exp-h":l==="Medium"?"exp-m":"exp-l";
 const expLabel = l => l==="Very High"?"● Very High":l==="High"?"● High":l==="Medium"?"○ Medium":"○ Low";
+// Route grade helpers
+const GRADE_COLOR = {A:"#10B981",B:"#34D399",C:"#F59E0B",D:"#94A3B8",E:"#64748B",F:"#475569"};
+const GRADE_BG    = {A:"rgba(16,185,129,.12)",B:"rgba(52,211,153,.08)",C:"rgba(245,158,11,.1)",D:"rgba(148,163,184,.07)",E:"rgba(100,116,139,.06)",F:"rgba(71,85,105,.06)"};
+const GRADE_TIP   = {A:"Named FD/CFO/MD + verified contact",B:"Named FD/CFO/MD + guessed email/contact page",C:"Named director + phone or email",D:"Company phone/email, no named person",E:"Website only",F:"No contact route found"};
+const gradeColor  = g => GRADE_COLOR[g] || "#475569";
+const gradeBg     = g => GRADE_BG[g]    || "rgba(71,85,105,.06)";
+const gradeTip    = g => GRADE_TIP[g]   || "";
+const TIER_COLOR  = {1:"#10B981",2:"#F59E0B",3:"#64748B"};
+const tierColor   = t => TIER_COLOR[t]  || "#64748B";
 const today    = new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 const dateShort= new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
 
@@ -82,6 +91,8 @@ const BLANK_FILTERS = {
   currencyPair: "all",
   segment:      "all",
   statuses:     [],
+  grades:       [],
+  sortBy:       "score",    // "score" | "grade" | "confidence"
   search:       "",
 };
 
@@ -133,10 +144,25 @@ function applyFilters(leads, filters, getCrmStatus) {
   if (filters.currencyPair !== "all") r = r.filter(l => (l.fx_exposure||"").includes(filters.currencyPair));
   if (filters.segment !== "all")    r = r.filter(l => (l.segment_name||"")===filters.segment);
   if (filters.statuses.length)      r = r.filter(l => filters.statuses.includes(getCrmStatus(l)));
+  if (filters.grades.length)        r = r.filter(l => filters.grades.includes(l.route_grade));
   if (filters.search) {
     const q = filters.search.toLowerCase();
-    r = r.filter(l => (l.company_name||"").toLowerCase().includes(q));
+    r = r.filter(l =>
+      (l.company_name||"").toLowerCase().includes(q) ||
+      (l.director_name||"").toLowerCase().includes(q)
+    );
   }
+  // Sort
+  const GRADE_ORDER = {A:0,B:1,C:2,D:3,E:4,F:5};
+  if (filters.sortBy === "grade") {
+    r = [...r].sort((a,b) => {
+      const gd = (GRADE_ORDER[a.route_grade]??9) - (GRADE_ORDER[b.route_grade]??9);
+      return gd !== 0 ? gd : (b.score||0) - (a.score||0);
+    });
+  } else if (filters.sortBy === "confidence") {
+    r = [...r].sort((a,b) => (b.contact_confidence||0) - (a.contact_confidence||0));
+  }
+  // default "score" sort: leads already come in score order from fetchData
   return r;
 }
 
@@ -365,14 +391,24 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .email-copy.copied{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.25);color:#10B981}
 .email-note{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.15);margin-top:4px;line-height:1.5}
 
+/* ROUTE GRADE BADGE */
+.grade-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;border:1px solid transparent;cursor:default}
+.conf-bar{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.3)}
+.conf-track{width:48px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.conf-fill{height:100%;border-radius:2px;transition:width .3s}
+
 /* DECISION MAKERS PANEL */
 .dm-panel{margin-bottom:12px}
-.dm-list{display:flex;flex-direction:column;gap:6px;margin-top:5px}
-.dm-card{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px}
+.dm-panel-hdr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.dm-list{display:flex;flex-direction:column;gap:6px}
+.dm-card{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;position:relative}
+.dm-card.tier-1{border-left:2px solid rgba(16,185,129,.35)}
+.dm-card.tier-2{border-left:2px solid rgba(245,158,11,.25)}
 .dm-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,rgba(16,185,129,.3),rgba(99,102,241,.3));border:1px solid rgba(16,185,129,.2);display:grid;place-items:center;font-size:10px;font-weight:700;color:#10B981;flex-shrink:0;margin-top:1px}
 .dm-info{flex:1;min-width:0}
-.dm-nm{font-size:13px;font-weight:600;color:#F8FAFC;line-height:1.3}
-.dm-rl{font-family:'JetBrains Mono',monospace;font-size:9px;color:#10B981;margin-bottom:4px}
+.dm-nm{font-size:13px;font-weight:600;color:#F8FAFC;line-height:1.3;display:flex;align-items:center;gap:6px}
+.dm-tier-badge{font-size:9px;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-weight:700;flex-shrink:0}
+.dm-rl{font-family:'JetBrains Mono',monospace;font-size:9px;margin-bottom:4px}
 .dm-email{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:2px}
 .dm-verified{font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#10B981}
 .dm-guessed{font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);color:#F59E0B}
@@ -636,18 +672,24 @@ function DMEmailCopy({ email }) {
 }
 
 function DMCard({ dm, co }) {
-  const initials = [dm.first_name, dm.last_name].filter(Boolean).map(w=>(w||"")[0]||"").join("").toUpperCase() || "?";
+  const initials    = [dm.first_name, dm.last_name].filter(Boolean).map(w=>(w||"")[0]||"").join("").toUpperCase() || "?";
   const verifiedEmail = dm.email_verified && dm.email ? dm.email : null;
-  const guessedTop   = !verifiedEmail && dm.email_guesses?.length ? dm.email_guesses[0]?.email : null;
-  const bestEmail    = verifiedEmail || guessedTop;
-  const liUrl        = dm.linkedin_search || (dm.name ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dm.name)}%22+%22${encodeURIComponent((co||"").split(" ").slice(0,3).join(" "))}%22` : null);
-  const since        = dm.appointed_on ? dm.appointed_on.slice(0,7) : null;
+  const guessedTop  = !verifiedEmail && dm.email_guesses?.length ? dm.email_guesses[0]?.email : null;
+  const bestEmail   = verifiedEmail || guessedTop;
+  const liUrl       = dm.linkedin_search || (dm.name ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dm.name)}%22+%22${encodeURIComponent((co||"").split(" ").slice(0,3).join(" "))}%22` : null);
+  const since       = dm.appointed_on ? dm.appointed_on.slice(0,7) : null;
+  const tier        = dm.tier || 3;
+  const tc          = tierColor(tier);
+  const tlabel      = dm.tier_label || (tier===1?"Primary":tier===2?"Secondary":"Fallback");
   return (
-    <div className="dm-card">
-      <div className="dm-av">{initials}</div>
+    <div className={`dm-card tier-${tier}`}>
+      <div className="dm-av" style={{borderColor:`${tc}40`,color:tc}}>{initials}</div>
       <div className="dm-info">
-        <div className="dm-nm">{dm.name || [dm.first_name, dm.last_name].filter(Boolean).join(" ")}</div>
-        <div className="dm-rl">{dm.role || "Director"}</div>
+        <div className="dm-nm">
+          {dm.name || [dm.first_name, dm.last_name].filter(Boolean).join(" ")}
+          <span className="dm-tier-badge" style={{color:tc,background:`${tc}18`,border:`1px solid ${tc}35`}}>{tlabel}</span>
+        </div>
+        <div className="dm-rl" style={{color:tc}}>{dm.role || "Director"}</div>
         {since && <div className="dm-appointed">Appointed {since}</div>}
         {bestEmail && (
           <div className="dm-email">
@@ -659,45 +701,93 @@ function DMCard({ dm, co }) {
         )}
       </div>
       <div className="dm-links">
-        {liUrl && (
-          <a href={liUrl} target="_blank" rel="noreferrer" className="dm-li-btn">🔍 LinkedIn →</a>
-        )}
-        {dm.google_email_search && (
-          <a href={dm.google_email_search} target="_blank" rel="noreferrer" className="dm-li-btn" style={{background:"rgba(245,158,11,.07)",borderColor:"rgba(245,158,11,.18)",color:"#F59E0B"}}>📧 Find email →</a>
+        {liUrl && <a href={liUrl} target="_blank" rel="noreferrer" className="dm-li-btn">🔍 LinkedIn →</a>}
+        {dm.google_email_search && !verifiedEmail && (
+          <a href={dm.google_email_search} target="_blank" rel="noreferrer" className="dm-li-btn" style={{background:"rgba(245,158,11,.07)",borderColor:"rgba(245,158,11,.18)",color:"#F59E0B"}}>📧 email →</a>
         )}
       </div>
     </div>
   );
 }
 
+function GradeBadge({ grade }) {
+  if (!grade) return null;
+  const gc = gradeColor(grade);
+  return (
+    <span
+      className="grade-badge"
+      style={{color:gc, background:gradeBg(grade), borderColor:`${gc}35`}}
+      title={gradeTip(grade)}
+    >
+      {grade}
+    </span>
+  );
+}
+
+function ConfidenceBar({ value }) {
+  if (value == null) return null;
+  const pct = Math.min(100, Math.max(0, value));
+  const c   = pct >= 70 ? "#10B981" : pct >= 45 ? "#F59E0B" : "#64748B";
+  return (
+    <div className="conf-bar">
+      <div className="conf-track">
+        <div className="conf-fill" style={{width:`${pct}%`, background:c}} />
+      </div>
+      <span style={{color:c}}>{pct}%</span>
+    </div>
+  );
+}
+
 function DecisionMakers({ lead }) {
-  const dms = lead.decision_makers;
-  const hasDMs = dms && dms.length > 0;
-  // If no enriched DMs yet, fall back to single director if present
+  const dms     = lead.decision_makers;
+  const grade   = lead.route_grade;
+  const conf    = lead.contact_confidence;
+  const hasDMs  = dms && dms.length > 0;
+
   if (!hasDMs) {
-    if (!lead.director_name) return null;
+    if (!lead.director_name && !grade) return null;
     const initials = (lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
     return (
       <div style={{gridColumn:"1/-1"}}>
-        <div className="xl">Decision maker</div>
-        <div className="dir-card" style={{marginTop:4}}>
-          <div className="dir-av">{initials}</div>
-          <div>
-            <div className="dir-nm">{lead.director_name}</div>
-            <div className="dir-rl">{lead.director_role}</div>
-          </div>
+        <div className="dm-panel-hdr">
+          <div className="xl" style={{margin:0}}>Decision maker</div>
+          {grade && <GradeBadge grade={grade} />}
+          <ConfidenceBar value={conf} />
         </div>
+        {lead.director_name && (
+          <div className="dir-card" style={{marginTop:4}}>
+            <div className="dir-av">{initials}</div>
+            <div>
+              <div className="dir-nm">{lead.director_name}</div>
+              <div className="dir-rl">{lead.director_role}</div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
+
   const verifiedCount = dms.filter(d=>d.email_verified && d.email).length;
-  const guessedCount  = dms.filter(d=>!d.email_verified && d.email_guesses?.length).length;
+  const tier1Count    = dms.filter(d=>d.tier === 1).length;
+
   return (
     <div className="dm-panel" style={{gridColumn:"1/-1"}}>
-      <div className="xl" style={{marginBottom:4}}>
-        Decision makers · {dms.length} director{dms.length>1?"s":""}
-        {verifiedCount>0 && <span style={{marginLeft:6,color:"#10B981",fontWeight:700}}>· {verifiedCount} verified email{verifiedCount>1?"s":""}</span>}
-        {guessedCount>0  && <span style={{marginLeft:4,color:"#F59E0B"}}>· {guessedCount} guessed</span>}
+      <div className="dm-panel-hdr">
+        <div className="xl" style={{margin:0}}>
+          Decision makers · {dms.length} director{dms.length>1?"s":""}
+        </div>
+        {grade && <GradeBadge grade={grade} />}
+        <ConfidenceBar value={conf} />
+        {verifiedCount > 0 && (
+          <span style={{fontSize:10,color:"#10B981",fontFamily:"'JetBrains Mono',monospace"}}>
+            ✓ {verifiedCount} verified
+          </span>
+        )}
+        {tier1Count > 0 && (
+          <span style={{fontSize:10,color:"rgba(255,255,255,.25)",fontFamily:"'JetBrains Mono',monospace"}}>
+            {tier1Count} FD/MD/CFO
+          </span>
+        )}
       </div>
       <div className="dm-list">
         {dms.map((dm,i) => <DMCard key={i} dm={dm} co={lead.company_name} />)}
@@ -743,6 +833,15 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
             {expConf && expConf !== "none" && (
               <span className={expConfClass(expConf)} title={expConfLabel(expConf)}>{expConf} conf</span>
             )}
+            {lead.route_grade && (
+              <span
+                className="grade-badge"
+                style={{color:gradeColor(lead.route_grade),background:gradeBg(lead.route_grade),borderColor:`${gradeColor(lead.route_grade)}35`}}
+                title={`Route grade ${lead.route_grade}: ${gradeTip(lead.route_grade)}`}
+              >
+                {lead.route_grade}
+              </span>
+            )}
           </div>
           <div className="cc-info">
             {lead.address && <span>📍 {lead.address.split(",").slice(-2).join(",").trim()}</span>}
@@ -754,6 +853,11 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
               <span style={{fontSize:11,color:"rgba(255,255,255,.2)"}}>👤</span>
               <b>{lead.director_name}</b>
               <span style={{color:"rgba(255,255,255,.25)"}}>· {lead.director_role}</span>
+              {lead.contact_confidence != null && (
+                <span style={{marginLeft:6,fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:"rgba(255,255,255,.2)"}}>
+                  {lead.contact_confidence}% conf
+                </span>
+              )}
             </div>
           )}
           {thesis && (
@@ -955,7 +1059,7 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState
   const hasExtra = filters.priorities.length||filters.siteConfs.length||filters.hasFxSignals||
     filters.hasWebsite||filters.hasDirector||filters.minScore>0||
     filters.eventId!=="all"||filters.currencyPair!=="all"||filters.segment!=="all"||
-    filters.statuses.length||filters.search;
+    filters.statuses.length||filters.grades.length||filters.sortBy!=="score"||filters.search;
 
   const priChipCls = p => {
     const on = filters.priorities.includes(p);
@@ -993,6 +1097,34 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState
             {c==="high"?"High":c==="medium"?"Med":c==="confirmed"?"Conf":"Low"}
           </button>
         ))}
+      </div>
+
+      <div className="fb-sep"/>
+
+      {/* Route grade filter */}
+      <div className="fb-group">
+        <span className="fb-label">Grade</span>
+        {["A","B","C","D","E"].map(g=>(
+          <button
+            key={g}
+            className={`chip${filters.grades.includes(g)?" on":""}`}
+            style={filters.grades.includes(g)?{background:gradeBg(g),borderColor:`${gradeColor(g)}55`,color:gradeColor(g)}:{}}
+            onClick={()=>toggleArr("grades",g)}
+            title={gradeTip(g)}
+          >{g}</button>
+        ))}
+      </div>
+
+      <div className="fb-sep"/>
+
+      {/* Sort */}
+      <div className="fb-group">
+        <span className="fb-label">Sort</span>
+        <select className="fb-select" value={filters.sortBy} onChange={e=>set("sortBy",e.target.value)}>
+          <option value="score">Score</option>
+          <option value="grade">Route grade</option>
+          <option value="confidence">Confidence</option>
+        </select>
       </div>
 
       <div className="fb-sep"/>
@@ -1053,7 +1185,7 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState
       {/* Search */}
       <input
         className="fb-search"
-        placeholder="🔍  Search company…"
+        placeholder="🔍  Company or director…"
         value={filters.search}
         onChange={e=>set("search",e.target.value)}
       />
