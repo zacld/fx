@@ -312,6 +312,20 @@ export function scoreLead(lead: Partial<ScoreInput>, urgency = 0): ScoreResult {
     score = Math.min(score, 49);
     reasons.push("⚠ Large/unreachable organisation — capped at QUEUE");
   }
+  // Gate J: HOT requires at least one actionable contact route.
+  // A lead with a score of 80+ but no way to reach anyone is not call-ready.
+  // Checks fields available at scoring time: phone, email, director name, contact page.
+  if (score >= 80) {
+    const hasContactRoute =
+      !!(lead.contact_phone) ||
+      !!(lead.contact_email) ||
+      !!(lead.director_name) ||
+      !!(lead.contact_page);
+    if (!hasContactRoute) {
+      score = 79;
+      reasons.push("⚠ HOT capped → WARM: no contact route (no phone, email, director, or contact page)");
+    }
+  }
 
   const priority: Priority = score >= 80 ? "HOT" : score >= 60 ? "WARM" : score >= 40 ? "QUEUE" : "SKIP";
   return { score, priority, reasons };

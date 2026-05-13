@@ -458,6 +458,16 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .site-detail{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);margin-top:3px}
 
 /* OUTREACH */
+/* call opener generator */
+.opener-panel{margin-bottom:14px;border:1px solid rgba(16,185,129,.18);border-radius:10px;background:rgba(16,185,129,.04);overflow:hidden}
+.opener-tabs{display:flex;border-bottom:1px solid rgba(16,185,129,.12)}
+.opener-tab{flex:1;padding:7px 0;font-size:11px;font-weight:600;cursor:pointer;background:none;border:none;color:rgba(255,255,255,.3);font-family:'Inter',sans-serif;transition:all .15s;letter-spacing:.02em}
+.opener-tab:hover{color:rgba(255,255,255,.6)}
+.opener-tab.active{color:#10B981;background:rgba(16,185,129,.07)}
+.opener-body{position:relative;padding:12px 14px}
+.opener-text{font-size:12px;line-height:1.75;color:rgba(255,255,255,.65);white-space:pre-wrap;word-break:break-word;padding-right:60px}
+.opener-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(16,185,129,.6);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.opener-char{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.2);margin-top:6px}
 .outreach{margin-bottom:12px}
 /* legacy out-* classes kept for backward compat */
 .out-tabs{display:flex;gap:2px;margin-bottom:0;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -686,44 +696,20 @@ function MessageAmmoPanel({ ingredients, outreach }) {
         <div className="xl" style={{marginBottom:7}}>Message notes — write in your own tone</div>
         {outreach.call_opener && (
           <div className="ammo-row">
-            <div className="ammo-label">Call opener</div>
+            <div className="ammo-header">
+              <span className="ammo-icon">📞</span>
+              <span className="ammo-label">Call opener</span>
+            </div>
             <div className="ammo-text">{outreach.call_opener}</div>
             <CopyBtn text={outreach.call_opener} />
-          </div>
-
-          <div className="sb">
-            <div className="sb-h">Exports</div>
-            <div className="sb-row">
-              <span className="sb-l">Today's Queue</span>
-              <button className="btn-sm" onClick={()=>exportLeadsToCsv(callListLeads, 'todays_queue.csv')}>CSV</button>
-            </div>
-            <div className="sb-row">
-              <span className="sb-l">Grade A/B leads</span>
-              <button className="btn-sm" onClick={()=>exportLeadsToCsv(leads.filter(l=>['A','B'].includes(computeRouteGrade(l))), 'grade_a_b.csv')}>CSV</button>
-            </div>
-            <div className="sb-row">
-              <span className="sb-l">Follow-ups due</span>
-              <button className="btn-sm" onClick={()=>{
-                const now = new Date();
-                const due = leads.filter(l=>{
-                  const crm = crmState[l.id]||{}; if(!crm.next_follow_up_at) return false; return new Date(crm.next_follow_up_at) <= now;
-                });
-                exportLeadsToCsv(due, 'followups_due.csv');
-              }}>CSV</button>
-            </div>
-          </div>
-
-          <div className="sb">
-            <div className="sb-h">Follow-ups</div>
-            <div className="sb-row"><span className="sb-l">Due today</span><span className="sb-v" style={{color:"#10B981"}}>{followupsDueToday}</span></div>
-            <div className="sb-row"><span className="sb-l">Overdue</span><span className="sb-v" style={{color:"#F97316"}}>{followupsOverdue}</span></div>
-            <div className="sb-row"><span className="sb-l">No next action</span><span className="sb-v" style={{color:"#64748B"}}>{noNextAction}</span></div>
-            <div className="sb-row"><span className="sb-l">Recently contacted</span><span className="sb-v" style={{color:"#38BDF8"}}>{recentlyContacted}</span></div>
           </div>
         )}
         {outreach.linkedin_connection && (
           <div className="ammo-row">
-            <div className="ammo-label">LinkedIn note</div>
+            <div className="ammo-header">
+              <span className="ammo-icon">💼</span>
+              <span className="ammo-label">LinkedIn note</span>
+            </div>
             <div className="ammo-text">{outreach.linkedin_connection}</div>
             <CopyBtn text={outreach.linkedin_connection} />
           </div>
@@ -1020,8 +1006,156 @@ function DecisionMakers({ lead }) {
   );
 }
 
+// ─── CALL OPENER GENERATOR ───────────────────────────────────────
+function generateOpener(lead, ev) {
+  ev = ev || {};
+  const co        = lead.company_name || "";
+  const coShort   = co.split(" ").slice(0, 4).join(" ");
+  const dirName   = lead.director_name || "";
+  const firstName = dirName.split(" ")[0] || "there";
+  const segment   = lead.segment_name || "";
+
+  // Currency
+  const pairs      = lead.inferred_currency_pairs || [];
+  const pair       = pairs[0] || lead.fx_exposure || (ev.currency_pairs||[])[0] || "GBP/EUR";
+  const parts      = pair.split("/");
+  const foreignCcy = parts[0] === "GBP" ? (parts[1] || "EUR") : (parts[0] || "EUR");
+  const isEur      = pair.includes("EUR");
+  const isUsd      = pair.includes("USD");
+
+  // Evidence
+  const snippets  = (lead.fx_evidence_snippets || []).filter(s => s && s.length > 8);
+  const suppliers = (lead.supplier_evidence     || []).filter(s => s && s.length > 5);
+  const countries = (lead.country_evidence      || []).filter(s => s && s.length > 2);
+
+  // Build evidence hook + type
+  let evidenceHook = "";
+  let evidenceType = "generic";
+
+  if (snippets.length > 0) {
+    const best = snippets[0].slice(0, 90);
+    evidenceHook = `I noticed on your website: "${best}${snippets[0].length > 90 ? "…" : ""}"`;
+    evidenceType = "snippet";
+  } else if (suppliers.length > 0) {
+    const sup = suppliers[0];
+    const supLower = sup.toLowerCase();
+    evidenceHook = (supLower.startsWith("source") || supLower.startsWith("import") || supLower.startsWith("buy"))
+      ? `I noticed ${co} ${sup.slice(0, 70)}`
+      : `I noticed ${co} sources ${sup.slice(0, 60)}`;
+    evidenceType = "supplier";
+  } else if (countries.length > 0) {
+    const ctry = countries.slice(0, 2).join(" and ");
+    evidenceHook = `I noticed ${co} works with suppliers or partners in ${ctry}`;
+    evidenceType = "country";
+  } else {
+    const segPhrase = segment ? `as a ${segment.slice(0, 40).toLowerCase()}` : "as a UK business";
+    evidenceHook = `I came across ${co} — ${segPhrase}, you're likely managing regular ${foreignCcy} payments`;
+    evidenceType = "generic";
+  }
+
+  // Payment flow follow-on (for non-generic)
+  let paymentBridge = "";
+  if (evidenceType !== "generic") {
+    paymentBridge = isEur
+      ? ` — so EUR supplier or customer payments are probably a regular part of your costs`
+      : isUsd
+      ? ` — so USD payments are likely a regular part of your costs`
+      : ` — so ${foreignCcy} payments are probably part of your regular costs`;
+  }
+
+  // Event tie-in
+  const evLine = ev.headline
+    ? `With ${pair} moving${ev.sales_angle ? ` — ${ev.sales_angle.slice(0, 70).toLowerCase()}` : " this week"}`
+    : `With recent ${pair} moves`;
+
+  // Ask
+  const ask = dirName
+    ? `Is this something that sits with you, or is there someone in finance I should speak to?`
+    : `Are you the right person for this, or would it be better to speak to whoever handles your overseas payments?`;
+
+  // ── CALL OPENER ──
+  const call = evidenceType === "generic"
+    ? `${evidenceHook}.\n${evLine}, I wanted to check in on how you're protecting against those moves.\n${ask}`
+    : `${evidenceHook}${paymentBridge}.\n${evLine}, I wanted to reach out about how you're managing those costs.\n${ask}`;
+
+  // ── LINKEDIN (≤300 chars) ──
+  const liSnippet = evidenceType === "snippet"
+    ? `I noticed ${coShort} sources internationally`
+    : evidenceType === "supplier"
+    ? `I noticed ${coShort} ${suppliers[0]?.slice(0, 35)?.toLowerCase() || "works with overseas suppliers"}`
+    : evidenceType === "country"
+    ? `I noticed ${coShort} works with suppliers in ${countries[0] || "Europe"}`
+    : `${coShort} ${segment ? "— as a " + segment.slice(0, 30).toLowerCase() : "as a UK business"}`;
+
+  let linkedin = `Hi ${firstName}, ${liSnippet}. With ${pair} moving this week, wanted to connect on how you're managing those FX costs. Happy to share what's useful.`;
+  if (linkedin.length > 300) {
+    linkedin = `Hi ${firstName}, with ${pair} moving this week, wanted to connect around how ${coShort} is managing ${foreignCcy} payment costs. Happy to share what's useful.`;
+  }
+  if (linkedin.length > 300) linkedin = linkedin.slice(0, 297) + "...";
+
+  // ── EMAIL ──
+  const subject  = `${foreignCcy} costs for ${coShort} — ${pair} move`;
+  const emailBody = evidenceType !== "generic"
+    ? `Hi ${firstName},\n\n${evidenceHook}${paymentBridge}.\n\n${evLine}, so I wanted to reach out. A lot of businesses managing ${foreignCcy} payments find the bank rate isn't the sharpest available — often there's a meaningful saving to be made.\n\nWould it be worth a quick conversation to see if there's anything useful for ${coShort}?`
+    : `Hi ${firstName},\n\n${evidenceHook}.\n\n${evLine}, so I wanted to reach out. Businesses like ${coShort} often find they can reduce ${foreignCcy} payment costs by reviewing their FX setup — it usually only takes one conversation to find out.\n\nWould it be worth a quick call?`;
+
+  return { call, linkedin, subject, emailBody };
+}
+
+function CallOpenerPanel({ lead, event }) {
+  const [tab, setTab]     = useState("call");
+  const [copied, setCopied] = useState(false);
+  const opener = useMemo(() => generateOpener(lead, event), [lead, event]);
+
+  function doCopy(text) { copy(text); setCopied(true); setTimeout(()=>setCopied(false), 2000); }
+
+  const content = tab === "call"
+    ? opener.call
+    : tab === "linkedin"
+    ? opener.linkedin
+    : opener.emailBody;
+
+  const charCount = tab === "linkedin" ? opener.linkedin.length : null;
+
+  // Don't show if there's no meaningful evidence to work from AND no event context
+  const hasContext = (lead.fx_evidence_snippets||[]).length > 0
+    || (lead.supplier_evidence||[]).length > 0
+    || (lead.country_evidence||[]).length > 0
+    || lead.segment_name
+    || event?.headline;
+  if (!hasContext) return null;
+
+  return (
+    <div className="opener-panel">
+      <div className="opener-tabs">
+        <button className={`opener-tab${tab==="call"?" active":""}`}     onClick={()=>setTab("call")}>📞 Call</button>
+        <button className={`opener-tab${tab==="linkedin"?" active":""}`} onClick={()=>setTab("linkedin")}>💼 LinkedIn</button>
+        <button className={`opener-tab${tab==="email"?" active":""}`}    onClick={()=>setTab("email")}>✉ Email</button>
+      </div>
+      <div className="opener-body">
+        {tab === "email" && (
+          <div className="opener-label">Subject: {opener.subject}</div>
+        )}
+        <div className="opener-text">{content}</div>
+        {charCount !== null && (
+          <div className="opener-char" style={{color: charCount > 300 ? "#F87171" : "rgba(255,255,255,.2)"}}>
+            {charCount}/300 chars{charCount > 300 ? " ⚠" : ""}
+          </div>
+        )}
+        <button
+          className={`copy-btn${copied?" copied":""}`}
+          style={{top:10,right:10}}
+          onClick={()=>doCopy(tab==="email"?`Subject: ${opener.subject}\n\n${opener.emailBody}`:content)}
+        >
+          {copied ? "✓ Copied" : "Copy"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── COMPANY CARD ────────────────────────────────────────────────
-function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry }) {
+function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event }) {
   const [open, setOpen] = useState(false);
   const color       = pri(lead.priority);
   const initials    = (lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
@@ -1118,6 +1252,9 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry }) {
 
           {/* CALL INTELLIGENCE — website evidence, countries, currency pair, FX score */}
           <CallIntelligencePanel lead={lead} />
+
+          {/* CALL OPENER — rule-based, three formats */}
+          <CallOpenerPanel lead={lead} event={event} />
 
           {/* EXPOSURE THESIS — AI-generated context (shown when no direct evidence) */}
           {thesis && !(lead.fx_evidence_snippets?.length) && (
@@ -1654,6 +1791,7 @@ function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet, getL
                       onCrmSet={onCrmSet}
                       performAction={performAction}
                       crmEntry={getLead(l)}
+                      event={event}
                     />
                   )}</div>
                 : <div style={{padding:"18px 0",textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"rgba(255,255,255,.2)"}}>All companies hidden by active filters</div>
@@ -1895,6 +2033,34 @@ export default function App() {
               ))}
             </div>
           )}
+
+          <div className="sb">
+            <div className="sb-h">Follow-ups</div>
+            <div className="sb-row"><span className="sb-l">Due today</span><span className="sb-v" style={{color:"#10B981"}}>{followupsDueToday}</span></div>
+            <div className="sb-row"><span className="sb-l">Overdue</span><span className="sb-v" style={{color:"#F97316"}}>{followupsOverdue}</span></div>
+            <div className="sb-row"><span className="sb-l">No next action</span><span className="sb-v" style={{color:"#64748B"}}>{noNextAction}</span></div>
+            <div className="sb-row"><span className="sb-l">Recently contacted</span><span className="sb-v" style={{color:"#38BDF8"}}>{recentlyContacted}</span></div>
+          </div>
+
+          <div className="sb">
+            <div className="sb-h">Exports</div>
+            <div className="sb-row">
+              <span className="sb-l">Today's Queue</span>
+              <button className="btn-sm" onClick={()=>exportLeadsToCsv(callListLeads, "todays_queue.csv")}>CSV</button>
+            </div>
+            <div className="sb-row">
+              <span className="sb-l">Grade A/B leads</span>
+              <button className="btn-sm" onClick={()=>exportLeadsToCsv(leads.filter(l=>["A","B"].includes(l.route_grade||computeRouteGrade(l))), "grade_a_b.csv")}>CSV</button>
+            </div>
+            <div className="sb-row">
+              <span className="sb-l">Follow-ups due</span>
+              <button className="btn-sm" onClick={()=>{
+                const now = new Date();
+                const due = leads.filter(l=>{ const crm=crmState[l.id]||{}; if(!crm.next_follow_up_at) return false; return new Date(crm.next_follow_up_at)<=now; });
+                exportLeadsToCsv(due, "followups_due.csv");
+              }}>CSV</button>
+            </div>
+          </div>
         </div>
       </div>
     </>
