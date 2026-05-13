@@ -47,6 +47,8 @@ MAX_OFFICERS     = 8             # cap per company
 SMTP_PER_PERSON  = 3             # max SMTP probes per director
 MAX_PAGES        = 5             # max web pages fetched per company
 FORCE_REFRESH    = "--force" in sys.argv
+# GitHub Actions (and most CI envs) block outbound SMTP port 25 — skip verification
+SKIP_SMTP        = os.getenv("CI") == "true" or "--no-smtp" in sys.argv
 
 # CH rate-limit guard: max 2 simultaneous CH calls
 _ch_sem = threading.Semaphore(2)
@@ -550,6 +552,9 @@ def smtp_check(email: str, mx: list[str]) -> bool | None:
 
 
 def verify_patterns(patterns: list[str], domain: str) -> list[dict]:
+    if SKIP_SMTP:
+        # CI environment — return unverified candidates (SMTP port 25 is blocked)
+        return [{"email": p, "smtp_verified": None, "catch_all": None} for p in patterns[:SMTP_PER_PERSON]]
     mx        = get_mx(domain)
     catch_all = is_catch_all(domain, mx) if mx else False
     results   = []

@@ -49,6 +49,25 @@ jobs:
           CATEGORY_MIN_SCORE_TO_SCRAPE: "65"
         run: npm run pipeline
 
+      # ── Python enrichment (runs on new/unenriched leads only — idempotent) ──
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: pip install requests dnspython --quiet
+
+      - name: Enrich decision makers (CH officers, team pages, route grade, contact confidence)
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          CI: "true"   # disables SMTP verification (port 25 blocked in Actions)
+        run: python3 scripts/enrich_decision_makers.py
+        continue-on-error: true   # enrichment failure should not block the commit
+
+      - name: Enrich website intelligence (evidence snippets, country/currency inference, FX likelihood)
+        run: python3 scripts/enrich_website_intelligence.py
+        continue-on-error: true
+
       - name: Refresh the dashboard data snapshot
         run: npm run sync-web-data
 
