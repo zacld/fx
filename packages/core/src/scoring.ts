@@ -281,6 +281,16 @@ export function scoreLead(lead: Partial<ScoreInput>, urgency = 0): ScoreResult {
     score = Math.min(score, 39);
     reasons.push("⚠ Dissolved company — capped at SKIP");
   }
+  // Gate F2: dormant (from CH accounts enrichment) → cap at QUEUE
+  const sizeBand = (lead as Record<string, unknown>).company_size_band as string | undefined;
+  const accsType = (lead as Record<string, unknown>).accounts_type as string | undefined;
+  const isDormant =
+    sizeBand === "dormant" ||
+    (typeof accsType === "string" && accsType.toLowerCase().includes("dormant"));
+  if (isDormant) {
+    score = Math.min(score, 49);
+    reasons.push("⚠ Dormant company (CH accounts) — capped at QUEUE");
+  }
   // Gate G: WARM/HOT requires B2B/trade evidence
   if (score >= 65) {
     const allSigs = new Set<string>([

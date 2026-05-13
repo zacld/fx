@@ -24,7 +24,7 @@ Run: python3.11 scripts/enrich_directories.py [--force]
 """
 
 import json, logging, os, re, shutil, sys, time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 from pathlib import Path
 from typing import Optional
 from urllib.parse import quote_plus, urljoin, urlparse
@@ -231,11 +231,20 @@ def phone_score(phone: str, postcode: str = "") -> int:
     return base + geo_score(phone, postcode)
 
 def normalise_phone(raw: str) -> str:
-    d = re.sub(r"[\s\-\(\)]", "", raw)
-    if d.startswith("+44"):
+    # URL-decode percent-encoded spaces first
+    r = raw.replace("%20", " ").replace("%2B", "+")
+    # Strip formatting chars
+    d = re.sub(r"[\s\-\(\)]", "", r)
+    # Handle +44(0)XXXXXXXXX — the (0) is the trunk prefix, strip it
+    if d.startswith("+440"):
+        d = "0" + d[4:]   # +440XXXXXXX → 0XXXXXXX
+    elif d.startswith("+44"):
         d = "0" + d[3:]
     elif d.startswith("44") and len(d) >= 11:
-        d = "0" + d[2:]
+        if d[2] == "0":
+            d = d[2:]      # 440XXXXXXXXX → 0XXXXXXXXX
+        else:
+            d = "0" + d[2:]
     if len(d) == 11:
         # 3-digit area codes (020/023/024/028/029): format as 0XX XXXX XXXX
         if d[1:3] in ("20", "23", "24", "28", "29"):
@@ -530,7 +539,7 @@ def lookup_phone_multi_source(
                     results[key] = fut.result(timeout=2) or []
                 except Exception:
                     results[key] = []
-        except TimeoutError:
+        except (TimeoutError, FuturesTimeoutError):
             # One or more sources took too long — use what arrived, cancel the rest
             for fut, key in futures.items():
                 if not fut.done():
