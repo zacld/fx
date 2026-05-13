@@ -69,7 +69,7 @@ export function parseChName(raw: string): ParsedName {
 
   if (name.includes(",")) {
     const [lastRaw, restRaw = ""] = name.split(",", 2);
-    last = titleCase(lastRaw.trim());
+    last = titleCase((lastRaw ?? "").trim());
     const parts = restRaw.trim().split(/\s+/).filter(Boolean);
     first = parts[0] ? capitalise(parts[0]) : "";
   } else {
