@@ -156,6 +156,8 @@ type ScoreInput = Pick<
   | "director_name" | "website" | "website_confidence" | "website_source"
   | "company_status" | "pays_fx_confirmed" | "why_affected" | "exposure_thesis"
   | "is_large_org"
+  // Gate J — actionable contact route required for HOT
+  | "contact_phone" | "contact_email" | "contact_page"
 >;
 
 /**

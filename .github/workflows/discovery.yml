@@ -63,7 +63,14 @@ jobs:
           FX_EMAIL_VERIFIER_TOKEN:      ${{ secrets.FX_EMAIL_VERIFIER_TOKEN }}
         run: npm run pipeline
 
-      # ── Python enrichment (runs on new/unenriched leads only — idempotent) ──
+      # ── Python supplementary scripts ──────────────────────────────────────
+      # The two big enrichments (decision makers, website intelligence) are now
+      # done in TypeScript inside `npm run pipeline` above. These remaining
+      # Python scripts are complementary — they fill in things the TS stages
+      # don't (CH iXBRL accounts, multi-source directory phone cross-reference,
+      # call_readiness derivation, QA audit). The duplicate scripts
+      # (enrich_decision_makers.py, enrich_website_intelligence.py, enrich_contacts.py)
+      # have been moved to scripts/legacy/ and are no longer run.
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -79,17 +86,6 @@ jobs:
 
       - name: Enrich directories (multi-source phone cross-reference — Yell, Scoot, Thomson, FreeIndex, Cylex)
         run: python3 scripts/enrich_directories.py
-        continue-on-error: true
-
-      - name: Enrich decision makers (CH officers, team pages, route grade, contact confidence)
-        env:
-          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
-          CI: "true"   # disables SMTP verification (port 25 blocked in Actions)
-        run: python3 scripts/enrich_decision_makers.py
-        continue-on-error: true   # enrichment failure should not block the commit
-
-      - name: Enrich website intelligence (evidence snippets, country/currency inference, FX likelihood)
-        run: python3 scripts/enrich_website_intelligence.py
         continue-on-error: true
 
       - name: Compute call readiness (READY / REVIEW / HOLD per lead)

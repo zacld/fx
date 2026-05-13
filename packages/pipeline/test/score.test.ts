@@ -36,13 +36,15 @@ function setupDb(dir: string): string {
     segment_name: l.segment_name ?? "", is_large_org: l.is_large_org ? 1 : 0, data: JSON.stringify(l),
   });
 
-  // L1: legacy lead — nationality words in fx_payment_signals; strong active importer otherwise
+  // L1: legacy lead — nationality words in fx_payment_signals; strong active importer otherwise.
+  // director_name is set so Gate J (HOT requires actionable contact route) doesn't cap it to WARM.
   put(makeLead({
     id: "L1", event_id: "evtCcy", company_name: "Acme Wine Importers Ltd", company_status: "active",
     company_number: "00111111", website: "https://acmewine.co.uk", website_domain: "acmewine.co.uk",
     website_confidence: "high", website_source: "ddg_search", sic_codes: ["46342"], exposure_level: "Very High",
     exposure_type: "Import cost exposure", fx_payment_signals: ["italian", "french", "we import", "sourced from"],
     b2b_signals: ["wholesale", "trade customers"], secondary_signals: ["european"], pays_fx_confirmed: true,
+    director_name: "Jane Doe", director_role: "Finance Director",
     why_affected: "Imports wine from European producers, invoiced in EUR, revenue in GBP — GBP/EUR moves squeeze margin.",
     priority: "QUEUE",
   }));

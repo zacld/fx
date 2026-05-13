@@ -1290,6 +1290,10 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
   const [open, setOpen] = useState(false);
   const color       = pri(lead.priority);
   const initials    = (lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
+  // Legacy v1 LinkedIn-assist blob. The v2 source of truth is
+  // lead.decision_makers[].linkedin_search / linkedin_name_only / google_email_search,
+  // produced by the new TS enrich-decision-makers stage. `li` is only read as a
+  // fallback for old data that pre-dates that stage.
   const li          = lead.linkedin_assist;
   const fxSigs      = lead.fx_payment_signals || [];
   const segSigs     = lead.segment_signals || [];
