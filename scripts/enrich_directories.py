@@ -254,6 +254,52 @@ def fingerprint(phone: str) -> str:
         d = "0" + d[2:]
     return d
 
+# 3-digit UK area codes (followed by 8-digit subscriber)
+_THREE_DIGIT_AREAS = {"020", "023", "024", "028", "029"}
+# 4-digit UK area codes (followed by 7-digit subscriber)
+_FOUR_DIGIT_AREAS = {
+    "0113","0114","0115","0116","0117","0118",  # major cities
+    "0121","0131","0141","0151","0161","0191",  # Birmingham/Edinburgh/Glasgow/Liverpool/Manchester/NE
+}
+
+def is_valid_uk_phone(phone: str) -> bool:
+    """
+    Validate that a digit string is a plausible UK phone number.
+    Rejects strings like 02140xxxxxx where 021 is not a real UK area code.
+    """
+    d = re.sub(r"\D", "", phone)
+    if d.startswith("44"):
+        d = "0" + d[2:]
+    if len(d) != 11:
+        return False
+    if not d.startswith("0"):
+        return False
+
+    # 03xx (non-geographic), 08xx (special rate), 09xx (premium)
+    if d[1] in ("3", "8", "9"):
+        return True
+
+    # 07xx mobile
+    if d[1] == "7":
+        return d[2] != "0"  # 070 is not mobile; 071-079 are
+
+    # 02x — must be a known 3-digit area code
+    if d[1] == "2":
+        return d[:3] in _THREE_DIGIT_AREAS
+
+    # 011x / 012x / 013x / 014x / 015x / 016x / 017x / 018x / 019x
+    if d[1] == "1":
+        # Known 4-digit codes
+        if d[:4] in _FOUR_DIGIT_AREAS:
+            return True
+        # All other 01xxx codes: area code is 5 digits (01xxx), subscriber is 6 digits
+        # Validate: second digit after 01 can be anything 1-9 (010 prefix doesn't exist in standard use)
+        if d[2] == "0":
+            return False  # 010 prefix doesn't exist
+        return True
+
+    return False
+
 def extract_phones_from_html(html: str, near_text: str = "") -> list[str]:
     """
     Extract phone numbers from HTML text, dedup by digit fingerprint.
@@ -265,14 +311,14 @@ def extract_phones_from_html(html: str, near_text: str = "") -> list[str]:
     for m in TEL_HREF_RE.finditer(html):
         raw = m.group(1).strip()
         fp  = fingerprint(raw)
-        if 9 <= len(fp) <= 13:
+        if 9 <= len(fp) <= 13 and is_valid_uk_phone(raw):
             found[fp] = normalise_phone(raw)
 
     # Fallback: regex on visible text
     for m in PHONE_RE.finditer(html):
         raw = m.group(0).strip()
         fp  = fingerprint(raw)
-        if fp and 9 <= len(fp) <= 13:
+        if fp and 9 <= len(fp) <= 13 and is_valid_uk_phone(raw):
             found.setdefault(fp, normalise_phone(raw))
 
     return list(found.values())
