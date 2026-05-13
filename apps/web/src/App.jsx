@@ -503,6 +503,18 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 
 /* ROUTE GRADE BADGE */
 .grade-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;border:1px solid transparent;cursor:default}
+.size-badge{display:inline-flex;align-items:center;padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid transparent;cursor:default}
+/* FINANCIALS PANEL */
+.fin-panel{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 14px;margin-bottom:12px}
+.fin-row{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:6px}
+.fin-item{display:flex;flex-direction:column;gap:2px}
+.fin-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.04em}
+.fin-value{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:rgba(255,255,255,.7)}
+.fin-date{font-size:10px;color:rgba(255,255,255,.2);margin-top:4px}
+.phone-row{display:flex;align-items:center;gap:8px;margin-top:4px;padding:5px 0}
+.phone-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#10B981;letter-spacing:.03em}
+.phone-src{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25)}
+.phone-src-high{color:#10B981}
 .conf-bar{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.3)}
 .conf-track{width:48px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
 .conf-fill{height:100%;border-radius:2px;transition:width .3s}
@@ -627,6 +639,95 @@ function siteConfClass(conf) {
   if (conf === "high" || conf === "confirmed") return "b b-site-high";
   if (conf === "medium") return "b b-site-med";
   return "b b-site-low";
+}
+
+// ─── COMPANY SIZE HELPERS ────────────────────────────────────────
+function sizeBandColor(band) {
+  if (!band || band === "unknown" || band === "dormant") return "#475569";
+  if (band === "<£1m")         return "#64748B";  // gray — micro/very small
+  if (band === "£1m–£5m")      return "#F59E0B";  // amber — SME sweet spot
+  if (band === "£5m–£25m")     return "#10B981";  // green — ideal FX target
+  if (band === "£25m–£100m")   return "#38BDF8";  // blue — medium-large
+  if (band === "£100m+")       return "#818CF8";  // purple — large corp
+  return "#475569";
+}
+function sizeBandLabel(band) {
+  if (!band || band === "unknown") return null;
+  if (band === "dormant") return "dormant";
+  return band;
+}
+function accTypeLabel(t) {
+  if (!t) return null;
+  const m = { "micro-entity":"micro", small:"small", medium:"medium", full:"full", group:"group", abridged:"abridged", dormant:"dormant" };
+  return m[t] || t;
+}
+function fmtGBP(n) {
+  if (n == null) return null;
+  if (n >= 1_000_000) return `£${(n/1_000_000).toFixed(1)}m`;
+  if (n >= 1_000)     return `£${(n/1_000).toFixed(0)}k`;
+  return `£${n.toFixed(0)}`;
+}
+
+// ─── COMPANY FINANCIALS PANEL ────────────────────────────────────
+function CompanyFinancials({ lead }) {
+  const band    = lead.company_size_band;
+  const actype  = lead.accounts_type;
+  const emp     = lead.employee_count;
+  const empBand = lead.employee_band;
+  const turnover= lead.turnover_amount;
+  const netAss  = lead.net_assets;
+  const lastDate= lead.last_accounts_date;
+
+  if (!band && !actype && emp == null) return null;
+  if (band === "unknown" && !actype && emp == null) return null;
+
+  const bc = sizeBandColor(band);
+
+  return (
+    <div className="fin-panel">
+      <div className="fin-row">
+        {band && band !== "unknown" && (
+          <div className="fin-item">
+            <div className="fin-label">Est. Revenue</div>
+            <div className="fin-value" style={{color:bc}}>{sizeBandLabel(band)}</div>
+          </div>
+        )}
+        {actype && actype !== "unknown" && (
+          <div className="fin-item">
+            <div className="fin-label">Accounts type</div>
+            <div className="fin-value" style={{color:actype==="dormant"?"#F87171":"rgba(255,255,255,.6)"}}>{accTypeLabel(actype)}</div>
+          </div>
+        )}
+        {turnover != null && (
+          <div className="fin-item">
+            <div className="fin-label">Turnover</div>
+            <div className="fin-value" style={{color:"#10B981"}}>{fmtGBP(turnover)}</div>
+          </div>
+        )}
+        {netAss != null && turnover == null && (
+          <div className="fin-item">
+            <div className="fin-label">Net assets</div>
+            <div className="fin-value">{fmtGBP(netAss)}</div>
+          </div>
+        )}
+        {emp != null && (
+          <div className="fin-item">
+            <div className="fin-label">Employees</div>
+            <div className="fin-value">{emp}</div>
+          </div>
+        )}
+        {emp == null && empBand && empBand !== "unknown" && (
+          <div className="fin-item">
+            <div className="fin-label">Employees</div>
+            <div className="fin-value" style={{color:"rgba(255,255,255,.5)"}}>{empBand}</div>
+          </div>
+        )}
+      </div>
+      {lastDate && (
+        <div className="fin-date">Last accounts: {lastDate}</div>
+      )}
+    </div>
+  );
 }
 
 // ─── CRM BADGE ───────────────────────────────────────────────────
@@ -1214,11 +1315,29 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             {(lead.inferred_currency_pairs||[]).slice(0,2).map(p=>(
               <span key={p} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,padding:"1px 5px",borderRadius:3,background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.18)",color:"#10B981"}}>{p}</span>
             ))}
+            {lead.company_size_band && lead.company_size_band !== "unknown" && (() => {
+              const bc = sizeBandColor(lead.company_size_band);
+              return (
+                <span
+                  className="size-badge"
+                  style={{color:bc,background:`${bc}12`,borderColor:`${bc}30`}}
+                  title={`Company size band: ${lead.company_size_band}`}
+                >
+                  {lead.company_size_band === "dormant" ? "dormant" : `~${lead.company_size_band}`}
+                </span>
+              );
+            })()}
           </div>
           <div className="cc-info">
             {lead.address && <span>📍 {lead.address.split(",").slice(-2).join(",").trim()}</span>}
             {lead.company_status && <span style={{color:lead.company_status==="active"?"#10B981":"#F59E0B"}}>● {lead.company_status}</span>}
             {lead.segment_name && <span style={{color:"rgba(255,255,255,.3)"}}>{lead.segment_name.slice(0,40)}</span>}
+            {lead.contact_phone && (
+              <span style={{color:"#10B981",fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700}}>
+                📞 {lead.contact_phone}
+                {(lead.phone_source_count||0) >= 2 && <span style={{color:"rgba(16,185,129,.5)",fontSize:9,marginLeft:4}}>✓×{lead.phone_source_count}</span>}
+              </span>
+            )}
           </div>
           {lead.director_name && (
             <div className="cc-dir" style={{marginBottom:7}}>
@@ -1256,6 +1375,9 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
           {/* CALL OPENER — rule-based, three formats */}
           <CallOpenerPanel lead={lead} event={event} />
 
+          {/* COMPANY FINANCIALS — CH accounts size, employees, turnover */}
+          <CompanyFinancials lead={lead} />
+
           {/* EXPOSURE THESIS — AI-generated context (shown when no direct evidence) */}
           {thesis && !(lead.fx_evidence_snippets?.length) && (
             <div className="thesis-box" style={{marginBottom:14}}>
@@ -1265,6 +1387,27 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
           )}
 
           <div className="cc-exp-grid">
+            {/* Phone — contact route */}
+            {lead.contact_phone && (
+              <div>
+                <div className="xl">Phone</div>
+                <div className="phone-row">
+                  <span className="phone-val">{lead.contact_phone}</span>
+                  {lead.phone_source_count >= 2 && (
+                    <span className="phone-src phone-src-high">✓ {lead.phone_source_count} sources</span>
+                  )}
+                  {(lead.phone_source_count||0) < 2 && lead.phone_sources?.length > 0 && (
+                    <span className="phone-src">{lead.phone_sources[0]}</span>
+                  )}
+                </div>
+                {lead.all_phones_found?.length > 1 && (
+                  <div style={{fontSize:10,color:"rgba(255,255,255,.2)",fontFamily:"'JetBrains Mono',monospace",marginTop:3}}>
+                    Also found: {lead.all_phones_found.slice(1,3).join("  ·  ")}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Decision makers — full panel (replaces single director) */}
             <DecisionMakers lead={lead} />
 

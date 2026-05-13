@@ -57,6 +57,16 @@ jobs:
       - name: Install Python deps
         run: pip install requests dnspython --quiet
 
+      - name: Enrich CH accounts (size band, employee count, turnover, accounts type)
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+        run: python3 scripts/enrich_ch_accounts.py
+        continue-on-error: true
+
+      - name: Enrich directories (multi-source phone cross-reference — Yell, Scoot, Thomson, FreeIndex, Cylex)
+        run: python3 scripts/enrich_directories.py
+        continue-on-error: true
+
       - name: Enrich decision makers (CH officers, team pages, route grade, contact confidence)
         env:
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
