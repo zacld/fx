@@ -26,11 +26,13 @@ ROOT      = Path(__file__).parent.parent
 DATA_FILE = ROOT / "data" / "leads.json"
 
 # ── Config ────────────────────────────────────────────────────────────────────
-TIMEOUT         = (4, 10)
-WORKERS         = 6           # parallel web workers
-SMTP_TIMEOUT    = 6
-CHECKPOINT_EVERY = 25
-SKIP_ALREADY_VERIFIED = True  # skip leads that already have contact_email
+TIMEOUT          = (4, 10)
+WORKERS          = 8           # parallel web workers
+SMTP_TIMEOUT     = 2           # 2s is enough — live mailservers respond in <1s
+CHECKPOINT_EVERY = 50
+SKIP_ALREADY_VERIFIED = True   # skip leads that already have contact_email
+SMTP_PRIORITY_ONLY    = True   # only SMTP-probe HOT/WARM leads (not all 446)
+COMMON_PFX_LIMIT      = 3      # only probe info@, accounts@, sales@ — not all 8
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -321,7 +323,7 @@ def verify_common_prefixes(domain: str) -> list[dict]:
     """
     mx = get_mx(domain)
     results: list[dict] = []
-    for pfx in COMMON_PFX[:8]:   # cap probes
+    for pfx in COMMON_PFX[:COMMON_PFX_LIMIT]:   # cap probes
         email = f"{pfx}@{domain}"
         verdict = smtp_verify(email, mx)
         results.append({"email": email, "smtp_verified": verdict})
@@ -415,8 +417,9 @@ def enrich_lead(lead: dict) -> dict:
             if merged:
                 log.info("    DDG found: %s", merged[0])
 
-    # Pass 3 — SMTP verify guessed patterns
-    if domain:
+    # Pass 3 — SMTP verify guessed patterns (only for allowed leads)
+    smtp_allowed = lead.pop("_smtp_allowed", True)
+    if domain and smtp_allowed:
         updated_guessed = verify_guessed_patterns(lead)
         if updated_guessed:
             lead["guessed_emails"] = updated_guessed
@@ -428,7 +431,7 @@ def enrich_lead(lead: dict) -> dict:
                 lead["contact_emails_found"] = list(dict.fromkeys(lead["contact_emails_found"]))[:4]
                 log.info("    SMTP verified: %s", best)
 
-        # If still no real email, try common prefixes
+        # If still no real email, try common prefixes (capped by COMMON_PFX_LIMIT)
         if not lead.get("contact_email"):
             common = verify_common_prefixes(domain)
             confirmed = [c for c in common if c.get("smtp_verified") is True]
@@ -455,6 +458,7 @@ def main():
     keys    = list(data.keys())    if is_dict else None
 
     # Prioritise leads without email, skip already-verified if flag set
+    hot_warm_ids = {i for i, l in enumerate(leads) if l.get("priority") in ("HOT","WARM")}
     to_process = []
     to_skip    = []
     for i, lead in enumerate(leads):
@@ -463,6 +467,8 @@ def main():
         elif not lead.get("website"):
             to_skip.append(i)
         else:
+            # Tag whether SMTP is allowed for this lead
+            lead["_smtp_allowed"] = (not SMTP_PRIORITY_ONLY) or (i in hot_warm_ids)
             to_process.append(i)
 
     log.info("Leads to enrich: %d  |  Already have email (skip): %d  |  No website (skip): %d",
