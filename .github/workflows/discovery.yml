@@ -35,7 +35,7 @@ jobs:
       - name: Install workspace deps
         run: npm ci
 
-      - name: Run the v2 pipeline (import → analyse → discover → enrich → score → dedup → export)
+      - name: Run the v2 pipeline (import → analyse → discover → enrich-contacts → enrich-decision-makers → enrich-website-intel → score → dedup → export)
         env:
           AI_PROVIDER:                  groq
           GROQ_API_KEY:                 ${{ secrets.GROQ_API_KEY }}
@@ -47,6 +47,20 @@ jobs:
           WEB_MAX_EVENTS:               "5"
           WEB_MAX_CATEGORIES_TO_SCRAPE: "6"
           CATEGORY_MIN_SCORE_TO_SCRAPE: "65"
+          # Port 25 is blocked from GitHub Actions egress, so the SMTP RCPT
+          # probe in enrich-decision-makers can't connect. The verifier falls
+          # back to MX-only checking; verified results from local runs still
+          # serve from data/cache/smtp.json when present.
+          FX_SMTP_DISABLE:              "1"
+          # Per-host fetch politeness — 6 concurrent leads × multiple stages
+          # would otherwise hammer the same domain.
+          FX_HOST_MIN_INTERVAL_MS:      "800"
+          # Optional: set FX_EMAIL_VERIFIER_URL (+ FX_EMAIL_VERIFIER_TOKEN) as
+          # GitHub secrets to route verification through Hunter / Snov /
+          # NeverBounce / a custom worker. When set, takes precedence over the
+          # SMTP_DISABLE branch above.
+          FX_EMAIL_VERIFIER_URL:        ${{ secrets.FX_EMAIL_VERIFIER_URL }}
+          FX_EMAIL_VERIFIER_TOKEN:      ${{ secrets.FX_EMAIL_VERIFIER_TOKEN }}
         run: npm run pipeline
 
       # ── Python enrichment (runs on new/unenriched leads only — idempotent) ──
