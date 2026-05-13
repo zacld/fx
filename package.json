@@ -19,9 +19,10 @@
     "analyse": "tsx packages/pipeline/src/stages/analyse.ts",
     "discover": "tsx packages/pipeline/src/stages/discover.ts",
     "enrich-contacts": "tsx packages/pipeline/src/stages/enrich-contacts.ts",
+    "enrich-decision-makers": "tsx packages/pipeline/src/stages/enrich-decision-makers.ts",
     "score": "tsx packages/pipeline/src/stages/score.ts",
     "dedup": "tsx packages/pipeline/src/stages/dedup.ts",
-    "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run score && npm run dedup && npm run db:export",
+    "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run enrich-decision-makers && npm run score && npm run dedup && npm run db:export",
     "sync-web-data": "mkdir -p apps/web/public/data && cp data/events.json data/leads.json apps/web/public/data/"
   },
   "devDependencies": {
