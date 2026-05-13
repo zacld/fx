@@ -68,6 +68,13 @@ jobs:
         run: python3 scripts/enrich_website_intelligence.py
         continue-on-error: true
 
+      - name: Compute call readiness (READY / REVIEW / HOLD per lead)
+        run: python3 scripts/compute_call_readiness.py
+        continue-on-error: true
+
+      - name: QA audit (summary printed to Actions log — non-blocking)
+        run: python3 scripts/audit_leads.py || true
+
       - name: Refresh the dashboard data snapshot
         run: npm run sync-web-data
 

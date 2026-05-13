@@ -30,6 +30,12 @@ const GRADE_BG    = {A:"rgba(16,185,129,.12)",B:"rgba(52,211,153,.08)",C:"rgba(2
 const GRADE_TIP   = {A:"Named FD/CFO/MD + verified contact",B:"Named FD/CFO/MD + guessed email/contact page",C:"Named director + phone or email",D:"Company phone/email, no named person",E:"Website only",F:"No contact route found"};
 const gradeColor  = g => GRADE_COLOR[g] || "#475569";
 const gradeBg     = g => GRADE_BG[g]    || "rgba(71,85,105,.06)";
+// Call readiness helpers
+const CR_COLOR = {READY:"#10B981",REVIEW:"#F59E0B",HOLD:"#64748B"};
+const CR_BG    = {READY:"rgba(16,185,129,.12)",REVIEW:"rgba(245,158,11,.1)",HOLD:"rgba(100,116,139,.07)"};
+const CR_ORDER = {READY:0,REVIEW:1,HOLD:2,undefined:3};
+const crColor  = r => CR_COLOR[r] || "#64748B";
+const crBg     = r => CR_BG[r]    || "rgba(100,116,139,.07)";
 const gradeTip    = g => GRADE_TIP[g]   || "";
 const TIER_COLOR  = {1:"#10B981",2:"#F59E0B",3:"#64748B"};
 const tierColor   = t => TIER_COLOR[t]  || "#64748B";
@@ -165,11 +171,11 @@ const BLANK_FILTERS = {
   segment:      "all",
   statuses:     [],
   grades:       [],
-  sortBy:       "score",    // "score" | "grade" | "confidence"
+  sortBy:       "score",    // "score" | "readiness" | "grade" | "confidence" | "fx_likelihood"
   search:       "",
 };
 
-const CALL_LIST_FILTERS = { ...BLANK_FILTERS, view: "call_list" };
+const CALL_LIST_FILTERS = { ...BLANK_FILTERS, view: "call_list", sortBy: "readiness" };
 const RESEARCH_FILTERS  = { ...BLANK_FILTERS, view: "research"  };
 const ALL_FILTERS       = { ...BLANK_FILTERS, view: "all"       };
 
@@ -227,7 +233,12 @@ function applyFilters(leads, filters, getCrmStatus) {
   }
   // Sort
   const GRADE_ORDER = {A:0,B:1,C:2,D:3,E:4,F:5};
-  if (filters.sortBy === "grade") {
+  if (filters.sortBy === "readiness") {
+    r = [...r].sort((a,b) => {
+      const rd = (CR_ORDER[a.call_readiness]??3) - (CR_ORDER[b.call_readiness]??3);
+      return rd !== 0 ? rd : (b.score||0) - (a.score||0);
+    });
+  } else if (filters.sortBy === "grade") {
     r = [...r].sort((a,b) => {
       const gd = (GRADE_ORDER[a.route_grade]??9) - (GRADE_ORDER[b.route_grade]??9);
       return gd !== 0 ? gd : (b.score||0) - (a.score||0);
@@ -916,6 +927,27 @@ function GradeBadge({ grade }) {
   );
 }
 
+function ReadinessBadge({ lead }) {
+  const cr = lead.call_readiness;
+  if (!cr) return null;
+  const col = crColor(cr);
+  const reasons = lead.call_readiness_reasons || [];
+  const tip = cr === "READY"
+    ? "READY — Grade A/B + strong FX evidence + high/medium website confidence"
+    : cr === "REVIEW"
+    ? `REVIEW — ${reasons.join(" · ")}`
+    : `HOLD — ${reasons.join(" · ")}`;
+  return (
+    <span
+      className="grade-badge"
+      style={{color:col, background:crBg(cr), borderColor:`${col}35`, letterSpacing:"0.02em"}}
+      title={tip}
+    >
+      {cr}
+    </span>
+  );
+}
+
 function ConfidenceBar({ value }) {
   if (value == null) return null;
   const pct = Math.min(100, Math.max(0, value));
@@ -1016,6 +1048,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry }) {
             {[lead.company_type?.toUpperCase(), lead.company_number&&`CH ${lead.company_number}`, lead.incorporated&&`Est. ${lead.incorporated.slice(0,4)}`].filter(Boolean).join(" · ")}
           </div>
           <div className="cc-badges">
+            <ReadinessBadge lead={lead} />
             <span className="b b-p">● {lead.priority}</span>
             {lead.exposure_level && <span className={`exp-level ${expClass(lead.exposure_level)}`}>{expLabel(lead.exposure_level)}</span>}
             {allSigs.length > 0 && (
@@ -1364,6 +1397,7 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState
       <div className="fb-group">
         <span className="fb-label">Sort</span>
         <select className="fb-select" value={filters.sortBy} onChange={e=>set("sortBy",e.target.value)}>
+          <option value="readiness">Call readiness</option>
           <option value="score">Score</option>
           <option value="grade">Route grade</option>
           <option value="confidence">Confidence</option>
