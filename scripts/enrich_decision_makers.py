@@ -68,6 +68,49 @@ JUNK_HOSTS = {
     "yourdomain.com", "email.com", "sentry-next.wixpress.com",
 }
 
+# ── Phone helpers ─────────────────────────────────────────────────────────────
+def extract_phones_from_html(html: str) -> list[str]:
+    """
+    Extract UK phone numbers from HTML in priority order:
+    tel: links → schema.org telephone → free text PHONE_RE.
+    Returns normalised, deduplicated list.
+    """
+    phones: list[str] = []
+
+    # 1. tel: links (highest confidence — deliberately placed by site owner)
+    for m in re.finditer(r'href=["\']tel:([+\d\s()\-\.]{7,20})["\']', html, re.IGNORECASE):
+        phones.append(m.group(1).strip())
+
+    # 2. Schema.org / JSON-LD telephone property
+    for m in re.finditer(r'"telephone"\s*:\s*"([^"]{7,20})"', html, re.IGNORECASE):
+        phones.append(m.group(1).strip())
+
+    # 3. Free text (strip tags first)
+    text = re.sub(r"<[^>]+>", " ", html)
+    for m in PHONE_RE.finditer(text):
+        phones.append(m.group(0).strip())
+
+    # Deduplicate by digit-only fingerprint
+    seen: set[str] = set()
+    out: list[str] = []
+    for p in phones:
+        digits = re.sub(r"[^\d+]", "", p)
+        if len(digits) >= 10 and digits not in seen:
+            seen.add(digits)
+            out.append(re.sub(r"[\s\-\.]", " ", p).strip())
+    return out
+
+
+def best_phone(phones: list[str]) -> str | None:
+    """
+    Pick the most useful phone from a list.
+    Prefer geographic (01/02) and mobile (07) over non-geo (0800/0300/0808).
+    """
+    if not phones:
+        return None
+    local = [p for p in phones if re.match(r"(\+44\s?[127]|0[127])", p)]
+    return local[0] if local else phones[0]
+
 # ── Role tier definitions ─────────────────────────────────────────────────────
 # Each entry: (regex pattern, tier 1-3, canonical label)
 ROLE_TIERS: list[tuple[str, int, str]] = [
@@ -465,9 +508,24 @@ def get_mx(domain: str) -> list[str]:
     return hosts
 
 
+def mx_provider(mx_hosts: list[str]) -> str:
+    """Detect email provider from MX hostnames → 'google' | 'microsoft' | 'zoho' | 'other'."""
+    for host in mx_hosts:
+        h = host.lower()
+        if any(k in h for k in ("google", "googlemail", "aspmx")):
+            return "google"
+        if any(k in h for k in ("outlook", "protection.outlook", "onmicrosoft")):
+            return "microsoft"
+        if "zoho" in h:
+            return "zoho"
+    return "other"
+
+
 def is_catch_all(domain: str, mx: list[str]) -> bool:
-    probe = f"zzzprobe{random.randint(10000, 99999)}@{domain}"
-    return smtp_check(probe, mx) is True
+    """Test 3 random probes — catch-all only if 2+ return True (majority vote)."""
+    probes = [f"zzz{random.randint(10000, 99999)}@{domain}" for _ in range(3)]
+    hits = sum(1 for p in probes if smtp_check(p, mx) is True)
+    return hits >= 2
 
 
 def smtp_check(email: str, mx: list[str]) -> bool | None:
@@ -503,25 +561,78 @@ def verify_patterns(patterns: list[str], domain: str) -> list[dict]:
 
 
 # ── Email pattern generation ──────────────────────────────────────────────────
-def email_patterns(first: str, last: str, domain: str) -> list[str]:
+def email_patterns(first: str, last: str, domain: str, mx_hosts: list[str] | None = None) -> list[str]:
+    """
+    Generate email candidates ordered by likelihood for the detected mail provider.
+    Google Workspace → firstname@ most common.
+    Microsoft 365    → firstname.lastname@ most common.
+    """
     f = re.sub(r"[^a-z]", "", first.lower())
     l = re.sub(r"[^a-z]", "", last.lower())
     if not f or not l or not domain:
         return []
-    patterns = [
-        f"{f}@{domain}",
-        f"{f}.{l}@{domain}",
-        f"{f[0]}.{l}@{domain}",
-        f"{f[0]}{l}@{domain}",
-        f"{f}{l[0]}@{domain}",
-        f"{f}_{l}@{domain}",
-    ]
+
+    provider = mx_provider(mx_hosts or [])
+
+    all_p = {
+        "f":      f"{f}@{domain}",
+        "f_l":    f"{f}.{l}@{domain}",
+        "fi_l":   f"{f[0]}.{l}@{domain}",
+        "fil":    f"{f[0]}{l}@{domain}",
+        "fli":    f"{f}{l[0]}@{domain}",
+        "f_ul":   f"{f}_{l}@{domain}",
+    }
+
+    if provider == "google":
+        order = ["f", "f_l", "fi_l", "fil", "fli", "f_ul"]
+    elif provider == "microsoft":
+        order = ["f_l", "f", "fi_l", "fil", "fli", "f_ul"]
+    else:
+        order = ["f", "f_l", "fi_l", "fil", "fli", "f_ul"]
+
     seen, out = set(), []
-    for p in patterns:
+    for key in order:
+        p = all_p[key]
         if p not in seen:
             seen.add(p)
             out.append(p)
     return out
+
+
+# ── Yell.com phone fallback ───────────────────────────────────────────────────
+def yell_phone_lookup(company_name: str) -> str | None:
+    """
+    Search Yell.com for the company and return the first listed phone number.
+    Used as a last-resort fallback when no phone found on the company's own site.
+    Rate: max 1 request per company, only called when contact_phone is empty.
+    """
+    try:
+        clean = re.sub(r"\s+(ltd\.?|limited|plc|llp)\s*$", "", company_name, flags=re.IGNORECASE).strip()
+        if not clean or len(clean) < 3:
+            return None
+        url = (
+            "https://www.yell.com/ucs/UcsSearchAction.do"
+            f"?keywords={quote_plus(clean)}&location=uk&scrambleSeed=1"
+        )
+        r = SESSION.get(url, timeout=(5, 10))
+        if not r.ok:
+            return None
+        html = r.text
+
+        # tel: links in search results (most reliable)
+        phones = []
+        for m in re.finditer(r'href=["\']tel:([+\d\s()\-\.]{7,20})["\']', html, re.IGNORECASE):
+            phones.append(m.group(1).strip())
+
+        if not phones:
+            # Fallback: PHONE_RE on stripped text
+            text = re.sub(r"<[^>]+>", " ", html)
+            for m in PHONE_RE.finditer(text):
+                phones.append(m.group(0).strip())
+
+        return best_phone(phones)
+    except Exception:
+        return None
 
 
 # ── LinkedIn / Google search URLs ─────────────────────────────────────────────
@@ -656,6 +767,7 @@ def enrich_lead(lead: dict) -> dict:
     all_html        = ""
     all_people: list[dict] = []   # from named-people extraction
     all_emails: list[str]  = []
+    all_phones: list[str]  = []   # phones from every crawled page
 
     for page_url in pages_to_scrape:
         html = fetch(page_url)
@@ -667,6 +779,14 @@ def enrich_lead(lead: dict) -> dict:
             if not any(x["name"].lower() == p["name"].lower() for x in all_people):
                 all_people.append(p)
         all_emails.extend(extract_emails_from_html(html, domain))
+        all_phones.extend(extract_phones_from_html(html))
+
+    # Update contact_phone from multi-page scrape if not already set
+    if all_phones and not lead.get("contact_phone"):
+        phone = best_phone(all_phones)
+        if phone:
+            lead["contact_phone"] = phone
+            lead["phone_source"]  = "multi_page_scrape"
 
     # Dedupe emails
     seen_e, clean_emails = set(), []
@@ -719,9 +839,10 @@ def enrich_lead(lead: dict) -> dict:
                 dm["email_source"] = "website_email_found"
                 dm["email_verified"] = True
 
-        # c) SMTP-verify generated patterns
+        # c) SMTP-verify generated patterns (MX-aware ordering)
         if domain:
-            patterns = email_patterns(fname, lname, domain)
+            mx_hosts = get_mx(domain)   # cached after first call per domain
+            patterns = email_patterns(fname, lname, domain, mx_hosts)
             if patterns:
                 verified = verify_patterns(patterns, domain)
                 dm["email_guesses"] = verified
@@ -763,6 +884,15 @@ def enrich_lead(lead: dict) -> dict:
 
     # Final sort: Tier 1 first, then 2, then 3
     decision_makers.sort(key=lambda d: d.get("tier", 3))
+
+    # ── 3b. Yell.com phone fallback ──────────────────────────────────
+    # Only if we still have no phone after scraping all company pages
+    if not lead.get("contact_phone") and co_clean:
+        yell_phone = yell_phone_lookup(co_clean)
+        if yell_phone:
+            lead["contact_phone"] = yell_phone
+            lead["phone_source"]  = "yell_lookup"
+            log.debug("Yell phone for %s: %s", co_clean, yell_phone)
 
     # ── 4. Compute route grade + confidence ──────────────────────────
     lead["decision_makers"]      = decision_makers
@@ -904,6 +1034,17 @@ def main():
         g = l.get("route_grade", "?")
         grades[g] = grades.get(g, 0) + 1
 
+    # Phone source summary
+    phone_sources: dict[str, int] = {}
+    yell_hits = 0
+    for l in leads:
+        src = l.get("phone_source", "")
+        if src:
+            phone_sources[src] = phone_sources.get(src, 0) + 1
+        if src == "yell_lookup":
+            yell_hits += 1
+    has_phone = sum(1 for l in leads if l.get("contact_phone"))
+
     log.info(
         "=== Done — %d enriched | %d multi-director | %d with verified email ===",
         enriched, multi_dm, verified_any,
@@ -911,6 +1052,11 @@ def main():
     log.info(
         "Route grades: %s",
         "  ".join(f"{g}={n}" for g, n in sorted(grades.items())),
+    )
+    log.info(
+        "Phone coverage: %d/%d (%.0f%%)  |  Sources: %s",
+        has_phone, len(leads), 100 * has_phone / max(len(leads), 1),
+        "  ".join(f"{k}={v}" for k, v in sorted(phone_sources.items())),
     )
 
 
