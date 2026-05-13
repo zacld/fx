@@ -352,8 +352,16 @@ async function enrichLead(
     smtp,
   };
 
-  // 1) CH officers + PSCs
-  const officers = lead.company_number ? await ch.officers(lead.company_number) : [];
+  // 1) CH officers + PSCs. If the lead has no CH number but does have a
+  //    legacy director_name (from older pipeline runs / v1 data), synthesize a
+  //    single officer record so the rest of the stage still has someone to
+  //    enrich. This keeps the v2 shape consistent across old + new leads.
+  let officers: ChOfficer[] = [];
+  if (lead.company_number) {
+    officers = await ch.officers(lead.company_number);
+  } else if (lead.director_name) {
+    officers = [{ name: lead.director_name, officer_role: lead.director_role || "director" }];
+  }
   const pscs = lead.company_number ? await ch.psc(lead.company_number) : [];
 
   // 1.5) No-website fallback. If we have no website but a clean company name +
