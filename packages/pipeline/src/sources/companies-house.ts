@@ -16,8 +16,38 @@ import { FileCache, repoRoot } from "@fx/core";
 const CH_BASE = "https://api.company-information.service.gov.uk";
 
 export interface ChSearchItem { title: string; company_number: string; company_status?: string; company_type?: string; date_of_creation?: string; description?: string; }
-export interface ChProfile { company_status?: string; sic_codes?: Array<string | number>; date_of_creation?: string; registered_office_address?: Record<string, string>; company_name?: string; }
-export interface ChOfficer { name?: string; officer_role?: string; resigned_on?: string; }
+export interface ChProfile {
+  company_status?: string;
+  sic_codes?: Array<string | number>;
+  date_of_creation?: string;
+  registered_office_address?: Record<string, string>;
+  company_name?: string;
+  accounts?: {
+    accounting_reference_date?: { day?: string; month?: string };
+    last_accounts?: { type?: string; period_end_on?: string; made_up_to?: string };
+    next_accounts?: { period_end_on?: string };
+  };
+  has_charges?: boolean;
+}
+export interface ChOfficer { name?: string; officer_role?: string; resigned_on?: string; appointed_on?: string; }
+export interface ChPsc {
+  name?: string;
+  kind?: string;
+  natures_of_control?: string[];
+  notified_on?: string;
+  ceased_on?: string;
+}
+export interface ChFilingItem {
+  type?: string;
+  description?: string;
+  date?: string;
+  category?: string;
+}
+export interface ChChargesSummary {
+  total_count: number;
+  outstanding: number;
+  satisfied: number;
+}
 export interface ChValidation {
   company_number: string; company_name: string; company_status: string; sic_codes: string[];
   incorporated: string; registered_address: string;
@@ -148,10 +178,62 @@ export class ChClient {
     const { hit, value } = this.cache.lookup(key, this.ttl);
     if (hit) { this.stats.cacheHits++; return Array.isArray(value) ? (value as ChOfficer[]) : []; }
     if (!this.budgetOk()) return [];
-    const j = (await this.http(`/company/${encodeURIComponent(cn)}/officers`)) as { items?: ChOfficer[] } | null;
+    const j = (await this.http(`/company/${encodeURIComponent(cn)}/officers?items_per_page=50`)) as { items?: ChOfficer[] } | null;
     const items = (j?.items ?? []).filter((o) => !o.resigned_on);
     this.cache.store(key, items, items.length === 0);
     return items;
+  }
+
+  /**
+   * Persons with Significant Control. Often the *real* decision maker (owner)
+   * vs the appointed director. Caller filters out ceased records.
+   */
+  async psc(cn: string): Promise<ChPsc[]> {
+    if (!cn) return [];
+    const key = `psc:${cn}`;
+    const { hit, value } = this.cache.lookup(key, this.ttl);
+    if (hit) { this.stats.cacheHits++; return Array.isArray(value) ? (value as ChPsc[]) : []; }
+    if (!this.budgetOk()) return [];
+    const j = (await this.http(`/company/${encodeURIComponent(cn)}/persons-with-significant-control`)) as { items?: ChPsc[] } | null;
+    const items = (j?.items ?? []).filter((p) => !p.ceased_on);
+    this.cache.store(key, items, items.length === 0);
+    return items;
+  }
+
+  /** Recent filings (most-recent N). Useful as an activity signal — recent
+   *  charges/mortgages/changes of name correlate with growth + trade finance. */
+  async filings(cn: string, n = 10): Promise<ChFilingItem[]> {
+    if (!cn) return [];
+    const key = `filings:${cn}|${n}`;
+    const { hit, value } = this.cache.lookup(key, this.ttl);
+    if (hit) { this.stats.cacheHits++; return Array.isArray(value) ? (value as ChFilingItem[]) : []; }
+    if (!this.budgetOk()) return [];
+    const j = (await this.http(`/company/${encodeURIComponent(cn)}/filing-history?items_per_page=${n}`)) as { items?: ChFilingItem[] } | null;
+    const items = j?.items ?? [];
+    this.cache.store(key, items, items.length === 0);
+    return items;
+  }
+
+  /** Charges summary — a recent outstanding charge often means active trade finance. */
+  async charges(cn: string): Promise<ChChargesSummary | null> {
+    if (!cn) return null;
+    const key = `charges:${cn}`;
+    const { hit, value } = this.cache.lookup(key, this.ttl);
+    if (hit) { this.stats.cacheHits++; return (value as ChChargesSummary | null) ?? null; }
+    if (!this.budgetOk()) return null;
+    const j = (await this.http(`/company/${encodeURIComponent(cn)}/charges`)) as {
+      total_count?: number; unfiltered_count?: number;
+      items?: Array<{ status?: string }>;
+    } | null;
+    if (!j) { this.cache.store(key, null, true); return null; }
+    let outstanding = 0, satisfied = 0;
+    for (const c of j.items ?? []) {
+      if ((c.status || "").toLowerCase().includes("outstanding")) outstanding++;
+      else if ((c.status || "").toLowerCase().includes("satisfied")) satisfied++;
+    }
+    const summary: ChChargesSummary = { total_count: j.total_count ?? (j.items?.length ?? 0), outstanding, satisfied };
+    this.cache.store(key, summary, summary.total_count === 0);
+    return summary;
   }
 
   /** Fuzzy-match a company name (Jaccard ≥ 0.35), then enrich with profile + officers. */
