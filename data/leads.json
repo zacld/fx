@@ -166,12 +166,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "graham@firstchemical.com",
+            "email": "graham.judd@firstchemical.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "graham.judd@firstchemical.com",
+            "email": "graham@firstchemical.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -479,12 +479,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "angela@convertingmachinery.co.uk",
+            "email": "angela.budd@convertingmachinery.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "angela.budd@convertingmachinery.co.uk",
+            "email": "angela@convertingmachinery.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -512,12 +512,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "michael@convertingmachinery.co.uk",
+            "email": "michael.gartside@convertingmachinery.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "michael.gartside@convertingmachinery.co.uk",
+            "email": "michael@convertingmachinery.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -1079,12 +1079,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "alex@admfoods.co.uk",
+            "email": "alex.nurse@admfoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "alex.nurse@admfoods.co.uk",
+            "email": "alex@admfoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -1112,12 +1112,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "daniel@admfoods.co.uk",
+            "email": "daniel.nurse@admfoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "daniel.nurse@admfoods.co.uk",
+            "email": "daniel@admfoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -1145,12 +1145,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "morgan@admfoods.co.uk",
+            "email": "morgan.watson@admfoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "morgan.watson@admfoods.co.uk",
+            "email": "morgan@admfoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -2163,12 +2163,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "nikolaos@grc.co.uk",
+            "email": "nikolaos.douros@grc.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "nikolaos.douros@grc.co.uk",
+            "email": "nikolaos@grc.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -2818,12 +2818,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ayyan@epicsourcing.co.uk",
+            "email": "ayyan.haider@epicsourcing.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ayyan.haider@epicsourcing.co.uk",
+            "email": "ayyan@epicsourcing.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -3062,12 +3062,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "christopher@appleton-scientific.com",
+            "email": "christopher.brown@appleton-scientific.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "christopher.brown@appleton-scientific.com",
+            "email": "christopher@appleton-scientific.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -3282,12 +3282,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ian@precisionengineering.com",
+            "email": "ian.davies@precisionengineering.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ian.davies@precisionengineering.com",
+            "email": "ian@precisionengineering.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -3315,12 +3315,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ian@precisionengineering.com",
+            "email": "ian.davies@precisionengineering.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ian.davies@precisionengineering.com",
+            "email": "ian@precisionengineering.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -3348,12 +3348,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "mark@precisionengineering.com",
+            "email": "mark.jones@precisionengineering.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "mark.jones@precisionengineering.com",
+            "email": "mark@precisionengineering.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -3381,12 +3381,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "robert@precisionengineering.com",
+            "email": "robert.mills@precisionengineering.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "robert.mills@precisionengineering.com",
+            "email": "robert@precisionengineering.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -5921,12 +5921,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "william@associatedseafoods.com",
+            "email": "william.west@associatedseafoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "william.west@associatedseafoods.com",
+            "email": "william@associatedseafoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -5954,12 +5954,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "alekos@associatedseafoods.com",
+            "email": "alekos.christofis@associatedseafoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "alekos.christofis@associatedseafoods.com",
+            "email": "alekos@associatedseafoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -6410,7 +6410,7 @@
           },
           {
             "email": "c.varley@approachaviation.co.uk",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           }
         ],
@@ -6857,12 +6857,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "karen@tarvinprecision.co.uk",
+            "email": "karen.bam@tarvinprecision.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "karen.bam@tarvinprecision.co.uk",
+            "email": "karen@tarvinprecision.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -6890,12 +6890,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "nigel@tarvinprecision.co.uk",
+            "email": "nigel.bam@tarvinprecision.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "nigel.bam@tarvinprecision.co.uk",
+            "email": "nigel@tarvinprecision.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -7601,12 +7601,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrew@aaelectricalwholesalers.co.uk",
+            "email": "andrew.ashton@aaelectricalwholesalers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrew.ashton@aaelectricalwholesalers.co.uk",
+            "email": "andrew@aaelectricalwholesalers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -7634,12 +7634,12 @@
         "email_verified": true,
         "email_guesses": [
           {
-            "email": "karl@aaelectricalwholesalers.co.uk",
+            "email": "karl.green@aaelectricalwholesalers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "karl.green@aaelectricalwholesalers.co.uk",
+            "email": "karl@aaelectricalwholesalers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -8561,12 +8561,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "christopher@unitedtoolingsolutions.com",
+            "email": "christopher.easter@unitedtoolingsolutions.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "christopher.easter@unitedtoolingsolutions.com",
+            "email": "christopher@unitedtoolingsolutions.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -8933,12 +8933,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "surriya@a-f.co.uk",
+            "email": "surriya.ahmed@a-f.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "surriya.ahmed@a-f.co.uk",
+            "email": "surriya@a-f.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -8966,12 +8966,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ghafoor@a-f.co.uk",
+            "email": "ghafoor.ahmed@a-f.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ghafoor.ahmed@a-f.co.uk",
+            "email": "ghafoor@a-f.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -9195,12 +9195,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "laurie@cfe.co.uk",
+            "email": "laurie.ellis@cfe.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "laurie.ellis@cfe.co.uk",
+            "email": "laurie@cfe.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -9228,12 +9228,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "james@cfe.co.uk",
+            "email": "james.wiles@cfe.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "james.wiles@cfe.co.uk",
+            "email": "james@cfe.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -9609,7 +9609,7 @@
     ],
     "generic_emails": [],
     "status": "new",
-    "contact_phone": null,
+    "contact_phone": "+13139211200",
     "contact_phones": [],
     "contact_email": "info@cttech.com",
     "contact_emails_found": [
@@ -9703,7 +9703,7 @@
       }
     ],
     "route_grade": "C",
-    "contact_confidence": 34,
+    "contact_confidence": 54,
     "company_linkedin": "https://www.google.com/search?q=site:linkedin.com/company+%22C+%26+T+Tech+Distribution%22",
     "company_name_clean": "C & T Tech Distribution",
     "fx_evidence_snippets": [],
@@ -9723,7 +9723,8 @@
       "award-winning"
     ],
     "fx_likelihood_score": 25,
-    "website_confidence_reason": "Medium confidence: website found but weaker signal match \u2014 worth validating manually"
+    "website_confidence_reason": "Medium confidence: website found but weaker signal match \u2014 worth validating manually",
+    "phone_source": "multi_page_scrape"
   },
   "1eb6af14177a9360": {
     "id": "1eb6af14177a9360",
@@ -9891,12 +9892,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "pippa@cathystephens.co.uk",
+            "email": "pippa.arkle@cathystephens.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "pippa.arkle@cathystephens.co.uk",
+            "email": "pippa@cathystephens.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -9924,12 +9925,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "catherine@cathystephens.co.uk",
+            "email": "catherine.stephens@cathystephens.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "catherine.stephens@cathystephens.co.uk",
+            "email": "catherine@cathystephens.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -9957,12 +9958,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "michael@cathystephens.co.uk",
+            "email": "michael.stephens@cathystephens.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "michael.stephens@cathystephens.co.uk",
+            "email": "michael@cathystephens.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -11454,12 +11455,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "eleanor@airlinecomponentservices.com",
+            "email": "eleanor.bradley@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "eleanor.bradley@airlinecomponentservices.com",
+            "email": "eleanor@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -11487,12 +11488,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "eleanor@airlinecomponentservices.com",
+            "email": "eleanor.bradley@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "eleanor.bradley@airlinecomponentservices.com",
+            "email": "eleanor@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -11520,12 +11521,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "michael@airlinecomponentservices.com",
+            "email": "michael.field@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "michael.field@airlinecomponentservices.com",
+            "email": "michael@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -11553,12 +11554,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "graham@airlinecomponentservices.com",
+            "email": "graham.higgins@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "graham.higgins@airlinecomponentservices.com",
+            "email": "graham@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -11586,12 +11587,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "rebeccajayne@airlinecomponentservices.com",
+            "email": "rebeccajayne.stanborough@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "rebeccajayne.stanborough@airlinecomponentservices.com",
+            "email": "rebeccajayne@airlinecomponentservices.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -12461,12 +12462,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "aryan@aryaninternational.com",
+            "email": "aryan.abdullah@aryaninternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "aryan.abdullah@aryaninternational.com",
+            "email": "aryan@aryaninternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -12941,12 +12942,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "tracy@aircharter.co.uk",
+            "email": "tracy.evans@aircharter.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "tracy.evans@aircharter.co.uk",
+            "email": "tracy@aircharter.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -13471,12 +13472,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "william@shawsiberian.co.uk",
+            "email": "william.stevenson@shawsiberian.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "william.stevenson@shawsiberian.co.uk",
+            "email": "william@shawsiberian.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -13504,12 +13505,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "david@shawsiberian.co.uk",
+            "email": "david.stuartmonteith@shawsiberian.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "david.stuartmonteith@shawsiberian.co.uk",
+            "email": "david@shawsiberian.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -13537,12 +13538,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "suzanna@shawsiberian.co.uk",
+            "email": "suzanna.stuartmonteith@shawsiberian.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "suzanna.stuartmonteith@shawsiberian.co.uk",
+            "email": "suzanna@shawsiberian.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -13906,12 +13907,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "dominic@hottile.co.uk",
+            "email": "dominic.strangeway@hottile.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "dominic.strangeway@hottile.co.uk",
+            "email": "dominic@hottile.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -13939,12 +13940,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "martin@hottile.co.uk",
+            "email": "martin.thompson@hottile.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "martin.thompson@hottile.co.uk",
+            "email": "martin@hottile.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -13972,12 +13973,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrew@hottile.co.uk",
+            "email": "andrew.wilkinson@hottile.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrew.wilkinson@hottile.co.uk",
+            "email": "andrew@hottile.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -14616,17 +14617,17 @@
         "email_guesses": [
           {
             "email": "spyridon@alfawholesale.com",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           },
           {
             "email": "spyridon.spyropoulos@alfawholesale.com",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           },
           {
             "email": "s.spyropoulos@alfawholesale.com",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           }
         ],
@@ -15266,12 +15267,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "nicola@lumag-gb.co.uk",
+            "email": "nicola.hollands@lumag-gb.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "nicola.hollands@lumag-gb.co.uk",
+            "email": "nicola@lumag-gb.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -15299,12 +15300,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrea@lumag-gb.co.uk",
+            "email": "andrea.clarke@lumag-gb.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrea.clarke@lumag-gb.co.uk",
+            "email": "andrea@lumag-gb.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -15332,12 +15333,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "paul@lumag-gb.co.uk",
+            "email": "paul.clarke@lumag-gb.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "paul.clarke@lumag-gb.co.uk",
+            "email": "paul@lumag-gb.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -15785,12 +15786,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrew@bonns.co.uk",
+            "email": "andrew.simpson@bonns.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrew.simpson@bonns.co.uk",
+            "email": "andrew@bonns.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -16696,12 +16697,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "simon@newmarketholidays.co.uk",
+            "email": "simon.hibbs@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "simon.hibbs@newmarketholidays.co.uk",
+            "email": "simon@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -16729,12 +16730,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "niel@newmarketholidays.co.uk",
+            "email": "niel.alobaidi@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "niel.alobaidi@newmarketholidays.co.uk",
+            "email": "niel@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -16762,12 +16763,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "toni@newmarketholidays.co.uk",
+            "email": "toni.frei@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "toni.frei@newmarketholidays.co.uk",
+            "email": "toni@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -16795,12 +16796,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ross@newmarketholidays.co.uk",
+            "email": "ross.gillougley@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ross.gillougley@newmarketholidays.co.uk",
+            "email": "ross@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -16828,12 +16829,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jeremy@newmarketholidays.co.uk",
+            "email": "jeremy.griffin@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jeremy.griffin@newmarketholidays.co.uk",
+            "email": "jeremy@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -16861,12 +16862,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "simon@newmarketholidays.co.uk",
+            "email": "simon.hibbs@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "simon.hibbs@newmarketholidays.co.uk",
+            "email": "simon@newmarketholidays.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -17236,12 +17237,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "michael@acs.co.uk",
+            "email": "michael.thorpe@acs.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "michael.thorpe@acs.co.uk",
+            "email": "michael@acs.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -17269,12 +17270,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "roger@acs.co.uk",
+            "email": "roger.murie@acs.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "roger.murie@acs.co.uk",
+            "email": "roger@acs.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -20023,17 +20024,17 @@
         "email_guesses": [
           {
             "email": "martin@creativefoods.co.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
             "email": "martin.back@creativefoods.co.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
             "email": "m.back@creativefoods.co.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           }
         ],
@@ -21270,12 +21271,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "michael@enterprisemachinery.co.uk",
+            "email": "michael.godfrey@enterprisemachinery.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "michael.godfrey@enterprisemachinery.co.uk",
+            "email": "michael@enterprisemachinery.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -22245,12 +22246,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "taher@tokyocafefw.com",
+            "email": "taher.said@tokyocafefw.com",
             "smtp_verified": null,
             "catch_all": false
           },
           {
-            "email": "taher.said@tokyocafefw.com",
+            "email": "taher@tokyocafefw.com",
             "smtp_verified": null,
             "catch_all": false
           },
@@ -22444,12 +22445,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "william@agbudget.co.uk",
+            "email": "william.grinnall@agbudget.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "william.grinnall@agbudget.co.uk",
+            "email": "william@agbudget.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -22647,12 +22648,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "lynne@acebuilding.co.uk",
+            "email": "lynne.cordice@acebuilding.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "lynne.cordice@acebuilding.co.uk",
+            "email": "lynne@acebuilding.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -23743,12 +23744,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "leander@lightningsystems.co.uk",
+            "email": "leander.fleming@lightningsystems.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "leander.fleming@lightningsystems.co.uk",
+            "email": "leander@lightningsystems.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -25372,12 +25373,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ralph@aboveaero.com",
+            "email": "ralph.bettany@aboveaero.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ralph.bettany@aboveaero.com",
+            "email": "ralph@aboveaero.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -25405,12 +25406,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "vincent@aboveaero.com",
+            "email": "vincent.essex@aboveaero.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "vincent.essex@aboveaero.com",
+            "email": "vincent@aboveaero.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -25438,12 +25439,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "amanpreet@aboveaero.com",
+            "email": "amanpreet.samra@aboveaero.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "amanpreet.samra@aboveaero.com",
+            "email": "amanpreet@aboveaero.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -25978,12 +25979,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "eric@jacksons.com",
+            "email": "eric.jackson@jacksons.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "eric.jackson@jacksons.com",
+            "email": "eric@jacksons.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -26310,12 +26311,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "margaret@jonesengineering.co.uk",
+            "email": "margaret.jones@jonesengineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "margaret.jones@jonesengineering.co.uk",
+            "email": "margaret@jonesengineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -26343,12 +26344,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "stephen@jonesengineering.co.uk",
+            "email": "stephen.jones@jonesengineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "stephen.jones@jonesengineering.co.uk",
+            "email": "stephen@jonesengineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -28105,12 +28106,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "fenilkumar@americanholidays.com",
+            "email": "fenilkumar.patel@americanholidays.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "fenilkumar.patel@americanholidays.com",
+            "email": "fenilkumar@americanholidays.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -28138,12 +28139,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jenish@americanholidays.com",
+            "email": "jenish.patel@americanholidays.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jenish.patel@americanholidays.com",
+            "email": "jenish@americanholidays.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -28171,12 +28172,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jigneshkumar@americanholidays.com",
+            "email": "jigneshkumar.patel@americanholidays.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jigneshkumar.patel@americanholidays.com",
+            "email": "jigneshkumar@americanholidays.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -28610,18 +28611,18 @@
         "tier": 3,
         "tier_label": "Director",
         "appointed_on": "2025-07-14",
-        "email": "maxim.gaidarji@deliciousfood.com",
+        "email": "maxim@deliciousfood.com",
         "email_source": "smtp_verified",
         "email_verified": true,
         "email_guesses": [
           {
             "email": "maxim@deliciousfood.com",
-            "smtp_verified": null,
+            "smtp_verified": true,
             "catch_all": false
           },
           {
             "email": "maxim.gaidarji@deliciousfood.com",
-            "smtp_verified": true,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
@@ -28823,12 +28824,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "stephen@aviationdefence.co.uk",
+            "email": "stephen.brown@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "stephen.brown@aviationdefence.co.uk",
+            "email": "stephen@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -28856,12 +28857,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "dominic@aviationdefence.co.uk",
+            "email": "dominic.bryant@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "dominic.bryant@aviationdefence.co.uk",
+            "email": "dominic@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -28889,12 +28890,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "james@aviationdefence.co.uk",
+            "email": "james.gordon@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "james.gordon@aviationdefence.co.uk",
+            "email": "james@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -28922,12 +28923,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "matthew@aviationdefence.co.uk",
+            "email": "matthew.gordon@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "matthew.gordon@aviationdefence.co.uk",
+            "email": "matthew@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -28955,12 +28956,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jakub@aviationdefence.co.uk",
+            "email": "jakub.prchal@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jakub.prchal@aviationdefence.co.uk",
+            "email": "jakub@aviationdefence.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -30745,24 +30746,24 @@
         "tier": 3,
         "tier_label": "Company Secretary",
         "appointed_on": "2007-11-30",
-        "email": "anne@arielflight.com",
-        "email_source": "smtp_verified",
-        "email_verified": true,
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
         "email_guesses": [
           {
             "email": "anne@arielflight.com",
-            "smtp_verified": true,
-            "catch_all": false
+            "smtp_verified": null,
+            "catch_all": true
           },
           {
             "email": "anne.robsonsmith@arielflight.com",
-            "smtp_verified": true,
-            "catch_all": false
+            "smtp_verified": null,
+            "catch_all": true
           },
           {
             "email": "a.robsonsmith@arielflight.com",
-            "smtp_verified": true,
-            "catch_all": false
+            "smtp_verified": null,
+            "catch_all": true
           }
         ],
         "phone": null,
@@ -30871,7 +30872,7 @@
       }
     ],
     "route_grade": "C",
-    "contact_confidence": 64,
+    "contact_confidence": 48,
     "company_linkedin": "https://www.google.com/search?q=site:linkedin.com/company+%22Ariel+Flight+Services%22",
     "company_name_clean": "Ariel Flight Services",
     "fx_evidence_snippets": [],
@@ -31674,12 +31675,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "graham@foodprocess.co.uk",
+            "email": "graham.elliott@foodprocess.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "graham.elliott@foodprocess.co.uk",
+            "email": "graham@foodprocess.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -31707,12 +31708,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "simon@foodprocess.co.uk",
+            "email": "simon.jubb@foodprocess.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "simon.jubb@foodprocess.co.uk",
+            "email": "simon@foodprocess.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -32666,7 +32667,7 @@
           },
           {
             "email": "j.smith@timadamswines.co.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           }
         ],
@@ -34321,12 +34322,12 @@
         "email_guesses": [
           {
             "email": "christopher@cl-engineering.co.uk",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           },
           {
             "email": "christopher.lord@cl-engineering.co.uk",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           },
           {
@@ -34731,12 +34732,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "philip@oasisfashion.com",
+            "email": "philip.ellis@oasisfashion.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "philip.ellis@oasisfashion.com",
+            "email": "philip@oasisfashion.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -34764,12 +34765,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "daniel@oasisfashion.com",
+            "email": "daniel.finley@oasisfashion.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "daniel.finley@oasisfashion.com",
+            "email": "daniel@oasisfashion.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -34921,12 +34922,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "john@foodmachinerysolutions.com",
+            "email": "john.hughes@foodmachinerysolutions.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "john.hughes@foodmachinerysolutions.com",
+            "email": "john@foodmachinerysolutions.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -35511,12 +35512,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "matthew@lowcostbeer.com",
+            "email": "matthew.ellis@lowcostbeer.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "matthew.ellis@lowcostbeer.com",
+            "email": "matthew@lowcostbeer.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -36300,12 +36301,12 @@
           },
           {
             "email": "meggin.shevill@scientificlaboratory.com",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
             "email": "m.shevill@scientificlaboratory.com",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           }
         ],
@@ -37342,12 +37343,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "fathalla@almasa.com",
+            "email": "fathalla.nassar@almasa.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "fathalla.nassar@almasa.com",
+            "email": "fathalla@almasa.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -37375,12 +37376,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ahmed@almasa.com",
+            "email": "ahmed.suleiman@almasa.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ahmed.suleiman@almasa.com",
+            "email": "ahmed@almasa.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -38223,12 +38224,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "philip@cultwines.com",
+            "email": "philip.gearing@cultwines.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "philip.gearing@cultwines.com",
+            "email": "philip@cultwines.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -38256,12 +38257,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "thomas@cultwines.com",
+            "email": "thomas.gearing@cultwines.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "thomas.gearing@cultwines.com",
+            "email": "thomas@cultwines.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -38464,12 +38465,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "lesley@access-chemicals.com",
+            "email": "lesley.clarke@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "lesley.clarke@access-chemicals.com",
+            "email": "lesley@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -38497,12 +38498,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "barry@access-chemicals.com",
+            "email": "barry.clarke@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "barry.clarke@access-chemicals.com",
+            "email": "barry@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -38530,12 +38531,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "david@access-chemicals.com",
+            "email": "david.clarke@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "david.clarke@access-chemicals.com",
+            "email": "david@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -38563,12 +38564,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "lesley@access-chemicals.com",
+            "email": "lesley.clarke@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "lesley.clarke@access-chemicals.com",
+            "email": "lesley@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -38596,12 +38597,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "richard@access-chemicals.com",
+            "email": "richard.clarke@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "richard.clarke@access-chemicals.com",
+            "email": "richard@access-chemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -38989,12 +38990,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "fabrizio@italianfoodexpo.net",
+            "email": "fabrizio.conte@italianfoodexpo.net",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "fabrizio.conte@italianfoodexpo.net",
+            "email": "fabrizio@italianfoodexpo.net",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -39022,12 +39023,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "natalia@italianfoodexpo.net",
+            "email": "natalia.conte@italianfoodexpo.net",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "natalia.conte@italianfoodexpo.net",
+            "email": "natalia@italianfoodexpo.net",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -40480,12 +40481,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "rita@fmx.co.uk",
+            "email": "rita.pignatelli@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "rita.pignatelli@fmx.co.uk",
+            "email": "rita@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -40513,12 +40514,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "carlos@fmx.co.uk",
+            "email": "carlos.izarra@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "carlos.izarra@fmx.co.uk",
+            "email": "carlos@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -40546,12 +40547,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "gianfranco@fmx.co.uk",
+            "email": "gianfranco.pignatelli@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "gianfranco.pignatelli@fmx.co.uk",
+            "email": "gianfranco@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -40579,12 +40580,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jolanda@fmx.co.uk",
+            "email": "jolanda.pignatelli@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jolanda.pignatelli@fmx.co.uk",
+            "email": "jolanda@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -40612,12 +40613,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "paolo@fmx.co.uk",
+            "email": "paolo.pignatelli@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "paolo.pignatelli@fmx.co.uk",
+            "email": "paolo@fmx.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -40897,12 +40898,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "lorenzo@justgourmetfoods.co.uk",
+            "email": "lorenzo.falchi@justgourmetfoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "lorenzo.falchi@justgourmetfoods.co.uk",
+            "email": "lorenzo@justgourmetfoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -41372,12 +41373,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "graham@tyronex.co.uk",
+            "email": "graham.cramer@tyronex.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "graham.cramer@tyronex.co.uk",
+            "email": "graham@tyronex.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -41405,12 +41406,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "sam@tyronex.co.uk",
+            "email": "sam.cramer@tyronex.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "sam.cramer@tyronex.co.uk",
+            "email": "sam@tyronex.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -41438,12 +41439,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "gareth@tyronex.co.uk",
+            "email": "gareth.reeves@tyronex.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "gareth.reeves@tyronex.co.uk",
+            "email": "gareth@tyronex.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -42225,12 +42226,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "gerard@aaainternationaltrading.com",
+            "email": "gerard.hughf@aaainternationaltrading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "gerard.hughf@aaainternationaltrading.com",
+            "email": "gerard@aaainternationaltrading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -44169,12 +44170,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ramzi@ajcommercial.co.uk",
+            "email": "ramzi.shampor@ajcommercial.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ramzi.shampor@ajcommercial.co.uk",
+            "email": "ramzi@ajcommercial.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -45061,7 +45062,7 @@
         "email_guesses": [
           {
             "email": "shahram@hanaco.ltd.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
@@ -45071,7 +45072,7 @@
           },
           {
             "email": "s.hanassab@hanaco.ltd.uk",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           }
         ],
@@ -45132,12 +45133,12 @@
           },
           {
             "email": "shahryar.hanassab@hanaco.ltd.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
             "email": "s.hanassab@hanaco.ltd.uk",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           }
         ],
@@ -45861,12 +45862,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "angad@aef.co.uk",
+            "email": "angad.rajput@aef.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "angad.rajput@aef.co.uk",
+            "email": "angad@aef.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -45894,12 +45895,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "angad@aef.co.uk",
+            "email": "angad.rajput@aef.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "angad.rajput@aef.co.uk",
+            "email": "angad@aef.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -47595,12 +47596,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "adam@altonaviation.com",
+            "email": "adam.cowburn@altonaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "adam.cowburn@altonaviation.com",
+            "email": "adam@altonaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -47628,12 +47629,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "john@altonaviation.com",
+            "email": "john.mowry@altonaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "john.mowry@altonaviation.com",
+            "email": "john@altonaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -47661,12 +47662,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "augusto@altonaviation.com",
+            "email": "augusto.vianssonponte@altonaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "augusto.vianssonponte@altonaviation.com",
+            "email": "augusto@altonaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -47864,7 +47865,7 @@
         "email_guesses": [
           {
             "email": "john@aviationadvisors.co.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
@@ -47874,7 +47875,7 @@
           },
           {
             "email": "j.nicholas@aviationadvisors.co.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           }
         ],
@@ -48911,12 +48912,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "john@apexaviation.co.uk",
+            "email": "john.allan@apexaviation.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "john.allan@apexaviation.co.uk",
+            "email": "john@apexaviation.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -48944,12 +48945,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "joseph@apexaviation.co.uk",
+            "email": "joseph.shanahan@apexaviation.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "joseph.shanahan@apexaviation.co.uk",
+            "email": "joseph@apexaviation.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -51535,7 +51536,7 @@
           },
           {
             "email": "darpan.chawla@bestwines.co.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
@@ -51745,24 +51746,24 @@
         "tier": 3,
         "tier_label": "Director",
         "appointed_on": "2024-11-21",
-        "email": "richard@chilternfoods.com",
-        "email_source": "smtp_verified",
-        "email_verified": true,
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
         "email_guesses": [
           {
             "email": "richard@chilternfoods.com",
-            "smtp_verified": true,
-            "catch_all": false
+            "smtp_verified": null,
+            "catch_all": true
           },
           {
             "email": "richard.hughes@chilternfoods.com",
-            "smtp_verified": true,
-            "catch_all": false
+            "smtp_verified": null,
+            "catch_all": true
           },
           {
             "email": "r.hughes@chilternfoods.com",
-            "smtp_verified": true,
-            "catch_all": false
+            "smtp_verified": null,
+            "catch_all": true
           }
         ],
         "phone": null,
@@ -51772,7 +51773,7 @@
       }
     ],
     "route_grade": "C",
-    "contact_confidence": 60,
+    "contact_confidence": 44,
     "company_linkedin": "https://www.google.com/search?q=site:linkedin.com/company+%22Chiltern+Foods+Wholesale%22",
     "company_name_clean": "Chiltern Foods Wholesale",
     "fx_evidence_snippets": [],
@@ -53524,12 +53525,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "elizabeth@accesshardware.co.uk",
+            "email": "elizabeth.lowndes@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "elizabeth.lowndes@accesshardware.co.uk",
+            "email": "elizabeth@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -53557,12 +53558,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "adam@accesshardware.co.uk",
+            "email": "adam.lowndes@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "adam.lowndes@accesshardware.co.uk",
+            "email": "adam@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -53590,12 +53591,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "carrie@accesshardware.co.uk",
+            "email": "carrie.lowndes@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "carrie.lowndes@accesshardware.co.uk",
+            "email": "carrie@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -53623,12 +53624,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "douglas@accesshardware.co.uk",
+            "email": "douglas.lowndes@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "douglas.lowndes@accesshardware.co.uk",
+            "email": "douglas@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -53656,12 +53657,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "elizabeth@accesshardware.co.uk",
+            "email": "elizabeth.lowndes@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "elizabeth.lowndes@accesshardware.co.uk",
+            "email": "elizabeth@accesshardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -53788,7 +53789,7 @@
     ],
     "generic_emails": [],
     "status": "new",
-    "contact_phone": null,
+    "contact_phone": "+44 (0) 20 3283 8667",
     "contact_phones": [],
     "contact_email": "info@cmjewellerydesigns.com",
     "contact_emails_found": [
@@ -53882,7 +53883,7 @@
       }
     ],
     "route_grade": "C",
-    "contact_confidence": 34,
+    "contact_confidence": 54,
     "company_linkedin": "https://www.google.com/search?q=site:linkedin.com/company+%22Cm+Jewellery+Designs%22",
     "company_name_clean": "Cm Jewellery Designs",
     "fx_evidence_snippets": [],
@@ -53893,7 +53894,8 @@
     "currency_reason": "",
     "size_signals": [],
     "fx_likelihood_score": 0,
-    "website_confidence_reason": "High confidence: discovered via domain guess; domain name matches company name"
+    "website_confidence_reason": "High confidence: discovered via domain guess; domain name matches company name",
+    "phone_source": "multi_page_scrape"
   },
   "85a0e9f1c52924a3": {
     "id": "85a0e9f1c52924a3",
@@ -53997,12 +53999,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "anthony@dms.co.uk",
+            "email": "anthony.weir@dms.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "anthony.weir@dms.co.uk",
+            "email": "anthony@dms.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -54030,12 +54032,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "anthony@dms.co.uk",
+            "email": "anthony.weir@dms.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "anthony.weir@dms.co.uk",
+            "email": "anthony@dms.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -54246,12 +54248,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "sandra@fibre.co.uk",
+            "email": "sandra.nurmohamed@fibre.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "sandra.nurmohamed@fibre.co.uk",
+            "email": "sandra@fibre.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -54279,12 +54281,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "mohamed@fibre.co.uk",
+            "email": "mohamed.nurmohamed@fibre.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "mohamed.nurmohamed@fibre.co.uk",
+            "email": "mohamed@fibre.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -54312,12 +54314,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "sandra@fibre.co.uk",
+            "email": "sandra.nurmohamed@fibre.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "sandra.nurmohamed@fibre.co.uk",
+            "email": "sandra@fibre.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -54513,12 +54515,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "daniel@djctradingspirits.co.uk",
+            "email": "daniel.connew@djctradingspirits.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "daniel.connew@djctradingspirits.co.uk",
+            "email": "daniel@djctradingspirits.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -54903,6 +54905,60 @@
     },
     "decision_makers": [
       {
+        "name": "Antonia Beggs",
+        "first_name": "Antonia",
+        "last_name": "Beggs",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "General Manager",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [],
+        "phone": null,
+        "linkedin_search": "https://www.google.com/search?q=site:linkedin.com/in+%22Antonia+Beggs%22+%22E+%26+I%22",
+        "linkedin_name_only": "https://www.google.com/search?q=site:linkedin.com/in+%22Antonia+Beggs%22",
+        "google_email_search": "https://www.google.com/search?q=%22Antonia+Beggs%22+%22%40e-i.co.uk%22",
+        "source": "website_only"
+      },
+      {
+        "name": "Badminton Horse",
+        "first_name": "Badminton",
+        "last_name": "Horse",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "General Manager",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [],
+        "phone": null,
+        "linkedin_search": "https://www.google.com/search?q=site:linkedin.com/in+%22Badminton+Horse%22+%22E+%26+I%22",
+        "linkedin_name_only": "https://www.google.com/search?q=site:linkedin.com/in+%22Badminton+Horse%22",
+        "google_email_search": "https://www.google.com/search?q=%22Badminton+Horse%22+%22%40e-i.co.uk%22",
+        "source": "website_only"
+      },
+      {
+        "name": "Thank You",
+        "first_name": "Thank",
+        "last_name": "You",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "General Manager",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [],
+        "phone": null,
+        "linkedin_search": "https://www.google.com/search?q=site:linkedin.com/in+%22Thank+You%22+%22E+%26+I%22",
+        "linkedin_name_only": "https://www.google.com/search?q=site:linkedin.com/in+%22Thank+You%22",
+        "google_email_search": "https://www.google.com/search?q=%22Thank+You%22+%22%40e-i.co.uk%22",
+        "source": "website_only"
+      },
+      {
         "name": "Ali Visaev",
         "first_name": "Ali",
         "last_name": "Visaev",
@@ -54937,7 +54993,7 @@
       }
     ],
     "route_grade": "C",
-    "contact_confidence": 54,
+    "contact_confidence": 66,
     "company_linkedin": "https://www.google.com/search?q=site:linkedin.com/company+%22E+%26+I+Oil+Trading%22",
     "company_name_clean": "E & I Oil Trading",
     "fx_evidence_snippets": [],
@@ -55671,12 +55727,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "robert@apollo-aerospace.com",
+            "email": "robert.vilsack@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "robert.vilsack@apollo-aerospace.com",
+            "email": "robert@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -55704,12 +55760,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "vistra@apollo-aerospace.com",
+            "email": "vistra.limited@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "vistra.limited@apollo-aerospace.com",
+            "email": "vistra@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -55737,12 +55793,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "patrick@apollo-aerospace.com",
+            "email": "patrick.fogarty@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "patrick.fogarty@apollo-aerospace.com",
+            "email": "patrick@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -55770,12 +55826,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "chiara@apollo-aerospace.com",
+            "email": "chiara.laiena@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "chiara.laiena@apollo-aerospace.com",
+            "email": "chiara@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -55803,12 +55859,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "brian@apollo-aerospace.com",
+            "email": "brian.norris@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "brian.norris@apollo-aerospace.com",
+            "email": "brian@apollo-aerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -56214,12 +56270,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "kirsty@qualityspiritsinternational.com",
+            "email": "kirsty.burns@qualityspiritsinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "kirsty.burns@qualityspiritsinternational.com",
+            "email": "kirsty@qualityspiritsinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -56247,12 +56303,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ewan@qualityspiritsinternational.com",
+            "email": "ewan.henderson@qualityspiritsinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ewan.henderson@qualityspiritsinternational.com",
+            "email": "ewan@qualityspiritsinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -56280,12 +56336,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "anthony@qualityspiritsinternational.com",
+            "email": "anthony.roberts@qualityspiritsinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "anthony.roberts@qualityspiritsinternational.com",
+            "email": "anthony@qualityspiritsinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -57366,12 +57422,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "wendy@barton-engineering.co.uk",
+            "email": "wendy.adams@barton-engineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "wendy.adams@barton-engineering.co.uk",
+            "email": "wendy@barton-engineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -57399,12 +57455,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "graham@barton-engineering.co.uk",
+            "email": "graham.adams@barton-engineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "graham.adams@barton-engineering.co.uk",
+            "email": "graham@barton-engineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -57432,12 +57488,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "james@barton-engineering.co.uk",
+            "email": "james.adams@barton-engineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "james.adams@barton-engineering.co.uk",
+            "email": "james@barton-engineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -57465,12 +57521,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "wendy@barton-engineering.co.uk",
+            "email": "wendy.adams@barton-engineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "wendy.adams@barton-engineering.co.uk",
+            "email": "wendy@barton-engineering.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -57603,12 +57659,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "daniel@foodexportinternational.co.uk",
+            "email": "daniel.crowe@foodexportinternational.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "daniel.crowe@foodexportinternational.co.uk",
+            "email": "daniel@foodexportinternational.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -57636,12 +57692,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ryan@foodexportinternational.co.uk",
+            "email": "ryan.mccuehope@foodexportinternational.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ryan.mccuehope@foodexportinternational.co.uk",
+            "email": "ryan@foodexportinternational.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -58372,12 +58428,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "harmesh@a-k.co.uk",
+            "email": "harmesh.lal@a-k.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "harmesh.lal@a-k.co.uk",
+            "email": "harmesh@a-k.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -58526,12 +58582,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jon@acermachinerysolutions.co.uk",
+            "email": "jon.ridgway@acermachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jon.ridgway@acermachinerysolutions.co.uk",
+            "email": "jon@acermachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -58559,12 +58615,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "emma@acermachinerysolutions.co.uk",
+            "email": "emma.ridgway@acermachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "emma.ridgway@acermachinerysolutions.co.uk",
+            "email": "emma@acermachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -58592,12 +58648,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jon@acermachinerysolutions.co.uk",
+            "email": "jon.ridgway@acermachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jon.ridgway@acermachinerysolutions.co.uk",
+            "email": "jon@acermachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -58820,12 +58876,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "elizabeth@adc.co.uk",
+            "email": "elizabeth.westhead@adc.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "elizabeth.westhead@adc.co.uk",
+            "email": "elizabeth@adc.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -58962,12 +59018,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "richard@ms.co.uk",
+            "email": "richard.crapper@ms.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "richard.crapper@ms.co.uk",
+            "email": "richard@ms.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -58995,12 +59051,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "james@ms.co.uk",
+            "email": "james.entwisle@ms.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "james.entwisle@ms.co.uk",
+            "email": "james@ms.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -59690,12 +59746,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "inmaculada@fagorprofessional.com",
+            "email": "inmaculada.lizarralde@fagorprofessional.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "inmaculada.lizarralde@fagorprofessional.com",
+            "email": "inmaculada@fagorprofessional.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -59723,12 +59779,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ernesto@fagorprofessional.com",
+            "email": "ernesto.garciagabilondo@fagorprofessional.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ernesto.garciagabilondo@fagorprofessional.com",
+            "email": "ernesto@fagorprofessional.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -59935,12 +59991,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "roger@spirits-international.com",
+            "email": "roger.barnes@spirits-international.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "roger.barnes@spirits-international.com",
+            "email": "roger@spirits-international.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -59968,12 +60024,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "mischa@spirits-international.com",
+            "email": "mischa.mandersonmills@spirits-international.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "mischa.mandersonmills@spirits-international.com",
+            "email": "mischa@spirits-international.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -60596,12 +60652,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "craig@homehardware.co.uk",
+            "email": "craig.pawley@homehardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "craig.pawley@homehardware.co.uk",
+            "email": "craig@homehardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -60629,12 +60685,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrew@homehardware.co.uk",
+            "email": "andrew.skinner@homehardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrew.skinner@homehardware.co.uk",
+            "email": "andrew@homehardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -60662,12 +60718,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "timothy@homehardware.co.uk",
+            "email": "timothy.strong@homehardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "timothy.strong@homehardware.co.uk",
+            "email": "timothy@homehardware.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -62682,12 +62738,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "waqas@airseadg.com",
+            "email": "waqas.javed@airseadg.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "waqas.javed@airseadg.com",
+            "email": "waqas@airseadg.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -62715,12 +62771,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ishtiaq@airseadg.com",
+            "email": "ishtiaq.malik@airseadg.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ishtiaq.malik@airseadg.com",
+            "email": "ishtiaq@airseadg.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -63503,12 +63559,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "victoria@andrewscott.co.uk",
+            "email": "victoria.scott@andrewscott.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "victoria.scott@andrewscott.co.uk",
+            "email": "victoria@andrewscott.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -63536,12 +63592,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrew@andrewscott.co.uk",
-            "smtp_verified": null,
+            "email": "andrew.scott@andrewscott.co.uk",
+            "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrew.scott@andrewscott.co.uk",
+            "email": "andrew@andrewscott.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -63569,12 +63625,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "victoria@andrewscott.co.uk",
+            "email": "victoria.scott@andrewscott.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "victoria.scott@andrewscott.co.uk",
+            "email": "victoria@andrewscott.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -64019,12 +64075,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "terence@platinumaircargo.com",
+            "email": "terence.nixey@platinumaircargo.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "terence.nixey@platinumaircargo.com",
+            "email": "terence@platinumaircargo.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -64416,12 +64472,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "mariehelene@ablecomponents.co.uk",
+            "email": "mariehelene.beauchamp@ablecomponents.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "mariehelene.beauchamp@ablecomponents.co.uk",
+            "email": "mariehelene@ablecomponents.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -64449,12 +64505,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "mariehelene@ablecomponents.co.uk",
+            "email": "mariehelene.beauchamp@ablecomponents.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "mariehelene.beauchamp@ablecomponents.co.uk",
+            "email": "mariehelene@ablecomponents.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -64482,12 +64538,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "simon@ablecomponents.co.uk",
+            "email": "simon.beauchamp@ablecomponents.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "simon.beauchamp@ablecomponents.co.uk",
+            "email": "simon@ablecomponents.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -64677,12 +64733,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "sam@allied-machine.com",
+            "email": "sam.davies@allied-machine.com",
             "smtp_verified": null,
             "catch_all": false
           },
           {
-            "email": "sam.davies@allied-machine.com",
+            "email": "sam@allied-machine.com",
             "smtp_verified": null,
             "catch_all": false
           },
@@ -64710,12 +64766,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "michael@allied-machine.com",
+            "email": "michael.stokey@allied-machine.com",
             "smtp_verified": null,
             "catch_all": false
           },
           {
-            "email": "michael.stokey@allied-machine.com",
+            "email": "michael@allied-machine.com",
             "smtp_verified": null,
             "catch_all": false
           },
@@ -64743,12 +64799,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "steven@allied-machine.com",
+            "email": "steven.stokey@allied-machine.com",
             "smtp_verified": null,
             "catch_all": false
           },
           {
-            "email": "steven.stokey@allied-machine.com",
+            "email": "steven@allied-machine.com",
             "smtp_verified": null,
             "catch_all": false
           },
@@ -64776,12 +64832,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "william@allied-machine.com",
+            "email": "william.stokey@allied-machine.com",
             "smtp_verified": null,
             "catch_all": false
           },
           {
-            "email": "william.stokey@allied-machine.com",
+            "email": "william@allied-machine.com",
             "smtp_verified": null,
             "catch_all": false
           },
@@ -65256,12 +65312,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "samuel@26aviation.com",
+            "email": "samuel.heather@26aviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "samuel.heather@26aviation.com",
+            "email": "samuel@26aviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -65454,12 +65510,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "richard@abseafoods.co.uk",
+            "email": "richard.mitchelmore@abseafoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "richard.mitchelmore@abseafoods.co.uk",
+            "email": "richard@abseafoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -65487,12 +65543,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "emma@abseafoods.co.uk",
+            "email": "emma.mitchelmoreredclift@abseafoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "emma.mitchelmoreredclift@abseafoods.co.uk",
+            "email": "emma@abseafoods.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -66581,12 +66637,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "james@airlinecomponents.com",
+            "email": "james.deans@airlinecomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "james.deans@airlinecomponents.com",
+            "email": "james@airlinecomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -66614,12 +66670,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "victoria@airlinecomponents.com",
+            "email": "victoria.deans@airlinecomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "victoria.deans@airlinecomponents.com",
+            "email": "victoria@airlinecomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -67136,13 +67192,13 @@
         "tier": 3,
         "tier_label": "Director",
         "appointed_on": "2025-11-21",
-        "email": "emily@roebuckcomputersequipment.co.uk",
+        "email": "emily.foster@roebuckcomputersequipment.co.uk",
         "email_source": "smtp_verified",
         "email_verified": true,
         "email_guesses": [
           {
             "email": "emily@roebuckcomputersequipment.co.uk",
-            "smtp_verified": true,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
@@ -68161,12 +68217,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jacqueline@bfreefoods.com",
+            "email": "jacqueline.mcnamee@bfreefoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jacqueline.mcnamee@bfreefoods.com",
+            "email": "jacqueline@bfreefoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68194,12 +68250,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ronan@bfreefoods.com",
+            "email": "ronan.mcnamee@bfreefoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ronan.mcnamee@bfreefoods.com",
+            "email": "ronan@bfreefoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68227,12 +68283,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "alex@bfreefoods.com",
+            "email": "alex.murphy@bfreefoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "alex.murphy@bfreefoods.com",
+            "email": "alex@bfreefoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68260,12 +68316,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "conor@bfreefoods.com",
+            "email": "conor.osullivan@bfreefoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "conor.osullivan@bfreefoods.com",
+            "email": "conor@bfreefoods.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68764,12 +68820,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ian@seafood-trading.com",
+            "email": "ian.fitzgerald@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ian.fitzgerald@seafood-trading.com",
+            "email": "ian@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68797,12 +68853,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "katherine@seafood-trading.com",
+            "email": "katherine.coxhead@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "katherine.coxhead@seafood-trading.com",
+            "email": "katherine@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68830,12 +68886,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ian@seafood-trading.com",
+            "email": "ian.fitzgerald@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ian.fitzgerald@seafood-trading.com",
+            "email": "ian@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68863,12 +68919,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "mark@seafood-trading.com",
+            "email": "mark.hixon@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "mark.hixon@seafood-trading.com",
+            "email": "mark@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68896,12 +68952,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "charles@seafood-trading.com",
+            "email": "charles.stein@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "charles.stein@seafood-trading.com",
+            "email": "charles@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68929,12 +68985,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "christopher@seafood-trading.com",
+            "email": "christopher.stein@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "christopher.stein@seafood-trading.com",
+            "email": "christopher@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68962,12 +69018,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "edward@seafood-trading.com",
+            "email": "edward.stein@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "edward.stein@seafood-trading.com",
+            "email": "edward@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -68995,12 +69051,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jack@seafood-trading.com",
+            "email": "jack.stein@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jack.stein@seafood-trading.com",
+            "email": "jack@seafood-trading.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -69522,12 +69578,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "haydn@airedaletours.co.uk",
+            "email": "haydn.abbott@airedaletours.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "haydn.abbott@airedaletours.co.uk",
+            "email": "haydn@airedaletours.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -69555,12 +69611,12 @@
         "email_verified": true,
         "email_guesses": [
           {
-            "email": "linda@airedaletours.co.uk",
+            "email": "linda.schulz@airedaletours.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "linda.schulz@airedaletours.co.uk",
+            "email": "linda@airedaletours.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -70500,12 +70556,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "fionnan@acehawkaerospace.com",
+            "email": "fionnan.collins@acehawkaerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "fionnan.collins@acehawkaerospace.com",
+            "email": "fionnan@acehawkaerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -70533,12 +70589,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "damian@acehawkaerospace.com",
+            "email": "damian.roberts@acehawkaerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "damian.roberts@acehawkaerospace.com",
+            "email": "damian@acehawkaerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -70566,12 +70622,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "darren@acehawkaerospace.com",
+            "email": "darren.wade@acehawkaerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "darren.wade@acehawkaerospace.com",
+            "email": "darren@acehawkaerospace.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -71392,12 +71448,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "rinku@hammerdistribution.com",
+            "email": "rinku.mirza@hammerdistribution.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "rinku.mirza@hammerdistribution.com",
+            "email": "rinku@hammerdistribution.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -71860,12 +71916,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "rose@finewine.co.uk",
+            "email": "rose.clowes@finewine.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "rose.clowes@finewine.co.uk",
+            "email": "rose@finewine.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -71893,12 +71949,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "george@finewine.co.uk",
+            "email": "george.clowes@finewine.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "george.clowes@finewine.co.uk",
+            "email": "george@finewine.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -72536,12 +72592,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "matthias@atlanticchemicals.com",
+            "email": "matthias.lohmann@atlanticchemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "matthias.lohmann@atlanticchemicals.com",
+            "email": "matthias@atlanticchemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -72569,12 +72625,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ramin@atlanticchemicals.com",
+            "email": "ramin.ghaffaritabrizi@atlanticchemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ramin.ghaffaritabrizi@atlanticchemicals.com",
+            "email": "ramin@atlanticchemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -72602,12 +72658,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "matin@atlanticchemicals.com",
+            "email": "matin.ghaffaritabrizi@atlanticchemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "matin.ghaffaritabrizi@atlanticchemicals.com",
+            "email": "matin@atlanticchemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -72635,12 +72691,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "richard@atlanticchemicals.com",
+            "email": "richard.sheehan@atlanticchemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "richard.sheehan@atlanticchemicals.com",
+            "email": "richard@atlanticchemicals.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -72885,12 +72941,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "surbeer@highspirits.com",
+            "email": "surbeer.kurana@highspirits.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "surbeer.kurana@highspirits.com",
+            "email": "surbeer@highspirits.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -73392,12 +73448,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "campbell@fie.org.uk",
+            "email": "campbell.shirlaw@fie.org.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "campbell.shirlaw@fie.org.uk",
+            "email": "campbell@fie.org.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -73425,12 +73481,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "iain@fie.org.uk",
+            "email": "iain.shirlaw@fie.org.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "iain.shirlaw@fie.org.uk",
+            "email": "iain@fie.org.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -73458,12 +73514,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "campbell@fie.org.uk",
+            "email": "campbell.shirlaw@fie.org.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "campbell.shirlaw@fie.org.uk",
+            "email": "campbell@fie.org.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -73821,7 +73877,7 @@
     ],
     "generic_emails": [],
     "status": "new",
-    "contact_phone": null,
+    "contact_phone": "00361652485",
     "contact_phones": [],
     "contact_email": "sales@abhardware.co.uk",
     "contact_emails_found": [
@@ -73948,7 +74004,7 @@
       }
     ],
     "route_grade": "C",
-    "contact_confidence": 34,
+    "contact_confidence": 54,
     "company_linkedin": "https://www.google.com/search?q=site:linkedin.com/company+%22Ab+Hardware%22",
     "company_name_clean": "Ab Hardware",
     "fx_evidence_snippets": [],
@@ -73959,7 +74015,8 @@
     "currency_reason": "",
     "size_signals": [],
     "fx_likelihood_score": 0,
-    "website_confidence_reason": "Medium confidence: website found but weaker signal match \u2014 worth validating manually"
+    "website_confidence_reason": "Medium confidence: website found but weaker signal match \u2014 worth validating manually",
+    "phone_source": "multi_page_scrape"
   },
   "ad013544346eb91a": {
     "id": "ad013544346eb91a",
@@ -74340,12 +74397,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "li@jbcomponents.com",
+            "email": "li.benhingwah@jbcomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "li.benhingwah@jbcomponents.com",
+            "email": "li@jbcomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -74373,12 +74430,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "li@jbcomponents.com",
+            "email": "li.benhingwah@jbcomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "li.benhingwah@jbcomponents.com",
+            "email": "li@jbcomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -74406,12 +74463,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "john@jbcomponents.com",
+            "email": "john.moore@jbcomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "john.moore@jbcomponents.com",
+            "email": "john@jbcomponents.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -74623,12 +74680,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "conor@aerospacecs.com",
+            "email": "conor.ash@aerospacecs.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "conor.ash@aerospacecs.com",
+            "email": "conor@aerospacecs.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -74656,12 +74713,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "stuart@aerospacecs.com",
+            "email": "stuart.ash@aerospacecs.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "stuart.ash@aerospacecs.com",
+            "email": "stuart@aerospacecs.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -74689,12 +74746,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "suzanne@aerospacecs.com",
+            "email": "suzanne.ash@aerospacecs.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "suzanne.ash@aerospacecs.com",
+            "email": "suzanne@aerospacecs.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -74918,12 +74975,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jacqueline@clarkeinternational.com",
+            "email": "jacqueline.williams@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jacqueline.williams@clarkeinternational.com",
+            "email": "jacqueline@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -74951,12 +75008,12 @@
         "email_verified": true,
         "email_guesses": [
           {
-            "email": "john@clarkeinternational.com",
+            "email": "john.clarke@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "john.clarke@clarkeinternational.com",
+            "email": "john@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -74984,12 +75041,12 @@
         "email_verified": true,
         "email_guesses": [
           {
-            "email": "sandra@clarkeinternational.com",
+            "email": "sandra.clarke@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "sandra.clarke@clarkeinternational.com",
+            "email": "sandra@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -75017,12 +75074,12 @@
         "email_verified": true,
         "email_guesses": [
           {
-            "email": "tracey@clarkeinternational.com",
+            "email": "tracey.clarke@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "tracey.clarke@clarkeinternational.com",
+            "email": "tracey@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -75050,12 +75107,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jacqueline@clarkeinternational.com",
+            "email": "jacqueline.williams@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jacqueline.williams@clarkeinternational.com",
+            "email": "jacqueline@clarkeinternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -75295,12 +75352,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrew@queentana.co.uk",
+            "email": "andrew.lawrence@queentana.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrew.lawrence@queentana.co.uk",
+            "email": "andrew@queentana.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -75328,12 +75385,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "john@queentana.co.uk",
+            "email": "john.wisdom@queentana.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "john.wisdom@queentana.co.uk",
+            "email": "john@queentana.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -76015,12 +76072,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "michael@airservices.co.uk",
+            "email": "michael.mitchell@airservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "michael.mitchell@airservices.co.uk",
+            "email": "michael@airservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -76048,12 +76105,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "steven@airservices.co.uk",
+            "email": "steven.mitchell@airservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "steven.mitchell@airservices.co.uk",
+            "email": "steven@airservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -76250,12 +76307,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jamie@dwt.co.uk",
+            "email": "jamie.graham@dwt.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jamie.graham@dwt.co.uk",
+            "email": "jamie@dwt.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -77180,12 +77237,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "alan@acronaviation.com",
+            "email": "alan.crawford@acronaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "alan.crawford@acronaviation.com",
+            "email": "alan@acronaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -77213,12 +77270,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "oakwood@acronaviation.com",
+            "email": "oakwood.limited@acronaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "oakwood.limited@acronaviation.com",
+            "email": "oakwood@acronaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -77246,12 +77303,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "alan@acronaviation.com",
+            "email": "alan.crawford@acronaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "alan.crawford@acronaviation.com",
+            "email": "alan@acronaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -77279,12 +77336,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "robin@acronaviation.com",
+            "email": "robin.gloverfaure@acronaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "robin.gloverfaure@acronaviation.com",
+            "email": "robin@acronaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -77490,12 +77547,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "mumtaz@aspirefood.co.uk",
+            "email": "mumtaz.khan@aspirefood.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "mumtaz.khan@aspirefood.co.uk",
+            "email": "mumtaz@aspirefood.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -77739,12 +77796,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ahsan@a-s.co.uk",
+            "email": "ahsan.hassan@a-s.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ahsan.hassan@a-s.co.uk",
+            "email": "ahsan@a-s.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -78594,12 +78651,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "difan@unibondseafood.com",
+            "email": "difan.yue@unibondseafood.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "difan.yue@unibondseafood.com",
+            "email": "difan@unibondseafood.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -78627,12 +78684,12 @@
         "email_verified": true,
         "email_guesses": [
           {
-            "email": "david@unibondseafood.com",
+            "email": "david.jiang@unibondseafood.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "david.jiang@unibondseafood.com",
+            "email": "david@unibondseafood.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -78660,12 +78717,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "difan@unibondseafood.com",
+            "email": "difan.yue@unibondseafood.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "difan.yue@unibondseafood.com",
+            "email": "difan@unibondseafood.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -79745,12 +79802,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "dean@internationaltimber.com",
+            "email": "dean.border@internationaltimber.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "dean.border@internationaltimber.com",
+            "email": "dean@internationaltimber.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -82262,7 +82319,7 @@
         "email_guesses": [
           {
             "email": "nasir@premiumit.co.uk",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
@@ -84902,12 +84959,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "david@dsg.co.uk",
+            "email": "david.taylor@dsg.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "david.taylor@dsg.co.uk",
+            "email": "david@dsg.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -85238,12 +85295,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "paul@css.co.uk",
+            "email": "paul.slade@css.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "paul.slade@css.co.uk",
+            "email": "paul@css.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -86226,18 +86283,18 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "judith@cps.co.uk",
-            "smtp_verified": false,
-            "catch_all": false
-          },
-          {
             "email": "judith.chapman@cps.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
+            "email": "judith@cps.co.uk",
+            "smtp_verified": false,
+            "catch_all": false
+          },
+          {
             "email": "j.chapman@cps.co.uk",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           }
         ],
@@ -86259,12 +86316,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "judith@cps.co.uk",
+            "email": "judith.chapman@cps.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "judith.chapman@cps.co.uk",
+            "email": "judith@cps.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -86292,12 +86349,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "david@cps.co.uk",
+            "email": "david.paige@cps.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "david.paige@cps.co.uk",
+            "email": "david@cps.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -86325,12 +86382,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "paul@cps.co.uk",
+            "email": "paul.stones@cps.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "paul.stones@cps.co.uk",
+            "email": "paul@cps.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -86735,12 +86792,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "nirma@starkgroup.dk",
+            "email": "nirma.cassidy@starkgroup.dk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "nirma.cassidy@starkgroup.dk",
+            "email": "nirma@starkgroup.dk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -86768,13 +86825,13 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "john@starkgroup.dk",
+            "email": "john.carter@starkgroup.dk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "john.carter@starkgroup.dk",
-            "smtp_verified": null,
+            "email": "john@starkgroup.dk",
+            "smtp_verified": false,
             "catch_all": false
           },
           {
@@ -86801,12 +86858,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "james@starkgroup.dk",
+            "email": "james.martin@starkgroup.dk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "james.martin@starkgroup.dk",
+            "email": "james@starkgroup.dk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -87506,23 +87563,23 @@
         "tier": 3,
         "tier_label": "Director",
         "appointed_on": "2024-04-11",
-        "email": null,
-        "email_source": null,
-        "email_verified": null,
+        "email": "george@machineryequipment.com",
+        "email_source": "smtp_verified",
+        "email_verified": true,
         "email_guesses": [
           {
             "email": "george@machineryequipment.com",
-            "smtp_verified": null,
+            "smtp_verified": true,
             "catch_all": false
           },
           {
             "email": "george.humphreys@machineryequipment.com",
-            "smtp_verified": null,
+            "smtp_verified": true,
             "catch_all": false
           },
           {
             "email": "g.humphreys@machineryequipment.com",
-            "smtp_verified": null,
+            "smtp_verified": true,
             "catch_all": false
           }
         ],
@@ -87546,17 +87603,17 @@
           {
             "email": "samer@machineryequipment.com",
             "smtp_verified": null,
-            "catch_all": false
+            "catch_all": true
           },
           {
             "email": "samer.khalid@machineryequipment.com",
             "smtp_verified": null,
-            "catch_all": false
+            "catch_all": true
           },
           {
             "email": "s.khalid@machineryequipment.com",
             "smtp_verified": null,
-            "catch_all": false
+            "catch_all": true
           }
         ],
         "phone": null,
@@ -87566,7 +87623,7 @@
       }
     ],
     "route_grade": "C",
-    "contact_confidence": 24,
+    "contact_confidence": 40,
     "company_linkedin": "https://www.google.com/search?q=site:linkedin.com/company+%22Machinery+%26+Equipment+Rental+Solutions%22",
     "company_name_clean": "Machinery & Equipment Rental Solutions",
     "fx_evidence_snippets": [],
@@ -88271,12 +88328,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "canute@originaltravel.co.uk",
+            "email": "canute.limited@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "canute.limited@originaltravel.co.uk",
+            "email": "canute@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -88304,12 +88361,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "thomas@originaltravel.co.uk",
+            "email": "thomas.barber@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "thomas.barber@originaltravel.co.uk",
+            "email": "thomas@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -88337,12 +88394,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "anne@originaltravel.co.uk",
+            "email": "anne.bouferguene@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "anne.bouferguene@originaltravel.co.uk",
+            "email": "anne@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -88370,12 +88427,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "alain@originaltravel.co.uk",
+            "email": "alain.capestan@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "alain.capestan@originaltravel.co.uk",
+            "email": "alain@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -88403,12 +88460,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "emmanuel@originaltravel.co.uk",
+            "email": "emmanuel.cohenboulakia@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "emmanuel.cohenboulakia@originaltravel.co.uk",
+            "email": "emmanuel@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -88436,12 +88493,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "alexia@originaltravel.co.uk",
+            "email": "alexia.dubourglavroff@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "alexia.dubourglavroff@originaltravel.co.uk",
+            "email": "alexia@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -88469,12 +88526,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jeanfrancois@originaltravel.co.uk",
+            "email": "jeanfrancois.rial@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jeanfrancois.rial@originaltravel.co.uk",
+            "email": "jeanfrancois@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -88502,12 +88559,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrew@originaltravel.co.uk",
+            "email": "andrew.smith@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrew.smith@originaltravel.co.uk",
+            "email": "andrew@originaltravel.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -89546,7 +89603,7 @@
         "email_guesses": [
           {
             "email": "khalid@stylecycle.co.uk",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           },
           {
@@ -89739,12 +89796,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "sarabjit@aafood.co.uk",
+            "email": "sarabjit.kaur@aafood.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "sarabjit.kaur@aafood.co.uk",
+            "email": "sarabjit@aafood.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -92398,12 +92455,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "margaret@foodpackmachinerysolutions.co.uk",
+            "email": "margaret.banham@foodpackmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "margaret.banham@foodpackmachinerysolutions.co.uk",
+            "email": "margaret@foodpackmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -92431,12 +92488,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "stephen@foodpackmachinerysolutions.co.uk",
+            "email": "stephen.banham@foodpackmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "stephen.banham@foodpackmachinerysolutions.co.uk",
+            "email": "stephen@foodpackmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -93427,12 +93484,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "christopher@budgetshippingcontainers.co.uk",
+            "email": "christopher.osborne@budgetshippingcontainers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "christopher.osborne@budgetshippingcontainers.co.uk",
+            "email": "christopher@budgetshippingcontainers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -93460,12 +93517,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "david@budgetshippingcontainers.co.uk",
+            "email": "david.sparrow@budgetshippingcontainers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "david.sparrow@budgetshippingcontainers.co.uk",
+            "email": "david@budgetshippingcontainers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -95619,12 +95676,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "nigel@finewinedirect.co.uk",
+            "email": "nigel.osullivan@finewinedirect.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "nigel.osullivan@finewinedirect.co.uk",
+            "email": "nigel@finewinedirect.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -95652,12 +95709,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "gregory@finewinedirect.co.uk",
+            "email": "gregory.williams@finewinedirect.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "gregory.williams@finewinedirect.co.uk",
+            "email": "gregory@finewinedirect.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -95940,12 +95997,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "alan@artifexinteriorsystems.com",
+            "email": "alan.fennelly@artifexinteriorsystems.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "alan.fennelly@artifexinteriorsystems.com",
+            "email": "alan@artifexinteriorsystems.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -95973,12 +96030,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "john@artifexinteriorsystems.com",
+            "email": "john.hickman@artifexinteriorsystems.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "john.hickman@artifexinteriorsystems.com",
+            "email": "john@artifexinteriorsystems.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -96198,12 +96255,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "juliette@portland-fuel.com",
+            "email": "juliette.spencer@portland-fuel.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "juliette.spencer@portland-fuel.com",
+            "email": "juliette@portland-fuel.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -96231,12 +96288,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "steven@portland-fuel.com",
+            "email": "steven.irwin@portland-fuel.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "steven.irwin@portland-fuel.com",
+            "email": "steven@portland-fuel.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -96264,12 +96321,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "james@portland-fuel.com",
+            "email": "james.spencer@portland-fuel.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "james.spencer@portland-fuel.com",
+            "email": "james@portland-fuel.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -96297,12 +96354,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "joe@portland-fuel.com",
+            "email": "joe.tuohy@portland-fuel.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "joe.tuohy@portland-fuel.com",
+            "email": "joe@portland-fuel.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -96602,12 +96659,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "elizabeth@corporateflight.com",
+            "email": "elizabeth.burke@corporateflight.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "elizabeth.burke@corporateflight.com",
+            "email": "elizabeth@corporateflight.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -96951,7 +97008,7 @@
     ],
     "generic_emails": [],
     "status": "new",
-    "contact_phone": null,
+    "contact_phone": "(0044) 2074731927",
     "contact_phones": [],
     "contact_email": "info@addtech-petroleum.com",
     "contact_emails_found": [
@@ -97030,7 +97087,7 @@
           },
           {
             "email": "dimitrios.roumeliotis@addtech-petroleum.com",
-            "smtp_verified": false,
+            "smtp_verified": null,
             "catch_all": false
           },
           {
@@ -97112,7 +97169,7 @@
       }
     ],
     "route_grade": "C",
-    "contact_confidence": 34,
+    "contact_confidence": 54,
     "company_linkedin": "https://www.google.com/search?q=site:linkedin.com/company+%22Addtech+Petroleum+Corporation%22",
     "company_name_clean": "Addtech Petroleum Corporation",
     "fx_evidence_snippets": [],
@@ -97123,7 +97180,8 @@
     "currency_reason": "",
     "size_signals": [],
     "fx_likelihood_score": 0,
-    "website_confidence_reason": "High confidence: discovered via domain guess; domain name matches company name"
+    "website_confidence_reason": "High confidence: discovered via domain guess; domain name matches company name",
+    "phone_source": "multi_page_scrape"
   },
   "ea761e120d7f2457": {
     "id": "ea761e120d7f2457",
@@ -97295,12 +97353,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "lee@eurocargoaviation.com",
+            "email": "lee.addinell@eurocargoaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "lee.addinell@eurocargoaviation.com",
+            "email": "lee@eurocargoaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -97328,12 +97386,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "stuart@eurocargoaviation.com",
-            "smtp_verified": null,
+            "email": "stuart.holland@eurocargoaviation.com",
+            "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "stuart.holland@eurocargoaviation.com",
+            "email": "stuart@eurocargoaviation.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -97576,7 +97634,7 @@
           },
           {
             "email": "d.vandermerwe@againstgrain.com",
-            "smtp_verified": null,
+            "smtp_verified": false,
             "catch_all": false
           }
         ],
@@ -97805,12 +97863,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "olayinka@claritytech.com",
+            "email": "olayinka.olatunji@claritytech.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "olayinka.olatunji@claritytech.com",
+            "email": "olayinka@claritytech.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -97947,12 +98005,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "janet@egrimesdirect.com",
+            "email": "janet.grimes@egrimesdirect.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "janet.grimes@egrimesdirect.com",
+            "email": "janet@egrimesdirect.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -97980,12 +98038,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "andrew@egrimesdirect.com",
+            "email": "andrew.grimes@egrimesdirect.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "andrew.grimes@egrimesdirect.com",
+            "email": "andrew@egrimesdirect.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -98184,12 +98242,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ewan@hendricksgin.com",
+            "email": "ewan.henderson@hendricksgin.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ewan.henderson@hendricksgin.com",
+            "email": "ewan@hendricksgin.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99077,12 +99135,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ying@cosco.co.uk",
+            "email": "ying.dong@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ying.dong@cosco.co.uk",
+            "email": "ying@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99110,12 +99168,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "norose@cosco.co.uk",
+            "email": "norose.limited@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "norose.limited@cosco.co.uk",
+            "email": "norose@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99143,12 +99201,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "yan@cosco.co.uk",
+            "email": "yan.chen@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "yan.chen@cosco.co.uk",
+            "email": "yan@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99176,12 +99234,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "dongxing@cosco.co.uk",
+            "email": "dongxing.cui@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "dongxing.cui@cosco.co.uk",
+            "email": "dongxing@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99209,12 +99267,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "hua@cosco.co.uk",
+            "email": "hua.hu@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "hua.hu@cosco.co.uk",
+            "email": "hua@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99242,12 +99300,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "zhenyu@cosco.co.uk",
+            "email": "zhenyu.li@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "zhenyu.li@cosco.co.uk",
+            "email": "zhenyu@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99275,12 +99333,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "guangzong@cosco.co.uk",
+            "email": "guangzong.qi@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "guangzong.qi@cosco.co.uk",
+            "email": "guangzong@cosco.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99477,12 +99535,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "edward@globalmachinerysolutions.co.uk",
+            "email": "edward.baker@globalmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "edward.baker@globalmachinerysolutions.co.uk",
+            "email": "edward@globalmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99510,12 +99568,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "james@globalmachinerysolutions.co.uk",
+            "email": "james.buckle@globalmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "james.buckle@globalmachinerysolutions.co.uk",
+            "email": "james@globalmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99543,12 +99601,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "steven@globalmachinerysolutions.co.uk",
+            "email": "steven.edwards@globalmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "steven.edwards@globalmachinerysolutions.co.uk",
+            "email": "steven@globalmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -99576,12 +99634,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "george@globalmachinerysolutions.co.uk",
+            "email": "george.westwood@globalmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "george.westwood@globalmachinerysolutions.co.uk",
+            "email": "george@globalmachinerysolutions.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -100597,12 +100655,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "sarah@abbeypolymers.co.uk",
+            "email": "sarah.bailey@abbeypolymers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "sarah.bailey@abbeypolymers.co.uk",
+            "email": "sarah@abbeypolymers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -100630,12 +100688,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "robin@abbeypolymers.co.uk",
+            "email": "robin.bailey@abbeypolymers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "robin.bailey@abbeypolymers.co.uk",
+            "email": "robin@abbeypolymers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -100663,12 +100721,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "sarah@abbeypolymers.co.uk",
+            "email": "sarah.bailey@abbeypolymers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "sarah.bailey@abbeypolymers.co.uk",
+            "email": "sarah@abbeypolymers.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -101449,12 +101507,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "paul@greatbritishmarketing.com",
+            "email": "paul.snape@greatbritishmarketing.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "paul.snape@greatbritishmarketing.com",
+            "email": "paul@greatbritishmarketing.com",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -102474,12 +102532,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ermias@airlinecargoservices.co.uk",
+            "email": "ermias.ghebresllasie@airlinecargoservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ermias.ghebresllasie@airlinecargoservices.co.uk",
+            "email": "ermias@airlinecargoservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -102507,12 +102565,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "kiran@airlinecargoservices.co.uk",
+            "email": "kiran.maharaj@airlinecargoservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "kiran.maharaj@airlinecargoservices.co.uk",
+            "email": "kiran@airlinecargoservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -102540,12 +102598,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "mengistu@airlinecargoservices.co.uk",
+            "email": "mengistu.yeshitla@airlinecargoservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "mengistu.yeshitla@airlinecargoservices.co.uk",
+            "email": "mengistu@airlinecargoservices.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -103829,12 +103887,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "ian@egotechnology.co.uk",
+            "email": "ian.austin@egotechnology.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "ian.austin@egotechnology.co.uk",
+            "email": "ian@egotechnology.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -103862,12 +103920,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "melissa@egotechnology.co.uk",
+            "email": "melissa.austin@egotechnology.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "melissa.austin@egotechnology.co.uk",
+            "email": "melissa@egotechnology.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -104706,12 +104764,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "savitri@srsinternational.co.uk",
+            "email": "savitri.maharaj@srsinternational.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "savitri.maharaj@srsinternational.co.uk",
+            "email": "savitri@srsinternational.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -104907,12 +104965,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "jason@brownbros.co.uk",
+            "email": "jason.brewer@brownbros.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "jason.brewer@brownbros.co.uk",
+            "email": "jason@brownbros.co.uk",
             "smtp_verified": false,
             "catch_all": false
           },
@@ -106640,12 +106698,12 @@
         "email_verified": null,
         "email_guesses": [
           {
-            "email": "irina@bainternational.com",
+            "email": "irina.adeniyi@bainternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
           {
-            "email": "irina.adeniyi@bainternational.com",
+            "email": "irina@bainternational.com",
             "smtp_verified": false,
             "catch_all": false
           },
