@@ -19,6 +19,14 @@ interface Entry {
   key: string;
   value: unknown;
   empty?: boolean;     // was this a deliberately-cached empty/failed result?
+  v?: number;          // schema version (entries with a different version are ignored)
+}
+
+interface CacheFile {
+  __version?: number;
+  __entries?: Record<string, Entry>;
+  // legacy v0: keys are entry keys, values are Entry — accepted on load.
+  [k: string]: unknown;
 }
 
 export const DEFAULT_TTL_SECONDS = 14 * 24 * 3600;
@@ -27,23 +35,42 @@ const now = () => Math.floor(Date.now() / 1000);
 
 export class FileCache {
   private readonly path: string;
+  private readonly version: number;
   private data: Record<string, Entry> = {};
   private loaded = false;
   private dirty = false;
   hits = 0;
   misses = 0;
   stores = 0;
+  versionMismatches = 0;
 
-  constructor(path: string) {
+  /**
+   * @param path  JSON file location.
+   * @param version  Schema version of the cached *values*. Bump this in the call
+   *   site when the shape of stored values changes — stale entries from earlier
+   *   versions are skipped on lookup and pruned on flush. Default 1.
+   */
+  constructor(path: string, version = 1) {
     this.path = path;
+    this.version = version;
   }
 
   private ensureLoaded(): void {
     if (this.loaded) return;
     try {
       if (existsSync(this.path)) {
-        const parsed = JSON.parse(readFileSync(this.path, "utf8"));
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) this.data = parsed as Record<string, Entry>;
+        const parsed = JSON.parse(readFileSync(this.path, "utf8")) as CacheFile;
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          // New layout: { __version, __entries }. Legacy layout: top-level keys are entries.
+          if (parsed.__entries && typeof parsed.__entries === "object") {
+            this.data = parsed.__entries as Record<string, Entry>;
+          } else {
+            // Migrate legacy in-memory: treat each top-level k → Entry. They'll get
+            // `v` stamped on next store(); current-version reads still work as long
+            // as the value shape is compatible.
+            this.data = parsed as unknown as Record<string, Entry>;
+          }
+        }
       }
     } catch {
       this.data = {};
@@ -56,29 +83,28 @@ export class FileCache {
     this.ensureLoaded();
     const k = String(key).trim().toLowerCase();
     const e = this.data[k];
-    if (e && now() - (e.ts ?? 0) < ttlSeconds) {
-      this.hits++;
-      return { hit: true, value: e.value };
-    }
-    this.misses++;
-    return { hit: false, value: undefined };
+    if (!e) { this.misses++; return { hit: false, value: undefined }; }
+    if ((e.v ?? 0) !== this.version) { this.versionMismatches++; this.misses++; return { hit: false, value: undefined }; }
+    if (now() - (e.ts ?? 0) >= ttlSeconds) { this.misses++; return { hit: false, value: undefined }; }
+    this.hits++;
+    return { hit: true, value: e.value };
   }
 
   store(key: string, value: unknown, empty = false): void {
     this.ensureLoaded();
     const k = String(key).trim().toLowerCase();
-    this.data[k] = { ts: now(), key: k, value, empty };
+    this.data[k] = { ts: now(), key: k, value, empty, v: this.version };
     this.dirty = true;
     this.stores++;
   }
 
-  /** Drop entries older than maxTtlSeconds. Returns count removed. */
+  /** Drop entries older than maxTtlSeconds or from a different schema version. Returns count removed. */
   prune(maxTtlSeconds: number = DEFAULT_TTL_SECONDS): number {
     this.ensureLoaded();
     const cutoff = now() - maxTtlSeconds;
     let removed = 0;
     for (const [k, e] of Object.entries(this.data)) {
-      if ((e.ts ?? 0) <= cutoff) {
+      if ((e.ts ?? 0) <= cutoff || (e.v ?? 0) !== this.version) {
         delete this.data[k];
         removed++;
       }
@@ -87,18 +113,23 @@ export class FileCache {
     return removed;
   }
 
-  /** Prune expired entries, then write to disk if dirty. */
+  /** Prune expired/stale entries, then write to disk if dirty. */
   flush(pruneTtlSeconds: number = DEFAULT_TTL_SECONDS): void {
     this.ensureLoaded();
     this.prune(pruneTtlSeconds);
     if (!this.dirty) return;
     mkdirSync(dirname(this.path), { recursive: true });
-    writeFileSync(this.path, JSON.stringify(this.data, null, 2));
+    const payload: CacheFile = { __version: this.version, __entries: this.data };
+    writeFileSync(this.path, JSON.stringify(payload, null, 2));
     this.dirty = false;
   }
 
-  stats(): { entries: number; hits: number; misses: number; stores: number } {
+  stats(): { entries: number; hits: number; misses: number; stores: number; versionMismatches: number } {
     this.ensureLoaded();
-    return { entries: Object.keys(this.data).length, hits: this.hits, misses: this.misses, stores: this.stores };
+    return {
+      entries: Object.keys(this.data).length,
+      hits: this.hits, misses: this.misses, stores: this.stores,
+      versionMismatches: this.versionMismatches,
+    };
   }
 }
