@@ -65,19 +65,89 @@ const CRM_COLORS   = {
   not_relevant:    "#475569",
 };
 
+function isoDaysFromNow(days) {
+  const d = new Date(); d.setDate(d.getDate() + days); return d.toISOString();
+}
+
+function scheduleNextFollowUp(touchCount, action) {
+  // touchCount is after increment
+  if (action === "replied") return null;
+  if (action === "meeting_booked") return null;
+  if (action === "not_relevant") return null;
+  if (touchCount <= 1) return isoDaysFromNow(2);
+  if (touchCount === 2) return isoDaysFromNow(4);
+  if (touchCount === 3) return isoDaysFromNow(7);
+  return null; // move to nurture
+}
+
+function computeRouteGrade(lead) {
+  // Derive a simple route grade (A/B/C/D) from available contact signals
+  const hasDirector = !!lead.director_name;
+  const hasEmailGuess = (lead.guessed_emails||[]).length>0;
+  const siteConf = lead.website_confidence||"low";
+  const hasPhone = !!lead.phone;
+  const fxSigs = (lead.fx_payment_signals||[]).length + (lead.pays_fx_confirmed?1:0);
+
+  // Grade A: director + email or phone + site_conf high + FX signals
+  if (hasDirector && (hasEmailGuess || hasPhone) && siteConf === "high" && fxSigs>=1) return "A";
+  // Grade B: director + (email|phone) and site_conf >= medium
+  if (hasDirector && (hasEmailGuess || hasPhone) && (siteConf === "medium" || siteConf === "high")) return "B";
+  // Grade C: director present but weak contact evidence
+  if (hasDirector) return "C";
+  // Grade D: no director, website only
+  if (lead.website) return "D";
+  return "E";
+}
+
 function useCrmState() {
   const [state, setState] = useState(() => {
     try { return JSON.parse(localStorage.getItem(CRM_KEY)||"{}"); } catch { return {}; }
   });
-  const setStatus = useCallback((leadId, status) => {
+
+  const persist = useCallback((next) => {
+    try { localStorage.setItem(CRM_KEY, JSON.stringify(next)); } catch {}
+  }, []);
+
+  const updateLead = useCallback((leadId, patch) => {
     setState(prev => {
-      const next = {...prev, [leadId]:status};
-      try { localStorage.setItem(CRM_KEY, JSON.stringify(next)); } catch {}
+      const cur = prev[leadId] || {};
+      const next = {...prev, [leadId]: {...cur, ...patch}};
+      persist(next);
       return next;
     });
-  }, []);
-  const getStatus = useCallback((lead) => state[lead.id]||lead.status||"new", [state]);
-  return { getStatus, setStatus, state };
+  }, [persist]);
+
+  const getLead = useCallback((lead) => {
+    return {...(state[lead.id]||{}), status: (state[lead.id]&&state[lead.id].status) || lead.status || "new" };
+  }, [state]);
+
+  const getStatus = useCallback((lead) => (state[lead.id] && state[lead.id].status) || lead.status || "new", [state]);
+
+  const performAction = useCallback((lead, action) => {
+    const id = lead.id;
+    setState(prev => {
+      const cur = prev[id] || {};
+      const touch = (cur.touch_count||0) + (action === "follow_later"?0:1);
+      const last_channel = action === "called" ? "phone" : action === "email_sent" ? "email" : action === "linkedin_sent" ? "linkedin" : action === "replied" ? "reply" : action === "meeting_booked" ? "meeting" : cur.last_channel || null;
+      const status = action === "not_relevant" ? "not_relevant" : action === "replied" ? "reviewed" : action === "meeting_booked" ? "meeting_booked" : "contacted";
+      const next_follow_up_at = scheduleNextFollowUp(touch, action);
+      const next = {
+        ...prev,
+        [id]: {
+          ...cur,
+          last_contacted_at: action === "follow_later" ? cur.last_contacted_at || null : new Date().toISOString(),
+          last_channel,
+          touch_count: touch,
+          status,
+          next_follow_up_at,
+        }
+      };
+      persist(next);
+      return next;
+    });
+  }, [persist]);
+
+  return { state, updateLead, getLead, getStatus, performAction };
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────
@@ -567,7 +637,7 @@ function CrmBadge({ leadId, status, onSet }) {
             <div
               key={s}
               className={`crm-opt${s===status?" active":""}`}
-              onClick={() => { onSet(leadId, s); setOpen(false); }}
+              onClick={() => { onSet(leadId, { status: s }); setOpen(false); }}
             >
               <span className="crm-dot" style={{background:CRM_COLORS[s]}}/>
               <span style={{color:CRM_COLORS[s]}}>{CRM_LABELS[s]}</span>
@@ -608,6 +678,36 @@ function MessageAmmoPanel({ ingredients, outreach }) {
             <div className="ammo-label">Call opener</div>
             <div className="ammo-text">{outreach.call_opener}</div>
             <CopyBtn text={outreach.call_opener} />
+          </div>
+
+          <div className="sb">
+            <div className="sb-h">Exports</div>
+            <div className="sb-row">
+              <span className="sb-l">Today's Queue</span>
+              <button className="btn-sm" onClick={()=>exportLeadsToCsv(callListLeads, 'todays_queue.csv')}>CSV</button>
+            </div>
+            <div className="sb-row">
+              <span className="sb-l">Grade A/B leads</span>
+              <button className="btn-sm" onClick={()=>exportLeadsToCsv(leads.filter(l=>['A','B'].includes(computeRouteGrade(l))), 'grade_a_b.csv')}>CSV</button>
+            </div>
+            <div className="sb-row">
+              <span className="sb-l">Follow-ups due</span>
+              <button className="btn-sm" onClick={()=>{
+                const now = new Date();
+                const due = leads.filter(l=>{
+                  const crm = crmState[l.id]||{}; if(!crm.next_follow_up_at) return false; return new Date(crm.next_follow_up_at) <= now;
+                });
+                exportLeadsToCsv(due, 'followups_due.csv');
+              }}>CSV</button>
+            </div>
+          </div>
+
+          <div className="sb">
+            <div className="sb-h">Follow-ups</div>
+            <div className="sb-row"><span className="sb-l">Due today</span><span className="sb-v" style={{color:"#10B981"}}>{followupsDueToday}</span></div>
+            <div className="sb-row"><span className="sb-l">Overdue</span><span className="sb-v" style={{color:"#F97316"}}>{followupsOverdue}</span></div>
+            <div className="sb-row"><span className="sb-l">No next action</span><span className="sb-v" style={{color:"#64748B"}}>{noNextAction}</span></div>
+            <div className="sb-row"><span className="sb-l">Recently contacted</span><span className="sb-v" style={{color:"#38BDF8"}}>{recentlyContacted}</span></div>
           </div>
         )}
         {outreach.linkedin_connection && (
@@ -889,7 +989,7 @@ function DecisionMakers({ lead }) {
 }
 
 // ─── COMPANY CARD ────────────────────────────────────────────────
-function CompanyCard({ lead, crmStatus, onCrmSet }) {
+function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry }) {
   const [open, setOpen] = useState(false);
   const color       = pri(lead.priority);
   const initials    = (lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
@@ -898,6 +998,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
   const segSigs     = lead.segment_signals || [];
   const confBadge   = siteConfLabel(lead.website_confidence, lead.website_source);
   const confCls     = siteConfClass(lead.website_confidence);
+  const routeGrade  = computeRouteGrade(lead);
   const expConf     = lead.exposure_confidence;
   const thesis      = lead.exposure_thesis || lead.fx_reason || "";
   const isMultiEvt  = lead.multi_event_trigger;
@@ -1117,18 +1218,53 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
             outreach={lead.outreach}
           />
 
-          <div className="actions">
-            <button className="act a-call" onClick={()=>{
-              const t = lead.message_ingredients?.call_opener || lead.outreach?.call_opener;
-              if(t) copy(t);
-            }}>📞 Call opener</button>
-            <button className="act a-email" onClick={()=>{
-              const t = lead.message_ingredients?.linkedin_note || lead.outreach?.linkedin_connection;
-              if(t) copy(t);
-            }}>💼 LI note</button>
+          <div style={{marginBottom:10,display:"flex",gap:8,flexWrap:"wrap"}}>
+            <button className="act a-call" onClick={()=>{ const t = lead.message_ingredients?.call_opener || lead.outreach?.call_opener; if(t) copy(t); performAction && performAction(lead, "called"); }}>📞 Called</button>
+            <button className="act a-email" onClick={()=>{ const t = lead.message_ingredients?.email_body || lead.email_draft || lead.outreach?.email_body; if(t) copy(t); performAction && performAction(lead, "email_sent"); }}>✉️ Email sent</button>
+            <button className="act a-email" onClick={()=>{ performAction && performAction(lead, "linkedin_sent"); const t = lead.message_ingredients?.linkedin_note || lead.outreach?.linkedin_connection; if(t) copy(t); }}>💼 LinkedIn sent</button>
+            <button className="act a-web" onClick={()=>{ performAction && performAction(lead, "replied"); }}>↩️ Replied</button>
+            <button className="act a-call" onClick={()=>{ performAction && performAction(lead, "meeting_booked"); }}>📅 Meeting</button>
+            <button className="act a-web" onClick={()=>{ performAction && performAction(lead, "not_relevant"); }}>❌ Not relevant</button>
+            <button className="act a-web" onClick={()=>{ performAction && performAction(lead, "follow_later"); }}>⏭ Follow up later</button>
             {lead.website && <a href={lead.website} target="_blank" rel="noreferrer" className="act a-web">🌐 Website</a>}
             {lead.company_number && (
               <a href={`https://find-and-update.company-information.service.gov.uk/company/${lead.company_number}`} target="_blank" rel="noreferrer" className="act a-web">🏛 CH</a>
+            )}
+          </div>
+
+          {/* Verification checkboxes + notes */}
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:10}}>
+            {['companyLinkedIn','personLinkedIn','email','phone','decisionMaker','bad_match'].map(k=>{
+              const label = k==='companyLinkedIn'?"Company LI":k==='personLinkedIn'?"Person LI":k==='decisionMaker'?"Decision maker":k==='bad_match'?"Bad match":k.charAt(0).toUpperCase()+k.slice(1);
+              const val = (crmEntry && crmEntry.verified && crmEntry.verified[k]) || false;
+              return (
+                <label key={k} style={{fontSize:12,opacity:.9,display:"inline-flex",alignItems:"center",gap:6}}>
+                  <input type="checkbox" checked={val} onChange={e=>onCrmSet(lead.id,{ verified: {...(crmEntry?.verified||{}), [k]: e.target.checked } })} /> {label}
+                </label>
+              );
+            })}
+          </div>
+
+          <div style={{marginBottom:12}}>
+            <div className="xl">Notes</div>
+            <textarea
+              placeholder="Quick notes — who you spoke to, next steps"
+              style={{width:"100%",minHeight:64,marginTop:8,padding:8,borderRadius:8,background:"#0b1222",border:"1px solid rgba(255,255,255,.05)",color:"#e6eef8"}}
+              value={crmEntry?.notes||""}
+              onChange={e=>onCrmSet(lead.id,{ notes: e.target.value })}
+            />
+          </div>
+
+          {/* Route grade / research reasons */}
+          <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:8}}>
+            <div className="xl">Route grade</div>
+            <div style={{fontWeight:700,fontSize:16}}>{routeGrade}</div>
+            {['C','D','E'].includes(routeGrade) && (
+              <div style={{fontSize:12,color:"rgba(255,255,255,.4)",padding:8,background:"rgba(255,255,255,.02)",borderRadius:8}}>
+                {routeGrade==='C' && 'Grade C: director found but weak contact evidence. Verify LinkedIn and finance contact.'}
+                {routeGrade==='D' && 'Grade D: website found but no named person. Check about/team pages.'}
+                {routeGrade==='E' && 'Grade E: little contact evidence — research Companies House and company site.'}
+              </div>
             )}
           </div>
         </div>
@@ -1310,7 +1446,7 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState
 }
 
 // ─── EVENT ITEM ──────────────────────────────────────────────────
-function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet }) {
+function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet, getLead, performAction }) {
   const [open, setOpen]          = useState(false);
   const [showCompanies, setShow] = useState(false);
   const color = urg(event.urgency_score||0);
@@ -1476,7 +1612,16 @@ function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet }) {
                 </div>
               </div>
               {eventLeads.length > 0
-                ? <div className="co-list">{eventLeads.map(l=><CompanyCard key={l.id} lead={l} crmStatus={getCrmStatus(l)} onCrmSet={onCrmSet}/>)}</div>
+                ? <div className="co-list">{eventLeads.map(l=>
+                    <CompanyCard
+                      key={l.id}
+                      lead={l}
+                      crmStatus={getCrmStatus(l)}
+                      onCrmSet={onCrmSet}
+                      performAction={performAction}
+                      crmEntry={getLead(l)}
+                    />
+                  )}</div>
                 : <div style={{padding:"18px 0",textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"rgba(255,255,255,.2)"}}>All companies hidden by active filters</div>
               }
             </div>
@@ -1494,7 +1639,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [lastRef, setLast]    = useState(null);
   const [filters, setFilters] = useState(CALL_LIST_FILTERS);
-  const { getStatus: getCrmStatus, setStatus: onCrmSet, state: crmState } = useCrmState();
+  const { state: crmState, getLead, getStatus: getCrmStatus, updateLead, performAction } = useCrmState();
 
   const load = useCallback(async()=>{
     setLoading(true);
@@ -1506,6 +1651,28 @@ export default function App() {
   },[]);
 
   useEffect(()=>{ load(); },[load]);
+
+  function downloadCsv(text, filename) {
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+
+  function exportLeadsToCsv(list, filename) {
+    const header = ['Company','Website','Director','Role','Phone','Email','LinkedIn search','FX exposure','Route grade','Confidence','Next action','Status','Notes'];
+    const rows = [header];
+    list.forEach(l=>{
+      const crm = crmState[l.id]||{};
+      const email = (l.guessed_emails&&l.guessed_emails[0]&&l.guessed_emails[0].email) || "";
+      const li = (l.linkedin_assist&&l.linkedin_assist.company_search) || "";
+      const row = [l.company_name||"", l.website||"", l.director_name||"", l.director_role||"", l.phone||"", email, li, l.fx_exposure||"", computeRouteGrade(l), l.website_confidence||"", crm.next_follow_up_at||"", crm.status||l.status||"", (crm.notes||"").replace(/\n/g,' ')];
+      rows.push(row.map(cell=>`"${String(cell||"").replace(/"/g,'""')}"`));
+    });
+    const text = rows.map(r=>Array.isArray(r)?r.join(","):r.join(",")).join("\n");
+    downloadCsv(text, filename);
+  }
 
   const filteredLeads  = useMemo(()=>applyFilters(leads,filters,getCrmStatus),[leads,filters,getCrmStatus]);
   // callListLeads = top CALL_LIST_MAX eligible leads (same slice as applyFilters call_list view)
@@ -1521,6 +1688,21 @@ export default function App() {
   const saved     = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="saved").length,[leads,getCrmStatus]);
   const meetings  = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="meeting_booked").length,[leads,getCrmStatus]);
   const hasSite   = leads.filter(l=>l.website).length;
+
+  // Follow-up and contact lists
+  const followupsDueToday = useMemo(()=>{
+    const now = new Date();
+    return leads.filter(l=>{ const crm = crmState[l.id]||{}; if(!crm.next_follow_up_at) return false; const d=new Date(crm.next_follow_up_at); return d.toDateString()===now.toDateString(); }).length;
+  },[leads,crmState]);
+  const followupsOverdue = useMemo(()=>{
+    const now = new Date();
+    return leads.filter(l=>{ const crm = crmState[l.id]||{}; if(!crm.next_follow_up_at) return false; const d=new Date(crm.next_follow_up_at); return d < now; }).length;
+  },[leads,crmState]);
+  const noNextAction = useMemo(()=>leads.filter(l=>{ const crm = crmState[l.id]||{}; return !crm.next_follow_up_at && (crm.status && crm.status!=='not_relevant' && crm.status!=='meeting_booked'); }).length,[leads,crmState]);
+  const recentlyContacted = useMemo(()=>{
+    const cutoff = Date.now() - (7*24*60*60*1000);
+    return leads.filter(l=>{ const crm = crmState[l.id]||{}; return crm.last_contacted_at && new Date(crm.last_contacted_at).getTime() >= cutoff; }).length;
+  },[leads,crmState]);
 
   const viewDesc = filters.view === "call_list"
     ? `Top ${CALL_LIST_MAX} leads · verified website · FX signals · contact route confirmed`
@@ -1638,8 +1820,10 @@ export default function App() {
                   leads={filteredLeads}
                   allLeads={leads}
                   index={i}
-                  getCrmStatus={getCrmStatus}
-                  onCrmSet={onCrmSet}
+                    getCrmStatus={getCrmStatus}
+                    onCrmSet={updateLead}
+                    getLead={getLead}
+                    performAction={performAction}
                 />
               ))}
             </div>
