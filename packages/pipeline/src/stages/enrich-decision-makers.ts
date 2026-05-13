@@ -46,9 +46,10 @@ import {
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 import { ChClient, type ChOfficer, type ChPsc } from "../sources/companies-house.js";
-import { createCachedFetcher, type CachedFetcher } from "../sources/fetch.js";
+import { createCachedFetcher, headOk as defaultHeadOk, type CachedFetcher } from "../sources/fetch.js";
 import { discoverPages } from "../sources/sitemap.js";
 import { createSmtpVerifier, type SmtpVerifier } from "../sources/smtp-verify.js";
+import { buildNoWebsiteHints, linkedinSearchForTown } from "../sources/no-website-fallback.js";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const MAX_OFFICERS = 8;
@@ -355,6 +356,17 @@ async function enrichLead(
   const officers = lead.company_number ? await ch.officers(lead.company_number) : [];
   const pscs = lead.company_number ? await ch.psc(lead.company_number) : [];
 
+  // 1.5) No-website fallback. If we have no website but a clean company name +
+  //      address, try to find a real domain by HEAD-probing common patterns,
+  //      and surface a switchboard area + town for the LinkedIn route.
+  let noWebsite: ReturnType<typeof buildNoWebsiteHints> | null = null;
+  if (!lead.website && ctx.coClean) {
+    noWebsite = buildNoWebsiteHints({ companyNameClean: ctx.coClean, address: lead.address ?? "" });
+    for (const url of noWebsite.candidate_domains) {
+      if (await defaultHeadOk(url)) { (lead as Record<string, unknown>).website = url; ctx.domain = bareDomain(url); break; }
+    }
+  }
+
   // 2) Pages to crawl
   const pages = await fetchPages(ctx);
   const websitePeople: ReturnType<typeof extractPeople> = [];
@@ -386,6 +398,14 @@ async function enrichLead(
     for (const s of detectTechStack(homepageHtml)) techSignals.set(s.label, s.evidence);
   }
 
+  // 5.5) If still no website found, swap each DM's LinkedIn search for a
+  //      town-qualified version (better signal for common-name people).
+  if (noWebsite && !lead.website && noWebsite.town) {
+    for (const dm of dms) {
+      if (dm.name) (dm as Record<string, unknown>).linkedin_search = linkedinSearchForTown(dm.name, noWebsite.town);
+    }
+  }
+
   // 6) Write back onto the lead.
   const leadAny = lead as Record<string, unknown>;
   leadAny.decision_makers = dms;
@@ -394,6 +414,9 @@ async function enrichLead(
   leadAny.route_grade = computeRouteGrade(lead, dms);
   leadAny.contact_confidence = computeContactConfidence(lead, dms);
   if (techSignals.size) leadAny.tech_signals = Array.from(techSignals.keys());
+  if (noWebsite?.switchboard_prefix && !lead.contact_phone) {
+    leadAny.switchboard_hint = `Likely UK switchboard prefix: ${noWebsite.switchboard_prefix} (from ${lead.address ?? "registered address"})`;
+  }
 
   // Back-fill top-level director_name / contact_email from best DM.
   const best = dms[0];
