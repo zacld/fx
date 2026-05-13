@@ -125,6 +125,101 @@ export const ContactFieldsSchema = z.object({
 });
 export type ContactFields = z.infer<typeof ContactFieldsSchema>;
 
+// ── Decision-maker enrichment (= scripts/legacy/enrich_decision_makers.py) ───
+// Tier 1 = primary FX conversation targets (FD/CFO/MD/CEO/Owner).
+// Tier 2 = secondary (Commercial/Ops/Procurement/Sales/Accounts Manager).
+// Tier 3 = generic Director / Company Secretary / Non-Executive fallback.
+export const PersonTier = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+export type PersonTier = z.infer<typeof PersonTier>;
+
+export const EmailSource = z.enum([
+  "website_page",          // explicit mailto: on the company's own pages
+  "website_email_found",   // on-domain email whose local-part matches a known name
+  "smtp_verified",         // SMTP RCPT verified one of the generated patterns
+  "pattern_inferred",      // learned domain pattern (e.g. acme uses first.last@)
+  "ch_director",           // surfaced via Companies House director → contact_email
+]);
+export type EmailSource = z.infer<typeof EmailSource>;
+
+export const EmailGuessSchema = z.object({
+  email: z.string(),
+  pattern: z.string().default(""),       // e.g. "{first}.{last}@"
+  smtp_verified: z.boolean().nullable().default(null),
+  catch_all: z.boolean().default(false),
+  pattern_confidence: z.number().min(0).max(1).default(0),   // domain-pattern inference
+}).passthrough();
+export type EmailGuess = z.infer<typeof EmailGuessSchema>;
+
+export const DecisionMakerSchema = z.object({
+  name: z.string(),
+  first_name: z.string().default(""),
+  last_name: z.string().default(""),
+  role: z.string().default(""),
+  tier: PersonTier.default(3),
+  tier_label: z.enum(["Primary", "Secondary", "Fallback"]).default("Fallback"),
+  appointed_on: z.string().nullable().default(null),
+  email: z.string().nullable().default(null),
+  email_source: EmailSource.nullable().default(null),
+  email_verified: z.boolean().nullable().default(null),
+  email_guesses: z.array(EmailGuessSchema).default([]),
+  phone: z.string().nullable().default(null),
+  linkedin_search: z.string().nullable().default(null),
+  linkedin_name_only: z.string().nullable().default(null),
+  google_email_search: z.string().nullable().default(null),
+  source: z.enum(["companies_house", "website_only", "ch+website"]).default("companies_house"),
+}).passthrough();
+export type DecisionMaker = z.infer<typeof DecisionMakerSchema>;
+
+export const RouteGrade = z.enum(["A", "B", "C", "D", "E", "F"]);
+export type RouteGrade = z.infer<typeof RouteGrade>;
+
+// ── Website intelligence (= scripts/legacy/enrich_website_intelligence.py) ───
+export const WebsiteIntelSchema = z.object({
+  fx_evidence_snippets: z.array(z.string()).default([]),
+  country_evidence: z.array(z.string()).default([]),
+  supplier_evidence: z.array(z.string()).default([]),
+  import_export_evidence: z.array(z.string()).default([]),
+  inferred_currency_pairs: z.array(z.string()).default([]),
+  currency_reason: z.string().default(""),
+  size_signals: z.array(z.string()).default([]),
+  tech_signals: z.array(z.string()).default([]),     // Shopify, multi-currency switcher, etc.
+  fx_likelihood_score: z.number().int().min(0).max(100).default(0),
+  website_confidence_reason: z.string().default(""),
+});
+export type WebsiteIntel = z.infer<typeof WebsiteIntelSchema>;
+
+// ── Decision-maker overlay applied to a lead ─────────────────────────────────
+export const DecisionMakerFieldsSchema = z.object({
+  decision_makers: z.array(DecisionMakerSchema).default([]),
+  route_grade: RouteGrade.default("F"),
+  contact_confidence: z.number().int().min(0).max(100).default(0),
+  company_linkedin: z.string().nullable().default(null),
+  company_name_clean: z.string().default(""),
+});
+export type DecisionMakerFields = z.infer<typeof DecisionMakerFieldsSchema>;
+
+// ── Companies House extras (PSCs / filings / charges) ────────────────────────
+export const PSCSchema = z.object({
+  name: z.string(),
+  kind: z.string().default(""),
+  natures_of_control: z.array(z.string()).default([]),
+  notified_on: z.string().nullable().default(null),
+}).passthrough();
+export type PSC = z.infer<typeof PSCSchema>;
+
+export const ChExtrasSchema = z.object({
+  psc: z.array(PSCSchema).default([]),
+  recent_filings: z.array(z.object({
+    type: z.string(),
+    description: z.string().default(""),
+    date: z.string().nullable().default(null),
+  })).default([]),
+  charges_count: z.number().int().default(0),
+  charges_outstanding: z.number().int().default(0),
+  accounts_turnover_band: z.string().default(""),   // "<1m" / "1-5m" / "5-25m" / "25m+" / ""
+});
+export type ChExtras = z.infer<typeof ChExtrasSchema>;
+
 // ── Provenance / source-evidence ─────────────────────────────────────────────
 export const LeadEvidenceSchema = z.object({
   website_source: z.union([WebsiteSource, z.string()]).optional(),
@@ -219,6 +314,9 @@ export const LeadSchema = z.object({
   status: z.string().default("new"),
 })
   .merge(ContactFieldsSchema.partial())
+  .merge(DecisionMakerFieldsSchema.partial())
+  .merge(WebsiteIntelSchema.partial())
+  .merge(ChExtrasSchema.partial())
   .passthrough();
 export type Lead = z.infer<typeof LeadSchema>;
 
