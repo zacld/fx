@@ -668,6 +668,36 @@ function fmtGBP(n) {
   return `£${n.toFixed(0)}`;
 }
 
+// ─── PHONE BADGE ─────────────────────────────────────────────────
+function PhoneBadge({ phone, sourceCount, large = false }) {
+  const [copied, setCopied] = useState(false);
+  if (!phone) return null;
+  const confirmed = (sourceCount || 0) >= 2;
+  return (
+    <span
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        fontFamily: "'JetBrains Mono',monospace",
+        fontSize: large ? 13 : 10,
+        fontWeight: 700,
+        color: "#10B981",
+        cursor: "pointer",
+        userSelect: "none",
+      }}
+      title={confirmed ? `${sourceCount}-source confirmed — click to copy` : "Click to copy"}
+      onClick={e => { e.stopPropagation(); copy(phone); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+    >
+      📞
+      <a href={`tel:${phone.replace(/\s/g, "")}`}
+        onClick={e => e.stopPropagation()}
+        style={{color: "inherit", textDecoration: "none"}}
+      >{phone}</a>
+      {confirmed && <span style={{color:"rgba(16,185,129,.5)",fontSize:8}}>✓×{sourceCount}</span>}
+      {copied && <span style={{fontSize:9,color:"#10B981",background:"rgba(16,185,129,.15)",padding:"0 4px",borderRadius:3}}>copied!</span>}
+    </span>
+  );
+}
+
 // ─── COMPANY FINANCIALS PANEL ────────────────────────────────────
 function CompanyFinancials({ lead }) {
   const band    = lead.company_size_band;
@@ -1332,12 +1362,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             {lead.address && <span>📍 {lead.address.split(",").slice(-2).join(",").trim()}</span>}
             {lead.company_status && <span style={{color:lead.company_status==="active"?"#10B981":"#F59E0B"}}>● {lead.company_status}</span>}
             {lead.segment_name && <span style={{color:"rgba(255,255,255,.3)"}}>{lead.segment_name.slice(0,40)}</span>}
-            {lead.contact_phone && (
-              <span style={{color:"#10B981",fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700}}>
-                📞 {lead.contact_phone}
-                {(lead.phone_source_count||0) >= 2 && <span style={{color:"rgba(16,185,129,.5)",fontSize:9,marginLeft:4}}>✓×{lead.phone_source_count}</span>}
-              </span>
-            )}
+            {lead.contact_phone && <PhoneBadge phone={lead.contact_phone} sourceCount={lead.phone_source_count} />}
           </div>
           {lead.director_name && (
             <div className="cc-dir" style={{marginBottom:7}}>
@@ -1392,10 +1417,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
               <div>
                 <div className="xl">Phone</div>
                 <div className="phone-row">
-                  <span className="phone-val">{lead.contact_phone}</span>
-                  {lead.phone_source_count >= 2 && (
-                    <span className="phone-src phone-src-high">✓ {lead.phone_source_count} sources</span>
-                  )}
+                  <PhoneBadge phone={lead.contact_phone} sourceCount={lead.phone_source_count} large />
                   {(lead.phone_source_count||0) < 2 && lead.phone_sources?.length > 0 && (
                     <span className="phone-src">{lead.phone_sources[0]}</span>
                   )}
