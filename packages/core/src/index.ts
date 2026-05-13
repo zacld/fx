@@ -6,6 +6,7 @@ export * from "./names.js";
 export * from "./emails.js";
 export * from "./people.js";
 export * from "./tech-stack.js";
+export * from "./website-intel.js";
 export * from "./cache.js";
 export { repoRoot, dataPath } from "./paths.js";
 export { importJson } from "./db/import-json.js";

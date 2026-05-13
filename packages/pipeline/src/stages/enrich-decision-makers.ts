@@ -105,7 +105,16 @@ function googleEmailSearch(name: string, domain: string): string {
 }
 
 // ── Route grade + confidence ─────────────────────────────────────────────────
-export function computeRouteGrade(lead: Pick<Lead, "contact_phone" | "contact_email" | "contact_page" | "website">, dms: ReadonlyArray<DecisionMaker>): RouteGrade {
+interface RouteFields {
+  contact_phone?: string | null;
+  contact_email?: string | null;
+  contact_page?: string | null;
+  team_page?: string | null;
+  about_page?: string | null;
+  website?: string | null;
+}
+
+export function computeRouteGrade(lead: RouteFields, dms: ReadonlyArray<DecisionMaker>): RouteGrade {
   const tier1 = dms.some((d) => d.tier === 1);
   const anyPerson = dms.length > 0;
   const vEmail = dms.some((d) => d.email_verified && d.email);
@@ -122,7 +131,7 @@ export function computeRouteGrade(lead: Pick<Lead, "contact_phone" | "contact_em
   return "F";
 }
 
-export function computeContactConfidence(lead: Pick<Lead, "contact_phone" | "contact_email" | "contact_page" | "team_page" | "about_page">, dms: ReadonlyArray<DecisionMaker>): number {
+export function computeContactConfidence(lead: RouteFields, dms: ReadonlyArray<DecisionMaker>): number {
   let score = 0;
   if (dms.length) {
     const bestTier = Math.min(...dms.map((d) => d.tier));
