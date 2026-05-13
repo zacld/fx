@@ -365,6 +365,25 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .email-copy.copied{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.25);color:#10B981}
 .email-note{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.15);margin-top:4px;line-height:1.5}
 
+/* DECISION MAKERS PANEL */
+.dm-panel{margin-bottom:12px}
+.dm-list{display:flex;flex-direction:column;gap:6px;margin-top:5px}
+.dm-card{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px}
+.dm-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,rgba(16,185,129,.3),rgba(99,102,241,.3));border:1px solid rgba(16,185,129,.2);display:grid;place-items:center;font-size:10px;font-weight:700;color:#10B981;flex-shrink:0;margin-top:1px}
+.dm-info{flex:1;min-width:0}
+.dm-nm{font-size:13px;font-weight:600;color:#F8FAFC;line-height:1.3}
+.dm-rl{font-family:'JetBrains Mono',monospace;font-size:9px;color:#10B981;margin-bottom:4px}
+.dm-email{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:2px}
+.dm-verified{font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#10B981}
+.dm-guessed{font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);color:#F59E0B}
+.dm-links{display:flex;flex-direction:column;gap:3px;align-items:flex-end;flex-shrink:0}
+.dm-li-btn{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:5px;background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.15);color:#38BDF8;font-size:10px;font-weight:600;text-decoration:none;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.dm-li-btn:hover{background:rgba(14,165,233,.13)}
+.dm-copy-btn{padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:9px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.dm-copy-btn:hover{background:rgba(255,255,255,.09);color:#fff}
+.dm-copy-btn.copied{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.25);color:#10B981}
+.dm-appointed{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.2);margin-top:1px}
+
 /* LINKEDIN */
 .li-section{margin-bottom:12px}
 .li-company-btn{display:flex;align-items:center;gap:6px;width:100%;padding:8px 12px;border-radius:7px;background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.18);color:#38BDF8;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;text-decoration:none;margin-bottom:7px}
@@ -606,6 +625,87 @@ function EmailPatterns({ emails }) {
   );
 }
 
+// ─── DECISION MAKERS PANEL ───────────────────────────────────────
+function DMEmailCopy({ email }) {
+  const [c, setC] = useState(false);
+  return (
+    <button className={`dm-copy-btn${c?" copied":""}`} onClick={()=>{copy(email);setC(true);setTimeout(()=>setC(false),2000);}}>
+      {c?"✓":"Copy"}
+    </button>
+  );
+}
+
+function DMCard({ dm, co }) {
+  const initials = [dm.first_name, dm.last_name].filter(Boolean).map(w=>(w||"")[0]||"").join("").toUpperCase() || "?";
+  const verifiedEmail = dm.email_verified && dm.email ? dm.email : null;
+  const guessedTop   = !verifiedEmail && dm.email_guesses?.length ? dm.email_guesses[0]?.email : null;
+  const bestEmail    = verifiedEmail || guessedTop;
+  const liUrl        = dm.linkedin_search || (dm.name ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dm.name)}%22+%22${encodeURIComponent((co||"").split(" ").slice(0,3).join(" "))}%22` : null);
+  const since        = dm.appointed_on ? dm.appointed_on.slice(0,7) : null;
+  return (
+    <div className="dm-card">
+      <div className="dm-av">{initials}</div>
+      <div className="dm-info">
+        <div className="dm-nm">{dm.name || [dm.first_name, dm.last_name].filter(Boolean).join(" ")}</div>
+        <div className="dm-rl">{dm.role || "Director"}</div>
+        {since && <div className="dm-appointed">Appointed {since}</div>}
+        {bestEmail && (
+          <div className="dm-email">
+            <span style={{color:verifiedEmail?"#10B981":"#F59E0B"}}>{verifiedEmail?"✓":"~"}</span>
+            <span style={{wordBreak:"break-all"}}>{bestEmail}</span>
+            {verifiedEmail ? <span className="dm-verified">verified</span> : <span className="dm-guessed">guessed</span>}
+            <DMEmailCopy email={bestEmail} />
+          </div>
+        )}
+      </div>
+      <div className="dm-links">
+        {liUrl && (
+          <a href={liUrl} target="_blank" rel="noreferrer" className="dm-li-btn">🔍 LinkedIn →</a>
+        )}
+        {dm.google_email_search && (
+          <a href={dm.google_email_search} target="_blank" rel="noreferrer" className="dm-li-btn" style={{background:"rgba(245,158,11,.07)",borderColor:"rgba(245,158,11,.18)",color:"#F59E0B"}}>📧 Find email →</a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DecisionMakers({ lead }) {
+  const dms = lead.decision_makers;
+  const hasDMs = dms && dms.length > 0;
+  // If no enriched DMs yet, fall back to single director if present
+  if (!hasDMs) {
+    if (!lead.director_name) return null;
+    const initials = (lead.director_name||"").split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?";
+    return (
+      <div style={{gridColumn:"1/-1"}}>
+        <div className="xl">Decision maker</div>
+        <div className="dir-card" style={{marginTop:4}}>
+          <div className="dir-av">{initials}</div>
+          <div>
+            <div className="dir-nm">{lead.director_name}</div>
+            <div className="dir-rl">{lead.director_role}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  const verifiedCount = dms.filter(d=>d.email_verified && d.email).length;
+  const guessedCount  = dms.filter(d=>!d.email_verified && d.email_guesses?.length).length;
+  return (
+    <div className="dm-panel" style={{gridColumn:"1/-1"}}>
+      <div className="xl" style={{marginBottom:4}}>
+        Decision makers · {dms.length} director{dms.length>1?"s":""}
+        {verifiedCount>0 && <span style={{marginLeft:6,color:"#10B981",fontWeight:700}}>· {verifiedCount} verified email{verifiedCount>1?"s":""}</span>}
+        {guessedCount>0  && <span style={{marginLeft:4,color:"#F59E0B"}}>· {guessedCount} guessed</span>}
+      </div>
+      <div className="dm-list">
+        {dms.map((dm,i) => <DMCard key={i} dm={dm} co={lead.company_name} />)}
+      </div>
+    </div>
+  );
+}
+
 // ─── COMPANY CARD ────────────────────────────────────────────────
 function CompanyCard({ lead, crmStatus, onCrmSet }) {
   const [open, setOpen] = useState(false);
@@ -683,19 +783,8 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
           )}
 
           <div className="cc-exp-grid">
-            {/* Decision maker */}
-            {lead.director_name && (
-              <div>
-                <div className="xl">Decision maker</div>
-                <div className="dir-card">
-                  <div className="dir-av">{initials}</div>
-                  <div>
-                    <div className="dir-nm">{lead.director_name}</div>
-                    <div className="dir-rl">{lead.director_role}</div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Decision makers — full panel (replaces single director) */}
+            <DecisionMakers lead={lead} />
 
             {/* Why pays FX */}
             <div>
@@ -778,11 +867,11 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
           <EmailPatterns emails={lead.guessed_emails} />
 
           {(li || lead.company_name) && (() => {
-            const co   = lead.company_name || li?.search_name || "";
-            const dir  = lead.director_name || "";
-            // Google site: searches are far more accurate than LinkedIn keyword search
-            const coUrl  = `https://www.google.com/search?q=site:linkedin.com/company+%22${encodeURIComponent(co)}%22`;
-            const dirUrl = dir ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dir)}%22` : null;
+            const co       = lead.company_name || li?.search_name || "";
+            const dir      = lead.director_name || "";
+            const hasDMs   = lead.decision_makers?.length > 0;
+            const coUrl    = `https://www.google.com/search?q=site:linkedin.com/company+%22${encodeURIComponent(co)}%22`;
+            const dirUrl   = dir ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dir)}%22` : null;
             const dirCoUrl = dir ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dir)}%22+%22${encodeURIComponent(co.split(" ").slice(0,3).join(" "))}%22` : null;
             return (
               <div className="li-section">
@@ -790,21 +879,24 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
                 <a href={coUrl} target="_blank" rel="noreferrer" className="li-company-btn">
                   💼 Find Company Page on LinkedIn →
                 </a>
-                <div className="li-people">
-                  {dir && (
-                    <a href={dirCoUrl} target="_blank" rel="noreferrer" className="li-person-btn">
-                      🔍 {dir} at {co.split(" ").slice(0,3).join(" ")} →
-                    </a>
-                  )}
-                  {dir && (
-                    <a href={dirUrl} target="_blank" rel="noreferrer" className="li-person-btn">
-                      👤 {dir} (name only) →
-                    </a>
-                  )}
-                  {(li?.people_searches||[]).filter(p=>!p.role.includes("direct search")).slice(0,3).map(p=>(
-                    <a key={p.role} href={`https://www.google.com/search?q=site:linkedin.com/in+${encodeURIComponent(co.split(" ").slice(0,3).join(" "))}+${encodeURIComponent(p.role.replace(/ →$/,""))}`} target="_blank" rel="noreferrer" className="li-person-btn">{p.role} →</a>
-                  ))}
-                </div>
+                {/* Only show generic role / single director links when DM panel isn't populated */}
+                {!hasDMs && (
+                  <div className="li-people">
+                    {dir && (
+                      <a href={dirCoUrl} target="_blank" rel="noreferrer" className="li-person-btn">
+                        🔍 {dir} at {co.split(" ").slice(0,3).join(" ")} →
+                      </a>
+                    )}
+                    {dir && (
+                      <a href={dirUrl} target="_blank" rel="noreferrer" className="li-person-btn">
+                        👤 {dir} (name only) →
+                      </a>
+                    )}
+                    {(li?.people_searches||[]).filter(p=>!p.role.includes("direct search")).slice(0,3).map(p=>(
+                      <a key={p.role} href={`https://www.google.com/search?q=site:linkedin.com/in+${encodeURIComponent(co.split(" ").slice(0,3).join(" "))}+${encodeURIComponent(p.role.replace(/ →$/,""))}`} target="_blank" rel="noreferrer" className="li-person-btn">{p.role} →</a>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })()}
