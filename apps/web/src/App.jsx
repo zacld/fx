@@ -33,6 +33,9 @@ const gradeBg     = g => GRADE_BG[g]    || "rgba(71,85,105,.06)";
 const gradeTip    = g => GRADE_TIP[g]   || "";
 const TIER_COLOR  = {1:"#10B981",2:"#F59E0B",3:"#64748B"};
 const tierColor   = t => TIER_COLOR[t]  || "#64748B";
+// FX likelihood score helpers
+const fxLikColor  = s => s>=70?"#10B981":s>=45?"#F59E0B":s>=25?"#818CF8":"#475569";
+const fxLikLabel  = s => s>=70?"Strong FX evidence":s>=45?"Moderate FX evidence":s>=25?"Some FX evidence":"Weak evidence";
 const today    = new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 const dateShort= new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
 
@@ -161,6 +164,8 @@ function applyFilters(leads, filters, getCrmStatus) {
     });
   } else if (filters.sortBy === "confidence") {
     r = [...r].sort((a,b) => (b.contact_confidence||0) - (a.contact_confidence||0));
+  } else if (filters.sortBy === "fx_likelihood") {
+    r = [...r].sort((a,b) => (b.fx_likelihood_score||0) - (a.fx_likelihood_score||0));
   }
   // default "score" sort: leads already come in score order from fetchData
   return r;
@@ -344,6 +349,20 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .cc-sl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--pc);opacity:.6}
 .cc-chev{font-size:10px;color:rgba(255,255,255,.18);margin-top:4px;transition:color .15s}
 .cc:hover .cc-chev{color:rgba(255,255,255,.35)}
+
+/* CALL INTELLIGENCE PANEL */
+.ci-panel{background:rgba(16,185,129,.025);border:1px solid rgba(16,185,129,.1);border-left:3px solid rgba(16,185,129,.4);border-radius:0 9px 9px 0;padding:12px 16px;margin-bottom:14px}
+.ci-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.ci-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#10B981;font-weight:700}
+.ci-pairs{display:flex;gap:4px;flex-wrap:wrap}
+.ci-pair{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#10B981;font-weight:700}
+.ci-countries{font-size:11px;color:rgba(255,255,255,.4)}
+.ci-fx-score{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid transparent;font-weight:700}
+.ci-snippets{display:flex;flex-direction:column;gap:5px}
+.ci-snippet{font-size:12px;line-height:1.6;color:rgba(255,255,255,.6);padding:7px 10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-left:2px solid rgba(16,185,129,.3);border-radius:0 6px 6px 0;font-style:italic}
+.ci-no-evidence{font-size:11px;color:rgba(255,255,255,.2);font-style:italic}
+.ci-size-signals{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.ci-size-tag{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.15);color:rgba(129,140,248,.6)}
 
 /* COMPANY EXPANDED */
 .cc-exp{border-top:1px solid rgba(255,255,255,.05);padding:12px 16px 16px 13px;background:rgba(0,0,0,.15);animation:fi .15s ease}
@@ -637,6 +656,79 @@ function MessageAmmoPanel({ ingredients, outreach }) {
   );
 }
 
+// ─── CALL INTELLIGENCE PANEL ─────────────────────────────────────
+function CallIntelligencePanel({ lead }) {
+  const snippets  = lead.fx_evidence_snippets || [];
+  const countries = lead.country_evidence || [];
+  const pairs     = lead.inferred_currency_pairs || [];
+  const supplier  = lead.supplier_evidence || [];
+  const ieEvidence= lead.import_export_evidence || [];
+  const sizeSignals = lead.size_signals || [];
+  const fxScore   = lead.fx_likelihood_score;
+  const reason    = lead.currency_reason || "";
+
+  // Combine evidence into best display text: snippets first, then supplier phrases
+  const allEvidence = [...snippets, ...supplier.filter(s => !snippets.some(sn=>sn.includes(s.slice(0,20))))];
+
+  // Only show panel if there's something useful
+  if (!pairs.length && !allEvidence.length && !countries.length && fxScore == null) return null;
+
+  const fc = fxScore != null ? fxLikColor(fxScore) : "#475569";
+
+  return (
+    <div className="ci-panel">
+      <div className="ci-header">
+        <span className="ci-title">Why call today</span>
+        {pairs.length > 0 && (
+          <div className="ci-pairs">
+            {pairs.slice(0,3).map(p=><span key={p} className="ci-pair">{p}</span>)}
+          </div>
+        )}
+        {countries.length > 0 && (
+          <span className="ci-countries">
+            {countries.slice(0,4).join(" · ")}
+          </span>
+        )}
+        {fxScore != null && (
+          <span
+            className="ci-fx-score"
+            style={{color:fc,background:`${fc}14`,borderColor:`${fc}30`}}
+            title={fxLikLabel(fxScore)}
+          >
+            FX {fxScore}%
+          </span>
+        )}
+      </div>
+
+      <div className="ci-snippets">
+        {allEvidence.length > 0 ? (
+          allEvidence.slice(0,3).map((s,i)=>(
+            <div key={i} className="ci-snippet">"{s}"</div>
+          ))
+        ) : ieEvidence.length > 0 ? (
+          ieEvidence.slice(0,2).map((s,i)=>(
+            <div key={i} className="ci-snippet">"{s}"</div>
+          ))
+        ) : (
+          <div className="ci-no-evidence">No direct evidence text extracted — check website manually</div>
+        )}
+      </div>
+
+      {sizeSignals.length > 0 && (
+        <div className="ci-size-signals">
+          {sizeSignals.map(s=><span key={s} className="ci-size-tag">{s}</span>)}
+        </div>
+      )}
+
+      {lead.website_confidence_reason && (
+        <div style={{marginTop:6,fontSize:10,color:"rgba(255,255,255,.2)",fontFamily:"'JetBrains Mono',monospace",lineHeight:1.5}}>
+          {lead.website_confidence_reason}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── EMAIL PATTERNS ──────────────────────────────────────────────
 function EmailPatterns({ emails }) {
   const [copied, setCopied] = useState(null);
@@ -842,6 +934,18 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
                 {lead.route_grade}
               </span>
             )}
+            {lead.fx_likelihood_score >= 25 && (
+              <span
+                className="grade-badge"
+                style={{color:fxLikColor(lead.fx_likelihood_score),background:`${fxLikColor(lead.fx_likelihood_score)}14`,borderColor:`${fxLikColor(lead.fx_likelihood_score)}30`}}
+                title={fxLikLabel(lead.fx_likelihood_score)}
+              >
+                FX {lead.fx_likelihood_score}%
+              </span>
+            )}
+            {(lead.inferred_currency_pairs||[]).slice(0,2).map(p=>(
+              <span key={p} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,padding:"1px 5px",borderRadius:3,background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.18)",color:"#10B981"}}>{p}</span>
+            ))}
           </div>
           <div className="cc-info">
             {lead.address && <span>📍 {lead.address.split(",").slice(-2).join(",").trim()}</span>}
@@ -878,8 +982,11 @@ function CompanyCard({ lead, crmStatus, onCrmSet }) {
       {open && (
         <div className="cc-exp">
 
-          {/* EXPOSURE THESIS — hero field */}
-          {thesis && (
+          {/* CALL INTELLIGENCE — website evidence, countries, currency pair, FX score */}
+          <CallIntelligencePanel lead={lead} />
+
+          {/* EXPOSURE THESIS — AI-generated context (shown when no direct evidence) */}
+          {thesis && !(lead.fx_evidence_snippets?.length) && (
             <div className="thesis-box" style={{marginBottom:14}}>
               <div className="thesis-label">Exposure thesis</div>
               <div className="thesis-text">{thesis}</div>
@@ -1124,6 +1231,7 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState
           <option value="score">Score</option>
           <option value="grade">Route grade</option>
           <option value="confidence">Confidence</option>
+          <option value="fx_likelihood">FX likelihood</option>
         </select>
       </div>
 

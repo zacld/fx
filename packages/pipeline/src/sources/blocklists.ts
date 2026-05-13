@@ -42,16 +42,19 @@ export const SKIP_DOMAINS: ReadonlySet<string> = new Set([
   "google.com", "google.co.uk", "bing.com", "yahoo.com", "duckduckgo.com", "wikipedia.org", "wikimedia.org",
   "wikidata.org",
   // review / comparison sites
-  "trustpilot.com", "glassdoor.com", "glassdoor.co.uk", "reviews.co.uk", "reevoo.com", "feefo.com",
-  "which.co.uk", "moneysavingexpert.com", "comparethemarket.com",
+  "trustpilot.com", "glassdoor.com", "glassdoor.co.uk", "reviews.co.uk", "reviews.io", "reevoo.com", "feefo.com",
+  "which.co.uk", "moneysavingexpert.com", "comparethemarket.com", "tripadvisor.com", "tripadvisor.co.uk",
+  "booking.com", "airbnb.com", "airbnb.co.uk", "tripadvisor.co.uk",
   // marketplaces / B2C retail
   "amazon.co.uk", "amazon.com", "ebay.co.uk", "ebay.com", "etsy.com", "notonthehighstreet.com",
   "wayfair.co.uk", "asos.com", "next.co.uk", "argos.co.uk", "johnlewis.com", "gumtree.com", "preloved.co.uk",
-  "onbuy.com", "manomano.co.uk",
+  "onbuy.com", "manomano.co.uk", "aliexpress.com", "wish.com", "depop.com", "vinted.co.uk",
+  // property portals
+  "rightmove.co.uk", "zoopla.co.uk", "onthemarket.com", "propertypal.com",
   // job boards / HR
   "reed.co.uk", "indeed.com", "indeed.co.uk", "totaljobs.com", "cv-library.co.uk", "monster.co.uk",
   "jobs.co.uk", "seek.com", "fish4.co.uk", "workable.com", "caterer.com", "michaelpage.co.uk", "hays.co.uk",
-  "robertwalters.co.uk",
+  "robertwalters.co.uk", "linkedin.com/jobs", "ziprecruiter.co.uk",
   // AI / lead-gen / generic aggregators
   "clutch.co", "goodfirms.co", "g2.com", "capterra.com", "getapp.com", "sortlist.co.uk", "upcity.com",
   "semrush.com", "similarweb.com",
