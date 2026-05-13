@@ -1,0 +1,32 @@
+{
+  "name": "fx-discovery",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "FX Discovery — market-triggered FX sales-intelligence engine. npm-workspace monorepo: packages/core, packages/pipeline, apps/web.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @fx/web",
+    "build": "npm run build -w @fx/web",
+    "preview": "npm run preview -w @fx/web",
+    "typecheck": "npm run typecheck -w @fx/core && npm run typecheck -w @fx/pipeline",
+    "test": "npm run test -w @fx/core && npm run test -w @fx/pipeline",
+    "db:import": "tsx packages/core/src/db/import-json.ts",
+    "db:export": "tsx packages/core/src/db/export-json.ts",
+    "analyse": "tsx packages/pipeline/src/stages/analyse.ts",
+    "discover": "tsx packages/pipeline/src/stages/discover.ts",
+    "enrich-contacts": "tsx packages/pipeline/src/stages/enrich-contacts.ts",
+    "enrich-decision-makers": "tsx packages/pipeline/src/stages/enrich-decision-makers.ts",
+    "enrich-website-intel": "tsx packages/pipeline/src/stages/enrich-website-intel.ts",
+    "score": "tsx packages/pipeline/src/stages/score.ts",
+    "dedup": "tsx packages/pipeline/src/stages/dedup.ts",
+    "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run db:export",
+    "sync-web-data": "mkdir -p apps/web/public/data && cp data/events.json data/leads.json apps/web/public/data/"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}

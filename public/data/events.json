@@ -1,0 +1,991 @@
+{
+  "c83d378134f1d94f": {
+    "id": "c83d378134f1d94f",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/eur-usd-falls-as-hot-us-inflation-data-boosts-fed-higher-for-longer-expectations-202605121344",
+    "headline": "Euro falls as hot US inflation data boosts Fed higher-for-longer expectations",
+    "raw_summary": "The Euro (EUR) trades under pressure against the US Dollar (USD) on Tuesday as hotter-than-expected US inflation data strengthens the Greenback and pushes US Treasury yields higher. At the time of writing, EUR/USD is trading around 1.1743, down roughly 0.35% on the day.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "no strong signals",
+    "detected_at": "2026-05-12T15:19:15.791545+00:00",
+    "event_type": "Currency move",
+    "summary": "The Euro weakened against the US Dollar today, which likely means GBP has strengthened against the Euro. This reduces the GBP value of Eurozone exports and EUR-denominated revenue for UK companies, directly impacting their profitability.",
+    "currency_pairs": [
+      "GBP/EUR",
+      "EUR/USD"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 9,
+    "commercial_relevance_reason": "Direct GBP/EUR move \u2014 UK exporters receive less GBP for their EUR revenue, impacting profitability.",
+    "what_happened": "The Euro weakened against the US Dollar following hotter-than-expected US inflation data.",
+    "what_changed_financially": "EUR/USD fell by approximately 0.35%, implying a stronger GBP/EUR (GBP strengthens against EUR).",
+    "who_pays_more": "None (UK importers pay less GBP for EUR invoices)",
+    "who_receives_less": "UK exporters to the Eurozone, UK businesses with EUR-denominated assets or revenue streams",
+    "currency_mismatch_businesses": "UK businesses exporting to the Eurozone with EUR revenue and GBP costs",
+    "margin_risk": "High for exporters",
+    "payment_timing_risk": "High for exporters (revenue risk)",
+    "affected_payment_flow": "EUR revenue vs GBP costs (exporters)",
+    "fx_payment_logic": "UK businesses exporting goods or services to the Eurozone invoice in EUR. When they convert these EUR receipts to GBP, a stronger GBP/EUR rate means they receive fewer GBP, directly impacting their revenue and profit margins. This creates a direct financial loss if not managed.",
+    "sales_angle": "Your Eurozone sales are now worth less in GBP, impacting your margins.",
+    "business_impact_summary": "UK businesses exporting to the Eurozone will see their EUR-denominated revenue convert to fewer GBP, directly impacting their profitability. Businesses with significant EUR assets or investments will also see their GBP value diminish. Today is relevant to call them as the currency move is immediate and affects upcoming conversions.",
+    "exposure_types": [
+      "EUR revenue exposure",
+      "export margin pressure"
+    ],
+    "overall_sales_angle": "Protecting your Eurozone export revenue from adverse GBP/EUR moves.",
+    "event_breadth": "broad_currency",
+    "target_segments": [
+      {
+        "segment_name": "UK Manufacturers Exporting to Eurozone",
+        "category_priority_score": 90,
+        "business_model": "UK-based manufacturers selling goods (e.g., machinery, components, food products) to clients in the Eurozone. They typically invoice in EUR and convert to GBP for their UK operations.",
+        "exposure_level": "Very High",
+        "exposure_type": "Export revenue exposure \u2014 EUR receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Manufacturer invoices EU client in EUR \u2192 EU client pays EUR \u2192 Manufacturer converts EUR to GBP \u2192 If GBP/EUR has risen (GBP strengthened) since the sale was agreed, they receive fewer GBP, impacting profit margins.",
+        "margin_risk": "High \u2014 Export margins can be 5-15%. A 0.5% GBP/EUR move on \u00a31m annual EUR revenue \u2248 \u00a35k loss.",
+        "payment_timing_risk": "High \u2014 Payment terms (30-90 days) create open FX window between order confirmation and EUR receipt/conversion.",
+        "affected_payment_flow": "EUR receipts from European clients, typically \u00a310k-\u00a3500k per invoice, monthly/quarterly.",
+        "website_validation_signals": [
+          "export to Europe",
+          "serving the EU market",
+          "international sales",
+          "European distribution"
+        ],
+        "sales_angle": "Your EUR export invoices are now converting to less GBP, eroding your profit margins.",
+        "exposure_thesis_template": "This company manufactures goods and exports to the Eurozone. A stronger GBP/EUR means their EUR invoices convert to less GBP, reducing their revenue and profit.",
+        "micro_categories": [
+          {
+            "name": "UK industrial machinery exporters to EU",
+            "why": "Large EUR invoices for machinery sales, long payment cycles create significant FX exposure on revenue.",
+            "search_queries": [
+              "\"industrial machinery export\" UK EU",
+              "\"UK engineering exports\" europe",
+              "\"precision manufacturing\" UK europe"
+            ],
+            "companies_house_terms": [
+              "engineering export",
+              "machinery solutions",
+              "industrial equipment"
+            ]
+          },
+          {
+            "name": "UK food & beverage exporters to EU",
+            "why": "Regular EUR sales to EU distributors/retailers, competitive margins mean FX moves directly impact profitability.",
+            "search_queries": [
+              "\"UK food export\" europe",
+              "\"british artisan food export\" EU",
+              "\"UK beverage distributor\" europe"
+            ],
+            "companies_house_terms": [
+              "food export",
+              "gourmet foods",
+              "beverage distribution"
+            ]
+          },
+          {
+            "name": "UK chemical product exporters to EU",
+            "why": "Bulk EUR sales, often with long-term contracts, mean consistent exposure to GBP/EUR fluctuations on revenue.",
+            "search_queries": [
+              "\"UK chemical export\" europe",
+              "\"speciality chemicals\" EU",
+              "\"industrial chemicals\" UK export"
+            ],
+            "companies_house_terms": [
+              "chemical solutions",
+              "materials export",
+              "industrial compounds"
+            ]
+          }
+        ],
+        "direct_or_second_order": "second_order",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 81,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Software & SaaS Providers with Eurozone Clients",
+        "category_priority_score": 85,
+        "business_model": "UK companies providing software, cloud services, or subscriptions to businesses in the Eurozone. They typically invoice in EUR for recurring revenue.",
+        "exposure_level": "High",
+        "exposure_type": "Recurring EUR revenue exposure \u2014 EUR receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "SaaS provider invoices EU client in EUR (monthly/annually) \u2192 EU client pays EUR \u2192 Provider converts EUR to GBP \u2192 If GBP/EUR has risen, recurring EUR revenue converts to fewer GBP, impacting recurring revenue and profitability.",
+        "margin_risk": "Moderate to High \u2014 A consistent adverse FX move can significantly reduce the GBP value of a large recurring revenue base. E.g., 0.5% GBP/EUR move on \u00a32m annual EUR subscriptions \u2248 \u00a310k loss.",
+        "payment_timing_risk": "Moderate \u2014 Monthly/annual subscriptions mean continuous exposure, but often less lag than physical goods.",
+        "affected_payment_flow": "Recurring EUR receipts from European clients, typically \u00a31k-\u00a350k per client per month/year.",
+        "website_validation_signals": [
+          "serving Europe",
+          "EU clients",
+          "international SaaS",
+          "European market"
+        ],
+        "sales_angle": "Your recurring EUR subscription revenue is now worth less in GBP, affecting your growth targets.",
+        "exposure_thesis_template": "This company provides software/SaaS to Eurozone clients. A stronger GBP/EUR means their recurring EUR revenue converts to less GBP, impacting their profitability and reinvestment capacity.",
+        "micro_categories": [
+          {
+            "name": "UK B2B SaaS Europe",
+            "why": "Monthly/annual EUR subscriptions mean direct and continuous impact on recurring revenue from GBP/EUR moves.",
+            "search_queries": [
+              "\"UK SaaS company\" europe",
+              "\"B2B software export\" EU",
+              "\"cloud solutions\" europe UK"
+            ],
+            "companies_house_terms": [
+              "software solutions",
+              "tech services",
+              "cloud platforms"
+            ]
+          },
+          {
+            "name": "UK IT consulting Eurozone",
+            "why": "Project-based or retainer EUR invoices, often large sums, are directly affected by GBP/EUR fluctuations.",
+            "search_queries": [
+              "\"UK IT consultancy\" europe",
+              "\"digital transformation\" EU UK",
+              "\"technology consulting\" europe"
+            ],
+            "companies_house_terms": [
+              "IT consulting",
+              "digital services",
+              "tech advisory"
+            ]
+          },
+          {
+            "name": "UK e-learning platforms Europe",
+            "why": "Subscription or course fee EUR revenue from EU users means direct exposure to GBP/EUR changes on their income.",
+            "search_queries": [
+              "\"UK e-learning\" europe",
+              "\"online education\" EU",
+              "\"digital training\" europe"
+            ],
+            "companies_house_terms": [
+              "e-learning solutions",
+              "education tech",
+              "online courses"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 78,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Online Retailers & E-commerce Selling to Eurozone",
+        "category_priority_score": 80,
+        "business_model": "UK e-commerce businesses selling consumer goods directly to customers in the Eurozone, receiving payments in EUR via platforms or direct card payments.",
+        "exposure_level": "High",
+        "exposure_type": "Online sales EUR revenue exposure \u2014 EUR receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EU customer pays EUR for goods \u2192 Payment processor converts EUR to GBP (often at spot) or retailer holds EUR \u2192 Retailer converts EUR to GBP \u2192 If GBP/EUR has risen, the GBP value of sales is reduced.",
+        "margin_risk": "High \u2014 E-commerce margins can be tight (10-20%). Even small FX moves can significantly impact profitability on high volumes. E.g., 0.5% GBP/EUR move on \u00a3500k annual EUR sales \u2248 \u00a32.5k loss.",
+        "payment_timing_risk": "Low to Moderate \u2014 Often near-instant conversion by payment processors, but some hold EUR, creating exposure.",
+        "affected_payment_flow": "Daily/weekly EUR receipts from online sales, typically small amounts per transaction but high volume.",
+        "website_validation_signals": [
+          "ship to Europe",
+          "EU delivery",
+          "international shipping",
+          "Eurozone customers"
+        ],
+        "sales_angle": "Your daily EUR e-commerce sales are now converting to less GBP, impacting your bottom line.",
+        "exposure_thesis_template": "This e-commerce company sells to Eurozone customers. A stronger GBP/EUR means their EUR sales revenue converts to less GBP, directly impacting their profitability on high-volume transactions.",
+        "micro_categories": [
+          {
+            "name": "UK fashion e-commerce Europe",
+            "why": "High volume of EUR sales in a competitive market means direct margin impact from GBP/EUR fluctuations.",
+            "search_queries": [
+              "\"UK fashion online\" europe",
+              "\"british clothing export\" EU",
+              "\"designer apparel\" europe UK"
+            ],
+            "companies_house_terms": [
+              "fashion retail",
+              "online boutique",
+              "apparel sales"
+            ]
+          },
+          {
+            "name": "UK homeware e-commerce Europe",
+            "why": "Selling home goods to EU, often larger basket sizes, means direct EUR revenue is significantly affected by FX moves.",
+            "search_queries": [
+              "\"UK homeware online\" europe",
+              "\"british home decor\" EU",
+              "\"furniture export\" europe UK"
+            ],
+            "companies_house_terms": [
+              "homeware sales",
+              "interior goods",
+              "home furnishings"
+            ]
+          },
+          {
+            "name": "UK sports equipment e-commerce Europe",
+            "why": "Niche market with direct sales to EU consumers means EUR payments are directly exposed to GBP/EUR changes.",
+            "search_queries": [
+              "\"UK sports equipment\" europe",
+              "\"outdoor gear export\" EU",
+              "\"fitness products\" europe UK"
+            ],
+            "companies_house_terms": [
+              "sports retail",
+              "equipment sales",
+              "activewear online"
+            ]
+          }
+        ],
+        "direct_or_second_order": "second_order",
+        "sme_accessibility_score": 80,
+        "final_scrape_score": 80,
+        "why_sme_accessible": "[inferred] Many UK SMEs in this niche with reachable FDs/MDs and findable company websites."
+      },
+      {
+        "segment_name": "UK Tourism & Hospitality (Eurozone Inbound)",
+        "category_priority_score": 75,
+        "business_model": "UK hotels, tour operators, attractions, and travel agencies that cater to visitors from the Eurozone, receiving payments in EUR.",
+        "exposure_level": "High",
+        "exposure_type": "Inbound tourism EUR revenue exposure \u2014 EUR receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EU visitor pays for services in EUR (e.g., hotel booking, tour package) \u2192 UK business receives EUR \u2192 Converts EUR to GBP \u2192 If GBP/EUR has risen, the GBP value of their services is reduced.",
+        "margin_risk": "High \u2014 Hospitality margins can be thin (5-15%). FX moves directly impact the value of bookings. E.g., 0.5% GBP/EUR move on \u00a3300k annual EUR bookings \u2248 \u00a31.5k loss.",
+        "payment_timing_risk": "Moderate \u2014 Bookings can be made months in advance, creating exposure between booking and payment/conversion.",
+        "affected_payment_flow": "EUR receipts from European tourists/agencies, varying amounts, daily/weekly.",
+        "website_validation_signals": [
+          "European guests",
+          "accepts Euro",
+          "international visitors",
+          "EU market"
+        ],
+        "sales_angle": "Your Eurozone bookings are now converting to less GBP, impacting your revenue per guest.",
+        "exposure_thesis_template": "This tourism/hospitality business caters to Eurozone visitors. A stronger GBP/EUR means their EUR revenue from bookings converts to less GBP, directly impacting their profitability.",
+        "micro_categories": [
+          {
+            "name": "UK hotels accepting EUR bookings",
+            "why": "Direct EUR revenue from EU guests means room rates and ancillary spend are directly impacted by GBP/EUR moves.",
+            "search_queries": [
+              "\"UK hotel\" europe bookings",
+              "\"london hotel\" eurozone guests",
+              "\"british hotel\" accept euro"
+            ],
+            "companies_house_terms": [
+              "hotel management",
+              "hospitality services",
+              "accommodation providers"
+            ]
+          },
+          {
+            "name": "UK tour operators Europe inbound",
+            "why": "Selling tour packages to EU clients, often large EUR invoices, means significant revenue exposure to GBP/EUR changes.",
+            "search_queries": [
+              "\"UK tour operator\" europe",
+              "\"inbound tourism\" UK EU",
+              "\"british travel agency\" europe"
+            ],
+            "companies_house_terms": [
+              "tour operations",
+              "travel services",
+              "destination management"
+            ]
+          },
+          {
+            "name": "UK attractions with EU visitors",
+            "why": "Ticket sales and gift shop revenue in EUR from EU tourists are directly affected by GBP/EUR conversion rates.",
+            "search_queries": [
+              "\"UK tourist attraction\" europe",
+              "\"museums\" europe visitors UK",
+              "\"heritage sites\" EU marketing"
+            ],
+            "companies_house_terms": [
+              "visitor attractions",
+              "leisure facilities",
+              "cultural venues"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 70,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Logistics & Freight Forwarders (Eurozone Routes)",
+        "category_priority_score": 82,
+        "business_model": "UK companies providing transport, warehousing, and customs services for goods moving between the UK and the Eurozone, often invoicing in EUR for EU-leg services.",
+        "exposure_level": "High",
+        "exposure_type": "Service fee EUR revenue exposure \u2014 EUR receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "UK logistics firm invoices EU client for freight services in EUR \u2192 EU client pays EUR \u2192 Firm converts EUR to GBP \u2192 If GBP/EUR has risen, the GBP value of their service fees is reduced.",
+        "margin_risk": "High \u2014 Logistics is a high-volume, low-margin business (2-8%). FX moves can quickly erode profitability. E.g., 0.5% GBP/EUR move on \u00a31m annual EUR revenue \u2248 \u00a35k loss.",
+        "payment_timing_risk": "High \u2014 Invoices often have 30-60 day payment terms, creating exposure between service provision and EUR receipt/conversion.",
+        "affected_payment_flow": "EUR receipts from European clients, typically \u00a31k-\u00a350k per invoice, weekly/monthly.",
+        "website_validation_signals": [
+          "European logistics",
+          "EU freight",
+          "cross-border transport",
+          "serving Europe"
+        ],
+        "sales_angle": "Your EUR freight invoices are now converting to less GBP, impacting your tight margins.",
+        "exposure_thesis_template": "This logistics company provides services for Eurozone routes. A stronger GBP/EUR means their EUR service fees convert to less GBP, directly impacting their already thin profit margins.",
+        "micro_categories": [
+          {
+            "name": "UK freight forwarders Europe",
+            "why": "Core business involves EUR invoicing for EU routes, meaning direct and significant FX exposure on revenue.",
+            "search_queries": [
+              "\"UK freight forwarder\" europe",
+              "\"european logistics\" UK",
+              "\"cross-border transport\" EU UK"
+            ],
+            "companies_house_terms": [
+              "freight services",
+              "logistics solutions",
+              "transport management"
+            ]
+          },
+          {
+            "name": "UK customs brokers Europe",
+            "why": "Fees for customs clearance on EU trade, often EUR-denominated, are directly affected by GBP/EUR changes.",
+            "search_queries": [
+              "\"UK customs broker\" europe",
+              "\"EU customs clearance\" UK",
+              "\"import export agent\" europe"
+            ],
+            "companies_house_terms": [
+              "customs agency",
+              "trade compliance",
+              "brokerage services"
+            ]
+          },
+          {
+            "name": "UK warehousing & distribution Europe",
+            "why": "Storage and distribution services for EU clients, invoicing in EUR, means revenue is exposed to FX fluctuations.",
+            "search_queries": [
+              "\"UK warehousing\" europe",
+              "\"european distribution\" UK",
+              "\"logistics hub\" europe"
+            ],
+            "companies_house_terms": [
+              "warehousing solutions",
+              "distribution centres",
+              "storage facilities"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 75,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Professional Services Firms (Eurozone Clients)",
+        "category_priority_score": 78,
+        "business_model": "UK-based legal, accounting, marketing, or consulting firms providing services to clients in the Eurozone, invoicing in EUR.",
+        "exposure_level": "Moderate",
+        "exposure_type": "Service fee EUR revenue exposure \u2014 EUR receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Firm invoices EU client in EUR for services rendered \u2192 EU client pays EUR \u2192 Firm converts EUR to GBP \u2192 If GBP/EUR has risen, the GBP value of their fees is reduced.",
+        "margin_risk": "Moderate \u2014 While professional services have higher margins, large project fees in EUR can be significantly impacted. E.g., 0.5% GBP/EUR move on a \u00a3200k EUR project \u2248 \u00a31k loss.",
+        "payment_timing_risk": "High \u2014 Project-based work often has milestones and payment terms (30-90 days), creating exposure.",
+        "affected_payment_flow": "EUR receipts from European clients, typically \u00a35k-\u00a3100k per invoice, project-based or monthly.",
+        "website_validation_signals": [
+          "serving European clients",
+          "EU market expertise",
+          "international advisory",
+          "European projects"
+        ],
+        "sales_angle": "Your EUR project fees from Eurozone clients are now worth less in GBP, impacting your profitability.",
+        "exposure_thesis_template": "This professional services firm advises Eurozone clients. A stronger GBP/EUR means their EUR invoices convert to less GBP, impacting their revenue and project profitability.",
+        "micro_categories": [
+          {
+            "name": "UK legal services Europe",
+            "why": "Advising EU clients often involves large EUR invoices for legal work, creating significant FX exposure.",
+            "search_queries": [
+              "\"UK law firm\" europe",
+              "\"cross-border legal advice\" EU",
+              "\"international law\" UK europe"
+            ],
+            "companies_house_terms": [
+              "legal services",
+              "solicitors international",
+              "law practice"
+            ]
+          },
+          {
+            "name": "UK marketing agencies Europe",
+            "why": "Providing marketing campaigns for EU clients, invoicing in EUR, means revenue is directly affected by GBP/EUR moves.",
+            "search_queries": [
+              "\"UK marketing agency\" europe",
+              "\"digital marketing\" EU UK",
+              "\"brand strategy\" europe"
+            ],
+            "companies_house_terms": [
+              "marketing solutions",
+              "advertising agency",
+              "digital media"
+            ]
+          },
+          {
+            "name": "UK accounting firms Europe",
+            "why": "Tax, audit, and advisory services for EU-based entities, invoicing in EUR, means revenue is exposed to FX fluctuations.",
+            "search_queries": [
+              "\"UK accountant\" europe",
+              "\"international tax advice\" EU",
+              "\"cross-border accounting\" UK"
+            ],
+            "companies_house_terms": [
+              "accounting services",
+              "financial advisory",
+              "tax consultants"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 73,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Creative & Media Agencies (Eurozone Projects)",
+        "category_priority_score": 70,
+        "business_model": "UK agencies producing content, design, video, or advertising for Eurozone clients, invoicing in EUR.",
+        "exposure_level": "Moderate",
+        "exposure_type": "Project-based EUR revenue exposure \u2014 EUR receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Agency invoices EU client in EUR for creative work \u2192 EU client pays EUR \u2192 Agency converts EUR to GBP \u2192 If GBP/EUR has risen, the GBP value of their project fees is reduced.",
+        "margin_risk": "Moderate \u2014 Project-based work with significant EUR invoices can see margins eroded, especially for larger projects.",
+        "payment_timing_risk": "High \u2014 Project milestones and payment terms create exposure between project agreement and EUR receipt/conversion.",
+        "affected_payment_flow": "EUR receipts from European clients, typically \u00a35k-\u00a350k per project, milestone-based.",
+        "website_validation_signals": [
+          "European clients",
+          "international portfolio",
+          "EU campaigns",
+          "global reach"
+        ],
+        "sales_angle": "Your EUR project fees from Eurozone clients are now worth less in GBP, impacting your project profitability.",
+        "exposure_thesis_template": "This creative/media agency undertakes projects for Eurozone clients. A stronger GBP/EUR means their EUR project fees convert to less GBP, impacting their revenue and project margins.",
+        "micro_categories": [
+          {
+            "name": "UK video production Europe",
+            "why": "Large project fees for video content, often EUR-denominated, means significant revenue exposure to GBP/EUR changes.",
+            "search_queries": [
+              "\"UK video production\" europe",
+              "\"corporate video\" EU",
+              "\"film production\" europe UK"
+            ],
+            "companies_house_terms": [
+              "video services",
+              "media production",
+              "film studio"
+            ]
+          },
+          {
+            "name": "UK graphic design Europe",
+            "why": "Design projects for EU clients, invoicing in EUR, means revenue is directly affected by GBP/EUR fluctuations.",
+            "search_queries": [
+              "\"UK graphic design\" europe",
+              "\"brand identity\" EU",
+              "\"web design\" europe UK"
+            ],
+            "companies_house_terms": [
+              "design agency",
+              "creative studio",
+              "graphic solutions"
+            ]
+          },
+          {
+            "name": "UK PR agencies Europe",
+            "why": "Public relations campaigns for EU clients, retainer or project fees in EUR, means revenue is exposed to FX moves.",
+            "search_queries": [
+              "\"UK PR agency\" europe",
+              "\"international PR\" EU",
+              "\"media relations\" europe UK"
+            ],
+            "companies_house_terms": [
+              "PR consultancy",
+              "communications agency",
+              "public relations"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 67,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      },
+      {
+        "segment_name": "UK Education Providers (Eurozone Students/Partners)",
+        "category_priority_score": 68,
+        "business_model": "UK language schools, universities, or vocational training providers receiving tuition fees or project funding in EUR from Eurozone students or partner institutions.",
+        "exposure_level": "Moderate",
+        "exposure_type": "Tuition/funding EUR revenue exposure \u2014 EUR receipts vs GBP costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EU student/institution pays tuition/fees in EUR \u2192 UK provider receives EUR \u2192 Converts EUR to GBP \u2192 If GBP/EUR has risen, the GBP value of their revenue is reduced.",
+        "margin_risk": "Moderate \u2014 Significant EUR revenue streams can be impacted, affecting budgets and operational funding.",
+        "payment_timing_risk": "Moderate \u2014 Termly/annual payments create exposure between fee setting/enrollment and EUR receipt/conversion.",
+        "affected_payment_flow": "EUR receipts from European students/institutions, typically \u00a31k-\u00a320k per student/project, termly/annually.",
+        "website_validation_signals": [
+          "EU students",
+          "European partnerships",
+          "international admissions",
+          "study in UK for EU"
+        ],
+        "sales_angle": "Your EUR tuition fees from Eurozone students are now worth less in GBP, impacting your budget.",
+        "exposure_thesis_template": "This education provider receives fees/funding in EUR from Eurozone students or partners. A stronger GBP/EUR means their EUR revenue converts to less GBP, impacting their operational budget.",
+        "micro_categories": [
+          {
+            "name": "UK language schools Europe",
+            "why": "Tuition fees from EU students are a direct EUR revenue stream, making them sensitive to GBP/EUR changes.",
+            "search_queries": [
+              "\"UK language school\" europe",
+              "\"english language courses\" EU",
+              "\"study english\" UK europe"
+            ],
+            "companies_house_terms": [
+              "language academy",
+              "education services",
+              "training centre"
+            ]
+          },
+          {
+            "name": "UK universities with EU students",
+            "why": "Tuition fees from EU students and research grants in EUR mean significant revenue exposure to GBP/EUR fluctuations.",
+            "search_queries": [
+              "\"UK university\" EU students",
+              "\"european student recruitment\" UK",
+              "\"international education\" europe"
+            ],
+            "companies_house_terms": [
+              "higher education",
+              "university research",
+              "academic institutions"
+            ]
+          },
+          {
+            "name": "UK vocational training Europe",
+            "why": "Training course fees from EU businesses or individuals, invoicing in EUR, means revenue is exposed to FX moves.",
+            "search_queries": [
+              "\"UK vocational training\" europe",
+              "\"professional development\" EU",
+              "\"skills training\" europe UK"
+            ],
+            "companies_house_terms": [
+              "training solutions",
+              "vocational courses",
+              "learning providers"
+            ]
+          }
+        ],
+        "direct_or_second_order": "direct",
+        "sme_accessibility_score": 60,
+        "final_scrape_score": 66,
+        "why_sme_accessible": "[inferred] Mixed sector; some UK SMEs present alongside larger companies."
+      }
+    ],
+    "total_micro_categories": 24,
+    "companies_house_terms": [
+      "engineering export",
+      "machinery solutions",
+      "industrial equipment",
+      "food export",
+      "gourmet foods",
+      "beverage distribution",
+      "chemical solutions",
+      "materials export",
+      "industrial compounds",
+      "software solutions",
+      "tech services",
+      "cloud platforms",
+      "IT consulting",
+      "digital services",
+      "tech advisory",
+      "e-learning solutions",
+      "education tech",
+      "online courses",
+      "fashion retail",
+      "online boutique",
+      "apparel sales",
+      "homeware sales",
+      "interior goods",
+      "home furnishings",
+      "sports retail",
+      "equipment sales",
+      "activewear online",
+      "hotel management",
+      "hospitality services",
+      "accommodation providers"
+    ],
+    "all_search_queries": [
+      "\"industrial machinery export\" UK EU",
+      "\"UK engineering exports\" europe",
+      "\"precision manufacturing\" UK europe",
+      "\"UK food export\" europe",
+      "\"british artisan food export\" EU",
+      "\"UK beverage distributor\" europe",
+      "\"UK chemical export\" europe",
+      "\"speciality chemicals\" EU",
+      "\"industrial chemicals\" UK export",
+      "\"UK SaaS company\" europe",
+      "\"B2B software export\" EU",
+      "\"cloud solutions\" europe UK",
+      "\"UK IT consultancy\" europe",
+      "\"digital transformation\" EU UK",
+      "\"technology consulting\" europe",
+      "\"UK e-learning\" europe",
+      "\"online education\" EU",
+      "\"digital training\" europe",
+      "\"UK fashion online\" europe",
+      "\"british clothing export\" EU",
+      "\"designer apparel\" europe UK",
+      "\"UK homeware online\" europe",
+      "\"british home decor\" EU",
+      "\"furniture export\" europe UK",
+      "\"UK sports equipment\" europe",
+      "\"outdoor gear export\" EU",
+      "\"fitness products\" europe UK",
+      "\"UK hotel\" europe bookings",
+      "\"london hotel\" eurozone guests",
+      "\"british hotel\" accept euro",
+      "\"UK tour operator\" europe",
+      "\"inbound tourism\" UK EU",
+      "\"british travel agency\" europe",
+      "\"UK tourist attraction\" europe",
+      "\"museums\" europe visitors UK",
+      "\"heritage sites\" EU marketing",
+      "\"UK freight forwarder\" europe",
+      "\"european logistics\" UK",
+      "\"cross-border transport\" EU UK",
+      "\"UK customs broker\" europe",
+      "\"EU customs clearance\" UK",
+      "\"import export agent\" europe",
+      "\"UK warehousing\" europe",
+      "\"european distribution\" UK",
+      "\"logistics hub\" europe",
+      "\"UK law firm\" europe",
+      "\"cross-border legal advice\" EU",
+      "\"international law\" UK europe",
+      "\"UK marketing agency\" europe",
+      "\"digital marketing\" EU UK"
+    ],
+    "status": "discovered",
+    "ai_provider_used": "gemini",
+    "ai_model_used": "gemini-2.5-flash",
+    "ai_fallback_reason": null,
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-05-12T21:58:51.191080+00:00"
+  },
+  "evt_opec_uae_001": {
+    "id": "evt_opec_uae_001",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens",
+    "raw_summary": "UAE's departure from OPEC+ reduced supply expectations, spiking crude prices. UK importers of petroleum products and chemical feedstocks face higher USD-denominated input costs.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-07T09:00:00.000000+00:00",
+    "event_type": "Commodity",
+    "summary": "UAE's departure from OPEC+ reduced supply expectations, spiking crude prices. UK importers of petroleum products and chemical feedstocks face higher USD-denominated input costs.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/USD'] exposure.",
+    "what_happened": "UAE quits OPEC+ \u2014 crude oil prices spike as supply outlook worsens",
+    "what_changed_financially": "UAE's departure from OPEC+ reduced supply expectations, spiking crude prices. UK importers of petroleum products and chemical feedstocks face higher USD-denominated input costs.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "evt_gbp_record_short_002": {
+    "id": "evt_gbp_record_short_002",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "GBP hits record short position \u2014 pound under pressure against EUR and USD",
+    "raw_summary": "Speculative short positions on GBP at record levels, increasing downward pressure on sterling. UK importers paying in EUR or USD face elevated FX costs.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-08T09:00:00.000000+00:00",
+    "event_type": "Currency move",
+    "summary": "Speculative short positions on GBP at record levels, increasing downward pressure on sterling. UK importers paying in EUR or USD face elevated FX costs.",
+    "currency_pairs": [
+      "GBP/EUR",
+      "GBP/USD"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/EUR', 'GBP/USD'] exposure.",
+    "what_happened": "GBP hits record short position \u2014 pound under pressure against EUR and USD",
+    "what_changed_financially": "Speculative short positions on GBP at record levels, increasing downward pressure on sterling. UK importers paying in EUR or USD face elevated FX costs.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "evt_fed_boe_003": {
+    "id": "evt_fed_boe_003",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "Fed and BoE both announce rate decisions \u2014 maximum GBP/USD volatility expected",
+    "raw_summary": "Simultaneous central bank decisions from the Fed and BoE create peak GBP/USD volatility. UK businesses with USD or NOK payment flows face timing risk on upcoming invoices.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-08T14:00:00.000000+00:00",
+    "event_type": "Rate change",
+    "summary": "Simultaneous central bank decisions from the Fed and BoE create peak GBP/USD volatility. UK businesses with USD or NOK payment flows face timing risk on upcoming invoices.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/NOK"
+    ],
+    "urgency_score": 9,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/USD', 'GBP/NOK'] exposure.",
+    "what_happened": "Fed and BoE both announce rate decisions \u2014 maximum GBP/USD volatility expected",
+    "what_changed_financially": "Simultaneous central bank decisions from the Fed and BoE create peak GBP/USD volatility. UK businesses with USD or NOK payment flows face timing risk on upcoming invoices.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "evt_iran_usd_004": {
+    "id": "evt_iran_usd_004",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "US-Iran tensions escalate \u2014 USD strengthens as safe-haven demand rises",
+    "raw_summary": "Escalating US-Iran tensions triggered safe-haven USD buying, strengthening the dollar against GBP. UK importers paying in USD face higher costs on upcoming invoices.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-09T09:00:00.000000+00:00",
+    "event_type": "Geopolitical",
+    "summary": "Escalating US-Iran tensions triggered safe-haven USD buying, strengthening the dollar against GBP. UK importers paying in USD face higher costs on upcoming invoices.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 7,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/USD'] exposure.",
+    "what_happened": "US-Iran tensions escalate \u2014 USD strengthens as safe-haven demand rises",
+    "what_changed_financially": "Escalating US-Iran tensions triggered safe-haven USD buying, strengthening the dollar against GBP. UK importers paying in USD face higher costs on upcoming invoices.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "evt_tariff_whisky_005": {
+    "id": "evt_tariff_whisky_005",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "US Section 338 tariff risk \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "raw_summary": "Ongoing US tariff threat on UK goods creates pricing uncertainty for UK exporters. Businesses selling to US customers in USD face margin pressure if tariffs force price cuts.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-09T14:00:00.000000+00:00",
+    "event_type": "Trade policy",
+    "summary": "Ongoing US tariff threat on UK goods creates pricing uncertainty for UK exporters. Businesses selling to US customers in USD face margin pressure if tariffs force price cuts.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 7,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/USD'] exposure.",
+    "what_happened": "US Section 338 tariff risk \u2014 UK exporters to America face ongoing pricing uncertainty",
+    "what_changed_financially": "Ongoing US tariff threat on UK goods creates pricing uncertainty for UK exporters. Businesses selling to US customers in USD face margin pressure if tariffs force price cuts.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "7a0e087eb196fcaf": {
+    "id": "7a0e087eb196fcaf",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "GBP/EUR weakens \u2014 UK importers of European goods face higher invoice costs",
+    "raw_summary": "Sterling weakened against the Euro, increasing GBP costs for UK businesses paying EUR supplier invoices. Importers of European manufactured goods, food, and components are directly exposed.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-09T09:00:00.000000+00:00",
+    "event_type": "Currency move",
+    "summary": "Sterling weakened against the Euro, increasing GBP costs for UK businesses paying EUR supplier invoices. Importers of European manufactured goods, food, and components are directly exposed.",
+    "currency_pairs": [
+      "GBP/EUR"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/EUR'] exposure.",
+    "what_happened": "GBP/EUR weakens \u2014 UK importers of European goods face higher invoice costs",
+    "what_changed_financially": "Sterling weakened against the Euro, increasing GBP costs for UK businesses paying EUR supplier invoices. Importers of European manufactured goods, food, and components are directly exposed.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "3763e2fb489a6938": {
+    "id": "3763e2fb489a6938",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "EUR/GBP rises \u2014 UK importers face rising costs on European supplier invoices",
+    "raw_summary": "Euro strengthened against GBP, raising costs for UK businesses importing from Europe. Wholesalers, distributors, and e-commerce retailers buying EU stock face immediate margin pressure.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-10T09:00:00.000000+00:00",
+    "event_type": "Currency move",
+    "summary": "Euro strengthened against GBP, raising costs for UK businesses importing from Europe. Wholesalers, distributors, and e-commerce retailers buying EU stock face immediate margin pressure.",
+    "currency_pairs": [
+      "GBP/EUR"
+    ],
+    "urgency_score": 7,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/EUR'] exposure.",
+    "what_happened": "EUR/GBP rises \u2014 UK importers face rising costs on European supplier invoices",
+    "what_changed_financially": "Euro strengthened against GBP, raising costs for UK businesses importing from Europe. Wholesalers, distributors, and e-commerce retailers buying EU stock face immediate margin pressure.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "30ecfdf142561afd": {
+    "id": "30ecfdf142561afd",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "British Airways fares to rise to offset \u00a31.7bn fuel cost hit \u2014 aviation sector under USD pressure",
+    "raw_summary": "Rising USD-priced aviation fuel costs force UK airlines to raise fares. UK aviation businesses paying in USD for fuel, maintenance, and leases face sustained cost pressure.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-10T14:00:00.000000+00:00",
+    "event_type": "Commodity move",
+    "summary": "Rising USD-priced aviation fuel costs force UK airlines to raise fares. UK aviation businesses paying in USD for fuel, maintenance, and leases face sustained cost pressure.",
+    "currency_pairs": [
+      "USD/GBP",
+      "GBP/USD"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['USD/GBP', 'GBP/USD'] exposure.",
+    "what_happened": "British Airways fares to rise to offset \u00a31.7bn fuel cost hit \u2014 aviation sector under USD pressure",
+    "what_changed_financially": "Rising USD-priced aviation fuel costs force UK airlines to raise fares. UK aviation businesses paying in USD for fuel, maintenance, and leases face sustained cost pressure.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "cf18ac3e6089882f": {
+    "id": "cf18ac3e6089882f",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "GBP/USD pressure \u2014 UK exporters to US face reduced USD receipt values",
+    "raw_summary": "GBP weakness against USD affects UK businesses receiving USD from US customers. Exporters, logistics firms, and transatlantic service providers face reduced GBP receipts.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-11T09:00:00.000000+00:00",
+    "event_type": "Currency move",
+    "summary": "GBP weakness against USD affects UK businesses receiving USD from US customers. Exporters, logistics firms, and transatlantic service providers face reduced GBP receipts.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/USD'] exposure.",
+    "what_happened": "GBP/USD pressure \u2014 UK exporters to US face reduced USD receipt values",
+    "what_changed_financially": "GBP weakness against USD affects UK businesses receiving USD from US customers. Exporters, logistics firms, and transatlantic service providers face reduced GBP receipts.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "2c91462c09f718b3": {
+    "id": "2c91462c09f718b3",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "EUR strengthens \u2014 UK wine, spirits and pharmaceutical importers face higher costs",
+    "raw_summary": "Euro strengthened against GBP, raising costs for UK importers of European wine, spirits, food, and pharmaceuticals. Businesses with quarterly EUR supplier contracts face immediate budget impact.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-11T14:00:00.000000+00:00",
+    "event_type": "Currency move",
+    "summary": "Euro strengthened against GBP, raising costs for UK importers of European wine, spirits, food, and pharmaceuticals. Businesses with quarterly EUR supplier contracts face immediate budget impact.",
+    "currency_pairs": [
+      "GBP/EUR"
+    ],
+    "urgency_score": 7,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/EUR'] exposure.",
+    "what_happened": "EUR strengthens \u2014 UK wine, spirits and pharmaceutical importers face higher costs",
+    "what_changed_financially": "Euro strengthened against GBP, raising costs for UK importers of European wine, spirits, food, and pharmaceuticals. Businesses with quarterly EUR supplier contracts face immediate budget impact.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  },
+  "91f0328fec7671d2": {
+    "id": "91f0328fec7671d2",
+    "source": "Pipeline",
+    "source_url": "",
+    "headline": "GBP/USD falls \u2014 UK importers of US goods and technology face higher costs",
+    "raw_summary": "Sterling weakened against the US Dollar, raising GBP costs for UK businesses buying US raw materials, components, technology, and cloud services. Importers with upcoming USD invoices face margin pressure.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "Reconstructed from lead data",
+    "detected_at": "2026-05-12T09:00:00.000000+00:00",
+    "event_type": "Currency move",
+    "summary": "Sterling weakened against the US Dollar, raising GBP costs for UK businesses buying US raw materials, components, technology, and cloud services. Importers with upcoming USD invoices face margin pressure.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Affects UK businesses with ['GBP/USD'] exposure.",
+    "what_happened": "GBP/USD falls \u2014 UK importers of US goods and technology face higher costs",
+    "what_changed_financially": "Sterling weakened against the US Dollar, raising GBP costs for UK businesses buying US raw materials, components, technology, and cloud services. Importers with upcoming USD invoices face margin pressure.",
+    "who_pays_more": "UK importers paying in foreign currency",
+    "who_receives_less": "UK exporters receiving foreign currency",
+    "affected_payment_flow": "Cross-border payments in affected currency pair",
+    "margin_risk": "high",
+    "payment_timing_risk": "high",
+    "segments": [],
+    "event_source": "reconstructed"
+  }
+}

@@ -1,0 +1,42 @@
+name: Deploy Dashboard to Fly.io
+
+# Mirrors the GitHub Pages workflow: redeploy the Fly-hosted dashboard whenever
+# code changes (push to main) or the discovery pipeline commits new data.
+#
+# Requires repo secret FLY_API_TOKEN — create it with:
+#   flyctl tokens create deploy --name github-actions
+# then add it under: repo → Settings → Secrets and variables → Actions
+# Until that secret is set this job will fail (authentication error) — that's the
+# only thing it needs.
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["FX Discovery"]   # after the discovery pipeline commits new data/
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: fly-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "::warning::FLY_API_TOKEN secret not set — skipping Fly deploy."
+            echo "Create it with: flyctl tokens create deploy --name github-actions"
+            echo "then add it under repo Settings → Secrets and variables → Actions."
+            exit 0
+          fi
+          flyctl deploy --remote-only --ha=false
