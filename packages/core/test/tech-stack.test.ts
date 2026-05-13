@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { detectTechStack, techStackFxScore } from "../src/tech-stack.js";
+import {
+  detectTechStack, techStackFxScore,
+  extractTrustpilotReviewCount, pressMentionsSearchUrl, trustpilotSearchUrl,
+} from "../src/tech-stack.js";
 
 describe("detectTechStack", () => {
   it("detects Shopify", () => {
@@ -38,6 +41,24 @@ describe("detectTechStack", () => {
   it("dedupes signals when patterns match multiple times", () => {
     const html = `<script src="//cdn.shopify.com/x"></script><script src="//cdn.shopify.com/y"></script>`;
     expect(detectTechStack(html).filter((s) => s.label === "shopify")).toHaveLength(1);
+  });
+});
+
+describe("extractTrustpilotReviewCount", () => {
+  it("reads number-of-reviews and trustscore from the embed", () => {
+    const html = `<div class="trustpilot-widget" data-locale="en-GB" data-template-id="x"
+      data-businessunit-id="y" data-style-numofreviews="142" data-style-trustscore="4.7"></div>`;
+    expect(extractTrustpilotReviewCount(html)).toEqual({ reviews: 142, score: 4.7 });
+  });
+  it("returns null when no widget present", () => {
+    expect(extractTrustpilotReviewCount("<p>nothing</p>")).toBeNull();
+  });
+});
+
+describe("pressMentionsSearchUrl / trustpilotSearchUrl", () => {
+  it("encode the company name as a quoted Google query", () => {
+    expect(pressMentionsSearchUrl("Acme Wines")).toContain(encodeURIComponent(`"Acme Wines"`));
+    expect(trustpilotSearchUrl("Acme Wines")).toContain("site:trustpilot.com");
   });
 });
 

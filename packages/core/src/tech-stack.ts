@@ -115,3 +115,31 @@ export function techStackFxScore(signals: ReadonlyArray<TechSignal>): number {
 }
 
 export { NON_GBP_CURRENCY_SYMBOLS };
+
+// ── Social-proof helpers ─────────────────────────────────────────────────────
+/**
+ * Pull a Trustpilot review count out of an embedded widget if one's present.
+ * Returns null if no widget or no count attribute is found. The widget element
+ * has data-style-trustscore="N" and data-style-numofreviews="N" on the
+ * <div class="trustpilot-widget"> root.
+ */
+export function extractTrustpilotReviewCount(html: string): { reviews: number; score: number | null } | null {
+  if (!html) return null;
+  const tag = /<div[^>]+class=["'][^"']*trustpilot-widget[^"']*["'][^>]*>/i.exec(html);
+  if (!tag) return null;
+  const block = tag[0];
+  const reviews = /data-(?:style-num(?:ber)?of|numof)reviews=["'](\d+)["']/i.exec(block);
+  const score = /data-(?:style-)?trustscore=["']([\d.]+)["']/i.exec(block);
+  if (!reviews) return null;
+  return { reviews: parseInt(reviews[1]!, 10), score: score ? parseFloat(score[1]!) : null };
+}
+
+/** Generate a Google search URL for press mentions of a company (last year). */
+export function pressMentionsSearchUrl(companyNameClean: string): string {
+  return `https://www.google.com/search?q=${encodeURIComponent(`"${companyNameClean}"`)}+(news+OR+announces+OR+launches)&tbs=qdr:y`;
+}
+
+/** Generate a Google search URL for Trustpilot reviews of a company. */
+export function trustpilotSearchUrl(companyNameClean: string): string {
+  return `https://www.google.com/search?q=site:trustpilot.com+${encodeURIComponent(`"${companyNameClean}"`)}`;
+}

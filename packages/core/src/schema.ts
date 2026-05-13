@@ -185,6 +185,11 @@ export const WebsiteIntelSchema = z.object({
   tech_signals: z.array(z.string()).default([]),     // Shopify, multi-currency switcher, etc.
   fx_likelihood_score: z.number().int().min(0).max(100).default(0),
   website_confidence_reason: z.string().default(""),
+  // Social proof — surfaced by enrich-website-intel.
+  trustpilot_reviews: z.number().int().nullable().default(null),
+  trustpilot_score: z.number().nullable().default(null),
+  trustpilot_search_url: z.string().nullable().default(null),
+  press_search_url: z.string().nullable().default(null),
 });
 export type WebsiteIntel = z.infer<typeof WebsiteIntelSchema>;
 

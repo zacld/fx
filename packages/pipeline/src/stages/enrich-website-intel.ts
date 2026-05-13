@@ -27,6 +27,8 @@ import {
   LeadSchema, repoRoot,
   htmlToText, extractWebsiteIntel, computeFxLikelihood, generateWebsiteConfidenceReason,
   detectTechStack, techStackFxScore,
+  extractTrustpilotReviewCount, pressMentionsSearchUrl, trustpilotSearchUrl,
+  cleanCompanyName,
   type Lead,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
@@ -135,6 +137,9 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
           techScore,
         );
 
+        const trustpilot = homepageHtml ? extractTrustpilotReviewCount(homepageHtml) : null;
+        const coClean = cleanCompanyName(l.company_name);
+
         const leadAny = l as Record<string, unknown>;
         leadAny.fx_evidence_snippets = evidence.fx_evidence_snippets;
         leadAny.country_evidence = evidence.country_evidence;
@@ -146,6 +151,10 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
         leadAny.tech_signals = techSigs.map((s) => s.label);
         leadAny.fx_likelihood_score = fxScore;
         leadAny.website_confidence_reason = generateWebsiteConfidenceReason(l);
+        leadAny.trustpilot_reviews = trustpilot?.reviews ?? null;
+        leadAny.trustpilot_score = trustpilot?.score ?? null;
+        leadAny.trustpilot_search_url = coClean ? trustpilotSearchUrl(coClean) : null;
+        leadAny.press_search_url = coClean ? pressMentionsSearchUrl(coClean) : null;
 
         // Fold inferred pairs into the existing fx_exposure string.
         const existing = (l.fx_exposure || "").trim();
