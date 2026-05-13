@@ -65,7 +65,7 @@ describe("enrich-contacts stage", () => {
     expect(r.withContactPage).toBe(1);          // only A has a /contact link in the mock HTML
 
     const out = JSON.parse(readFileSync(outPath, "utf8")) as Record<string, Lead>;
-    expect(out.A!.contact_phone).toBe("+44 20 7946 0123");
+    expect(out.A!.contact_phone).toBe("020 7946 0123");          // libphonenumber-normalised national format
     expect(out.A!.contact_email).toBe("accounts@acmewine.co.uk");
     expect(out.A!.contact_page).toBe("https://www.acmewine.co.uk/contact-us");
     expect(out.A!.best_contact_route).toMatch(/^Email accounts@acmewine\.co\.uk directly/);
@@ -79,7 +79,7 @@ describe("enrich-contacts stage", () => {
     const { db, sqlite, close } = getDb(dbPath);
     try {
       const a = db.select().from(schema.leads).all().find((x) => x.id === "A")!;
-      expect(a.data.contact_phone).toBe("+44 20 7946 0123");
+      expect(a.data.contact_phone).toBe("020 7946 0123");
       expect((sqlite.prepare("SELECT COUNT(*) c FROM runs").get() as { c: number }).c).toBe(1);
     } finally { close(); }
 
@@ -94,6 +94,6 @@ describe("enrich-contacts stage", () => {
     expect(r2.needEnriching).toBe(1);            // only D still lacks contacts
     expect(r2.cacheHits).toBeGreaterThanOrEqual(1);
     const out2 = JSON.parse(readFileSync(outPath, "utf8")) as Record<string, Lead>;
-    expect(out2.A!.contact_phone).toBe("+44 20 7946 0123");   // unchanged
+    expect(out2.A!.contact_phone).toBe("020 7946 0123");   // unchanged
   });
 });
