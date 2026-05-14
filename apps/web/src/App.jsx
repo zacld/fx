@@ -180,19 +180,28 @@ const RESEARCH_FILTERS  = { ...BLANK_FILTERS, view: "research"  };
 const ALL_FILTERS       = { ...BLANK_FILTERS, view: "all"       };
 
 function isCallListEligible(l) {
-  // Daily Call List: 5-gate check per CLAUDE.md
-  // Gate 1: real company (director name as proxy — ensures CH registration found)
-  // Gate 2: FX evidence (direct FX signal on website OR pays_fx_confirmed)
-  // Gate 3: verified website (confidence high or medium)
-  // Gate 4: commercial fit (HOT or WARM score — means scoring passed B2B/segment filters)
-  // Gate 5: contact route (director name = CH-verified contact exists)
+  // Daily Call List eligibility: HOT-only with real evidence + contact route.
+  // Ranking within the call list is by ready_score (computed by pipeline).
+  // WARM leads go to Research Queue — not the call list.
+  const isHot         = l.priority === "HOT";
   const hasWebConf    = ["high","medium","confirmed"].includes(l.website_confidence);
   const hasWebsite    = !!l.website;
-  const hasFxEvidence = (l.fx_payment_signals||[]).length > 0 || !!l.pays_fx_confirmed;
-  const hotOrWarm     = l.priority==="HOT" || l.priority==="WARM";
+  // Require at least 1 real scraped FX signal — no pays_fx_confirmed bypass
+  const hasFxEvidence = (l.fx_payment_signals||[]).length > 0;
   const notExcluded   = !["not_relevant"].includes(l.outreach_status);
   const hasDirector   = !!l.director_name;
-  return hotOrWarm && hasWebsite && hasWebConf && hasFxEvidence && hasDirector && notExcluded;
+  return isHot && hasWebsite && hasWebConf && hasFxEvidence && hasDirector && notExcluded;
+}
+
+// Sort HOT leads by ready_score desc, fall back to score then company name
+function sortByReadyScore(leads) {
+  return [...leads].sort((a, b) => {
+    const rd = (b.ready_score || 0) - (a.ready_score || 0);
+    if (rd !== 0) return rd;
+    const sd = (b.score || 0) - (a.score || 0);
+    if (sd !== 0) return sd;
+    return (a.company_name || "").localeCompare(b.company_name || "");
+  });
 }
 
 const CALL_LIST_MAX = 25;
@@ -201,13 +210,14 @@ function applyFilters(leads, filters, getCrmStatus) {
   let r = leads;
 
   // Primary view filter
-  // call_list = top CALL_LIST_MAX eligible leads sorted by score (already sorted from fetchData)
-  // research  = everything NOT in the top-25 call list (overflow HOT/WARM + QUEUE)
+  // call_list = all eligible HOT leads sorted by ready_score (pipeline-computed ranking)
+  // research  = everything NOT in the call list (remaining HOT shown in DailyCallListView,
+  //             WARM + QUEUE in research tab)
   if (filters.view === "call_list") {
-    r = r.filter(isCallListEligible).slice(0, CALL_LIST_MAX);
+    r = sortByReadyScore(r.filter(isCallListEligible));
   } else if (filters.view === "research") {
     const callListIds = new Set(
-      leads.filter(isCallListEligible).slice(0, CALL_LIST_MAX).map(l => l.website_domain || l.company_number)
+      r.filter(isCallListEligible).map(l => l.website_domain || l.company_number)
     );
     r = r.filter(l => !callListIds.has(l.website_domain || l.company_number));
   }
@@ -234,10 +244,8 @@ function applyFilters(leads, filters, getCrmStatus) {
   // Sort
   const GRADE_ORDER = {A:0,B:1,C:2,D:3,E:4,F:5};
   if (filters.sortBy === "readiness") {
-    r = [...r].sort((a,b) => {
-      const rd = (CR_ORDER[a.call_readiness]??3) - (CR_ORDER[b.call_readiness]??3);
-      return rd !== 0 ? rd : (b.score||0) - (a.score||0);
-    });
+    // call_list view already sorted by ready_score above; for other views fall back to ready_score
+    r = sortByReadyScore(r);
   } else if (filters.sortBy === "grade") {
     r = [...r].sort((a,b) => {
       const gd = (GRADE_ORDER[a.route_grade]??9) - (GRADE_ORDER[b.route_grade]??9);
@@ -1420,6 +1428,11 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             {lead.address && <span>📍 {lead.address.split(",").slice(-2).join(",").trim()}</span>}
             {lead.company_status && <span style={{color:lead.company_status==="active"?"#10B981":"#F59E0B"}}>● {lead.company_status}</span>}
             {lead.segment_name && <span style={{color:"rgba(255,255,255,.3)"}}>{lead.segment_name.slice(0,40)}</span>}
+            {lead.priority === "HOT" && lead.ready_score > 0 && (
+              <span title={`Ready score: ${lead.ready_score}/100 — ranking within HOT pool`} style={{color:"#10B981",fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".03em"}}>
+                ★ {lead.ready_score}
+              </span>
+            )}
             {lead.contact_phone && <PhoneBadge phone={lead.contact_phone} sourceCount={lead.phone_source_count} />}
             {crmEntry?.touch_count > 0 && (
               <span className="crm-touch crm-touched" title={`Last: ${crmEntry.last_channel||"contact"} · ${ago(crmEntry.last_contacted_at)}`}>
@@ -2125,14 +2138,16 @@ function FollowupsDueSection({ allLeads, events, crmState, getCrmStatus, updateL
 }
 
 // ─── DAILY CALL LIST VIEW ─────────────────────────────────────────
-function DailyCallListView({ callListLeads, allLeads, events, crmState, getCrmStatus, updateLead, performAction, getLead, today }) {
-  const [showTop10, setShowTop10]     = useState(true);
-  const [showBackup, setShowBackup]   = useState(true);
+function DailyCallListView({ callListLeads, remainingHot, allLeads, events, crmState, getCrmStatus, updateLead, performAction, getLead, today }) {
+  const [showTop10, setShowTop10]       = useState(true);
+  const [showBackup, setShowBackup]     = useState(true);
+  const [showRemaining, setShowRemaining] = useState(false);
 
   const top10   = callListLeads.slice(0, 10);
   const backup15= callListLeads.slice(10, 25);
 
-  function renderBand(leads, title, color, accentBg, open, toggle, emptyMsg) {
+  function renderBand(leads, title, color, accentBg, open, toggle, emptyMsg, desc) {
+    const bandDesc = desc ?? (title.includes("Top") ? "Highest-confidence · call today" : title.includes("Backup") ? "Call if top 10 is clear" : "Evidence-backed · not yet ranked for today");
     return (
       <div className="cl-section">
         <div className="cl-section-hdr" onClick={toggle}>
@@ -2140,9 +2155,7 @@ function DailyCallListView({ callListLeads, allLeads, events, crmState, getCrmSt
           <span className="cl-section-count" style={{background:accentBg,color,border:`1px solid ${color}40`}}>
             {leads.length}
           </span>
-          <span className="cl-section-desc">
-            {title.includes("Top") ? "Highest-confidence · call today" : "Call if top 10 is clear"}
-          </span>
+          <span className="cl-section-desc">{bandDesc}</span>
           <span className="cl-toggle">{open?"▲":"▼ show"}</span>
         </div>
         {open && (
@@ -2192,6 +2205,7 @@ function DailyCallListView({ callListLeads, allLeads, events, crmState, getCrmSt
 
       {renderBand(top10, "⚡ Today's Top 10", "#10B981", "rgba(16,185,129,.1)", showTop10, ()=>setShowTop10(o=>!o), "No eligible leads in top 10 — check scoring gates")}
       {backup15.length > 0 && renderBand(backup15, "📋 Backup 15", "#F59E0B", "rgba(245,158,11,.1)", showBackup, ()=>setShowBackup(o=>!o), "No backup leads")}
+      {remainingHot && remainingHot.length > 0 && renderBand(remainingHot, "🔵 Remaining HOT", "#6366F1", "rgba(99,102,241,.1)", showRemaining, ()=>setShowRemaining(o=>!o), "No remaining HOT leads", "Evidence-backed but below top 25 · review when ready")}
 
       {callListLeads.length === 0 && (
         <div className="empty">
@@ -2247,12 +2261,20 @@ export default function App() {
   }
 
   const filteredLeads  = useMemo(()=>applyFilters(leads,filters,getCrmStatus),[leads,filters,getCrmStatus]);
-  // callListLeads = top CALL_LIST_MAX eligible leads (same slice as applyFilters call_list view)
-  const callListLeads  = useMemo(()=>leads.filter(isCallListEligible).slice(0, CALL_LIST_MAX),[leads]);
-  const researchLeads  = useMemo(()=>{
-    const ids = new Set(callListLeads.map(l => l.website_domain || l.company_number));
-    return leads.filter(l => !ids.has(l.website_domain || l.company_number));
+  // callListLeads = all eligible HOT leads sorted by ready_score (Top 10 + Backup 15)
+  const callListLeads  = useMemo(()=>sortByReadyScore(leads.filter(isCallListEligible)),[leads]);
+  // remainingHot = HOT leads that passed scoring but didn't make the call list eligibility check,
+  // or are beyond the top 25 — shown collapsed in DailyCallListView
+  const remainingHot   = useMemo(()=>{
+    const callListIds = new Set(callListLeads.map(l => l.id));
+    return sortByReadyScore(
+      leads.filter(l => l.priority === "HOT" && !callListIds.has(l.id))
+    );
   },[leads, callListLeads]);
+  const researchLeads  = useMemo(()=>{
+    const hotIds = new Set(leads.filter(l => l.priority === "HOT").map(l => l.id));
+    return leads.filter(l => !hotIds.has(l.id));
+  },[leads]);
 
   const hot       = leads.filter(l=>l.priority==="HOT").length;
   const warm      = leads.filter(l=>l.priority==="WARM").length;
@@ -2277,9 +2299,9 @@ export default function App() {
   },[leads,crmState]);
 
   const viewDesc = filters.view === "call_list"
-    ? `Top 10 + Backup 15 · verified website · FX signals · contact route confirmed`
+    ? `Top 10 + Backup 15 + ${remainingHot.length} remaining HOT · ranked by ready_score`
     : filters.view === "research"
-    ? "Remaining leads — needs review before calling"
+    ? `WARM + QUEUE · ${researchLeads.filter(l=>l.priority==="WARM").length} WARM, ${researchLeads.filter(l=>l.priority==="QUEUE").length} QUEUE`
     : "All leads across all events";
 
   const viewCountCls = filters.view === "call_list" ? "view-count view-count-cl"
@@ -2317,8 +2339,8 @@ export default function App() {
       {/* STATS */}
       <div className="stats">
         {[
-          {n:callListLeads.length, l:"Call targets",      s:"HOT/WARM · FX confirmed",   c:"#10B981"},
-          {n:hot,                  l:"HOT leads",         s:"Score ≥ 80",                c:"#10B981"},
+          {n:Math.min(callListLeads.length,25), l:"READY leads",   s:"Top 25 · ranked by ready_score", c:"#10B981"},
+          {n:hot,                  l:"HOT leads",         s:"Score ≥ 80 · FX confirmed", c:"#10B981"},
           {n:warm,                 l:"WARM leads",        s:"Score 60–79",               c:"#F59E0B"},
           {n:leads.length,         l:"Companies found",   s:"All events · all priority", c:"#6366F1"},
           {n:hasSite,              l:"Website verified",  s:`${Math.round(hasSite/Math.max(leads.length,1)*100)}% of pipeline`, c:"#38BDF8"},
@@ -2340,7 +2362,7 @@ export default function App() {
             className={`view-tab${filters.view==="call_list"?" active-cl":""}`}
             onClick={()=>setFilters(CALL_LIST_FILTERS)}
           >
-            ⚡ Daily Call List {callListLeads.length > 0 && `(${Math.min(callListLeads.length,10)}+${Math.max(0,callListLeads.length-10)})`}
+            ⚡ Daily Call List {callListLeads.length > 0 && `(${Math.min(callListLeads.length,10)}+${Math.max(0,Math.min(callListLeads.length,25)-10)})`}
           </button>
           <button
             className={`view-tab${filters.view==="research"?" active-rq":""}`}
@@ -2375,6 +2397,7 @@ export default function App() {
           {filters.view === "call_list" ? (
             <DailyCallListView
               callListLeads={callListLeads}
+              remainingHot={remainingHot}
               allLeads={leads}
               events={events}
               crmState={crmState}
@@ -2437,7 +2460,8 @@ export default function App() {
           <div className="sb">
             <div className="sb-h">Pipeline summary</div>
             {[
-              {l:"Priority leads",   v:callListLeads.length, c:"#10B981"},
+              {l:"READY (top 25)",    v:Math.min(callListLeads.length,25), c:"#10B981"},
+              {l:"HOT (all)",        v:leads.filter(l=>l.priority==="HOT").length, c:"#10B981"},
               {l:"Research queue",   v:researchLeads.length, c:"#F59E0B"},
               {l:"With website",     v:hasSite,              c:"#38BDF8"},
               {l:"Contacted",        v:contacted,            c:"#38BDF8"},

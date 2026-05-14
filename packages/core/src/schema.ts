@@ -307,6 +307,9 @@ export const LeadSchema = z.object({
   score: z.number().int().min(0).max(100).default(0),
   priority: Priority.default("QUEUE"),
   scoring_reasons: z.array(z.string()).default([]),
+  /** Ranking score for HOT leads — determines Daily Call List order (Top 10 / Backup 15).
+   *  Computed after scoreLead(); only meaningful when priority === "HOT". 0 for non-HOT. */
+  ready_score: z.number().int().min(0).max(100).default(0),
   lead_type: LeadType.default("unknown"),
   awareness_level: Confidence3.default("low"),
   saving_opportunity: Confidence3.default("low"),

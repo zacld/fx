@@ -346,6 +346,67 @@ export function scoreLead(lead: Partial<ScoreInput>, urgency = 0): ScoreResult {
   return { score, priority, reasons };
 }
 
+// ── computeReadyScore ─────────────────────────────────────────────────────────
+/**
+ * Ranks HOT leads for the Daily Call List (Top 10 / Backup 15 / Remaining HOT).
+ * Pure function — no I/O. Only meaningful when priority === "HOT"; returns 0 otherwise.
+ *
+ * Dimensions (100 pts total):
+ *  1. FX evidence depth      0–25   (count of real website FX signals)
+ *  2. Evidence quality       0–20   (fx_evidence_snippets / supplier / import-export)
+ *  3. Website confidence     0–15   (high > medium > low)
+ *  4. Contact route quality  0–20   (route_grade A > B > C > D)
+ *  5. Decision-maker quality 0–10   (tier-1 with email > tier-1 any > any DM)
+ *  6. B2B / trade fit        0–10   (lead_type + b2b_signal count)
+ *  7. Company maturity       0–5    (established age)
+ *  [max 105, capped at 100]
+ */
+export function computeReadyScore(lead: Partial<Lead>): number {
+  let s = 0;
+
+  // 1. FX evidence depth (0–25)
+  const fxN = (lead.fx_payment_signals ?? []).length;
+  s += fxN >= 5 ? 25 : fxN >= 3 ? 20 : fxN >= 2 ? 15 : fxN >= 1 ? 8 : 0;
+
+  // 2. Evidence quality (0–20) — deep-page evidence snippets
+  const snippets = ((lead as Record<string, unknown>).fx_evidence_snippets as string[] | undefined) ?? [];
+  const supplierEv = ((lead as Record<string, unknown>).supplier_evidence as string[] | undefined) ?? [];
+  const importExEv = ((lead as Record<string, unknown>).import_export_evidence as string[] | undefined) ?? [];
+  if (snippets.length >= 3) s += 20;
+  else if (snippets.length >= 2) s += 15;
+  else if (snippets.length >= 1) s += 10;
+  else if (supplierEv.length >= 1 || importExEv.length >= 1) s += 5;
+
+  // 3. Website confidence (0–15)
+  const wc = lead.website_confidence ?? "";
+  s += wc === "high" ? 15 : (wc === "medium" || wc === "confirmed") ? 10 : wc === "low" ? 4 : 0;
+
+  // 4. Contact route quality (0–20) — route_grade A/B/C/D/E/F
+  const GRADE_PTS: Record<string, number> = { A: 20, B: 15, C: 8, D: 4 };
+  const grade = ((lead as Record<string, unknown>).route_grade as string | undefined) ?? "F";
+  s += GRADE_PTS[grade] ?? 0;
+
+  // 5. Decision-maker quality (0–10)
+  const dms = ((lead as Record<string, unknown>).decision_makers as Array<Record<string, unknown>> | undefined) ?? [];
+  const tier1Email = dms.find((d) => d["tier"] === 1 && (d["email"] || d["email_candidate"]));
+  const tier1Any   = dms.find((d) => d["tier"] === 1);
+  const anyDm      = dms.length > 0;
+  s += tier1Email ? 10 : tier1Any ? 7 : anyDm ? 3 : 0;
+
+  // 6. B2B / trade fit (0–10)
+  const lt = lead.lead_type ?? "unknown";
+  const b2bN = (lead.b2b_signals ?? []).length;
+  s += lt === "both" ? 10 : lt === "evergreen_saving" ? 8 : lt === "trigger_exposed" ? 5 : 0;
+  if (b2bN >= 3) s += 2; // small bonus — already contributing to score gate
+
+  // 7. Company maturity (0–5)
+  const yr = parseInt(String(lead.incorporated ?? "").slice(0, 4), 10);
+  const age = Number.isFinite(yr) ? new Date().getUTCFullYear() - yr : 0;
+  s += age >= 10 ? 5 : age >= 5 ? 3 : age >= 2 ? 1 : 0;
+
+  return Math.min(s, 100);
+}
+
 // ── exposure confidence (port of rescore.compute_exposure_confidence) ────────
 export function exposureConfidence(lead: Partial<Lead>): "high" | "medium" | "low" | "none" {
   const fx = (lead.fx_payment_signals ?? []).length;

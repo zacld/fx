@@ -35,6 +35,7 @@ describe("db — schema + round-trip", () => {
         multi_event_trigger: false, multi_event_count: 1, sales_angle: "", suggested_next_step: "",
         guessed_emails: [], generic_emails: [], status: "new",
         call_opener: "", email_draft: "", linkedin_note: "",
+        ready_score: 0,
       };
 
       db.insert(schema.leads).values({

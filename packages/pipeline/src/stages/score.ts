@@ -26,7 +26,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  scoreLead, exposureConfidence, isLargeOrg, bestContactRoute, ensureContactFields,
+  scoreLead, exposureConfidence, computeReadyScore, isLargeOrg, bestContactRoute, ensureContactFields,
   WEAK_ORIGIN_TOKENS, LeadSchema, repoRoot, type Lead,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
@@ -83,6 +83,8 @@ export function scoreAndClassify(lead: Lead, event: EventInfo | undefined): { ch
   lead.score = score;
   lead.priority = priority;
   lead.scoring_reasons = reasons;
+  // ready_score ranks HOT leads for the Daily Call List — 0 for non-HOT
+  lead.ready_score = priority === "HOT" ? computeReadyScore(lead) : 0;
   lead.exposure_confidence = exposureConfidence(lead);
   lead.signal_count = (lead.fx_payment_signals ?? []).length + (lead.secondary_signals ?? []).length;
   lead.rescored_at = new Date().toISOString();
