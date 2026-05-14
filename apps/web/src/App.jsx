@@ -179,6 +179,100 @@ const CALL_LIST_FILTERS = { ...BLANK_FILTERS, view: "call_list", sortBy: "readin
 const RESEARCH_FILTERS  = { ...BLANK_FILTERS, view: "research"  };
 const ALL_FILTERS       = { ...BLANK_FILTERS, view: "all"       };
 
+// ── READY eligibility helpers (mirrors scoring.ts isReadyEligible) ────────────
+// Platform/cloud/SaaS domains — not operating companies.
+const PLATFORM_DOMAINS_SET = new Set([
+  "microsoft.com","azure.microsoft.com","azure.com","office.com",
+  "google.com","googleapis.com","cloud.google.com",
+  "aws.amazon.com","amazonaws.com",
+  "shopify.com","shopify.co.uk","wix.com","squarespace.com",
+  "wordpress.com","wordpress.org","medium.com","substack.com",
+  "blogger.com","blogspot.com","hubspot.com","mailchimp.com","salesforce.com",
+  "linkedin.com","facebook.com","twitter.com","x.com","instagram.com",
+  "youtube.com","tiktok.com","indeed.com","glassdoor.com",
+  "totaljobs.com","reed.co.uk","cv-library.co.uk",
+  "rightmove.co.uk","zoopla.co.uk","onthemarket.com",
+  "amazon.com","amazon.co.uk","ebay.com","ebay.co.uk","etsy.com",
+  // whisky investment / content sites
+  "casktrade.com","whiskyinvestdirect.com","whiskyintelligence.com",
+]);
+// Content page path patterns — same as scoring.ts CONTENT_PAGE_RE
+const CONTENT_PATH_RE = /\/(blog|article|articles|news|pricing|price|report|reports|statistics?|stats|figures?|guide|guides|resources?|academy|dictionary|encyclopedia|faq|case-stud|whitepaper|press-release|press\/|events\/|webinar|sitemap|index\.htm|investment-guide)/i;
+// Long content-slug heuristic: path segments containing "figures", "statistics", "analysis", "investment" + year or hyphen-heavy
+const CONTENT_SLUG_RE = /\/[a-z-]*(?:figures?|statistics?|analysis|investment-guide|market-report|export-data|import-data|price-comparison)[a-z0-9-]*\//i;
+
+function bareDomain(url) {
+  if (!url) return "";
+  try { return new URL(url).hostname.toLowerCase().replace(/^www\d*\./, ""); } catch { return ""; }
+}
+function isPlatformDomain(url) {
+  const d = bareDomain(url);
+  if (!d) return false;
+  if (PLATFORM_DOMAINS_SET.has(d)) return true;
+  for (const p of PLATFORM_DOMAINS_SET) if (d.endsWith("." + p)) return true;
+  return false;
+}
+function isContentPage(url) {
+  if (!url) return false;
+  try {
+    const path = new URL(url).pathname;
+    if (CONTENT_PATH_RE.test(path)) return true;
+    if (/\/\d{4}\/\d{2}\//.test(path)) return true;  // /2024/04/... blog date pattern
+    if (CONTENT_SLUG_RE.test(path)) return true;       // /scotch-whisky-export-figures-2024/
+  } catch { /* not parseable */ }
+  return false;
+}
+
+// Page-title company name indicators — a name containing these markers is a scraped page title, not a company
+function isPageTitleName(name) {
+  if (!name) return false;
+  if (name.includes("|")) return true;          // "Scotch Whisky Figures 2024 | Casktrade"
+  if (/^about\s+(us\s*[-–]?\s*)?/i.test(name)) return true;  // "About Us - Franceline Transport"
+  // Name contains a year AND content-page words → page title
+  if (/\b20\d{2}\b/.test(name) && /\b(figures?|statistics?|report|export|import|guide|analysis|data)\b/i.test(name)) return true;
+  return false;
+}
+
+// ── Client-side DM name validator ─────────────────────────────────────────────
+// Used when pipeline hasn't yet populated dm_valid (enrich-decision-makers not re-run).
+// Mirrors the NOT_A_NAME_WORD logic in enrich-decision-makers.ts.
+const NOT_A_FIRST_NAME_CLIENT = new Set([
+  "sourcing","specialist","general","manager","director","marketing","sales",
+  "accounts","admin","support","info","contact","team","import","imports","importer",
+  "export","exports","exporter","trade","trading","group","services","service",
+  "solutions","solution","international","global","limited","ltd","plc","consulting",
+  "holdings","partners","partner","wholesale","retail","logistics","distribution",
+  "procurement","purchasing","department","mobile","portrait","quality","value",
+  "leading","premium","trusted","welcome","about","overview","address","line","sector",
+  "price","pricing","statistics","figures","report","news","blog","guide",
+  "whisky","scotch","wine","beer","spirits","food","furniture","electronics",
+  "samsung","apple","google","microsoft","brand","china","france","italy",
+  "germany","spain","india","taiwan","korea","europe","asia","america",
+  "target","dragon","sole","source","sourced","product","products","accessories",
+  "textile","textiles","apparel","clothing","medical","optical","dental","pharma",
+  "tamil","naidu","korea","korean","brands","designs","collections","collection",
+]);
+function isPlausibleFirstNameClient(fn) {
+  if (!fn || fn.length < 2 || fn.length > 20) return false;
+  if (NOT_A_FIRST_NAME_CLIENT.has(fn.toLowerCase())) return false;
+  // Must start with capital letter
+  if (!/^[A-Z]/.test(fn)) return false;
+  return true;
+}
+
+// Client-side READY eligibility check (mirrors pipeline scoring.ts isReadyEligible)
+function isReadyEligibleClient(l) {
+  if (!l.website) return false;
+  if (isPlatformDomain(l.website)) return false;
+  if (isContentPage(l.website)) return false;
+  if (isPageTitleName(l.company_name)) return false;
+  if (l.website_confidence === "low") return false;
+  const hasCompanyNumber = !!l.company_number;
+  const hasHighConf = ["high","confirmed"].includes(l.website_confidence||"");
+  if (!hasCompanyNumber && !hasHighConf) return false;
+  return true;
+}
+
 function isCallListEligible(l) {
   // Daily Call List eligibility: HOT-only with real evidence + contact route.
   // Ranking within the call list is by ready_score (computed by pipeline).
@@ -190,7 +284,9 @@ function isCallListEligible(l) {
   const hasFxEvidence = (l.fx_payment_signals||[]).length > 0;
   const notExcluded   = !["not_relevant"].includes(l.outreach_status);
   const hasDirector   = !!l.director_name;
-  return isHot && hasWebsite && hasWebConf && hasFxEvidence && hasDirector && notExcluded;
+  // Additional READY exclusions: content pages, platform domains, no CH number + low conf
+  const readyOk       = isReadyEligibleClient(l);
+  return isHot && hasWebsite && hasWebConf && hasFxEvidence && hasDirector && notExcluded && readyOk;
 }
 
 // Sort HOT leads by ready_score desc, fall back to score then company name
@@ -205,6 +301,36 @@ function sortByReadyScore(leads) {
 }
 
 const CALL_LIST_MAX = 25;
+
+// ── READY deduplication ────────────────────────────────────────────
+// Before ranking Top 10 / Backup 15, deduplicate by domain, company_number,
+// and normalised company name. Keeps the higher-ranked (ready_score) lead.
+function normaliseCoName(name) {
+  return (name||"").toLowerCase()
+    .replace(/\s+(ltd|limited|plc|llp|llc|inc|corp|co|group|holdings?|uk|international|global)\.?$/i,"")
+    .replace(/[^a-z0-9]/g,"")
+    .trim();
+}
+function dedupeForReady(leads) {
+  const seenDomains = new Set();
+  const seenCompanyNums = new Set();
+  const seenNames = new Set();
+  const result = [];
+  // Input should already be sorted by ready_score desc — first occurrence wins
+  for (const l of leads) {
+    const domain = bareDomain(l.website);
+    const cn = l.company_number;
+    const normName = normaliseCoName(l.company_name);
+    if (domain && seenDomains.has(domain)) continue;
+    if (cn && seenCompanyNums.has(cn)) continue;
+    if (normName.length >= 5 && seenNames.has(normName)) continue;
+    if (domain) seenDomains.add(domain);
+    if (cn) seenCompanyNums.add(cn);
+    if (normName.length >= 5) seenNames.add(normName);
+    result.push(l);
+  }
+  return result;
+}
 
 function applyFilters(leads, filters, getCrmStatus) {
   let r = leads;
@@ -1032,27 +1158,40 @@ function DMCard({ dm, co }) {
   const initials    = [dm.first_name, dm.last_name].filter(Boolean).map(w=>(w||"")[0]||"").join("").toUpperCase() || "?";
   const verifiedEmail = dm.email_verified && dm.email ? dm.email : null;
   const guessedTop  = !verifiedEmail && dm.email_guesses?.length ? dm.email_guesses[0]?.email : null;
-  const bestEmail   = verifiedEmail || guessedTop;
+  const bestEmail   = verifiedEmail || (dm.email_candidate || null) || guessedTop;
   const liUrl       = dm.linkedin_search || (dm.name ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(dm.name + " " + (co||"").split(" ").slice(0,3).join(" "))}` : null);
   const since       = dm.appointed_on ? dm.appointed_on.slice(0,7) : null;
   const tier        = dm.tier || 3;
   const tc          = tierColor(tier);
   const tlabel      = dm.tier_label || (tier===1?"Primary":tier===2?"Secondary":"Fallback");
+  // Email confidence: use the pipeline-computed field when available, otherwise infer
+  const emailConf   = dm.email_confidence || (verifiedEmail ? "verified" : "guessed");
+  // DM validity: use pipeline field if present; compute client-side if pipeline hasn't run enrich-decision-makers yet
+  const isCh        = dm.source === "companies_house" || dm.source === "ch+website";
+  const dmValid     = dm.dm_valid !== undefined
+    ? dm.dm_valid                                              // pipeline-computed
+    : isCh || isPlausibleFirstNameClient(dm.first_name || ""); // client-side fallback
+  const dmConf      = dm.dm_confidence || (isCh ? "high" : (dmValid ? "medium" : "low"));
   return (
-    <div className={`dm-card tier-${tier}`}>
+    <div className={`dm-card tier-${tier}`} style={{opacity: dmValid ? 1 : 0.5}}>
       <div className="dm-av" style={{borderColor:`${tc}40`,color:tc}}>{initials}</div>
       <div className="dm-info">
         <div className="dm-nm">
           {dm.name || [dm.first_name, dm.last_name].filter(Boolean).join(" ")}
           <span className="dm-tier-badge" style={{color:tc,background:`${tc}18`,border:`1px solid ${tc}35`}}>{tlabel}</span>
+          {!dmValid && <span style={{fontSize:9,padding:"1px 5px",borderRadius:3,background:"rgba(248,113,113,.1)",border:"1px solid rgba(248,113,113,.25)",color:"#F87171",fontFamily:"'JetBrains Mono',monospace"}}>unverified name</span>}
+          {dmConf === "high" && <span style={{fontSize:9,padding:"1px 5px",borderRadius:3,background:"rgba(16,185,129,.07)",border:"1px solid rgba(16,185,129,.2)",color:"#10B981",fontFamily:"'JetBrains Mono',monospace"}}>CH</span>}
         </div>
         <div className="dm-rl" style={{color:tc}}>{dm.role || "Director"}</div>
         {since && <div className="dm-appointed">Appointed {since}</div>}
         {bestEmail && (
           <div className="dm-email">
-            <span style={{color:verifiedEmail?"#10B981":"#F59E0B"}}>{verifiedEmail?"✓":"~"}</span>
-            <span style={{wordBreak:"break-all"}}>{bestEmail}</span>
-            {verifiedEmail ? <span className="dm-verified">verified</span> : <span className="dm-guessed">guessed</span>}
+            {emailConf === "verified"
+              ? <><span style={{color:"#10B981"}}>✓</span><span style={{wordBreak:"break-all"}}>{bestEmail}</span><span className="dm-verified">smtp verified</span></>
+              : emailConf === "pattern_based"
+              ? <><span style={{color:"#818CF8"}}>~</span><span style={{wordBreak:"break-all"}}>{bestEmail}</span><span className="dm-guessed" style={{background:"rgba(99,102,241,.08)",borderColor:"rgba(99,102,241,.2)",color:"#818CF8"}}>pattern</span></>
+              : <><span style={{color:"#F59E0B"}}>?</span><span style={{wordBreak:"break-all"}}>{bestEmail}</span><span className="dm-guessed">guessed</span></>
+            }
             <DMEmailCopy email={bestEmail} />
           </div>
         )}
@@ -1610,9 +1749,17 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             const co       = lead.company_name || li?.search_name || "";
             const dir      = lead.director_name || "";
             const hasDMs   = lead.decision_makers?.length > 0;
-            const coUrl    = lead.company_linkedin || `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(co)}`;
+            // Fix #6: prefer native LinkedIn URLs (from TS enrich-decision-makers stage).
+            // legacy company_linkedin may be a Google site: search — detect and skip.
+            const isNativeLiUrl = u => u && (u.startsWith("https://www.linkedin.com/") || u.startsWith("https://linkedin.com/"));
+            const coUrl =
+              isNativeLiUrl(lead.company_linkedin) ? lead.company_linkedin :
+              isNativeLiUrl(li?.company_search)     ? li.company_search :
+              `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(co)}`;
             const dirUrl   = dir ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(dir)}` : null;
             const dirCoUrl = dir ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(dir + " " + co.split(" ").slice(0,3).join(" "))}` : null;
+            // linkedin_assist.people_searches[] from old Python pipeline — use .url if it's a native LI URL
+            const liAssistPeople = (li?.people_searches||[]).filter(p => isNativeLiUrl(p.url));
             return (
               <div className="li-section">
                 <div className="xl" style={{marginBottom:7}}>LinkedIn — open manually, do not automate</div>
@@ -1632,9 +1779,19 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
                         👤 {dir} (name only) →
                       </a>
                     )}
-                    {(li?.people_searches||[]).filter(p=>!p.role.includes("direct search")).slice(0,3).map(p=>(
-                      <a key={p.role} href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(co.split(" ").slice(0,3).join(" ") + " " + p.role.replace(/ →$/,""))}`} target="_blank" rel="noreferrer" className="li-person-btn">{p.role} →</a>
+                    {/* Use native LI URLs from linkedin_assist if available */}
+                    {liAssistPeople.slice(0,3).map((p,i)=>(
+                      <a key={i} href={p.url} target="_blank" rel="noreferrer" className="li-person-btn">
+                        {p.role || p.name || "Person"} →
+                      </a>
                     ))}
+                    {/* Role-based fallback when no named people */}
+                    {!dir && liAssistPeople.length === 0 && (
+                      <>
+                        <a href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(co.split(" ").slice(0,3).join(" ") + " Finance Director")}`} target="_blank" rel="noreferrer" className="li-person-btn">Finance Director →</a>
+                        <a href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(co.split(" ").slice(0,3).join(" ") + " Managing Director")}`} target="_blank" rel="noreferrer" className="li-person-btn">Managing Director →</a>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -2261,8 +2418,8 @@ export default function App() {
   }
 
   const filteredLeads  = useMemo(()=>applyFilters(leads,filters,getCrmStatus),[leads,filters,getCrmStatus]);
-  // callListLeads = all eligible HOT leads sorted by ready_score (Top 10 + Backup 15)
-  const callListLeads  = useMemo(()=>sortByReadyScore(leads.filter(isCallListEligible)),[leads]);
+  // callListLeads = eligible HOT leads sorted by ready_score, deduplicated by domain/CH number/name
+  const callListLeads  = useMemo(()=>dedupeForReady(sortByReadyScore(leads.filter(isCallListEligible))),[leads]);
   // remainingHot = HOT leads that passed scoring but didn't make the call list eligibility check,
   // or are beyond the top 25 — shown collapsed in DailyCallListView
   const remainingHot   = useMemo(()=>{

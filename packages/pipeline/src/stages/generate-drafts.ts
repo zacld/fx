@@ -43,27 +43,45 @@ export interface GenerateDraftsResult {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-// Common English words that appear in website-extracted "names" — skip them.
-const NOT_A_NAME = new Set([
-  "sourcing", "specialist", "general", "manager", "director", "marketing",
-  "sales", "accounts", "admin", "support", "info", "contact", "team",
-  "group", "services", "solutions", "international", "imports", "exports",
-  "trading", "limited", "ltd", "consulting", "holdings", "partners",
+// Words that appear in garbled scrapes — never valid as a first name.
+// Kept broader than the enrich-decision-makers list to be safe in greeting context.
+const NOT_A_FIRST_NAME = new Set([
+  "sourcing","specialist","general","manager","director","marketing",
+  "sales","accounts","admin","support","info","contact","team","import",
+  "imports","importer","export","exports","exporter","trade","trading",
+  "group","services","service","solutions","solution","international","global",
+  "trading","limited","ltd","plc","consulting","holdings","partners","partner",
+  "wholesale","retail","logistics","distribution","procurement","purchasing",
+  "department","mobile","portrait","quality","value","leading","premium",
+  "trusted","welcome","about","overview","address","line","sector",
+  "price","pricing","statistics","figures","report","news","blog","guide",
+  "whisky","scotch","wine","beer","spirits","food","furniture","electronics",
+  "samsung","apple","google","microsoft","brand","china","france","italy",
+  "germany","spain","india","taiwan","korea","europe","asia","america",
+  "target","dragon","sole","source","sourced","product","products",
 ]);
 
 function isPlausibleFirstName(name: string): boolean {
   if (!name || name.length < 2 || name.length > 20) return false;
-  if (NOT_A_NAME.has(name.toLowerCase())) return false;
-  // Must look like a proper noun (starts with capital, rest lower)
+  if (NOT_A_FIRST_NAME.has(name.toLowerCase())) return false;
+  // Must look like a proper noun (starts with capital, rest lower/hyphen/apostrophe)
   if (!/^[A-Z][a-z'-]+$/.test(name)) return false;
   return true;
 }
 
 function firstName(lead: Lead): string {
   const dms = lead.decision_makers ?? [];
-  // Prefer CH-sourced DMs — they have real CH-registered names
-  const chDms = dms.filter((d) => d.source === "companies_house" || d.source === "ch+website");
-  const candidates = chDms.length > 0 ? chDms : dms;
+  // Priority: CH-backed DMs with dm_confidence="high" (from enrich-decision-makers)
+  const chDms = dms.filter((d) => {
+    const src = d.source as string;
+    return src === "companies_house" || src === "ch+website";
+  });
+  // Fallback: website DMs only if dm_valid is true
+  const validWebDms = dms.filter((d) => {
+    const rec = d as Record<string, unknown>;
+    return d.source === "website_only" && rec.dm_valid === true;
+  });
+  const candidates = chDms.length > 0 ? chDms : validWebDms;
   const sorted = [...candidates].sort((a, b) => a.tier - b.tier);
   for (const dm of sorted) {
     const fn = (dm.first_name ?? "").trim();
@@ -145,14 +163,20 @@ function buildCallOpener(lead: Lead): string {
   const flow = paymentFlowLine(lead);
   const event = eventLine(lead);
   const fname = firstName(lead);
-  const greeting = fname ? `Hi, could I speak to ${fname} please? ` : "Hi, could I speak to whoever handles your FX or overseas payments? ";
+  // Safe greeting: only use a person's name if it's from a validated source.
+  // Generic fallback asks for whoever handles overseas supplier payments — avoids
+  // "Hi Dragon", "Hi Mobile", "Hi Scotch" when scrape produced garbage names.
+  const greeting = fname
+    ? `Hi, could I speak to ${fname} please? `
+    : "Hi, could I speak to whoever handles overseas supplier payments or currency exposure? ";
   return `${greeting}I'm calling from a currency brokerage — it looks like ${co} may have ${flow}, and given ${event}, it might be worth a quick conversation about the rate you're getting on those payments.`;
 }
 
 function buildEmailDraft(lead: Lead): string {
   const co = companyShort(lead);
   const fname = firstName(lead);
-  const greeting = fname ? `Hi ${fname},` : "Hi,";
+  // Generic greeting uses company team if no validated name available
+  const greeting = fname ? `Hi ${fname},` : `Hi ${co} team,`;
   const event = eventLine(lead);
   const flow = paymentFlowLine(lead);
   const pair = lead.currency_pair || "FX";
@@ -185,7 +209,7 @@ function buildEmailDraft(lead: Lead): string {
 function buildLinkedinNote(lead: Lead): string {
   const co = companyShort(lead);
   const fname = firstName(lead);
-  const greeting = fname ? `Hi ${fname}` : "Hi";
+  const greeting = fname ? `Hi ${fname}` : "Hi there";
   const pair = lead.currency_pair || "FX";
   const event = eventLine(lead);
 

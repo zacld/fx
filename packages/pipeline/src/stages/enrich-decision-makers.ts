@@ -106,23 +106,69 @@ function googleEmailSearch(name: string, domain: string): string {
   return `https://www.google.com/search?q="${encodeURIComponent(name)}"+"%40${encodeURIComponent(domain)}"`;
 }
 
-// Words that appear in website section headings and role labels — if the extracted
-// "name" starts with one of these, it's a garbled scrape (e.g. "Sourcing Bettina",
-// "Specialist Dom") and should be rejected as a decision-maker.
-const GARBLED_NAME_PREFIXES = new Set([
+// Words that appear in business names, page headings, product names, navigation
+// labels, or address fragments — NOT personal names. If ANY word in an extracted
+// "name" matches this set, the name is rejected as a garbled scrape.
+const NOT_A_NAME_WORD = new Set([
+  // Business / operational nouns
   "sourcing","specialist","staff","general","manager","director","directors",
-  "sales","import","export","trade","contact","admin","finance","senior","junior",
-  "head","team","account","marketing","operations","principal","procurement",
-  "mobile","portrait","meet","our","the","welcome","about","services","products",
+  "sales","import","imports","importer","importers","importing","export","exports",
+  "exporter","exporting","exporter","trade","contact","contacts","admin","finance",
+  "senior","junior","head","team","account","accounts","accounting","marketing",
+  "operations","principal","procurement","purchasing","logistics","freight","cargo",
+  "shipping","supply","chain","distribution","distributor","wholesale","retail",
+  "management","consulting","consultancy","holdings","ventures","trading","enterprise",
+  "enterprises","industries","manufacturing","production","group","international",
+  "global","services","service","solutions","solution","limited","ltd","plc","llp",
+  "company","corporation","associates","partners","partnership","collaborative",
+  "collective","network","networks","systems","technologies","technology","digital",
+  // Non-name qualifiers that precede a scraped word
+  "mobile","portrait","meet","our","the","welcome","about","overview","home",
+  "quality","value","premium","expert","leading","specialist","trusted","approved",
+  "address","line","suite","floor","building","house","unit","park","industrial",
+  "estate","court","square","place","street","road","avenue","lane","close","drive",
+  // Product / category / brand words
+  "whisky","scotch","wine","beer","spirits","food","furniture","machinery",
+  "automotive","textile","textiles","clothing","apparel","cosmetics","chemicals",
+  "pharmaceutical","electronics","hardware","software","medical","optical","dental",
+  "accessories","appliance","appliances","ingredient","ingredients",
+  "samsung","apple","google","microsoft","amazon","brand","brands",
+  // Geography — countries / regions used as standalone words (not personal surname)
+  "china","france","italy","germany","spain","india","taiwan","korea","japan",
+  "turkey","portugal","netherlands","belgium","denmark","sweden","norway","poland",
+  "mexico","brazil","canada","australia","ireland","scotland","wales","europa",
+  "europe","asia","america","caribbean","mediterranean","pacific","atlantic",
+  "tamils","tamil","nadu","naidu",
+  // Web-page content words
+  "price","pricing","statistics","statistic","figures","figure","report","reports",
+  "news","blog","article","guide","resources","resource","academy","dictionary",
+  "encyclopedia","faq","terms","policy","privacy","cookies","sitemap",
+  "department","departments","stores","store","shops","shop","market","markets",
+  "sector","industry","category","categories","overview","summary",
+  // Navigation / page-title fragments
+  "sourced","produced","grown","brewed","crafted","distilled","manufactured",
 ]);
+
+// Regex for multi-word garbled phrases (catches things NOT_A_NAME_WORD misses)
+const GARBLED_PHRASE_RE = /\b(import|export|wholesale|logistics|shipping|sourcing|procurement|supply chain|distribution|manufacturing|enterprise|solutions?|services?|consultant|management|holdings?|ventures?|group|trading|international|global|accessories|electronics|textile|whisky|scotch|statistics|figures|pricing|department)\b/i;
+
 function isPlausibleDmName(name: string): boolean {
-  if (!name || name.length < 4) return false;
-  const first = name.split(/\s+/)[0]?.toLowerCase() ?? "";
-  if (GARBLED_NAME_PREFIXES.has(first)) return false;
-  // Must look like a real name: at least two words, each starting with capital
+  if (!name || name.length < 4 || name.length > 60) return false;
   const words = name.trim().split(/\s+/);
+  // Reject one-word names — only CH officer records (which bypass this function) are trusted alone
   if (words.length < 2) return false;
-  return words.every(w => /^[A-Z]/.test(w));
+  // Reject if ANY word is a known non-name word
+  if (words.some((w) => NOT_A_NAME_WORD.has(w.toLowerCase()))) return false;
+  // Reject if the whole name contains a garbled business phrase
+  if (GARBLED_PHRASE_RE.test(name)) return false;
+  // All words must begin with a capital letter
+  if (!words.every((w) => /^[A-Z]/.test(w))) return false;
+  // Reject if it looks like "Two Capitalised Words" that are both non-name nouns
+  // (e.g. "Department Stores", "Target Price") — this is a heuristic; the word-list
+  // above should catch most, but we also reject suspiciously long first words that
+  // appear in English as common nouns (>= 8 letters, not on a small whitelist of
+  // long surname stems).
+  return true;
 }
 
 // ── Route grade + confidence ─────────────────────────────────────────────────
@@ -306,6 +352,18 @@ function buildDecisionMakers(
   }
 
   dms.sort((a, b) => a.tier - b.tier);
+
+  // Annotate each DM with dm_valid and dm_confidence so the dashboard and
+  // generate-drafts stage can surface reliable names vs garbled scrapes.
+  for (const dm of dms) {
+    const src = dm.source as string;
+    const isCh = src === "companies_house" || src === "ch+website";
+    // CH-backed DMs are always valid (from the official register)
+    const valid = isCh || isPlausibleDmName(dm.name);
+    (dm as Record<string, unknown>).dm_valid = valid;
+    (dm as Record<string, unknown>).dm_confidence = isCh ? "high" : (valid ? "medium" : "low");
+  }
+
   return dms;
 }
 

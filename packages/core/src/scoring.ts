@@ -122,6 +122,8 @@ const KNOWN_BAD_DOMAINS = new Set([
   "luxurytribune.com", "luxurydaily.com", "womanandhome.com", "shiptothemoon.com",
   "j5fashion.com", "gemimports.co.uk", "thewholesaler.co.uk", "dinainternational.co.uk",
   "europages.com", "europages.co.uk", "thomasnet.com", "kompass.com",
+  // whisky investment content sites (not operating companies)
+  "casktrade.com", "whiskyinvestment.co.uk", "caskwhiskyinvesting.com",
 ]);
 
 function extractDomain(website: string | null | undefined): string {
@@ -141,6 +143,60 @@ function domainInSet(website: string | null | undefined, set: ReadonlySet<string
 }
 export const isHardSkipDomain = (website: string | null | undefined) => domainInSet(website, HARD_SKIP_DOMAINS);
 export const isKnownBadDomain = (website: string | null | undefined) => domainInSet(website, KNOWN_BAD_DOMAINS);
+
+// ── READY-ELIGIBLE FILTER ─────────────────────────────────────────────────────
+/** Platform/cloud/SaaS/social domains — not operating companies */
+const READY_EXCLUDE_DOMAINS = new Set([
+  // Cloud / software platforms
+  "microsoft.com", "azure.microsoft.com", "azure.com", "office.com",
+  "google.com", "googleapis.com", "cloud.google.com",
+  "aws.amazon.com", "amazonaws.com",
+  "shopify.com", "shopify.co.uk", "shopify.dev",
+  "wix.com", "squarespace.com", "wordpress.com", "wordpress.org",
+  "medium.com", "substack.com", "blogger.com", "blogspot.com",
+  "hubspot.com", "mailchimp.com", "salesforce.com",
+  // Social / job boards
+  "linkedin.com", "facebook.com", "twitter.com", "x.com",
+  "instagram.com", "youtube.com", "tiktok.com",
+  "indeed.com", "glassdoor.com", "totaljobs.com", "reed.co.uk", "cv-library.co.uk",
+  // Property
+  "rightmove.co.uk", "zoopla.co.uk", "onthemarket.com",
+  // Marketplaces / retail
+  "amazon.com", "amazon.co.uk", "ebay.com", "ebay.co.uk",
+  "etsy.com", "notonthehighstreet.com", "wayfair.com", "wayfair.co.uk",
+]);
+
+/** URL path patterns that indicate a content/article/pricing page — not a company homepage */
+const CONTENT_PAGE_RE = /\/(blog|article|articles|news|pricing|price|report|reports|statistics?|stats|figures|guide|guides|resources?|resource|academy|dictionary|encyclopedia|faq|case-stud|whitepaper|press-release|press\/|events\/|webinar|sitemap|index\.htm)/i;
+
+/**
+ * Returns false for content/article/pricing pages, platform domains, and leads
+ * without enough validation to justify a same-day call.
+ * Leads that fail this check get ready_score = 0 (excluded from Daily Call List
+ * Top 10 / Backup 15 but remain visible in Research Queue).
+ */
+export function isReadyEligible(lead: Partial<Lead>): boolean {
+  const website = lead.website ?? null;
+  if (!website) return false;
+  // Block known platform / cloud / social domains
+  if (domainInSet(website, READY_EXCLUDE_DOMAINS)) return false;
+  // Also block any subdomain of a hard-skip domain (e.g. azure.microsoft.com)
+  if (domainInSet(website, HARD_SKIP_DOMAINS)) return false;
+  // Block URL paths that indicate a content/article/pricing/blog page
+  try {
+    const path = new URL(website).pathname;
+    if (CONTENT_PAGE_RE.test(path)) return false;
+    // /2024/04/... — blog date-based URL pattern
+    if (/\/\d{4}\/\d{2}\//.test(path)) return false;
+  } catch { /* not a valid URL — don't block */ }
+  // Block low-confidence website leads from READY
+  if (lead.website_confidence === "low") return false;
+  // Require Companies House number OR high-confidence validated website
+  const hasCompanyNumber = !!(lead.company_number);
+  const hasHighConf = ["high", "confirmed"].includes(lead.website_confidence ?? "");
+  if (!hasCompanyNumber && !hasHighConf) return false;
+  return true;
+}
 
 // ── scoreLead ────────────────────────────────────────────────────────────────
 export interface ScoreResult {
