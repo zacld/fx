@@ -604,6 +604,35 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .empty-t{font-size:15px;font-weight:600;color:rgba(255,255,255,.3);margin-bottom:6px}
 .empty-s{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:rgba(255,255,255,.15)}
 .empty-s code{color:rgba(16,185,129,.5)}
+
+/* DAILY CALL LIST SECTIONS */
+.cl-section{margin-bottom:24px}
+.cl-section-hdr{display:flex;align-items:center;gap:10px;padding:12px 0 10px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:10px;cursor:pointer}
+.cl-section-title{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.cl-section-count{font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 8px;border-radius:5px;font-weight:700}
+.cl-section-desc{font-size:11px;color:rgba(255,255,255,.25);flex:1}
+.cl-toggle{font-size:10px;color:rgba(255,255,255,.2);margin-left:auto}
+
+/* FOLLOW-UP DUE BANNER */
+.fu-banner{background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.2);border-left:3px solid rgba(249,115,22,.5);border-radius:0 10px 10px 0;margin-bottom:20px;overflow:hidden}
+.fu-banner-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer}
+.fu-banner-title{font-size:12px;font-weight:700;color:#F97316;letter-spacing:.04em}
+.fu-banner-count{font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 8px;border-radius:5px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);color:#F97316;font-weight:700}
+.fu-banner-hint{font-size:11px;color:rgba(249,115,22,.5);flex:1}
+.fu-banner-tog{font-size:10px;color:rgba(249,115,22,.4)}
+.fu-leads{padding:0 14px 12px}
+.fu-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);margin-bottom:5px;cursor:pointer;transition:all .15s}
+.fu-row:hover{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.2)}
+.fu-name{font-size:13px;font-weight:600;color:#F8FAFC;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fu-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);white-space:nowrap}
+.fu-overdue{color:#F87171}
+.fu-channel{font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.3)}
+
+/* CRM TOUCH INFO ON CARD */
+.crm-touch{font-family:'JetBrains Mono',monospace;font-size:10px;display:inline-flex;align-items:center;gap:3px}
+.crm-fu-due{color:#F97316}
+.crm-fu-soon{color:#F59E0B}
+.crm-touched{color:#38BDF8}
 `;
 
 // ─── HELPERS ──────────────────────────────────────────────────────
@@ -1236,20 +1265,45 @@ function generateOpener(lead, ev) {
 function CallOpenerPanel({ lead, event }) {
   const [tab, setTab]     = useState("call");
   const [copied, setCopied] = useState(false);
-  const opener = useMemo(() => generateOpener(lead, event), [lead, event]);
+
+  // Prefer pre-generated drafts from generate-drafts stage (rule-based, clean tone)
+  const hasPreGenerated = !!(lead.call_opener || lead.email_draft || lead.linkedin_note);
+
+  const opener = useMemo(() => {
+    if (hasPreGenerated) return null;
+    return generateOpener(lead, event);
+  }, [lead, event, hasPreGenerated]);
+
+  // Parse email_draft: "Subject: X\n\nbody..."
+  const emailSubject = useMemo(() => {
+    if (lead.email_draft) {
+      const m = lead.email_draft.match(/^Subject:\s*(.+?)(?:\n|$)/);
+      return m ? m[1] : "";
+    }
+    return opener?.subject || "";
+  }, [lead.email_draft, opener]);
+
+  const emailBody = useMemo(() => {
+    if (lead.email_draft) return lead.email_draft.replace(/^Subject:.+\n\n?/, "");
+    return opener?.emailBody || "";
+  }, [lead.email_draft, opener]);
+
+  const callText     = lead.call_opener   || opener?.call      || "";
+  const linkedinText = lead.linkedin_note || opener?.linkedin  || "";
 
   function doCopy(text) { copy(text); setCopied(true); setTimeout(()=>setCopied(false), 2000); }
 
   const content = tab === "call"
-    ? opener.call
+    ? callText
     : tab === "linkedin"
-    ? opener.linkedin
-    : opener.emailBody;
+    ? linkedinText
+    : emailBody;
 
-  const charCount = tab === "linkedin" ? opener.linkedin.length : null;
+  const charCount = tab === "linkedin" ? linkedinText.length : null;
 
-  // Don't show if there's no meaningful evidence to work from AND no event context
-  const hasContext = (lead.fx_evidence_snippets||[]).length > 0
+  // Don't show if there's no meaningful content to display
+  const hasContext = hasPreGenerated
+    || (lead.fx_evidence_snippets||[]).length > 0
     || (lead.supplier_evidence||[]).length > 0
     || (lead.country_evidence||[]).length > 0
     || lead.segment_name
@@ -1264,8 +1318,8 @@ function CallOpenerPanel({ lead, event }) {
         <button className={`opener-tab${tab==="email"?" active":""}`}    onClick={()=>setTab("email")}>✉ Email</button>
       </div>
       <div className="opener-body">
-        {tab === "email" && (
-          <div className="opener-label">Subject: {opener.subject}</div>
+        {tab === "email" && emailSubject && (
+          <div className="opener-label">Subject: {emailSubject}</div>
         )}
         <div className="opener-text">{content}</div>
         {charCount !== null && (
@@ -1276,7 +1330,7 @@ function CallOpenerPanel({ lead, event }) {
         <button
           className={`copy-btn${copied?" copied":""}`}
           style={{top:10,right:10}}
-          onClick={()=>doCopy(tab==="email"?`Subject: ${opener.subject}\n\n${opener.emailBody}`:content)}
+          onClick={()=>doCopy(tab==="email" ? (emailSubject ? `Subject: ${emailSubject}\n\n${emailBody}` : emailBody) : content)}
         >
           {copied ? "✓ Copied" : "Copy"}
         </button>
@@ -1367,6 +1421,28 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             {lead.company_status && <span style={{color:lead.company_status==="active"?"#10B981":"#F59E0B"}}>● {lead.company_status}</span>}
             {lead.segment_name && <span style={{color:"rgba(255,255,255,.3)"}}>{lead.segment_name.slice(0,40)}</span>}
             {lead.contact_phone && <PhoneBadge phone={lead.contact_phone} sourceCount={lead.phone_source_count} />}
+            {crmEntry?.touch_count > 0 && (
+              <span className="crm-touch crm-touched" title={`Last: ${crmEntry.last_channel||"contact"} · ${ago(crmEntry.last_contacted_at)}`}>
+                📬 {crmEntry.touch_count} touch{crmEntry.touch_count!==1?"es":""}
+              </span>
+            )}
+            {crmEntry?.next_follow_up_at && (() => {
+              const d = new Date(crmEntry.next_follow_up_at);
+              const overdue = d <= new Date();
+              const label = overdue
+                ? `overdue · ${d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}`
+                : `follow up ${d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}`;
+              return (
+                <span className={`crm-touch ${overdue?"crm-fu-due":"crm-fu-soon"}`} title={overdue?"Follow-up overdue":"Scheduled follow-up"}>
+                  🔔 {label}
+                </span>
+              );
+            })()}
+            {crmEntry?.last_contacted_at && !crmEntry?.next_follow_up_at && (
+              <span className="crm-touch" style={{color:"rgba(255,255,255,.2)"}} title={crmEntry.last_channel||"contacted"}>
+                Last contact {ago(crmEntry.last_contacted_at)}
+              </span>
+            )}
           </div>
           {lead.director_name && (
             <div className="cc-dir" style={{marginBottom:7}}>
@@ -1973,6 +2049,161 @@ function EventItem({ event, leads, allLeads, index, getCrmStatus, onCrmSet, getL
   );
 }
 
+// ─── FOLLOW-UPS DUE SECTION ──────────────────────────────────────
+function FollowupsDueSection({ allLeads, events, crmState, getCrmStatus, updateLead, performAction, getLead }) {
+  const [open, setOpen] = useState(true);
+  const [expanded, setExpanded] = useState(null);
+
+  const now = new Date();
+  const dueTodayLeads = useMemo(() => {
+    return allLeads.filter(l => {
+      const crm = crmState[l.id] || {};
+      if (!crm.next_follow_up_at) return false;
+      const d = new Date(crm.next_follow_up_at);
+      return d <= now && getCrmStatus(l) !== "not_relevant" && getCrmStatus(l) !== "meeting_booked";
+    });
+  }, [allLeads, crmState, getCrmStatus]);
+
+  if (!dueTodayLeads.length) return null;
+
+  const CHAN_ICON = { phone:"📞", email:"✉️", linkedin:"💼", reply:"↩️", meeting:"📅" };
+
+  return (
+    <div className="fu-banner">
+      <div className="fu-banner-hdr" onClick={()=>setOpen(o=>!o)}>
+        <span style={{fontSize:14}}>🔔</span>
+        <span className="fu-banner-title">Follow-ups Due</span>
+        <span className="fu-banner-count">{dueTodayLeads.length}</span>
+        <span className="fu-banner-hint">
+          {dueTodayLeads.filter(l=>new Date((crmState[l.id]||{}).next_follow_up_at)<now).length > 0
+            ? `${dueTodayLeads.filter(l=>new Date((crmState[l.id]||{}).next_follow_up_at)<now).length} overdue`
+            : "due today"}
+        </span>
+        <span className="fu-banner-tog">{open?"▲ hide":"▼ show"}</span>
+      </div>
+      {open && (
+        <div className="fu-leads">
+          {dueTodayLeads.map(l => {
+            const crm = crmState[l.id] || {};
+            const d = new Date(crm.next_follow_up_at);
+            const overdue = d < now;
+            const ev = events.find(e => e.id === l.event_id);
+            const isExpanded = expanded === l.id;
+            return (
+              <div key={l.id}>
+                <div className="fu-row" onClick={()=>setExpanded(isExpanded ? null : l.id)}>
+                  <span style={{fontSize:11}}>{CHAN_ICON[crm.last_channel]||"📋"}</span>
+                  <span className="fu-name">{l.company_name}</span>
+                  {crm.last_channel && <span className="fu-channel">{crm.last_channel}</span>}
+                  {crm.touch_count > 0 && <span className="fu-meta">{crm.touch_count} touch{crm.touch_count!==1?"es":""}</span>}
+                  <span className={`fu-meta ${overdue?"fu-overdue":""}`}>
+                    {overdue
+                      ? `overdue · ${d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}`
+                      : `due ${d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}`}
+                  </span>
+                  <span style={{fontSize:10,color:"rgba(255,255,255,.2)"}}>{isExpanded?"▲":"▼"}</span>
+                </div>
+                {isExpanded && (
+                  <div style={{marginBottom:8}}>
+                    <CompanyCard
+                      lead={l}
+                      crmStatus={getCrmStatus(l)}
+                      onCrmSet={updateLead}
+                      performAction={performAction}
+                      crmEntry={getLead(l)}
+                      event={ev}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── DAILY CALL LIST VIEW ─────────────────────────────────────────
+function DailyCallListView({ callListLeads, allLeads, events, crmState, getCrmStatus, updateLead, performAction, getLead, today }) {
+  const [showTop10, setShowTop10]     = useState(true);
+  const [showBackup, setShowBackup]   = useState(true);
+
+  const top10   = callListLeads.slice(0, 10);
+  const backup15= callListLeads.slice(10, 25);
+
+  function renderBand(leads, title, color, accentBg, open, toggle, emptyMsg) {
+    return (
+      <div className="cl-section">
+        <div className="cl-section-hdr" onClick={toggle}>
+          <span className="cl-section-title" style={{color}}>{title}</span>
+          <span className="cl-section-count" style={{background:accentBg,color,border:`1px solid ${color}40`}}>
+            {leads.length}
+          </span>
+          <span className="cl-section-desc">
+            {title.includes("Top") ? "Highest-confidence · call today" : "Call if top 10 is clear"}
+          </span>
+          <span className="cl-toggle">{open?"▲":"▼ show"}</span>
+        </div>
+        {open && (
+          leads.length > 0 ? (
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {leads.map(l => {
+                const ev = events.find(e => e.id === l.event_id);
+                return (
+                  <CompanyCard
+                    key={l.id}
+                    lead={l}
+                    crmStatus={getCrmStatus(l)}
+                    onCrmSet={updateLead}
+                    performAction={performAction}
+                    crmEntry={getLead(l)}
+                    event={ev}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{padding:"20px 0",textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"rgba(255,255,255,.2)"}}>
+              {emptyMsg}
+            </div>
+          )
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="feed-hdr">
+        <div className="feed-title">Daily Call List</div>
+        <div className="feed-date">{today}</div>
+      </div>
+
+      <FollowupsDueSection
+        allLeads={allLeads}
+        events={events}
+        crmState={crmState}
+        getCrmStatus={getCrmStatus}
+        updateLead={updateLead}
+        performAction={performAction}
+        getLead={getLead}
+      />
+
+      {renderBand(top10, "⚡ Today's Top 10", "#10B981", "rgba(16,185,129,.1)", showTop10, ()=>setShowTop10(o=>!o), "No eligible leads in top 10 — check scoring gates")}
+      {backup15.length > 0 && renderBand(backup15, "📋 Backup 15", "#F59E0B", "rgba(245,158,11,.1)", showBackup, ()=>setShowBackup(o=>!o), "No backup leads")}
+
+      {callListLeads.length === 0 && (
+        <div className="empty">
+          <div className="empty-i">📡</div>
+          <div className="empty-t">No call targets yet</div>
+          <div className="empty-s">Run <code>npm run pipeline</code> to discover leads<br/>Leads need HOT/WARM priority · verified website · FX signals · contact route</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── ROOT APP ────────────────────────────────────────────────────
 export default function App() {
   const [events,  setEvents]  = useState([]);
@@ -2046,7 +2277,7 @@ export default function App() {
   },[leads,crmState]);
 
   const viewDesc = filters.view === "call_list"
-    ? `Top ${CALL_LIST_MAX} leads · verified website · FX signals · contact route confirmed`
+    ? `Top 10 + Backup 15 · verified website · FX signals · contact route confirmed`
     : filters.view === "research"
     ? "Remaining leads — needs review before calling"
     : "All leads across all events";
@@ -2109,7 +2340,7 @@ export default function App() {
             className={`view-tab${filters.view==="call_list"?" active-cl":""}`}
             onClick={()=>setFilters(CALL_LIST_FILTERS)}
           >
-            ⚡ Daily Call List {callListLeads.length > 0 && `(${callListLeads.length})`}
+            ⚡ Daily Call List {callListLeads.length > 0 && `(${Math.min(callListLeads.length,10)}+${Math.max(0,callListLeads.length-10)})`}
           </button>
           <button
             className={`view-tab${filters.view==="research"?" active-rq":""}`}
@@ -2141,33 +2372,63 @@ export default function App() {
       {/* MAIN LAYOUT */}
       <div className="layout">
         <div>
-          <div className="feed-hdr">
-            <div className="feed-title">Today's market events</div>
-            <div className="feed-date">{today}</div>
-          </div>
-
-          {events.length === 0 ? (
-            <div className="empty">
-              <div className="empty-i">📡</div>
-              <div className="empty-t">No events yet</div>
-              <div className="empty-s">Run <code>python3 scripts/ingest.py</code> to pull today's market events<br/>then <code>python3 scripts/discover.py</code> to find affected companies</div>
-            </div>
+          {filters.view === "call_list" ? (
+            <DailyCallListView
+              callListLeads={callListLeads}
+              allLeads={leads}
+              events={events}
+              crmState={crmState}
+              getCrmStatus={getCrmStatus}
+              updateLead={updateLead}
+              performAction={performAction}
+              getLead={getLead}
+              today={today}
+            />
           ) : (
-            <div className="feed">
-              {events.map((ev,i)=>(
-                <EventItem
-                  key={ev.id}
-                  event={ev}
-                  leads={filteredLeads}
+            <>
+              <div className="feed-hdr">
+                <div className="feed-title">
+                  {filters.view === "research" ? "Research Queue" : "All leads · market events"}
+                </div>
+                <div className="feed-date">{today}</div>
+              </div>
+
+              {filters.view === "research" && (
+                <FollowupsDueSection
                   allLeads={leads}
-                  index={i}
-                    getCrmStatus={getCrmStatus}
-                    onCrmSet={updateLead}
-                    getLead={getLead}
-                    performAction={performAction}
+                  events={events}
+                  crmState={crmState}
+                  getCrmStatus={getCrmStatus}
+                  updateLead={updateLead}
+                  performAction={performAction}
+                  getLead={getLead}
                 />
-              ))}
-            </div>
+              )}
+
+              {events.length === 0 ? (
+                <div className="empty">
+                  <div className="empty-i">📡</div>
+                  <div className="empty-t">No events yet</div>
+                  <div className="empty-s">Run <code>npm run pipeline</code> to pull today's market events<br/>then discover affected companies</div>
+                </div>
+              ) : (
+                <div className="feed">
+                  {events.map((ev,i)=>(
+                    <EventItem
+                      key={ev.id}
+                      event={ev}
+                      leads={filteredLeads}
+                      allLeads={leads}
+                      index={i}
+                      getCrmStatus={getCrmStatus}
+                      onCrmSet={updateLead}
+                      getLead={getLead}
+                      performAction={performAction}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 

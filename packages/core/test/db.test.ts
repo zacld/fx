@@ -34,6 +34,7 @@ describe("db — schema + round-trip", () => {
         lead_type: "trigger_exposed", awareness_level: "high", saving_opportunity: "high",
         multi_event_trigger: false, multi_event_count: 1, sales_angle: "", suggested_next_step: "",
         guessed_emails: [], generic_emails: [], status: "new",
+        call_opener: "", email_draft: "", linkedin_note: "",
       };
 
       db.insert(schema.leads).values({

@@ -9,7 +9,7 @@ function dm(p: Partial<DecisionMaker>): DecisionMaker {
     appointed_on: null, email: p.email ?? null, email_source: p.email_source ?? null,
     email_verified: p.email_verified ?? null, email_guesses: p.email_guesses ?? [],
     phone: null, linkedin_search: null, linkedin_name_only: null, google_email_search: null,
-    source: "companies_house",
+    source: "companies_house", email_candidate: null, email_confidence: null,
   };
 }
 

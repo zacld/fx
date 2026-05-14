@@ -115,7 +115,7 @@ function paymentFlowLine(lead: Lead): string {
 /** Short event description — not the full summary. Never starts with "recent". */
 function eventLine(lead: Lead): string {
   // Prefer the trigger headline (shorter) over the full event summary
-  const h = (lead.trigger_headline || lead.event_headline || "").trim();
+  const h = (lead.trigger_headline || "").trim();
   if (h && h.length < 120) {
     return h.replace(/\.$/, "").replace(/^recent\s+/i, "");
   }
