@@ -1025,7 +1025,7 @@ function DMCard({ dm, co }) {
   const verifiedEmail = dm.email_verified && dm.email ? dm.email : null;
   const guessedTop  = !verifiedEmail && dm.email_guesses?.length ? dm.email_guesses[0]?.email : null;
   const bestEmail   = verifiedEmail || guessedTop;
-  const liUrl       = dm.linkedin_search || (dm.name ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dm.name)}%22+%22${encodeURIComponent((co||"").split(" ").slice(0,3).join(" "))}%22` : null);
+  const liUrl       = dm.linkedin_search || (dm.name ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(dm.name + " " + (co||"").split(" ").slice(0,3).join(" "))}` : null);
   const since       = dm.appointed_on ? dm.appointed_on.slice(0,7) : null;
   const tier        = dm.tier || 3;
   const tc          = tierColor(tier);
@@ -1597,9 +1597,9 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             const co       = lead.company_name || li?.search_name || "";
             const dir      = lead.director_name || "";
             const hasDMs   = lead.decision_makers?.length > 0;
-            const coUrl    = `https://www.google.com/search?q=site:linkedin.com/company+%22${encodeURIComponent(co)}%22`;
-            const dirUrl   = dir ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dir)}%22` : null;
-            const dirCoUrl = dir ? `https://www.google.com/search?q=site:linkedin.com/in+%22${encodeURIComponent(dir)}%22+%22${encodeURIComponent(co.split(" ").slice(0,3).join(" "))}%22` : null;
+            const coUrl    = lead.company_linkedin || `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(co)}`;
+            const dirUrl   = dir ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(dir)}` : null;
+            const dirCoUrl = dir ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(dir + " " + co.split(" ").slice(0,3).join(" "))}` : null;
             return (
               <div className="li-section">
                 <div className="xl" style={{marginBottom:7}}>LinkedIn — open manually, do not automate</div>
@@ -1620,7 +1620,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
                       </a>
                     )}
                     {(li?.people_searches||[]).filter(p=>!p.role.includes("direct search")).slice(0,3).map(p=>(
-                      <a key={p.role} href={`https://www.google.com/search?q=site:linkedin.com/in+${encodeURIComponent(co.split(" ").slice(0,3).join(" "))}+${encodeURIComponent(p.role.replace(/ →$/,""))}`} target="_blank" rel="noreferrer" className="li-person-btn">{p.role} →</a>
+                      <a key={p.role} href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(co.split(" ").slice(0,3).join(" ") + " " + p.role.replace(/ →$/,""))}`} target="_blank" rel="noreferrer" className="li-person-btn">{p.role} →</a>
                     ))}
                   </div>
                 )}

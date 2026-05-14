@@ -91,18 +91,38 @@ function bareDomain(url: string | null | undefined): string {
   try { return new URL(url).hostname.toLowerCase().replace(/^www\d*\./, ""); } catch { return ""; }
 }
 
-function quote(s: string): string { return encodeURIComponent(`"${s}"`); }
-function googleLinkedinPerson(name: string, coShort: string): string {
-  return `https://www.google.com/search?q=site:linkedin.com/in+${quote(name)}+${quote(coShort)}`;
+// LinkedIn native search URLs — works when logged in, doesn't depend on Google's index.
+function liPersonSearch(name: string, coShort: string): string {
+  const kw = [name, coShort].filter(Boolean).join(" ");
+  return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(kw)}`;
 }
-function googleLinkedinNameOnly(name: string): string {
-  return `https://www.google.com/search?q=site:linkedin.com/in+${quote(name)}`;
+function liPersonNameOnly(name: string): string {
+  return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(name)}`;
 }
-function googleLinkedinCompany(coClean: string): string {
-  return `https://www.google.com/search?q=site:linkedin.com/company+${quote(coClean)}`;
+function liCompanySearch(coClean: string): string {
+  return `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(coClean)}`;
 }
 function googleEmailSearch(name: string, domain: string): string {
-  return `https://www.google.com/search?q=${quote(name)}+${quote("@" + domain)}`;
+  return `https://www.google.com/search?q="${encodeURIComponent(name)}"+"%40${encodeURIComponent(domain)}"`;
+}
+
+// Words that appear in website section headings and role labels — if the extracted
+// "name" starts with one of these, it's a garbled scrape (e.g. "Sourcing Bettina",
+// "Specialist Dom") and should be rejected as a decision-maker.
+const GARBLED_NAME_PREFIXES = new Set([
+  "sourcing","specialist","staff","general","manager","director","directors",
+  "sales","import","export","trade","contact","admin","finance","senior","junior",
+  "head","team","account","marketing","operations","principal","procurement",
+  "mobile","portrait","meet","our","the","welcome","about","services","products",
+]);
+function isPlausibleDmName(name: string): boolean {
+  if (!name || name.length < 4) return false;
+  const first = name.split(/\s+/)[0]?.toLowerCase() ?? "";
+  if (GARBLED_NAME_PREFIXES.has(first)) return false;
+  // Must look like a real name: at least two words, each starting with capital
+  const words = name.trim().split(/\s+/);
+  if (words.length < 2) return false;
+  return words.every(w => /^[A-Z]/.test(w));
 }
 
 // ── Route grade + confidence ─────────────────────────────────────────────────
@@ -210,8 +230,8 @@ function buildDecisionMakers(
       email: null, email_source: null, email_verified: null, email_guesses: [],
       email_candidate: null, email_confidence: null,
       phone: null,
-      linkedin_search: parsed.full_name ? googleLinkedinPerson(parsed.full_name, ctx.coShort) : null,
-      linkedin_name_only: parsed.full_name ? googleLinkedinNameOnly(parsed.full_name) : null,
+      linkedin_search: parsed.full_name ? liPersonSearch(parsed.full_name, ctx.coShort) : null,
+      linkedin_name_only: parsed.full_name ? liPersonNameOnly(parsed.full_name) : null,
       google_email_search: ctx.domain && parsed.full_name ? googleEmailSearch(parsed.full_name, ctx.domain) : null,
       source: "companies_house",
     });
@@ -234,8 +254,8 @@ function buildDecisionMakers(
       email: null, email_source: null, email_verified: null, email_guesses: [],
       email_candidate: null, email_confidence: null,
       phone: null,
-      linkedin_search: parsed.full_name ? googleLinkedinPerson(parsed.full_name, ctx.coShort) : null,
-      linkedin_name_only: parsed.full_name ? googleLinkedinNameOnly(parsed.full_name) : null,
+      linkedin_search: parsed.full_name ? liPersonSearch(parsed.full_name, ctx.coShort) : null,
+      linkedin_name_only: parsed.full_name ? liPersonNameOnly(parsed.full_name) : null,
       google_email_search: ctx.domain && parsed.full_name ? googleEmailSearch(parsed.full_name, ctx.domain) : null,
       source: "companies_house",
     });
@@ -263,6 +283,7 @@ function buildDecisionMakers(
       continue;
     }
     if (p.tier > 2) continue;        // skip generic "Director" with no CH backing
+    if (!isPlausibleDmName(p.name)) continue;  // skip garbled scrape (e.g. "Sourcing Bettina")
     dms.push({
       name: p.name,
       first_name: p.first_name,
@@ -277,8 +298,8 @@ function buildDecisionMakers(
       email_candidate: p.email || null,
       email_confidence: p.email ? "verified" : null,
       phone: null,
-      linkedin_search: googleLinkedinPerson(p.name, ctx.coShort),
-      linkedin_name_only: googleLinkedinNameOnly(p.name),
+      linkedin_search: liPersonSearch(p.name, ctx.coShort),
+      linkedin_name_only: liPersonNameOnly(p.name),
       google_email_search: ctx.domain ? googleEmailSearch(p.name, ctx.domain) : null,
       source: "website_only",
     });
@@ -437,7 +458,7 @@ async function enrichLead(
   const leadAny = lead as Record<string, unknown>;
   leadAny.decision_makers = dms;
   leadAny.company_name_clean = ctx.coClean;
-  leadAny.company_linkedin = ctx.coClean ? googleLinkedinCompany(ctx.coClean) : null;
+  leadAny.company_linkedin = ctx.coClean ? liCompanySearch(ctx.coClean) : null;
   leadAny.route_grade = computeRouteGrade(lead, dms);
   leadAny.contact_confidence = computeContactConfidence(lead, dms);
   if (techSignals.size) leadAny.tech_signals = Array.from(techSignals.keys());
