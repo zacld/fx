@@ -257,10 +257,13 @@ export function scoreLead(lead: Partial<ScoreInput>, urgency = 0): ScoreResult {
     if (hasSic) { score = Math.min(score, 55); reasons.push("⚠ No website FX signals — QUEUE cap (SIC only)"); }
     else { score = Math.min(score, 39); reasons.push("⚠ No trade evidence at all — SKIP"); }
   }
-  // Gate C: HOT requires direct FX
-  if (score >= 80 && !hasFx) {
+  // Gate C: HOT requires at least 1 real extracted website FX signal.
+  // pays_fx_confirmed alone (set from secondary signals / segment signals) is NOT
+  // sufficient — a lead needs actual scraped evidence ("we import", "overseas suppliers",
+  // "EUR invoices", etc.) to justify a same-day call.
+  if (score >= 80 && fxSigs.length === 0) {
     score = 79;
-    reasons.push("⚠ HOT capped → WARM: no direct FX signal on website");
+    reasons.push("⚠ HOT capped → WARM: no real website FX signal (secondary/segment signals don't count for HOT)");
   }
   // Gate D: WARM requires international evidence (unless decent website confidence)
   if (score >= 60 && !hasIntl && hasWebsite) {
