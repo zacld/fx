@@ -330,13 +330,22 @@ async function attachEmails(
       dm.email = bestVerified.email;
       dm.email_source = "smtp_verified";
       dm.email_verified = true;
+      // email_candidate mirrors the verified email
+      (dm as Record<string, unknown>).email_candidate = bestVerified.email;
+      (dm as Record<string, unknown>).email_confidence = "verified";
     } else if (!dm.email && inferred.pattern && verifiedGuesses[0]?.pattern === inferred.pattern && inferred.confidence >= 0.5) {
       // No SMTP confirmation, but the domain's prevailing pattern is strong —
-      // surface the top-ranked guess on the DM record without claiming
-      // verified=true.
+      // surface the top-ranked guess on the DM record without claiming verified=true.
       dm.email = verifiedGuesses[0]!.email;
       dm.email_source = "pattern_inferred";
       dm.email_verified = false;
+      (dm as Record<string, unknown>).email_candidate = verifiedGuesses[0]!.email;
+      (dm as Record<string, unknown>).email_confidence = "pattern_based";
+    } else if (verifiedGuesses[0]) {
+      // Always surface the best guess as email_candidate even without confidence.
+      // The dashboard labels this clearly as unverified. The user decides whether to use it.
+      (dm as Record<string, unknown>).email_candidate = verifiedGuesses[0].email;
+      (dm as Record<string, unknown>).email_confidence = "guessed";
     }
   }
 }

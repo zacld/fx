@@ -162,6 +162,9 @@ export const DecisionMakerSchema = z.object({
   email_source: EmailSource.nullable().default(null),
   email_verified: z.boolean().nullable().default(null),
   email_guesses: z.array(EmailGuessSchema).default([]),
+  // Best contactable email — may be unverified. Always label clearly in the UI.
+  email_candidate: z.string().nullable().default(null),
+  email_confidence: z.enum(["verified", "pattern_based", "guessed"]).nullable().default(null),
   phone: z.string().nullable().default(null),
   linkedin_search: z.string().nullable().default(null),
   linkedin_name_only: z.string().nullable().default(null),
@@ -315,6 +318,10 @@ export const LeadSchema = z.object({
   suggested_next_step: z.string().default(""),
   guessed_emails: z.array(z.object({ pattern: z.string(), email: z.string() })).default([]),
   generic_emails: z.array(z.object({ pattern: z.string(), email: z.string() })).default([]),
+  // outreach ingredients — copy-ready, never auto-sent (CLAUDE.md Priority 13)
+  call_opener: z.string().default(""),          // 1–2 sentence opener for phone
+  email_draft: z.string().default(""),          // subject + body, editable before sending
+  linkedin_note: z.string().default(""),        // ≤300 chars for LinkedIn message
 
   status: z.string().default("new"),
 })

@@ -23,7 +23,8 @@
     "enrich-website-intel": "tsx packages/pipeline/src/stages/enrich-website-intel.ts",
     "score": "tsx packages/pipeline/src/stages/score.ts",
     "dedup": "tsx packages/pipeline/src/stages/dedup.ts",
-    "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run db:export",
+    "generate-drafts": "tsx packages/pipeline/src/stages/generate-drafts.ts",
+    "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run generate-drafts && npm run db:export",
     "sync-web-data": "mkdir -p apps/web/public/data && cp data/events.json data/leads.json apps/web/public/data/"
   },
   "devDependencies": {

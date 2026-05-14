@@ -15,7 +15,7 @@ name: FX Discovery
 
 on:
   schedule:
-    - cron: '0 6 * * 1-5'   # 6am Mon–Fri UTC
+    - cron: '0 5 * * 1-5'   # 5am Mon–Fri UTC (list ready ~7am BST for morning commute)
   workflow_dispatch:          # manual trigger from the Actions UI
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
       - name: Install workspace deps
         run: npm ci
 
-      - name: Run the v2 pipeline (import → analyse → discover → enrich-contacts → enrich-decision-makers → enrich-website-intel → score → dedup → export)
+      - name: Run the v2 pipeline (import → analyse → discover → enrich-contacts → enrich-decision-makers → enrich-website-intel → score → dedup → generate-drafts → export)
         env:
           AI_PROVIDER:                  groq
           GROQ_API_KEY:                 ${{ secrets.GROQ_API_KEY }}
