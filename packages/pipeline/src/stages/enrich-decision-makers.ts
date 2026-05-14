@@ -124,8 +124,14 @@ export function computeRouteGrade(lead: RouteFields, dms: ReadonlyArray<Decision
   const hasCPage = !!lead.contact_page;
   const hasCEmail = !!lead.contact_email;
   const hasWeb = !!lead.website;
+  // A: Tier-1 person (MD/FD/PSC/owner) + verified contact route
   if (tier1 && (vEmail || hasPhone)) return "A";
+  // B: Tier-1 person + guessable contact OR any named person + email route
+  // Rationale: a named person with an email pattern beats a faceless company phone —
+  // you can email them directly AND call and ask for them by name.
   if (tier1 && (gEmail || hasCPage || hasCEmail)) return "B";
+  if (anyPerson && (vEmail || gEmail)) return "B";
+  // C: Named person (any tier) + company contact route
   if (anyPerson && (hasPhone || hasCEmail || hasCPage)) return "C";
   if (hasPhone || hasCEmail) return "D";
   if (hasWeb || hasCPage) return "E";
