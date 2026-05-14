@@ -70,20 +70,68 @@ export function extractOriginHints(text: string): string[] {
 
 // ── DIRECT FX PAYMENT SIGNALS (high weight) — no bare adjectives ─────────────
 export const FX_PAYMENT_SIGNALS: ReadonlyArray<string> = [
-  "we import", "we source", "sourced from", "imported from", "direct from",
-  "importing from", "we buy from", "purchased from", "procured from",
-  "overseas supplier", "european supplier", "international supplier", "foreign supplier",
+  // ── We + verb ────────────────────────────────────────────────────────────────
+  "we import", "we import our", "we import from",
+  "we source", "we source our", "we source from",
+  "we buy from", "we purchase from", "we procure from",
+  "we work with suppliers", "we work with overseas",
+  "we distribute", "import and distribute", "import and supply",
+  // ── Sourced / imported ───────────────────────────────────────────────────────
+  "sourced from", "sourced directly", "sourced overseas", "sourced internationally",
+  "imported from", "imported directly",
+  "procured from", "purchased from",
+  "direct from", "directly from", "importing from",
+  // ── Made / produced / grown / crafted in [country] ───────────────────────────
+  "made in italy", "made in france", "made in spain", "made in germany",
+  "made in china", "made in japan", "made in india", "made in usa",
+  "made in europe", "made in portugal", "made in belgium",
+  "made in the netherlands", "made in denmark", "made in sweden",
+  "made in norway", "made in poland",
+  "produced in", "grown in", "brewed in", "crafted in", "distilled in",
+  "manufactured in europe", "manufactured in germany", "manufactured in italy",
+  "manufactured in china", "manufactured in japan",
+  // ── Supplier phrases ─────────────────────────────────────────────────────────
+  "overseas supplier", "overseas suppliers",
+  "european supplier", "european suppliers",
+  "international supplier", "international suppliers",
+  "foreign supplier", "foreign suppliers",
   "global supplier", "worldwide supplier",
-  "from italy", "from france", "from spain", "from germany", "from china", "from usa",
-  "from america", "from japan", "from india", "from norway", "from australia",
-  "from new zealand", "from south africa", "from denmark", "from netherlands",
+  "overseas manufacturer", "overseas manufacturers",
+  "overseas producer", "overseas producers",
+  "overseas factory", "overseas factories",
+  "international manufacturer", "foreign manufacturer",
+  "our suppliers are", "our suppliers in",
+  "suppliers in europe", "suppliers in china", "suppliers in italy",
+  "suppliers in germany", "suppliers in asia", "suppliers in france",
+  "suppliers across europe",
+  // ── From [country] ───────────────────────────────────────────────────────────
+  "from italy", "from france", "from spain", "from germany", "from china",
+  "from usa", "from america", "from japan", "from india", "from norway",
+  "from australia", "from new zealand", "from south africa", "from denmark",
+  "from netherlands", "from holland", "from belgium", "from portugal",
+  "from sweden", "from poland", "from taiwan", "from hong kong",
+  "from south korea", "from turkey", "from brazil", "from mexico", "from canada",
   "from europe", "from asia", "from the us", "from the usa", "from the eu",
-  "foreign currency", "currency risk", "exchange rate", "fx exposure",
+  "from the continent",
+  // ── Currency / payment ───────────────────────────────────────────────────────
+  "foreign currency", "currency risk", "exchange rate", "fx exposure", "foreign exchange",
   "international payments", "overseas payments", "currency hedging", "fx risk",
+  "cross-border payments", "multi-currency",
+  "pay in euros", "pay in dollars", "pay in usd", "pay in eur",
+  "paying in euros", "paying in dollars",
+  "invoice in euros", "invoice in dollars", "invoiced in euros",
+  "eur invoice", "usd invoice", "euro invoice",
+  "priced in euros", "priced in dollars",
+  // ── Business model ───────────────────────────────────────────────────────────
   "importer", "import company", "import business", "exclusive importer",
-  "uk importer", "sole importer", "we distribute", "import and distribute",
-  "export", "exports", "exporting", "we export", "overseas customers", "global customers",
-  "international customers", "us customers", "american customers", "european customers",
+  "uk importer", "sole importer", "official importer", "authorised importer",
+  "international trade", "global trade",
+  // ── Export ───────────────────────────────────────────────────────────────────
+  "export", "exports", "exporting", "we export", "we export to",
+  "export to", "exporter", "export markets",
+  "overseas customers", "global customers", "international customers",
+  "us customers", "american customers", "european customers",
+  "serving international", "serving global markets",
 ];
 
 // ── SECONDARY / TRADE SIGNALS (lower weight) — no bare adjectives ────────────

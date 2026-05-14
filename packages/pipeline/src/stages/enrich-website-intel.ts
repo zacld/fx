@@ -28,7 +28,7 @@ import {
   htmlToText, extractWebsiteIntel, computeFxLikelihood, generateWebsiteConfidenceReason,
   detectTechStack, techStackFxScore,
   extractTrustpilotReviewCount, pressMentionsSearchUrl, trustpilotSearchUrl,
-  cleanCompanyName,
+  cleanCompanyName, classifyText,
   type Lead,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
@@ -131,6 +131,24 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
         const evidence = extractWebsiteIntel(combinedText);
         const techSigs = homepageHtml ? detectTechStack(homepageHtml) : [];
         const techScore = techStackFxScore(techSigs);
+
+        // ── Feed deep-page FX signals back into fx_payment_signals ─────────────
+        // The homepage-only scrape (discover stage) misses signals buried on
+        // /products, /suppliers, /about etc. Run classifyText on the combined
+        // multi-page text and merge any new signals in so they count for scoring.
+        const deepCls = classifyText(combinedText);
+        const existingFxSet = new Set(l.fx_payment_signals ?? []);
+        const newFxSigs = deepCls.fxPaymentSignals.filter((s) => !existingFxSet.has(s));
+        if (newFxSigs.length > 0) {
+          l.fx_payment_signals = [...(l.fx_payment_signals ?? []), ...newFxSigs];
+        }
+        // Also merge new secondary signals (used for pays_fx_confirmed + Gate G)
+        const existingSecSet = new Set(l.secondary_signals ?? []);
+        const newSecSigs = deepCls.secondarySignals.filter((s) => !existingSecSet.has(s));
+        if (newSecSigs.length > 0) {
+          l.secondary_signals = [...(l.secondary_signals ?? []), ...newSecSigs];
+        }
+
         const fxScore = computeFxLikelihood(
           (l.fx_payment_signals ?? []).length,
           evidence,
