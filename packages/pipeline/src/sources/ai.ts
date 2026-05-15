@@ -268,6 +268,95 @@ Required output shape (use this when trigger_strength is strong / medium / weak)
   ]
 }
 
+MEDIUM / LIMITED example (note: trigger_score=68 not 58 — score varies per event, do not anchor):
+{
+  "trigger_strength": "medium",
+  "trigger_score": 68,
+  "urgency_score": 6,
+  "discovery_mode": "limited",
+  "recommended_query_budget": 12,
+  "is_fx_relevant": true,
+  "commercial_relevance": 6,
+  "commercial_relevance_reason": "GBP/EUR weakening driven by political uncertainty — affects UK importers paying EUR suppliers and EUR-revenue exporters",
+  "confidence_level": "medium",
+  "confidence_reason": "Currency move is real but triggered by political noise, not a central bank decision — urgency is moderate",
+  "event_type": "Currency move",
+  "event_breadth": "broad_currency",
+  "currency_pairs": ["GBP/EUR"],
+  "what_happened": "GBP slipped against EUR following UK political uncertainty",
+  "what_changed_financially": "GBP/EUR rate moved, increasing cost of EUR-denominated supplier invoices for UK importers",
+  "who_pays_more": "UK importers with outstanding EUR supplier invoices",
+  "who_receives_less": "UK exporters converting EUR customer payments back to GBP",
+  "margin_risk": "Medium",
+  "payment_timing_risk": "Medium",
+  "affected_payment_flow": "GBP revenue vs EUR supplier costs",
+  "likely_affected_businesses": ["UK European food importers", "UK machinery importers from EU", "UK exporters with EUR customer revenue"],
+  "why_now": "EUR supplier invoices placed before the GBP dip now cost more to settle",
+  "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
+  "summary": "GBP weakened against EUR on UK political uncertainty. UK businesses paying EUR supplier invoices face higher GBP cost. Exporters receiving EUR revenue face a small gain on conversion.",
+  "fx_payment_logic": "UK importers order goods priced in EUR → invoice arrives → they must convert GBP to EUR to pay → GBP has weakened → more GBP required per EUR",
+  "sales_angle": "If you have upcoming EUR supplier payments, the current rate is worse than it was last week.",
+  "business_impact_summary": "UK importers of European goods face higher landed costs on recent orders. Exporters receiving EUR revenue see a modest benefit on conversion.",
+  "exposure_types": ["EUR supplier payment exposure", "EUR revenue conversion"],
+  "overall_sales_angle": "GBP slippage means upcoming EUR invoices cost more — worth reviewing the rate.",
+  "target_segments": [
+    {
+      "segment_name": "UK importers of European manufactured goods",
+      "category_priority_score": 78,
+      "business_model": "UK wholesaler/distributor buying from EU manufacturers, paying EUR invoices, selling GBP to UK trade",
+      "exposure_level": "High",
+      "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
+      "likely_currency_pairs": ["GBP/EUR"],
+      "fx_payment_logic": "EUR invoice arrives → UK business converts GBP → GBP weaker → margin compressed",
+      "margin_risk": "Medium — 1.5% GBP/EUR move on £300k annual buy ≈ £4.5k extra cost if unhedged",
+      "payment_timing_risk": "Medium — typical 30-60 day payment terms",
+      "affected_payment_flow": "EUR payments to EU manufacturers, typically £30k-£300k per shipment",
+      "website_validation_signals": ["imported from", "European supplier", "sourced from", "manufacturer in"],
+      "avoid_segments": ["pure UK domestic manufacturers", "retailers without own import ops"],
+      "sales_angle": "Your upcoming EUR supplier invoices are costing more in GBP than they were last month.",
+      "exposure_thesis_template": "This company imports manufactured goods from EU. GBP/EUR move increases GBP cost of EUR supplier invoices.",
+      "micro_categories": [
+        {
+          "name": "UK importers of Italian and German machinery parts",
+          "why": "Pay EUR to EU manufacturers — direct exposure to GBP/EUR move on component costs",
+          "search_queries": ["\"machinery importer\" UK European", "\"German machinery\" UK distributor", "\"Italian parts\" UK importer"],
+          "companies_house_terms": ["machinery imports", "european parts", "component imports"]
+        },
+        {
+          "name": "UK distributors of European consumer goods",
+          "why": "EUR-priced branded goods from EU — margin hit when GBP weakens at order-to-payment stage",
+          "search_queries": ["European goods distributor UK", "\"exclusive distributor\" European UK", "continental goods importer UK"],
+          "companies_house_terms": ["european goods", "continental imports", "eu distributor"]
+        }
+      ]
+    },
+    {
+      "segment_name": "UK exporters receiving EUR customer revenue",
+      "category_priority_score": 68,
+      "business_model": "UK manufacturer or service firm selling to EU customers in EUR, converting receipts back to GBP",
+      "exposure_level": "Medium",
+      "exposure_type": "Revenue conversion — EUR receipts into GBP",
+      "likely_currency_pairs": ["GBP/EUR"],
+      "fx_payment_logic": "EU customer pays EUR → UK exporter receives EUR → converts to GBP → weaker GBP = slightly more GBP per EUR received",
+      "margin_risk": "Low to medium — GBP weakness is a marginal benefit on EUR receipts but creates pricing pressure on future EUR quotes",
+      "payment_timing_risk": "Medium — EUR revenue sitting unconverted faces rate risk on timing of conversion",
+      "affected_payment_flow": "EUR receipts from EU customers, converting to GBP",
+      "website_validation_signals": ["export", "European customers", "EU market", "sold throughout Europe"],
+      "avoid_segments": ["pure domestic UK sellers", "businesses with no EU customer base"],
+      "sales_angle": "If you're receiving EUR from EU customers, the conversion timing can make a meaningful difference.",
+      "exposure_thesis_template": "This company exports to EU customers in EUR. GBP/EUR moves affect GBP value of incoming EUR receipts.",
+      "micro_categories": [
+        {
+          "name": "UK manufacturers exporting to EU buyers",
+          "why": "Invoice EU customers in EUR — GBP/EUR rate on conversion date affects GBP revenue",
+          "search_queries": ["UK manufacturer \"export to Europe\"", "\"European customers\" UK manufacturer", "UK exporter EU market"],
+          "companies_house_terms": ["exports europe", "uk manufacturer export", "european sales"]
+        }
+      ]
+    }
+  ]
+}
+
 For weak triggers, return the same shape but with discovery_mode = "context_only", recommended_query_budget = 0, and target_segments = [] (or 1-2 thin segments kept ONLY as messaging context).
 
 For reject, return ONLY:
@@ -326,7 +415,7 @@ export async function analyseViaGroq(headline: string, summary: string, opts: Ai
     res = await fetchImpl("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, temperature: 0.3, response_format: { type: "json_object" }, messages: [{ role: "user", content: formatPrompt(headline, summary) }] }),
+      body: JSON.stringify({ model, temperature: 0.5, response_format: { type: "json_object" }, messages: [{ role: "user", content: formatPrompt(headline, summary) }] }),
       signal: AbortSignal.timeout(opts.timeoutMs ?? 60_000),
     });
   } catch (e) {
