@@ -84,6 +84,36 @@ REJECT (trigger_score 0-19, discovery_mode = "reject")
 
 If you're unsure between two tiers, pick the LOWER-effort tier (e.g. medium not strong, weak not medium). It is better to under-spend discovery on a borderline event than to waste a full run on a weak one.
 
+SCORE WITHIN EACH BAND — five dimensions push the score up or down inside its tier:
+
+  1. Surprise / urgency
+     Unexpected rate cut, shock tariff announcement, "worst week in N months" → top of band.
+     "Rate held as expected", routine analyst preview → bottom of band.
+
+  2. Payment-flow clarity
+     You can name the exact transaction: "EUR invoices from Italian suppliers", "USD raw
+     material purchases" → top of band. Vague "some FX exposure" → bottom.
+
+  3. UK business specificity
+     You can name 2+ distinct UK business types with clear FX payment flow → top of band.
+     Only generic categories like "international companies" → bottom.
+
+  4. Actionability today
+     Upcoming invoice window, fresh rate move not yet absorbed, imminent payment deadline
+     → top of band. "Might matter at some point" or multi-step reasoning → bottom.
+
+  5. Actual event vs commentary
+     Central bank decision, live rate move, tariff announcement → top of band.
+     Bank forecast, analyst opinion piece, speculative preview → bottom.
+
+Calibration examples — do NOT anchor every medium event at 58:
+  "GBP worst week in 18 months" (unexpected political shock, clear import cost impact)     → 68–72
+  "BoE holds rates, GBP slips 0.4%" (expected, moderate move)                             → 52–58
+  "GBP/USD forecast — Societe Generale expects gradual weakening"                          → 22–28 (weak)
+  "EUR/USD commentary from ING — hawkish Fed"                                              → 18–24 (weak/reject)
+
+Score each event individually. Do not use a fixed value for a tier.
+
 ═══════════════════════════════════════
 DISCOVERY EFFORT GUIDANCE
 ═══════════════════════════════════════
@@ -133,7 +163,16 @@ For full discovery, produce the right number of segments for the event_breadth:
   broad_currency / broad_macro → 5-10 segments
   tariff / commodity           → 4-7 segments
   sector_specific              → 3-5 segments
-For limited discovery, produce 2-4 tightly-targeted segments only.
+For limited discovery, produce 2-4 commercially DISTINCT segments. Never produce
+just 1 broad catch-all (e.g. "UK importers of US goods" is too generic on its own).
+Break medium events into the distinct niches the event actually justifies. Example
+for a medium GBP/USD event:
+  - UK importers of USD-priced goods (e.g. electronics components, machinery parts)
+  - UK exporters receiving USD revenue and converting back to GBP
+  - UK wholesalers/distributors of dollar-branded goods (priced in USD at source)
+Not all three need to apply — pick only the niches the specific event genuinely
+justifies. But if you cannot find 2 commercially distinct segments, the event may
+belong in context_only rather than limited discovery.
 For context_only / reject, target_segments = [].
 
 For each segment:
