@@ -63,14 +63,118 @@ describe("dedupLeads (pure)", () => {
     expect(s.totalAfter).toBe(1);
   });
 
-  it("leaves all-null-CN leads sharing a domain alone (v1 quirk, faithful)", () => {
+  it("merges all-null-CN leads sharing a domain into the best lead (v1 quirk removed)", () => {
+    // Old behavior left these as duplicates ("v1 quirk, faithful"); now we merge
+    // — same domain + no CH numbers = same company, no evidence to the contrary.
     const leads: Record<string, Lead> = {
-      a: L({ id: "a", company_number: null, website: "https://x.co.uk", website_domain: "x.co.uk", score: 60, priority: "WARM" }),
-      b: L({ id: "b", company_number: null, website: "https://x.co.uk", website_domain: "x.co.uk", score: 55, priority: "QUEUE" }),
+      a: L({ id: "a", company_number: null, website: "https://x.co.uk", website_domain: "x.co.uk", score: 60, priority: "WARM",
+             source_query: "query A", website_source: "ddg_search" }),
+      b: L({ id: "b", company_number: null, website: "https://x.co.uk", website_domain: "x.co.uk", score: 55, priority: "QUEUE",
+             source_query: "query B", website_source: "domain_guess" }),
+    };
+    const s = dedupLeads(leads);
+    expect(s.domainGroupsMerged).toBe(1);
+    expect(s.domainLeadsRemoved).toBe(1);
+    expect(leads.a).toBeDefined();
+    expect(leads.b).toBeUndefined();
+    expect(leads.a!.website).toBe("https://x.co.uk");
+    expect(leads.a!.duplicate_sources?.[0]?.source_query).toBe("query B");
+  });
+
+  it("merges null-CN leads into the CN-bearing one when they share a domain (single distinct CN)", () => {
+    const leads: Record<string, Lead> = {
+      cn:   L({ id: "cn",   company_number: "00111111", website: "https://acme.co.uk", website_domain: "acme.co.uk", score: 70, priority: "WARM" }),
+      nul1: L({ id: "nul1", company_number: null,       website: "https://acme.co.uk", website_domain: "acme.co.uk", score: 65, priority: "WARM",
+                source_query: "acme distributor" }),
+      nul2: L({ id: "nul2", company_number: null,       website: "https://acme.co.uk", website_domain: "acme.co.uk", score: 60, priority: "WARM" }),
+    };
+    const s = dedupLeads(leads);
+    expect(s.domainGroupsMerged).toBe(1);
+    expect(leads.cn).toBeDefined();
+    expect(leads.nul1).toBeUndefined();
+    expect(leads.nul2).toBeUndefined();
+    expect(leads.cn!.company_number).toBe("00111111");          // best lead retains its CN
+    expect(leads.cn!.duplicate_sources?.length).toBe(2);
+  });
+
+  it("name-fallback: merges null-CN leads with identical normalised company names", () => {
+    // Both rows are the same company, found two ways, with no CH match (the case that
+    // motivated removing the v1 quirk — eg. the French Cellar duplicates).
+    const leads: Record<string, Lead> = {
+      a: L({ id: "a", company_number: null, company_name: "Boutique French Wine Importer UK | Exclusive French Wines",
+             website: "https://frenchcellar.co.uk/wholesale", website_domain: "frenchcellar.co.uk", score: 100, priority: "HOT", ready_score: 100 } as Partial<Lead>),
+      b: L({ id: "b", company_number: null, company_name: "Boutique French Wine Importer UK | Exclusive French Wines",
+             website: "https://frenchcellar.co.uk/wholesale", website_domain: "frenchcellar.co.uk", score: 100, priority: "HOT", ready_score: 95 } as Partial<Lead>),
+    };
+    const s = dedupLeads(leads);
+    // Same domain → domain-pass catches it before name-pass even runs.
+    expect(s.domainGroupsMerged + s.nameGroupsMerged).toBe(1);
+    const survivor = leads.a ?? leads.b;
+    expect(survivor).toBeDefined();
+    expect((survivor!).ready_score).toBe(100);                    // higher ready_score wins
+    expect(Object.values(leads).length).toBe(1);
+  });
+
+  it("name-fallback catches null-CN duplicates with different page URLs (different domain paths)", () => {
+    // Same company, different scraped URLs → different website_domain values
+    // when one was guessed. CN+domain passes can't merge; name fallback should.
+    const leads: Record<string, Lead> = {
+      a: L({ id: "a", company_number: null, company_name: "Alpine Machinery Supplies Ltd",
+             website: "https://alpinemachinery.co.uk/about", website_domain: "alpinemachinery.co.uk", score: 88, priority: "HOT" } as Partial<Lead>),
+      b: L({ id: "b", company_number: null, company_name: "ALPINE MACHINERY SUPPLIES LIMITED",
+             website: "https://alpinemachinery.com",        website_domain: "alpinemachinery.com",    score: 75, priority: "WARM" } as Partial<Lead>),
+    };
+    const s = dedupLeads(leads);
+    expect(s.nameGroupsMerged).toBe(1);
+    expect(s.nameLeadsRemoved).toBe(1);
+    expect(leads.a).toBeDefined();                                // higher score wins
+    expect(leads.b).toBeUndefined();
+    expect(leads.a!.duplicate_sources?.length).toBe(1);
+  });
+
+  it("name-fallback does NOT merge on too-generic / too-short normalised keys", () => {
+    // "Trading Co Ltd" and "Trading Company UK" both normalise to "" (all-generic) — must NOT merge.
+    const leads: Record<string, Lead> = {
+      a: L({ id: "a", company_number: null, company_name: "Trading Co Ltd",      score: 60, priority: "WARM" } as Partial<Lead>),
+      b: L({ id: "b", company_number: null, company_name: "Trading Company UK",  score: 55, priority: "WARM" } as Partial<Lead>),
+      // "Wine Importers UK" → cleanCompanyName strips " UK", → "Wine Importers". Tokens: "wine" + "importers"
+      // (generic) → filtered to "wine" — 1 token, NOT dedupable.
+      c: L({ id: "c", company_number: null, company_name: "Wine Importers UK Ltd",      score: 65, priority: "WARM" } as Partial<Lead>),
+      d: L({ id: "d", company_number: null, company_name: "Wine Importers UK Limited",  score: 60, priority: "WARM" } as Partial<Lead>),
+    };
+    const s = dedupLeads(leads);
+    expect(s.nameGroupsMerged).toBe(0);
+    expect(s.nameLeadsRemoved).toBe(0);
+    expect(Object.keys(leads).sort()).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("uses the ready_score → score → fx-signals → website-confidence → route_grade tie-break order", () => {
+    // a has lower score but higher ready_score → a should win.
+    const leads: Record<string, Lead> = {
+      a: L({ id: "a", company_number: null, company_name: "Boutique French Wine Importer", website: "https://x.co.uk", website_domain: "x.co.uk",
+             score: 70, priority: "WARM", ready_score: 95 } as Partial<Lead>),
+      b: L({ id: "b", company_number: null, company_name: "Boutique French Wine Importer", website: "https://x.co.uk", website_domain: "x.co.uk",
+             score: 80, priority: "HOT",   ready_score: 70 } as Partial<Lead>),
     };
     dedupLeads(leads);
-    expect(leads.a!.website).toBe("https://x.co.uk");
-    expect(leads.b!.website).toBe("https://x.co.uk");
+    expect(leads.a).toBeDefined();
+    expect(leads.b).toBeUndefined();
+    expect(leads.a!.ready_score).toBe(95);
+  });
+
+  it("preserves source evidence in duplicate_sources across the CN, domain, and name passes", () => {
+    const leads: Record<string, Lead> = {
+      // CN-pass dedup
+      cn1: L({ id: "cn1", company_number: "00111111", score: 80, priority: "HOT",
+              source_query: "cn1 query", source_segment: "Wine importers", website_source: "ddg_search" }),
+      cn2: L({ id: "cn2", company_number: "00111111", score: 70, priority: "WARM",
+              source_query: "cn2 query", source_segment: "Spirits importers", website_source: "ch_lookup" }),
+    };
+    dedupLeads(leads);
+    expect(leads.cn1).toBeDefined();
+    expect(leads.cn1!.duplicate_sources?.length).toBe(1);
+    expect(leads.cn1!.duplicate_sources?.[0]?.source_query).toBe("cn2 query");
+    expect(leads.cn1!.duplicate_sources?.[0]?.source_segment).toBe("Spirits importers");
   });
 });
 

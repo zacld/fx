@@ -54,6 +54,59 @@ export function linkedinCompanyName(raw: string): string {
   return words.slice(0, 3).join(" ") || clean;
 }
 
+// ── companyNameKey — aggressive normalisation for dedup grouping ─────────────
+// Generic / trade-descriptor tokens that should not contribute to identity.
+// "dragon import services" should dedup to "dragon" — but a single-token
+// distinctive key is too weak to merge on (see isDedupableNameKey).
+const GENERIC_NAME_TOKENS: ReadonlySet<string> = new Set([
+  "the", "and", "of", "for",
+  "company", "co", "uk",
+  "ltd", "limited", "plc", "llp", "llc", "inc", "corp", "corporation",
+  "group", "holdings", "holding",
+  "import", "imports", "importer", "importers", "importing",
+  "export", "exports", "exporter", "exporters", "exporting",
+  "trade", "trading", "trader", "traders",
+  "wholesale", "wholesaler", "wholesalers",
+  "distributor", "distributors", "distribution",
+  "supplier", "suppliers", "supply", "supplies",
+  "services", "service", "solutions", "consulting",
+  "international", "global", "worldwide",
+  "about", "home", "contact", "welcome",
+]);
+
+/**
+ * Normalised dedup key for a company name. Strips legal suffixes, page-title
+ * slogans, punctuation, diacritics, generic trade tokens — leaves only the
+ * distinctive identifying tokens. Returns "" if the input collapses to
+ * nothing (eg. "Import Services Ltd" → all generic).
+ *
+ * Pair with isDedupableNameKey() before using the key to merge leads — a key
+ * with a single short token is too weak (every "consulting" / "trading"
+ * remnant would collide).
+ */
+export function companyNameKey(raw: string): string {
+  if (!raw) return "";
+  let name = cleanCompanyName(raw).toLowerCase();
+  name = name.normalize("NFD").replace(/[̀-ͯ]/g, "");      // strip diacritics
+  name = name.replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!name) return "";
+  const tokens = name.split(" ").filter((t) => t && !GENERIC_NAME_TOKENS.has(t));
+  return tokens.join(" ");
+}
+
+/**
+ * Is a normalised key specific enough to safely merge leads on? Requires at
+ * least 2 distinct tokens, ≥6 chars total — keeps "wine importers" → "wine"
+ * (1 token) out, lets "boutique french wine" through.
+ */
+export function isDedupableNameKey(key: string): boolean {
+  if (!key) return false;
+  const tokens = key.split(" ").filter(Boolean);
+  if (tokens.length < 2) return false;
+  if (key.replace(/\s/g, "").length < 6) return false;
+  return true;
+}
+
 // ── CH name parser ───────────────────────────────────────────────────────────
 export interface ParsedName {
   full_name: string;
