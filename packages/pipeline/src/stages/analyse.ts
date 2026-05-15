@@ -17,7 +17,7 @@ import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 import { fetchHtml as defaultFetchHtml, type HtmlFetcher } from "../sources/fetch.js";
 import { RSS_FEEDS, type RssFeed, parseFeed, scoreCommercialRelevance, ENTRY_KEYWORDS, dedupeId } from "../sources/rss.js";
-import { analyseEvent, RateLimitError, type AnalyseFn } from "../sources/ai.js";
+import { analyseEvent, RateLimitError, resolveProviderModel, type AiProvider, type AnalyseFn } from "../sources/ai.js";
 
 const nowIso = () => new Date().toISOString();
 
@@ -94,8 +94,12 @@ export function deriveTriggerDecision(raw: {
   return { strength, mode, status, budget };
 }
 
-/** Rule-based fallback event when the AI is unavailable. Port of ingest.py build_fallback_event. */
-export function buildFallbackEvent(item: RawItem): Record<string, unknown> {
+/** Rule-based fallback event when the AI is unavailable. Port of ingest.py
+ *  build_fallback_event. Always conservative: confidence_level=low,
+ *  discovery_mode=limited, trigger_strength=medium (or weak when the rule-based
+ *  pre_relevance_score is low). `failureReason` is folded into confidence_reason
+ *  so the audit can see exactly why fallback fired (rate-limit, 404, parse err…). */
+export function buildFallbackEvent(item: RawItem, failureReason?: string): Record<string, unknown> {
   const text = `${item.headline} ${item.raw_summary}`.toLowerCase();
   const has = (...ws: string[]) => ws.some((w) => text.includes(w));
   let eventType: string, pairs: string[], fxLogic: string, impact: string, segments: Seg[], chTerms: string[];
@@ -234,18 +238,31 @@ export function buildFallbackEvent(item: RawItem): Record<string, unknown> {
 
   normaliseSegments(segments);
   const { chTerms: ct, queries } = extractChTerms(segments);
+  // Conservative tier when AI is down. Weak vs medium hinges on the rule-based
+  // pre-relevance: a borderline pre_relevance still gets medium so it isn't
+  // dropped, but anything that didn't strongly trigger the keyword pre-filter
+  // downgrades to weak (context_only — Brain 3 won't burn budget on it).
+  const pre = Number(item.pre_relevance_score ?? 0);
+  const triggerStrength = pre >= 5 ? "medium" : "weak";
+  const discoveryMode = triggerStrength === "medium" ? "limited" : "context_only";
+  const budget = triggerStrength === "medium" ? 12 : 0;
+  const triggerScore = triggerStrength === "medium" ? 55 : 30;
+  const confidenceReason = failureReason
+    ? `AI fallback used — ${failureReason}. Rule-based segments inferred from headline keywords.`
+    : "AI unavailable — rule-based fallback based on keyword routing.";
   return {
     ...item, id: item.id, detected_at: nowIso(), event_type: eventType,
     event_breadth: TYPE_TO_BREADTH[eventType] ?? "sector_specific",
     summary: item.raw_summary || item.headline, currency_pairs: pairs,
-    urgency_score: 6, commercial_relevance: item.pre_relevance_score ?? 5,
-    commercial_relevance_reason: "Fallback event — AI unavailable",
-    // Conservative tier: AI is down, so we trust the event less. Limited discovery.
-    trigger_strength: "medium", trigger_score: 55, discovery_mode: "limited", recommended_query_budget: 12,
+    urgency_score: 6, commercial_relevance: pre || 5,
+    commercial_relevance_reason: failureReason ? `Fallback event — ${failureReason}` : "Fallback event — AI unavailable",
+    trigger_strength: triggerStrength, trigger_score: triggerScore, discovery_mode: discoveryMode, recommended_query_budget: budget,
     likely_affected_businesses: segments.map((s) => s.segment_name).filter(Boolean) as string[],
     why_now: `Recent ${eventType.toLowerCase()} may affect upcoming overseas payments for UK businesses`,
-    discovery_recommendation: "Limited run — AI fallback, using rule-based segment hypothesis",
-    confidence_level: "low", confidence_reason: "AI unavailable — rule-based fallback based on keyword routing",
+    discovery_recommendation: triggerStrength === "medium"
+      ? "Limited run — AI fallback, using rule-based segment hypothesis"
+      : "Context only — pre-relevance was weak and AI was unavailable",
+    confidence_level: "low", confidence_reason: confidenceReason,
     what_happened: item.headline, what_changed_financially: `Market ${eventType.toLowerCase()} with direct FX implications for UK businesses`,
     who_pays_more: "UK importers with overseas supplier invoices", who_receives_less: "UK exporters with overseas customer revenue (if GBP strengthened)",
     margin_risk: "Medium", payment_timing_risk: "Medium",
@@ -316,9 +333,21 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
       detected_at: String(ev.detected_at ?? nowIso()), data: JSON.stringify(ev),
     }); };
 
-    let rateLimited = false;
+    // Log the AI config once per run so CI logs make it obvious which model was
+    // actually contacted (the "GROQ_MODEL=' '" trap that broke the last audit).
+    const provider: AiProvider = (process.env.AI_PROVIDER as AiProvider) || "groq";
+    const model = resolveProviderModel(provider);
+    if (newItems.length) console.log(`analyse: AI provider=${provider} model=${model} new_items=${newItems.length}`);
+
+    let stickyFallback = false;          // once tripped, all remaining events use fallback (saves repeat-calls on deterministic errors)
+    let stickyReason = "";               // reason persisted into the fallback's confidence_reason
     for (const item of newItems) {
-      if (rateLimited) { putEvent(buildFallbackEvent(item)); st.fallbackUsed++; st.saved++; continue; }
+      if (stickyFallback) {
+        putEvent(buildFallbackEvent(item, stickyReason));
+        st.fallbackUsed++; st.saved++;
+        console.warn(`analyse[fallback]: "${item.headline.slice(0, 80)}" — sticky AI failure (${stickyReason})`);
+        continue;
+      }
       try {
         const a = await analyseFn(item.headline, item.raw_summary);
         const decision = deriveTriggerDecision(a);
@@ -333,6 +362,7 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
             urgency_score: urgency, commercial_relevance: rel,
             commercial_relevance_reason: String(a.commercial_relevance_reason ?? ""),
             confidence_level: String(a.confidence_level ?? "low"), confidence_reason: String(a.confidence_reason ?? ""),
+            ai_provider: provider, ai_model: model,
           });
           continue;
         }
@@ -358,12 +388,21 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
           sales_angle: a.sales_angle ?? "", business_impact_summary: a.business_impact_summary ?? "",
           exposure_types: a.exposure_types ?? [], overall_sales_angle: a.overall_sales_angle ?? "",
           target_segments: segments, companies_house_terms: chTerms, all_search_queries: queries,
-          status: decision.status, ai_provider: process.env.AI_PROVIDER || "groq",
+          status: decision.status, ai_provider: provider, ai_model: model,
         });
         st.aiOk++; st.saved++;
       } catch (e) {
-        if (e instanceof RateLimitError) { rateLimited = true; putEvent(buildFallbackEvent(item)); st.fallbackUsed++; st.saved++; }
-        else { st.failed++; console.warn(`analyse failed for ${item.headline.slice(0, 50)}: ${e instanceof Error ? e.message : String(e)}`); }
+        // Any AI error (rate-limit, 4xx, 5xx, timeout, parse error) → conservative
+        // fallback so we don't silently drop events on a provider/config glitch.
+        // The first failure flips the sticky flag — subsequent events skip the AI
+        // call entirely because the same config error will keep firing.
+        const msg = e instanceof Error ? e.message : String(e);
+        const kind = e instanceof RateLimitError ? "rate-limit" : "ai-error";
+        stickyFallback = true;
+        stickyReason = `${kind}: ${msg.slice(0, 200)}`;
+        st.fallbackUsed++; st.saved++;
+        putEvent(buildFallbackEvent(item, stickyReason));
+        console.warn(`analyse[fallback]: "${item.headline.slice(0, 80)}" — ${kind} (provider=${provider}, model=${model}): ${msg.slice(0, 200)}`);
       }
     }
   } finally {

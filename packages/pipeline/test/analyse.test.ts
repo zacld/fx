@@ -264,6 +264,35 @@ describe("analyse stage (mocked feeds + AI)", () => {
       expect(events.every((e) => (e.data as { fallback_mode?: boolean }).fallback_mode === true)).toBe(true);
       expect(events.every((e) => Array.isArray((e.data as { target_segments?: unknown[] }).target_segments) && ((e.data as { target_segments?: unknown[] }).target_segments?.length ?? 0) > 0)).toBe(true);
       expect(events.every((e) => e.status === "ready")).toBe(true);
+      // The fallback now embeds the failure reason in confidence_reason
+      const first = events[0]!.data as { confidence_reason?: string; commercial_relevance_reason?: string };
+      expect(first.confidence_reason || "").toMatch(/rate-limit|fallback/i);
+    } finally { close(); }
+  });
+
+  it("on a non-rate-limit AI error (e.g. 404 model-not-found) it falls back instead of dropping the event", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fxanalyse3-"));
+    const dbPath = join(dir, "fx.db");
+    const r = await runAnalyseStage({
+      dbPath, runsDir: join(dir, "runs"), feeds: [{ source: "Test", url: "https://test.feed/rss" }],
+      fetchHtml: feedFetch, maxEvents: 5,
+      analyse: async () => { throw new Error("Groq 404: model `` not found"); },
+    });
+    // Both items fallback, neither counted as `failed` (the previous silent-drop bug).
+    expect(r.failed).toBe(0);
+    expect(r.fallbackUsed).toBe(2);
+    expect(r.saved).toBe(2);
+    const { db, close } = getDb(dbPath);
+    try {
+      const events = db.select().from(schema.events).all();
+      expect(events.length).toBe(2);
+      expect(events.every((e) => (e.data as { fallback_mode?: boolean }).fallback_mode === true)).toBe(true);
+      const data = events[0]!.data as { confidence_reason?: string; commercial_relevance_reason?: string; confidence_level?: string; discovery_mode?: string; trigger_strength?: string };
+      expect(data.confidence_reason || "").toMatch(/ai-error|fallback|404/i);
+      expect(data.confidence_level).toBe("low");
+      // Conservative defaults: limited (medium pre-relevance) or context_only (weak), never full.
+      expect(["limited", "context_only"]).toContain(data.discovery_mode!);
+      expect(["medium", "weak"]).toContain(data.trigger_strength!);
     } finally { close(); }
   });
 });

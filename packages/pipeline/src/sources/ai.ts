@@ -276,8 +276,10 @@ const _isRateLimited = (status: number, body: string) => status === 429 || /quot
 
 /** Groq — OpenAI-compatible chat/completions with JSON mode. Default provider. */
 export async function analyseViaGroq(headline: string, summary: string, opts: AiOptions = {}): Promise<Record<string, unknown>> {
-  const apiKey = opts.apiKey ?? process.env.GROQ_API_KEY ?? "";
-  const model = opts.model ?? process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
+  // `||` (not `??`) so an empty-string env var (e.g. `GROQ_MODEL: ${{ secrets.GROQ_MODEL }}`
+  // when the secret is unset) falls back to the default instead of becoming model="".
+  const apiKey = opts.apiKey || process.env.GROQ_API_KEY || "";
+  const model = opts.model || process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
   if (!apiKey) throw new Error("no GROQ_API_KEY");
   const fetchImpl = opts.fetchImpl ?? fetch;
   let res: Response;
@@ -304,8 +306,9 @@ export async function analyseViaGroq(headline: string, summary: string, opts: Ai
 
 /** Gemini — generativelanguage.googleapis.com generateContent. Alternative provider. */
 export async function analyseViaGemini(headline: string, summary: string, opts: AiOptions = {}): Promise<Record<string, unknown>> {
-  const apiKey = opts.apiKey ?? process.env.GEMINI_API_KEY ?? "";
-  const model = opts.model ?? process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
+  // `||` here for the same reason as Groq: empty-string env vars should fall through.
+  const apiKey = opts.apiKey || process.env.GEMINI_API_KEY || "";
+  const model = opts.model || process.env.GEMINI_MODEL || "gemini-2.0-flash";
   if (!apiKey) throw new Error("no GEMINI_API_KEY");
   const fetchImpl = opts.fetchImpl ?? fetch;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
@@ -332,6 +335,14 @@ export async function analyseViaGemini(headline: string, summary: string, opts: 
 
 /** One LLM call for an event — dispatches to the configured provider (Groq by default). */
 export async function analyseEvent(headline: string, summary: string, opts: AiOptions = {}): Promise<Record<string, unknown>> {
-  const provider: AiProvider = opts.provider ?? (process.env.AI_PROVIDER as AiProvider) ?? "groq";
+  const provider: AiProvider = opts.provider || (process.env.AI_PROVIDER as AiProvider) || "groq";
   return provider === "gemini" ? analyseViaGemini(headline, summary, opts) : analyseViaGroq(headline, summary, opts);
+}
+
+/** The model name actually used for a given provider, applying the same fallback
+ *  rules as analyseViaGroq/Gemini. For logging/audit so we can see in CI exactly
+ *  what was sent. */
+export function resolveProviderModel(provider: AiProvider, opts: AiOptions = {}): string {
+  if (provider === "gemini") return opts.model || process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  return opts.model || process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 }
