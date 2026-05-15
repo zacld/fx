@@ -16,7 +16,19 @@ name: FX Discovery
 on:
   schedule:
     - cron: '0 5 * * 1-5'   # 5am Mon–Fri UTC (list ready ~7am BST for morning commute)
-  workflow_dispatch:          # manual trigger from the Actions UI
+  workflow_dispatch:
+    # Optional one-off overrides for trigger-quality audits. Blank → use the
+    # scheduled defaults below. Useful when you want Brain 1 to see a wider /
+    # narrower mix of real events than the daily run would catch.
+    inputs:
+      min_relevance:
+        description: "DISCOVERY_MIN_RELEVANCE override (default 4 — lower = broader real-event audit)"
+        required: false
+        default: ""
+      max_events:
+        description: "DISCOVERY_MAX_EVENTS override (default 12 — raise for a wider audit batch)"
+        required: false
+        default: ""
 
 jobs:
   discover:
@@ -43,7 +55,9 @@ jobs:
           GEMINI_API_KEY:               ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL:                 ${{ secrets.GEMINI_MODEL }}
           COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
-          DISCOVERY_MAX_EVENTS:         "12"
+          # Manual-dispatch overrides win when set, otherwise scheduled defaults.
+          DISCOVERY_MAX_EVENTS:         ${{ inputs.max_events != '' && inputs.max_events || '12' }}
+          DISCOVERY_MIN_RELEVANCE:      ${{ inputs.min_relevance != '' && inputs.min_relevance || '4' }}
           WEB_MAX_EVENTS:               "5"
           WEB_MAX_CATEGORIES_TO_SCRAPE: "6"
           CATEGORY_MIN_SCORE_TO_SCRAPE: "65"
