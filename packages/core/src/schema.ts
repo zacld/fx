@@ -44,6 +44,17 @@ export type LeadType = z.infer<typeof LeadType>;
 export const Confidence3 = z.enum(["high", "medium", "low", "none"]);
 export type Confidence3 = z.infer<typeof Confidence3>;
 
+// ── Brain 1 tiered trigger (CLAUDE.md Brain 1 sharpening) ────────────────────
+// "strong" → run full discovery; "medium" → limited discovery (fewer segments /
+// queries / results); "weak" → keep as messaging context only, no discovery;
+// "reject" → drop entirely. discovery_mode tracks the same decision after any
+// downstream gating (analyse.ts may downgrade an AI-claimed tier).
+export const TriggerStrength = z.enum(["strong", "medium", "weak", "reject"]);
+export type TriggerStrength = z.infer<typeof TriggerStrength>;
+
+export const DiscoveryMode = z.enum(["full", "limited", "context_only", "reject"]);
+export type DiscoveryMode = z.infer<typeof DiscoveryMode>;
+
 // ── Brain 2: micro-categories & segments ─────────────────────────────────────
 export const MicroCategorySchema = z.object({
   name: z.string(),
@@ -85,13 +96,26 @@ export const EventSchema = z.object({
   source: z.string().default(""),
   source_url: z.string().default(""),
   detected_at: z.string().optional(),
-  status: z.enum(["ready", "discovered", "low_relevance"]).default("ready"),
+  status: z.enum(["ready", "discovered", "low_relevance", "context_only"]).default("ready"),
   event_type: z.string().default(""),
   event_breadth: z.union([EventBreadth, z.literal("")]).default("sector_specific"),
   currency_pairs: z.array(z.string()).default([]),
   urgency_score: z.number().int().min(0).max(10).default(0),
   commercial_relevance: z.number().int().min(0).max(10).default(0),
   commercial_relevance_reason: z.string().default(""),
+
+  // Brain 1 tiered trigger fields. trigger_score / discovery_mode drive how much
+  // discovery effort the event gets (full / limited / context_only / reject).
+  trigger_strength: TriggerStrength.default("medium"),
+  trigger_score: z.number().int().min(0).max(100).default(0),
+  discovery_mode: DiscoveryMode.default("limited"),
+  recommended_query_budget: z.number().int().min(0).default(0),
+  likely_affected_businesses: z.array(z.string()).default([]),
+  why_now: z.string().default(""),
+  confidence_level: Confidence3.default("low"),
+  confidence_reason: z.string().default(""),
+  discovery_recommendation: z.string().default(""),
+
   what_happened: z.string().default(""),
   what_changed_financially: z.string().default(""),
   who_pays_more: z.string().default(""),

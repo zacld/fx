@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { getDb, schema } from "@fx/core/db";
 import { parseFeed, scoreCommercialRelevance, dedupeId, ENTRY_KEYWORDS } from "../src/sources/rss.js";
 import { extractJson, formatPrompt, RateLimitError, COMBINED_ANALYSIS_PROMPT } from "../src/sources/ai.js";
-import { runAnalyseStage, buildFallbackEvent } from "../src/stages/analyse.js";
+import { runAnalyseStage, buildFallbackEvent, deriveTriggerDecision } from "../src/stages/analyse.js";
 import type { HtmlFetcher } from "../src/sources/fetch.js";
 
 const RSS_XML = `<?xml version="1.0"?><rss version="2.0"><channel><title>Test Feed</title>
@@ -62,7 +62,10 @@ describe("ai helpers", () => {
     const p = formatPrompt("GBP/EUR slides", "Sterling fell ~1%.");
     expect(p).toContain("Headline: GBP/EUR slides");
     expect(p).toContain("Summary: Sterling fell ~1%.");
-    expect(p).toContain("PART 1 — EVENT TRIAGE");
+    expect(p).toContain("TIERED TRIGGER SYSTEM");
+    expect(p).toContain("trigger_strength");
+    expect(p).toContain("discovery_mode");
+    expect(p).toContain("recommended_query_budget");
     expect(p).toContain("category_priority_score");
     expect(COMBINED_ANALYSIS_PROMPT).not.toContain("__HEADLINE__".slice(0, 0) + "{headline}");   // not Python .format style
   });
@@ -90,10 +93,56 @@ describe("buildFallbackEvent", () => {
     expect(ccy.event_breadth).toBe("broad_currency");
     expect(ccy.status).toBe("ready");
     expect(ccy.fallback_mode).toBe(true);
+    // Fallback events are conservative: medium tier, limited discovery
+    expect(ccy.trigger_strength).toBe("medium");
+    expect(ccy.discovery_mode).toBe("limited");
+    expect((ccy.recommended_query_budget as number)).toBeGreaterThan(0);
+    expect(ccy.confidence_level).toBe("low");
 
     const rate = buildFallbackEvent({ id: "t4", source: "X", source_url: "", headline: "Bank of England raises interest rates", raw_summary: "", pre_relevance_score: 6, pre_relevance_reason: "" });
     expect(rate.event_type).toBe("Rate decision");
     expect(rate.event_breadth).toBe("broad_macro");
+  });
+});
+
+describe("deriveTriggerDecision", () => {
+  it("respects an explicit strong trigger and keeps full discovery", () => {
+    const d = deriveTriggerDecision({ trigger_strength: "strong", trigger_score: 85, discovery_mode: "full", recommended_query_budget: 30 });
+    expect(d.strength).toBe("strong");
+    expect(d.mode).toBe("full");
+    expect(d.status).toBe("ready");
+    expect(d.budget).toBe(30);
+  });
+  it("downgrades when the AI claims strong but asks for limited discovery", () => {
+    const d = deriveTriggerDecision({ trigger_strength: "strong", trigger_score: 80, discovery_mode: "limited" });
+    expect(d.strength).toBe("strong");
+    expect(d.mode).toBe("limited");
+    expect(d.status).toBe("ready");
+  });
+  it("won't upgrade an AI-claimed weak/medium tier into a fuller mode", () => {
+    const d = deriveTriggerDecision({ trigger_strength: "weak", trigger_score: 30, discovery_mode: "full" });
+    expect(d.strength).toBe("weak");
+    // weak default is context_only; AI cannot upgrade it to full
+    expect(d.mode).toBe("context_only");
+    expect(d.status).toBe("context_only");
+  });
+  it("treats reject as low_relevance with zero budget", () => {
+    const d = deriveTriggerDecision({ trigger_strength: "reject", trigger_score: 5, is_fx_relevant: false, commercial_relevance: 1 });
+    expect(d.strength).toBe("reject");
+    expect(d.mode).toBe("reject");
+    expect(d.status).toBe("low_relevance");
+    expect(d.budget).toBe(0);
+  });
+  it("falls back to trigger_score thresholds when strength is missing", () => {
+    expect(deriveTriggerDecision({ trigger_score: 80 }).strength).toBe("strong");
+    expect(deriveTriggerDecision({ trigger_score: 60 }).strength).toBe("medium");
+    expect(deriveTriggerDecision({ trigger_score: 30 }).strength).toBe("weak");
+    expect(deriveTriggerDecision({ trigger_score: 5 }).strength).toBe("reject");
+  });
+  it("derives from commercial_relevance when both trigger_strength and trigger_score are missing", () => {
+    expect(deriveTriggerDecision({ commercial_relevance: 8, is_fx_relevant: true }).strength).toBe("strong");
+    expect(deriveTriggerDecision({ commercial_relevance: 5, is_fx_relevant: true }).strength).toBe("medium");
+    expect(deriveTriggerDecision({ commercial_relevance: 2, is_fx_relevant: false }).strength).toBe("reject");
   });
 });
 
@@ -104,6 +153,11 @@ describe("analyse stage (mocked feeds + AI)", () => {
   };
   const cannedAnalysis = {
     is_fx_relevant: true, commercial_relevance: 8, commercial_relevance_reason: "Direct GBP/EUR move",
+    trigger_strength: "strong", trigger_score: 85, discovery_mode: "full", recommended_query_budget: 28,
+    likely_affected_businesses: ["UK European wine importers", "UK Italian food importers"],
+    why_now: "Upcoming EUR supplier invoices now cost more in GBP",
+    discovery_recommendation: "Full run — concrete payment flow, multiple importer niches",
+    confidence_level: "high", confidence_reason: "Currency move is explicit and importers are concrete",
     event_type: "Currency move", event_breadth: "broad_currency", urgency_score: 8,
     what_happened: "Sterling fell against the euro", what_changed_financially: "GBP/EUR rate moved",
     who_pays_more: "UK importers", who_receives_less: "none", margin_risk: "High", payment_timing_risk: "High",
@@ -153,6 +207,11 @@ describe("analyse stage (mocked feeds + AI)", () => {
       expect(seg.segment_signals).toEqual(seg.website_validation_signals);            // alias kept in sync
       expect((data.companies_house_terms as string[])).toContain("french wine");      // flattened from micro_categories
       expect((data.all_search_queries as string[])).toContain('"french wine importer" UK');
+      // Tiered trigger metadata is persisted on the event JSON
+      expect(data.trigger_strength).toBe("strong");
+      expect(data.discovery_mode).toBe("full");
+      expect(data.recommended_query_budget).toBe(28);
+      expect((data.likely_affected_businesses as string[]).length).toBeGreaterThan(0);
       expect((sqlite.prepare("SELECT COUNT(*) c FROM runs").get() as { c: number }).c).toBe(1);
     } finally { close(); }
 
@@ -160,6 +219,33 @@ describe("analyse stage (mocked feeds + AI)", () => {
     const r2 = await runAnalyseStage({ dbPath, runsDir: join(dir, "runs"), feeds: [{ source: "Test", url: "https://test.feed/rss" }], fetchHtml: feedFetch, analyse: async () => cannedAnalysis });
     expect(r2.newItems).toBe(0);
     expect(r2.saved).toBe(0);
+  });
+
+  it("routes weak triggers to context_only (no segments) and reject to low_relevance", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fxanalyse-tiered-"));
+    const dbPath = join(dir, "fx.db");
+    const r = await runAnalyseStage({
+      dbPath, runsDir: join(dir, "runs"), feeds: [{ source: "Test", url: "https://test.feed/rss" }],
+      fetchHtml: feedFetch, maxEvents: 5,
+      analyse: async (headline) => {
+        // Currency item → weak (context only); tariff item → reject
+        if (headline.toLowerCase().includes("pound")) {
+          return { ...cannedAnalysis, trigger_strength: "weak", trigger_score: 30, discovery_mode: "context_only", recommended_query_budget: 0, is_fx_relevant: true, commercial_relevance: 5, urgency_score: 3 };
+        }
+        return { trigger_strength: "reject", trigger_score: 8, discovery_mode: "reject", recommended_query_budget: 0, is_fx_relevant: false, commercial_relevance: 1, urgency_score: 1, commercial_relevance_reason: "No UK B2B FX hook", target_segments: [] };
+      },
+    });
+    expect(r.saved).toBe(1);            // weak event saved (status=context_only)
+    expect(r.lowRelevance).toBe(1);     // reject event saved as low_relevance
+    const { db, close } = getDb(dbPath);
+    try {
+      const events = db.select().from(schema.events).all();
+      const weak = events.find((e) => (e.data as { trigger_strength?: string }).trigger_strength === "weak")!;
+      expect(weak.status).toBe("context_only");
+      expect(((weak.data as { target_segments?: unknown[] }).target_segments ?? []).length).toBe(0);
+      const rej = events.find((e) => (e.data as { trigger_strength?: string }).trigger_strength === "reject")!;
+      expect(rej.status).toBe("low_relevance");
+    } finally { close(); }
   });
 
   it("on a 429 from the AI it falls back to a rule-based event for the rest", async () => {

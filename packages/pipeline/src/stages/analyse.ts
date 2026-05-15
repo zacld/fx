@@ -49,6 +49,51 @@ const TYPE_TO_BREADTH: Record<string, string> = {
   Commodity: "commodity", "Supply chain": "commodity", Geopolitical: "sector_specific",
 };
 
+type TriggerStrength = "strong" | "medium" | "weak" | "reject";
+type DiscoveryMode = "full" | "limited" | "context_only" | "reject";
+
+/** Normalise the AI's trigger_strength + trigger_score into (strength, mode, status, budget).
+ *  Keeps the AI's stated mode if internally consistent, otherwise derives one from strength. */
+export function deriveTriggerDecision(raw: {
+  trigger_strength?: unknown; trigger_score?: unknown; discovery_mode?: unknown;
+  recommended_query_budget?: unknown; is_fx_relevant?: unknown; commercial_relevance?: unknown;
+}): { strength: TriggerStrength; mode: DiscoveryMode; status: "ready" | "context_only" | "low_relevance"; budget: number } {
+  const rawStrength = String(raw.trigger_strength ?? "").toLowerCase();
+  const rawMode = String(raw.discovery_mode ?? "").toLowerCase();
+  const score = Number(raw.trigger_score ?? NaN);
+  const rel = Number(raw.commercial_relevance ?? 0);
+
+  let strength: TriggerStrength;
+  if (rawStrength === "strong" || rawStrength === "medium" || rawStrength === "weak" || rawStrength === "reject") {
+    strength = rawStrength;
+  } else if (Number.isFinite(score)) {
+    strength = score >= 75 ? "strong" : score >= 45 ? "medium" : score >= 20 ? "weak" : "reject";
+  } else if (raw.is_fx_relevant === false || rel <= 2) {
+    strength = "reject";
+  } else {
+    strength = rel >= 7 ? "strong" : rel >= 5 ? "medium" : "weak";
+  }
+
+  // Default mode per strength; the AI may downgrade (but not upgrade) it.
+  const defaultMode: Record<TriggerStrength, DiscoveryMode> = {
+    strong: "full", medium: "limited", weak: "context_only", reject: "reject",
+  };
+  const rank: Record<DiscoveryMode, number> = { full: 3, limited: 2, context_only: 1, reject: 0 };
+  let mode = defaultMode[strength];
+  if (rawMode === "full" || rawMode === "limited" || rawMode === "context_only" || rawMode === "reject") {
+    if (rank[rawMode as DiscoveryMode] <= rank[mode]) mode = rawMode as DiscoveryMode;
+  }
+
+  const status: "ready" | "context_only" | "low_relevance" =
+    mode === "reject" ? "low_relevance" : mode === "context_only" ? "context_only" : "ready";
+
+  const budgetDefault: Record<DiscoveryMode, number> = { full: 30, limited: 12, context_only: 0, reject: 0 };
+  const claimed = Number(raw.recommended_query_budget ?? NaN);
+  const budget = Number.isFinite(claimed) && claimed >= 0 ? Math.min(claimed, budgetDefault[mode] * 2) : budgetDefault[mode];
+
+  return { strength, mode, status, budget };
+}
+
 /** Rule-based fallback event when the AI is unavailable. Port of ingest.py build_fallback_event. */
 export function buildFallbackEvent(item: RawItem): Record<string, unknown> {
   const text = `${item.headline} ${item.raw_summary}`.toLowerCase();
@@ -195,6 +240,12 @@ export function buildFallbackEvent(item: RawItem): Record<string, unknown> {
     summary: item.raw_summary || item.headline, currency_pairs: pairs,
     urgency_score: 6, commercial_relevance: item.pre_relevance_score ?? 5,
     commercial_relevance_reason: "Fallback event — AI unavailable",
+    // Conservative tier: AI is down, so we trust the event less. Limited discovery.
+    trigger_strength: "medium", trigger_score: 55, discovery_mode: "limited", recommended_query_budget: 12,
+    likely_affected_businesses: segments.map((s) => s.segment_name).filter(Boolean) as string[],
+    why_now: `Recent ${eventType.toLowerCase()} may affect upcoming overseas payments for UK businesses`,
+    discovery_recommendation: "Limited run — AI fallback, using rule-based segment hypothesis",
+    confidence_level: "low", confidence_reason: "AI unavailable — rule-based fallback based on keyword routing",
     what_happened: item.headline, what_changed_financially: `Market ${eventType.toLowerCase()} with direct FX implications for UK businesses`,
     who_pays_more: "UK importers with overseas supplier invoices", who_receives_less: "UK exporters with overseas customer revenue (if GBP strengthened)",
     margin_risk: "Medium", payment_timing_risk: "Medium",
@@ -270,19 +321,36 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
       if (rateLimited) { putEvent(buildFallbackEvent(item)); st.fallbackUsed++; st.saved++; continue; }
       try {
         const a = await analyseFn(item.headline, item.raw_summary);
+        const decision = deriveTriggerDecision(a);
         const urgency = Number(a.urgency_score ?? 0), rel = Number(a.commercial_relevance ?? 0);
-        if (!a.is_fx_relevant || urgency < 4 || rel < 5) {
+
+        if (decision.mode === "reject") {
           st.lowRelevance++;
-          putEvent({ ...item, detected_at: nowIso(), status: "low_relevance", urgency_score: urgency, commercial_relevance: rel, commercial_relevance_reason: String(a.commercial_relevance_reason ?? "") });
+          putEvent({
+            ...item, detected_at: nowIso(), status: "low_relevance",
+            trigger_strength: decision.strength, trigger_score: Number(a.trigger_score ?? 0),
+            discovery_mode: decision.mode, recommended_query_budget: 0,
+            urgency_score: urgency, commercial_relevance: rel,
+            commercial_relevance_reason: String(a.commercial_relevance_reason ?? ""),
+            confidence_level: String(a.confidence_level ?? "low"), confidence_reason: String(a.confidence_reason ?? ""),
+          });
           continue;
         }
-        const segments = normaliseSegments((a.target_segments as Seg[]) ?? []);
+
+        // For context_only we keep the event for messaging colour but skip discovery —
+        // target_segments stays empty so Brain 3 cannot mine it.
+        const segments = decision.mode === "context_only" ? [] : normaliseSegments((a.target_segments as Seg[]) ?? []);
         const { chTerms, queries } = extractChTerms(segments);
         putEvent({
           ...item, detected_at: nowIso(),
           event_type: a.event_type, event_breadth: a.event_breadth ?? "sector_specific",
           summary: a.summary ?? item.raw_summary, currency_pairs: a.currency_pairs ?? [],
           urgency_score: urgency, commercial_relevance: rel, commercial_relevance_reason: a.commercial_relevance_reason ?? "",
+          trigger_strength: decision.strength, trigger_score: Number(a.trigger_score ?? 0),
+          discovery_mode: decision.mode, recommended_query_budget: decision.budget,
+          likely_affected_businesses: Array.isArray(a.likely_affected_businesses) ? a.likely_affected_businesses : [],
+          why_now: a.why_now ?? "", discovery_recommendation: a.discovery_recommendation ?? "",
+          confidence_level: a.confidence_level ?? "low", confidence_reason: a.confidence_reason ?? "",
           what_happened: a.what_happened ?? "", what_changed_financially: a.what_changed_financially ?? "",
           who_pays_more: a.who_pays_more ?? "", who_receives_less: a.who_receives_less ?? "",
           margin_risk: a.margin_risk ?? "", payment_timing_risk: a.payment_timing_risk ?? "",
@@ -290,7 +358,7 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
           sales_angle: a.sales_angle ?? "", business_impact_summary: a.business_impact_summary ?? "",
           exposure_types: a.exposure_types ?? [], overall_sales_angle: a.overall_sales_angle ?? "",
           target_segments: segments, companies_house_terms: chTerms, all_search_queries: queries,
-          status: "ready", ai_provider: process.env.AI_PROVIDER || "groq",
+          status: decision.status, ai_provider: process.env.AI_PROVIDER || "groq",
         });
         st.aiOk++; st.saved++;
       } catch (e) {

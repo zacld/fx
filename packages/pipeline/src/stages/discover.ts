@@ -176,39 +176,61 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
 
     for (const row of ready) {
       const event = row.data;
+      // Brain 1 tiered trigger: "limited" mode scales segments / queries / results
+      // down so weaker triggers burn less budget; "context_only" / "reject" skip
+      // discovery entirely (analyse.ts already routes those to non-ready status,
+      // but we belt-and-brace here in case persisted JSON disagrees).
+      const mode = (event as { discovery_mode?: string }).discovery_mode || "full";
+      if (mode === "context_only" || mode === "reject") {
+        const ed = { ...event, web_discovery_done: true, web_discovery_at: new Date().toISOString(), web_discovery_skipped: mode };
+        if (persist) updEvent.run({ id: row.id, status: mode === "reject" ? "low_relevance" : "context_only", data: JSON.stringify(ed) });
+        continue;
+      }
+      const scale = mode === "limited" ? 0.5 : 1;
+      const effMaxSegments = Math.max(1, Math.round(maxSegments * scale));
+      const effMaxQPerMc = Math.max(1, Math.round(maxQPerMc * scale));
+      const effMaxQPerSeg = Math.max(1, Math.round(maxQPerSeg * scale));
+      const effMaxResults = Math.max(2, Math.round(maxResults * (mode === "limited" ? 0.6 : 1)));
+      const budgetCap = Number((event as { recommended_query_budget?: number }).recommended_query_budget ?? 0);
+
       const segments = (event.target_segments ?? [])
         .filter((s) => (s.category_priority_score == null) || (s.category_priority_score >= minScore))
-        .slice(0, maxSegments);
+        .slice(0, effMaxSegments);
+
+      let queriesUsed = 0;
+      const budgetExceeded = () => budgetCap > 0 && queriesUsed >= budgetCap;
 
       for (const seg of segments) {
+        if (budgetExceeded()) break;
         const segSignals = (seg.website_validation_signals?.length ? seg.website_validation_signals : seg.segment_signals) ?? [];
         // build (microCategory, query) pairs
         const pairs: Array<{ mc: string; q: string }> = [];
         const mcs = (seg.micro_categories ?? []).slice(0, maxMicroCats);
         if (mcs.length) {
-          for (const mc of mcs) for (const q of (mc.search_queries ?? []).slice(0, maxQPerMc)) pairs.push({ mc: mc.name ?? "", q });
+          for (const mc of mcs) for (const q of (mc.search_queries ?? []).slice(0, effMaxQPerMc)) pairs.push({ mc: mc.name ?? "", q });
         } else {
-          for (const q of (seg.high_intent_search_queries ?? []).slice(0, maxQPerSeg)) pairs.push({ mc: "", q });
+          for (const q of (seg.high_intent_search_queries ?? []).slice(0, effMaxQPerSeg)) pairs.push({ mc: "", q });
         }
 
         for (const { mc, q } of pairs) {
           if (!q) continue;
-          st.queriesRun++;
+          if (budgetExceeded()) break;
+          st.queriesRun++; queriesUsed++;
           // ── search: DDG → Bing → CH keyword ──────────────────────────────
           let results: Array<{ url: string; title: string }>; let path: "ddg" | "bing" | "ch_keyword";
-          const ddg = await ddgSearch(q, maxResults, fetcher);
+          const ddg = await ddgSearch(q, effMaxResults, fetcher);
           if (ddg.results.length) { results = ddg.results; path = "ddg"; st.ddgOk++; }
           else {
             if (ddg.stats.status !== "ok") { /* blocked/empty */ } else st.ddgEmpty++;
-            const bing = await bingSearch(q, maxResults, fetcher);
+            const bing = await bingSearch(q, effMaxResults, fetcher);
             if (bing.results.length) { results = bing.results; path = "bing"; st.bingOk++; }
             else {
               st.bingEmpty++;
-              const chItems = ch.enabled ? await ch.search(coreKeyword(q), maxResults) : [];
+              const chItems = ch.enabled ? await ch.search(coreKeyword(q), effMaxResults) : [];
               if (chItems.length) { st.chFallbackUsed++; }
               results = []; path = "ch_keyword";
               // CH-fallback items: no URL — create CN-only leads (the score stage will mostly SKIP them)
-              await Promise.all(chItems.slice(0, maxResults).map((it) => limitFor(concurrency)(async () => {
+              await Promise.all(chItems.slice(0, effMaxResults).map((it) => limitFor(concurrency)(async () => {
                 if (!it.company_number || (it.company_status && it.company_status.toLowerCase() !== "active")) return;
                 const profile = await ch.profile(it.company_number);
                 const officers = await ch.officers(it.company_number);
