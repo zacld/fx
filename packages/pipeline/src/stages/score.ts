@@ -27,7 +27,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   scoreLead, exposureConfidence, computeReadyScore, isReadyEligible, isLargeOrg, bestContactRoute, ensureContactFields,
-  WEAK_ORIGIN_TOKENS, LeadSchema, repoRoot, type Lead,
+  isPlausibleDmName, WEAK_ORIGIN_TOKENS, LeadSchema, repoRoot, type Lead,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
@@ -75,6 +75,14 @@ export function classifyLead(lead: Lead, event: EventInfo | undefined): void {
 
 /** Score & classify a single lead in place (no I/O). Exported for tests / reuse. */
 export function scoreAndClassify(lead: Lead, event: EventInfo | undefined): { changedPriority: boolean; reclassified: boolean } {
+  // Clear a stale junk director_name (e.g. "Mobile Portrait", "Address Line")
+  // back-filled from an older pipeline run. CH-backed leads are trusted as-is;
+  // only the website-scraped names need re-validation against the current rules.
+  // Without this, the existing dm propagates into ready_score and the call list.
+  if (!lead.company_number && lead.director_name && !isPlausibleDmName(lead.director_name)) {
+    lead.director_name = null;
+    lead.director_role = null;
+  }
   const reclassified = reclassifyOriginTokens(lead);
   // backfill is_large_org from name/website/snippet (mirrors rescore.py's backfill) — Gate I reads it
   lead.is_large_org = isLargeOrg(lead.company_name ?? "", lead.website ?? "", lead.website_snippet ?? "");

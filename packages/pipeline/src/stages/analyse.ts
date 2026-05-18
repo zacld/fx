@@ -303,6 +303,31 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
   const st: AnalyseResult = { feedsFetched: 0, itemsPreFiltered: 0, newItems: 0, saved: 0, aiOk: 0, fallbackUsed: 0, lowRelevance: 0, failed: 0, runId: rec.run.run_id };
 
   try {
+    // ── Stale-event cleanup ────────────────────────────────────────────────
+    // Delete rows older than 14 days that never made it through a successful
+    // AI call AND aren't a recorded rule-based fallback. These are stragglers
+    // from earlier schema versions (no ai_provider, no trigger_score, no
+    // target_segments) that INSERT OR REPLACE will never refresh on its own,
+    // and they poison the medium-event audit. RSS re-surfaces anything still
+    // newsworthy on the next pull.
+    if (persist) {
+      const cutoffIso = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+      const before = db.select().from(schema.events).all();
+      const stale = before.filter((e) => {
+        const d = (e.data ?? {}) as Record<string, unknown>;
+        const aiProvider = String(d.ai_provider ?? "");
+        const fallback = d.fallback_mode === true;
+        const detectedAt = String(d.detected_at ?? e.detected_at ?? "");
+        return !aiProvider && !fallback && detectedAt && detectedAt < cutoffIso;
+      });
+      if (stale.length) {
+        const del = sqlite.prepare(`DELETE FROM events WHERE id=@id`);
+        const tx = sqlite.transaction(() => { for (const e of stale) del.run({ id: e.id }); });
+        tx();
+        console.log(`analyse: purged ${stale.length} stale events (pre-schema, > 14d old, no AI/fallback record)`);
+      }
+    }
+
     const existingIds = new Set(db.select().from(schema.events).all().map((e) => e.id));
 
     // ── fetch + pre-filter feeds ────────────────────────────────────────────

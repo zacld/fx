@@ -107,6 +107,71 @@ export function isDedupableNameKey(key: string): boolean {
   return true;
 }
 
+// ── isPlausibleDmName ────────────────────────────────────────────────────────
+// Words that appear in business names, page headings, product names, navigation
+// labels, or address fragments — NOT personal names. If ANY word in an extracted
+// "name" matches this set, the name is rejected as a garbled scrape.
+const NOT_A_NAME_WORD: ReadonlySet<string> = new Set([
+  // Business / operational nouns
+  "sourcing","specialist","staff","general","manager","director","directors",
+  "sales","import","imports","importer","importers","importing","export","exports",
+  "exporter","exporting","trade","contact","contacts","admin","finance",
+  "senior","junior","head","team","account","accounts","accounting","marketing",
+  "operations","principal","procurement","purchasing","logistics","freight","cargo",
+  "shipping","supply","chain","distribution","distributor","wholesale","retail",
+  "management","consulting","consultancy","holdings","ventures","trading","enterprise",
+  "enterprises","industries","manufacturing","production","group","international",
+  "global","services","service","solutions","solution","limited","ltd","plc","llp",
+  "company","corporation","associates","partners","partnership","collaborative",
+  "collective","network","networks","systems","technologies","technology","digital",
+  // Non-name qualifiers that precede a scraped word
+  "mobile","portrait","meet","our","the","welcome","about","overview","home",
+  "quality","value","premium","expert","leading","trusted","approved",
+  "address","line","suite","floor","building","house","unit","park","industrial",
+  "estate","court","square","place","street","road","avenue","lane","close","drive",
+  // Product / category / brand words
+  "whisky","scotch","wine","beer","spirits","food","furniture","machinery",
+  "automotive","textile","textiles","clothing","apparel","cosmetics","chemicals",
+  "pharmaceutical","electronics","hardware","software","medical","optical","dental",
+  "accessories","appliance","appliances","ingredient","ingredients",
+  "samsung","apple","google","microsoft","amazon","brand","brands",
+  // Geography — countries / regions used as standalone words (not personal surname)
+  "china","france","italy","germany","spain","india","taiwan","korea","japan",
+  "turkey","portugal","netherlands","belgium","denmark","sweden","norway","poland",
+  "mexico","brazil","canada","australia","ireland","scotland","wales","europa",
+  "europe","asia","america","caribbean","mediterranean","pacific","atlantic",
+  "tamils","tamil","nadu","naidu",
+  // Web-page content words
+  "price","pricing","statistics","statistic","figures","figure","report","reports",
+  "news","blog","article","guide","resources","resource","academy","dictionary",
+  "encyclopedia","faq","terms","policy","privacy","cookies","sitemap",
+  "department","departments","stores","store","shops","shop","market","markets",
+  "sector","industry","category","categories","summary",
+  // Navigation / page-title fragments
+  "sourced","produced","grown","brewed","crafted","distilled","manufactured",
+]);
+
+const GARBLED_PHRASE_RE = /\b(import|export|wholesale|logistics|shipping|sourcing|procurement|supply chain|distribution|manufacturing|enterprise|solutions?|services?|consultant|management|holdings?|ventures?|group|trading|international|global|accessories|electronics|textile|whisky|scotch|statistics|figures|pricing|department)\b/i;
+
+/**
+ * Cheap structural validator for a "First Last" personal name extracted from a
+ * webpage. Rejects business / page-fragment / address / brand strings that the
+ * extractor sometimes grabs by mistake (e.g. "Mobile Portrait", "Address Line",
+ * "Tamil Nadu"). Trust CH-sourced names without running this — they come from
+ * the official register.
+ */
+export function isPlausibleDmName(name: string | null | undefined): boolean {
+  if (!name) return false;
+  const s = String(name).trim();
+  if (s.length < 4 || s.length > 60) return false;
+  const words = s.split(/\s+/);
+  if (words.length < 2) return false;
+  if (words.some((w) => NOT_A_NAME_WORD.has(w.toLowerCase()))) return false;
+  if (GARBLED_PHRASE_RE.test(s)) return false;
+  if (!words.every((w) => /^[A-Z]/.test(w))) return false;
+  return true;
+}
+
 // ── CH name parser ───────────────────────────────────────────────────────────
 export interface ParsedName {
   full_name: string;

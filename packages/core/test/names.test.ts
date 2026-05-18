@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   cleanCompanyName, linkedinCompanyName, parseChName,
   normalisedFirstName, levenshtein, namesMatch, nameSimilarity,
+  isPlausibleDmName,
 } from "../src/names.js";
 
 describe("cleanCompanyName", () => {
@@ -84,6 +85,31 @@ describe("namesMatch", () => {
   });
   it("rejects when last names are too short to be reliable", () => {
     expect(namesMatch("Jo Li", "Jo Lo")).toBe(false);
+  });
+});
+
+describe("isPlausibleDmName", () => {
+  it("rejects CSS/page-fragment strings the extractor grabs by mistake", () => {
+    expect(isPlausibleDmName("Mobile Portrait")).toBe(false);
+    expect(isPlausibleDmName("Address Line")).toBe(false);
+    expect(isPlausibleDmName("Tamil Nadu")).toBe(false);
+    expect(isPlausibleDmName("Department Store")).toBe(false);
+  });
+  it("rejects single-word / too-short / too-long inputs", () => {
+    expect(isPlausibleDmName("Smith")).toBe(false);
+    expect(isPlausibleDmName("")).toBe(false);
+    expect(isPlausibleDmName(null)).toBe(false);
+    expect(isPlausibleDmName("A".repeat(70))).toBe(false);
+  });
+  it("rejects lowercase / mixed-case junk", () => {
+    expect(isPlausibleDmName("mobile portrait")).toBe(false);
+    expect(isPlausibleDmName("James smith")).toBe(false);
+  });
+  it("accepts plausible British/American/European personal names", () => {
+    expect(isPlausibleDmName("James Smith")).toBe(true);
+    expect(isPlausibleDmName("Carl Smith")).toBe(true);
+    expect(isPlausibleDmName("Carriann Everard")).toBe(true);
+    expect(isPlausibleDmName("Paul Zanutto")).toBe(true);
   });
 });
 

@@ -170,6 +170,23 @@ const READY_EXCLUDE_DOMAINS = new Set([
 const CONTENT_PAGE_RE = /\/(blog|article|articles|news|pricing|price|report|reports|statistics?|stats|figures|guide|guides|resources?|resource|academy|dictionary|encyclopedia|faq|case-stud|whitepaper|press-release|press\/|events\/|webinar|sitemap|index\.htm)/i;
 
 /**
+ * True when company_name is clearly a scraped page <title>, not a real company.
+ * Mirrors apps/web/src/App.jsx isPageTitleName so backend ready_score = 0 for
+ * leads the dashboard would already filter out client-side.
+ */
+export function looksLikePageTitle(name: string | null | undefined): boolean {
+  if (!name) return false;
+  const n = String(name);
+  if (n.includes("|")) return true;
+  if (/^(about\s+(us\s*[-–—]?\s*)?|home\s*[-–—|:]\s*|welcome\s+to\s+)/i.test(n)) return true;
+  if (n.endsWith("...") || n.endsWith("…")) return true;
+  if (/[?!]/.test(n)) return true;
+  if (/^(how\s+to|what\s+is|why\s+|where\s+to|when\s+to|the\s+best|top\s+\d+)\b/i.test(n)) return true;
+  if (/\b20\d{2}\b/.test(n) && /\b(figures?|statistics?|report|export|import|guide|analysis|data|tutorial|review)\b/i.test(n)) return true;
+  return false;
+}
+
+/**
  * Returns false for content/article/pricing pages, platform domains, and leads
  * without enough validation to justify a same-day call.
  * Leads that fail this check get ready_score = 0 (excluded from Daily Call List
@@ -191,6 +208,8 @@ export function isReadyEligible(lead: Partial<Lead>): boolean {
   } catch { /* not a valid URL — don't block */ }
   // Block low-confidence website leads from READY
   if (lead.website_confidence === "low") return false;
+  // Block leads whose company_name is a scraped page title, not a company
+  if (looksLikePageTitle(lead.company_name)) return false;
   // Require Companies House number OR high-confidence validated website
   const hasCompanyNumber = !!(lead.company_number);
   const hasHighConf = ["high", "confirmed"].includes(lead.website_confidence ?? "");

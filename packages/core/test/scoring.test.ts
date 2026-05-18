@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scoreLead, exposureConfidence, isHardSkipDomain, isKnownBadDomain } from "../src/scoring.js";
+import { scoreLead, exposureConfidence, isHardSkipDomain, isKnownBadDomain, isReadyEligible, looksLikePageTitle } from "../src/scoring.js";
 import type { Lead } from "../src/schema.js";
 
 function lead(p: Partial<Lead>): Partial<Lead> {
@@ -116,6 +116,51 @@ describe("domain blocklists", () => {
     expect(isKnownBadDomain("https://www.thegrocer.co.uk/x")).toBe(true);
     expect(isKnownBadDomain("https://italianfoodnews.com/x")).toBe(true);
     expect(isKnownBadDomain("https://acmewine.co.uk")).toBe(false);
+  });
+});
+
+describe("looksLikePageTitle", () => {
+  it("flags pipe-separated page titles", () => {
+    expect(looksLikePageTitle("Boutique French Wine Importer UK | Exclusive French Wines")).toBe(true);
+    expect(looksLikePageTitle("Wholesale Fabrics | Oddies Textiles | Order Online")).toBe(true);
+    expect(looksLikePageTitle("Home | tropifresh | Exotic Fruit")).toBe(true);
+  });
+  it("flags 'About Us -' prefixed page titles", () => {
+    expect(looksLikePageTitle("About Us - Franceline Transport the French Haulage Specialist")).toBe(true);
+  });
+  it("flags blog-style titles (How to / Top N / questions)", () => {
+    expect(looksLikePageTitle("How to Sell from the UK to the US: 2025 Guide - Xigen")).toBe(true);
+    expect(looksLikePageTitle("Top 5 Importers of European Wine")).toBe(true);
+    expect(looksLikePageTitle("Why is GBP weakening?")).toBe(true);
+  });
+  it("flags truncated titles ending in ellipsis", () => {
+    expect(looksLikePageTitle("Map Imports (uk) Ltd | Sourcing agent for products...")).toBe(true);
+  });
+  it("does not flag real company names", () => {
+    expect(looksLikePageTitle("ACME WINE IMPORTERS LIMITED")).toBe(false);
+    expect(looksLikePageTitle("Dragon Import Services Ltd")).toBe(false);
+    expect(looksLikePageTitle("Smith & Oakley Imports Limited")).toBe(false);
+  });
+});
+
+describe("isReadyEligible", () => {
+  const base = {
+    website: "https://acmewine.co.uk",
+    website_confidence: "high" as const,
+    company_number: "12345678",
+    company_name: "Acme Wine Importers Ltd",
+  };
+  it("accepts a confirmed CH-backed company with real name", () => {
+    expect(isReadyEligible(base)).toBe(true);
+  });
+  it("rejects a lead whose company_name is a page title", () => {
+    expect(isReadyEligible({ ...base, company_name: "Boutique French Wine Importer | Exclusive Wines" })).toBe(false);
+  });
+  it("rejects blog/article paths", () => {
+    expect(isReadyEligible({ ...base, website: "https://acmewine.co.uk/blog/how-to-source" })).toBe(false);
+  });
+  it("rejects platform domains", () => {
+    expect(isReadyEligible({ ...base, website: "https://acmewine.shopify.com" })).toBe(false);
   });
 });
 
