@@ -304,14 +304,15 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
 
   try {
     // ── Stale-event cleanup ────────────────────────────────────────────────
-    // Delete rows older than 14 days that never made it through a successful
-    // AI call AND aren't a recorded rule-based fallback. These are stragglers
-    // from earlier schema versions (no ai_provider, no trigger_score, no
-    // target_segments) that INSERT OR REPLACE will never refresh on its own,
-    // and they poison the medium-event audit. RSS re-surfaces anything still
-    // newsworthy on the next pull.
+    // Delete rows that never made it through a successful AI call AND aren't
+    // a recorded rule-based fallback — they're stragglers from earlier schema
+    // versions (no ai_provider, no trigger_score, no target_segments) that
+    // INSERT OR REPLACE never refreshes on its own, and they poison the
+    // medium-event audit. 5 days is past typical RSS rotation, so anything
+    // still newsworthy will have been re-detected by now (each detection
+    // refreshes detected_at via nowIso(), so the cutoff is meaningful).
     if (persist) {
-      const cutoffIso = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+      const cutoffIso = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
       const before = db.select().from(schema.events).all();
       const stale = before.filter((e) => {
         const d = (e.data ?? {}) as Record<string, unknown>;
@@ -324,7 +325,7 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
         const del = sqlite.prepare(`DELETE FROM events WHERE id=@id`);
         const tx = sqlite.transaction(() => { for (const e of stale) del.run({ id: e.id }); });
         tx();
-        console.log(`analyse: purged ${stale.length} stale events (pre-schema, > 14d old, no AI/fallback record)`);
+        console.log(`analyse: purged ${stale.length} stale events (pre-schema, > 5d old, no AI/fallback record)`);
       }
     }
 

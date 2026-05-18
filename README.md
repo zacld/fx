@@ -62,6 +62,21 @@ Repo → Settings → Secrets and variables → Actions
 | `GROQ_API_KEY` | Your Groq API key (from https://console.groq.com/keys) |
 | `COMPANIES_HOUSE_API_KEY` | Your Companies House API key |
 | `GROQ_MODEL` | *(optional)* defaults to `llama-3.3-70b-versatile` |
+| `GOOGLE_SHEET_ID` | *(optional)* spreadsheet ID — turns on the Daily Call List export (see below) |
+| `GOOGLE_SERVICE_ACCOUNT_KEY` | *(optional)* service-account JSON for that sheet |
+
+### Optional: push the Daily Call List to Google Sheets
+
+The `export-sheets` stage writes the top-25 HOT leads to a Google Sheet at the end of every pipeline run. Skipped silently when either secret is unset.
+
+One-time setup:
+
+1. **Create a Sheet.** New blank sheet → rename a tab to `Daily Call List` (or whatever you set `GOOGLE_SHEET_TAB` to). Copy the spreadsheet ID from the URL (the long string between `/d/` and `/edit`) — that's `GOOGLE_SHEET_ID`.
+2. **Create a service account.** [Google Cloud Console](https://console.cloud.google.com/) → pick or create a project → enable the Google Sheets API → IAM & Admin → Service Accounts → Create. Then Keys → Add Key → JSON. Save that file.
+3. **Share the sheet** with the service account's email (looks like `fx-bot@<project>.iam.gserviceaccount.com`) as **Editor**.
+4. **Add the secrets.** Paste the spreadsheet ID into `GOOGLE_SHEET_ID`. Paste the entire JSON file contents into `GOOGLE_SERVICE_ACCOUNT_KEY` (raw or base64 — both work). Optional repo variable `GOOGLE_SHEET_TAB` overrides the default tab name.
+
+Each run clears `A1:Z1000` of the tab and writes a header row plus up to 25 ranked call-ready leads (rank, ready score, company, website, segment, event, director, role, phone, email, route grade, FX signal count + samples, exposure thesis, LinkedIn search URLs, last-rescored timestamp).
 
 > **Security:** Never put real API keys in this README, in any `.md` file, or in any committed file.  
 > The `.env` file is in `.gitignore` and must never be committed.

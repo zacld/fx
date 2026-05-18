@@ -75,6 +75,11 @@ jobs:
           # SMTP_DISABLE branch above.
           FX_EMAIL_VERIFIER_URL:        ${{ secrets.FX_EMAIL_VERIFIER_URL }}
           FX_EMAIL_VERIFIER_TOKEN:      ${{ secrets.FX_EMAIL_VERIFIER_TOKEN }}
+          # Optional: push the top-25 daily call list to a Google Sheet at the
+          # end of the run. Skipped silently if either secret is unset.
+          GOOGLE_SHEET_ID:              ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_KEY:   ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          GOOGLE_SHEET_TAB:             ${{ vars.GOOGLE_SHEET_TAB }}
         run: npm run pipeline
 
       # ── Python supplementary scripts ──────────────────────────────────────
