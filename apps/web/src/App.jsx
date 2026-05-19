@@ -267,6 +267,8 @@ function isReadyEligibleClient(l) {
   if (isContentPage(l.website)) return false;
   if (isPageTitleName(l.company_name)) return false;
   if (l.website_confidence === "low") return false;
+  // Block micro-entity filers — CH threshold <£632k turnover, well under £100k/month floor
+  if (typeof l.accounts_type === "string" && l.accounts_type.toLowerCase().includes("micro")) return false;
   const hasCompanyNumber = !!l.company_number;
   const hasHighConf = ["high","confirmed"].includes(l.website_confidence||"");
   if (!hasCompanyNumber && !hasHighConf) return false;

@@ -210,6 +210,10 @@ export function isReadyEligible(lead: Partial<Lead>): boolean {
   if (lead.website_confidence === "low") return false;
   // Block leads whose company_name is a scraped page title, not a company
   if (looksLikePageTitle(lead.company_name)) return false;
+  // Block micro-entity filers — turnover definitively below £632k (~£53k/month),
+  // well under the £100k/month minimum viable FX client floor.
+  const accsType = (lead as Record<string, unknown>).accounts_type as string | undefined;
+  if (typeof accsType === "string" && accsType.toLowerCase().includes("micro")) return false;
   // Require Companies House number OR high-confidence validated website
   const hasCompanyNumber = !!(lead.company_number);
   const hasHighConf = ["high", "confirmed"].includes(lead.website_confidence ?? "");
@@ -368,6 +372,15 @@ export function scoreLead(lead: Partial<ScoreInput>, urgency = 0): ScoreResult {
   if (isDormant) {
     score = Math.min(score, 49);
     reasons.push("⚠ Dormant company (CH accounts) — capped at QUEUE");
+  }
+  // Gate F3: micro-entity accounts filer → cap at QUEUE.
+  // UK micro-entity threshold: turnover ≤ £632k / balance sheet ≤ £316k / ≤ 10 employees
+  // (two of three). Well below the £100k/month (~£1.2M/year) minimum viable FX client floor.
+  // Micro-entity leads stay visible in Research Queue but cannot reach HOT or WARM.
+  const isMicroEntity = typeof accsType === "string" && accsType.toLowerCase().includes("micro");
+  if (isMicroEntity) {
+    score = Math.min(score, 49);
+    reasons.push("⚠ Micro-entity accounts filer (likely <£632k turnover) — capped at QUEUE");
   }
   // Gate G: WARM/HOT requires B2B/trade evidence
   if (score >= 65) {
