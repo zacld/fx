@@ -56,11 +56,13 @@ jobs:
           GEMINI_MODEL:                 ${{ secrets.GEMINI_MODEL }}
           COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           # Manual-dispatch overrides win when set, otherwise scheduled defaults.
-          DISCOVERY_MAX_EVENTS:         ${{ inputs.max_events != '' && inputs.max_events || '12' }}
+          DISCOVERY_MAX_EVENTS:         ${{ inputs.max_events != '' && inputs.max_events || '20' }}
           DISCOVERY_MIN_RELEVANCE:      ${{ inputs.min_relevance != '' && inputs.min_relevance || '4' }}
-          WEB_MAX_EVENTS:               "5"
-          WEB_MAX_CATEGORIES_TO_SCRAPE: "6"
+          WEB_MAX_EVENTS:               "10"
+          WEB_MAX_CATEGORIES_TO_SCRAPE: "10"
           CATEGORY_MIN_SCORE_TO_SCRAPE: "65"
+          WEB_MAX_RESULTS_PER_QUERY:    "8"
+          WEB_MAX_QUERIES_PER_MICRO_CATEGORY: "3"
           # Port 25 is blocked from GitHub Actions egress, so the SMTP RCPT
           # probe in enrich-decision-makers can't connect. The verifier falls
           # back to MX-only checking; verified results from local runs still
