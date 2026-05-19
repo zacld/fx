@@ -34,11 +34,15 @@ export function cleanCompanyName(raw: string): string {
 
   // Strip slogan suffixes after a separator when 3+ words follow ("Acme — the
   // best widgets in town" → "Acme") but keep short trade descriptors.
-  for (const sep of ["|", "–", "—"]) {
+  // ` - ` (spaced hyphen) is also a common web-page separator — only strip when
+  // the right-hand side has 4+ words so "Smith-Jones" style names are preserved.
+  for (const [sep, minWords] of [
+    ["|", 2], ["–", 3], ["—", 3], [" - ", 4],
+  ] as Array<[string, number]>) {
     const idx = name.indexOf(sep);
     if (idx > 0) {
-      const after = name.slice(idx + 1).trim();
-      if (after.split(/\s+/).length >= 3) { name = name.slice(0, idx).trim(); break; }
+      const after = name.slice(idx + sep.length).trim();
+      if (after.split(/\s+/).length >= minWords) { name = name.slice(0, idx).trim(); break; }
     }
   }
 

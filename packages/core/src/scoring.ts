@@ -492,6 +492,25 @@ export function computeReadyScore(lead: Partial<Lead>): number {
   const age = Number.isFinite(yr) ? new Date().getUTCFullYear() - yr : 0;
   s += age >= 10 ? 5 : age >= 5 ? 3 : age >= 2 ? 1 : 0;
 
+  // 8. Contact richness (0–8) — leads with both phone AND a named email are
+  //    genuinely more call-ready than phone-only or email-only leads.
+  const hasPhone = !!(lead.contact_phone);
+  const hasEmail = !!(lead.contact_email ||
+    dms.find((d) => d["email"] || d["email_candidate"]));
+  const hasVerifiedEmail = !!(lead.contact_email ||
+    dms.find((d) => d["email_verified"] || d["email_candidate"]));
+  if (hasPhone && hasVerifiedEmail) s += 8;
+  else if (hasPhone && hasEmail) s += 5;
+  else if (hasPhone) s += 2;
+  else if (hasEmail) s += 1;
+
+  // 9. Accounts filing quality (0–4) — full/group/medium filers are more
+  //    established and larger than abridged/small/unknown.
+  const at = ((lead as Record<string, unknown>).accounts_type as string | undefined) ?? "";
+  const atL = at.toLowerCase();
+  if (["full", "group", "medium"].some((v) => atL.includes(v))) s += 4;
+  else if (["small", "abridged"].some((v) => atL.includes(v))) s += 2;
+
   return Math.min(s, 100);
 }
 

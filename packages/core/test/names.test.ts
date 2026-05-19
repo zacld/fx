@@ -18,9 +18,15 @@ describe("cleanCompanyName", () => {
     expect(cleanCompanyName("Meet The Team — Acme Wines")).toBe("Acme Wines");
   });
 
-  it("strips multi-word slogan suffixes but keeps short trade descriptors", () => {
+  it("strips slogan suffixes after separators", () => {
     expect(cleanCompanyName("Acme Wines — the finest Italian wines in London")).toBe("Acme Wines");
-    expect(cleanCompanyName("Acme Wines | wholesale only")).toBe("Acme Wines | wholesale only");   // 2 words, keep
+    expect(cleanCompanyName("Acme Wines | wholesale only")).toBe("Acme Wines");      // 2 words → strip
+    expect(cleanCompanyName("Acme Wines | Spirits")).toBe("Acme Wines | Spirits");  // 1 word → keep
+  });
+
+  it("strips spaced-hyphen slogans (≥4 words after) but preserves short right-side parts", () => {
+    expect(cleanCompanyName("Emporia Brands - Premium Spirits Importer & Distributor for UK Trade")).toBe("Emporia Brands");
+    expect(cleanCompanyName("Smith-Jones Logistics")).toBe("Smith-Jones Logistics");  // no spaces around -
   });
 
   it("linkedinCompanyName caps at 3 words", () => {

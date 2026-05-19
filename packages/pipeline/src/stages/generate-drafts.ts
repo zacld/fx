@@ -20,7 +20,7 @@ import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 
 import { getDb, schema } from "@fx/core/db";
-import { LeadSchema, repoRoot, type Lead } from "@fx/core";
+import { LeadSchema, repoRoot, cleanCompanyName, type Lead } from "@fx/core";
 import { RunRecorder } from "../run.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -125,9 +125,24 @@ function evidenceSnippet(lead: Lead): string {
 function paymentFlowLine(lead: Lead): string {
   const flow = lead.affected_payment_flow || lead.fx_exposure || "";
   if (flow) return flow.toLowerCase().replace(/\.$/, "");
-  const pair = lead.currency_pair || "";
+  const pair = bestCurrencyPair(lead);
   if (pair) return `${pair} exposure`;
   return "foreign currency exposure";
+}
+
+/** Best single currency pair for this lead (e.g. "GBP/EUR"). */
+function bestCurrencyPair(lead: Lead): string {
+  // 1. Direct field
+  const cp = (lead as Record<string, unknown>).currency_pair as string | undefined;
+  if (cp) return cp;
+  // 2. inferred_currency_pairs array (set by website-intel stage)
+  const icp = (lead as Record<string, unknown>).inferred_currency_pairs as string[] | undefined;
+  if (icp?.length) return icp[0]!;
+  // 3. fx_exposure string (e.g. "GBP/EUR, GBP/USD")
+  const fxE = lead.fx_exposure || "";
+  const match = fxE.match(/[A-Z]{3}\/[A-Z]{3}/);
+  if (match) return match[0];
+  return "";
 }
 
 /** Short event description — not the full summary. Never starts with "recent". */
@@ -138,7 +153,7 @@ function eventLine(lead: Lead): string {
     return h.replace(/\.$/, "").replace(/^recent\s+/i, "");
   }
   // Fallback: derive from event type + currency
-  const pair = lead.currency_pair || "GBP";
+  const pair = bestCurrencyPair(lead) || "GBP";
   const et = (lead.event_type || "").toLowerCase();
   if (et.includes("weaken")) return `${pair} weakening`;
   if (et.includes("strengthen")) return `${pair} strengthening`;
@@ -153,23 +168,84 @@ function sectorLabel(lead: Lead): string {
 }
 
 function companyShort(lead: Lead): string {
-  return (lead.company_name_clean || lead.company_name || "").trim();
+  // Re-run cleaner on whatever is stored — picks up the ` - ` separator fix
+  // and any other improvements even on old data runs.
+  const raw = lead.company_name_clean || lead.company_name || "";
+  return cleanCompanyName(raw).trim() || raw.trim();
+}
+
+/**
+ * Builds a specific "what I noticed on your website" hook from FX payment signals.
+ * More concrete than the generic payment-flow description — makes the call feel
+ * researched rather than cold. Falls back to payment flow if no usable signals.
+ */
+function buildWebsiteHook(lead: Lead): string {
+  const co = companyShort(lead);
+  const sigs = (lead.fx_payment_signals ?? []).map((s) => s.toLowerCase());
+
+  const hasDirectFrom   = sigs.some((s) => /direct from|directly from|sourced from/.test(s));
+  const hasImport       = sigs.some((s) => /\bimport/.test(s));
+  const hasExport       = sigs.some((s) => /\bexport/.test(s));
+  const hasOverseas     = sigs.some((s) => /overseas|foreign supplier|international supplier/.test(s));
+  const hasForeign      = sigs.some((s) => /foreign supplier/.test(s));
+  // Named-country signals: cover common abbreviations and adjectives used in scrapes
+  const hasEurope       = sigs.some((s) =>
+    /europe|european|eur invoice|pay in eur|france|french|german|german|italian|italy|spain|spanish|dutch|belgium|portuguese|polish|scandina|nordic|dutch|swiss/.test(s)
+  );
+  const hasUSA          = sigs.some((s) =>
+    /america|american|\busa\b|us supplier|usd invoice|pay in usd|from usa|us import|united states/.test(s)
+  );
+  const hasAsia         = sigs.some((s) =>
+    /china|chinese|\basia\b|asian|taiwan|india|indian|hong kong|japan|japanese|korea|korean|vietnam|vietnamese|bangladesh|pakistan/.test(s)
+  );
+  const hasCurrency     = sigs.some((s) => /currency|exchange rate|\bfx\b|hedging/.test(s));
+
+  // Most specific first
+  if (hasDirectFrom && hasAsia)    return `it looks like ${co} sources directly from Asian suppliers`;
+  if (hasDirectFrom && hasEurope)  return `it looks like ${co} sources directly from European suppliers`;
+  if (hasDirectFrom && hasUSA)     return `it looks like ${co} sources directly from the US`;
+  if (hasDirectFrom)               return `it looks like ${co} sources directly from overseas suppliers`;
+  if (hasImport && hasAsia)        return `it looks like ${co} imports from Asia`;
+  if (hasImport && hasEurope)      return `it looks like ${co} imports from European suppliers`;
+  if (hasImport && hasUSA)         return `it looks like ${co} imports from the US`;
+  if (hasImport)                   return `it looks like ${co} has import operations`;
+  if (hasExport && hasEurope)      return `it looks like ${co} exports to European customers`;
+  if (hasExport && hasUSA)         return `it looks like ${co} exports to the US`;
+  if (hasExport)                   return `it looks like ${co} has export operations`;
+  if (hasForeign || hasOverseas)   return `it looks like ${co} works with overseas suppliers`;
+  // Geography alone (no import/export keyword found, but country signal present)
+  if (hasAsia)    return `it looks like ${co} sources products from Asia`;
+  if (hasEurope)  return `it looks like ${co} sources products from European suppliers`;
+  if (hasUSA)     return `it looks like ${co} sources products from the US`;
+  if (hasCurrency)                 return `it looks like ${co} has foreign currency exposure`;
+
+  // Fall back to payment flow description
+  return `it looks like ${co} may have ${paymentFlowLine(lead)}`;
 }
 
 // ── Draft builders ────────────────────────────────────────────────────────────
 
 function buildCallOpener(lead: Lead): string {
-  const co = companyShort(lead);
-  const flow = paymentFlowLine(lead);
   const event = eventLine(lead);
   const fname = firstName(lead);
+  const pair  = bestCurrencyPair(lead);
+
   // Safe greeting: only use a person's name if it's from a validated source.
   // Generic fallback asks for whoever handles overseas supplier payments — avoids
   // "Hi Dragon", "Hi Mobile", "Hi Scotch" when scrape produced garbage names.
   const greeting = fname
     ? `Hi, could I speak to ${fname} please? `
     : "Hi, could I speak to whoever handles overseas supplier payments or currency exposure? ";
-  return `${greeting}I'm calling from a currency brokerage — it looks like ${co} may have ${flow}, and given ${event}, it might be worth a quick conversation about the rate you're getting on those payments.`;
+
+  // Specific website hook — reads researched, not cold
+  const hook = buildWebsiteHook(lead);
+
+  // Currency-specific closing (mention EUR/USD/etc. if we know it)
+  const paymentsPhrase = pair
+    ? `the rate you're getting on those ${pair.split("/")[1] ?? pair} payments`
+    : "the rate you're getting on those payments";
+
+  return `${greeting}I'm calling from a currency brokerage — ${hook}, and given ${event}, it might be worth a quick conversation about ${paymentsPhrase}.`;
 }
 
 function buildEmailDraft(lead: Lead): string {
@@ -178,17 +254,18 @@ function buildEmailDraft(lead: Lead): string {
   // Generic greeting uses company team if no validated name available
   const greeting = fname ? `Hi ${fname},` : `Hi ${co} team,`;
   const event = eventLine(lead);
-  const flow = paymentFlowLine(lead);
-  const pair = lead.currency_pair || "FX";
+  const pair = bestCurrencyPair(lead) || "FX";
+  const hook = buildWebsiteHook(lead);
 
-  // Opening line — use payment flow (reliable) not raw website scraping
-  const openLine = `I came across ${co} — it looks like you may have ${flow}.`;
+  // Opening line — use the same specific website hook as the call opener
+  const openLine = `I came across ${co} — ${hook.replace(/^it looks like [^ ]+ /, "it looks like you ")}.`;
 
   // Second paragraph — why this matters now, softened per spec
-  const body2 = `Given ${event}, that may create margin pressure around upcoming ${pair} payments. `
+  const payCurrency = pair !== "FX" ? pair.split("/")[1] ?? pair : pair;
+  const body2 = `Given ${event}, that may create margin pressure around upcoming ${payCurrency} payments. `
     + `A lot of businesses in this space don't always realise there's often a better rate available outside their bank.`;
 
-  const subject = `${co} — ${pair} exposure`;
+  const subject = `${co} — ${payCurrency !== "FX" ? payCurrency : pair} exposure`;
 
   const body = [
     greeting,
@@ -210,11 +287,12 @@ function buildLinkedinNote(lead: Lead): string {
   const co = companyShort(lead);
   const fname = firstName(lead);
   const greeting = fname ? `Hi ${fname}` : "Hi there";
-  const pair = lead.currency_pair || "FX";
+  const pair = bestCurrencyPair(lead) || "FX";
+  const payCurrency = pair !== "FX" ? pair.split("/")[1] ?? pair : pair;
   const event = eventLine(lead);
 
   // Must be ≤300 chars
-  const note = `${greeting} — I came across ${co} and thought the ${event} might be relevant if you have ${pair} payments. Worth a quick chat? I work with a number of similar businesses on the rate side.`;
+  const note = `${greeting} — I came across ${co} and thought the ${event} might be relevant if you have ${payCurrency} payments. Worth a quick chat? I work with a number of similar businesses on the rate side.`;
 
   if (note.length <= 300) return note;
   // Trim gracefully if over limit
