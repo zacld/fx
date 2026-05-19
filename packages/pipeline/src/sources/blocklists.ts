@@ -70,6 +70,8 @@ export const SKIP_PATH_PATTERNS: ReadonlyArray<RegExp> = [
   // content / resource pages — not company homepages
   /\/collections\//, /\/insights\//, /\/guides?\//, /\/resources\//, /\/case-stud/, /\/white-paper/,
   /\/infographic/, /\/podcast\//, /\/webinar\//, /\/event\//, /\/pricing\/details\//,
+  // sub-page paths that are never the root company homepage
+  /\/about[-\/]/, /\/about$/, /\/contact[-\/]/, /\/contact$/, /\/services\//,
 ];
 
 export const SKIP_TITLE_PATTERNS: ReadonlyArray<RegExp> = [

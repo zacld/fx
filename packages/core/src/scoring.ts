@@ -208,8 +208,12 @@ export function isReadyEligible(lead: Partial<Lead>): boolean {
   } catch { /* not a valid URL — don't block */ }
   // Block low-confidence website leads from READY
   if (lead.website_confidence === "low") return false;
-  // Block leads whose company_name is a scraped page title, not a company
-  if (looksLikePageTitle(lead.company_name)) return false;
+  // Block leads whose company_name is a scraped page title, not a company.
+  // Prefer company_name_clean (after prefix/slogan stripping) — if the cleaned
+  // name passes, the raw page-title artifact has been resolved and the lead is valid.
+  const cleanName = (lead as Record<string, unknown>).company_name_clean as string | undefined;
+  const nameToCheck = (cleanName && cleanName.trim()) ? cleanName : lead.company_name;
+  if (looksLikePageTitle(nameToCheck)) return false;
   // Block micro-entity filers — turnover definitively below £632k (~£53k/month),
   // well under the £100k/month minimum viable FX client floor.
   const accsType = (lead as Record<string, unknown>).accounts_type as string | undefined;
