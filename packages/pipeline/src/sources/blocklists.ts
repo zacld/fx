@@ -38,9 +38,11 @@ export const SKIP_DOMAINS: ReadonlySet<string> = new Set([
   "gov.uk", "hmrc.gov.uk", "legislation.gov.uk", "parliament.uk", "nhs.uk", "acas.org.uk", "ico.org.uk",
   "fca.org.uk", "cma.gov.uk", "food.gov.uk", "wsta.co.uk", "scotchwhisky.com", "swa.org.uk", "fdf.org.uk",
   "seafish.org", "cefic.org",
-  // search / tech / reference
+  // search / tech / reference / major cloud/SaaS whose pages are not companies
   "google.com", "google.co.uk", "bing.com", "yahoo.com", "duckduckgo.com", "wikipedia.org", "wikimedia.org",
-  "wikidata.org",
+  "wikidata.org", "microsoft.com", "azure.microsoft.com", "office.com", "office365.com",
+  "salesforce.com", "hubspot.com", "shopify.com", "shopify.co.uk", "squarespace.com", "wix.com",
+  "wordpress.com", "medium.com", "substack.com", "quora.com", "stackoverflow.com",
   // review / comparison sites
   "trustpilot.com", "glassdoor.com", "glassdoor.co.uk", "reviews.co.uk", "reviews.io", "reevoo.com", "feefo.com",
   "which.co.uk", "moneysavingexpert.com", "comparethemarket.com", "tripadvisor.com", "tripadvisor.co.uk",
@@ -61,10 +63,13 @@ export const SKIP_DOMAINS: ReadonlySet<string> = new Set([
 ]);
 
 export const SKIP_PATH_PATTERNS: ReadonlyArray<RegExp> = [
-  /\/blog\//, /\/news\//, /\/press-release/, /\/article\//, /\/articles\//, /\/forum\//, /\/community\//,
+  /\/blog\//, /\/news\//, /\/newsroom\//, /\/press-release/, /\/article\//, /\/articles\//, /\/forum\//, /\/community\//,
   /\/wiki\//, /\/help\//, /\/support\/faq/, /\/jobs\//, /\/careers\//, /\/recruit/, /\/vacancies/,
   /\/login/, /\/signup/, /\/register/, /\/checkout/, /\/basket/, /\/cart/, /\/search\?/, /\/results\?/,
   /\/find\?/, /\/category\//, /\/tag\//, /\/author\//, /\.pdf$/, /\.docx?$/, /\.xlsx?$/,
+  // content / resource pages — not company homepages
+  /\/collections\//, /\/insights\//, /\/guides?\//, /\/resources\//, /\/case-stud/, /\/white-paper/,
+  /\/infographic/, /\/podcast\//, /\/webinar\//, /\/event\//, /\/pricing\/details\//,
 ];
 
 export const SKIP_TITLE_PATTERNS: ReadonlyArray<RegExp> = [
@@ -74,6 +79,12 @@ export const SKIP_TITLE_PATTERNS: ReadonlyArray<RegExp> = [
   /\bmarket report\b/i, /\bindustry report\b/i, /\bcompare\s+/i, /\breviews?\s+(of|for)\b/i,
   /^(find|discover)\s+(a|the|your)\s+/i, /\d+\s+importer/i, /\d+\s+exporter/i, /\d+\s+supplier/i,
   /database of\s/i, /register of\s/i,
+  // news / statistics headlines — not company pages
+  /industry records\s+[£$€]/, /\brecords?\s+[\$£€][\d.]+[bm]n?\b/i,
+  /^how to\s+/i, /^guide\s+(to|for)\s+/i, /\b202\d\s+guide\b/i,
+  /^(buy|shop|order)\s+\w+\s+online/i,
+  // cloud/SaaS product pages
+  /pricing\s*[-–—|:]\s*(cloud|azure|aws|saas)/i,
 ];
 
 export function domainFromUrl(url: string): string | null {
