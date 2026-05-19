@@ -47,6 +47,48 @@ const dateShort= new Date().toLocaleDateString("en-GB",{weekday:"short",day:"num
 
 function copy(text) { navigator.clipboard.writeText(text).catch(()=>{}); }
 
+// ─── CSV / Sheets export ──────────────────────────────────────────────────────
+function leadsToCSV(leads) {
+  const headers = [
+    "Rank","Company","Website","Segment","Director","Role","Phone","Email",
+    "FX Signals (n)","FX Signals","Exposure Thesis","Why Now",
+    "Score","Priority","Accounts Type","Route Grade","LinkedIn Director","Rescored At"
+  ];
+  const esc = v => {
+    const s = (v ?? "").toString().replace(/"/g,'""');
+    return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s}"` : s;
+  };
+  const rows = leads.map((l, i) => {
+    const dms = l.decision_makers || [];
+    const dm = dms.find(d=>d.tier===1) || dms[0] || {};
+    const liUrl = dm.linkedin_search || dm.linkedin_url || "";
+    const email = l.contact_email || dm.email_candidate || dm.email || "";
+    const phone = l.contact_phone || "";
+    return [
+      i+1, l.company_name, l.website, l.segment_name,
+      l.director_name || (dm.first_name ? `${dm.first_name} ${dm.last_name||""}`.trim() : ""),
+      l.director_role || dm.role || "",
+      phone, email,
+      (l.fx_payment_signals||[]).length,
+      (l.fx_payment_signals||[]).slice(0,6).join("; "),
+      l.exposure_thesis || l.why_affected || "",
+      l.why_now || "",
+      l.score, l.priority, l.accounts_type || "",
+      l.route_grade || "", liUrl, l.rescored_at || ""
+    ].map(esc).join(",");
+  });
+  return [headers.join(","), ...rows].join("\n");
+}
+
+function downloadCSV(leads, filename) {
+  const csv = leadsToCSV(leads);
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ─── CRM ───────────────────────────────────────────────────────────
 const CRM_KEY      = "fx_crm_state";
 const CRM_STATUSES = ["new","reviewed","saved","contacted","follow_up","meeting_booked","passed_to_closer","not_relevant"];
@@ -2538,6 +2580,20 @@ export default function App() {
         </div>
         <span className="view-desc">{viewDesc}</span>
         <span className={viewCountCls}>{filteredLeads.length} leads</span>
+        <div style={{display:"flex",gap:6,marginLeft:"auto"}}>
+          <button
+            className="btn-sm"
+            style={{background:"rgba(16,185,129,.08)",borderColor:"rgba(16,185,129,.2)",color:"#10B981",display:"flex",alignItems:"center",gap:5}}
+            onClick={()=>{
+              const exportLeads = filters.view==="call_list" ? callListLeads.slice(0,25) : filteredLeads;
+              const label = filters.view==="call_list"?"daily-call-list":filters.view==="research"?"research-queue":"all-leads";
+              downloadCSV(exportLeads, `fx-${label}-${new Date().toISOString().slice(0,10)}.csv`);
+            }}
+            title="Download as CSV — open in Google Sheets or Excel"
+          >
+            ⬇ Export CSV
+          </button>
+        </div>
       </div>
 
       {/* FILTER BAR */}
