@@ -82,7 +82,7 @@ export const SKIP_TITLE_PATTERNS: ReadonlyArray<RegExp> = [
   // news / statistics headlines — not company pages
   /industry records\s+[£$€]/, /\brecords?\s+[\$£€][\d.]+[bm]n?\b/i,
   /^how to\s+/i, /^guide\s+(to|for)\s+/i, /\b202\d\s+guide\b/i,
-  /^(buy|shop|order)\s+\w+\s+online/i,
+  /^(buy|shop|order)\s+[\w\s]+\s+online\b/i,
   // cloud/SaaS product pages
   /pricing\s*[-–—|:]\s*(cloud|azure|aws|saas)/i,
 ];
