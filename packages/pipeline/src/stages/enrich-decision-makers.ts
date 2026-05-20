@@ -463,6 +463,7 @@ async function enrichLead(
   leadAny.company_linkedin = ctx.coClean ? liCompanySearch(ctx.coClean) : null;
   leadAny.route_grade = computeRouteGrade(lead, dms);
   leadAny.contact_confidence = computeContactConfidence(lead, dms);
+  leadAny.dm_enriched_at = new Date().toISOString(); // tracks last enrichment; used to skip re-runs within 7 days
   if (techSignals.size) leadAny.tech_signals = Array.from(techSignals.keys());
   if (noWebsite?.switchboard_prefix && !lead.contact_phone) {
     leadAny.switchboard_hint = `Likely UK switchboard prefix: ${noWebsite.switchboard_prefix} (from ${lead.address ?? "registered address"})`;
@@ -506,7 +507,15 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
 
     const needsEnrichment = (l: Lead): boolean => {
       if (force) return true;
+      // Skip leads already enriched with a usable contact route (A–E)
       if ((l.decision_makers?.length ?? 0) > 0 && l.route_grade && l.route_grade !== "F") return false;
+      // Skip leads enriched within the last 7 days even if route_grade=F —
+      // re-running won't find new contacts and just wastes time on the growing pool.
+      const enrichedAt = (l as Record<string, unknown>).dm_enriched_at as string | undefined;
+      if (enrichedAt) {
+        const ageDays = (Date.now() - new Date(enrichedAt).getTime()) / 86_400_000;
+        if (ageDays < 7) return false;
+      }
       return !!(l.company_number || l.director_name || l.website);
     };
     const candidates = Object.values(leads).filter(needsEnrichment).slice(0, max);
