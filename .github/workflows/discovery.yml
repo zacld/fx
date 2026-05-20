@@ -15,7 +15,8 @@ name: FX Discovery
 
 on:
   schedule:
-    - cron: '0 5 * * 1-5'   # 5am Mon–Fri UTC (list ready ~7am BST for morning commute)
+    - cron: '0 5 * * 1-5'    # 5am Mon–Fri UTC  — list ready ~7am BST for morning commute
+    - cron: '0 12 * * 1-5'   # 12pm Mon–Fri UTC — midday market/news update (~1pm BST)
   workflow_dispatch:
     # Optional one-off overrides for trigger-quality audits. Blank → use the
     # scheduled defaults below. Useful when you want Brain 1 to see a wider /

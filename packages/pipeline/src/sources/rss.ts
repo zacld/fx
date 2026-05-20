@@ -9,13 +9,35 @@ import * as cheerio from "cheerio";
 
 export interface RssFeed { source: string; url: string; }
 export const RSS_FEEDS: ReadonlyArray<RssFeed> = [
-  { source: "BBC Business", url: "http://feeds.bbci.co.uk/news/business/rss.xml" },
-  { source: "Reuters Business", url: "https://feeds.reuters.com/reuters/businessNews" },
-  { source: "FXStreet", url: "https://www.fxstreet.com/rss/news" },
-  { source: "Bank of England", url: "https://www.bankofengland.co.uk/rss/news" },
-  { source: "GOV.UK Trade", url: "https://www.gov.uk/search/news-and-communications.atom?keywords=trade" },
-  { source: "The Guardian Biz", url: "https://www.theguardian.com/uk/business/rss" },
-  { source: "Sky News Biz", url: "https://feeds.skynews.com/feeds/rss/business.xml" },
+  // ── FX / macro / rates ────────────────────────────────────────────────────
+  { source: "BBC Business",        url: "http://feeds.bbci.co.uk/news/business/rss.xml" },
+  { source: "Reuters Business",    url: "https://feeds.reuters.com/reuters/businessNews" },
+  { source: "FXStreet",            url: "https://www.fxstreet.com/rss/news" },
+  { source: "ForexLive",           url: "https://www.forexlive.com/feed/news" },
+  { source: "DailyFX",             url: "https://www.dailyfx.com/feeds/all" },
+  { source: "Bank of England",     url: "https://www.bankofengland.co.uk/rss/news" },
+  { source: "ECB Press",           url: "https://www.ecb.europa.eu/rss/press.rss" },
+  { source: "Federal Reserve",     url: "https://www.federalreserve.gov/feeds/press_all.xml" },
+  // ── UK business / trade ───────────────────────────────────────────────────
+  { source: "GOV.UK Trade",        url: "https://www.gov.uk/search/news-and-communications.atom?keywords=trade" },
+  { source: "GOV.UK Tariffs",      url: "https://www.gov.uk/search/news-and-communications.atom?keywords=tariff+import+duty" },
+  { source: "GOV.UK Export",       url: "https://www.gov.uk/search/news-and-communications.atom?keywords=export+import+supply+chain" },
+  { source: "The Guardian Biz",    url: "https://www.theguardian.com/uk/business/rss" },
+  { source: "Sky News Biz",        url: "https://feeds.skynews.com/feeds/rss/business.xml" },
+  { source: "CityAM",              url: "https://www.cityam.com/feed/" },
+  { source: "This is Money",       url: "https://www.thisismoney.co.uk/money/rss.xml" },
+  // ── commodities / energy / oil ───────────────────────────────────────────
+  { source: "OilPrice.com",        url: "https://oilprice.com/rss/main" },
+  // ── UK trade press: food & drink ─────────────────────────────────────────
+  { source: "The Grocer",          url: "https://www.thegrocer.co.uk/rss" },
+  { source: "Food Manufacture",    url: "https://www.foodmanufacture.co.uk/rss/feeds/news" },
+  { source: "The Drinks Business", url: "https://www.thedrinksbusiness.com/feed/" },
+  { source: "Harpers Wine",        url: "https://harpers.co.uk/feed/" },
+  { source: "Foodnavigator UK",    url: "https://www.foodnavigator.com/rss/editorial/food-business" },
+  { source: "Undercurrent News",   url: "https://www.undercurrentnews.com/feed/" },
+  // ── UK trade press: manufacturing / logistics ─────────────────────────────
+  { source: "The Manufacturer",    url: "https://www.themanufacturer.com/feed/" },
+  { source: "Logistics Manager",   url: "https://www.logisticsmanager.com/feed/" },
 ];
 
 export interface FeedEntry { title: string; link: string; summary: string; }

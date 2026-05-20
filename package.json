@@ -25,7 +25,9 @@
     "dedup": "tsx packages/pipeline/src/stages/dedup.ts",
     "generate-drafts": "tsx packages/pipeline/src/stages/generate-drafts.ts",
     "export-sheets": "tsx packages/pipeline/src/stages/export-sheets.ts",
+    "evergreen": "tsx packages/pipeline/src/stages/evergreen.ts",
     "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run generate-drafts && npm run db:export && npm run export-sheets",
+    "pipeline:evergreen": "npm run db:import && npm run evergreen && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run generate-drafts && npm run db:export && npm run export-sheets",
     "sync-web-data": "mkdir -p apps/web/public/data && cp data/events.json data/leads.json apps/web/public/data/"
   },
   "devDependencies": {

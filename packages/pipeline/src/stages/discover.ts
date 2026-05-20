@@ -186,13 +186,18 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
         if (persist) updEvent.run({ id: row.id, status: "low_relevance", data: JSON.stringify(ed) });
         continue;
       }
-      // context_only (weak trigger) → minimal scrape: 1 segment, 1 micro-cat, 2 queries, 4 results
-      // This ensures every event surfaces at least some fresh candidates rather than returning nothing.
-      const scale = mode === "limited" ? 0.5 : mode === "context_only" ? 0.25 : 1;
-      const effMaxSegments = mode === "context_only" ? 1 : Math.max(1, Math.round(maxSegments * scale));
-      const effMaxQPerMc   = mode === "context_only" ? 1 : Math.max(1, Math.round(maxQPerMc * scale));
-      const effMaxQPerSeg  = mode === "context_only" ? 2 : Math.max(1, Math.round(maxQPerSeg * scale));
-      const effMaxResults  = mode === "context_only" ? 4 : Math.max(2, Math.round(maxResults * (mode === "limited" ? 0.6 : 1)));
+      // Dynamic budget by trigger strength:
+      //   strong  → 1.5x budget (more segments, more results) — strong triggers justify deeper search
+      //   full    → 1x (default)
+      //   limited → 0.5x
+      //   context_only → minimal (1 seg, 1 mc, 2 q, 4 results) — ensures fresh candidates even on weak days
+      const triggerStrength = (event as { trigger_strength?: string }).trigger_strength ?? "medium";
+      const isStrong = mode === "full" && triggerStrength === "strong";
+      const scale = mode === "context_only" ? 0.25 : mode === "limited" ? 0.5 : isStrong ? 1.5 : 1;
+      const effMaxSegments = mode === "context_only" ? 1 : Math.min(20, Math.max(1, Math.round(maxSegments * scale)));
+      const effMaxQPerMc   = mode === "context_only" ? 1 : Math.min(5, Math.max(1, Math.round(maxQPerMc * scale)));
+      const effMaxQPerSeg  = mode === "context_only" ? 2 : Math.min(8, Math.max(1, Math.round(maxQPerSeg * scale)));
+      const effMaxResults  = mode === "context_only" ? 4 : Math.min(15, Math.max(2, Math.round(maxResults * (mode === "limited" ? 0.6 : isStrong ? 1.5 : 1))));
       const budgetCap = Number((event as { recommended_query_budget?: number }).recommended_query_budget ?? 0);
 
       const segments = (event.target_segments ?? [])
