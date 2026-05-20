@@ -1,16 +1,13 @@
 {
   "025b6352ccbfc55c": {
     "id": "025b6352ccbfc55c",
+    "headline": "UK delays some sanctions on Russian oil and gas amid Middle East conflict",
     "source": "The Guardian Biz",
     "source_url": "https://www.theguardian.com/politics/2026/may/20/uk-relaxes-strict-sanctions-on-russian-crude-oil",
-    "headline": "UK delays some sanctions on Russian oil and gas amid Middle East conflict",
-    "raw_summary": "‘Short-term’ measures on import of jet fuel and diesel, and shipping of LNG, aimed to help tackle soaring prices Business live – latest updates The UK has delayed some sanctions on Russian oil and liquefied natural gas to help tackle soaring prices as the conflict in the Middle East disrupts global supplies. A trade licence that came into effect on Wednesday permits the import of jet fuel and diesel refined from Russian crude in third countries while another lifts restrictions on shipping LNG from two Russian terminals. Continue reading...",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-05-20T14:04:54.580Z",
+    "status": "ready",
     "event_type": "Sanctions and trade policy",
     "event_breadth": "sector_specific",
-    "summary": "The UK's delay in sanctions on Russian oil and gas may impact UK businesses importing these commodities, affecting their FX exposure and costs. This event has a medium level of urgency and relevance, warranting a limited discovery effort.",
     "currency_pairs": [
       "GBP/USD",
       "GBP/RUB"
@@ -27,49 +24,40 @@
       "UK businesses in the aviation and transportation sectors"
     ],
     "why_now": "The conflict in the Middle East is disrupting global supplies, making the delay in sanctions a timely event to consider for UK businesses importing these commodities.",
-    "discovery_recommendation": "Limited run — the event has some FX relevance, particularly for businesses importing oil and gas products, but the connection to specific payment flows and UK businesses is not as strong as other events.",
     "confidence_level": "medium",
     "confidence_reason": "The event is related to trade and sanctions, which can impact FX, but the connection to specific UK businesses and their payment flows is not as direct as a central bank decision or a sharp currency move.",
+    "discovery_recommendation": "Limited run — the event has some FX relevance, particularly for businesses importing oil and gas products, but the connection to specific payment flows and UK businesses is not as strong as other events.",
     "what_happened": "The UK delayed some sanctions on Russian oil and gas to help tackle soaring prices.",
     "what_changed_financially": "The delay in sanctions may reduce the cost of importing jet fuel and diesel refined from Russian crude, potentially affecting the GBP cost for UK businesses.",
     "who_pays_more": "None directly, but UK businesses may face indirect effects from changes in global supply chains and prices.",
     "who_receives_less": "None directly, but the delay in sanctions may reduce revenue for some UK businesses if they are involved in the oil and gas sector and were anticipating the sanctions to increase their market share or prices.",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP payments for imported oil and gas products, potentially invoiced in USD or other currencies.",
     "fx_payment_logic": "UK businesses importing oil and gas products may face changes in their FX exposure due to the delay in sanctions, particularly if they are invoiced in USD or other currencies. The timing of payments and the specific currencies used in these transactions can create FX risks that need to be managed.",
-    "sales_angle": "If your business imports oil and gas products, the delay in sanctions on Russian imports may impact your costs and FX exposure. It's worth reviewing your current arrangements and considering how to mitigate any potential risks.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "The delay in sanctions may reduce costs for UK businesses importing oil and gas products, but it also introduces uncertainty and potential FX risks that need to be managed. Businesses in the aviation and transportation sectors may be particularly affected.",
-    "exposure_types": [
-      "Commodity price exposure",
-      "FX exposure on imports"
-    ],
+    "sales_angle": "If your business imports oil and gas products, the delay in sanctions on Russian imports may impact your costs and FX exposure. It's worth reviewing your current arrangements and considering how to mitigate any potential risks.",
     "overall_sales_angle": "The delay in sanctions on Russian oil and gas imports may impact your business's costs and FX exposure. Let's discuss how to navigate these changes and mitigate any potential risks.",
+    "summary": "The UK's delay in sanctions on Russian oil and gas may impact UK businesses importing these commodities, affecting their FX exposure and costs. This event has a medium level of urgency and relevance, warranting a limited discovery effort.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of oil and gas products",
-        "category_priority_score": 72,
         "business_model": "UK businesses importing oil and gas products, potentially invoiced in USD or other currencies.",
         "exposure_level": "Medium",
         "exposure_type": "Commodity price exposure and FX exposure on imports",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK importers face FX risks when paying for oil and gas products in currencies other than GBP, particularly if the delay in sanctions affects global prices and supply chains.",
         "margin_risk": "Medium — changes in commodity prices and FX rates can impact margins for importers.",
         "payment_timing_risk": "Medium — the timing of payments for oil and gas imports can create FX risks if not managed properly.",
         "affected_payment_flow": "GBP payments for oil and gas imports, potentially invoiced in USD or other currencies.",
-        "website_validation_signals": [
-          "oil imports",
-          "gas imports",
-          "energy sector"
-        ],
-        "avoid_segments": [
-          "UK businesses with no international trade",
-          "pure domestic UK suppliers"
-        ],
-        "sales_angle": "The delay in sanctions on Russian oil and gas imports may impact your costs and FX exposure. Let's discuss how to navigate these changes.",
-        "exposure_thesis_template": "This company imports oil and gas products, potentially facing commodity price exposure and FX risks on imports due to the delay in sanctions.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of jet fuel",
@@ -96,11 +84,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "oil imports",
+          "gas imports",
+          "energy sector"
+        ],
         "segment_signals": [
           "oil imports",
           "gas imports",
           "energy sector"
-        ]
+        ],
+        "avoid_segments": [
+          "UK businesses with no international trade",
+          "pure domestic UK suppliers"
+        ],
+        "sales_angle": "The delay in sanctions on Russian oil and gas imports may impact your costs and FX exposure. Let's discuss how to navigate these changes.",
+        "exposure_thesis_template": "This company imports oil and gas products, potentially facing commodity price exposure and FX risks on imports due to the delay in sanctions."
       }
     ],
     "companies_house_terms": [
@@ -115,24 +116,26 @@
       "\"diesel importer\" UK",
       "\"fuel importer\" UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "‘Short-term’ measures on import of jet fuel and diesel, and shipping of LNG, aimed to help tackle soaring prices Business live – latest updates The UK has delayed some sanctions on Russian oil and liquefied natural gas to help tackle soaring prices as the conflict in the Middle East disrupts global supplies. A trade licence that came into effect on Wednesday permits the import of jet fuel and diesel refined from Russian crude in third countries while another lifts restrictions on shipping LNG from two Russian terminals. Continue reading...",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "Commodity price exposure",
+      "FX exposure on imports"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-20T14:05:00.823Z"
   },
   "062fd662536438ee": {
     "id": "062fd662536438ee",
+    "headline": "China to buy 200 Boeing jets and ease rare earth curbs in US trade breakthrough",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/china-to-buy-200-boeing-jets-and-ease-rare-earth-curbs-in-us-trade-breakthrough-20260520/",
-    "headline": "China to buy 200 Boeing jets and ease rare earth curbs in US trade breakthrough",
-    "raw_summary": "China announced it will purchase 200 Boeing jets, review rare earth export licences for civilian use and pursue reciprocal tariff cuts on $30 billion or more of goods with the US as part of a broad trade package. Summary: The following is drawn from a China Commerce Ministry statement. China will purchase 200 Boeing jets, with the US committing to provide engines, parts and supply guarantees for components as part of the deal Beijing will review rare earth export licence applications for civilian use and both sides agreed to jointly study and resolve each other's concerns on rare earths, a sig",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-05-20T14:04:48.205Z",
+    "status": "ready",
     "event_type": "Trade agreement",
     "event_breadth": "sector_specific",
-    "summary": "The US-China trade deal may impact UK businesses with US supply chains or competing with Boeing. Changes in rare earth export policies and potential tariff cuts could also affect UK manufacturers.",
     "currency_pairs": [
       "USD/CNY",
       "GBP/USD"
@@ -150,49 +153,40 @@
       "UK manufacturers with US supply chains"
     ],
     "why_now": "The trade deal may lead to changes in global supply chains, affecting UK businesses with US or Chinese connections",
-    "discovery_recommendation": "Limited run — focusing on UK businesses with potential exposure to US-China trade developments",
     "confidence_level": "medium",
     "confidence_reason": "Trade deal specifics are clear but the direct impact on UK businesses is indirect and requires further analysis",
+    "discovery_recommendation": "Limited run — focusing on UK businesses with potential exposure to US-China trade developments",
     "what_happened": "China announced a trade package including the purchase of 200 Boeing jets and potential easing of rare earth export restrictions",
     "what_changed_financially": "Potential increase in Boeing sales, changes in rare earth export policies, and possible tariff cuts on $30 billion in goods",
     "who_pays_more": "UK businesses competing with Boeing or relying on rare earths may face increased costs or competition",
     "who_receives_less": "None directly, but UK businesses with US supply chains may benefit from reduced tariffs",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Low to medium",
     "affected_payment_flow": "GBP/USD for UK businesses with US supply chains, potential impact on rare earth prices",
     "fx_payment_logic": "UK businesses with US supply chains may face changes in GBP/USD exchange rates, affecting their costs and competitiveness",
-    "sales_angle": "If you have a US supply chain or compete with Boeing, the recent trade deal may impact your business",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Low to medium",
     "business_impact_summary": "UK businesses may face increased competition or costs due to the trade deal, while those with US supply chains may benefit from reduced tariffs",
-    "exposure_types": [
-      "Supply chain exposure",
-      "Competitive pressure"
-    ],
+    "sales_angle": "If you have a US supply chain or compete with Boeing, the recent trade deal may impact your business",
     "overall_sales_angle": "The US-China trade deal may change your supply chain costs or competitive landscape — worth reviewing your FX exposure",
+    "summary": "The US-China trade deal may impact UK businesses with US supply chains or competing with Boeing. Changes in rare earth export policies and potential tariff cuts could also affect UK manufacturers.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK aerospace suppliers",
-        "category_priority_score": 72,
         "business_model": "UK supplier to aerospace industry, potentially competing with Boeing or relying on US supply chains",
         "exposure_level": "Medium",
         "exposure_type": "Competitive pressure — Boeing sales and rare earth export policies",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK supplier faces changes in GBP/USD exchange rates, affecting costs and competitiveness",
         "margin_risk": "Medium — changes in Boeing sales and rare earth prices may impact UK supplier margins",
         "payment_timing_risk": "Low to medium — typical payment terms in aerospace industry",
         "affected_payment_flow": "GBP/USD payments for US supply chains or rare earth imports",
-        "website_validation_signals": [
-          "aerospace supplier",
-          "US supply chain",
-          "Boeing competitor"
-        ],
-        "avoid_segments": [
-          "pure domestic UK aerospace suppliers",
-          "non-Boeing competitors"
-        ],
-        "sales_angle": "The US-China trade deal may impact your aerospace supply chain costs or competitiveness",
-        "exposure_thesis_template": "This company supplies the aerospace industry and may face changes in competitive pressure or supply chain costs due to the trade deal",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK suppliers to Boeing",
@@ -209,11 +203,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "aerospace supplier",
+          "US supply chain",
+          "Boeing competitor"
+        ],
         "segment_signals": [
           "aerospace supplier",
           "US supply chain",
           "Boeing competitor"
-        ]
+        ],
+        "avoid_segments": [
+          "pure domestic UK aerospace suppliers",
+          "non-Boeing competitors"
+        ],
+        "sales_angle": "The US-China trade deal may impact your aerospace supply chain costs or competitiveness",
+        "exposure_thesis_template": "This company supplies the aerospace industry and may face changes in competitive pressure or supply chain costs due to the trade deal"
       }
     ],
     "companies_house_terms": [
@@ -226,8 +233,13 @@
       "Boeing UK partner",
       "aerospace supplier UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "China announced it will purchase 200 Boeing jets, review rare earth export licences for civilian use and pursue reciprocal tariff cuts on $30 billion or more of goods with the US as part of a broad trade package. Summary: The following is drawn from a China Commerce Ministry statement. China will purchase 200 Boeing jets, with the US committing to provide engines, parts and supply guarantees for components as part of the deal Beijing will review rare earth export licence applications for civilian use and both sides agreed to jointly study and resolve each other's concerns on rare earths, a sig",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "Supply chain exposure",
+      "Competitive pressure"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-20T14:04:59.492Z"
@@ -847,6 +859,57 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-20T08:24:59.141Z"
   },
+  "487abbb4bb3c2a42": {
+    "id": "487abbb4bb3c2a42",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/canadian-dollar-remains-pressured-as-hawkish-fed-bets-and-iran-tensions-support-the-us-dollar-202605201416",
+    "headline": "Canadian Dollar remains pressured as hawkish Fed bets and Iran tensions support the US Dollar",
+    "raw_summary": "USD/CAD trades with a mild upside bias on Wednesday, supported by a firmer US Dollar (USD), while a modest pullback in Crude Oil prices weighs slightly on the commodity-linked Canadian Dollar (CAD). At the time of writing, the pair is trading around 1.3760, hovering near one-month highs.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-05-20T15:29:15.762Z",
+    "event_type": "Currency move",
+    "event_breadth": "commodity_currency",
+    "summary": "The Canadian Dollar is under pressure, which might have a mild impact on UK businesses trading with Canada. However, the direct relevance is limited compared to moves in more significant currencies like the EUR or USD.",
+    "currency_pairs": [
+      "USD/CAD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "USD/CAD move may affect UK businesses importing from or exporting to Canada, but the direct impact is limited and indirect.",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of Canadian goods",
+      "UK exporters to Canada"
+    ],
+    "why_now": "The recent move in USD/CAD could be a reminder for UK businesses trading with Canada to review their currency exposure.",
+    "discovery_recommendation": "Context only — the event is not directly impactful but can be used as background information for outreach.",
+    "confidence_level": "medium",
+    "confidence_reason": "The event is a currency move, but it involves the Canadian Dollar, which is less directly relevant to UK businesses compared to EUR or USD.",
+    "what_happened": "The Canadian Dollar remains under pressure due to a hawkish Fed and Iran tensions supporting the US Dollar.",
+    "what_changed_financially": "The USD/CAD rate moved, potentially affecting the cost of Canadian imports or the revenue from Canadian exports for UK businesses.",
+    "who_pays_more": "UK businesses importing from Canada might face higher costs if they have to convert GBP to CAD.",
+    "who_receives_less": "UK businesses exporting to Canada might receive less GBP for their CAD earnings.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP to CAD conversions for trade with Canada.",
+    "fx_payment_logic": "UK businesses may need to convert GBP to CAD for imports from Canada or convert CAD earnings to GBP for exports to Canada. The value of these transactions could be affected by the USD/CAD rate move.",
+    "sales_angle": "If you trade with Canada, you might want to consider the current currency environment and how it affects your costs or revenues.",
+    "business_impact_summary": "The impact on UK businesses is indirect and likely to be small unless they have significant trade with Canada. The move in USD/CAD is more of a background factor than a direct trigger for action.",
+    "exposure_types": [
+      "CAD payment exposure"
+    ],
+    "overall_sales_angle": "Reviewing currency exposure for trade with Canada might be worthwhile given the current USD/CAD move.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "4d47fb7c7500756b": {
     "id": "4d47fb7c7500756b",
     "headline": "Euro remains stronger against Canadian Dollar as oil prices ease",
@@ -908,35 +971,35 @@
     "raw_summary": "As the broader market focus stays on the fallout from the Middle East crisis, it is easy to expect inflation to keep running up on the back of higher energy prices. But as we look to the UK CPI report later, the expectation is for price pressures to ease in April. That at least on an annual basis. So, what's the deal here? Let's take a quick look as to why that is and what can we expect. The headline numbers are still very much expected to be impacted by higher energy prices from the US-Iran conflict. That should lead to monthly inflation jumping by around 0.9%. However, the annual estimate is",
     "pre_relevance_score": 7,
     "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-05-20T14:04:32.418Z",
-    "event_type": "inflation report",
+    "detected_at": "2026-05-20T15:29:10.085Z",
+    "event_type": "Economic report",
     "event_breadth": "macro",
-    "summary": "UK CPI report may show easing price pressures, but no direct FX implications",
+    "summary": "The UK CPI report is expected to show easing annual inflation despite higher energy prices. While it has implications for future monetary policy, the direct FX relevance is low.",
     "currency_pairs": [],
-    "urgency_score": 2,
+    "urgency_score": 3,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "UK CPI report may have indirect implications for GBP, but no direct FX hook",
+    "commercial_relevance_reason": "UK CPI report has indirect implications for future BoE decisions, which could influence GBP, but it's not a direct FX hook",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
-    "why_now": "Indirect potential implications for GBP due to CPI report",
-    "discovery_recommendation": "Context only — no direct FX payment flow hook",
+    "why_now": "The CPI report's implications for future BoE decisions could have a long-term impact on GBP, but it's not an immediate FX concern",
+    "discovery_recommendation": "Context only — keep for messaging context, but do not generate new leads from it",
     "confidence_level": "medium",
-    "confidence_reason": "While the CPI report may influence monetary policy, the connection to FX is indirect and speculative",
-    "what_happened": "UK CPI report expected to show easing price pressures on an annual basis",
-    "what_changed_financially": "None directly, but potential implications for interest rates and GBP",
+    "confidence_reason": "While the CPI report has implications for monetary policy, the direct FX relevance is low without a clear surprise in the data",
+    "what_happened": "UK CPI report is expected to show easing price pressures on an annual basis despite monthly inflation increase due to higher energy prices",
+    "what_changed_financially": "Expectation of easing annual inflation rate",
     "who_pays_more": "None directly",
     "who_receives_less": "None directly",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "None",
-    "fx_payment_logic": "None",
-    "sales_angle": "None",
-    "business_impact_summary": "Indirect potential implications for GBP, but no direct impact on UK businesses",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX payment logic applies as this is an economic report without immediate FX implications",
+    "sales_angle": "Today's UK CPI report may have future implications for GBP, but it's not a direct reason to review your FX strategy today",
+    "business_impact_summary": "The CPI report may influence future BoE decisions, which could impact GBP, but it does not directly affect UK businesses' FX exposures today",
     "exposure_types": [],
-    "overall_sales_angle": "None",
+    "overall_sales_angle": "The CPI report is more about future implications for GBP rather than an immediate FX concern",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -994,16 +1057,13 @@
   },
   "72838d82725c1064": {
     "id": "72838d82725c1064",
+    "headline": "investingLive European markets wrap: A little risk respite as Nvidia earnings eyed",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/investinglive-european-markets-wrap-a-little-risk-respite-as-nvidia-earnings-eyed-20260520/",
-    "headline": "investingLive European markets wrap: A little risk respite as Nvidia earnings eyed",
-    "raw_summary": "Headlines: A steadier mood as we get into European trading, still no US-Iran breakthrough yet EUR/USD continues its run lower amid increasing Fed hike bets, surging Treasury yields Gold extends the losses as Fed rate hike risks increase amid prolonged US-Iran stalemate ECB policymaker Wunsch warns we are at the beginning of an inflation problem Soon to be ECB policymaker Moulin says it's too soon to say if ECB needs to act in June What did the U.S. walk away with from the China summit? China to buy 200 Boeing jets and ease rare earth curbs in US trade breakthrough UK inflation underwhelms in A",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-05-20T14:04:39.553Z",
+    "status": "context_only",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "EUR/USD moved lower amid Fed hike bets and surging Treasury yields. UK businesses with USD-priced imports or revenue streams may be affected.",
     "currency_pairs": [
       "EUR/USD"
     ],
@@ -1019,43 +1079,44 @@
       "UK businesses with USD revenue streams"
     ],
     "why_now": "The current EUR/USD move may prompt UK businesses to review their USD-priced imports or revenue streams",
-    "discovery_recommendation": "Context only — while the EUR/USD move has implications, it's less direct than a GBP/EUR or GBP/USD move",
     "confidence_level": "medium",
     "confidence_reason": "While EUR/USD move is relevant, its direct impact on UK businesses is less clear without specific USD-priced import or revenue streams",
+    "discovery_recommendation": "Context only — while the EUR/USD move has implications, it's less direct than a GBP/EUR or GBP/USD move",
     "what_happened": "EUR/USD continued its downward trend amid increasing Fed hike bets and surging Treasury yields",
     "what_changed_financially": "EUR/USD rate moved, potentially affecting UK businesses with USD-priced imports or revenue streams",
     "who_pays_more": "UK businesses with USD-priced imports may face higher costs if they haven't hedged",
     "who_receives_less": "UK businesses with USD revenue streams may receive less GBP upon conversion",
-    "margin_risk": "Low to Medium",
-    "payment_timing_risk": "Low to Medium",
     "affected_payment_flow": "USD-priced imports or revenue streams",
     "fx_payment_logic": "UK businesses importing USD-priced goods or receiving USD revenue streams face exchange rate risk on these transactions",
-    "sales_angle": "If you have USD-priced imports or revenue streams, the current EUR/USD move might be worth reviewing.",
+    "margin_risk": "Low to Medium",
+    "payment_timing_risk": "Low to Medium",
     "business_impact_summary": "UK businesses with USD-priced imports may face higher costs, while those with USD revenue streams may receive less GBP upon conversion.",
+    "sales_angle": "If you have USD-priced imports or revenue streams, the current EUR/USD move might be worth reviewing.",
+    "overall_sales_angle": "EUR/USD move has indirect implications for UK businesses — worth discussing potential impacts on USD-priced imports or revenue streams.",
+    "summary": "EUR/USD moved lower amid Fed hike bets and surging Treasury yields. UK businesses with USD-priced imports or revenue streams may be affected.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Headlines: A steadier mood as we get into European trading, still no US-Iran breakthrough yet EUR/USD continues its run lower amid increasing Fed hike bets, surging Treasury yields Gold extends the losses as Fed rate hike risks increase amid prolonged US-Iran stalemate ECB policymaker Wunsch warns we are at the beginning of an inflation problem Soon to be ECB policymaker Moulin says it's too soon to say if ECB needs to act in June What did the U.S. walk away with from the China summit? China to buy 200 Boeing jets and ease rare earth curbs in US trade breakthrough UK inflation underwhelms in A",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
     "exposure_types": [
       "USD import exposure",
       "USD revenue conversion"
     ],
-    "overall_sales_angle": "EUR/USD move has indirect implications for UK businesses — worth discussing potential impacts on USD-priced imports or revenue streams.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "73a4fdf8b8ef56df": {
     "id": "73a4fdf8b8ef56df",
+    "headline": "British Pound: Choppy range risks against Euro – Rabobank",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/british-pound-choppy-range-risks-against-euro-rabobank-202605201236",
-    "headline": "British Pound: Choppy range risks against Euro – Rabobank",
-    "raw_summary": "Rabobank's Senior FX Strategist Jane Foley note that reduced expectations for aggressive Bank of England (BoE) tightening are weighing on the British Pound (GBP), even as recent United Kingdom (UK) labour and Consumer Price Index (CPI) data have eased market nerves.",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
     "detected_at": "2026-05-20T14:04:37.206Z",
+    "status": "context_only",
     "event_type": "Currency analysis",
     "event_breadth": "broad_currency",
-    "summary": "Rabobank notes reduced BoE tightening expectations weigh on GBP, but the move is within a range. UK businesses with EUR exposure should monitor but have no immediate action required.",
     "currency_pairs": [
       "GBP/EUR"
     ],
@@ -1071,43 +1132,44 @@
       "UK exporters with EUR customer revenue"
     ],
     "why_now": "No immediate reason, as the analysis is more about market expectations than current rate moves",
-    "discovery_recommendation": "Context only — keep as background for potential future GBP/EUR moves",
     "confidence_level": "medium",
     "confidence_reason": "GBP/EUR move is relevant but lacks clear direction or significant magnitude change",
+    "discovery_recommendation": "Context only — keep as background for potential future GBP/EUR moves",
     "what_happened": "Rabobank's Senior FX Strategist noted reduced expectations for aggressive BoE tightening are weighing on GBP",
     "what_changed_financially": "GBP/EUR range-bound, with reduced expectations for BoE tightening",
     "who_pays_more": "None directly, as the move is more about expectations and less about immediate rate changes",
     "who_receives_less": "None directly, but exporters might face pressure on pricing if GBP weakens further",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP revenue vs EUR costs, but no immediate change",
     "fx_payment_logic": "UK businesses with EUR exposure should be aware of the potential for GBP/EUR moves, but current analysis suggests a range-bound situation rather than a clear direction",
-    "sales_angle": "If you have EUR exposure, it's worth keeping an eye on the GBP/EUR rate, given the current market expectations",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK businesses with EUR exposure face potential risks from GBP/EUR moves, but the current situation is more about monitoring than immediate action",
+    "sales_angle": "If you have EUR exposure, it's worth keeping an eye on the GBP/EUR rate, given the current market expectations",
+    "overall_sales_angle": "Monitoring the GBP/EUR rate is prudent for businesses with EUR exposure, given the market's reduced expectations for BoE tightening",
+    "summary": "Rabobank notes reduced BoE tightening expectations weigh on GBP, but the move is within a range. UK businesses with EUR exposure should monitor but have no immediate action required.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Rabobank's Senior FX Strategist Jane Foley note that reduced expectations for aggressive Bank of England (BoE) tightening are weighing on the British Pound (GBP), even as recent United Kingdom (UK) labour and Consumer Price Index (CPI) data have eased market nerves.",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
     "exposure_types": [
       "EUR supplier payment exposure",
       "EUR revenue conversion"
     ],
-    "overall_sales_angle": "Monitoring the GBP/EUR rate is prudent for businesses with EUR exposure, given the market's reduced expectations for BoE tightening",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "7dd4949d6b48c195": {
     "id": "7dd4949d6b48c195",
+    "headline": "British Pound outperforms Euro as traders reassess ECB and BoE outlook after inflation data",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/british-pound-outperforms-euro-as-traders-reassess-ecb-and-boe-outlook-after-inflation-data-202605201316",
-    "headline": "British Pound outperforms Euro as traders reassess ECB and BoE outlook after inflation data",
-    "raw_summary": "The Euro (EUR) weakens against the British Pound (GBP) on Wednesday, with EUR/GBP extending losses for a third consecutive day as traders digest the latest inflation data from both the United Kingdom and the Eurozone.",
-    "pre_relevance_score": 7,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
     "detected_at": "2026-05-20T14:04:30.751Z",
+    "status": "ready",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "GBP strengthened against EUR on reassessed central bank outlooks. UK businesses paying EUR supplier invoices face lower GBP costs. Exporters receiving EUR revenue see less GBP on conversion.",
     "currency_pairs": [
       "GBP/EUR"
     ],
@@ -1124,50 +1186,40 @@
       "UK exporters with EUR customer revenue"
     ],
     "why_now": "EUR supplier invoices placed before the GBP rise now cost less to settle, while EUR sales revenue converts to fewer GBP",
-    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "confidence_level": "medium",
     "confidence_reason": "Currency move is real but driven by reassessment of central bank outlooks, not a direct policy change — moderate urgency",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "what_happened": "GBP strengthened against EUR as traders reassessed ECB and BoE outlooks post-inflation data",
     "what_changed_financially": "GBP/EUR rate moved, decreasing the cost of EUR-denominated supplier invoices for UK importers and reducing GBP revenue from EUR sales for UK exporters",
     "who_pays_more": "",
     "who_receives_less": "UK exporters converting EUR customer payments back to GBP",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs EUR supplier costs",
     "fx_payment_logic": "UK importers order goods priced in EUR → invoice arrives → they must convert GBP to EUR to pay → GBP has strengthened → less GBP required per EUR",
-    "sales_angle": "If you have upcoming EUR supplier payments, the current rate is better than it was last week.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers of European goods face lower landed costs on recent orders. Exporters receiving EUR revenue see a modest loss on conversion.",
-    "exposure_types": [
-      "EUR supplier payment exposure",
-      "EUR revenue conversion"
-    ],
+    "sales_angle": "If you have upcoming EUR supplier payments, the current rate is better than it was last week.",
     "overall_sales_angle": "GBP strength means upcoming EUR invoices cost less — worth reviewing the rate.",
+    "summary": "GBP strengthened against EUR on reassessed central bank outlooks. UK businesses paying EUR supplier invoices face lower GBP costs. Exporters receiving EUR revenue see less GBP on conversion.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of European manufactured goods",
-        "category_priority_score": 72,
         "business_model": "UK wholesaler/distributor buying from EU manufacturers, paying EUR invoices, selling GBP to UK trade",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "EUR invoice arrives → UK business converts GBP → GBP stronger → margin improved",
         "margin_risk": "Medium — 1.5% GBP/EUR move on £300k annual buy ≈ £4.5k less cost if unhedged",
         "payment_timing_risk": "Medium — typical 30-60 day payment terms",
         "affected_payment_flow": "EUR payments to EU manufacturers, typically £30k-£300k per shipment",
-        "website_validation_signals": [
-          "imported from",
-          "European supplier",
-          "sourced from",
-          "manufacturer in"
-        ],
-        "avoid_segments": [
-          "pure UK domestic manufacturers",
-          "retailers without own import ops"
-        ],
-        "sales_angle": "Your upcoming EUR supplier invoices are costing less in GBP than they were last month.",
-        "exposure_thesis_template": "This company imports manufactured goods from EU. GBP/EUR move decreases GBP cost of EUR supplier invoices.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of Italian and German machinery parts",
@@ -1198,38 +1250,43 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ],
         "segment_signals": [
           "imported from",
           "European supplier",
           "sourced from",
           "manufacturer in"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming EUR supplier invoices are costing less in GBP than they were last month.",
+        "exposure_thesis_template": "This company imports manufactured goods from EU. GBP/EUR move decreases GBP cost of EUR supplier invoices."
       },
       {
         "segment_name": "UK exporters receiving EUR customer revenue",
-        "category_priority_score": 58,
         "business_model": "UK manufacturer or service firm selling to EU customers in EUR, converting receipts back to GBP",
         "exposure_level": "Medium",
         "exposure_type": "Revenue conversion — EUR receipts into GBP",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "EU customer pays EUR → UK exporter receives EUR → converts to GBP → weaker EUR = less GBP per EUR received",
         "margin_risk": "Low to medium — GBP strength is a marginal loss on EUR receipts but creates pricing pressure on future EUR quotes",
         "payment_timing_risk": "Medium — EUR revenue sitting unconverted faces rate risk on timing of conversion",
         "affected_payment_flow": "EUR receipts from EU customers, converting to GBP",
-        "website_validation_signals": [
-          "export",
-          "European customers",
-          "EU market",
-          "sold throughout Europe"
-        ],
-        "avoid_segments": [
-          "pure domestic UK sellers",
-          "businesses with no EU customer base"
-        ],
-        "sales_angle": "If you're receiving EUR from EU customers, the conversion timing can make a meaningful difference.",
-        "exposure_thesis_template": "This company exports to EU customers in EUR. GBP/EUR moves affect GBP value of incoming EUR receipts.",
+        "ideal_company_profile": "",
+        "category_priority_score": 58,
         "micro_categories": [
           {
             "name": "UK manufacturers exporting to EU buyers",
@@ -1246,12 +1303,26 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "export",
+          "European customers",
+          "EU market",
+          "sold throughout Europe"
+        ],
         "segment_signals": [
           "export",
           "European customers",
           "EU market",
           "sold throughout Europe"
-        ]
+        ],
+        "avoid_segments": [
+          "pure domestic UK sellers",
+          "businesses with no EU customer base"
+        ],
+        "sales_angle": "If you're receiving EUR from EU customers, the conversion timing can make a meaningful difference.",
+        "exposure_thesis_template": "This company exports to EU customers in EUR. GBP/EUR moves affect GBP value of incoming EUR receipts."
       }
     ],
     "companies_house_terms": [
@@ -1276,24 +1347,26 @@
       "\"European customers\" UK manufacturer",
       "UK exporter EU market"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "The Euro (EUR) weakens against the British Pound (GBP) on Wednesday, with EUR/GBP extending losses for a third consecutive day as traders digest the latest inflation data from both the United Kingdom and the Eurozone.",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
+    "exposure_types": [
+      "EUR supplier payment exposure",
+      "EUR revenue conversion"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-20T14:04:58.496Z"
   },
   "a74f6a1bd5f9205d": {
     "id": "a74f6a1bd5f9205d",
+    "headline": "British Pound: Softer UK inflation weighs on Pound – BBH",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/british-pound-softer-uk-inflation-weighs-on-pound-bbh-202605201136",
-    "headline": "British Pound: Softer UK inflation weighs on Pound – BBH",
-    "raw_summary": "Brown Brothers Harriman’s (BBH) Elias Haddad reports GBP/USD is trading below 1.3400 after United Kingdom (UK) inflation undershot expectations, easing pressure on the Bank of England (BoE).",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
     "detected_at": "2026-05-20T14:04:34.584Z",
+    "status": "context_only",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "GBP/USD moved on lower UK inflation. UK businesses with USD exposure may see changes in costs or revenue.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -1309,28 +1382,32 @@
       "UK exporters with USD customer revenue"
     ],
     "why_now": "Current GBP/USD rate may offer a better conversion opportunity for some businesses",
-    "discovery_recommendation": "Context only — no strong payment-flow hook, but can be used for messaging context",
     "confidence_level": "medium",
     "confidence_reason": "Currency move is based on a real event but lacks direct payment-flow implications for most UK businesses",
+    "discovery_recommendation": "Context only — no strong payment-flow hook, but can be used for messaging context",
     "what_happened": "GBP/USD fell below 1.3400 following lower-than-expected UK inflation",
     "what_changed_financially": "GBP/USD rate moved, affecting the cost of USD-denominated transactions for UK businesses",
     "who_pays_more": "UK businesses with USD-denominated costs or invoices",
     "who_receives_less": "UK exporters receiving USD revenue and converting back to GBP",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP revenue vs USD costs or revenue",
     "fx_payment_logic": "UK businesses with USD transactions face changing costs or revenue due to the GBP/USD move",
-    "sales_angle": "If you have USD exposure, the current GBP/USD rate may impact your costs or revenue.",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK businesses with USD exposure may see changes in costs or revenue due to the GBP/USD move.",
-    "exposure_types": [
-      "USD transaction exposure"
-    ],
+    "sales_angle": "If you have USD exposure, the current GBP/USD rate may impact your costs or revenue.",
     "overall_sales_angle": "GBP/USD move may affect businesses with USD exposure — worth reviewing current rates.",
+    "summary": "GBP/USD moved on lower UK inflation. UK businesses with USD exposure may see changes in costs or revenue.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "Brown Brothers Harriman’s (BBH) Elias Haddad reports GBP/USD is trading below 1.3400 after United Kingdom (UK) inflation undershot expectations, easing pressure on the Bank of England (BoE).",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
+    "exposure_types": [
+      "USD transaction exposure"
+    ],
     "ai_model": "llama-3.3-70b-versatile"
   },
   "a768d904c388f429": {
@@ -1456,42 +1533,35 @@
     "raw_summary": "CPI +3.0% vs +3.0% y/y prelim Prior +2.6% Core CPI +2.2% vs +2.2% y/y prelim Prior +2.3% Services inflation continues to be the main sticking point, but is at least seen easing to 3.0% in April (previously 3.3%). Meanwhile, food price inflation is still keeping thereabouts at 2.4% (previously 2.5%). But with regards to the headline reading, energy price inflation is the main category that is bringing up prices. On a monthly basis, energy prices were up 3.0% and up 10.8% on an annual basis. On the latter, that is a marked step up from the 5.1% estimate in March. All in all, this just points to ",
     "pre_relevance_score": 4,
     "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-05-20T14:04:44.433Z",
+    "detected_at": "2026-05-20T15:29:18.047Z",
     "event_type": "Inflation data",
     "event_breadth": "macro",
-    "summary": "Euro area inflation rose in April, mainly due to energy prices. This could influence the EUR, affecting UK businesses with EUR transactions.",
-    "currency_pairs": [
-      "GBP/EUR"
-    ],
+    "summary": "Euro area inflation rose in April, driven by energy prices. This has limited direct impact on UK businesses unless they import affected commodities.",
+    "currency_pairs": [],
     "urgency_score": 2,
-    "commercial_relevance": 4,
-    "commercial_relevance_reason": "Euro area inflation rise, driven by energy prices, could influence EUR strength, affecting UK businesses with EUR-denominated transactions",
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Inflation in the Euro area does not directly impact UK B2B FX unless it affects specific import/export flows or commodity prices",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
-    "likely_affected_businesses": [
-      "UK importers of Euro area goods",
-      "UK exporters to the Euro area"
-    ],
-    "why_now": "The inflation data could lead to changes in monetary policy, influencing the EUR and impacting UK businesses with EUR exposure",
-    "discovery_recommendation": "Context only — inflation data has indirect implications for FX and UK businesses",
+    "likely_affected_businesses": [],
+    "why_now": "No immediate reason for UK businesses to act unless they have specific Euro area supply chains or commodity exposures",
+    "discovery_recommendation": "Context only — keep for background but do not generate new leads",
     "confidence_level": "medium",
-    "confidence_reason": "Inflation data is relevant but its direct impact on FX rates and UK businesses is indirect and requires further context",
-    "what_happened": "Euro area headline inflation rose to 3.0% in April, driven by energy price inflation",
-    "what_changed_financially": "Energy price inflation increased to 10.8% annually, which could impact the EUR and subsequently affect UK businesses with EUR transactions",
-    "who_pays_more": "UK businesses importing from the Euro area might face higher costs due to potential EUR strength",
-    "who_receives_less": "UK exporters to the Euro area might receive less in GBP terms if the EUR strengthens",
-    "margin_risk": "Low to Medium",
+    "confidence_reason": "The inflation data is real but its direct impact on UK businesses is indirect and depends on specific supply chains or commodity exposures",
+    "what_happened": "Euro area headline inflation rose to 3.0% in April",
+    "what_changed_financially": "Energy price inflation drove the increase, with a 10.8% annual rise",
+    "who_pays_more": "None directly, unless specific UK businesses import energy or related commodities from the Euro area",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "GBP vs EUR transactions for importers and exporters",
-    "fx_payment_logic": "UK businesses with EUR-denominated transactions might face changes in costs or revenues due to potential EUR strength driven by inflation data",
-    "sales_angle": "If you have EUR transactions, changes in Euro area inflation could impact your costs or revenues.",
-    "business_impact_summary": "UK businesses with EUR exposure might face higher costs or lower revenues due to potential EUR strength following the inflation data",
-    "exposure_types": [
-      "EUR transaction exposure"
-    ],
-    "overall_sales_angle": "Euro area inflation rise could impact your EUR transactions — worth reviewing your exposure",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX payment flow is affected by this inflation data unless specific UK businesses import from the Euro area and are exposed to energy price inflation",
+    "sales_angle": "No specific angle unless discussing energy or commodity import exposures",
+    "business_impact_summary": "Minimal direct impact on UK businesses unless specific supply chains or commodity exposures are affected",
+    "exposure_types": [],
+    "overall_sales_angle": "No sharp angle unless tied to specific energy or commodity import exposures",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -1507,35 +1577,35 @@
     "raw_summary": "The Bank of England will not need to raise interest rates this year to combat the effects of rising energy costs, according to the world's lender of last resort.",
     "pre_relevance_score": 5,
     "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-05-20T14:04:41.970Z",
-    "event_type": "Economic forecast",
+    "detected_at": "2026-05-20T15:29:12.924Z",
+    "event_type": "Economic commentary",
     "event_breadth": "macro",
-    "summary": "The IMF believes the Bank of England may not raise interest rates this year. This has indirect implications for the GBP but does not directly affect current payment flows or FX positions of UK businesses.",
+    "summary": "IMF believes the Bank of England might not raise interest rates this year due to energy costs. This has indirect implications for GBP but lacks a direct payment-flow hook for UK businesses.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "IMF statement on BoE rate decision has indirect implications for GBP but lacks a direct FX hook",
+    "commercial_relevance_reason": "IMF commentary on BoE rate decision has indirect implications for GBP but lacks concrete payment-flow hook",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
-    "why_now": "No immediate reason for UK businesses to review their FX positions based on this statement alone",
-    "discovery_recommendation": "Context only — no direct FX or payment flow impact",
+    "why_now": "IMF's statement provides context for potential future interest rate decisions but lacks immediate urgency for UK businesses",
+    "discovery_recommendation": "Context only — IMF's view is more about future rate speculation than current payment-flow impact",
     "confidence_level": "medium",
-    "confidence_reason": "The IMF's statement is an opinion piece and does not directly influence current market conditions or immediate payment flows",
-    "what_happened": "IMF suggests the Bank of England may not need to raise interest rates this year due to rising energy costs",
-    "what_changed_financially": "No direct financial change; an opinion on future monetary policy",
+    "confidence_reason": "While IMF's view on interest rates could influence market expectations, it does not directly impact UK businesses' foreign currency payment flows",
+    "what_happened": "IMF suggests Bank of England may not need to raise interest rates this year due to rising energy costs",
+    "what_changed_financially": "Potential for interest rate movement, which could indirectly affect currency rates",
     "who_pays_more": "None directly",
     "who_receives_less": "None directly",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly affected",
-    "fx_payment_logic": "The statement does not directly influence current FX transactions or payment flows between UK businesses and their international counterparts.",
-    "sales_angle": "While not directly impactful, the IMF's view on interest rates could influence future GBP strength or weakness. Worth monitoring but not a reason to adjust FX strategies today.",
-    "business_impact_summary": "No direct business impact from the IMF's statement. UK businesses should continue to monitor economic forecasts and their potential impact on future FX decisions.",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "No direct FX payment logic applies as this event is about potential future interest rate decisions rather than current currency movements or payment flows",
+    "sales_angle": "Interest rate speculation could influence currency markets, but there's no immediate action for businesses to take based on this IMF statement alone.",
+    "business_impact_summary": "The IMF's commentary on potential interest rate decisions has indirect implications for the broader economic environment but does not directly affect UK businesses' foreign currency payment flows at this time.",
     "exposure_types": [],
-    "overall_sales_angle": "The IMF's statement on potential BoE rate decisions has no immediate FX implications for UK businesses but could be a point of interest in broader economic discussions.",
+    "overall_sales_angle": "While the IMF's statement provides economic context, it does not offer a compelling reason for UK businesses to review their FX strategies immediately.",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -1682,51 +1752,115 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-20T08:24:58.247Z"
   },
-  "d4f992c7fada51c1": {
-    "id": "d4f992c7fada51c1",
+  "d5967f0b0a909a9d": {
+    "id": "d5967f0b0a909a9d",
     "source": "ForexLive",
-    "source_url": "https://investinglive.com/news/canada-cpi-inflation-yoy-for-april-28-vs-31-estimate-20260519/",
-    "headline": "Canada CPI inflation YoY for April 2.8%  vs 3.1% estimate",
-    "raw_summary": "Prior 2.4% CPI MoM 0.4% vs 0.7% expected Prior CPI MoM 0.9% Core Measures: BOC core YoY 2.1% vs 2.5% last month BOC core MoM 0.2% vs 0.2% last month Core CPI % MOM 0.1% vs 0.0% last month CPI Median 2.1% vs 2.2% estimate. Last month 2.3% CPI Trim 2.0% vs 2.1% estimate. Last month 2.2% CPI Common 2.5% versus 2.6% last month Details from Statistics Canada Energy prices surged 19.2% YoY in April, accelerating sharply from +3.9% in March. Gasoline prices jumped 28.6% YoY after rising 5.9% in March. Base effects from the April 2025 carbon levy removal boosted annual comparisons. Middle East conflic",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-05-20T14:04:50.329Z",
-    "event_type": "inflation data",
-    "event_breadth": "macro",
-    "summary": "Canadian inflation data showed a lower than expected increase, which might influence CAD but lacks direct relevance to UK B2B FX decisions",
+    "source_url": "https://investinglive.com/news/ecb-rate-hike-very-likely-in-june-20260520/",
+    "headline": "Sources: ECB rate hike very likely in June",
+    "raw_summary": "A Reuters article is making the rounds saying that a June rate hike is \"nearly sealed\" ECB officials see a June rate hike as nearly certain, with persistent high energy costs keeping inflation pressures elevated. The ECB is likely to avoid committing to a July hike, preferring to keep options open and remain data dependent. Inflation risks have increased as elevated energy prices continue to pressure the outlook, with no visible peace agreement involving Iran in sight. Headline inflation is already running at 3%, well above the ECB’s 2% target, reinforcing the case for a June rate hike. Offici",
+    "pre_relevance_score": 8,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-05-20T15:29:07.917Z",
+    "event_type": "Central bank rate hike anticipation",
+    "event_breadth": "broad_macro",
+    "summary": "ECB officials indicated a June rate hike is likely due to high energy costs and inflation. UK businesses with EUR payment flows may be affected by the potential rate hike.",
     "currency_pairs": [
-      "USD/CAD"
+      "GBP/EUR"
     ],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "Canada CPI inflation data has indirect implications for USD/CAD but lacks direct UK B2B FX hook",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "No immediate reason for UK businesses to act based on Canadian inflation data alone",
-    "discovery_recommendation": "Context only — keep for background information but do not generate new leads",
+    "urgency_score": 4,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "ECB rate hike anticipation may impact EUR-denominated payment flows for UK businesses",
+    "trigger_strength": "medium",
+    "trigger_score": 58,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK importers of European goods",
+      "UK exporters to the EU"
+    ],
+    "why_now": "The anticipated June ECB rate hike may prompt UK businesses to review their EUR payment flows and consider hedging strategies",
+    "discovery_recommendation": "Limited run — focus on UK businesses with EUR-denominated payment flows and assess their potential exposure to the anticipated ECB rate hike",
     "confidence_level": "medium",
-    "confidence_reason": "CPI data can influence currency markets but the connection to UK businesses is indirect and not immediately actionable",
-    "what_happened": "Canada's April CPI inflation came in at 2.8% YoY, below the 3.1% estimate",
-    "what_changed_financially": "Lower than expected inflation might influence the Bank of Canada's monetary policy decisions, potentially affecting the CAD",
-    "who_pays_more": "None directly, as this is Canadian data with indirect implications for UK businesses",
-    "who_receives_less": "None directly, as this is Canadian data with indirect implications for UK businesses",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly",
-    "fx_payment_logic": "No direct FX payment logic applies as this event is about Canadian inflation data",
-    "sales_angle": "No direct sales angle as the event lacks immediate relevance to UK businesses' FX needs",
-    "business_impact_summary": "No direct business impact as this is Canadian data with indirect implications for UK businesses",
-    "exposure_types": [],
-    "overall_sales_angle": "No direct reason to call based on this event alone",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
+    "confidence_reason": "Rate hike likelihood is high but not officially confirmed, and its impact on UK businesses depends on their specific EUR payment flows",
+    "what_happened": "ECB officials indicated a June rate hike is nearly certain due to persistent high energy costs and elevated inflation",
+    "what_changed_financially": "Anticipation of a June ECB rate hike may influence EUR-denominated payment flows and currency exchange rates",
+    "who_pays_more": "UK businesses with EUR-denominated expenses may face higher costs if the ECB rate hike strengthens the EUR",
+    "who_receives_less": "UK businesses receiving EUR revenue may see a decrease in GBP value if the ECB rate hike strengthens the EUR",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "EUR-denominated payments and receipts for UK businesses",
+    "fx_payment_logic": "UK businesses with EUR-denominated expenses or revenue may face changes in their payment flows due to the anticipated ECB rate hike",
+    "sales_angle": "If you have EUR-denominated payment flows, the anticipated ECB rate hike may impact your costs or revenue — it's essential to review your exposure and consider hedging strategies",
+    "business_impact_summary": "UK businesses with EUR payment flows may face higher costs or lower revenue due to the anticipated ECB rate hike. Reviewing their exposure and considering hedging strategies can help mitigate potential risks.",
+    "exposure_types": [
+      "EUR payment flow exposure"
+    ],
+    "overall_sales_angle": "The anticipated ECB rate hike may impact your EUR payment flows — let's discuss how to mitigate potential risks",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of European goods",
+        "category_priority_score": 72,
+        "business_model": "UK businesses importing goods from the EU, paying EUR invoices, and selling in GBP",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EUR invoice arrives → UK business converts GBP to EUR → anticipated ECB rate hike may strengthen EUR → higher GBP cost",
+        "margin_risk": "Medium — anticipated ECB rate hike may increase EUR costs for UK importers",
+        "payment_timing_risk": "Medium — typical 30-60 day payment terms",
+        "affected_payment_flow": "EUR payments to EU suppliers, typically £30k-£300k per shipment",
+        "website_validation_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming EUR supplier invoices may cost more in GBP due to the anticipated ECB rate hike.",
+        "exposure_thesis_template": "This company imports goods from the EU. The anticipated ECB rate hike may increase the GBP cost of EUR supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK importers of Italian and German machinery parts",
+            "why": "Pay EUR to EU manufacturers — direct exposure to GBP/EUR move on component costs",
+            "search_queries": [
+              "\"machinery importer\" UK European",
+              "\"German machinery\" UK distributor",
+              "\"Italian parts\" UK importer"
+            ],
+            "companies_house_terms": [
+              "machinery imports",
+              "european parts",
+              "component imports"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "machinery imports",
+      "european parts",
+      "component imports"
+    ],
+    "all_search_queries": [
+      "\"machinery importer\" UK European",
+      "\"German machinery\" UK distributor",
+      "\"Italian parts\" UK importer"
+    ],
+    "status": "ready",
     "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-05-20T15:29:24.870Z"
   },
   "e94401c3758f021a": {
     "id": "e94401c3758f021a",
@@ -1880,5 +2014,137 @@
     "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu",
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "f3c5ee47031faf16": {
+    "id": "f3c5ee47031faf16",
+    "source": "OilPrice.com",
+    "source_url": "https://oilprice.com/Latest-Energy-News/World-News/UK-Eases-Some-Russian-Oil-Sanctions-as-Fuel-Prices-Soar.html",
+    "headline": "UK Eases Some Russian Oil Sanctions as Fuel Prices Soar",
+    "raw_summary": "As a result of spiking fuel prices and concerns about jet fuel supply shortages, the UK government has waived sanctions on imports of diesel and jet fuel processed from Russia-origin crude in third countries. The easing of a small part of the UK’s strict sanctions and bans on Russian crude and oil product imports is to protect supply security, the Labour government argues. But the Conservatives slammed the decision as “insane” and a sign that the sanctions are being undermined by domestic political agenda. This “small and…",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-05-20T15:29:21.963Z",
+    "event_type": "Sanctions easing",
+    "event_breadth": "sector_specific",
+    "summary": "The UK's easing of sanctions on Russian oil imports may impact fuel prices and supply security. UK fuel distributors and airlines should review their import costs and hedging strategies.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "UK easing of Russian oil sanctions affects import costs and supply security for fuel distributors and airlines",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK fuel distributors",
+      "UK airlines",
+      "UK businesses importing diesel or jet fuel"
+    ],
+    "why_now": "The easing of sanctions may lead to changes in fuel pricing and supply security, affecting UK businesses' import costs and revenue",
+    "discovery_recommendation": "Limited run — focus on fuel distributors and airlines with international supply chains",
+    "confidence_level": "medium",
+    "confidence_reason": "The easing of sanctions is a specific event but its impact on FX is indirect and depends on fuel price movements",
+    "what_happened": "UK government eased sanctions on imports of diesel and jet fuel from Russian crude processed in third countries",
+    "what_changed_financially": "Potential reduction in fuel costs for UK distributors and airlines due to increased supply",
+    "who_pays_more": "None directly, but fuel distributors and airlines may face pricing pressure if sanctions easing does not lead to lower fuel costs",
+    "who_receives_less": "None directly, but UK businesses importing fuel may benefit from potential price decreases",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP payments for fuel imports, potentially affecting USD or EUR transactions if fuel is priced in those currencies",
+    "fx_payment_logic": "UK fuel distributors and airlines import fuel priced in USD or EUR, and the easing of sanctions may affect their GBP costs and revenue",
+    "sales_angle": "If you're a fuel distributor or airline, the UK's easing of sanctions on Russian oil imports may impact your fuel costs and supply security.",
+    "business_impact_summary": "UK fuel distributors and airlines may face changes in fuel pricing and supply security due to the easing of sanctions. They should review their import costs, hedging strategies, and supply chains to mitigate potential risks.",
+    "exposure_types": [
+      "Fuel price exposure",
+      "Supply security exposure"
+    ],
+    "overall_sales_angle": "The UK's easing of sanctions on Russian oil imports may impact your fuel costs and supply security — it's worth reviewing your hedging strategies.",
+    "target_segments": [
+      {
+        "segment_name": "UK fuel distributors",
+        "category_priority_score": 72,
+        "business_model": "UK businesses importing and distributing fuel, potentially paying in USD or EUR",
+        "exposure_level": "Medium",
+        "exposure_type": "Fuel price exposure — potential changes in import costs due to sanctions easing",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "UK fuel distributors import fuel priced in USD or EUR and pay in GBP — changes in fuel prices or exchange rates affect their costs",
+        "margin_risk": "Medium — changes in fuel prices or exchange rates may compress margins",
+        "payment_timing_risk": "Medium — payment terms for fuel imports may expose distributors to FX risk",
+        "affected_payment_flow": "GBP payments for fuel imports, potentially affecting USD or EUR transactions",
+        "website_validation_signals": [
+          "fuel imports",
+          "diesel distribution",
+          "jet fuel supply"
+        ],
+        "avoid_segments": [
+          "pure UK domestic fuel retailers",
+          "businesses without international supply chains"
+        ],
+        "sales_angle": "If you're a fuel distributor, the UK's easing of sanctions on Russian oil imports may impact your fuel costs and supply security.",
+        "exposure_thesis_template": "This company imports fuel from international suppliers. Changes in fuel prices or exchange rates may affect their GBP costs and revenue.",
+        "micro_categories": [
+          {
+            "name": "UK diesel distributors",
+            "why": "Import diesel from international suppliers — changes in fuel prices or exchange rates may affect their costs",
+            "search_queries": [
+              "diesel distributor UK",
+              "fuel imports UK",
+              "diesel supplier UK"
+            ],
+            "companies_house_terms": [
+              "diesel distribution",
+              "fuel imports",
+              "diesel supplier"
+            ]
+          },
+          {
+            "name": "UK jet fuel distributors",
+            "why": "Import jet fuel from international suppliers — changes in fuel prices or exchange rates may affect their costs",
+            "search_queries": [
+              "jet fuel distributor UK",
+              "aviation fuel supplier UK",
+              "jet fuel imports UK"
+            ],
+            "companies_house_terms": [
+              "jet fuel distribution",
+              "aviation fuel supplier",
+              "jet fuel imports"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "fuel imports",
+          "diesel distribution",
+          "jet fuel supply"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "diesel distribution",
+      "fuel imports",
+      "diesel supplier",
+      "jet fuel distribution",
+      "aviation fuel supplier",
+      "jet fuel imports"
+    ],
+    "all_search_queries": [
+      "diesel distributor UK",
+      "fuel imports UK",
+      "diesel supplier UK",
+      "jet fuel distributor UK",
+      "aviation fuel supplier UK",
+      "jet fuel imports UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-05-20T15:29:27.128Z"
   }
 }
