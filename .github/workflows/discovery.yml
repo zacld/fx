@@ -126,5 +126,6 @@ jobs:
           git config user.email "bot@users.noreply.github.com"
           git add data/events.json data/leads.json apps/web/public/data/
           git diff --staged --quiet || git commit -m "data: auto-update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git checkout -- .
           git pull --rebase origin main
           git push
