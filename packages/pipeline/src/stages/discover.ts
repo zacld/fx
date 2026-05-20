@@ -181,16 +181,18 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
       // discovery entirely (analyse.ts already routes those to non-ready status,
       // but we belt-and-brace here in case persisted JSON disagrees).
       const mode = (event as { discovery_mode?: string }).discovery_mode || "full";
-      if (mode === "context_only" || mode === "reject") {
+      if (mode === "reject") {
         const ed = { ...event, web_discovery_done: true, web_discovery_at: new Date().toISOString(), web_discovery_skipped: mode };
-        if (persist) updEvent.run({ id: row.id, status: mode === "reject" ? "low_relevance" : "context_only", data: JSON.stringify(ed) });
+        if (persist) updEvent.run({ id: row.id, status: "low_relevance", data: JSON.stringify(ed) });
         continue;
       }
-      const scale = mode === "limited" ? 0.5 : 1;
-      const effMaxSegments = Math.max(1, Math.round(maxSegments * scale));
-      const effMaxQPerMc = Math.max(1, Math.round(maxQPerMc * scale));
-      const effMaxQPerSeg = Math.max(1, Math.round(maxQPerSeg * scale));
-      const effMaxResults = Math.max(2, Math.round(maxResults * (mode === "limited" ? 0.6 : 1)));
+      // context_only (weak trigger) → minimal scrape: 1 segment, 1 micro-cat, 2 queries, 4 results
+      // This ensures every event surfaces at least some fresh candidates rather than returning nothing.
+      const scale = mode === "limited" ? 0.5 : mode === "context_only" ? 0.25 : 1;
+      const effMaxSegments = mode === "context_only" ? 1 : Math.max(1, Math.round(maxSegments * scale));
+      const effMaxQPerMc   = mode === "context_only" ? 1 : Math.max(1, Math.round(maxQPerMc * scale));
+      const effMaxQPerSeg  = mode === "context_only" ? 2 : Math.max(1, Math.round(maxQPerSeg * scale));
+      const effMaxResults  = mode === "context_only" ? 4 : Math.max(2, Math.round(maxResults * (mode === "limited" ? 0.6 : 1)));
       const budgetCap = Number((event as { recommended_query_budget?: number }).recommended_query_budget ?? 0);
 
       const segments = (event.target_segments ?? [])

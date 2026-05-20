@@ -515,6 +515,19 @@ export function computeReadyScore(lead: Partial<Lead>): number {
   if (["full", "group", "medium"].some((v) => atL.includes(v))) s += 4;
   else if (["small", "abridged"].some((v) => atL.includes(v))) s += 2;
 
+  // 10. Freshness (0–12) — leads discovered today surface above older recycled ones.
+  //     Ensures the daily call list reflects today's market intelligence, not weeks-old data.
+  const createdAt = (lead as Record<string, unknown>).created_at as string | undefined;
+  if (createdAt) {
+    const ageDays = (Date.now() - new Date(createdAt).getTime()) / 86_400_000;
+    if (ageDays < 1)        s += 12;   // discovered today
+    else if (ageDays < 3)   s += 8;    // last 3 days
+    else if (ageDays < 7)   s += 4;    // this week
+    else if (ageDays < 14)  s += 1;    // last 2 weeks
+    // older → 0 (stale, stays at bottom of READY list)
+  }
+  // Leads without created_at are very old imports — no freshness bonus.
+
   return Math.min(s, 100);
 }
 
