@@ -28,7 +28,7 @@ import pLimit from "p-limit";
 import { LeadSchema, scoreLead, repoRoot, type Lead, type Segment } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
-import { ddgSearch, bingSearch } from "../sources/search.js";
+import { ddgSearch, bingSearch, braveSearch } from "../sources/search.js";
 import { validateWebsite } from "../sources/website.js";
 import { mineSourcePage } from "../sources/source-page-miner.js";
 import { domainFromUrl, domainCoherentWithName, nameTokens } from "../sources/blocklists.js";
@@ -52,7 +52,7 @@ export interface DiscoverOptions {
 
 export interface DiscoverResult {
   events: number; queriesRun: number;
-  ddgOk: number; ddgEmpty: number; bingOk: number; bingEmpty: number; chFallbackUsed: number;
+  braveOk: number; ddgOk: number; ddgEmpty: number; bingOk: number; bingEmpty: number; chFallbackUsed: number;
   sourcePagesMined: number; sourcePageLinks: number;
   candidates: number; rejectedIncoherent: number; rejectedValidation: number; rejectedNoSignals: number; rejectedNegatives: number; rejectedDuplicate: number;
   leadsAdded: number; byPriority: Record<string, number>; runId: string;
@@ -128,7 +128,7 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
   const { db, sqlite, close } = getDb(dbPath);
   const rec = new RunRecorder("discover", { dbPath, maxEvents, maxSegments, sourcePageMining });
   const st: DiscoverResult = {
-    events: 0, queriesRun: 0, ddgOk: 0, ddgEmpty: 0, bingOk: 0, bingEmpty: 0, chFallbackUsed: 0,
+    events: 0, queriesRun: 0, braveOk: 0, ddgOk: 0, ddgEmpty: 0, bingOk: 0, bingEmpty: 0, chFallbackUsed: 0,
     sourcePagesMined: 0, sourcePageLinks: 0, candidates: 0, rejectedIncoherent: 0, rejectedValidation: 0,
     rejectedNoSignals: 0, rejectedNegatives: 0, rejectedDuplicate: 0, leadsAdded: 0,
     byPriority: { HOT: 0, WARM: 0, QUEUE: 0, SKIP: 0 }, runId: rec.run.run_id,
@@ -223,35 +223,53 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
           if (!q) continue;
           if (budgetExceeded()) break;
           st.queriesRun++; queriesUsed++;
-          // ── search: DDG → Bing → CH keyword ──────────────────────────────
-          let results: Array<{ url: string; title: string }>; let path: "ddg" | "bing" | "ch_keyword";
-          const ddg = await ddgSearch(q, effMaxResults, fetcher);
-          if (ddg.results.length) { results = ddg.results; path = "ddg"; st.ddgOk++; }
-          else {
-            if (ddg.stats.status !== "ok") { /* blocked/empty */ } else st.ddgEmpty++;
+          // ── search: Brave → DDG → Bing → CH keyword ──────────────────────
+          // Brave Search API (BRAVE_API_KEY secret) is the preferred source — it
+          // works from GitHub Actions IPs and returns clean JSON with real URLs.
+          // DDG html.duckduckgo.com serves a bot-detection lite page in CI.
+          // Bing wraps all URLs in bing.com/ck/a tracking redirects that the
+          // blocklist correctly rejects. CH keyword is the guaranteed last resort.
+          let results: Array<{ url: string; title: string }> = [];
+          let path: "brave" | "ddg" | "bing" | "ch_keyword" = "ch_keyword";
+          const braveKey = process.env.BRAVE_API_KEY ?? "";
+
+          // 1. Brave (if key set)
+          if (braveKey && !results.length) {
+            const brave = await braveSearch(q, effMaxResults, braveKey);
+            if (brave.results.length) { results = brave.results; path = "brave"; st.braveOk++; }
+          }
+          // 2. DDG (always try — works locally; usually blocked in CI)
+          if (!results.length) {
+            const ddg = await ddgSearch(q, effMaxResults, fetcher);
+            if (ddg.results.length) { results = ddg.results; path = "ddg"; st.ddgOk++; }
+            else if (ddg.stats.status === "ok") st.ddgEmpty++;
+          }
+          // 3. Bing (skip if Brave configured — Bing wraps URLs in tracking redirects)
+          if (!results.length && !braveKey) {
             const bing = await bingSearch(q, effMaxResults, fetcher);
             if (bing.results.length) { results = bing.results; path = "bing"; st.bingOk++; }
-            else {
-              st.bingEmpty++;
-              const chItems = ch.enabled ? await ch.search(coreKeyword(q), effMaxResults) : [];
-              if (chItems.length) { st.chFallbackUsed++; }
-              results = []; path = "ch_keyword";
-              // CH-fallback items: no URL — create CN-only leads (the score stage will mostly SKIP them)
-              await Promise.all(chItems.slice(0, effMaxResults).map((it) => limitFor(concurrency)(async () => {
-                if (!it.company_number || (it.company_status && it.company_status.toLowerCase() !== "active")) return;
-                const profile = await ch.profile(it.company_number);
-                const officers = await ch.officers(it.company_number);
-                const dir = extractDirector(officers);
-                st.candidates++;
-                const lead = buildLead({
-                  url: null, domain: "", title: it.title || "", validation: null,
-                  chData: { company_number: it.company_number, company_status: (profile?.company_status || "").toLowerCase(), sic_codes: (profile?.sic_codes ?? []).map(String), incorporated: profile?.date_of_creation || "", registered_address: [profile?.registered_office_address?.["address_line_1"], profile?.registered_office_address?.["locality"], profile?.registered_office_address?.["postal_code"]].filter(Boolean).join(", "), director_name: dir?.name ?? null, director_role: dir?.role ?? null },
-                  segment: seg, eventId: row.id, event, websiteSource: "ch_keyword", discoveryPath: "ch_fallback", sourceQuery: q, microCategory: mc,
-                });
-                persistLead(lead, event, { website_source: "ch_keyword", discovery_path: "ch_fallback", source_query: q, source_segment: seg.segment_name, source_micro_category: mc });
-              })));
-              continue;   // done with this query (CH fallback handled)
-            }
+            else st.bingEmpty++;
+          }
+          // 4. CH keyword fallback — guaranteed results, no URL
+          if (!results.length) {
+            const chItems = ch.enabled ? await ch.search(coreKeyword(q), effMaxResults) : [];
+            if (chItems.length) { st.chFallbackUsed++; }
+            path = "ch_keyword";
+            // CH-fallback items: no URL — create CN-only leads (the score stage will mostly SKIP them)
+            await Promise.all(chItems.slice(0, effMaxResults).map((it) => limitFor(concurrency)(async () => {
+              if (!it.company_number || (it.company_status && it.company_status.toLowerCase() !== "active")) return;
+              const profile = await ch.profile(it.company_number);
+              const officers = await ch.officers(it.company_number);
+              const dir = extractDirector(officers);
+              st.candidates++;
+              const lead = buildLead({
+                url: null, domain: "", title: it.title || "", validation: null,
+                chData: { company_number: it.company_number, company_status: (profile?.company_status || "").toLowerCase(), sic_codes: (profile?.sic_codes ?? []).map(String), incorporated: profile?.date_of_creation || "", registered_address: [profile?.registered_office_address?.["address_line_1"], profile?.registered_office_address?.["locality"], profile?.registered_office_address?.["postal_code"]].filter(Boolean).join(", "), director_name: dir?.name ?? null, director_role: dir?.role ?? null },
+                segment: seg, eventId: row.id, event, websiteSource: "ch_keyword", discoveryPath: "ch_fallback", sourceQuery: q, microCategory: mc,
+              });
+              persistLead(lead, event, { website_source: "ch_keyword", discovery_path: "ch_fallback", source_query: q, source_segment: seg.segment_name, source_micro_category: mc });
+            })));
+            continue;   // done with this query (CH fallback handled above)
           }
 
           // ── split into direct candidates + mineable source pages ─────────
@@ -333,7 +351,7 @@ function parseArgs(argv: string[]): DiscoverOptions {
 const isMain = (() => { try { return !!process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url); } catch { return false; } })();
 if (isMain) {
   runDiscoverStage(parseArgs(process.argv.slice(2))).then((r) => {
-    console.log(`discover: ${r.events} events | ${r.queriesRun} queries (ddg ok ${r.ddgOk}, bing ok ${r.bingOk}, ch-fallback ${r.chFallbackUsed}) | source pages mined ${r.sourcePagesMined} (+${r.sourcePageLinks} links) | candidates ${r.candidates} | leads added ${r.leadsAdded} ${JSON.stringify(r.byPriority)}`);
+    console.log(`discover: ${r.events} events | ${r.queriesRun} queries (brave ok ${r.braveOk}, ddg ok ${r.ddgOk}, bing ok ${r.bingOk}, ch-fallback ${r.chFallbackUsed}) | source pages mined ${r.sourcePagesMined} (+${r.sourcePageLinks} links) | candidates ${r.candidates} | leads added ${r.leadsAdded} ${JSON.stringify(r.byPriority)}`);
     console.log(`  rejected — incoherent ${r.rejectedIncoherent}, validation ${r.rejectedValidation}, no-signals ${r.rejectedNoSignals}, negatives ${r.rejectedNegatives}, duplicate ${r.rejectedDuplicate}`);
     console.log(`  run_id ${r.runId}`);
   }).catch((e) => { console.error("discover failed:", e); process.exitCode = 1; });

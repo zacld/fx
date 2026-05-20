@@ -39,6 +39,7 @@ jobs:
 
       - name: Run evergreen pipeline (insert playbook events → discover → enrich → score → export)
         env:
+          BRAVE_API_KEY:                 ${{ secrets.BRAVE_API_KEY }}
           COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           FX_SMTP_DISABLE:              "1"
           FX_HOST_MIN_INTERVAL_MS:      "800"

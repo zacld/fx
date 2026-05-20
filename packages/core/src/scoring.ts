@@ -176,13 +176,71 @@ const CONTENT_PAGE_RE = /\/(blog|article|articles|news|pricing|price|report|repo
  */
 export function looksLikePageTitle(name: string | null | undefined): boolean {
   if (!name) return false;
-  const n = String(name);
+  const n = String(name).trim();
+  if (!n) return false;
   if (n.includes("|")) return true;
-  if (/^(about\s+(us\s*[-–—]?\s*)?|home\s*[-–—|:]\s*|welcome\s+to\s+)/i.test(n)) return true;
+  // "About Us", "About —", "About" alone, "Home:", "Welcome to…"
+  if (/^(about(\s+(us|the|our|company|page)\b.*)?\s*$|home\s*[-–—|:]\s*|welcome\s+to\s+)/i.test(n)) return true;
   if (n.endsWith("...") || n.endsWith("…")) return true;
   if (/[?!]/.test(n)) return true;
   if (/^(how\s+to|what\s+is|why\s+|where\s+to|when\s+to|the\s+best|top\s+\d+)\b/i.test(n)) return true;
   if (/\b20\d{2}\b/.test(n) && /\b(figures?|statistics?|report|export|import|guide|analysis|data|tutorial|review)\b/i.test(n)) return true;
+  // Search-query style phrases scraped as company names.
+  // e.g. "Shipping To China", "Sourcing From Europe", "Importing From Italy"
+  if (/^[A-Za-z]+(ing|tion)\s+(to|from|into|in|out\s+of)\s+/i.test(n)) return true;
+  // "[anything] UK based [place]" — scraper description, not a company name
+  if (/\bUK[\s-]based\s+[A-Z]/i.test(n)) return true;
+  // Single bare common-word names that are page elements, not companies
+  if (/^(home|welcome|contact|services|products|solutions|overview|introduction|menu|index|main|default|untitled)$/i.test(n)) return true;
+  return false;
+}
+
+/**
+ * True when a company name looks like a search-engine query phrase rather than
+ * a real trading name. These slip through looksLikePageTitle because they're not
+ * page titles — they're keyword phrases the scraper used as a search query.
+ *
+ * Examples: "FMCG Wholesale", "Consumer Electronics Equipment Distribut",
+ * "Budget Shipping Containers", "Hot Tile Importers".
+ *
+ * Heuristic: ≥ 2 words, ALL words are from a closed set of generic trade/category
+ * nouns or modifiers with no proper-noun anchor.
+ */
+const GENERIC_TRADE_WORDS = new Set([
+  "fmcg", "b2b", "b2c", "sme", "smb", "uk", "eu", "us", "usa", "gb",
+  "importer", "importers", "importing", "exporter", "exporters", "exporting",
+  "wholesale", "wholesaler", "wholesalers", "wholesaling",
+  "distributor", "distributors", "distribution",
+  "supplier", "suppliers", "supply", "supplies",
+  "freight", "logistics", "shipping", "cargo", "haulage", "haulier",
+  "sourcing", "procurement", "trading", "trader", "traders",
+  "manufacturer", "manufacturers", "manufacturing",
+  "food", "drink", "drinks", "beverage", "beverages",
+  "electronics", "electrical", "consumer", "industrial", "commercial",
+  "components", "parts", "equipment", "machinery", "products", "goods",
+  "budget", "premium", "global", "national", "international", "direct",
+  "services", "solutions", "group", "company", "limited", "ltd",
+  "hot", "cool", "fresh", "quality", "express", "fast", "quick",
+  "containers", "packaging", "boxes", "tiles", "tile",
+]);
+
+// Registered company legal suffixes — presence strongly implies it's a real company name.
+const COMPANY_SUFFIX_RE = /\b(ltd|limited|plc|llp|llc|inc|corp|gmbh|bv|nv|sa|sas|srl|co\.?\s*ltd|trading\s+as)\b\.?$/i;
+
+export function looksLikeKeywordPhrase(name: string | null | undefined): boolean {
+  if (!name) return false;
+  const n = String(name).trim();
+  // If the name ends with a registered legal suffix it's a real company, not a keyword phrase
+  if (COMPANY_SUFFIX_RE.test(n)) return false;
+  const words = n.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean);
+  // Only apply to multi-word names — single word handled by looksLikePageTitle
+  if (words.length < 2 || words.length > 7) return false;
+  // If every word is a generic trade word, it's a keyword phrase not a company
+  const allGeneric = words.every(w => GENERIC_TRADE_WORDS.has(w));
+  if (allGeneric) return true;
+  // 4+ words where all but one are generic: "Hot Tile Importers Uk", "Consumer Electronics Equipment Dist"
+  const genericCount = words.filter(w => GENERIC_TRADE_WORDS.has(w)).length;
+  if (words.length >= 4 && genericCount >= words.length - 1) return true;
   return false;
 }
 
@@ -214,6 +272,7 @@ export function isReadyEligible(lead: Partial<Lead>): boolean {
   const cleanName = (lead as Record<string, unknown>).company_name_clean as string | undefined;
   const nameToCheck = (cleanName && cleanName.trim()) ? cleanName : lead.company_name;
   if (looksLikePageTitle(nameToCheck)) return false;
+  if (looksLikeKeywordPhrase(nameToCheck)) return false;
   // Block micro-entity filers — turnover definitively below £632k (~£53k/month),
   // well under the £100k/month minimum viable FX client floor.
   const accsType = (lead as Record<string, unknown>).accounts_type as string | undefined;

@@ -55,6 +55,7 @@ jobs:
           GROQ_MODEL:                   ${{ secrets.GROQ_MODEL }}
           GEMINI_API_KEY:               ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL:                 ${{ secrets.GEMINI_MODEL }}
+          BRAVE_API_KEY:                 ${{ secrets.BRAVE_API_KEY }}
           COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           # Manual-dispatch overrides win when set, otherwise scheduled defaults.
           DISCOVERY_MAX_EVENTS:         ${{ inputs.max_events != '' && inputs.max_events || '100' }}
