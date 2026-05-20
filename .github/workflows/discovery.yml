@@ -56,9 +56,9 @@ jobs:
           GEMINI_MODEL:                 ${{ secrets.GEMINI_MODEL }}
           COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           # Manual-dispatch overrides win when set, otherwise scheduled defaults.
-          DISCOVERY_MAX_EVENTS:         ${{ inputs.max_events != '' && inputs.max_events || '20' }}
+          DISCOVERY_MAX_EVENTS:         ${{ inputs.max_events != '' && inputs.max_events || '100' }}
           DISCOVERY_MIN_RELEVANCE:      ${{ inputs.min_relevance != '' && inputs.min_relevance || '4' }}
-          WEB_MAX_EVENTS:               "10"
+          WEB_MAX_EVENTS:               "100"
           WEB_MAX_CATEGORIES_TO_SCRAPE: "10"
           CATEGORY_MIN_SCORE_TO_SCRAPE: "65"
           WEB_MAX_RESULTS_PER_QUERY:    "8"
