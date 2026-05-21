@@ -720,6 +720,50 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "38e43f007703f1d8": {
+    "id": "38e43f007703f1d8",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/japan-flash-pmi-slips-to-five-month-low-in-may-as-selling-prices-hit-record-high-20260521/",
+    "headline": "Japan flash PMI slips to five-month low in May as selling prices hit record high",
+    "raw_summary": "Japan's flash composite PMI eased to 51.1 in May from 52.2 in April, a five-month low, as services activity stalled for the first time in over a year and selling prices rose at the sharpest pace in nearly 19 years of data, per S&amp;P Global. Summary: All bullets per S&amp;P Global Flash Japan PMI release, May 2026, with comment from Annabel Fiddes, Economics Associate Director at S&amp;P Global Market Intelligence: The composite PMI output index fell to 51.1 in May from 52.2 in April, the weakest reading in five months, marking the fourteenth consecutive month of expansion Manufacturing PMI e",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bshipping cost|\\bfreight|\\bsu; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-05-21T01:18:35.262Z",
+    "event_type": "Economic indicator",
+    "event_breadth": "broad_macro",
+    "summary": "Japan's flash PMI eased in May, but this has no direct implications for UK businesses' foreign currency payment flows",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Japan's flash PMI and selling price changes have indirect implications for global trade but lack a direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate reason for UK businesses to act based on Japan's PMI change",
+    "discovery_recommendation": "Context only — no direct payment flow implications for UK businesses",
+    "confidence_level": "medium",
+    "confidence_reason": "While Japan's economic indicators can influence global markets, this specific event lacks a clear connection to UK businesses' foreign currency payment flows",
+    "what_happened": "Japan's flash composite PMI slipped to a five-month low in May",
+    "what_changed_financially": "Japan's economic activity slowed, with services stalling and selling prices rising sharply",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "No direct UK B2B FX payment flow is affected by Japan's flash PMI changes",
+    "sales_angle": "No specific angle based on this event",
+    "business_impact_summary": "No direct impact on UK businesses from Japan's economic indicators in this context",
+    "exposure_types": [],
+    "overall_sales_angle": "No immediate reason to call based on Japan's flash PMI",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "39835d36232c1623": {
     "id": "39835d36232c1623",
     "headline": "Starmer eases sanctions on Russian oil despite calls to ramp up North Sea drilling",
@@ -1158,50 +1202,6 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "57cbbc31e2b94bbf": {
-    "id": "57cbbc31e2b94bbf",
-    "source": "ForexLive",
-    "source_url": "https://investinglive.com/news/there-will-be-more-to-the-uk-cpi-report-than-what-meets-the-eye-later-today-20260520/",
-    "headline": "There will be more to the UK CPI report than what meets the eye later today",
-    "raw_summary": "As the broader market focus stays on the fallout from the Middle East crisis, it is easy to expect inflation to keep running up on the back of higher energy prices. But as we look to the UK CPI report later, the expectation is for price pressures to ease in April. That at least on an annual basis. So, what's the deal here? Let's take a quick look as to why that is and what can we expect. The headline numbers are still very much expected to be impacted by higher energy prices from the US-Iran conflict. That should lead to monthly inflation jumping by around 0.9%. However, the annual estimate is",
-    "pre_relevance_score": 7,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-05-21T00:36:17.782Z",
-    "event_type": "Economic report",
-    "event_breadth": "macro",
-    "summary": "The UK CPI report may show easing annual inflation despite higher energy prices. The direct impact on FX is weak, but it could influence future BoE decisions.",
-    "currency_pairs": [],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "UK CPI report may have indirect implications on future BoE decisions, which could influence GBP, but the direct FX hook is weak",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "The CPI report might influence future monetary policy decisions, but its immediate impact on FX is indirect",
-    "discovery_recommendation": "Context only — the event lacks a direct FX payment flow hook",
-    "confidence_level": "medium",
-    "confidence_reason": "While the CPI report is significant for the UK economy, its direct impact on FX is less clear without considering the broader monetary policy context",
-    "what_happened": "UK CPI report is expected to show easing price pressures on an annual basis despite monthly inflation increase due to higher energy prices",
-    "what_changed_financially": "Expectation of easing annual inflation rate in the UK",
-    "who_pays_more": "None directly due to this event",
-    "who_receives_less": "None directly due to this event",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None",
-    "fx_payment_logic": "No direct FX payment flow is affected by the CPI report itself",
-    "sales_angle": "Today's CPI report may have implications for future interest rate decisions, which can impact your FX exposure, but the connection is indirect.",
-    "business_impact_summary": "The CPI report's direct impact on businesses is related to inflation expectations rather than immediate FX exposure.",
-    "exposure_types": [],
-    "overall_sales_angle": "The CPI report is a macroeconomic indicator that may influence future monetary policy, potentially affecting FX rates indirectly.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
-  },
   "5c6bedca60023091": {
     "id": "5c6bedca60023091",
     "headline": "EUR/USD Price Forecast: 1.1600 support holds as bearish momentum lingers",
@@ -1257,16 +1257,13 @@
   },
   "623dbae244628c9d": {
     "id": "623dbae244628c9d",
+    "headline": "UK and Gulf strike historic multi-billion-pound trade deal",
     "source": "GOV.UK Export",
     "source_url": "https://www.gov.uk/government/news/uk-and-gulf-strike-historic-multi-billion-pound-trade-deal",
-    "headline": "UK and Gulf strike historic multi-billion-pound trade deal",
-    "raw_summary": "Wages and GDP to see boost as UK and Gulf strike historic multi-billion-pound trade deal",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d",
     "detected_at": "2026-05-21T00:36:21.620Z",
+    "status": "ready",
     "event_type": "Trade deal",
     "event_breadth": "sector_specific",
-    "summary": "UK and Gulf strike historic multi-billion-pound trade deal, potentially increasing trade and affecting businesses with existing or potential trade relationships",
     "currency_pairs": [
       "GBP/AED",
       "GBP/SAR"
@@ -1283,28 +1280,26 @@
       "UK exporters to Gulf countries"
     ],
     "why_now": "The new trade deal may lead to changes in trade volumes and prices, affecting businesses with existing or potential trade relationships",
-    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "confidence_level": "medium",
     "confidence_reason": "Trade deal announcement is a real event, but its impact on specific businesses will depend on various factors, including the terms of the deal and existing trade relationships",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "what_happened": "UK and Gulf strike historic multi-billion-pound trade deal",
     "what_changed_financially": "Potential increase in trade between UK and Gulf, affecting imports and exports",
     "who_pays_more": "UK businesses importing goods from Gulf countries may face changes in costs due to the new trade agreement",
     "who_receives_less": "UK businesses exporting goods to Gulf countries may see an increase in revenue",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP payments for imports from Gulf countries, GBP receipts from exports to Gulf countries",
     "fx_payment_logic": "UK businesses may need to convert GBP to AED or SAR for imports, or receive AED or SAR for exports, with potential changes in exchange rates affecting their costs and revenue",
-    "sales_angle": "If you're trading with Gulf countries, the new trade deal may bring opportunities and challenges — let's discuss how to manage your FX exposure",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses trading with Gulf countries may see changes in costs and revenue due to the new trade deal, and may need to review their FX management strategies",
-    "exposure_types": [
-      "Import cost exposure",
-      "Export revenue exposure"
-    ],
+    "sales_angle": "If you're trading with Gulf countries, the new trade deal may bring opportunities and challenges — let's discuss how to manage your FX exposure",
     "overall_sales_angle": "New trade deal between UK and Gulf — what does it mean for your business and how can you manage your FX exposure?",
+    "summary": "UK and Gulf strike historic multi-billion-pound trade deal, potentially increasing trade and affecting businesses with existing or potential trade relationships",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of Gulf goods",
-        "category_priority_score": 72,
         "business_model": "UK businesses importing goods from Gulf countries, paying in AED or SAR",
         "exposure_level": "Medium",
         "exposure_type": "Import cost exposure — AED or SAR payments vs GBP revenue",
@@ -1312,21 +1307,14 @@
           "GBP/AED",
           "GBP/SAR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK importer pays AED or SAR for goods from Gulf countries → converts GBP to AED or SAR → exchange rate affects cost",
         "margin_risk": "Medium — changes in exchange rates may affect import costs",
         "payment_timing_risk": "Medium — payment terms may expose businesses to exchange rate fluctuations",
         "affected_payment_flow": "AED or SAR payments for imports from Gulf countries",
-        "website_validation_signals": [
-          "imported from Gulf",
-          "Gulf suppliers",
-          "Middle East trade"
-        ],
-        "avoid_segments": [
-          "pure UK domestic businesses",
-          "businesses without Gulf trade relationships"
-        ],
-        "sales_angle": "If you're importing goods from Gulf countries, the new trade deal may affect your costs — let's discuss how to manage your FX exposure",
-        "exposure_thesis_template": "This company imports goods from Gulf countries. Changes in exchange rates may affect import costs.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of Gulf food products",
@@ -1355,15 +1343,27 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from Gulf",
+          "Gulf suppliers",
+          "Middle East trade"
+        ],
         "segment_signals": [
           "imported from Gulf",
           "Gulf suppliers",
           "Middle East trade"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic businesses",
+          "businesses without Gulf trade relationships"
+        ],
+        "sales_angle": "If you're importing goods from Gulf countries, the new trade deal may affect your costs — let's discuss how to manage your FX exposure",
+        "exposure_thesis_template": "This company imports goods from Gulf countries. Changes in exchange rates may affect import costs."
       },
       {
         "segment_name": "UK exporters to Gulf countries",
-        "category_priority_score": 65,
         "business_model": "UK businesses exporting goods to Gulf countries, receiving AED or SAR",
         "exposure_level": "Medium",
         "exposure_type": "Export revenue exposure — AED or SAR receipts vs GBP costs",
@@ -1371,21 +1371,14 @@
           "GBP/AED",
           "GBP/SAR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK exporter receives AED or SAR for goods sold to Gulf countries → converts AED or SAR to GBP → exchange rate affects revenue",
         "margin_risk": "Medium — changes in exchange rates may affect export revenue",
         "payment_timing_risk": "Medium — payment terms may expose businesses to exchange rate fluctuations",
         "affected_payment_flow": "AED or SAR receipts from exports to Gulf countries",
-        "website_validation_signals": [
-          "export to Gulf",
-          "Gulf customers",
-          "Middle East market"
-        ],
-        "avoid_segments": [
-          "pure UK domestic businesses",
-          "businesses without Gulf trade relationships"
-        ],
-        "sales_angle": "If you're exporting goods to Gulf countries, the new trade deal may bring opportunities — let's discuss how to manage your FX exposure",
-        "exposure_thesis_template": "This company exports goods to Gulf countries. Changes in exchange rates may affect export revenue.",
+        "ideal_company_profile": "",
+        "category_priority_score": 65,
         "micro_categories": [
           {
             "name": "UK manufacturers exporting to Gulf countries",
@@ -1401,11 +1394,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "export to Gulf",
+          "Gulf customers",
+          "Middle East market"
+        ],
         "segment_signals": [
           "export to Gulf",
           "Gulf customers",
           "Middle East market"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic businesses",
+          "businesses without Gulf trade relationships"
+        ],
+        "sales_angle": "If you're exporting goods to Gulf countries, the new trade deal may bring opportunities — let's discuss how to manage your FX exposure",
+        "exposure_thesis_template": "This company exports goods to Gulf countries. Changes in exchange rates may affect export revenue."
       }
     ],
     "companies_house_terms": [
@@ -1427,8 +1433,13 @@
       "Gulf manufacturer distributor UK",
       "Middle East manufacturer supplier UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "Wages and GDP to see boost as UK and Gulf strike historic multi-billion-pound trade deal",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d",
+    "exposure_types": [
+      "Import cost exposure",
+      "Export revenue exposure"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-21T00:36:40.649Z"
@@ -2340,35 +2351,39 @@
     "raw_summary": "CPI +3.0% vs +3.0% y/y prelim Prior +2.6% Core CPI +2.2% vs +2.2% y/y prelim Prior +2.3% Services inflation continues to be the main sticking point, but is at least seen easing to 3.0% in April (previously 3.3%). Meanwhile, food price inflation is still keeping thereabouts at 2.4% (previously 2.5%). But with regards to the headline reading, energy price inflation is the main category that is bringing up prices. On a monthly basis, energy prices were up 3.0% and up 10.8% on an annual basis. On the latter, that is a marked step up from the 5.1% estimate in March. All in all, this just points to ",
     "pre_relevance_score": 4,
     "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-05-21T00:36:23.508Z",
+    "detected_at": "2026-05-21T01:18:37.676Z",
     "event_type": "Inflation data",
     "event_breadth": "macro",
-    "summary": "Euro area inflation rose in April, driven by energy prices. While this has indirect implications for UK businesses, it is not a direct FX trigger.",
+    "summary": "Euro area inflation rose in April, driven by energy prices. While this has indirect implications for UK importers, particularly those exposed to energy and food price inflation, the impact is not immediate or direct in terms of FX payment flows.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "Euro area inflation rise has indirect implications for UK businesses importing from the EU, but the payment-flow hook is weak",
+    "commercial_relevance_reason": "Euro area inflation rise has indirect implications for UK businesses importing from the EU, particularly those exposed to energy and food price inflation",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "Inflation rise might lead to future interest rate decisions, indirectly affecting FX rates",
-    "discovery_recommendation": "Context only — inflation data is not a direct FX trigger",
+    "likely_affected_businesses": [
+      "UK importers of EU energy and food products"
+    ],
+    "why_now": "The inflation rise may lead to higher costs for UK importers, but the impact is indirect and depends on specific supply chains and pricing strategies",
+    "discovery_recommendation": "Context only — inflation data lacks direct FX payment flow implications without further context",
     "confidence_level": "medium",
-    "confidence_reason": "Inflation data is relevant but does not directly trigger FX decisions for most UK businesses",
+    "confidence_reason": "Inflation data is relevant but lacks direct FX payment flow implications for UK businesses without further context on specific supply chains or trade agreements",
     "what_happened": "Euro area headline inflation rose to 3.0% in April, driven by energy price inflation",
-    "what_changed_financially": "Energy price inflation increased to 10.8% annually, up from 5.1% in March",
-    "who_pays_more": "None directly, but UK importers of EU goods might face higher costs due to inflation",
+    "what_changed_financially": "Higher inflation in the Euro area may lead to increased costs for UK importers of EU goods, particularly those related to energy and food",
+    "who_pays_more": "UK importers of EU goods, especially those exposed to energy and food price inflation",
     "who_receives_less": "None directly",
-    "margin_risk": "Low",
+    "margin_risk": "Low to medium",
     "payment_timing_risk": "Low",
     "affected_payment_flow": "None directly",
-    "fx_payment_logic": "None directly — inflation rise does not immediately impact FX payment flows for UK businesses",
-    "sales_angle": "Inflation in the Euro area might influence future interest rate decisions, which could impact your FX rates.",
-    "business_impact_summary": "UK businesses importing from the EU might face higher costs due to inflation, but this is an indirect effect.",
-    "exposure_types": [],
-    "overall_sales_angle": "Euro area inflation rise has indirect implications for UK businesses, but is not a direct FX trigger.",
+    "fx_payment_logic": "Higher Euro area inflation could lead to increased costs for UK importers if suppliers raise prices. However, this effect is indirect and depends on the specific supply chain and pricing strategy.",
+    "sales_angle": "If you import goods from the EU, especially energy or food products, you might face higher costs due to rising inflation in the Euro area.",
+    "business_impact_summary": "UK importers of EU goods, particularly those related to energy and food, might face increased costs due to higher inflation in the Euro area. However, the impact is indirect and depends on various factors.",
+    "exposure_types": [
+      "Indirect inflation exposure"
+    ],
+    "overall_sales_angle": "Rising Euro area inflation might indirectly affect your business through increased import costs, especially for energy and food products.",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
