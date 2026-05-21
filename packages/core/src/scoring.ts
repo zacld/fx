@@ -184,7 +184,14 @@ export function looksLikePageTitle(name: string | null | undefined): boolean {
   if (n.endsWith("...") || n.endsWith("…")) return true;
   if (/[?!]/.test(n)) return true;
   if (/^(how\s+to|what\s+is|why\s+|where\s+to|when\s+to|the\s+best|top\s+\d+)\b/i.test(n)) return true;
-  if (/\b20\d{2}\b/.test(n) && /\b(figures?|statistics?|report|export|import|guide|analysis|data|tutorial|review)\b/i.test(n)) return true;
+  if (/\b20\d{2}\b/.test(n) && /\b(figures?|statistics?|report|exports?|imports?|guide|analysis|data|tutorial|review)\b/i.test(n)) return true;
+  // "Top N exports/imports/products [of year/country]"
+  if (/^top\s+\d+\b/i.test(n)) return true;
+  // News headlines: contain news verbs or start with news subjects
+  if (/\b(hails?|announces?|reveals?|seals?\s+deal|strikes?\s+deal|clinches?|inks?\s+deal)\b/i.test(n)) return true;
+  if (/^(economy|government|minister|chancellor|president|treasury|parliament|trade\s+deal|uk[\s-]gulf|uk[\s-]us|uk[\s-]eu)\b/i.test(n)) return true;
+  // "win as [something]" news framing
+  if (/\bwin\s+as\b/i.test(n)) return true;
   // Search-query style phrases scraped as company names.
   // e.g. "Shipping To China", "Sourcing From Europe", "Importing From Italy"
   if (/^[A-Za-z]+(ing|tion)\s+(to|from|into|in|out\s+of)\s+/i.test(n)) return true;
@@ -215,7 +222,9 @@ const GENERIC_TRADE_WORDS = new Set([
   "freight", "logistics", "shipping", "cargo", "haulage", "haulier",
   "sourcing", "procurement", "trading", "trader", "traders",
   "manufacturer", "manufacturers", "manufacturing",
+  "import", "export",
   "food", "drink", "drinks", "beverage", "beverages",
+  "produce", "fruit", "vegetable", "vegetables", "grocery", "groceries",
   "electronics", "electrical", "consumer", "industrial", "commercial",
   "components", "parts", "equipment", "machinery", "products", "goods",
   "budget", "premium", "global", "national", "international", "direct",
