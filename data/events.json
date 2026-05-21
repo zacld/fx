@@ -127,6 +127,50 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-20T14:05:00.823Z"
   },
+  "03a02120dfe9077d": {
+    "id": "03a02120dfe9077d",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-may-flash-services-pmi-509-vs-511-expected-20260521/",
+    "headline": "US May flash services PMI 50.9 vs 51.1 expected",
+    "raw_summary": "Prior 51.0 Manufacturing PMI 55.3 vs 53.8 expected Prior 54.5 Composite PMI 51.7 vs 51.8 expected Prior 51.7 Key Findings: Subdued growth in May amid price surge Comment: Chris Williamson, Chief Business Economist at S&amp;P Global Market Intelligence: “The damaging economic impact from the war in the Middle East is becoming increasingly evident in the business surveys. The ‘flash’ PMI data for May recorded only modest growth of business activity as demand was again squeezed by a further spike in prices and jobs were cut as firms worried over rising costs and the economic outlook. “Coming on t",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-05-21T22:59:13.805Z",
+    "event_type": "Economic indicator",
+    "event_breadth": "macro",
+    "summary": "The US services PMI indicates slow growth and rising prices, which could impact global economic sentiment and potentially influence currency markets, but lacks a direct UK B2B FX hook",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US services PMI has indirect implications for global economic sentiment and potentially USD, but lacks direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "The subdued growth and price surge in the US services sector could contribute to a broader economic slowdown, potentially influencing currency markets indirectly",
+    "discovery_recommendation": "Context only — keep for general market awareness, but do not generate new leads from this event",
+    "confidence_level": "medium",
+    "confidence_reason": "While the US services PMI can influence global economic trends and potentially impact currencies like USD, its direct relevance to specific UK businesses with identifiable foreign-currency payment flows is limited",
+    "what_happened": "US May flash services PMI came in at 50.9, slightly below the expected 51.1",
+    "what_changed_financially": "The PMI reading indicates subdued growth in the US services sector, which could have broader implications for global economic sentiment",
+    "who_pays_more": "None directly, as this is a macroeconomic indicator rather than a specific trade or currency event",
+    "who_receives_less": "None directly, as this event does not directly impact specific payment flows",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly affected",
+    "fx_payment_logic": "This event does not directly trigger specific FX transactions or payment flows for UK businesses",
+    "sales_angle": "While not directly relevant, the slowing US services sector could be part of a broader discussion on global economic trends and potential currency implications",
+    "business_impact_summary": "The US services PMI has indirect implications for global economic trends, which could potentially affect UK businesses through broader economic and currency market shifts",
+    "exposure_types": [],
+    "overall_sales_angle": "The US economic indicators can influence global market sentiment and potentially impact currencies, but this specific event lacks a direct UK B2B FX hook",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "062fd662536438ee": {
     "id": "062fd662536438ee",
     "headline": "China to buy 200 Boeing jets and ease rare earth curbs in US trade breakthrough",
@@ -866,16 +910,13 @@
   },
   "468b1f3cc17ac7d5": {
     "id": "468b1f3cc17ac7d5",
+    "headline": "Euro area economic activity falls at quickest pace in over two years in May",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/eurozone-may-flash-services-pmi-464-vs-477-expected-20260521/",
-    "headline": "Euro area economic activity falls at quickest pace in over two years in May",
-    "raw_summary": "Services PMI 46.4 vs 47.7 expected Prior 47.6 Manufacturing PMI 51.4 vs 51.8 expected Prior 52.2 Composite PMI 47.5 vs 48.8 expected Prior 48.6 The fallout from the Middle East crisis intensifies as euro area business activity takes a big knock in May, no thanks to a hit to demand conditions and surging cost pressures. France was the most notable drag among the big names, as seen earlier here . As for the overall Eurozone readings above, the manufacturing print was a 3-month low while the services print was a 63-month low. Meanwhile, the composite print was a 31-month low. All in all, it point",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-05-21T08:31:44.025Z",
+    "status": "ready",
     "event_type": "Economic indicator",
     "event_breadth": "broad_macro",
-    "summary": "Euro area economic activity declined sharply in May, which may lead to a weaker EUR and impact UK businesses with EUR transactions",
     "currency_pairs": [
       "GBP/EUR"
     ],
@@ -891,49 +932,40 @@
       "UK exporters to the Eurozone"
     ],
     "why_now": "Potential EUR weakening may impact upcoming EUR transactions",
-    "discovery_recommendation": "Limited run — focus on UK businesses with EUR-denominated transactions",
     "confidence_level": "medium",
     "confidence_reason": "PMI data indicates a significant slowdown in euro area economic activity, which could impact EUR exchange rates",
+    "discovery_recommendation": "Limited run — focus on UK businesses with EUR-denominated transactions",
     "what_happened": "Euro area economic activity fell at the quickest pace in over two years in May",
     "what_changed_financially": "Weakening EUR demand due to economic downturn may impact UK businesses with EUR transactions",
     "who_pays_more": "UK businesses with EUR-denominated expenses or imports",
     "who_receives_less": "UK businesses with EUR-denominated revenue or exports",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs EUR expenses or imports",
     "fx_payment_logic": "UK businesses with EUR-denominated transactions may face exchange rate risks due to the euro area economic downturn",
-    "sales_angle": "If you have EUR-denominated transactions, the current economic situation in the euro area may affect your exchange rates",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses with EUR transactions may face exchange rate risks due to the euro area economic downturn",
-    "exposure_types": [
-      "EUR transaction exposure"
-    ],
+    "sales_angle": "If you have EUR-denominated transactions, the current economic situation in the euro area may affect your exchange rates",
     "overall_sales_angle": "The euro area economic downturn may impact your EUR transactions — it's essential to review your exchange rates",
+    "summary": "Euro area economic activity declined sharply in May, which may lead to a weaker EUR and impact UK businesses with EUR transactions",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of European goods",
-        "category_priority_score": 72,
         "business_model": "UK businesses importing goods from the Eurozone, paying EUR invoices",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "EUR invoice arrives → UK business converts GBP → EUR weakening → more GBP required per EUR",
         "margin_risk": "Medium — 1.5% GBP/EUR move on £300k annual buy ≈ £4.5k extra cost if unhedged",
         "payment_timing_risk": "Medium — typical 30-60 day payment terms",
         "affected_payment_flow": "EUR payments to Eurozone suppliers, typically £30k-£300k per shipment",
-        "website_validation_signals": [
-          "imported from",
-          "European supplier",
-          "sourced from",
-          "manufacturer in"
-        ],
-        "avoid_segments": [
-          "pure UK domestic manufacturers",
-          "retailers without own import ops"
-        ],
-        "sales_angle": "Your upcoming EUR supplier invoices may cost more in GBP due to the euro area economic downturn",
-        "exposure_thesis_template": "This company imports goods from the Eurozone. EUR weakening increases GBP cost of EUR supplier invoices.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of French and German goods",
@@ -950,12 +982,26 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ],
         "segment_signals": [
           "imported from",
           "European supplier",
           "sourced from",
           "manufacturer in"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming EUR supplier invoices may cost more in GBP due to the euro area economic downturn",
+        "exposure_thesis_template": "This company imports goods from the Eurozone. EUR weakening increases GBP cost of EUR supplier invoices."
       }
     ],
     "companies_house_terms": [
@@ -968,8 +1014,12 @@
       "\"German goods distributor\" UK",
       "Eurozone goods importer UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "Services PMI 46.4 vs 47.7 expected Prior 47.6 Manufacturing PMI 51.4 vs 51.8 expected Prior 52.2 Composite PMI 47.5 vs 48.8 expected Prior 48.6 The fallout from the Middle East crisis intensifies as euro area business activity takes a big knock in May, no thanks to a hit to demand conditions and surging cost pressures. France was the most notable drag among the big names, as seen earlier here . As for the overall Eurozone readings above, the manufacturing print was a 3-month low while the services print was a 63-month low. Meanwhile, the composite print was a 31-month low. All in all, it point",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
+    "exposure_types": [
+      "EUR transaction exposure"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-21T08:31:47.855Z"
@@ -1311,6 +1361,57 @@
       "CAD payment exposure for European oil importers",
       "EUR revenue conversion for Canadian oil exporters"
     ],
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "4faf06df40511b2e": {
+    "id": "4faf06df40511b2e",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-fx-news-wrap-markets-cheer-on-claims-of-us-iran-agreement-20260521/",
+    "headline": "investingLive Americas FX news wrap: Markets cheer on claims of US-Iran agreement",
+    "raw_summary": "Iran's President says on state TV that they won’t back down in talks Crude oil futures settle at $96.35, down 1.94% on claims of US-Iran draft agreement More from Fed's Barkin: I'm nervous about the tails on both sides of the mandate US and Iran reach a draft agreement with the mediation of Pakistan - Iran's ILNA Fed's Barkin: Current policy is in a good place to respond to ongoing shocks Trump says he wants Strait of Hormuz open, free and with no tolls Fed's Goolsbee: We have a pretty significant inflation problem US Secretary of State Rubio says that Hormuz toll system would make peace deal ",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-05-21T22:59:06.597Z",
+    "event_type": "Geopolitical event",
+    "event_breadth": "broad_macro",
+    "summary": "Rumors of a US-Iran draft agreement led to a drop in crude oil futures. The indirect impact on USD-priced commodity imports could be relevant for some UK businesses.",
+    "currency_pairs": [
+      "USD/GBP",
+      "EUR/USD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Possible impact on oil prices and subsequently on USD-priced commodity imports due to US-Iran agreement rumors",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of USD-priced commodities"
+    ],
+    "why_now": "The rumor of an agreement could lead to changes in oil prices, affecting USD-priced commodity imports in the future",
+    "discovery_recommendation": "Context only — indirect FX relevance through potential impact on commodity prices",
+    "confidence_level": "low",
+    "confidence_reason": "The event is based on rumors of a draft agreement and its impact on FX is indirect through commodity prices",
+    "what_happened": "Rumors of a US-Iran draft agreement potentially easing tensions in the region",
+    "what_changed_financially": "Crude oil futures prices dropped 1.94% on the news, which could affect USD-priced commodity imports",
+    "who_pays_more": "None directly, but potentially UK businesses importing USD-priced commodities if the agreement leads to higher oil prices in the future",
+    "who_receives_less": "None directly, but potentially UK businesses exporting to the US if a stronger USD results from reduced geopolitical tensions",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "USD-priced commodity imports",
+    "fx_payment_logic": "A potential decrease in oil prices due to reduced tensions could lead to lower costs for UK businesses importing USD-priced commodities. However, this is highly speculative at this stage.",
+    "sales_angle": "If you import USD-priced commodities, changes in global tensions can impact your costs. It might be worth reviewing your FX strategy.",
+    "business_impact_summary": "The potential for decreased oil prices could benefit UK importers of USD-priced commodities, but this is an indirect and speculative effect.",
+    "exposure_types": [
+      "USD-priced commodity import exposure"
+    ],
+    "overall_sales_angle": "Geopolitical events can have indirect effects on your business through commodity prices and FX rates.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "519dfccc69818059": {
@@ -2604,57 +2705,163 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "c75f72df9d0b3766": {
-    "id": "c75f72df9d0b3766",
+  "ba6281ba26ea00a3": {
+    "id": "ba6281ba26ea00a3",
     "source": "FXStreet",
-    "source_url": "https://www.fxstreet.com/news/canadian-dollar-weakens-to-near-13750-on-softer-canadian-cpi-us-iran-diplomatic-hopes-202605210700",
-    "headline": "Canadian Dollar weakens to near 1.3750 on softer Canadian CPI, US-Iran diplomatic hopes",
-    "raw_summary": "The USD/CAD pair gathers strength to near 1.3765 during the early European session on Thursday. The Canadian Dollar (CAD) softens against the US Dollar (USD) on cooling domestic inflation data and a decline in crude oil prices.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
-    "detected_at": "2026-05-21T08:31:41.345Z",
+    "source_url": "https://www.fxstreet.com/news/british-pound-political-volatility-and-fiscal-clarity-abn-amro-202605211717",
+    "headline": "British Pound: Political volatility and fiscal clarity – ABN AMRO",
+    "raw_summary": "ABN AMRO’s Georgette Boele notes that Sterling has weakened alongside the Euro versus the US Dollar, with energy prices a key driver. She argues UK political uncertainty could temporarily lift volatility in Sterling and gilts, but expects this phase to be short-lived.",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-05-21T22:59:04.161Z",
     "event_type": "Currency move",
-    "event_breadth": "specific_currency",
-    "summary": "The Canadian Dollar has weakened against the US Dollar. While this has limited direct implications for UK businesses, it might affect import costs or competitiveness for some companies",
+    "event_breadth": "broad_currency",
+    "summary": "GBP has weakened against EUR and USD due to UK political uncertainty and energy price drivers. UK businesses with international transactions may be affected, but the impact is indirect and driven by broader market conditions.",
     "currency_pairs": [
-      "USD/CAD"
+      "GBP/EUR",
+      "GBP/USD"
     ],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "CAD weakness has indirect implications for UK businesses importing from Canada or competing with Canadian goods",
+    "commercial_relevance_reason": "GBP/EUR move has implications for UK businesses with EUR-denominated transactions, but the move is driven by broader USD strength and UK political uncertainty rather than a direct UK B2B FX hook",
     "trigger_strength": "weak",
-    "trigger_score": 22,
+    "trigger_score": 24,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [
-      "UK importers of Canadian goods",
-      "UK exporters competing with Canadian products"
+      "UK importers of European goods",
+      "UK exporters with EUR or USD customer revenue"
     ],
-    "why_now": "The recent CAD weakening might prompt UK businesses to review their CAD-related payment flows and pricing strategies",
-    "discovery_recommendation": "Context only — the event has limited direct relevance to UK B2B FX but can be used as background information",
+    "why_now": "Current market conditions and political uncertainty may lead to increased FX volatility, affecting UK businesses with international transactions",
+    "discovery_recommendation": "Context only — the event has some relevance to UK B2B FX, but the impact is indirect and not specific enough to warrant a full discovery run",
     "confidence_level": "medium",
-    "confidence_reason": "The event is a currency move triggered by economic data, but its direct relevance to UK B2B FX is limited",
-    "what_happened": "The Canadian Dollar weakened against the US Dollar due to softer Canadian CPI data and declining crude oil prices",
-    "what_changed_financially": "The USD/CAD rate moved, potentially affecting the cost of Canadian goods for importers and the competitiveness of Canadian exports",
-    "who_pays_more": "UK businesses importing goods from Canada might face higher costs if they pay in CAD",
-    "who_receives_less": "UK exporters competing with Canadian goods might see a relative gain in competitiveness",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "CAD payments for Canadian goods or services",
-    "fx_payment_logic": "UK importers of Canadian goods might face higher costs due to the weaker CAD. UK exporters competing with Canadian products might see a relative gain in competitiveness",
-    "sales_angle": "If you import goods from Canada or compete with Canadian products, the recent CAD move might be worth reviewing",
-    "business_impact_summary": "The CAD weakening has indirect implications for UK businesses with Canadian trade connections. It might affect import costs or competitiveness, but the impact is likely to be limited",
+    "confidence_reason": "The event is relevant to UK businesses with international transactions, but the impact is indirect and driven by general market conditions rather than a specific UK B2B FX event",
+    "what_happened": "GBP weakened against EUR and USD due to UK political uncertainty and energy price drivers",
+    "what_changed_financially": "GBP/EUR and GBP/USD rates moved, affecting UK businesses with international transactions",
+    "who_pays_more": "UK importers with outstanding EUR or USD invoices",
+    "who_receives_less": "UK exporters converting EUR or USD revenue back to GBP",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low to medium",
+    "affected_payment_flow": "GBP revenue vs EUR or USD supplier costs",
+    "fx_payment_logic": "UK businesses with EUR or USD transactions may face increased costs or reduced revenue due to the current GBP/EUR and GBP/USD rates",
+    "sales_angle": "If you have international transactions, the current market conditions may affect your costs or revenue.",
+    "business_impact_summary": "UK businesses with international transactions may face increased costs or reduced revenue due to the current FX rates, but the impact is indirect and driven by broader market conditions.",
     "exposure_types": [
-      "CAD payment exposure",
-      "competitiveness vs Canadian goods"
+      "EUR supplier payment exposure",
+      "USD revenue conversion"
     ],
-    "overall_sales_angle": "The CAD move is a reminder to review currency-related risks and opportunities in trade with Canada",
+    "overall_sales_angle": "Current market conditions may affect your international transactions — worth reviewing your FX exposure.",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
     "status": "context_only",
     "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "bc6c3c4cae3a9866": {
+    "id": "bc6c3c4cae3a9866",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/british-pound-falls-as-iran-deal-doubts-weak-uk-pmi-bite-202605211608",
+    "headline": "British Pound falls as Iran deal doubts and weak UK PMI weigh",
+    "raw_summary": "The GBP/USD pair falls by about 0.20% on Thursday amid concerns that the US and Iran couldn’t reach a deal, while strong US economic data was a headwind for the Pound Sterling (GBP), which dips amid weakening UK business activity.",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\buk business|\\buk compan|\\buk",
+    "detected_at": "2026-05-21T22:59:09.083Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "GBP/USD fell due to Iran deal doubts and weak UK PMI. UK businesses with USD transactions face changed costs and revenues.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "GBP/USD move affects UK businesses importing from or exporting to the US",
+    "trigger_strength": "medium",
+    "trigger_score": 58,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK importers of US goods",
+      "UK exporters to the US"
+    ],
+    "why_now": "USD-denominated invoices placed before the GBP/USD move now cost more to settle in GBP",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "GBP/USD rate move is driven by external geopolitical and economic factors",
+    "what_happened": "GBP/USD pair fell by about 0.20% on Thursday due to Iran deal doubts and weak UK PMI",
+    "what_changed_financially": "GBP/USD rate moved, affecting UK businesses with USD-denominated transactions",
+    "who_pays_more": "UK importers with USD-denominated supplier invoices",
+    "who_receives_less": "UK exporters receiving USD customer payments and converting to GBP",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs USD supplier costs",
+    "fx_payment_logic": "UK importers order goods priced in USD → invoice arrives → they must convert GBP to USD to pay → GBP has weakened → more GBP required per USD",
+    "sales_angle": "If you have upcoming USD supplier payments, the current rate is worse than it was before the move.",
+    "business_impact_summary": "UK importers of US goods face higher landed costs on recent orders. Exporters receiving USD revenue see a small gain on conversion.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "GBP/USD move means upcoming USD invoices cost more — worth reviewing the rate.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US goods",
+        "category_priority_score": 72,
+        "business_model": "UK wholesaler/distributor buying from US manufacturers, paying USD invoices, selling GBP to UK trade",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure — USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "USD invoice arrives → UK business converts GBP → GBP weaker → margin compressed",
+        "margin_risk": "Medium — 1% GBP/USD move on £200k annual buy ≈ £2k extra cost if unhedged",
+        "payment_timing_risk": "Medium — typical 30-60 day payment terms",
+        "affected_payment_flow": "USD payments to US manufacturers, typically £20k-£200k per shipment",
+        "website_validation_signals": [
+          "imported from USA",
+          "US supplier",
+          "sourced from America"
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming USD supplier invoices are costing more in GBP than they were before the move.",
+        "exposure_thesis_template": "This company imports goods from the US. GBP/USD move increases GBP cost of USD supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK importers of US machinery parts",
+            "why": "Pay USD to US manufacturers — direct exposure to GBP/USD move on component costs",
+            "search_queries": [
+              "\"US machinery importer\" UK",
+              "\"US parts\" UK distributor"
+            ],
+            "companies_house_terms": [
+              "US machinery",
+              "american parts"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from USA",
+          "US supplier",
+          "sourced from America"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "US machinery",
+      "american parts"
+    ],
+    "all_search_queries": [
+      "\"US machinery importer\" UK",
+      "\"US parts\" UK distributor"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-05-21T22:59:24.023Z"
   },
   "d183ead58079eb10": {
     "id": "d183ead58079eb10",
@@ -3117,6 +3324,52 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "eeccab9ab8e25d82": {
+    "id": "eeccab9ab8e25d82",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/uk-may-flash-services-pmi-479-vs-517-expected-20260521/",
+    "headline": "UK economic activity slides in May on Middle East conflict, political turmoil",
+    "raw_summary": "Services PMI 47.9 vs 51.7 expected Prior 52.7 Manufacturing PMI 53.7 vs 53.0 expected Prior 53.7 Composite PMI 48.5 vs 51.6 expected Prior 52.6 Ouch. That's a big miss on the services print as business activity there falls to the lowest in 64 months. That's leading UK economic activity to contract in May, with the composite print being the weakest in 13 months. Service firms signaled the sharpest decline in business activity since January 2021 citing greater economic hesitancy and weaker investment sentiment among clients, alongside delayed consumer spending decisions in response to the Middle",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba",
+    "detected_at": "2026-05-21T22:59:15.729Z",
+    "event_type": "Economic indicator",
+    "event_breadth": "macro",
+    "summary": "UK economic activity contracted in May, driven by a decline in the services sector. While this has broad implications, it lacks a direct FX angle.",
+    "currency_pairs": [],
+    "urgency_score": 3,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "UK economic contraction may indirectly affect businesses with international exposure, but no direct FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK businesses with international exposure"
+    ],
+    "why_now": "Economic contraction may lead to reduced consumer spending and investment, potentially affecting businesses with international operations",
+    "discovery_recommendation": "Context only — no direct FX hook, but may influence market sentiment",
+    "confidence_level": "medium",
+    "confidence_reason": "Economic contraction has broad implications, but lacks a clear FX angle without more specific trade or currency data",
+    "what_happened": "UK economic activity contracted in May due to services sector decline",
+    "what_changed_financially": "Services PMI fell to 47.9, indicating a decline in business activity",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX logic applies, as the event is a macroeconomic indicator without specific trade or currency implications",
+    "sales_angle": "The current economic climate may lead to increased uncertainty for businesses with international exposure.",
+    "business_impact_summary": "UK businesses may face reduced consumer spending and investment due to economic contraction, but no direct FX impact is evident.",
+    "exposure_types": [],
+    "overall_sales_angle": "Economic uncertainty may increase the need for FX risk management among businesses with international exposure.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "f07d71a3a0d89014": {
     "id": "f07d71a3a0d89014",
     "headline": "investingLive European FX news wrap: UK jobs data disappoints, US dollar remains supported",
@@ -3476,6 +3729,58 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-20T22:00:09.432Z"
+  },
+  "f880bebc1d40399b": {
+    "id": "f880bebc1d40399b",
+    "source": "OilPrice.com",
+    "source_url": "https://oilprice.com/Latest-Energy-News/World-News/Saudi-Oil-Export-Income-Jumped-to-35-Year-High-in-March-as-Prices-Soared.html",
+    "headline": "Saudi Oil Export Income Jumped to 3.5-Year High in March as Prices Soared",
+    "raw_summary": "Despite the lowest production and export volumes on record, Saudi Arabia saw the value of its oil exports surge by 37.4% in March to the highest level in three and a half years, data from Saudi Arabia’s General Authority for Statistics showed. The value of the Kingdom’s total merchandise exports rose by 21.5% in March 2026 from a year earlier, with oil exports surging by 37.4% as the soaring oil prices and the re-routing of crude exports to the Red Sea port Yanbu helped the world’s top crude exporter offset most of the traffic…",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bred sea|\\bsuez|\\bpanama cana; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-05-21T22:59:11.418Z",
+    "event_type": "Commodity price move",
+    "event_breadth": "commodity",
+    "summary": "Saudi oil export income jumped to a 3.5-year high in March due to soaring oil prices. This could lead to higher costs for UK businesses importing oil or oil-based products.",
+    "currency_pairs": [
+      "USD/GBP",
+      "USD/EUR"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Higher oil prices can affect UK businesses importing oil or oil-based products, particularly if priced in USD",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK oil importers",
+      "UK manufacturers using oil-based products"
+    ],
+    "why_now": "The recent surge in oil prices could lead to higher costs for UK businesses importing oil or oil-based products",
+    "discovery_recommendation": "Context only — the event has indirect relevance to UK B2B FX, mainly through potential increased costs of oil imports",
+    "confidence_level": "medium",
+    "confidence_reason": "The event is relevant but its direct impact on UK businesses is indirect and depends on various factors including the currency of oil transactions",
+    "what_happened": "Saudi Arabia's oil export income reached a 3.5-year high in March due to soaring oil prices",
+    "what_changed_financially": "The value of Saudi oil exports increased by 37.4% in March, potentially affecting the cost of oil imports for other countries",
+    "who_pays_more": "UK businesses importing oil or oil-based products, especially if transactions are in USD",
+    "who_receives_less": "None directly, but UK exporters might face increased costs if their products are oil-intensive",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "USD or EUR payments for oil imports",
+    "fx_payment_logic": "UK businesses importing oil or oil-based products may face higher costs if transactions are in USD or EUR, due to the increased price of oil",
+    "sales_angle": "If you import oil or oil-based products, the recent surge in oil prices could impact your costs, especially if transactions are in USD or EUR.",
+    "business_impact_summary": "UK businesses importing oil or oil-based products might face increased costs due to the surge in oil prices. This could affect their margins, especially if they cannot pass on the increased costs to their customers.",
+    "exposure_types": [
+      "USD or EUR payment exposure for oil imports"
+    ],
+    "overall_sales_angle": "Recent oil price increases could mean higher import costs for your business, particularly if you're paying in USD or EUR.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "fd4aba753bd6b035": {
     "id": "fd4aba753bd6b035",
