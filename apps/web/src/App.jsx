@@ -205,7 +205,7 @@ function useCrmState() {
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────
-// view: "call_list" | "research" | "all"
+// view: "call_list" | "research" | "all" | "new"
 const BLANK_FILTERS = {
   view:         "call_list",
   priorities:   [],
@@ -226,6 +226,7 @@ const BLANK_FILTERS = {
 const CALL_LIST_FILTERS = { ...BLANK_FILTERS, view: "call_list", sortBy: "readiness" };
 const RESEARCH_FILTERS  = { ...BLANK_FILTERS, view: "research"  };
 const ALL_FILTERS       = { ...BLANK_FILTERS, view: "all"       };
+const NEW_FILTERS       = { ...BLANK_FILTERS, view: "new", sortBy: "readiness" };
 
 // ── READY eligibility helpers (mirrors scoring.ts isReadyEligible) ────────────
 // Platform/cloud/SaaS domains — not operating companies.
@@ -391,6 +392,9 @@ function applyFilters(leads, filters, getCrmStatus) {
   //             WARM + QUEUE in research tab)
   if (filters.view === "call_list") {
     r = sortByReadyScore(r.filter(isCallListEligible));
+  } else if (filters.view === "new") {
+    const cutoff = Date.now() - 24*60*60*1000;
+    r = sortByReadyScore(r.filter(l => l.created_at && new Date(l.created_at).getTime() > cutoff));
   } else if (filters.view === "research") {
     const callListIds = new Set(
       r.filter(isCallListEligible).map(l => l.website_domain || l.company_number)
@@ -486,6 +490,7 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .view-tab.active-cl{background:rgba(16,185,129,.15);color:#10B981}
 .view-tab.active-rq{background:rgba(245,158,11,.12);color:#F59E0B}
 .view-tab.active-all{background:rgba(255,255,255,.06);color:rgba(255,255,255,.7)}
+.view-tab.active-new{background:rgba(251,191,36,.12);color:#FBB724}
 .view-desc{font-size:12px;color:rgba(255,255,255,.25);flex:1}
 .view-count{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:4px 12px;border-radius:6px;white-space:nowrap}
 .view-count-cl{background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)}
@@ -1555,6 +1560,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
   const thesis      = lead.exposure_thesis || lead.fx_reason || "";
   const isMultiEvt  = lead.multi_event_trigger;
   const allSigs     = [...new Set([...fxSigs, ...segSigs])];
+  const isNew = lead.created_at && (Date.now() - new Date(lead.created_at).getTime() < 24*60*60*1000);
 
   return (
     <div className="cc" style={{"--pc":color}}>
@@ -1568,6 +1574,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             {[lead.company_type?.toUpperCase(), lead.company_number&&`CH ${lead.company_number}`, lead.incorporated&&`Est. ${lead.incorporated.slice(0,4)}`].filter(Boolean).join(" · ")}
           </div>
           <div className="cc-badges">
+            {isNew && <span style={{padding:"1px 7px",borderRadius:4,background:"rgba(251,191,36,.15)",border:"1px solid rgba(251,191,36,.4)",color:"#FBB724",fontFamily:"'JetBrains Mono',monospace",fontSize:9,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase"}}>NEW</span>}
             <ReadinessBadge lead={lead} />
             <span className="b b-p">● {lead.priority}</span>
             {lead.exposure_level && <span className={`exp-level ${expClass(lead.exposure_level)}`}>{expLabel(lead.exposure_level)}</span>}
@@ -2583,6 +2590,18 @@ export default function App() {
           >
             ⊙ All Leads
           </button>
+          {(() => {
+            const cutoff = Date.now() - 24*60*60*1000;
+            const newCount = leads.filter(l => l.created_at && new Date(l.created_at).getTime() > cutoff).length;
+            return newCount > 0 ? (
+              <button
+                className={`view-tab${filters.view==="new"?" active-new":""}`}
+                onClick={()=>setFilters(NEW_FILTERS)}
+              >
+                ✦ New Leads ({newCount})
+              </button>
+            ) : null;
+          })()}
         </div>
         <span className="view-desc">{viewDesc}</span>
         <span className={viewCountCls}>{filteredLeads.length} leads</span>
