@@ -1574,7 +1574,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             {[lead.company_type?.toUpperCase(), lead.company_number&&`CH ${lead.company_number}`, lead.incorporated&&`Est. ${lead.incorporated.slice(0,4)}`].filter(Boolean).join(" · ")}
           </div>
           <div className="cc-badges">
-            {isNew && <span style={{padding:"1px 7px",borderRadius:4,background:"rgba(251,191,36,.15)",border:"1px solid rgba(251,191,36,.4)",color:"#FBB724",fontFamily:"'JetBrains Mono',monospace",fontSize:9,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase"}}>NEW</span>}
+            {isNew && <span style={{padding:"2px 9px",borderRadius:5,background:"rgba(251,191,36,.2)",border:"1px solid rgba(251,191,36,.5)",color:"#FBB724",fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:800,letterSpacing:".12em",textTransform:"uppercase",boxShadow:"0 0 8px rgba(251,191,36,.2)"}}>✦ NEW</span>}
             <ReadinessBadge lead={lead} />
             <span className="b b-p">● {lead.priority}</span>
             {lead.exposure_level && <span className={`exp-level ${expClass(lead.exposure_level)}`}>{expLabel(lead.exposure_level)}</span>}
@@ -2438,7 +2438,7 @@ export default function App() {
   const [leads,   setLeads]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastRef, setLast]    = useState(null);
-  const [filters, setFilters] = useState(CALL_LIST_FILTERS);
+  const [filters, setFilters] = useState(NEW_FILTERS);
   const { state: crmState, getLead, getStatus: getCrmStatus, updateLead, performAction } = useCrmState();
 
   const load = useCallback(async()=>{
@@ -2512,7 +2512,14 @@ export default function App() {
     return leads.filter(l=>{ const crm = crmState[l.id]||{}; return crm.last_contacted_at && new Date(crm.last_contacted_at).getTime() >= cutoff; }).length;
   },[leads,crmState]);
 
-  const viewDesc = filters.view === "call_list"
+  const newLeadsCount = useMemo(()=>{
+    const cutoff = Date.now() - 24*60*60*1000;
+    return leads.filter(l => l.created_at && new Date(l.created_at).getTime() > cutoff).length;
+  },[leads]);
+
+  const viewDesc = filters.view === "new"
+    ? `Added in the last 24 hours · sorted by readiness`
+    : filters.view === "call_list"
     ? `Top 10 + Backup 15 + ${remainingHot.length} remaining HOT · ranked by ready_score`
     : filters.view === "research"
     ? `WARM + QUEUE · ${researchLeads.filter(l=>l.priority==="WARM").length} WARM, ${researchLeads.filter(l=>l.priority==="QUEUE").length} QUEUE`
@@ -2520,6 +2527,7 @@ export default function App() {
 
   const viewCountCls = filters.view === "call_list" ? "view-count view-count-cl"
     : filters.view === "research" ? "view-count view-count-rq"
+    : filters.view === "new" ? "view-count view-count-cl"
     : "view-count view-count-all";
 
   return (
@@ -2553,6 +2561,7 @@ export default function App() {
       {/* STATS */}
       <div className="stats">
         {[
+          {n:newLeadsCount,        l:"New leads",         s:"Added last 24h · click to view", c:"#FBB724", onClick:()=>setFilters(NEW_FILTERS)},
           {n:Math.min(callListLeads.length,25), l:"READY leads",   s:"Top 25 · ranked by ready_score", c:"#10B981"},
           {n:hot,                  l:"HOT leads",         s:"Score ≥ 80 · FX confirmed", c:"#10B981"},
           {n:warm,                 l:"WARM leads",        s:"Score 60–79",               c:"#F59E0B"},
@@ -2561,8 +2570,8 @@ export default function App() {
           {n:contacted,            l:"In progress",       s:"Contacted/follow-up",       c:"#38BDF8"},
           {n:meetings,             l:"Meetings booked",   s:"CRM tracked",               c:"#10B981"},
           {n:saved,                l:"Saved",             s:"Worth revisiting",          c:"#F59E0B"},
-        ].map(({n,l,s,c})=>(
-          <div className="stat" key={l}>
+        ].map(({n,l,s,c,onClick})=>(
+          <div className="stat" key={l} onClick={onClick} style={onClick?{cursor:"pointer"}:{}}>
             <div className="stat-n" style={{color:c}}>{n}</div>
             <div><span className="stat-l">{l}</span><span className="stat-s">{s}</span></div>
           </div>
@@ -2572,36 +2581,33 @@ export default function App() {
       {/* VIEW SWITCHER */}
       <div className="view-banner">
         <div className="view-tabs">
+          {newLeadsCount > 0 && (
+            <button
+              className={`view-tab${filters.view==="new"?" active-new":""}`}
+              onClick={()=>setFilters(NEW_FILTERS)}
+              style={{fontWeight:700}}
+            >
+              ✦ New Leads ({newLeadsCount})
+            </button>
+          )}
           <button
             className={`view-tab${filters.view==="call_list"?" active-cl":""}`}
             onClick={()=>setFilters(CALL_LIST_FILTERS)}
           >
-            ⚡ Daily Call List {callListLeads.length > 0 && `(${Math.min(callListLeads.length,10)}+${Math.max(0,Math.min(callListLeads.length,25)-10)})`}
+            ⚡ Call List
           </button>
           <button
             className={`view-tab${filters.view==="research"?" active-rq":""}`}
             onClick={()=>setFilters(RESEARCH_FILTERS)}
           >
-            🔍 Research Queue
+            🔍 Research
           </button>
           <button
             className={`view-tab${filters.view==="all"?" active-all":""}`}
             onClick={()=>setFilters(ALL_FILTERS)}
           >
-            ⊙ All Leads
+            ⊙ All
           </button>
-          {(() => {
-            const cutoff = Date.now() - 24*60*60*1000;
-            const newCount = leads.filter(l => l.created_at && new Date(l.created_at).getTime() > cutoff).length;
-            return newCount > 0 ? (
-              <button
-                className={`view-tab${filters.view==="new"?" active-new":""}`}
-                onClick={()=>setFilters(NEW_FILTERS)}
-              >
-                ✦ New Leads ({newCount})
-              </button>
-            ) : null;
-          })()}
         </div>
         <span className="view-desc">{viewDesc}</span>
         <span className={viewCountCls}>{filteredLeads.length} leads</span>
