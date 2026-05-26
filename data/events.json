@@ -172,6 +172,50 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "03af706563b710dd": {
+    "id": "03af706563b710dd",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/live/2026/may/26/oil-price-bonds-rally-markets-us-iran-peace-deal-hopes-retail-inflation-growth-live-updates",
+    "headline": "UK government borrowing costs fall to lowest since mid-April as markets cling to US-Iran peace deal hopes – business live",
+    "raw_summary": "Rolling coverage of the latest economic and financial news Middle East crisis live: US attacks Iran missile sites as Tehran negotiators hold talks in Qatar Rachel Reeves tells ministers to ‘buy British’ in four key industries British government borrowing costs are falling sharply this morning on hopes that US and Iranian negotiators will make progress reopening the strait of Hormuz. UK bond prices are ralling in early trading, pushing down the yield (or interest rate) on the debt. Rising oil prices have been fuelling inflation expectations across the globe, putting upward pressure on global yi",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-05-26T08:30:29.824Z",
+    "event_type": "Government borrowing costs",
+    "event_breadth": "macro",
+    "summary": "UK government borrowing costs have decreased due to hopes of a US-Iran peace deal, but this has no direct FX payment flow implications for UK businesses",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "UK government borrowing costs and bond yields have indirect implications for GBP but lack direct FX payment flow relevance",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "Indirect influence on GBP through broader market sentiment",
+    "discovery_recommendation": "Context only — no direct payment flow hook",
+    "confidence_level": "medium",
+    "confidence_reason": "The connection between UK borrowing costs and FX rates is indirect and influenced by broader market sentiment",
+    "what_happened": "UK government borrowing costs fell due to hopes of a US-Iran peace deal",
+    "what_changed_financially": "UK bond prices rose, pushing down the yield on the debt",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX payment flow implications from this event",
+    "sales_angle": "Today's decrease in UK government borrowing costs may reflect broader market optimism, but its direct impact on your FX exposure is minimal",
+    "business_impact_summary": "The decrease in UK government borrowing costs has indirect implications for the economy but lacks a direct FX payment flow hook for UK businesses",
+    "exposure_types": [],
+    "overall_sales_angle": "No direct reason to call based on this event alone",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "062fd662536438ee": {
     "id": "062fd662536438ee",
     "headline": "China to buy 200 Boeing jets and ease rare earth curbs in US trade breakthrough",
@@ -565,6 +609,56 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-20T08:25:00.515Z"
   },
+  "181dc423d9240785": {
+    "id": "181dc423d9240785",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/euro-ecb-hawkishness-fails-to-lift-versus-us-dollar-societe-generale-202605260735",
+    "headline": "Euro: ECB hawkishness fails to lift versus US Dollar – Societe Generale",
+    "raw_summary": "The report by Societe Generale notes that Eurozone yields are slightly firmer after hawkish comments from ECB member Schnabel, who highlights rising medium-term inflation expectations and signals a likely rate hike in June.",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-05-26T08:30:23.362Z",
+    "event_type": "Central bank commentary",
+    "event_breadth": "broad_macro",
+    "summary": "ECB member Schnabel's hawkish comments may influence EUR/USD, indirectly affecting UK businesses with USD exposure",
+    "currency_pairs": [
+      "EUR/USD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Hawkish ECB comments may influence EUR/USD, indirectly affecting UK businesses with USD exposure",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK businesses with USD exposure"
+    ],
+    "why_now": "ECB's hawkish comments may influence EUR/USD, affecting UK businesses with USD exposure",
+    "discovery_recommendation": "Context only — no direct payment-flow hook",
+    "confidence_level": "medium",
+    "confidence_reason": "ECB comments are relevant but do not directly impact UK B2B FX payment flows",
+    "what_happened": "ECB member Schnabel made hawkish comments, signaling a likely rate hike in June",
+    "what_changed_financially": "EUR/USD rate may be influenced by ECB's hawkish stance",
+    "who_pays_more": "None directly, but UK businesses with USD exposure may face indirect effects",
+    "who_receives_less": "None directly, but UK businesses with EUR revenue may face indirect effects",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "UK businesses with USD exposure may face indirect effects from EUR/USD rate changes",
+    "sales_angle": "ECB's hawkish comments may impact EUR/USD, which could affect your USD exposure",
+    "business_impact_summary": "UK businesses with USD exposure may face indirect effects from EUR/USD rate changes",
+    "exposure_types": [
+      "USD exposure"
+    ],
+    "overall_sales_angle": "ECB's comments may influence EUR/USD, affecting your USD exposure",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "1997ddcea0e4b82b": {
     "id": "1997ddcea0e4b82b",
     "source": "ForexLive",
@@ -573,35 +667,35 @@
     "raw_summary": "EUROPEAN SESSION In the European session, we don't have much on the agenda other than a couple of low tier releases like the Spanish PPI and the UK CBI which are not going to change anything for the respective central banks. The ECB is widely expected to hike in June and then wait at least until September to deliver another rate hike if necessary. The BoE, on the other hand, is seen keeping the Bank Rate unchanged in June with the first of the two hikes expected coming in September at the earliest. AMERICAN SESSION In the American session, the only highlight is the US Consumer Confidence repor",
     "pre_relevance_score": 6,
     "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-05-26T07:45:20.415Z",
-    "event_type": "Economic Indicators",
+    "detected_at": "2026-05-26T08:30:24.707Z",
+    "event_type": "Economic releases",
     "event_breadth": "macro",
-    "summary": "Low-tier economic releases and central bank expectations do not immediately impact UK B2B FX decisions.",
+    "summary": "Low-tier economic releases with no direct FX impact on UK businesses. No immediate reason for UK businesses to review their FX exposure.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "Low-tier releases and expected central bank decisions have minimal immediate impact on UK B2B FX",
+    "commercial_relevance_reason": "Low-tier economic releases with no direct FX impact on UK businesses",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
-    "why_now": "No immediate reason for UK businesses to adjust FX strategies based on these events",
-    "discovery_recommendation": "Context only — no direct payment-flow hook or urgency",
+    "why_now": "No immediate reason for UK businesses to review their FX exposure",
+    "discovery_recommendation": "Context only — no significant payment-flow hook",
     "confidence_level": "medium",
-    "confidence_reason": "Central bank expectations and low-tier data releases do not directly influence current FX decisions for UK businesses",
-    "what_happened": "ECB and BoE rate expectations were discussed with low-tier data releases in the European session",
-    "what_changed_financially": "No significant changes in financial conditions for UK businesses due to these events",
-    "who_pays_more": "None directly",
-    "who_receives_less": "None directly",
+    "confidence_reason": "The events mentioned are not expected to significantly impact currency markets or UK business payment flows",
+    "what_happened": "Low-tier economic releases in European and American sessions",
+    "what_changed_financially": "No significant changes expected in currency markets or UK business payment flows",
+    "who_pays_more": "None",
+    "who_receives_less": "None",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly impacted",
-    "fx_payment_logic": "No direct FX payment logic applies due to the nature of these events",
-    "sales_angle": "No specific angle due to lack of direct impact",
-    "business_impact_summary": "No significant business impact from these events on UK B2B FX",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "No specific FX payment logic applies to this event",
+    "sales_angle": "No specific sales angle applies to this event",
+    "business_impact_summary": "No significant impact expected on UK businesses",
     "exposure_types": [],
-    "overall_sales_angle": "No immediate reason to call based on these events",
+    "overall_sales_angle": "No immediate reason to call UK businesses today",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -2360,6 +2454,128 @@
     "pre_relevance_score": 6,
     "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +4 \\bshipping cost|\\bfreight|\\bsu; +3 \\benergy price|\\bgas price|\\bf",
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "70705f7bea92e66f": {
+    "id": "70705f7bea92e66f",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/euro-strengthens-against-british-pound-as-ecb-signals-june-hike-202605260656",
+    "headline": "Euro strengthens against British Pound as ECB signals June hike",
+    "raw_summary": "The EUR/GBP cross gathers strength to near 0.8630 during the early European session on Tuesday. Hawkish remarks from the ‌European Central Bank (ECB) provide some support to the Euro (EUR) against the British Pound (GBP).",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
+    "detected_at": "2026-05-26T08:30:28.033Z",
+    "event_type": "Central Bank signal",
+    "event_breadth": "broad_currency",
+    "summary": "The ECB's signal for a June hike has strengthened the EUR against the GBP. UK importers face higher costs on EUR-denominated invoices, while exporters see a slight decrease in GBP value from EUR payments.",
+    "currency_pairs": [
+      "EUR/GBP"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Direct EUR/GBP move — UK businesses importing from Europe face higher costs due to a stronger EUR",
+    "trigger_strength": "strong",
+    "trigger_score": 82,
+    "discovery_mode": "full",
+    "recommended_query_budget": 28,
+    "likely_affected_businesses": [
+      "UK European food importers",
+      "UK machinery importers from EU",
+      "UK wine and spirits importers"
+    ],
+    "why_now": "Upcoming EUR supplier invoices will cost more in GBP due to the strengthened EUR",
+    "discovery_recommendation": "Full run — clear payment flow, multiple identifiable importer niches, public websites should show import language",
+    "confidence_level": "high",
+    "confidence_reason": "Explicit ECB signal for a June hike strengthens EUR, directly impacting UK importers with EUR-denominated supplier invoices",
+    "what_happened": "The European Central Bank signaled a potential June hike, strengthening the Euro against the British Pound",
+    "what_changed_financially": "The EUR/GBP rate moved, increasing the cost of EUR-denominated supplier invoices for UK importers",
+    "who_pays_more": "UK businesses importing goods from Europe with EUR-denominated invoices",
+    "who_receives_less": "UK exporters receiving EUR payments, now worth less in GBP",
+    "margin_risk": "High",
+    "payment_timing_risk": "High",
+    "affected_payment_flow": "EUR payments to European suppliers vs GBP revenue",
+    "fx_payment_logic": "UK importers receive EUR invoices from European suppliers. The strengthened EUR means more GBP is required to pay these invoices, compressing margins.",
+    "sales_angle": "If you have upcoming EUR supplier payments, the current EUR strength means these will cost more in GBP than previously.",
+    "business_impact_summary": "UK importers of European goods face higher landed costs due to the strengthened EUR. Exporters receiving EUR payments see a marginal decrease in GBP value.",
+    "exposure_types": [
+      "EUR supplier payment exposure",
+      "EUR revenue conversion"
+    ],
+    "overall_sales_angle": "The ECB's signal has made upcoming EUR invoices more expensive in GBP — a review of the current rate is warranted.",
+    "target_segments": [
+      {
+        "segment_name": "European food and wine importers",
+        "category_priority_score": 90,
+        "business_model": "UK importer buying from European suppliers, paying EUR invoices, selling GBP to UK trade",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "EUR/GBP"
+        ],
+        "fx_payment_logic": "EUR invoice from European supplier → UK importer converts GBP to EUR → stronger EUR → more GBP needed",
+        "margin_risk": "High — 2% EUR/GBP move on £200k annual buy ≈ £4k extra cost if unhedged",
+        "payment_timing_risk": "High — 30-90 day terms create open FX window",
+        "affected_payment_flow": "EUR payments to European food and wine suppliers, typically £20k-£200k per shipment",
+        "website_validation_signals": [
+          "imported from Europe",
+          "European wine",
+          "direct from the vineyard"
+        ],
+        "avoid_segments": [
+          "retail food shops without import operations",
+          "supermarkets"
+        ],
+        "sales_angle": "Upcoming EUR food and wine payments now cost more in GBP due to the ECB's signal.",
+        "exposure_thesis_template": "This company imports food and wine from Europe. The EUR/GBP move increases GBP cost of EUR supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "French wine importers UK",
+            "why": "Pay EUR to French wine producers — direct exposure to EUR/GBP move on wine costs",
+            "search_queries": [
+              "\"french wine importer\" UK",
+              "\"wine from France\" UK"
+            ],
+            "companies_house_terms": [
+              "french wine",
+              "wine imports"
+            ]
+          },
+          {
+            "name": "Italian food importers UK",
+            "why": "EUR-invoiced Italian suppliers with GBP-only UK revenue creates direct currency mismatch",
+            "search_queries": [
+              "\"italian food importer\" UK",
+              "\"food from Italy\" UK"
+            ],
+            "companies_house_terms": [
+              "italian food",
+              "food imports italy"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from Europe",
+          "European wine",
+          "direct from the vineyard"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "french wine",
+      "wine imports",
+      "italian food",
+      "food imports italy"
+    ],
+    "all_search_queries": [
+      "\"french wine importer\" UK",
+      "\"wine from France\" UK",
+      "\"italian food importer\" UK",
+      "\"food from Italy\" UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-05-26T08:30:47.985Z"
   },
   "72838d82725c1064": {
     "id": "72838d82725c1064",
