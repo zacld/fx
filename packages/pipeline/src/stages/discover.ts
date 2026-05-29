@@ -18,6 +18,11 @@
  * WEB_MAX_QUERIES_PER_MICRO_CATEGORY / WEB_MAX_RESULTS_PER_QUERY and the CH call
  * budget. WEB_DISCOVERY_ENABLED=false skips it entirely.
  *
+ * Industry targeting: set INDUSTRY_PRESET env var to one of the preset IDs in
+ * config/industries.ts to inject a synthetic segment with preset keywords into
+ * every event. The synthetic segment runs alongside (not instead of) the
+ * AI-derived event segments.
+ *
  * CLI: tsx src/stages/discover.ts [--db ...] [--runs ...] [--limit N] [--max-events N]
  */
 import { createHash } from "node:crypto";
@@ -34,6 +39,7 @@ import { mineSourcePage } from "../sources/source-page-miner.js";
 import { domainFromUrl, domainCoherentWithName, nameTokens } from "../sources/blocklists.js";
 import { ChClient, coreKeyword, extractDirector } from "../sources/companies-house.js";
 import { fetchHtml as defaultFetchHtml, type HtmlFetcher } from "../sources/fetch.js";
+import { getIndustryPreset } from "../config/industries.js";
 
 const SOURCE_PAGE_PATH = /(^|[/\-_])(members?|member-directory|directory|suppliers?|supplier-list|find-a-supplier|find-a-member|our-members|membership|business-directory|trade-directory|exporters?|importers?|manufacturers?)([/\-_]|$)/i;
 
@@ -125,6 +131,13 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
   const fetcher = opts.fetchHtml ?? defaultFetchHtml;
   const ch = opts.chClient ?? new ChClient();
 
+  // Industry preset: when set, inject a synthetic segment with preset keywords.
+  // Runs alongside AI-derived segments — does not replace them.
+  const industryPreset = getIndustryPreset(process.env.INDUSTRY_PRESET);
+  if (industryPreset) {
+    console.log(`[discover] Industry preset: ${industryPreset.label} (${industryPreset.keywords.length} keywords)`);
+  }
+
   const { db, sqlite, close } = getDb(dbPath);
   const rec = new RunRecorder("discover", { dbPath, maxEvents, maxSegments, sourcePageMining });
   const st: DiscoverResult = {
@@ -200,9 +213,39 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
       const effMaxResults  = mode === "context_only" ? 4 : Math.min(15, Math.max(2, Math.round(maxResults * (mode === "limited" ? 0.6 : isStrong ? 1.5 : 1))));
       const budgetCap = Number((event as { recommended_query_budget?: number }).recommended_query_budget ?? 0);
 
-      const segments = (event.target_segments ?? [])
+      const segments: Segment[] = (event.target_segments ?? [])
         .filter((s) => (s.category_priority_score == null) || (s.category_priority_score >= minScore))
         .slice(0, effMaxSegments);
+
+      // ── Industry preset injection ──────────────────────────────────────────
+      // When INDUSTRY_PRESET is set, append a synthetic segment using the preset's
+      // keywords so Brain 3 always searches this industry — even on event-light days.
+      if (industryPreset) {
+        const syntheticSegment: Segment = {
+          segment_name: industryPreset.label,
+          business_model: industryPreset.label,
+          exposure_level: "",
+          exposure_type: "industry_preset",
+          likely_currency_pairs: [],
+          why_affected: `Targeting ${industryPreset.label} companies via INDUSTRY_PRESET=${industryPreset.id}`,
+          why_financially_exposed: "",
+          fx_payment_logic: "",
+          margin_risk: "",
+          payment_timing_risk: "",
+          affected_payment_flow: "",
+          ideal_company_profile: "",
+          category_priority_score: 100,
+          micro_categories: [],
+          high_intent_search_queries: industryPreset.keywords,
+          companies_house_terms: [],
+          website_validation_signals: industryPreset.websiteSignals,
+          segment_signals: industryPreset.websiteSignals,
+          avoid_segments: [],
+          sales_angle: "",
+          exposure_thesis_template: "",
+        };
+        segments.push(syntheticSegment);
+      }
 
       let queriesUsed = 0;
       const budgetExceeded = () => budgetCap > 0 && queriesUsed >= budgetCap;
