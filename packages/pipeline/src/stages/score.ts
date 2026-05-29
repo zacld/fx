@@ -11,6 +11,8 @@
  *      table.
  *   3. recomputes exposure_confidence, signal_count, and lead_type / awareness_level
  *      / saving_opportunity (port of rescore.py classify_lead).
+ *   4. attaches fx_exposure_score (0–100, rule-based FX exposure dimension) and
+ *      industry_label (from INDUSTRY_PRESET env var, or "FX Discovery" default).
  * Writes updated leads back to the DB, exports a {id: lead} JSON map to --out
  * (default data/leads.json — the canonical file the dashboard reads), and records
  * a `runs` row. The `dedup` stage runs after this and rewrites the same file.
@@ -27,10 +29,11 @@ import { fileURLToPath } from "node:url";
 
 import {
   scoreLead, exposureConfidence, computeReadyScore, isReadyEligible, isLargeOrg, bestContactRoute, ensureContactFields,
-  isPlausibleDmName, WEAK_ORIGIN_TOKENS, LeadSchema, repoRoot, type Lead,
+  isPlausibleDmName, WEAK_ORIGIN_TOKENS, LeadSchema, repoRoot, computeFxExposureScore, type Lead,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
+import { getIndustryPreset } from "../config/industries.js";
 
 const TRIGGER_BREADTHS = new Set(["broad_currency", "broad_macro", "tariff", "commodity"]);
 const EVERGREEN_FREIGHT_SIC_PREFIXES = ["5010", "5020", "5110", "5121", "5122"];
@@ -117,6 +120,10 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const persist = opts.persist ?? true;
 
+  // Industry preset — used to compute fx_exposure_score and set industry_label
+  const industryPreset = getIndustryPreset(process.env.INDUSTRY_PRESET);
+  const industryLabel = industryPreset?.label ?? "FX Discovery";
+
   const { db, sqlite, close } = getDb(dbPath);
   const rec = new RunRecorder("score", { dbPath, outPath });
 
@@ -143,6 +150,13 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
       if (r.reclassified) reclassified++;
       if (r.changedPriority) changedPriority++;
       after[lead.priority] = (after[lead.priority] ?? 0) + 1;
+
+      // ── Industry supplementary fields ──────────────────────────────────────
+      // fx_exposure_score: standalone 0–100 FX exposure dimension (never overrides scoring gates).
+      // industry_label: which preset was active when this lead was scored.
+      lead.fx_exposure_score = computeFxExposureScore(lead, industryPreset ?? undefined);
+      lead.industry_label = industryLabel;
+
       out[lead.id] = lead;
     }
 
@@ -172,6 +186,7 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
         website_domain: l.website_domain, segment_name: l.segment_name, lead_type: l.lead_type,
         fx_payment_signals: l.fx_payment_signals, contact_phone: l.contact_phone ?? null,
         best_contact_route: l.best_contact_route ?? "",
+        fx_exposure_score: l.fx_exposure_score, industry_label: l.industry_label,
       })),
     );
     if (persist) rec.finish(sqlite, runsDir);
