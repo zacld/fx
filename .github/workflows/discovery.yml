@@ -33,6 +33,10 @@ on:
         description: "DISCOVERY_MAX_EVENTS override (default 12 — raise for a wider audit batch)"
         required: false
         default: ""
+      industry_preset:
+        description: "INDUSTRY_PRESET override (blank = default FX behaviour; e.g. it_technology, manufacturing, logistics)"
+        required: false
+        default: ""
 
 jobs:
   discover:
@@ -88,6 +92,9 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_KEY:   ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
           GOOGLE_SHEET_TAB:             ${{ vars.GOOGLE_SHEET_TAB }}
           NODE_OPTIONS:                 "--max-old-space-size=4096"
+          # Industry preset — blank on scheduled runs (default FX behaviour).
+          # Set via workflow_dispatch input for one-off industry-targeted runs.
+          INDUSTRY_PRESET:              ${{ inputs.industry_preset || '' }}
         run: npm run pipeline
 
       # ── Python supplementary scripts ──────────────────────────────────────
