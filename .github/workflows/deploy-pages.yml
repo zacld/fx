@@ -30,4 +30,4 @@ jobs:
           VITE_COMPANIES_HOUSE_API_KEY: ${{ secrets.VITE_COMPANIES_HOUSE_API_KEY }}
 
       - name: Deploy to Netlify
-        run: npx netlify-cli deploy --prod --dir=apps/web/dist --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: npx netlify-cli deploy --prod --dir="$(pwd)/apps/web/dist" --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }}
