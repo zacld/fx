@@ -205,7 +205,7 @@ function useCrmState() {
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────
-// view: "call_list" | "research" | "all"
+// view: "call_list" | "research" | "all" | "new"
 const BLANK_FILTERS = {
   view:         "call_list",
   priorities:   [],
@@ -214,6 +214,7 @@ const BLANK_FILTERS = {
   hasWebsite:   false,
   hasDirector:  false,
   minScore:     0,
+  minRevenue:   0,           // 0 = any; otherwise minimum confirmed annual_turnover in £
   eventId:      "all",
   currencyPair: "all",
   segment:      "all",
@@ -226,6 +227,7 @@ const BLANK_FILTERS = {
 const CALL_LIST_FILTERS = { ...BLANK_FILTERS, view: "call_list", sortBy: "readiness" };
 const RESEARCH_FILTERS  = { ...BLANK_FILTERS, view: "research"  };
 const ALL_FILTERS       = { ...BLANK_FILTERS, view: "all"       };
+const NEW_FILTERS       = { ...BLANK_FILTERS, view: "new", sortBy: "readiness" };
 
 // ── READY eligibility helpers (mirrors scoring.ts isReadyEligible) ────────────
 // Platform/cloud/SaaS domains — not operating companies.
@@ -382,6 +384,16 @@ function dedupeForReady(leads) {
   return result;
 }
 
+// Revenue fit — uses ONLY confirmed iXBRL-parsed annual_turnover.
+// company_size_band, accounts_type, net_assets, employee_count are NOT treated as confirmed.
+// Returns: "passes" | "below" | "unverified"
+function sizeFit(lead, minRevenue) {
+  if (!minRevenue || minRevenue <= 0) return "passes";
+  const t = lead.annual_turnover;
+  if (t == null || typeof t !== "number") return "unverified";
+  return t >= minRevenue ? "passes" : "below";
+}
+
 function applyFilters(leads, filters, getCrmStatus) {
   let r = leads;
 
@@ -391,6 +403,9 @@ function applyFilters(leads, filters, getCrmStatus) {
   //             WARM + QUEUE in research tab)
   if (filters.view === "call_list") {
     r = sortByReadyScore(r.filter(isCallListEligible));
+  } else if (filters.view === "new") {
+    const cutoff = Date.now() - 24*60*60*1000;
+    r = sortByReadyScore(r.filter(l => l.created_at && new Date(l.created_at).getTime() > cutoff));
   } else if (filters.view === "research") {
     const callListIds = new Set(
       r.filter(isCallListEligible).map(l => l.website_domain || l.company_number)
@@ -410,6 +425,8 @@ function applyFilters(leads, filters, getCrmStatus) {
   if (filters.segment !== "all")    r = r.filter(l => (l.segment_name||"")===filters.segment);
   if (filters.statuses.length)      r = r.filter(l => filters.statuses.includes(getCrmStatus(l)));
   if (filters.grades.length)        r = r.filter(l => filters.grades.includes(l.route_grade));
+  // Revenue filter — strictly confirmed annual_turnover only. "unverified" and "below" are excluded.
+  if (filters.minRevenue > 0)        r = r.filter(l => sizeFit(l, filters.minRevenue) === "passes");
   if (filters.search) {
     const q = filters.search.toLowerCase();
     r = r.filter(l =>
@@ -486,6 +503,65 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 .view-tab.active-cl{background:rgba(16,185,129,.15);color:#10B981}
 .view-tab.active-rq{background:rgba(245,158,11,.12);color:#F59E0B}
 .view-tab.active-all{background:rgba(255,255,255,.06);color:rgba(255,255,255,.7)}
+.view-tab.active-new{background:rgba(251,191,36,.12);color:#FBB724}
+.view-tab.active-lk{background:rgba(99,102,241,.15);color:#818CF8}
+
+/* COMPANY LOOKUP */
+.lookup-wrap{max-width:1500px;margin:0 auto;padding:40px 40px 80px}
+.lookup-hero{margin-bottom:32px}
+.lookup-hero-title{font-size:22px;font-weight:800;color:rgba(255,255,255,.9);margin-bottom:6px}
+.lookup-hero-sub{font-size:13px;color:rgba(255,255,255,.35)}
+.lookup-row{display:flex;gap:10px;margin-bottom:24px}
+.lookup-input{flex:1;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:rgba(255,255,255,.85);font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:all .15s}
+.lookup-input:focus{border-color:rgba(99,102,241,.5);background:rgba(99,102,241,.05)}
+.lookup-input::placeholder{color:rgba(255,255,255,.2)}
+.lookup-btn{padding:12px 24px;background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.4);border-radius:10px;color:#818CF8;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.lookup-btn:hover{background:rgba(99,102,241,.28);border-color:rgba(99,102,241,.6)}
+.lookup-btn:disabled{opacity:.4;cursor:not-allowed}
+.lookup-suggestions{background:rgba(15,15,20,1);border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.lookup-sug-item{padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);transition:background .1s;display:flex;align-items:center;gap:12px}
+.lookup-sug-item:last-child{border-bottom:none}
+.lookup-sug-item:hover{background:rgba(99,102,241,.08)}
+.lookup-sug-name{font-size:14px;font-weight:600;color:rgba(255,255,255,.8)}
+.lookup-sug-meta{font-size:11px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace}
+.lookup-sug-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
+.lookup-sug-status.active{background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.2)}
+.lookup-sug-status.dissolved{background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.2)}
+.lookup-sug-status.other{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.08)}
+.lookup-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden}
+.lookup-card-head{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.lookup-card-name{font-size:20px;font-weight:800;color:rgba(255,255,255,.9);flex:1}
+.lookup-card-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.3);margin-top:3px}
+.lookup-card-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.lookup-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:5px;text-transform:uppercase;letter-spacing:.05em}
+.lookup-card-body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-bottom:1px solid rgba(255,255,255,.06)}
+@media(max-width:900px){.lookup-card-body{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.lookup-card-body{grid-template-columns:1fr}.lookup-wrap{padding:20px 16px 60px}}
+.lookup-panel{padding:20px 24px;border-right:1px solid rgba(255,255,255,.06)}
+.lookup-panel:last-child{border-right:none}
+.lookup-panel-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:12px}
+.lookup-dm{padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;margin-bottom:8px}
+.lookup-dm:last-child{margin-bottom:0}
+.lookup-dm-name{font-size:14px;font-weight:700;color:rgba(255,255,255,.85)}
+.lookup-dm-role{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px}
+.lookup-dm-fd{border-color:rgba(16,185,129,.2);background:rgba(16,185,129,.04)}
+.lookup-dm-fd .lookup-dm-name{color:#10B981}
+.lookup-rev-val{font-size:22px;font-weight:800;color:rgba(255,255,255,.8);margin-bottom:4px}
+.lookup-rev-type{font-size:11px;color:rgba(255,255,255,.3);margin-bottom:8px}
+.lookup-rev-note{font-size:11px;color:rgba(255,255,255,.25);line-height:1.5}
+.lookup-fx-score{font-size:38px;font-weight:900;line-height:1;margin-bottom:4px}
+.lookup-fx-label{font-size:12px;font-weight:600;margin-bottom:10px}
+.lookup-fx-bar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.lookup-fx-fill{height:100%;border-radius:2px;transition:width .4s}
+.lookup-fx-reason{font-size:11px;color:rgba(255,255,255,.3);line-height:1.5}
+.lookup-sic{font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,.25);margin-top:6px}
+.lookup-card-foot{padding:16px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lookup-link-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.lookup-empty{padding:60px 24px;text-align:center;color:rgba(255,255,255,.2);font-size:14px}
+.lookup-err{padding:12px 16px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#F87171;font-size:13px;margin-bottom:16px}
+.lookup-loading{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.3);font-size:13px;padding:16px 0}
+.lookup-spin{width:16px;height:16px;border:2px solid rgba(99,102,241,.2);border-top-color:#818CF8;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .view-desc{font-size:12px;color:rgba(255,255,255,.25);flex:1}
 .view-count{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:4px 12px;border-radius:6px;white-space:nowrap}
 .view-count-cl{background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)}
@@ -1555,6 +1631,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
   const thesis      = lead.exposure_thesis || lead.fx_reason || "";
   const isMultiEvt  = lead.multi_event_trigger;
   const allSigs     = [...new Set([...fxSigs, ...segSigs])];
+  const isNew = lead.created_at && (Date.now() - new Date(lead.created_at).getTime() < 24*60*60*1000);
 
   return (
     <div className="cc" style={{"--pc":color}}>
@@ -1568,6 +1645,7 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
             {[lead.company_type?.toUpperCase(), lead.company_number&&`CH ${lead.company_number}`, lead.incorporated&&`Est. ${lead.incorporated.slice(0,4)}`].filter(Boolean).join(" · ")}
           </div>
           <div className="cc-badges">
+            {isNew && <span style={{padding:"2px 9px",borderRadius:5,background:"rgba(251,191,36,.2)",border:"1px solid rgba(251,191,36,.5)",color:"#FBB724",fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:800,letterSpacing:".12em",textTransform:"uppercase",boxShadow:"0 0 8px rgba(251,191,36,.2)"}}>✦ NEW</span>}
             <ReadinessBadge lead={lead} />
             <span className="b b-p">● {lead.priority}</span>
             {lead.exposure_level && <span className={`exp-level ${expClass(lead.exposure_level)}`}>{expLabel(lead.exposure_level)}</span>}
@@ -1908,6 +1986,317 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
   );
 }
 
+// ─── COMPANY LOOKUP ──────────────────────────────────────────────
+const CH_API = "https://api.company-information.service.gov.uk";
+const CH_KEY = (typeof import.meta !== "undefined" && import.meta.env?.VITE_COMPANIES_HOUSE_API_KEY) || "";
+
+function chAuth() {
+  return "Basic " + btoa(CH_KEY + ":");
+}
+
+async function chGet(path) {
+  if (!CH_KEY) return null;
+  try {
+    const r = await fetch(CH_API + path, { headers: { Authorization: chAuth(), Accept: "application/json" } });
+    return r.ok ? r.json() : null;
+  } catch { return null; }
+}
+
+// SIC → FX likelihood (port of scoring.ts sicTier)
+const _SIC_T1 = ["4671","4672","4673","4674","4675","4676","4677","4631","4632","4633","4634","4635","4636","4637","4638","4639","4641","4642","4643","4644","4645","4646","4647","4648","4649","4610","4620","4630","4650","4660","4669","5010","5020","5110","5121","5122"];
+const _SIC_T2_PFX = ["10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","46","47"];
+const _SIC_T3_PFX = ["491","492","493","494","521","522","523","524"];
+
+function sicFxScore(sicCodes) {
+  if (!sicCodes || sicCodes.length === 0) return { score: 0, tier: 0, label: "No SIC data", color: "#475569" };
+  const codes = sicCodes.map(s => String(s).replace(/\s/g,""));
+  let tier = 0;
+  let matchedCode = codes[0];
+  for (const c of codes) {
+    if (_SIC_T1.some(t => c.startsWith(t) || t.startsWith(c.slice(0,4)))) { tier = 1; matchedCode = c; break; }
+    if (_SIC_T2_PFX.some(p => c.startsWith(p))) { tier = Math.max(tier, 2); matchedCode = c; }
+    if (_SIC_T3_PFX.some(p => c.startsWith(p))) { tier = Math.max(tier, 3); }
+  }
+  const map = {
+    1: { score: 78, label: "Wholesaler / Importer — strong FX likelihood", color: "#10B981" },
+    2: { score: 52, label: "Manufacturer — moderate FX likelihood", color: "#F59E0B" },
+    3: { score: 30, label: "Retail / Logistics — some FX exposure", color: "#818CF8" },
+    0: { score: 10, label: "Low FX signal from SIC", color: "#475569" },
+  };
+  return { ...map[tier], tier, matchedCode };
+}
+
+function revenueEstimate(profile) {
+  const accs = profile?.accounts;
+  const t = accs?.last_accounts?.type || "";
+  if (t === "micro-entity" || t === "micro") return { label: "Under £632k", band: "micro", note: "Micro-entity accounts filed" };
+  if (t === "total-exemption-small" || t === "small") return { label: "£632k – £10.2m", band: "small", note: "Small company accounts (full turnover not disclosed)" };
+  if (t === "total-exemption-full") return { label: "£1m – £10.2m", band: "medium", note: "Total-exemption full accounts" };
+  if (t === "full" || t === "group" || t === "audit-exemption-subsidiary") return { label: "Likely £10m+", band: "large", note: "Full / large company accounts filed" };
+  if (t) return { label: "Filed: " + t, band: "unknown", note: "Accounts on record — type " + t };
+  return { label: "Not disclosed", band: "unknown", note: "No accounts type available" };
+}
+
+function cleanChName(raw) {
+  if (!raw) return "";
+  const s = raw.trim();
+  if (!s.includes(",")) return s.replace(/\b\w/g, c => c.toUpperCase());
+  const comma = s.indexOf(",");
+  const surname = s.slice(0, comma).trim();
+  const forename = s.slice(comma + 1).trim();
+  return (forename + " " + surname).replace(/\b\w/g, c => c.toUpperCase()).replace(/\s+/g, " ").trim();
+}
+
+function isFd(officer) {
+  const occ = (officer.occupation || "").toLowerCase();
+  const role = (officer.officer_role || "").toLowerCase();
+  return occ.includes("finance") || occ.includes("chief financial") || occ.includes("cfo") ||
+    occ.includes("accounts director") || occ.includes("financial director") ||
+    role.includes("finance");
+}
+
+function CompanyLookupView() {
+  const [query, setQuery]       = useState("");
+  const [suggestions, setSugg]  = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [profile, setProfile]   = useState(null);
+  const [officers, setOfficers] = useState([]);
+  const [loading, setLoading]   = useState(false);
+  const [cardLoad, setCardLoad] = useState(false);
+  const [error, setError]       = useState("");
+  const inputRef = useRef(null);
+
+  const noKey = !CH_KEY;
+
+  const search = useCallback(async () => {
+    const q = query.trim();
+    if (!q) return;
+    setLoading(true); setError(""); setSugg([]); setSelected(null); setProfile(null); setOfficers([]);
+    const data = await chGet(`/search/companies?q=${encodeURIComponent(q)}&items_per_page=8`);
+    if (!data) { setError(noKey ? "Add VITE_COMPANIES_HOUSE_API_KEY to your .env file and rebuild." : "Companies House API error — check your API key."); }
+    else setSugg(data.items || []);
+    setLoading(false);
+  }, [query, noKey]);
+
+  const pick = useCallback(async (item) => {
+    setSelected(item); setSugg([]); setCardLoad(true); setProfile(null); setOfficers([]);
+    const [p, o] = await Promise.all([
+      chGet(`/company/${item.company_number}`),
+      chGet(`/company/${item.company_number}/officers?items_per_page=50`),
+    ]);
+    setProfile(p);
+    setOfficers(o?.items || []);
+    setCardLoad(false);
+  }, []);
+
+  const reset = () => { setSugg([]); setSelected(null); setProfile(null); setOfficers([]); setError(""); setQuery(""); inputRef.current?.focus(); };
+
+  // Build decision-maker list: active officers, FDs first then MD/CEO, then all directors
+  const activeOfficers = officers.filter(o => !o.resigned_on);
+  const fds  = activeOfficers.filter(isFd);
+  const dirs = activeOfficers.filter(o => !isFd(o) && (o.officer_role||"").toLowerCase().includes("director"));
+  const dms  = [...fds, ...dirs].slice(0, 8);
+
+  const sicCodes = profile?.sic_codes || [];
+  const fxInfo   = sicFxScore(sicCodes);
+  const revInfo  = revenueEstimate(profile);
+  const website  = profile?.links?.self ? null : null; // CH profile doesn't expose website; we'll link to CH page
+
+  const statusCls = s => s === "active" ? "active" : s === "dissolved" ? "dissolved" : "other";
+  const statusLabel = s => s ? s.replace(/-/g," ").replace(/\b\w/g, c=>c.toUpperCase()) : "Unknown";
+
+  return (
+    <div className="lookup-wrap">
+      <div className="lookup-hero">
+        <div className="lookup-hero-title">Company Intelligence Lookup</div>
+        <div className="lookup-hero-sub">Finance director names · Revenue estimate · FX likelihood · From Companies House</div>
+      </div>
+
+      {noKey && (
+        <div className="lookup-err">
+          No API key found. Add <code>VITE_COMPANIES_HOUSE_API_KEY=your_key</code> to <code>apps/web/.env</code> (or root <code>.env</code>) and run <code>npm run build</code>.
+        </div>
+      )}
+
+      <div className="lookup-row">
+        <input
+          ref={inputRef}
+          className="lookup-input"
+          placeholder="Type a company name, e.g. Alpine Machinery Supplies..."
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && search()}
+          disabled={noKey}
+        />
+        <button className="lookup-btn" onClick={search} disabled={noKey || loading || !query.trim()}>
+          {loading ? "Searching…" : "Look up →"}
+        </button>
+        {selected && (
+          <button className="lookup-btn" onClick={reset} style={{background:"rgba(255,255,255,.04)",borderColor:"rgba(255,255,255,.1)",color:"rgba(255,255,255,.4)"}}>
+            ← New search
+          </button>
+        )}
+      </div>
+
+      {error && <div className="lookup-err">{error}</div>}
+
+      {loading && (
+        <div className="lookup-loading">
+          <div className="lookup-spin"/>
+          Searching Companies House…
+        </div>
+      )}
+
+      {suggestions.length > 0 && !selected && (
+        <div className="lookup-suggestions">
+          {suggestions.map(s => (
+            <div className="lookup-sug-item" key={s.company_number} onClick={() => pick(s)}>
+              <div style={{flex:1}}>
+                <div className="lookup-sug-name">{s.title}</div>
+                <div className="lookup-sug-meta">{s.company_number} · {(s.description_identifier||[s.company_type]).join(" · ")}</div>
+              </div>
+              <span className={`lookup-sug-status ${statusCls(s.company_status)}`}>{statusLabel(s.company_status)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {cardLoad && (
+        <div className="lookup-loading">
+          <div className="lookup-spin"/>
+          Loading company profile and officers…
+        </div>
+      )}
+
+      {profile && !cardLoad && (
+        <div className="lookup-card">
+          {/* Header */}
+          <div className="lookup-card-head">
+            <div style={{flex:1}}>
+              <div className="lookup-card-name">{profile.company_name || selected?.title}</div>
+              <div className="lookup-card-num">Companies House #{selected?.company_number} · Incorporated {profile.date_of_creation || "—"}</div>
+              <div className="lookup-card-badges">
+                <span className="lookup-badge" style={{background:`rgba(16,185,129,.1)`,color:"#10B981",border:"1px solid rgba(16,185,129,.2)"}}>
+                  {statusLabel(profile.company_status)}
+                </span>
+                {(profile.sic_codes||[]).slice(0,3).map(c => (
+                  <span key={c} className="lookup-badge" style={{background:"rgba(255,255,255,.04)",color:"rgba(255,255,255,.4)",border:"1px solid rgba(255,255,255,.08)"}}>{c}</span>
+                ))}
+              </div>
+            </div>
+            <div style={{textAlign:"right",flexShrink:0}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"rgba(255,255,255,.2)"}}>
+                {profile.registered_office_address ? [
+                  profile.registered_office_address.locality,
+                  profile.registered_office_address.region,
+                  profile.registered_office_address.postal_code,
+                ].filter(Boolean).join(", ") : ""}
+              </div>
+            </div>
+          </div>
+
+          {/* Three panels */}
+          <div className="lookup-card-body">
+            {/* FDs / Directors */}
+            <div className="lookup-panel">
+              <div className="lookup-panel-title">Finance Director & Officers</div>
+              {dms.length === 0 ? (
+                <div style={{color:"rgba(255,255,255,.2)",fontSize:12}}>No active directors found</div>
+              ) : dms.map((o, i) => {
+                const fd = isFd(o);
+                return (
+                  <div key={i} className={`lookup-dm${fd?" lookup-dm-fd":""}`}>
+                    <div className="lookup-dm-name">
+                      {fd && <span style={{fontSize:10,fontWeight:700,marginRight:6,color:"#10B981"}}>FD</span>}
+                      {cleanChName(o.name)}
+                    </div>
+                    <div className="lookup-dm-role">{o.officer_role?.replace(/-/g," ")} {o.occupation ? `· ${o.occupation}` : ""}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Revenue estimate */}
+            <div className="lookup-panel">
+              <div className="lookup-panel-title">Estimated Revenue</div>
+              <div className="lookup-rev-val" style={{
+                color: revInfo.band==="large"?"#10B981":revInfo.band==="medium"?"#F59E0B":revInfo.band==="small"?"#818CF8":"rgba(255,255,255,.5)"
+              }}>{revInfo.label}</div>
+              <div className="lookup-rev-type">{revInfo.note}</div>
+              <div className="lookup-rev-note">
+                {profile.accounts?.last_accounts?.period_end_on && (
+                  <>Year end: {profile.accounts.last_accounts.period_end_on}<br/></>
+                )}
+                {profile.accounts?.overdue && <span style={{color:"#F87171"}}>⚠ Accounts overdue</span>}
+                {revInfo.band === "large" && "Large company — strong candidate for FX flows."}
+                {revInfo.band === "medium" && "Mid-size — worth a call if SIC matches."}
+                {revInfo.band === "small" && "Small company — check FX signals on website."}
+                {revInfo.band === "micro" && "Micro-entity — likely too small for FX sales."}
+              </div>
+            </div>
+
+            {/* FX Likelihood */}
+            <div className="lookup-panel">
+              <div className="lookup-panel-title">FX Likelihood</div>
+              <div className="lookup-fx-score" style={{color:fxInfo.color}}>{fxInfo.score}</div>
+              <div className="lookup-fx-label" style={{color:fxInfo.color}}>{fxInfo.score>=70?"Strong FX evidence":fxInfo.score>=45?"Moderate FX evidence":fxInfo.score>=25?"Some FX exposure":"Weak signal"}</div>
+              <div className="lookup-fx-bar">
+                <div className="lookup-fx-fill" style={{width:fxInfo.score+"%",background:fxInfo.color}}/>
+              </div>
+              <div className="lookup-fx-reason">{fxInfo.label}</div>
+              {sicCodes.length > 0 && (
+                <div className="lookup-sic">SIC: {sicCodes.join(", ")}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Footer actions */}
+          <div className="lookup-card-foot">
+            <a
+              className="lookup-link-btn"
+              href={`https://find-and-update.company-information.service.gov.uk/company/${selected?.company_number}`}
+              target="_blank" rel="noreferrer"
+              style={{background:"rgba(99,102,241,.1)",borderColor:"rgba(99,102,241,.3)",color:"#818CF8"}}
+            >
+              Companies House →
+            </a>
+            <a
+              className="lookup-link-btn"
+              href={`https://www.google.com/search?q=${encodeURIComponent((profile.company_name||"")+" phone number")}`}
+              target="_blank" rel="noreferrer"
+              style={{background:"rgba(245,158,11,.08)",borderColor:"rgba(245,158,11,.25)",color:"#F59E0B"}}
+            >
+              Find phone →
+            </a>
+            <a
+              className="lookup-link-btn"
+              href={`https://www.google.com/search?q=${encodeURIComponent((profile.company_name||"")+" site:linkedin.com")}`}
+              target="_blank" rel="noreferrer"
+              style={{background:"rgba(56,189,248,.07)",borderColor:"rgba(56,189,248,.2)",color:"#38BDF8"}}
+            >
+              LinkedIn →
+            </a>
+            <a
+              className="lookup-link-btn"
+              href={`https://www.google.com/search?q=${encodeURIComponent(profile.company_name||"")}`}
+              target="_blank" rel="noreferrer"
+              style={{background:"rgba(255,255,255,.04)",borderColor:"rgba(255,255,255,.1)",color:"rgba(255,255,255,.4)"}}
+            >
+              Google →
+            </a>
+          </div>
+        </div>
+      )}
+
+      {!loading && !cardLoad && !selected && !error && suggestions.length === 0 && (
+        <div className="lookup-empty">
+          Enter a company name above and press Enter or click Look up
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── FILTER BAR ──────────────────────────────────────────────────
 function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState }) {
   const priorities  = useMemo(()=>[...new Set(leads.map(l=>l.priority))].filter(Boolean).sort(),[leads]);
@@ -1935,7 +2324,7 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState
   },[leads,crmState]);
 
   const hasExtra = filters.priorities.length||filters.siteConfs.length||filters.hasFxSignals||
-    filters.hasWebsite||filters.hasDirector||filters.minScore>0||
+    filters.hasWebsite||filters.hasDirector||filters.minScore>0||filters.minRevenue>0||
     filters.eventId!=="all"||filters.currencyPair!=="all"||filters.segment!=="all"||
     filters.statuses.length||filters.grades.length||filters.sortBy!=="score"||filters.search;
 
@@ -2043,6 +2432,24 @@ function FilterBar({ filters, setFilters, leads, events, filteredCount, crmState
           </select>
         </div>
       )}
+
+      <div className="fb-group">
+        <span className="fb-label">Revenue</span>
+        <select
+          className="fb-select"
+          value={filters.minRevenue}
+          onChange={e=>set("minRevenue",Number(e.target.value))}
+          title="Confirmed turnover from CH iXBRL accounts only — unknown companies move to Unverified section"
+          style={filters.minRevenue>0?{borderColor:"rgba(16,185,129,.35)",color:"#10B981"}:{}}
+        >
+          <option value={0}>Any</option>
+          <option value={1000000}>£1m+</option>
+          <option value={2000000}>£2m+</option>
+          <option value={5000000}>£5m+</option>
+          <option value={10000000}>£10m+</option>
+          <option value={25000000}>£25m+</option>
+        </select>
+      </div>
 
       <div className="fb-sep"/>
 
@@ -2345,13 +2752,59 @@ function FollowupsDueSection({ allLeads, events, crmState, getCrmStatus, updateL
 }
 
 // ─── DAILY CALL LIST VIEW ─────────────────────────────────────────
-function DailyCallListView({ callListLeads, remainingHot, allLeads, events, crmState, getCrmStatus, updateLead, performAction, getLead, today }) {
+// ─── UNVERIFIED REVENUE SECTION ─────────────────────────────────
+function UnverifiedRevenueSection({ leads, minRevenue, events, getCrmStatus, updateLead, performAction, getLead }) {
+  const [open, setOpen] = useState(false);
+  if (!minRevenue || leads.length === 0) return null;
+  const fmtThresh = minRevenue >= 1_000_000 ? `£${minRevenue/1_000_000}m` : `£${minRevenue/1_000}k`;
+  return (
+    <div className="cl-section" style={{marginTop:16}}>
+      <div className="cl-section-hdr" onClick={()=>setOpen(o=>!o)}>
+        <span className="cl-section-title" style={{color:"#F59E0B"}}>⚠ Unverified revenue</span>
+        <span className="cl-section-count" style={{background:"rgba(245,158,11,.1)",color:"#F59E0B",border:"1px solid rgba(245,158,11,.25)"}}>
+          {leads.length}
+        </span>
+        <span className="cl-section-desc">
+          Turnover not in public CH accounts — may qualify for {fmtThresh} but cannot be confirmed · review manually
+        </span>
+        <span className="cl-toggle">{open?"▲":"▼ show"}</span>
+      </div>
+      {open && (
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {leads.map(l => {
+            const ev = events.find(e=>e.id===l.event_id);
+            return (
+              <CompanyCard
+                key={l.id}
+                lead={l}
+                crmStatus={getCrmStatus(l)}
+                onCrmSet={updateLead}
+                performAction={performAction}
+                crmEntry={getLead(l)}
+                event={ev}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DailyCallListView({ callListLeads, remainingHot, allLeads, events, crmState, getCrmStatus, updateLead, performAction, getLead, today, minRevenue }) {
   const [showTop10, setShowTop10]       = useState(true);
   const [showBackup, setShowBackup]     = useState(true);
   const [showRemaining, setShowRemaining] = useState(false);
 
-  const top10   = callListLeads.slice(0, 10);
-  const backup15= callListLeads.slice(10, 25);
+  // Apply revenue filter to call list bands — confirmed passes only, unverified collected separately
+  const revPasses   = minRevenue > 0 ? callListLeads.filter(l => sizeFit(l, minRevenue) === "passes") : callListLeads;
+  const revUnverCL  = minRevenue > 0 ? callListLeads.filter(l => sizeFit(l, minRevenue) === "unverified") : [];
+  const remPasses   = minRevenue > 0 ? (remainingHot||[]).filter(l => sizeFit(l, minRevenue) === "passes") : (remainingHot||[]);
+  const remUnver    = minRevenue > 0 ? (remainingHot||[]).filter(l => sizeFit(l, minRevenue) === "unverified") : [];
+  const allUnver    = [...revUnverCL, ...remUnver];
+
+  const top10   = revPasses.slice(0, 10);
+  const backup15= revPasses.slice(10, 25);
 
   function renderBand(leads, title, color, accentBg, open, toggle, emptyMsg, desc) {
     const bandDesc = desc ?? (title.includes("Top") ? "Highest-confidence · call today" : title.includes("Backup") ? "Call if top 10 is clear" : "Evidence-backed · not yet ranked for today");
@@ -2410,9 +2863,24 @@ function DailyCallListView({ callListLeads, remainingHot, allLeads, events, crmS
         getLead={getLead}
       />
 
+      {minRevenue > 0 && (
+        <div style={{padding:"6px 0 10px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"#10B981",opacity:.6}}>
+          Confirmed £{(minRevenue/1_000_000).toFixed(0)}m+ companies · {revPasses.length} match · {revUnverCL.length + remUnver.length} unverified · below-threshold hidden
+        </div>
+      )}
       {renderBand(top10, "⚡ Today's Top 10", "#10B981", "rgba(16,185,129,.1)", showTop10, ()=>setShowTop10(o=>!o), "No eligible leads in top 10 — check scoring gates")}
       {backup15.length > 0 && renderBand(backup15, "📋 Backup 15", "#F59E0B", "rgba(245,158,11,.1)", showBackup, ()=>setShowBackup(o=>!o), "No backup leads")}
-      {remainingHot && remainingHot.length > 0 && renderBand(remainingHot, "🔵 Remaining HOT", "#6366F1", "rgba(99,102,241,.1)", showRemaining, ()=>setShowRemaining(o=>!o), "No remaining HOT leads", "Evidence-backed but below top 25 · review when ready")}
+      {remPasses.length > 0 && renderBand(remPasses, "🔵 Remaining HOT", "#6366F1", "rgba(99,102,241,.1)", showRemaining, ()=>setShowRemaining(o=>!o), "No remaining HOT leads", "Evidence-backed but below top 25 · review when ready")}
+
+      <UnverifiedRevenueSection
+        leads={allUnver}
+        minRevenue={minRevenue}
+        events={events}
+        getCrmStatus={getCrmStatus}
+        updateLead={updateLead}
+        performAction={performAction}
+        getLead={getLead}
+      />
 
       {callListLeads.length === 0 && (
         <div className="empty">
@@ -2431,7 +2899,7 @@ export default function App() {
   const [leads,   setLeads]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastRef, setLast]    = useState(null);
-  const [filters, setFilters] = useState(CALL_LIST_FILTERS);
+  const [filters, setFilters] = useState(NEW_FILTERS);
   const { state: crmState, getLead, getStatus: getCrmStatus, updateLead, performAction } = useCrmState();
 
   const load = useCallback(async()=>{
@@ -2505,7 +2973,14 @@ export default function App() {
     return leads.filter(l=>{ const crm = crmState[l.id]||{}; return crm.last_contacted_at && new Date(crm.last_contacted_at).getTime() >= cutoff; }).length;
   },[leads,crmState]);
 
-  const viewDesc = filters.view === "call_list"
+  const newLeadsCount = useMemo(()=>{
+    const cutoff = Date.now() - 24*60*60*1000;
+    return leads.filter(l => l.created_at && new Date(l.created_at).getTime() > cutoff).length;
+  },[leads]);
+
+  const viewDesc = filters.view === "new"
+    ? `Added in the last 24 hours · sorted by readiness`
+    : filters.view === "call_list"
     ? `Top 10 + Backup 15 + ${remainingHot.length} remaining HOT · ranked by ready_score`
     : filters.view === "research"
     ? `WARM + QUEUE · ${researchLeads.filter(l=>l.priority==="WARM").length} WARM, ${researchLeads.filter(l=>l.priority==="QUEUE").length} QUEUE`
@@ -2513,6 +2988,7 @@ export default function App() {
 
   const viewCountCls = filters.view === "call_list" ? "view-count view-count-cl"
     : filters.view === "research" ? "view-count view-count-rq"
+    : filters.view === "new" ? "view-count view-count-cl"
     : "view-count view-count-all";
 
   return (
@@ -2546,6 +3022,7 @@ export default function App() {
       {/* STATS */}
       <div className="stats">
         {[
+          {n:newLeadsCount,        l:"New leads",         s:"Added last 24h · click to view", c:"#FBB724", onClick:()=>setFilters(NEW_FILTERS)},
           {n:Math.min(callListLeads.length,25), l:"READY leads",   s:"Top 25 · ranked by ready_score", c:"#10B981"},
           {n:hot,                  l:"HOT leads",         s:"Score ≥ 80 · FX confirmed", c:"#10B981"},
           {n:warm,                 l:"WARM leads",        s:"Score 60–79",               c:"#F59E0B"},
@@ -2554,8 +3031,8 @@ export default function App() {
           {n:contacted,            l:"In progress",       s:"Contacted/follow-up",       c:"#38BDF8"},
           {n:meetings,             l:"Meetings booked",   s:"CRM tracked",               c:"#10B981"},
           {n:saved,                l:"Saved",             s:"Worth revisiting",          c:"#F59E0B"},
-        ].map(({n,l,s,c})=>(
-          <div className="stat" key={l}>
+        ].map(({n,l,s,c,onClick})=>(
+          <div className="stat" key={l} onClick={onClick} style={onClick?{cursor:"pointer"}:{}}>
             <div className="stat-n" style={{color:c}}>{n}</div>
             <div><span className="stat-l">{l}</span><span className="stat-s">{s}</span></div>
           </div>
@@ -2565,23 +3042,38 @@ export default function App() {
       {/* VIEW SWITCHER */}
       <div className="view-banner">
         <div className="view-tabs">
+          {newLeadsCount > 0 && (
+            <button
+              className={`view-tab${filters.view==="new"?" active-new":""}`}
+              onClick={()=>setFilters(NEW_FILTERS)}
+              style={{fontWeight:700}}
+            >
+              ✦ New Leads ({newLeadsCount})
+            </button>
+          )}
           <button
             className={`view-tab${filters.view==="call_list"?" active-cl":""}`}
             onClick={()=>setFilters(CALL_LIST_FILTERS)}
           >
-            ⚡ Daily Call List {callListLeads.length > 0 && `(${Math.min(callListLeads.length,10)}+${Math.max(0,Math.min(callListLeads.length,25)-10)})`}
+            ⚡ Call List
           </button>
           <button
             className={`view-tab${filters.view==="research"?" active-rq":""}`}
             onClick={()=>setFilters(RESEARCH_FILTERS)}
           >
-            🔍 Research Queue
+            🔍 Research
           </button>
           <button
             className={`view-tab${filters.view==="all"?" active-all":""}`}
             onClick={()=>setFilters(ALL_FILTERS)}
           >
-            ⊙ All Leads
+            ⊙ All
+          </button>
+          <button
+            className={`view-tab${filters.view==="lookup"?" active-lk":""}`}
+            onClick={()=>setFilters({...BLANK_FILTERS,view:"lookup"})}
+          >
+            ⌕ Lookup
           </button>
         </div>
         <span className="view-desc">{viewDesc}</span>
@@ -2601,6 +3093,8 @@ export default function App() {
           </button>
         </div>
       </div>
+
+      {filters.view === "lookup" ? <CompanyLookupView /> : (<>
 
       {/* FILTER BAR */}
       <FilterBar
@@ -2627,6 +3121,7 @@ export default function App() {
               performAction={performAction}
               getLead={getLead}
               today={today}
+              minRevenue={filters.minRevenue}
             />
           ) : (
             <>
@@ -2672,6 +3167,30 @@ export default function App() {
                   ))}
                 </div>
               )}
+
+              {/* Unverified revenue — shown below main results when a threshold is active */}
+              {filters.minRevenue > 0 && (() => {
+                const unver = leads.filter(l => {
+                  if (filters.view === "call_list") return false; // handled by DailyCallListView
+                  // Apply same view+segment+event filters but NOT the revenue filter
+                  if (filters.priorities.length && !filters.priorities.includes(l.priority)) return false;
+                  if (filters.eventId !== "all" && l.event_id !== filters.eventId) return false;
+                  if (filters.segment !== "all" && (l.segment_name||"") !== filters.segment) return false;
+                  if (filters.grades.length && !filters.grades.includes(l.route_grade)) return false;
+                  return sizeFit(l, filters.minRevenue) === "unverified";
+                });
+                return (
+                  <UnverifiedRevenueSection
+                    leads={unver}
+                    minRevenue={filters.minRevenue}
+                    events={events}
+                    getCrmStatus={getCrmStatus}
+                    updateLead={updateLead}
+                    performAction={performAction}
+                    getLead={getLead}
+                  />
+                );
+              })()}
             </>
           )}
         </div>
@@ -2738,6 +3257,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      </>)}
     </>
   );
 }
