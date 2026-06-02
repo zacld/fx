@@ -767,6 +767,26 @@ body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-fon
 /* FINANCIALS PANEL */
 .fin-panel{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 14px;margin-bottom:12px}
 .fin-row{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:6px}
+
+/* FX INTELLIGENCE CARD */
+.fxi-card{border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid}
+.fxi-card-a{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.25)}
+.fxi-card-b{background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2)}
+.fxi-card-c{background:rgba(99,102,241,.05);border-color:rgba(99,102,241,.18)}
+.fxi-card-d{background:rgba(71,85,105,.05);border-color:rgba(71,85,105,.18)}
+.fxi-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.fxi-grade{font-size:18px;font-weight:900;font-family:'JetBrains Mono',monospace;width:28px;text-align:center}
+.fxi-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);flex:1}
+.fxi-currencies{display:flex;gap:4px;flex-wrap:wrap}
+.fxi-cur{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-family:'JetBrains Mono',monospace}
+.fxi-row{display:flex;gap:6px;margin-bottom:6px;align-items:baseline}
+.fxi-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;width:110px}
+.fxi-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600}
+.fxi-evidence{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)}
+.fxi-ev-item{font-size:11px;color:rgba(255,255,255,.35);margin-bottom:3px;padding-left:12px;position:relative}
+.fxi-ev-item::before{content:"·";position:absolute;left:0;color:rgba(255,255,255,.2)}
+.fxi-angle{margin-top:10px;padding:10px 12px;background:rgba(0,0,0,.2);border-radius:7px;font-size:12px;color:rgba(255,255,255,.55);line-height:1.6;font-style:italic;cursor:pointer}
+.fxi-angle:hover{color:rgba(255,255,255,.75)}
 .fin-item{display:flex;flex-direction:column;gap:2px}
 .fin-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.04em}
 .fin-value{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:rgba(255,255,255,.7)}
@@ -1044,6 +1064,89 @@ function CompanyFinancials({ lead }) {
       </div>
       {lastDate && (
         <div className="fin-date">Last accounts: {lastDate}</div>
+      )}
+    </div>
+  );
+}
+
+// ─── FX INTELLIGENCE CARD ────────────────────────────────────────
+const FXI_GRADE_COLOR = { A:"#10B981", B:"#F59E0B", C:"#818CF8", D:"#475569" };
+
+function FxIntelCard({ lead }) {
+  const [copiedAngle, setCopiedAngle] = useState(false);
+  const grade = lead.fx_priority;
+  if (!grade || grade === "D") return null;  // hide D — not enough to show
+
+  const color     = FXI_GRADE_COLOR[grade] || "#475569";
+  const cardCls   = `fxi-card fxi-card-${grade.toLowerCase()}`;
+  const currencies= lead.fx_currencies_detected || [];
+  const creditors = lead.fx_creditors_gbp;
+  const debtors   = lead.fx_debtors_gbp;
+  const oppLabel  = lead.fx_opportunity_label;
+  const evidence  = lead.fx_evidence || [];
+  const angle     = lead.fx_call_angle;
+
+  const copyAngle = () => {
+    if (angle) { copy(angle); setCopiedAngle(true); setTimeout(()=>setCopiedAngle(false), 2000); }
+  };
+
+  return (
+    <div className={cardCls}>
+      <div className="fxi-header">
+        <span className="fxi-grade" style={{color}}>{grade}</span>
+        <span className="fxi-title">FX Priority {grade}{grade==="A"?" — Disclosed exposure":grade==="B"?" — Policy confirmed":""}</span>
+        {currencies.length > 0 && (
+          <div className="fxi-currencies">
+            {currencies.slice(0,4).map(c=>(
+              <span key={c} className="fxi-cur">{c}</span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        {creditors != null && (
+          <div className="fxi-row">
+            <span className="fxi-lbl">FX Creditors</span>
+            <span className="fxi-val" style={{color:"#10B981"}}>£{creditors.toLocaleString()}</span>
+          </div>
+        )}
+        {debtors != null && (
+          <div className="fxi-row">
+            <span className="fxi-lbl">FX Debtors</span>
+            <span className="fxi-val" style={{color:"#38BDF8"}}>£{debtors.toLocaleString()}</span>
+          </div>
+        )}
+        {oppLabel && (
+          <div className="fxi-row">
+            <span className="fxi-lbl">Est. annual FX</span>
+            <span className="fxi-val" style={{color}}>{oppLabel}</span>
+          </div>
+        )}
+        {lead.fx_has_hedging && (
+          <div className="fxi-row">
+            <span className="fxi-lbl">Hedging</span>
+            <span className="fxi-val" style={{color:"#F59E0B"}}>Referenced in accounts</span>
+          </div>
+        )}
+      </div>
+
+      {evidence.length > 0 && (
+        <div className="fxi-evidence">
+          {evidence.map((e,i)=>(
+            <div key={i} className="fxi-ev-item">{e}</div>
+          ))}
+        </div>
+      )}
+
+      {angle && (
+        <div
+          className="fxi-angle"
+          onClick={copyAngle}
+          title="Click to copy call opener"
+        >
+          {copiedAngle ? <span style={{color:"#10B981",fontStyle:"normal",fontSize:10}}>Copied ✓</span> : `"${angle}"`}
+        </div>
       )}
     </div>
   );
@@ -1762,6 +1865,9 @@ function CompanyCard({ lead, crmStatus, onCrmSet, performAction, crmEntry, event
 
           {/* COMPANY FINANCIALS — CH accounts size, employees, turnover */}
           <CompanyFinancials lead={lead} />
+
+          {/* FX INTELLIGENCE — priority grade, disclosed exposure, call angle */}
+          <FxIntelCard lead={lead} />
 
           {/* EXPOSURE THESIS — AI-generated context (shown when no direct evidence) */}
           {thesis && !(lead.fx_evidence_snippets?.length) && (

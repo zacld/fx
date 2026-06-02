@@ -1,6 +1,5 @@
 [build]
-  base    = "apps/web"
-  command = "cd ../.. && npm ci && npm run build --workspace=apps/web"
+  command = "npm ci && npm run build --workspace=apps/web"
   publish = "apps/web/dist"
 
 [build.environment]
