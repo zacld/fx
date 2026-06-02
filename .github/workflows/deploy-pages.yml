@@ -1,4 +1,4 @@
-name: Deploy dashboard to GitHub Pages
+name: Deploy dashboard to Netlify
 
 on:
   push:
@@ -8,9 +8,6 @@ on:
       - 'apps/web/public/data/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   build-and-deploy:
@@ -32,9 +29,5 @@ jobs:
         env:
           VITE_COMPANIES_HOUSE_API_KEY: ${{ secrets.VITE_COMPANIES_HOUSE_API_KEY }}
 
-      - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: apps/web/dist
-          force_orphan: true
+      - name: Deploy to Netlify
+        run: npx netlify-cli deploy --prod --dir=apps/web/dist --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }}
