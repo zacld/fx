@@ -26,6 +26,11 @@
     "generate-drafts": "tsx packages/pipeline/src/stages/generate-drafts.ts",
     "export-sheets": "tsx packages/pipeline/src/stages/export-sheets.ts",
     "evergreen": "tsx packages/pipeline/src/stages/evergreen.ts",
+    "discover-sic": "tsx packages/pipeline/src/stages/discover-sic.ts",
+    "export-it-leads": "tsx packages/pipeline/src/stages/export-it-leads.ts",
+    "export-fx-leads": "tsx packages/pipeline/src/stages/export-fx-leads.ts",
+    "enrich-accounts": "tsx packages/pipeline/src/stages/enrich-accounts.ts",
+    "enrich-fx-confidence": "tsx packages/pipeline/src/stages/enrich-fx-confidence.ts",
     "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run generate-drafts && npm run db:export && npm run export-sheets",
     "pipeline:evergreen": "npm run db:import && npm run evergreen && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run generate-drafts && npm run db:export && npm run export-sheets",
     "sync-web-data": "mkdir -p apps/web/public/data && cp data/events.json data/leads.json apps/web/public/data/"

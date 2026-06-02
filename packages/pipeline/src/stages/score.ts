@@ -11,6 +11,8 @@
  *      table.
  *   3. recomputes exposure_confidence, signal_count, and lead_type / awareness_level
  *      / saving_opportunity (port of rescore.py classify_lead).
+ *   4. attaches fx_exposure_score (0–100, rule-based FX exposure dimension) and
+ *      industry_label (from INDUSTRY_PRESET env var, or "FX Discovery" default).
  * Writes updated leads back to the DB, exports a {id: lead} JSON map to --out
  * (default data/leads.json — the canonical file the dashboard reads), and records
  * a `runs` row. The `dedup` stage runs after this and rewrites the same file.
@@ -27,10 +29,11 @@ import { fileURLToPath } from "node:url";
 
 import {
   scoreLead, exposureConfidence, computeReadyScore, isReadyEligible, isLargeOrg, bestContactRoute, ensureContactFields,
-  isPlausibleDmName, WEAK_ORIGIN_TOKENS, LeadSchema, repoRoot, type Lead,
+  isPlausibleDmName, WEAK_ORIGIN_TOKENS, LeadSchema, repoRoot, computeFxExposureScore, type Lead,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
+import { getIndustryPreset } from "../config/industries.js";
 
 const TRIGGER_BREADTHS = new Set(["broad_currency", "broad_macro", "tariff", "commodity"]);
 const EVERGREEN_FREIGHT_SIC_PREFIXES = ["5010", "5020", "5110", "5121", "5122"];
@@ -117,6 +120,10 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const persist = opts.persist ?? true;
 
+  // Industry preset — used to compute fx_exposure_score and set industry_label
+  const industryPreset = getIndustryPreset(process.env.INDUSTRY_PRESET);
+  const industryLabel = industryPreset?.label ?? "FX Discovery";
+
   const { db, sqlite, close } = getDb(dbPath);
   const rec = new RunRecorder("score", { dbPath, outPath });
 
@@ -143,6 +150,54 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
       if (r.reclassified) reclassified++;
       if (r.changedPriority) changedPriority++;
       after[lead.priority] = (after[lead.priority] ?? 0) + 1;
+
+      // ── Industry supplementary fields ──────────────────────────────────────
+      // fx_exposure_score: standalone 0–100 FX exposure dimension.
+      // industry_label: which preset was active when this lead was scored.
+      lead.fx_exposure_score = computeFxExposureScore(lead, industryPreset ?? undefined);
+      lead.industry_label = industryLabel;
+
+      // ── Industry preset score override ────────────────────────────────────
+      // When INDUSTRY_PRESET is set, leads with confirmed industry signals on
+      // their website (segment_signals ≥ 1) were capped at SKIP/QUEUE by FX
+      // gates that don't apply here. Lift them using fx_exposure_score so
+      // mid-market industry companies surface rather than being filtered out.
+      // Excluded: micro-entities (< £632k turnover), large orgs, no website.
+      if (industryPreset && lead.priority === "SKIP" && (lead.segment_signals ?? []).length >= 1) {
+        const isMicro = (lead.accounts_type ?? "").toLowerCase().includes("micro");
+        const hasWebsite = !!(lead.website || lead.website_domain);
+        if (hasWebsite && !lead.is_large_org && !isMicro) {
+          const lifted = Math.max(lead.score ?? 0, lead.fx_exposure_score ?? 0);
+          if (lifted >= 40) {
+            lead.score = lifted;
+            lead.priority = lifted >= 80 ? "HOT" : lifted >= 60 ? "WARM" : "QUEUE";
+            lead.scoring_reasons = [...(lead.scoring_reasons ?? []),
+              `↑ Industry preset lift: fx_exposure_score=${lead.fx_exposure_score} (${industryPreset.id})`];
+            after[lead.priority] = (after[lead.priority] ?? 0) + 1;
+            after["SKIP"] = Math.max(0, (after["SKIP"] ?? 0) - 1);
+          }
+        }
+      }
+
+      // ── CH SIC discovery lift (no-website IT companies) ──────────────────
+      // Leads created by discover-sic (source="ch_sic_search") are CH-validated
+      // mid-market IT companies that have no website yet. They're gated to SKIP
+      // purely because Gate B requires a website. Lift them to QUEUE (score=42)
+      // so they survive dedup and can be enriched by enrich-contacts later.
+      // Once they have a website, the next score pass will re-score properly.
+      // Excluded: micro-entities, large orgs.
+      if (lead.priority === "SKIP" && (lead.source as string) === "ch_sic_search") {
+        const isMicro = (lead.accounts_type ?? "").toLowerCase().includes("micro");
+        if (!lead.is_large_org && !isMicro) {
+          lead.score = 42;
+          lead.priority = "QUEUE";
+          lead.scoring_reasons = [...(lead.scoring_reasons ?? []),
+            "↑ CH SIC discovery: no website yet — held at QUEUE for website enrichment"];
+          after["QUEUE"] = (after["QUEUE"] ?? 0) + 1;
+          after["SKIP"] = Math.max(0, (after["SKIP"] ?? 0) - 1);
+        }
+      }
+
       out[lead.id] = lead;
     }
 
@@ -172,6 +227,7 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
         website_domain: l.website_domain, segment_name: l.segment_name, lead_type: l.lead_type,
         fx_payment_signals: l.fx_payment_signals, contact_phone: l.contact_phone ?? null,
         best_contact_route: l.best_contact_route ?? "",
+        fx_exposure_score: l.fx_exposure_score, industry_label: l.industry_label,
       })),
     );
     if (persist) rec.finish(sqlite, runsDir);

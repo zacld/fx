@@ -351,6 +351,10 @@ export const LeadSchema = z.object({
   linkedin_note: z.string().default(""),        // ≤300 chars for LinkedIn message
 
   status: z.string().default("new"),
+
+  // Industry refactor — supplementary fields (optional, never override scoring gates)
+  fx_exposure_score: z.number().int().min(0).max(100).optional(),
+  industry_label: z.string().optional(),
 })
   .merge(ContactFieldsSchema.partial())
   .merge(DecisionMakerFieldsSchema.partial())

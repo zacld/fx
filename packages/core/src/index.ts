@@ -1,6 +1,7 @@
 export * from "./schema.js";
 export * from "./signals.js";
 export * from "./scoring.js";
+export * from "./fx-exposure.js";
 export * from "./contacts.js";
 export * from "./names.js";
 export * from "./emails.js";

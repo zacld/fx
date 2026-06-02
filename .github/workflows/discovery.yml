@@ -15,11 +15,11 @@ name: FX Discovery
 
 on:
   schedule:
-    - cron: '0 5 * * 1-5'    # 5am Mon–Fri UTC  — list ready ~7am BST for morning commute
-    - cron: '0 12 * * 1-5'   # 12pm Mon–Fri UTC — midday market/news update (~1pm BST)
-    - cron: '0 18 * * 1-5'   # 6pm Mon–Fri UTC  — evening top-up
-    - cron: '0 22 * * 1-5'   # 10pm Mon–Fri UTC — late run before overnight
-    - cron: '0 2 * * 1-5'    # 2am Mon–Fri UTC  — overnight refresh (ready for 5am)
+    - cron: '0 22 * * 1-5'   # 10pm UTC — overnight run 1
+    - cron: '0 0 * * 2-6'    # midnight UTC — overnight run 2
+    - cron: '0 2 * * 2-6'    # 2am UTC  — overnight run 3
+    - cron: '0 4 * * 2-6'    # 4am UTC  — overnight run 4
+    - cron: '0 5 * * 1-5'    # 5am UTC  — final push, list ready by 6am BST
   workflow_dispatch:
     # Optional one-off overrides for trigger-quality audits. Blank → use the
     # scheduled defaults below. Useful when you want Brain 1 to see a wider /
@@ -31,6 +31,10 @@ on:
         default: ""
       max_events:
         description: "DISCOVERY_MAX_EVENTS override (default 12 — raise for a wider audit batch)"
+        required: false
+        default: ""
+      industry_preset:
+        description: "INDUSTRY_PRESET override (blank = default FX behaviour; e.g. it_technology, manufacturing, logistics)"
         required: false
         default: ""
 
@@ -87,6 +91,10 @@ jobs:
           GOOGLE_SHEET_ID:              ${{ secrets.GOOGLE_SHEET_ID }}
           GOOGLE_SERVICE_ACCOUNT_KEY:   ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
           GOOGLE_SHEET_TAB:             ${{ vars.GOOGLE_SHEET_TAB }}
+          NODE_OPTIONS:                 "--max-old-space-size=4096"
+          # Industry preset — blank on scheduled runs (default FX behaviour).
+          # Set via workflow_dispatch input for one-off industry-targeted runs.
+          INDUSTRY_PRESET:              ${{ inputs.industry_preset || '' }}
         run: npm run pipeline
 
       # ── Python supplementary scripts ──────────────────────────────────────
@@ -131,5 +139,5 @@ jobs:
           git add data/events.json data/leads.json apps/web/public/data/
           git diff --staged --quiet || git commit -m "data: auto-update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git checkout -- .
-          git pull --rebase origin main
+          git pull --rebase -X ours origin main
           git push
