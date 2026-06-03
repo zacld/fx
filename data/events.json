@@ -50,50 +50,6 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "013e6503fa21cfb6": {
-    "id": "013e6503fa21cfb6",
-    "source": "ForexLive",
-    "source_url": "https://investinglive.com/news/china-rating-dog-services-pmi-may-2026-544-expected-523-prior-526-20260603/",
-    "headline": "China Services PMI, May 2026 54.4 (expect 52.3, prior 52.6) fastest expansion in 3 months",
-    "raw_summary": "China's services PMI rose to 54.4 in May from 52.6, the fastest expansion in three months, with new orders growing for a 41st straight month and employment returning to growth. Earlier PMI data for the month: Official PMIs for May were mixed, while the private manufacturing PMI fell to 51.8. China's services acceleration stands in sharp contrast to the stagnation and contraction visible in Japan and Australia's May PMIs, and reinforces the view that Beijing's domestic demand support measures are providing meaningful insulation from the global energy shock. The composite reading at 54.0 is comf",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-06-03T09:24:19.966Z",
-    "event_type": "Economic Indicator",
-    "event_breadth": "macro",
-    "summary": "China's services PMI accelerated, but lacks a direct impact on UK businesses' FX exposure. The event may influence global trade and commodity prices, but is not a trigger for immediate FX action.",
-    "currency_pairs": [],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "China's services PMI rise has indirect implications for global trade and commodity prices, but lacks a direct UK B2B FX hook",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "No immediate reason for UK businesses to adjust FX strategies based on this event alone",
-    "discovery_recommendation": "Context only — no direct UK B2B FX hook, but may inform broader market context",
-    "confidence_level": "medium",
-    "confidence_reason": "While China's economic indicators can influence global markets, the direct impact on UK businesses' FX exposure is minimal without a clear payment-flow connection",
-    "what_happened": "China's services PMI rose to 54.4 in May, indicating the fastest expansion in three months",
-    "what_changed_financially": "China's services sector growth accelerated, potentially influencing global trade and commodity prices",
-    "who_pays_more": "None directly",
-    "who_receives_less": "None directly",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly",
-    "fx_payment_logic": "No direct FX payment logic applies, as the event does not directly affect UK businesses' payment flows",
-    "sales_angle": "While China's economic indicators are important, this specific event does not directly impact your FX exposure.",
-    "business_impact_summary": "The rise in China's services PMI may have indirect implications for global trade, but does not directly affect UK businesses' FX strategies.",
-    "exposure_types": [],
-    "overall_sales_angle": "No direct sales angle applies, as the event lacks a clear UK B2B FX hook",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
-  },
   "025b6352ccbfc55c": {
     "id": "025b6352ccbfc55c",
     "headline": "UK delays some sanctions on Russian oil and gas amid Middle East conflict",
@@ -267,50 +223,6 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "049d93afc16f5dc8": {
-    "id": "049d93afc16f5dc8",
-    "source": "OilPrice.com",
-    "source_url": "https://oilprice.com/Latest-Energy-News/World-News/Goldman-Sachs-CEO-Warns-Oil-Shock-Could-Alter-Consumer-Behavior.html",
-    "headline": "Goldman Sachs CEO Warns Oil Shock Could Alter Consumer Behavior",
-    "raw_summary": "Tightening crude oil supply will lead to consumer behavior changes in the second half of the year as the imbalance with demand pushes inflation higher, the chief executive of Goldman Sachs has warned. Speaking at an industry event in New York, David Solomon suggested consumers are already changing their behavior in response to higher energy prices, and those changes could become more pronounced after July. He added, as quoted by Reuters, that the Fed will likely keep interest rates unchanged because of these developments. “You can see some…",
-    "pre_relevance_score": 7,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-06-03T09:24:11.500Z",
-    "event_type": "Commodity price warning",
-    "event_breadth": "macro",
-    "summary": "Goldman Sachs CEO warned of potential oil shock and its impact on consumer behavior, but no direct FX payment flow impact",
-    "currency_pairs": [],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "Oil price and supply imbalance may indirectly affect UK businesses through inflation and consumer behavior changes, but no direct FX hook",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "No immediate FX payment flow impact, but potential for future economic changes",
-    "discovery_recommendation": "Context only — no direct FX hook, but useful for broader economic context",
-    "confidence_level": "medium",
-    "confidence_reason": "The warning from Goldman Sachs CEO about oil shock and consumer behavior changes is relevant to the broader economic context but lacks a direct FX payment flow impact",
-    "what_happened": "Goldman Sachs CEO warned of potential oil shock and its impact on consumer behavior",
-    "what_changed_financially": "Potential for higher inflation due to oil supply imbalance",
-    "who_pays_more": "None directly, but potentially UK businesses and consumers through higher energy prices",
-    "who_receives_less": "None directly",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly",
-    "fx_payment_logic": "No direct FX payment flow logic applies",
-    "sales_angle": "No direct sales angle due to lack of FX payment flow impact",
-    "business_impact_summary": "No direct business impact, but potential for broader economic changes",
-    "exposure_types": [],
-    "overall_sales_angle": "No direct sales angle, but potential for discussing broader economic trends",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
-  },
   "04fad4b78d122cc2": {
     "id": "04fad4b78d122cc2",
     "source": "ForexLive",
@@ -319,41 +231,40 @@
     "raw_summary": "Services PMI 47.7 vs 46.4 prelim Prior 47.6 Composite PMI 48.5 vs 47.5 prelim Prior 48.8 Despite the troubles in France, the overall Eurozone services economy managed to hold up in May. However, private sector business activity as a whole fell to an 18-month low and marked back-to-back months of contraction for the first time since the end of 2024. Looking to the services sector, total new order inflows fell again for a third straight month. And while slowing from April, the pace of decline was nonetheless the second-sharpest since November 2024. On the prices front, the latest data showed a f",
     "pre_relevance_score": 5,
     "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-06-03T09:24:13.903Z",
-    "event_type": "Economic indicator",
+    "detected_at": "2026-06-03T23:27:54.146Z",
+    "event_type": "Economic data release",
     "event_breadth": "macro",
-    "summary": "Eurozone business activity contracted in May, which may lead to reduced demand for UK exports and increased competition from EU imports. However, the connection to FX payment flows is indirect and not immediately actionable.",
+    "summary": "Eurozone economic activity contracted further in May, which might have indirect implications for UK businesses trading with the Eurozone. However, the connection to specific FX exposure is too indirect for immediate action.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "Eurozone business activity contraction has indirect implications for UK businesses, particularly those exporting to the EU or competing with EU imports",
+    "commercial_relevance_reason": "Eurozone economic struggles may affect UK businesses importing from or exporting to the Eurozone, but the connection is indirect and more about general economic health than specific FX exposure.",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [
-      "UK exporters to EU",
-      "UK importers competing with EU goods"
+      "UK importers from Eurozone",
+      "UK exporters to Eurozone"
     ],
-    "why_now": "The contraction in Eurozone business activity may lead to reduced demand for UK exports and increased competition from EU imports",
-    "discovery_recommendation": "Context only — the event has indirect implications for UK businesses, but no clear FX payment flow hook",
+    "why_now": "The economic contraction in the Eurozone might lead to changes in trade volumes or currency exchange rates, but the impact is speculative at this stage.",
+    "discovery_recommendation": "Context only — no immediate FX hook but useful for broader economic context.",
     "confidence_level": "medium",
-    "confidence_reason": "While the event has some relevance to UK businesses, the connection to FX payment flows is indirect and not immediately actionable",
-    "what_happened": "Eurozone business activity contracted in May, with services PMI at 47.7 and composite PMI at 48.5",
-    "what_changed_financially": "Eurozone private sector business activity fell to an 18-month low, with services sector new orders declining for the third straight month",
-    "who_pays_more": "None directly, but UK businesses exporting to the EU may face reduced demand",
-    "who_receives_less": "UK businesses exporting to the EU may receive less EUR revenue due to reduced demand",
+    "confidence_reason": "The economic data, while indicating contraction, does not directly tie to a specific FX event or payment flow that would immediately impact UK businesses.",
+    "what_happened": "Eurozone business activity contracted further in May, with services PMI at 47.7 and composite PMI at 48.5.",
+    "what_changed_financially": "The economic contraction in the Eurozone may influence trade and investment decisions, potentially affecting currency exchange rates indirectly.",
+    "who_pays_more": "None directly, as this is an economic indicator rather than a direct FX or tariff event.",
+    "who_receives_less": "None directly, as this is an economic indicator rather than a direct FX or revenue event.",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly",
-    "fx_payment_logic": "The event has no direct impact on FX payment flows, but UK businesses exporting to the EU may face reduced demand and therefore reduced EUR revenue",
-    "sales_angle": "The contraction in Eurozone business activity may lead to reduced demand for UK exports, which could impact your EUR revenue",
-    "business_impact_summary": "UK businesses exporting to the EU may face reduced demand, while UK importers competing with EU goods may face increased competition",
+    "affected_payment_flow": "None directly affected by this economic data release.",
+    "fx_payment_logic": "While there's no direct FX payment logic triggered by this event, UK businesses importing from or exporting to the Eurozone might face changes in trade conditions or currency exchange rates as a result of the economic contraction.",
+    "sales_angle": "The economic situation in the Eurozone is worth monitoring for its potential impact on trade and currency exchange rates, which could affect UK businesses in the future.",
+    "business_impact_summary": "The contraction in Eurozone business activity may have indirect implications for UK businesses through changes in trade conditions or currency exchange rates, but the impact is not immediate or direct.",
     "exposure_types": [
-      "Indirect demand reduction",
-      "Increased competition from EU imports"
+      "Indirect economic exposure"
     ],
-    "overall_sales_angle": "The Eurozone business activity contraction may have indirect implications for your business, particularly if you export to the EU or compete with EU imports",
+    "overall_sales_angle": "Monitoring Eurozone economic health is important for understanding potential future impacts on trade and currency exchange rates.",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -521,6 +432,53 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:51:54.345Z"
+  },
+  "064b1160de284143": {
+    "id": "064b1160de284143",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-european-markets-wrap-us-iran-tensions-continue-yen-volatility-in-focus-20260603/",
+    "headline": "investingLive European markets wrap: US-Iran tensions continue; yen volatility in focus",
+    "raw_summary": "Headlines: US president Trump reaffirms that Iran has agreed to not have a nuclear weapon Iran reserves right to defend against any country permitting US attacks EU says latest US tariffs on forced labour grounds are unjustified USD/JPY continues to poke and prod at intervention strike zone BOJ governor Ueda says will continue to raise policy rate if baseline outlook holds ECB policymaker Elderson says prolonged war increases likelihood of second-round effects SNB Chairman Schlegel says medium-term inflation pressure is basically unchanged Eurozone business activity struggles further in May am",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\boil price|\\bcrude oil|\\bwti|; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
+    "detected_at": "2026-06-03T23:27:51.520Z",
+    "event_type": "Geopolitical",
+    "event_breadth": "broad_macro",
+    "summary": "US-Iran tensions continue, affecting global market volatility. No direct UK B2B FX hook, but potential for indirect trade implications.",
+    "currency_pairs": [
+      "USD/JPY",
+      "EUR/USD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Geopolitical tensions and potential trade implications, but no direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "Ongoing geopolitical tensions may lead to trade disruptions, affecting UK businesses indirectly",
+    "discovery_recommendation": "Context only — no direct UK B2B FX hook, but useful for messaging context",
+    "confidence_level": "low",
+    "confidence_reason": "Event is more about global market context and less about specific UK B2B FX exposure",
+    "what_happened": "US-Iran tensions continue, affecting market volatility",
+    "what_changed_financially": "Increased uncertainty in global markets due to geopolitical tensions",
+    "who_pays_more": "None directly, but potential for increased costs due to trade disruptions",
+    "who_receives_less": "None directly, but potential for decreased revenue due to trade disruptions",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "None directly, but potential for trade disruptions affecting UK businesses",
+    "sales_angle": "Geopolitical tensions may lead to trade disruptions, affecting your business. Review your FX exposure.",
+    "business_impact_summary": "No direct impact, but potential for indirect trade implications due to geopolitical tensions.",
+    "exposure_types": [],
+    "overall_sales_angle": "Review your FX exposure in light of ongoing geopolitical tensions.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "06dbd0d07a7eecb3": {
     "id": "06dbd0d07a7eecb3",
@@ -1919,6 +1877,118 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "3a8026266e92fc0b": {
+    "id": "3a8026266e92fc0b",
+    "source": "OilPrice.com",
+    "source_url": "https://oilprice.com/Energy/Energy-General/Europe-Scrambles-to-Contain-the-Energy-Shock.html",
+    "headline": "Europe Scrambles to Contain the Energy Shock",
+    "raw_summary": "The European Union and the Eurozone are feeling the energy shock as the Iran war enters its fourth month. The spike in oil and gas prices amid the Middle East crisis is raising inflation and moderating economic growth expectations in the EU and the Euro area, which are grappling with the second energy crisis in four years. Comparisons with the 2022 inflation and gas supply shock in the wake of the Russian invasion of Ukraine are flawed as circumstances are different and the likelihood of runaway inflation is low, analysts and economists say. Nevertheless,…",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-06-03T23:28:02.786Z",
+    "event_type": "Energy price shock",
+    "event_breadth": "sector_specific",
+    "summary": "The energy shock in Europe due to the Iran war may increase costs for UK importers of EU goods and reduce demand for UK exports to the EU",
+    "currency_pairs": [
+      "GBP/EUR"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Energy price shock in Europe affects UK businesses importing energy or energy-intensive goods from the EU",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK importers of EU chemicals",
+      "UK importers of EU steel",
+      "UK manufacturers using EU energy"
+    ],
+    "why_now": "The current energy price shock may lead to higher costs for UK importers and reduced demand for UK exporters to the EU",
+    "discovery_recommendation": "Limited run — focus on UK importers of EU energy-intensive goods and manufacturers using EU energy",
+    "confidence_level": "medium",
+    "confidence_reason": "The energy shock has a clear impact on EU and Eurozone economies, which can affect UK businesses through trade",
+    "what_happened": "The Iran war has led to a spike in oil and gas prices, affecting the European Union and Eurozone economies",
+    "what_changed_financially": "Higher energy prices increase production costs for EU manufacturers, potentially affecting UK importers of EU goods",
+    "who_pays_more": "UK importers of energy-intensive goods from the EU, such as chemicals or steel",
+    "who_receives_less": "None directly, but UK exporters to the EU may face reduced demand due to slower economic growth",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP payments for EU energy or energy-intensive goods imports",
+    "fx_payment_logic": "UK importers pay GBP for EU goods, but higher energy prices increase EU production costs, potentially affecting UK import costs",
+    "sales_angle": "If you import goods from the EU, the current energy price shock may increase your costs — is your FX strategy adapted?",
+    "business_impact_summary": "UK importers of EU energy-intensive goods face higher costs, while UK exporters to the EU may face reduced demand",
+    "exposure_types": [
+      "EUR supplier payment exposure",
+      "energy price risk"
+    ],
+    "overall_sales_angle": "The European energy shock may affect your business through higher import costs or reduced export demand — review your FX strategy",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of EU chemicals",
+        "category_priority_score": 72,
+        "business_model": "UK manufacturer or distributor importing chemicals from EU suppliers, paying in GBP, and selling to UK customers in GBP",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "UK importer pays GBP for EU chemicals, but higher EU energy prices may increase import costs",
+        "margin_risk": "Medium — 2% increase in EU energy prices may lead to £5k extra cost on £250k annual import",
+        "payment_timing_risk": "Medium — typical 30-60 day payment terms",
+        "affected_payment_flow": "GBP payments to EU chemical suppliers, typically £50k-£250k per shipment",
+        "website_validation_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ],
+        "avoid_segments": [
+          "pure UK domestic chemical manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your EU chemical imports may cost more due to the energy price shock — review your FX strategy",
+        "exposure_thesis_template": "This company imports chemicals from EU suppliers. Higher EU energy prices may increase GBP import costs.",
+        "micro_categories": [
+          {
+            "name": "UK importers of German chemicals",
+            "why": "Pay GBP for German chemicals — direct exposure to EUR supplier payments and EU energy prices",
+            "search_queries": [
+              "\"chemical importer\" UK German",
+              "\"German chemicals\" UK distributor",
+              "chemicals from Germany UK"
+            ],
+            "companies_house_terms": [
+              "chemical imports",
+              "German chemicals",
+              "chemicals from Germany"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "chemical imports",
+      "German chemicals",
+      "chemicals from Germany"
+    ],
+    "all_search_queries": [
+      "\"chemical importer\" UK German",
+      "\"German chemicals\" UK distributor",
+      "chemicals from Germany UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-03T23:28:07.488Z"
+  },
   "3b29d444c05ce3e2": {
     "id": "3b29d444c05ce3e2",
     "headline": "Goldman Soloman: I believe AI is going to interrupt jobs, dislocate",
@@ -2613,16 +2683,13 @@
   },
   "48fe49a769c7c783": {
     "id": "48fe49a769c7c783",
+    "headline": "Trump tries again. US proposes 10% tariffs on 60 nations, forced-labour Section 301 probe",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/trump-tries-again-us-proposes-10-tariffs-on-60-nations-forced-labour-section-301-probe-20260603/",
-    "headline": "Trump tries again. US proposes 10% tariffs on 60 nations, forced-labour Section 301 probe",
-    "raw_summary": "The US proposed tariffs of at least 10% on imports from around 60 countries under a Section 301 forced-labour probe, with higher 12.5% levies targeting China, India, Japan and others. Summary: Source: Office of the US Trade Representative; reporting by financial newswires The USTR has recommended tariffs of at least 10% on imports from approximately 60 countries including Canada, Mexico, the EU, Taiwan and the UK, following a Section 301 investigation into forced-labour practices China, India, Japan, South Korea, Brazil and Switzerland face a higher proposed rate of 12.5% The levies are not im",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-06-03T09:24:17.969Z",
+    "status": "ready",
     "event_type": "Tariff announcement",
     "event_breadth": "broad_macro",
-    "summary": "The US proposed tariffs on 60 countries, including the UK. UK businesses importing from these countries will face increased costs.",
     "currency_pairs": [],
     "urgency_score": 9,
     "commercial_relevance": 9,
@@ -2637,49 +2704,40 @@
       "UK importers of Mexican goods"
     ],
     "why_now": "The proposed tariffs will increase costs for UK businesses importing from affected countries",
-    "discovery_recommendation": "Full run — clear payment flow, multiple identifiable importer niches, public websites should show import language",
     "confidence_level": "high",
     "confidence_reason": "Tariff announcement directly impacts UK businesses importing from affected countries",
+    "discovery_recommendation": "Full run — clear payment flow, multiple identifiable importer niches, public websites should show import language",
     "what_happened": "The US proposed tariffs of at least 10% on imports from around 60 countries",
     "what_changed_financially": "Tariff rates on imports from 60 countries, including the UK, will increase by at least 10%",
     "who_pays_more": "UK businesses importing from the US, Canada, Mexico, EU, Taiwan, and other affected countries",
     "who_receives_less": "None",
-    "margin_risk": "High",
-    "payment_timing_risk": "High",
     "affected_payment_flow": "Imports from 60 countries, including the UK, will face increased tariffs",
     "fx_payment_logic": "UK importers will pay more for goods from affected countries due to increased tariffs, not a direct FX issue but a payment flow impact",
-    "sales_angle": "If you import from the US, Canada, Mexico, or other affected countries, the proposed tariffs will increase your costs.",
+    "margin_risk": "High",
+    "payment_timing_risk": "High",
     "business_impact_summary": "UK importers will face higher costs due to the proposed tariffs, affecting their margins and competitiveness.",
-    "exposure_types": [
-      "Tariff exposure",
-      "Import cost exposure"
-    ],
+    "sales_angle": "If you import from the US, Canada, Mexico, or other affected countries, the proposed tariffs will increase your costs.",
     "overall_sales_angle": "Proposed US tariffs on 60 countries will increase costs for UK importers — worth reviewing the impact.",
+    "summary": "The US proposed tariffs on 60 countries, including the UK. UK businesses importing from these countries will face increased costs.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of US goods",
-        "category_priority_score": 95,
         "business_model": "UK businesses importing goods from the US, paying in USD or GBP, and selling in the UK market",
         "exposure_level": "Very High",
         "exposure_type": "Import cost exposure — increased tariffs on US goods",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK importers will pay more for US goods due to increased tariffs, affecting their margins",
         "margin_risk": "High — 10% tariff on $100,000 import ≈ $10,000 extra cost",
         "payment_timing_risk": "High — importers must pay tariffs on goods imported after the tariff implementation date",
         "affected_payment_flow": "Imports from the US, typically £50,000-£500,000 per shipment, monthly",
-        "website_validation_signals": [
-          "imported from USA",
-          "US goods",
-          "American products"
-        ],
-        "avoid_segments": [
-          "UK businesses with no US imports",
-          "pure UK domestic manufacturers"
-        ],
-        "sales_angle": "If you import from the US, the proposed tariffs will increase your costs — worth reviewing the impact.",
-        "exposure_thesis_template": "This company imports goods from the US. The proposed US tariffs will increase the cost of these imports.",
+        "ideal_company_profile": "",
+        "category_priority_score": 95,
         "micro_categories": [
           {
             "name": "UK importers of US machinery parts",
@@ -2706,36 +2764,41 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from USA",
+          "US goods",
+          "American products"
+        ],
         "segment_signals": [
           "imported from USA",
           "US goods",
           "American products"
-        ]
+        ],
+        "avoid_segments": [
+          "UK businesses with no US imports",
+          "pure UK domestic manufacturers"
+        ],
+        "sales_angle": "If you import from the US, the proposed tariffs will increase your costs — worth reviewing the impact.",
+        "exposure_thesis_template": "This company imports goods from the US. The proposed US tariffs will increase the cost of these imports."
       },
       {
         "segment_name": "UK importers of Canadian goods",
-        "category_priority_score": 90,
         "business_model": "UK businesses importing goods from Canada, paying in CAD or GBP, and selling in the UK market",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — increased tariffs on Canadian goods",
         "likely_currency_pairs": [
           "GBP/CAD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK importers will pay more for Canadian goods due to increased tariffs, affecting their margins",
         "margin_risk": "High — 10% tariff on $50,000 import ≈ $5,000 extra cost",
         "payment_timing_risk": "High — importers must pay tariffs on goods imported after the tariff implementation date",
         "affected_payment_flow": "Imports from Canada, typically £20,000-£200,000 per shipment, quarterly",
-        "website_validation_signals": [
-          "imported from Canada",
-          "Canadian goods",
-          "Canadian products"
-        ],
-        "avoid_segments": [
-          "UK businesses with no Canadian imports",
-          "pure UK domestic manufacturers"
-        ],
-        "sales_angle": "If you import from Canada, the proposed tariffs will increase your costs — worth reviewing the impact.",
-        "exposure_thesis_template": "This company imports goods from Canada. The proposed US tariffs will increase the cost of these imports.",
+        "ideal_company_profile": "",
+        "category_priority_score": 90,
         "micro_categories": [
           {
             "name": "UK importers of Canadian lumber",
@@ -2750,11 +2813,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from Canada",
+          "Canadian goods",
+          "Canadian products"
+        ],
         "segment_signals": [
           "imported from Canada",
           "Canadian goods",
           "Canadian products"
-        ]
+        ],
+        "avoid_segments": [
+          "UK businesses with no Canadian imports",
+          "pure UK domestic manufacturers"
+        ],
+        "sales_angle": "If you import from Canada, the proposed tariffs will increase your costs — worth reviewing the impact.",
+        "exposure_thesis_template": "This company imports goods from Canada. The proposed US tariffs will increase the cost of these imports."
       }
     ],
     "companies_house_terms": [
@@ -2773,8 +2849,13 @@
       "\"Canadian lumber\" UK importer",
       "\"lumber from Canada\" UK distributor"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "The US proposed tariffs of at least 10% on imports from around 60 countries under a Section 301 forced-labour probe, with higher 12.5% levies targeting China, India, Japan and others. Summary: Source: Office of the US Trade Representative; reporting by financial newswires The USTR has recommended tariffs of at least 10% on imports from approximately 60 countries including Canada, Mexico, the EU, Taiwan and the UK, following a Section 301 investigation into forced-labour practices China, India, Japan, South Korea, Brazil and Switzerland face a higher proposed rate of 12.5% The levies are not im",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "Tariff exposure",
+      "Import cost exposure"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-03T09:24:31.565Z"
@@ -3508,16 +3589,13 @@
   },
   "6a95f67ebeca5111": {
     "id": "6a95f67ebeca5111",
+    "headline": "UK in line for fresh US tariff hit as Trump proposes ‘forced labour’ levy",
     "source": "CityAM",
     "source_url": "https://www.cityam.com/uk-in-line-for-fresh-us-tariff-hit-as-trump-proposes-forced-labour-levy/",
-    "headline": "UK in line for fresh US tariff hit as Trump proposes ‘forced labour’ levy",
-    "raw_summary": "Donald Trump has proposed a fresh round of tariffs that would hit numerous nations including the UK as the President seeks to rebuild his sweeping wall of levies that were struck down by the Supreme Court. The US is exploring a tariff of at least ten per cent on imports from up to 60 trading [...]",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-06-03T09:24:26.441Z",
+    "status": "ready",
     "event_type": "Tariff announcement",
     "event_breadth": "tariff",
-    "summary": "The US has proposed new tariffs on UK imports, which would increase costs for UK businesses exporting to the US. This could compress margins and affect competitiveness.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -3533,49 +3611,40 @@
       "UK wholesalers/distributors of UK-made goods to the US"
     ],
     "why_now": "The proposed tariffs could be implemented soon, affecting upcoming US-bound shipments from the UK",
-    "discovery_recommendation": "Full run — clear payment flow, multiple identifiable exporter niches, public websites should show export language",
     "confidence_level": "high",
     "confidence_reason": "The proposal of new tariffs by the US President is a concrete event with direct implications for UK-US trade, making it highly relevant for UK businesses with US export operations",
+    "discovery_recommendation": "Full run — clear payment flow, multiple identifiable exporter niches, public websites should show export language",
     "what_happened": "US President Donald Trump has proposed a new round of tariffs that would affect numerous countries, including the UK",
     "what_changed_financially": "A potential tariff of at least 10% on UK imports to the US, which could increase costs for UK exporters",
     "who_pays_more": "UK businesses exporting goods to the US",
     "who_receives_less": "None, as this is a cost increase rather than a revenue decrease",
-    "margin_risk": "High",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs USD costs (tariffs)",
     "fx_payment_logic": "UK exporters sell goods to US customers, priced in USD. Proposed tariffs increase the USD cost of these goods, which, when converted back to GBP, could result in lower GBP margins if not passed on to US customers.",
-    "sales_angle": "If you export to the US, proposed tariffs could increase your costs and reduce your competitiveness.",
+    "margin_risk": "High",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses exporting to the US face potential increases in costs due to proposed tariffs, which could affect their margins and competitiveness. This is a critical moment to review their pricing strategies and consider hedging options.",
-    "exposure_types": [
-      "USD tariff payment exposure",
-      "export margin pressure"
-    ],
+    "sales_angle": "If you export to the US, proposed tariffs could increase your costs and reduce your competitiveness.",
     "overall_sales_angle": "Proposed US tariffs on UK imports mean higher costs for UK exporters. Reviewing pricing and hedging strategies is crucial.",
+    "summary": "The US has proposed new tariffs on UK imports, which would increase costs for UK businesses exporting to the US. This could compress margins and affect competitiveness.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK manufacturers exporting to the US",
-        "category_priority_score": 95,
         "business_model": "UK manufacturer selling goods to US customers, with prices in USD and potential tariffs increasing costs",
         "exposure_level": "Very High",
         "exposure_type": "Tariff cost exposure — USD tariffs on UK exports",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "USD tariffs on exports increase the USD cost, potentially reducing GBP margins if prices are not adjusted",
         "margin_risk": "High — 10% tariff on $100,000 export ≈ $10,000 additional cost, potentially reducing GBP margin",
         "payment_timing_risk": "Medium — tariff implementation timeline creates uncertainty for upcoming shipments",
         "affected_payment_flow": "USD payments for tariffs on exports to the US",
-        "website_validation_signals": [
-          "export to US",
-          "US market",
-          "sell to America"
-        ],
-        "avoid_segments": [
-          "pure domestic UK manufacturers",
-          "businesses without US export operations"
-        ],
-        "sales_angle": "Proposed US tariffs could significantly increase your costs on exports to the US.",
-        "exposure_thesis_template": "This company exports to the US and faces increased costs due to proposed tariffs.",
+        "ideal_company_profile": "",
+        "category_priority_score": 95,
         "micro_categories": [
           {
             "name": "UK automotive parts exporters to the US",
@@ -3602,36 +3671,41 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "export to US",
+          "US market",
+          "sell to America"
+        ],
         "segment_signals": [
           "export to US",
           "US market",
           "sell to America"
-        ]
+        ],
+        "avoid_segments": [
+          "pure domestic UK manufacturers",
+          "businesses without US export operations"
+        ],
+        "sales_angle": "Proposed US tariffs could significantly increase your costs on exports to the US.",
+        "exposure_thesis_template": "This company exports to the US and faces increased costs due to proposed tariffs."
       },
       {
         "segment_name": "UK wholesalers/distributors of UK-made goods to the US",
-        "category_priority_score": 85,
         "business_model": "UK wholesaler/distributor of UK-made goods selling to US customers, with prices in USD and potential tariffs affecting costs",
         "exposure_level": "High",
         "exposure_type": "Tariff cost exposure — USD tariffs on UK-made goods distributed in the US",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Tariffs on distributed goods increase USD costs, potentially reducing GBP margins if prices are not adjusted",
         "margin_risk": "Medium to High — depends on the ability to pass on tariff costs to US customers",
         "payment_timing_risk": "Medium — uncertainty around tariff implementation and its impact on pricing",
         "affected_payment_flow": "USD payments for tariffs on distributed UK-made goods in the US",
-        "website_validation_signals": [
-          "distribute in US",
-          "US wholesale market",
-          "sell UK goods in America"
-        ],
-        "avoid_segments": [
-          "pure domestic UK wholesalers",
-          "businesses without US distribution operations"
-        ],
-        "sales_angle": "Proposed tariffs could impact your margins on US distribution of UK-made goods.",
-        "exposure_thesis_template": "This company distributes UK-made goods in the US and faces potential tariff costs.",
+        "ideal_company_profile": "",
+        "category_priority_score": 85,
         "micro_categories": [
           {
             "name": "UK electronics distributors to the US",
@@ -3646,11 +3720,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "distribute in US",
+          "US wholesale market",
+          "sell UK goods in America"
+        ],
         "segment_signals": [
           "distribute in US",
           "US wholesale market",
           "sell UK goods in America"
-        ]
+        ],
+        "avoid_segments": [
+          "pure domestic UK wholesalers",
+          "businesses without US distribution operations"
+        ],
+        "sales_angle": "Proposed tariffs could impact your margins on US distribution of UK-made goods.",
+        "exposure_thesis_template": "This company distributes UK-made goods in the US and faces potential tariff costs."
       }
     ],
     "companies_house_terms": [
@@ -3668,11 +3755,60 @@
       "UK electronics distributor US",
       "US electronics market UK supplier"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "Donald Trump has proposed a fresh round of tariffs that would hit numerous nations including the UK as the President seeks to rebuild his sweeping wall of levies that were struck down by the Supreme Court. The US is exploring a tariff of at least ten per cent on imports from up to 60 trading [...]",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "USD tariff payment exposure",
+      "export margin pressure"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-03T09:24:32.121Z"
+  },
+  "6d59e08e4f142e6f": {
+    "id": "6d59e08e4f142e6f",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/may-ism-services-index-545-vs-538-expected-20260603/",
+    "headline": "May ISM services index 54.5 vs 53.8 expected",
+    "raw_summary": "Business activity index vs 55.9 prior Employment 47.9 vs 48.0 prior New orders 57.3 vs 53.5 prior Prices paid 71.3 vs 70.7 prior Supplier deliveries 55.2 vs 56.8 prior Inventories 62.5 vs 53.1 prior Backlog of orders 51.3 vs 53.0 prior New export orders 50.0 vs 52.1 prior Imports 51.1 vs 54.7 prior Inventory sentiment 55.2 vs 55.1 prior The details are a tad worse than the headline and that prices paid number is worrisome. Despite several indicators showing a better jobs market, this one is still in contraction. Comments in the report: “We are seeing the dual effects of the administration’s ta",
+    "pre_relevance_score": 9,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu",
+    "detected_at": "2026-06-03T23:27:46.517Z",
+    "event_type": "Economic indicator",
+    "event_breadth": "macro",
+    "summary": "The US ISM services index showed a mixed picture, slightly above expectations but with signs of contraction in certain areas. While this has implications for the global economy, it does not directly impact UK B2B FX exposure.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US services index move has indirect implications for UK businesses but lacks a direct FX payment-flow hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "The report provides general economic context but lacks a specific trigger for UK B2B FX action",
+    "discovery_recommendation": "Context only — the event lacks a direct UK B2B FX hook",
+    "confidence_level": "medium",
+    "confidence_reason": "While the US services index provides insight into the US economy, its direct relevance to UK B2B FX exposure is limited",
+    "what_happened": "US ISM services index came in at 54.5, slightly above expectations but with mixed details",
+    "what_changed_financially": "The index reflects the state of the US services sector, which can influence global economic trends",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "There is no direct FX payment logic applicable to this event for UK businesses",
+    "sales_angle": "The US economic indicators can influence global trends, but this specific event does not directly affect your FX exposure.",
+    "business_impact_summary": "The US services index move has indirect implications for the global economy but does not directly affect UK businesses' FX exposure.",
+    "exposure_types": [],
+    "overall_sales_angle": "While the US economy's health is important, this specific index move does not directly impact your business's FX exposure.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "72838d82725c1064": {
     "id": "72838d82725c1064",
@@ -4020,6 +4156,50 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:34.945Z"
+  },
+  "8387bb9428f93814": {
+    "id": "8387bb9428f93814",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/may-us-sp-global-services-pmi-507-vs-509-prelim-20260603/",
+    "headline": "May US S&P Global services PMI 50.7 vs 50.9 prelim",
+    "raw_summary": "Prior was 50.9 Final April reading was 51.0 Final composite PMI 51.5 vs 51.7 prelim and 51.7 prior The ISM services survey is due at the top of the hour, alongside factory orders. Four of seven sectors expanded, down from five in April and the fewest since June 2025. Healthcare leading isn't exactly cyclical expansion so be careful with any optimism here. Consumer Services is concerning. At 47.5 it was the sharpest contraction of any sector, and it's now shrunk in three of the last four months. This is the part of the economy that actually tracks the household — discretionary spending, the con",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d",
+    "detected_at": "2026-06-03T23:27:49.859Z",
+    "event_type": "Economic indicator",
+    "event_breadth": "macro",
+    "summary": "US services PMI data shows a slight contraction, but it does not directly impact UK B2B FX transactions",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US services PMI data does not directly impact UK B2B FX transactions",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate reason for UK businesses to adjust FX strategies based on this US data point",
+    "discovery_recommendation": "Context only — no direct FX relevance",
+    "confidence_level": "high",
+    "confidence_reason": "The event is a US economic indicator with no direct FX payment flow hook for UK businesses",
+    "what_happened": "US S&P Global services PMI was 50.7, slightly lower than the preliminary reading",
+    "what_changed_financially": "No direct financial impact on UK businesses from this US economic indicator",
+    "who_pays_more": "None",
+    "who_receives_less": "None",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "No direct FX payment flow logic applies to this event",
+    "sales_angle": "No specific sales angle arises from this US economic indicator",
+    "business_impact_summary": "No direct impact on UK businesses from this US services PMI data",
+    "exposure_types": [],
+    "overall_sales_angle": "No sharp reason to call UK businesses today based on this event",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "8488d5e189162501": {
     "id": "8488d5e189162501",
@@ -4524,6 +4704,50 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:45.710Z"
   },
+  "9c3e34678e78e0ea": {
+    "id": "9c3e34678e78e0ea",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/feds-logan-inflation-is-taking-too-long-to-return-to-2-202606032029",
+    "headline": "Fed’s Logan: Inflation is taking too long to return to 2%",
+    "raw_summary": "Lorie Logan, President of the Federal Reserve (Fed) Bank of Dallas, said on Wednesday that inflation remains too elevated and warned that higher interest rates could be needed later this year if price pressures fail to ease further.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-06-03T23:27:56.074Z",
+    "event_type": "Central Bank Commentary",
+    "event_breadth": "macro",
+    "summary": "Fed's Logan warns inflation is too high and may require higher interest rates. This has indirect implications for USD and thus FX rates but lacks a direct UK B2B FX hook.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Fed comments on inflation and potential interest rate hikes have indirect implications for USD strength and thus FX rates, but lack direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate reason for UK businesses to act based on this statement alone",
+    "discovery_recommendation": "Context only — keep for background information, not for generating new leads",
+    "confidence_level": "medium",
+    "confidence_reason": "While Fed comments can influence market expectations and currency rates, this specific statement lacks direct relevance to UK businesses' foreign currency payment flows",
+    "what_happened": "Fed's Logan expressed concern over inflation not returning to 2% and hinted at potential higher interest rates",
+    "what_changed_financially": "Potential for higher interest rates in the US, which could influence USD strength",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX payment logic applies as this is a macroeconomic commentary without specific payment flow implications",
+    "sales_angle": "No direct sales angle applies as this event lacks a clear and immediate impact on UK businesses' foreign currency payment flows",
+    "business_impact_summary": "No direct business impact summary applies as the event does not directly affect UK businesses' payment flows or margins",
+    "exposure_types": [],
+    "overall_sales_angle": "No sharp sales angle emerges from this event due to its indirect nature",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "a74f6a1bd5f9205d": {
     "id": "a74f6a1bd5f9205d",
     "headline": "British Pound: Softer UK inflation weighs on Pound – BBH",
@@ -5004,43 +5228,51 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "c6f739f9d2bc164b": {
-    "id": "c6f739f9d2bc164b",
-    "source": "ForexLive",
-    "source_url": "https://investinglive.com/news/japan-approves-19bn-supplementary-budget-to-offset-trump-war-middle-east-inflation-20260603/",
-    "headline": "Japan approves $19bn supplementary budget to offset Trump war Middle East inflation",
-    "raw_summary": "Japan's cabinet approved a ¥3.1 trillion supplementary budget funded by deficit bonds to subsidise fuel and utility costs, with a ¥2.5 trillion reserve targeting gasoline prices first. Summary: Japan's cabinet approved a ¥3.1 trillion ($19 billion) supplementary budget to cushion households and businesses from Middle East-driven inflationary pressure The package creates a ¥2.5 trillion contingency reserve to subsidise commodity price rises, with gasoline price controls the initial priority, followed by utility bill support The budget will be funded entirely through deficit-financing bonds; the",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
-    "detected_at": "2026-06-03T09:24:21.681Z",
-    "event_type": "Government budget announcement",
-    "event_breadth": "macro",
-    "summary": "Japan's supplementary budget aims to cushion households and businesses from inflation, but its direct impact on UK B2B FX is indirect and uncertain",
-    "currency_pairs": [],
+  "ce3c18810f18f0c0": {
+    "id": "ce3c18810f18f0c0",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/british-pound-range-bound-versus-us-dollar-ahead-of-boe-scotiabank-202606031509",
+    "headline": "British Pound: Range-bound versus US Dollar ahead of BoE – Scotiabank",
+    "raw_summary": "Scotiabank strategists Shaun Osborne and Eric Theoret highlight that the British Pound (GBP) is trading fractionally lower against the Dollar, with limited fresh data beyond a slightly contractionary services PMI.",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
+    "detected_at": "2026-06-03T23:27:48.241Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "GBP trading lower against USD ahead of BoE. UK businesses with USD exposure may face higher costs or lower revenue.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "No direct UK B2B FX hook, but possible indirect impact on global commodity prices and supply chains",
+    "commercial_relevance_reason": "GBP/USD range-bound ahead of BoE, potential implications for UK businesses with USD exposure",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "No immediate reason for UK businesses to take action",
-    "discovery_recommendation": "Context only — no direct payment-flow hook, but possible indirect impact on commodity prices and supply chains",
+    "likely_affected_businesses": [
+      "UK importers of USD-priced goods",
+      "UK businesses with USD-denominated costs"
+    ],
+    "why_now": "Upcoming BoE decision may impact GBP/USD rate, affecting UK businesses with USD exposure",
+    "discovery_recommendation": "Context only — limited urgency and no strong payment-flow hook",
     "confidence_level": "medium",
-    "confidence_reason": "Event is related to global economic conditions, but its direct impact on UK B2B FX is indirect and uncertain",
-    "what_happened": "Japan approved a $19 billion supplementary budget to offset inflation",
-    "what_changed_financially": "Japan's government will provide subsidies to households and businesses to cushion the impact of Middle East-driven inflation",
-    "who_pays_more": "None directly, but possible indirect impact on global commodity prices",
-    "who_receives_less": "None directly",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly",
-    "fx_payment_logic": "No direct FX payment logic applies, as the event is related to Japan's domestic economic policy",
-    "sales_angle": "No immediate sales angle, but possible indirect impact on global commodity prices and supply chains",
-    "business_impact_summary": "No direct impact on UK businesses, but possible indirect effects on global commodity prices and supply chains",
-    "exposure_types": [],
-    "overall_sales_angle": "No immediate reason for UK businesses to take action",
+    "confidence_reason": "GBP/USD move is relevant but lacks strong urgency or surprise",
+    "what_happened": "GBP trading lower against USD ahead of BoE",
+    "what_changed_financially": "GBP/USD rate moved, potentially affecting UK businesses with USD exposure",
+    "who_pays_more": "UK businesses with USD-denominated costs or invoices",
+    "who_receives_less": "UK businesses receiving USD revenue and converting to GBP",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low to medium",
+    "affected_payment_flow": "GBP revenue vs USD costs or invoices",
+    "fx_payment_logic": "UK businesses with USD exposure may face higher costs or lower revenue due to GBP/USD move",
+    "sales_angle": "If you have USD exposure, the upcoming BoE decision may impact your costs or revenue.",
+    "business_impact_summary": "UK businesses with USD exposure may face higher costs or lower revenue due to GBP/USD move.",
+    "exposure_types": [
+      "USD cost exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "GBP/USD move may impact your business — worth reviewing your USD exposure.",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -7804,6 +8036,121 @@
       "USD or EUR payment exposure for oil imports"
     ],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "fc513b03f590b2a4": {
+    "id": "fc513b03f590b2a4",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/eu-says-latest-us-tariffs-on-forced-labour-grounds-are-unjustified-20260603/",
+    "headline": "EU says latest US tariffs on forced labour grounds are unjustified",
+    "raw_summary": "Just when the EU looks to have settled one thing on the tariffs front, they are now getting thrown another curveball by the US. Yesterday, the EU parliament voted in favour of the legislation to remove duties on many US goods and imports. That move is one to avoid another clash with the US on trade, essentially ratifying the trade deal from last year. It's a move that they wanted to get done quickly as Trump's reciprocal tariffs was shot down by the Supreme Court. But now, we're seeing this put out by the administration in Washington: US proposes 10% tariffs on 60 nations, forced-labour Sectio",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-06-03T23:27:59.630Z",
+    "event_type": "Tariff announcement",
+    "event_breadth": "tariff",
+    "summary": "The US has announced new tariffs on 60 nations, which could increase costs for UK businesses importing goods from these countries. The move is under forced-labour grounds and follows recent trade deal ratifications.",
+    "currency_pairs": [],
+    "urgency_score": 4,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "New US tariffs on 60 nations could affect UK businesses importing from these countries, particularly those with supply chains in nations targeted by the tariffs",
+    "trigger_strength": "medium",
+    "trigger_score": 58,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK importers of goods from nations with new US tariffs"
+    ],
+    "why_now": "Upcoming imports from these nations will be more expensive due to the new tariffs",
+    "discovery_recommendation": "Limited run — focusing on UK businesses with direct import exposure to the targeted nations",
+    "confidence_level": "medium",
+    "confidence_reason": "Tariff announcement has direct payment-flow implications but is part of ongoing trade tensions, making the urgency moderate",
+    "what_happened": "US proposes 10% tariffs on 60 nations under forced-labour grounds",
+    "what_changed_financially": "Potential increase in costs for UK businesses importing goods from the affected countries",
+    "who_pays_more": "UK importers of goods from the 60 targeted nations",
+    "who_receives_less": "None directly, but UK exporters might face retaliatory tariffs",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "Imports from the 60 nations affected by the new tariffs",
+    "fx_payment_logic": "UK importers will face higher costs on goods imported from the 60 nations due to the new 10% tariffs, potentially affecting their margins and pricing strategies",
+    "sales_angle": "If you import goods from any of the 60 nations targeted by the new US tariffs, your costs are about to increase.",
+    "business_impact_summary": "UK businesses importing from the affected nations will see higher costs, potentially affecting their profitability and competitiveness. This could lead to a review of their supply chains and pricing strategies.",
+    "exposure_types": [
+      "Import cost exposure due to new tariffs"
+    ],
+    "overall_sales_angle": "New US tariffs on 60 nations mean higher import costs for UK businesses — a review of current pricing and supply chains might be necessary",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of goods from nations with new US tariffs",
+        "category_priority_score": 72,
+        "business_model": "UK businesses importing goods from countries affected by the new US tariffs, selling in the UK market",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure due to new tariffs",
+        "likely_currency_pairs": [],
+        "fx_payment_logic": "Importers pay more for goods due to the 10% tariff, affecting their GBP costs and potentially their pricing",
+        "margin_risk": "Medium — dependent on the ability to pass on increased costs to consumers",
+        "payment_timing_risk": "Medium — payment terms and tariff implementation timing affect the immediate financial impact",
+        "affected_payment_flow": "Imports from the 60 nations with new tariffs",
+        "website_validation_signals": [
+          "import from",
+          "international suppliers",
+          "global sourcing"
+        ],
+        "avoid_segments": [
+          "Pure UK domestic manufacturers",
+          "Businesses without international supply chains"
+        ],
+        "sales_angle": "Your import costs from these nations are about to rise due to the new US tariffs.",
+        "exposure_thesis_template": "This company imports goods from nations affected by the new US tariffs, increasing their costs and potentially affecting their profitability.",
+        "micro_categories": [
+          {
+            "name": "UK importers of electronics from tariffed nations",
+            "why": "Pay more for electronics due to the new tariffs, affecting their cost structure",
+            "search_queries": [
+              "\"electronics importer\" UK",
+              "\"import electronics\" from nations with new US tariffs"
+            ],
+            "companies_house_terms": [
+              "electronics import",
+              "international electronics"
+            ]
+          },
+          {
+            "name": "UK importers of machinery parts from nations with new tariffs",
+            "why": "Face higher costs for machinery parts, potentially impacting their production costs and supply chain",
+            "search_queries": [
+              "\"machinery parts importer\" UK",
+              "\"import machinery\" from nations with new US tariffs"
+            ],
+            "companies_house_terms": [
+              "machinery parts import",
+              "international machinery"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "import from",
+          "international suppliers",
+          "global sourcing"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "electronics import",
+      "international electronics",
+      "machinery parts import",
+      "international machinery"
+    ],
+    "all_search_queries": [
+      "\"electronics importer\" UK",
+      "\"import electronics\" from nations with new US tariffs",
+      "\"machinery parts importer\" UK",
+      "\"import machinery\" from nations with new US tariffs"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-03T23:28:06.695Z"
   },
   "fd4aba753bd6b035": {
     "id": "fd4aba753bd6b035",
