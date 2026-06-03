@@ -386,16 +386,13 @@
   },
   "06e00fcc3a0dd9e1": {
     "id": "06e00fcc3a0dd9e1",
+    "headline": "Euro: Range trading persists against US Dollar as ECB turns hawkish – DBS",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/euro-range-trading-persists-against-us-dollar-as-ecb-turns-hawkish-dbs-202606020831",
-    "headline": "Euro: Range trading persists against US Dollar as ECB turns hawkish – DBS",
-    "raw_summary": "DBS Group Research’s Philip Wee notes that the Euro (EUR) remains trapped in a range against the US Dollar (USD) as markets focus on the June FOMC and ECB meetings. The European Central Bank is expected to deliver a 25 bps ‘insurance’ hike and upgrade its inflation outlook.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "no strong signals",
     "detected_at": "2026-06-02T09:05:44.552Z",
+    "status": "context_only",
     "event_type": "Central Bank outlook",
     "event_breadth": "broad_macro",
-    "summary": "ECB's expected hawkish stance may influence EUR/USD, indirectly affecting UK businesses with USD or EUR exposure. However, it's not a direct UK B2B FX hook.",
     "currency_pairs": [
       "EUR/USD"
     ],
@@ -411,28 +408,32 @@
       "UK exporters with EUR or USD revenue"
     ],
     "why_now": "Upcoming ECB meeting may lead to EUR/USD rate changes, indirectly affecting UK businesses",
-    "discovery_recommendation": "Context only — indirect implications for UK businesses, not a strong enough hook for discovery",
     "confidence_level": "medium",
     "confidence_reason": "ECB's expected hawkish stance has indirect implications for UK businesses, but it's not a direct UK B2B FX hook",
+    "discovery_recommendation": "Context only — indirect implications for UK businesses, not a strong enough hook for discovery",
     "what_happened": "DBS expects the European Central Bank to deliver a 25 bps 'insurance' hike and upgrade its inflation outlook",
     "what_changed_financially": "ECB's hawkish tilt may strengthen EUR, affecting UK businesses with EUR or USD exposure",
     "who_pays_more": "UK businesses with USD-priced imports or EUR-denominated costs may face higher costs if EUR strengthens",
     "who_receives_less": "UK exporters receiving EUR or USD revenue may see a slight decrease in GBP value of their revenue",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "Indirectly affects GBP/USD and GBP/EUR through EUR/USD movement",
     "fx_payment_logic": "UK businesses with USD or EUR exposure may face changes in their costs or revenue due to ECB's hawkish tilt, but it's an indirect effect",
-    "sales_angle": "If you have USD or EUR exposure, the upcoming ECB meeting may lead to rate changes that affect your costs or revenue.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK businesses with USD or EUR exposure may face indirect implications from ECB's hawkish stance, but it's not a strong enough reason to call today",
-    "exposure_types": [
-      "Indirect EUR/USD exposure"
-    ],
+    "sales_angle": "If you have USD or EUR exposure, the upcoming ECB meeting may lead to rate changes that affect your costs or revenue.",
     "overall_sales_angle": "ECB's hawkish tilt may lead to indirect rate changes — worth keeping an eye on for businesses with USD or EUR exposure",
+    "summary": "ECB's expected hawkish stance may influence EUR/USD, indirectly affecting UK businesses with USD or EUR exposure. However, it's not a direct UK B2B FX hook.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "DBS Group Research’s Philip Wee notes that the Euro (EUR) remains trapped in a range against the US Dollar (USD) as markets focus on the June FOMC and ECB meetings. The European Central Bank is expected to deliver a 25 bps ‘insurance’ hike and upgrade its inflation outlook.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "no strong signals",
+    "exposure_types": [
+      "Indirect EUR/USD exposure"
+    ],
     "ai_model": "llama-3.3-70b-versatile"
   },
   "0aae9ef9cc513424": {
@@ -808,159 +809,54 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:51:58.613Z"
   },
-  "1ab3cf82eeadfede": {
-    "id": "1ab3cf82eeadfede",
-    "headline": "UK and Gulf strike historic multi-billion-pound trade deal",
-    "source": "GOV.UK Tariffs",
-    "source_url": "https://www.gov.uk/government/news/uk-and-gulf-strike-historic-multi-billion-pound-trade-deal",
-    "detected_at": "2026-05-29T14:19:09.366Z",
-    "status": "ready",
-    "event_type": "Currency move",
-    "event_breadth": "broad_currency",
-    "currency_pairs": [
-      "GBP/USD"
-    ],
-    "urgency_score": 6,
-    "commercial_relevance": 5,
-    "commercial_relevance_reason": "Fallback event — rate-limit: Groq 429: {\"error\":{\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kn1qw9dvebs88x9zaf5pw5yf` service tier `on_demand` on tokens per minute (TPM): Limit 12000,",
-    "trigger_strength": "medium",
-    "trigger_score": 55,
-    "discovery_mode": "limited",
-    "recommended_query_budget": 12,
+  "155e6790eed437bd": {
+    "id": "155e6790eed437bd",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/canadas-leblanc-says-trade-talks-with-us-unfrozen-more-meetings-ahead-20260602/",
+    "headline": "Canada's LeBlanc says trade talks with US unfrozen, more meetings ahead",
+    "raw_summary": "Canada's trade minister says US talks are unfrozen and a meeting with USTR Greer was positive, but warned the road to conclusions is not always a straight line. Summary: LeBlanc described a meeting with US Trade Representative Jamieson Greer as positive, with a follow-up planned for next week Canada raised concerns over US tariffs on autos, steel, aluminum and softwood lumber LeBlanc said Canada has made what it considers significant submissions addressing US trade concerns, and has been preparing for potential US Section 301 tariff investigations He characterised US-Canada trade talks as havi",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d",
+    "detected_at": "2026-06-02T23:29:13.780Z",
+    "event_type": "Trade talks",
+    "event_breadth": "broad_trade",
+    "summary": "US-Canada trade talks have resumed, potentially impacting tariffs and affecting UK businesses with imports from or exports to these countries.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "US-Canada trade talks resuming may impact tariffs, affecting UK businesses importing from or exporting to these countries",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
     "likely_affected_businesses": [
-      "UK food and drink importers",
-      "UK furniture and homeware importers"
+      "UK importers of US or Canadian goods",
+      "UK exporters to the US or Canada"
     ],
-    "why_now": "Recent currency move may affect upcoming overseas payments for UK businesses",
-    "confidence_level": "low",
-    "confidence_reason": "AI fallback used — rate-limit: Groq 429: {\"error\":{\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kn1qw9dvebs88x9zaf5pw5yf` service tier `on_demand` on tokens per minute (TPM): Limit 12000,. Rule-based segments inferred from headline keywords.",
-    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
-    "what_happened": "UK and Gulf strike historic multi-billion-pound trade deal",
-    "what_changed_financially": "Market currency move with direct FX implications for UK businesses",
-    "who_pays_more": "UK importers with overseas supplier invoices",
-    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
-    "fx_payment_logic": "A currency move directly affects the GBP cost of any overseas supplier invoice or the GBP value of any overseas customer receipt. UK businesses with recurring international payments are immediately exposed.",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
-    "business_impact_summary": "UK businesses with overseas supplier invoices or overseas customer revenue are directly affected — importers face changed input costs, exporters face changed GBP revenue.",
-    "sales_angle": "Recent currency move may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
-    "overall_sales_angle": "Recent currency move creates FX exposure for UK businesses with international payment flows.",
-    "summary": "Wages and GDP to see boost as UK and Gulf strike historic multi-billion-pound trade deal",
-    "ai_provider": "",
-    "fallback_mode": true,
-    "target_segments": [
-      {
-        "segment_name": "UK food and drink importers",
-        "business_model": "UK importer/distributor buying food/drink from European or international suppliers, selling in GBP",
-        "exposure_level": "Very High",
-        "exposure_type": "Import cost exposure — EUR/USD supplier payments vs GBP revenue",
-        "likely_currency_pairs": [
-          "GBP/USD"
-        ],
-        "why_affected": "",
-        "why_financially_exposed": "",
-        "fx_payment_logic": "Supplier invoice in EUR/USD → convert GBP to pay → currency move changes GBP cost vs when the order was placed",
-        "margin_risk": "High — thin food-distribution margins amplify FX impact",
-        "payment_timing_risk": "High — invoices due monthly, often 30-60 day terms",
-        "affected_payment_flow": "",
-        "ideal_company_profile": "",
-        "micro_categories": [],
-        "high_intent_search_queries": [
-          "\"food importer\" UK",
-          "\"wine importer\" UK",
-          "\"seafood importer\" UK"
-        ],
-        "companies_house_terms": [
-          "food international",
-          "wines wholesale",
-          "seafood wholesale",
-          "foods import"
-        ],
-        "website_validation_signals": [
-          "we import",
-          "imported from",
-          "overseas supplier",
-          "international supplier"
-        ],
-        "segment_signals": [
-          "we import",
-          "imported from",
-          "overseas supplier",
-          "international supplier"
-        ],
-        "avoid_segments": [],
-        "sales_angle": "Currency move means upcoming overseas food supplier payments now cost more in GBP than when orders were placed.",
-        "exposure_thesis_template": "This company appears to import food/drink from overseas — currency moves affect the GBP cost of upcoming supplier payments."
-      },
-      {
-        "segment_name": "UK furniture and homeware importers",
-        "business_model": "UK wholesaler/distributor importing furniture, homeware or consumer goods from Europe/Asia, selling to UK trade in GBP",
-        "exposure_level": "Very High",
-        "exposure_type": "Import cost exposure — EUR/USD vs GBP",
-        "likely_currency_pairs": [
-          "GBP/USD"
-        ],
-        "why_affected": "",
-        "why_financially_exposed": "",
-        "fx_payment_logic": "Furniture/homeware invoice from European/Asian supplier in EUR/USD → GBP conversion at payment → adverse move compresses margin on stock already ordered",
-        "margin_risk": "High — furniture margins 25-40% but currency moves can take 10-20% of that",
-        "payment_timing_risk": "High — 60-120 day lead times create a long FX window",
-        "affected_payment_flow": "",
-        "ideal_company_profile": "",
-        "micro_categories": [],
-        "high_intent_search_queries": [
-          "\"furniture importer\" UK",
-          "\"homeware wholesaler\" UK",
-          "\"furniture distributor\" UK"
-        ],
-        "companies_house_terms": [
-          "furniture wholesale",
-          "furniture import",
-          "homeware wholesale"
-        ],
-        "website_validation_signals": [
-          "we import",
-          "imported from",
-          "overseas supplier",
-          "international supplier"
-        ],
-        "segment_signals": [
-          "we import",
-          "imported from",
-          "overseas supplier",
-          "international supplier"
-        ],
-        "avoid_segments": [],
-        "sales_angle": "Currency moves affect the GBP cost of furniture/homeware importers' overseas stock orders.",
-        "exposure_thesis_template": "This company appears to import furniture/homeware — currency moves affect the GBP cost of upcoming stock orders, especially with long lead times."
-      }
-    ],
-    "companies_house_terms": [
-      "food international",
-      "wines wholesale",
-      "seafood wholesale",
-      "foods import",
-      "furniture wholesale",
-      "furniture import",
-      "homeware wholesale"
-    ],
-    "all_search_queries": [
-      "\"food importer\" UK",
-      "\"wine importer\" UK",
-      "\"seafood importer\" UK",
-      "\"furniture importer\" UK",
-      "\"homeware wholesaler\" UK",
-      "\"furniture distributor\" UK"
-    ],
-    "raw_summary": "Wages and GDP to see boost as UK and Gulf strike historic multi-billion-pound trade deal",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d",
+    "why_now": "Resumed trade talks may lead to tariff changes, affecting UK businesses with transatlantic trade",
+    "discovery_recommendation": "Context only — indirect FX hook, no immediate urgency",
+    "confidence_level": "medium",
+    "confidence_reason": "Trade talks restarting is a positive step, but outcome uncertainty means the FX impact is indirect and speculative at this stage",
+    "what_happened": "Canada's trade minister announced that trade talks with the US have resumed",
+    "what_changed_financially": "Potential for changes in tariffs on autos, steel, aluminum, and softwood lumber between the US and Canada",
+    "who_pays_more": "UK businesses importing from the US or Canada, potentially facing tariff changes",
+    "who_receives_less": "UK exporters to the US or Canada, potentially benefiting from reduced tariffs",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "Potential changes in tariffs affecting UK imports from or exports to the US and Canada",
+    "fx_payment_logic": "Changes in US-Canada tariffs may affect UK businesses importing from or exporting to these countries, altering their FX exposure through changes in costs or revenues",
+    "sales_angle": "If you import from or export to the US or Canada, changes in tariffs could impact your business.",
+    "business_impact_summary": "UK businesses trading with the US or Canada may face changes in tariffs, affecting their costs or revenues.",
     "exposure_types": [
-      "Currency move exposure"
+      "Tariff risk"
     ],
-    "web_discovery_done": true,
-    "web_discovery_at": "2026-06-01T20:52:13.770Z"
+    "overall_sales_angle": "Tariff changes from US-Canada trade talks could impact your business.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "181dc423d9240785": {
     "id": "181dc423d9240785",
@@ -1598,6 +1494,28 @@
       "Oil import exposure",
       "Refining margin exposure"
     ],
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "3b29d444c05ce3e2": {
+    "id": "3b29d444c05ce3e2",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/goldman-soloman-i-believe-ai-is-going-to-interrupt-jobs-dislocate-20260602/",
+    "headline": "Goldman Soloman: I believe AI is going to interrupt jobs, dislocate",
+    "raw_summary": "Goldman Sachs is speaking at the Economic club of New York and to CNBC. I believe AI is going to unleash a growth moment, productivity boom Demand for community is not going to go in straight line everybody is currently projecting I do not believe we are going to have massive structural unemployment due to AI, but AI is going to interrupt jobs, dislocate Alphabet shares are trading quite well despite the $80 billion equity raise. This is the first concrete data point for bringing something like this to the market. We are at a moment where there is more greed than fear. The capital is available",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-06-02T23:29:16.524Z",
+    "status": "low_relevance",
+    "trigger_strength": "reject",
+    "trigger_score": 5,
+    "discovery_mode": "reject",
+    "recommended_query_budget": 0,
+    "urgency_score": 1,
+    "commercial_relevance": 1,
+    "commercial_relevance_reason": "No direct UK B2B FX hook, discussion about AI and market trends without specific currency or payment flow implications",
+    "confidence_level": "high",
+    "confidence_reason": "The event lacks any mention of foreign exchange rates, tariffs, or specific payment flows that would directly impact UK businesses in terms of FX exposure",
+    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "3e82b2324f0fb822": {
@@ -2546,6 +2464,53 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "57e7f9b155eb72a4": {
+    "id": "57e7f9b155eb72a4",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-european-fx-news-wrap-optimism-continues-to-prevail-in-the-markets-20260602/",
+    "headline": "investingLive European FX news wrap: Optimism continues to prevail in the markets",
+    "raw_summary": "ECB policymaker Rehn says June rate move would be an \"insurance\" hike Marvell Technology stock soars as Nvidia CEO says it's \"the next trillion-dollar company\" Euro area inflation continues to pick up in May, core prices nudge up as well Gold analysis shows it repaired higher. See my targets. UK mortgage approvals climbs in April, holds above six-month average European Parliament votes to remove import duties on US goods to comply with trade deal BoJ taper debate heats up as rising yields complicate exit strategy The Japanese yen extends losses as June rate hike bets continue to look wrong Pal",
+    "pre_relevance_score": 9,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-06-02T23:28:57.674Z",
+    "event_type": "Central bank comments and inflation data",
+    "event_breadth": "broad_macro",
+    "summary": "ECB policymaker comments and rising euro area inflation might influence the euro's value, but lack a direct UK B2B FX payment flow hook",
+    "currency_pairs": [
+      "EUR/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "ECB policymaker comments and euro area inflation might influence GBP/EUR rate indirectly, but no direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate reason for UK businesses to act, as the event lacks a direct payment-flow hook",
+    "discovery_recommendation": "Context only — maintain awareness of ECB comments and euro area inflation for potential future FX implications",
+    "confidence_level": "medium",
+    "confidence_reason": "Comments from ECB policymaker and inflation data are relevant but lack a direct link to UK businesses' FX payment flows",
+    "what_happened": "ECB policymaker Rehn mentioned a potential June rate move as an 'insurance' hike, and euro area inflation picked up in May",
+    "what_changed_financially": "ECB comments and euro area inflation might influence the euro's value against other currencies, including GBP",
+    "who_pays_more": "Potentially UK importers if EUR strengthens against GBP due to ECB actions or inflation",
+    "who_receives_less": "Potentially UK exporters if EUR weakens against GBP",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "Indirectly affects GBP/EUR payment flows through potential rate changes or currency value shifts",
+    "fx_payment_logic": "No direct FX payment logic applies, as the event is more about macroeconomic and central bank perspectives than specific payment flows",
+    "sales_angle": "No immediate sales angle, as the event is not directly relevant to UK businesses' FX payment flows",
+    "business_impact_summary": "No direct business impact, as the event is more about broader economic trends and central bank policies",
+    "exposure_types": [],
+    "overall_sales_angle": "No sharp reason to call today, as the event lacks a direct UK B2B FX hook",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "598adbbc29197e16": {
     "id": "598adbbc29197e16",
     "headline": "investingLive Asia-Pacific FX news wrap: Asia markets climb. Japan CPI hits four-year low",
@@ -2927,6 +2892,57 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "68bf9fd504d77d9d": {
+    "id": "68bf9fd504d77d9d",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/euro-stalls-as-oil-shock-keeps-the-us-dollar-in-play-202606022113",
+    "headline": "Euro stalls as Oil shock keeps the US Dollar in play",
+    "raw_summary": "The Euro (EUR) consolidates within familiar levels on Tuesday, flatlining around 1.1630 as the US Dollar (USD) recovers some ground, underpinned by high Oil prices amid halted US-Iran talks, even though US President Donald Trump says this is fake news.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-06-02T23:29:09.361Z",
+    "event_type": "Commodity price movement",
+    "event_breadth": "broad_commodity",
+    "summary": "High oil prices due to geopolitical tensions support the USD, indirectly affecting the EUR/USD rate. European importers of oil or USD-priced goods may face higher costs.",
+    "currency_pairs": [
+      "EUR/USD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Indirect impact of oil prices on currency through USD strength",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "European oil importers",
+      "European buyers of USD-priced commodities"
+    ],
+    "why_now": "Ongoing geopolitical tensions and their impact on oil prices and the USD",
+    "discovery_recommendation": "Context only — indirect FX hook through commodity prices and USD strength",
+    "confidence_level": "medium",
+    "confidence_reason": "Oil price impact on USD is indirect and subject to change with geopolitical developments",
+    "what_happened": "Oil prices remain high due to halted US-Iran talks, supporting the US Dollar",
+    "what_changed_financially": "High oil prices indirectly strengthen the USD, affecting EUR/USD exchange rate",
+    "who_pays_more": "European importers of oil or USD-priced commodities",
+    "who_receives_less": "Exporters from Europe selling in USD, converting back to EUR",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "EUR revenue vs USD costs for European importers of oil or USD-priced goods",
+    "fx_payment_logic": "European businesses importing oil or USD-priced commodities face higher costs in EUR due to the stronger USD, indirectly influenced by high oil prices.",
+    "sales_angle": "If you import oil or USD-priced commodities, the current USD strength might affect your costs.",
+    "business_impact_summary": "European importers of oil or USD-priced goods face potential cost increases due to the stronger USD. Exporters selling in USD and converting back to EUR see a slight decrease in EUR revenue.",
+    "exposure_types": [
+      "USD commodity price exposure"
+    ],
+    "overall_sales_angle": "The indirect impact of high oil prices on the USD and your business's costs.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "72838d82725c1064": {
     "id": "72838d82725c1064",
     "headline": "investingLive European markets wrap: A little risk respite as Nvidia earnings eyed",
@@ -3230,6 +3246,57 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:34.945Z"
   },
+  "84110c922f595145": {
+    "id": "84110c922f595145",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/eurozone-may-preliminary-cpi-32-vs-32-yy-expected-20260602/",
+    "headline": "Euro area inflation continues to pick up in May, core prices nudge up as well",
+    "raw_summary": "CPI +3.2% vs +3.2% y/y expected Prior +3.0% Core CPI +2.5% vs +2.4% y/y expected Prior +2.2% The headline estimate moves up in May, as expected, with energy price inflation being the standout once again. Even though energy prices were down 1.1% on the month, it is still up by 10.9% year-on-year (up from 10.8% in April). Besides that, the monthly estimates show a broadening in the increase in price pressures across the region. Of note, services inflation was up 0.4% on the month. Meanwhile, inflation for non-energy industrial goods also increased by 0.2% on the month. Food price inflation was f",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-06-02T23:29:01.149Z",
+    "event_type": "Inflation data",
+    "event_breadth": "macro",
+    "summary": "Euro area inflation increased, which might lead to ECB rate hikes, potentially affecting GBP/EUR rates and thus UK importers and exporters",
+    "currency_pairs": [
+      "GBP/EUR"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Euro area inflation rise could lead to ECB rate decisions affecting GBP/EUR, but it's indirect and not immediate",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of European goods",
+      "UK exporters to the EU"
+    ],
+    "why_now": "The inflation data might influence future ECB decisions, which could impact GBP/EUR rates",
+    "discovery_recommendation": "Context only — the event is not immediate but could set the stage for future FX relevance",
+    "confidence_level": "medium",
+    "confidence_reason": "Inflation data is relevant but does not directly translate to a specific FX payment flow without further ECB actions",
+    "what_happened": "Euro area inflation rose to 3.2% in May, with core prices increasing to 2.5%",
+    "what_changed_financially": "Higher inflation could lead to ECB considering rate hikes, potentially strengthening EUR",
+    "who_pays_more": "Potentially UK importers if EUR strengthens against GBP due to future ECB actions",
+    "who_receives_less": "Potentially UK exporters if EUR strengthens against GBP, making their goods more expensive for EU customers",
+    "margin_risk": "Low to Medium",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "Indirectly affects GBP/EUR through potential future ECB monetary policy decisions",
+    "fx_payment_logic": "Higher Euro area inflation could lead to ECB rate hikes, strengthening EUR against GBP, thus affecting UK businesses with EUR-denominated transactions",
+    "sales_angle": "The recent inflation data in the Euro area might lead to changes in ECB monetary policy, which could impact your business's FX exposure",
+    "business_impact_summary": "While not immediate, the rise in Euro area inflation could lead to future changes in GBP/EUR rates, affecting UK businesses with cross-border transactions",
+    "exposure_types": [
+      "Potential future EUR strengthening due to ECB actions"
+    ],
+    "overall_sales_angle": "Keep an eye on ECB decisions following the inflation data, as they might impact your FX exposure",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "8488d5e189162501": {
     "id": "8488d5e189162501",
     "headline": "investingLive Americas FX news wrap 28 May: Softer PCE pressures dollar and yields",
@@ -3380,6 +3447,57 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:41.524Z"
   },
+  "871c9ff75795552d": {
+    "id": "871c9ff75795552d",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/philippine-peso-year-end-2026-forecast-raised-to-627-against-us-dollar-dbs-202606022017",
+    "headline": "Philippine Peso: Year-end 2026 forecast raised to 62.7 against US Dollar – DBS",
+    "raw_summary": "Philip Wee at DBS Group Research has raised his USD/PHP year-end 2026 forecast to 62.7 from 57.8, reflecting persistent external and domestic pressures. The closure of the Strait of Hormuz and higher Oil prices have widened trade deficits and pushed inflation well above target.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-06-02T23:29:11.694Z",
+    "event_type": "Forecast change",
+    "event_breadth": "currency_forecast",
+    "summary": "DBS raised its USD/PHP forecast due to external and domestic pressures in the Philippines. While this has no direct impact on current UK B2B FX transactions, it may influence future trade and inflation expectations.",
+    "currency_pairs": [
+      "USD/PHP"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "USD/PHP forecast change has indirect implications for UK businesses importing from or exporting to the Philippines, but lacks direct FX payment flow relevance",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers from the Philippines",
+      "UK exporters to the Philippines"
+    ],
+    "why_now": "No immediate reason for UK businesses to act, but worth monitoring for potential future FX implications",
+    "discovery_recommendation": "Context only — no direct payment-flow hook, but useful for background knowledge",
+    "confidence_level": "medium",
+    "confidence_reason": "Forecast change is based on analyst opinion, which may influence market expectations but does not directly impact current FX transactions",
+    "what_happened": "DBS Group Research raised its USD/PHP year-end 2026 forecast to 62.7 from 57.8",
+    "what_changed_financially": "USD/PHP forecast changed, potentially affecting future trade and inflation expectations",
+    "who_pays_more": "None directly, but UK importers from the Philippines might face higher costs if PHP weakens further",
+    "who_receives_less": "None directly, but UK exporters to the Philippines might receive less PHP for their goods if PHP weakens",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly, but potential future impact on USD/PHP transactions",
+    "fx_payment_logic": "No direct FX payment flow impact, but potential future implications for UK businesses trading with the Philippines",
+    "sales_angle": "No immediate reason to call, but worth mentioning as background information on potential future FX trends",
+    "business_impact_summary": "No direct impact, but UK businesses importing from or exporting to the Philippines should monitor the situation for potential future FX implications",
+    "exposure_types": [
+      "Indirect FX implications"
+    ],
+    "overall_sales_angle": "No immediate sales angle, but useful for context on potential future FX trends",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "8a2edb7de6e4db74": {
     "id": "8a2edb7de6e4db74",
     "headline": "British Pound edges lower towards 1.3400 as BoE Bailey buys time",
@@ -3489,6 +3607,54 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:43.150Z"
+  },
+  "90806766fa3fa948": {
+    "id": "90806766fa3fa948",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-fx-news-wrap-2-jun-markets-randomly-walk-through-the-flow-of-news-20260602/",
+    "headline": "investingLive Americas FX news wrap 2 Jun: Markets randomly walk through the flow of news",
+    "raw_summary": "Bitcoin has lost its cool Copper prices are nearing records as analysts get increasingly bullish Trump to Iran: It is time to make a deal Crude oil prices move above the 200 hour MA at $92.48 Hezbollah will not accept partial ceasefire with Israel - report Bank of England's Greene: Risk of acting is less severe than the risk of failing to act Rubio: We are in talks with Iran BOE's Bailey: The inflation overshoot is entirely due to events in the Persian Gulf US April JOLTS job openings 7.618m vs 6.88m expected First they came for the free cash flow, then the came for the equity Fed's Hammack: W",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-06-02T23:29:15.546Z",
+    "event_type": "Commodity price movement",
+    "event_breadth": "broad_commodity",
+    "summary": "Oil prices moved above the 200 hour MA. UK businesses importing oil or related products might face higher costs.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Oil price movement and its potential impact on UK businesses importing oil or related products",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of oil or oil-related products"
+    ],
+    "why_now": "Oil price movement might affect businesses with upcoming oil or related product purchases",
+    "discovery_recommendation": "Context only — no strong FX hook, but might be useful for messaging context",
+    "confidence_level": "low",
+    "confidence_reason": "The event is more related to commodity prices and geopolitical news, which might have an indirect impact on FX",
+    "what_happened": "Crude oil prices moved above the 200 hour MA at $92.48",
+    "what_changed_financially": "Oil price increase, potentially affecting businesses with oil-related costs or revenues",
+    "who_pays_more": "UK businesses importing oil or oil-related products",
+    "who_receives_less": "None directly, but potentially UK businesses exporting oil or related products",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly, but potentially affecting businesses with oil-related costs or revenues",
+    "fx_payment_logic": "None directly, but potentially affecting businesses with oil-related costs or revenues",
+    "sales_angle": "If you import oil or related products, the recent price movement might affect your costs.",
+    "business_impact_summary": "UK importers of oil or related products might face higher costs due to the oil price increase.",
+    "exposure_types": [
+      "Oil price exposure"
+    ],
+    "overall_sales_angle": "Recent oil price movement might affect your business costs.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "95c31c2d45c77984": {
     "id": "95c31c2d45c77984",
@@ -3810,6 +3976,160 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:47.259Z"
   },
+  "a92f1197d3730b70": {
+    "id": "a92f1197d3730b70",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/european-parliament-votes-to-remove-import-duties-on-us-goods-to-comply-with-trade-deal-20260602/",
+    "headline": "European Parliament votes to remove import duties on US goods to comply with trade deal",
+    "raw_summary": "The European Parliament committee just voted in favour of the legislation to remove duties on many US goods and imports, essentially steering clear of another clash with the US on trade - such as the one last year. As a reminder, US president Trump set a deadline of 4 July for the EU to sort this out or risk incurring a further butting of heads on trade/tariffs once again. With the passing of the vote here, we are at least seeing the EU avoid another trade conflict with the US. And that's good news especially at a time when the fallout from the Middle East conflict is set to dampen the economy",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-06-02T23:29:20.588Z",
+    "event_type": "Tariff change",
+    "event_breadth": "tariff",
+    "summary": "The EU's removal of import duties on US goods could increase competition for UK businesses in the EU market, potentially affecting their pricing and margins",
+    "currency_pairs": [
+      "GBP/USD",
+      "EUR/USD"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Removal of import duties on US goods impacts UK businesses importing from the US or competing with US imports in the EU market",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK importers of US goods",
+      "UK businesses competing with US imports in the EU"
+    ],
+    "why_now": "The tariff removal could lead to increased competition from US goods in the EU market, affecting UK businesses' pricing and margins",
+    "discovery_recommendation": "Limited run — focusing on UK importers of US goods and businesses competing with US imports in the EU",
+    "confidence_level": "medium",
+    "confidence_reason": "The vote's outcome directly affects trade between the US and EU, potentially altering the competitive landscape for UK businesses",
+    "what_happened": "European Parliament voted to remove import duties on US goods",
+    "what_changed_financially": "Tariff reduction on US goods imported into the EU",
+    "who_pays_more": "None directly, as tariffs are being removed",
+    "who_receives_less": "UK businesses competing with cheaper US imports in the EU market might see reduced sales or margins",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Low to Medium",
+    "affected_payment_flow": "GBP or EUR payments for US imports into the EU",
+    "fx_payment_logic": "UK businesses importing US goods will benefit from lower tariffs, but those competing with US imports might face pricing pressure",
+    "sales_angle": "If you import US goods or compete with US imports in the EU, the recent tariff changes could impact your business's competitiveness and margins",
+    "business_impact_summary": "UK importers of US goods may see cost savings, while UK businesses competing with US imports could face increased competition and potential margin erosion",
+    "exposure_types": [
+      "Import cost savings",
+      "Competitive pressure from US imports"
+    ],
+    "overall_sales_angle": "Tariff changes on US goods could alter your business's competitive landscape in the EU market",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US goods",
+        "category_priority_score": 75,
+        "business_model": "UK businesses importing goods from the US, potentially benefiting from lower tariffs",
+        "exposure_level": "Medium",
+        "exposure_type": "Import cost savings — lower tariffs on US goods",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Lower tariffs on US imports reduce the GBP cost of these goods for UK importers",
+        "margin_risk": "Low to Medium — tariff savings could improve margins for importers",
+        "payment_timing_risk": "Low",
+        "affected_payment_flow": "GBP payments for US imports",
+        "website_validation_signals": [
+          "import from US",
+          "US goods",
+          "transatlantic trade"
+        ],
+        "avoid_segments": [
+          "Businesses with no US imports"
+        ],
+        "sales_angle": "The recent tariff removal could reduce your costs for US imports, improving your business's competitiveness",
+        "exposure_thesis_template": "This company imports goods from the US. The EU's removal of tariffs on US goods could reduce their import costs.",
+        "micro_categories": [
+          {
+            "name": "UK importers of US machinery and equipment",
+            "why": "Benefit from lower tariffs on US machinery and equipment imports",
+            "search_queries": [
+              "\"US machinery importer\" UK",
+              "\"import US equipment\" UK"
+            ],
+            "companies_house_terms": [
+              "US machinery",
+              "equipment imports"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "import from US",
+          "US goods",
+          "transatlantic trade"
+        ]
+      },
+      {
+        "segment_name": "UK businesses competing with US imports in the EU",
+        "category_priority_score": 65,
+        "business_model": "UK businesses selling goods or services in the EU market, competing with US imports",
+        "exposure_level": "Medium",
+        "exposure_type": "Competitive pressure from US imports — potential margin erosion",
+        "likely_currency_pairs": [
+          "EUR/USD",
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Cheaper US imports could pressure UK businesses' pricing and margins in the EU market",
+        "margin_risk": "Medium — increased competition from cheaper US imports",
+        "payment_timing_risk": "Medium — depends on the business's pricing strategy and market position",
+        "affected_payment_flow": "GBP or EUR revenue from EU sales",
+        "website_validation_signals": [
+          "EU market",
+          "compete with US imports",
+          "European sales"
+        ],
+        "avoid_segments": [
+          "Purely domestic UK businesses",
+          "Businesses with no EU sales"
+        ],
+        "sales_angle": "The tariff removal could increase competition from US imports in the EU, affecting your business's pricing and margins",
+        "exposure_thesis_template": "This company competes with US imports in the EU market. The removal of tariffs on US goods could increase competitive pressure.",
+        "micro_categories": [
+          {
+            "name": "UK manufacturers selling in the EU market",
+            "why": "Face increased competition from cheaper US imports, potentially affecting their EU sales and margins",
+            "search_queries": [
+              "UK manufacturer EU market",
+              "EU sales UK company"
+            ],
+            "companies_house_terms": [
+              "EU sales",
+              "European market"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "EU market",
+          "compete with US imports",
+          "European sales"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "US machinery",
+      "equipment imports",
+      "EU sales",
+      "European market"
+    ],
+    "all_search_queries": [
+      "\"US machinery importer\" UK",
+      "\"import US equipment\" UK",
+      "UK manufacturer EU market",
+      "EU sales UK company"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-02T23:29:28.617Z"
+  },
   "ac2de51eb48b27c1": {
     "id": "ac2de51eb48b27c1",
     "headline": "NZ consumer confidence lifts off lows but remains well below January peak",
@@ -3912,6 +4232,50 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:54.209Z"
+  },
+  "c4ecb0d629ab74ca": {
+    "id": "c4ecb0d629ab74ca",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/chinas-saic-motor-to-build-first-eu-electric-vehicle-factory-in-europe-spain-20260602/",
+    "headline": "China's SAIC Motor to build first EU electric vehicle factory in Europe (Spain)",
+    "raw_summary": "China's SAIC Motor plans its first EU factory in Spain's Galicia, with a 200 million euro initial investment, 120,000-vehicle annual capacity and an operational target of end-2028. Summary: Sources: Reuters; Xinhua SAIC Motor will build its first European Union manufacturing facility in Galicia, northwestern Spain, located between the port of Ferrol and the town of As Pontes Initial investment is set at 200 million euros ($232 million), with construction due to begin in 2027 and the plant targeting operational status by end-2028 Full capacity at the site is expected to reach 120,000 vehicles p",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-06-02T23:29:03.239Z",
+    "event_type": "Foreign investment",
+    "event_breadth": "sector_specific",
+    "summary": "China's SAIC Motor plans to build its first EU electric vehicle factory in Spain, with potential for future trade flows between Spain and other EU countries, including the UK",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "No direct UK B2B FX hook, but potential for future impact on UK businesses importing electric vehicles from Spain",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate impact, but potential for future FX implications if UK businesses import electric vehicles from Spain",
+    "discovery_recommendation": "Context only — no clear FX payment flow, but may be useful for future reference",
+    "confidence_level": "medium",
+    "confidence_reason": "The event is a foreign investment in the EU automotive sector, which may have indirect implications for UK businesses, but lacks a clear FX payment flow",
+    "what_happened": "China's SAIC Motor announced plans to build its first EU electric vehicle factory in Spain",
+    "what_changed_financially": "Initial investment of 200 million euros, with potential for future trade flows between Spain and other EU countries, including the UK",
+    "who_pays_more": "None directly, but potential future impact on UK businesses importing electric vehicles from Spain",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX payment flow, but potential for future implications if UK businesses import electric vehicles from Spain",
+    "sales_angle": "No immediate sales angle, but potential for future discussion if UK businesses are impacted by the investment",
+    "business_impact_summary": "No direct impact on UK businesses, but potential for future implications if they import electric vehicles from Spain",
+    "exposure_types": [],
+    "overall_sales_angle": "No immediate sales angle, but potential for future discussion",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "d4639628e23387bf": {
     "id": "d4639628e23387bf",
@@ -4052,6 +4416,204 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:55.950Z"
   },
+  "e67d5e2cc16a7692": {
+    "id": "e67d5e2cc16a7692",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/white-house-trims-tariffs-on-farm-and-industrial-gear-tweaks-metals-regime-20260602/",
+    "headline": "White House trims tariffs on farm and industrial gear, tweaks metals regime",
+    "raw_summary": "The White House announced adjustments to tariff arrangements covering aluminium, steel and copper imports, while cutting duties on agricultural equipment such as combines and harvesters from 25% to 15%. Mobile industrial equipment including bulldozers and forklifts will also qualify for a 15% rate when imported from countries with existing trade agreements. This article was written by Eamonn Sheridan at investinglive.com.",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-06-02T23:29:07.227Z",
+    "event_type": "Tariff change",
+    "event_breadth": "tariff",
+    "summary": "The White House reduced tariffs on certain US imports, potentially benefiting UK exporters of agricultural and industrial equipment.",
+    "currency_pairs": [],
+    "urgency_score": 5,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Tariff reduction on US imports of agricultural and industrial equipment may benefit UK exporters",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK agricultural equipment exporters",
+      "UK industrial equipment exporters"
+    ],
+    "why_now": "UK businesses exporting affected equipment to the US may see increased demand or improved margins due to the tariff reduction",
+    "discovery_recommendation": "Limited run — two distinct export niches worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "Tariff changes are specific and quantifiable, but the impact on UK businesses may vary",
+    "what_happened": "The White House reduced tariffs on certain agricultural and industrial equipment imports",
+    "what_changed_financially": "Tariff rates on imports of agricultural equipment and mobile industrial equipment decreased from 25% to 15%",
+    "who_pays_more": "None, as tariffs are being reduced",
+    "who_receives_less": "US importers of affected equipment, potentially benefiting UK exporters",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "USD payments for equipment imports from countries with trade agreements",
+    "fx_payment_logic": "UK exporters selling equipment to US buyers may see improved demand or pricing power due to reduced tariffs, but this is a USD-denominated transaction and does not directly involve FX payment flow for the UK business",
+    "sales_angle": "If you export agricultural or industrial equipment to the US, the reduced tariffs may improve your competitiveness or margins.",
+    "business_impact_summary": "UK exporters of affected equipment may see increased demand or improved margins due to the tariff reduction, but this is an indirect benefit and the impact on individual businesses may vary",
+    "exposure_types": [
+      "USD revenue conversion",
+      "export competitiveness"
+    ],
+    "overall_sales_angle": "Tariff reductions may benefit UK exporters, but the impact on individual businesses depends on their specific export activities and markets",
+    "target_segments": [
+      {
+        "segment_name": "UK agricultural equipment exporters",
+        "category_priority_score": 72,
+        "business_model": "UK manufacturer or distributor exporting agricultural equipment to US buyers",
+        "exposure_level": "Medium",
+        "exposure_type": "Export competitiveness — tariff reduction may improve demand or pricing power",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK business receives USD from US buyer, converts to GBP — but the tariff reduction affects the US buyer's cost, not the UK business's FX exposure",
+        "margin_risk": "Low to medium — tariff reduction may improve export competitiveness, but individual business impact varies",
+        "payment_timing_risk": "Low — payment terms are typically fixed and not directly affected by tariff changes",
+        "affected_payment_flow": "USD receipts from US buyers, converting to GBP",
+        "website_validation_signals": [
+          "export",
+          "US market",
+          "agricultural equipment"
+        ],
+        "avoid_segments": [
+          "pure domestic UK sellers",
+          "businesses with no US export activities"
+        ],
+        "sales_angle": "The reduced US tariffs on agricultural equipment may improve your export competitiveness or margins.",
+        "exposure_thesis_template": "This company exports agricultural equipment to the US. Tariff reductions may improve demand or pricing power.",
+        "micro_categories": [
+          {
+            "name": "UK manufacturers of combines and harvesters",
+            "why": "Exporting to the US, potentially benefiting from reduced tariffs on agricultural equipment",
+            "search_queries": [
+              "UK manufacturer \"agricultural equipment\" export US",
+              "combine harvester exporter UK"
+            ],
+            "companies_house_terms": [
+              "agricultural equipment",
+              "combine harvester",
+              "export"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "export",
+          "US market",
+          "agricultural equipment"
+        ]
+      },
+      {
+        "segment_name": "UK industrial equipment exporters",
+        "category_priority_score": 68,
+        "business_model": "UK manufacturer or distributor exporting industrial equipment to US buyers",
+        "exposure_level": "Medium",
+        "exposure_type": "Export competitiveness — tariff reduction may improve demand or pricing power",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK business receives USD from US buyer, converts to GBP — but the tariff reduction affects the US buyer's cost, not the UK business's FX exposure",
+        "margin_risk": "Low to medium — tariff reduction may improve export competitiveness, but individual business impact varies",
+        "payment_timing_risk": "Low — payment terms are typically fixed and not directly affected by tariff changes",
+        "affected_payment_flow": "USD receipts from US buyers, converting to GBP",
+        "website_validation_signals": [
+          "export",
+          "US market",
+          "industrial equipment"
+        ],
+        "avoid_segments": [
+          "pure domestic UK sellers",
+          "businesses with no US export activities"
+        ],
+        "sales_angle": "The reduced US tariffs on industrial equipment may improve your export competitiveness or margins.",
+        "exposure_thesis_template": "This company exports industrial equipment to the US. Tariff reductions may improve demand or pricing power.",
+        "micro_categories": [
+          {
+            "name": "UK manufacturers of bulldozers and forklifts",
+            "why": "Exporting to the US, potentially benefiting from reduced tariffs on industrial equipment",
+            "search_queries": [
+              "UK manufacturer \"industrial equipment\" export US",
+              "bulldozer exporter UK"
+            ],
+            "companies_house_terms": [
+              "industrial equipment",
+              "bulldozer",
+              "export"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "export",
+          "US market",
+          "industrial equipment"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "agricultural equipment",
+      "combine harvester",
+      "export",
+      "industrial equipment",
+      "bulldozer"
+    ],
+    "all_search_queries": [
+      "UK manufacturer \"agricultural equipment\" export US",
+      "combine harvester exporter UK",
+      "UK manufacturer \"industrial equipment\" export US",
+      "bulldozer exporter UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-02T23:29:28.204Z"
+  },
+  "e8d2b3e74cb462f0": {
+    "id": "e8d2b3e74cb462f0",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-asia-pacific-fx-news-wrap-20260602/",
+    "headline": "investingLive Asia-Pacific FX news wrap: Trump indicated a deal within a week. Again.",
+    "raw_summary": "BOJ should hike in June and signal clear rate path, SMFG markets chief says Citi reiterate forecast for a 25bp RBA rate hike at the Bank's August meeting. Nvidia's Huang says supply secured for robust AI growth despite constraints Australia's net trade and flat government spending cloud GDP outlook S&amp;P 500 futures analysis today: ES JUN26 fails repair near 7632 Japan one step from historic yen collapse, SMBC Nikko warns Australia widening current account deficit, inventory draw to weigh on Q1 GDP Ethereum Analysis Today: ETH Repairs From Washout, But Bulls Need Acceptance Above 2020.5 Whit",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-06-02T23:29:22.754Z",
+    "event_type": "FX forecast",
+    "event_breadth": "broad_macro",
+    "summary": "Speculative FX news and forecasts without direct relevance to UK B2B businesses. No immediate action required.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "News is mostly speculative and lacks concrete FX hooks for UK B2B businesses",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate reason for UK B2B businesses to act based on this news",
+    "discovery_recommendation": "Context only — no clear FX payment flow hooks",
+    "confidence_level": "medium",
+    "confidence_reason": "Most news items are forecasts or speculative comments without immediate FX relevance to UK businesses",
+    "what_happened": "Various FX forecasts and comments from market figures without direct UK B2B impact",
+    "what_changed_financially": "Nothing concrete for UK B2B businesses",
+    "who_pays_more": "None directly mentioned",
+    "who_receives_less": "None directly mentioned",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "No specific FX payment logic applies due to lack of concrete information",
+    "sales_angle": "No sharp angle due to speculative nature of the news",
+    "business_impact_summary": "No direct impact on UK B2B businesses mentioned in the news",
+    "exposure_types": [],
+    "overall_sales_angle": "No immediate reason to call based on this news",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "e94401c3758f021a": {
     "id": "e94401c3758f021a",
     "headline": "Canadian Dollar gains against Euro despite softer domestic inflation data",
@@ -4105,6 +4667,28 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "e949f75bc50c4f1a": {
+    "id": "e949f75bc50c4f1a",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/australia-services-pmi-slips-to-487-as-middle-east-war-hammers-demand-20260602/",
+    "headline": "Australia services PMI slips to 48.7 as Middle East war hammers demand",
+    "raw_summary": "Australia's services PMI fell to 48.7 in May from 50.7, with new orders contracting at the fastest pace in two and a half years and employment falling for the first time since late 2024. Summary: Source: S&amp;P Global Australia Services PMI, May 2026 The services Business Activity Index fell to 48.7 in May from 50.7 in April, the second contraction in three months, with respondents citing reduced demand, market uncertainty and higher prices linked to the Middle East conflict New business declined at the sharpest pace in just under two and a half years, falling for a third consecutive month; n",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-06-02T23:28:58.737Z",
+    "status": "low_relevance",
+    "trigger_strength": "reject",
+    "trigger_score": 5,
+    "discovery_mode": "reject",
+    "recommended_query_budget": 0,
+    "urgency_score": 1,
+    "commercial_relevance": 1,
+    "commercial_relevance_reason": "The event is about Australia's services PMI and its impact on their domestic market, with no direct UK B2B FX hook",
+    "confidence_level": "high",
+    "confidence_reason": "The article discusses Australian economic data with no mention of UK businesses, foreign exchange, or international trade that would affect UK companies",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "evergreen-2026-W23-0": {
     "id": "evergreen-2026-W23-0",
     "headline": "Evergreen: UK wine, spirits & drinks importers",
@@ -4114,25 +4698,50 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK wine, spirits & drinks importers",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Wine & Spirits Importers",
+        "business_model": "",
         "exposure_level": "Very High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
-        "affected_payment_flow": "GBP revenue / EUR supplier costs",
         "why_affected": "Pay EUR invoices to European producers. GBP/EUR moves directly compress margin on every shipment.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR supplier costs",
+        "ideal_company_profile": "",
         "category_priority_score": 95,
-        "sales_angle": "EUR invoice costs. Rate review on upcoming payments.",
         "micro_categories": [
           {
             "name": "Italian wine importers UK",
@@ -4182,17 +4791,30 @@
               "wine importer"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "EUR invoice costs. Rate review on upcoming payments.",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "Specialty Beer & Craft Drinks Importers",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
-        "affected_payment_flow": "GBP revenue / EUR supplier costs",
         "why_affected": "Import craft beer and drinks from European breweries in EUR.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR supplier costs",
+        "ideal_company_profile": "",
         "category_priority_score": 78,
         "micro_categories": [
           {
@@ -4219,13 +4841,18 @@
               "beverage importer"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK wine, spirits & drinks importers",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:03:28.166Z"
   },
@@ -4238,23 +4865,49 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK food importers & continental food distributors",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Italian & Continental Food Importers",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
-        "affected_payment_flow": "GBP revenue / EUR supplier costs",
         "why_affected": "Buy produce, deli goods, and specialty foods from Italian, French, Spanish producers in EUR.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR supplier costs",
+        "ideal_company_profile": "",
         "category_priority_score": 90,
         "micro_categories": [
           {
@@ -4293,18 +4946,31 @@
               "charcuterie importer"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "Seafood & Fresh Produce Importers",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR",
           "GBP/NOK"
         ],
-        "affected_payment_flow": "GBP revenue / EUR and NOK supplier costs",
         "why_affected": "Import seafood and fresh produce from European and Norwegian sources in EUR/NOK.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR and NOK supplier costs",
+        "ideal_company_profile": "",
         "category_priority_score": 82,
         "micro_categories": [
           {
@@ -4331,13 +4997,18 @@
               "fresh food importer"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK food importers & continental food distributors",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:04:19.430Z"
   },
@@ -4350,24 +5021,50 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK freight forwarders & logistics companies with FX exposure",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Freight Forwarders & Logistics",
+        "business_model": "",
         "exposure_level": "Medium",
         "exposure_type": "multi_currency",
         "likely_currency_pairs": [
           "GBP/EUR",
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / multi-currency freight and port costs",
         "why_affected": "Pay overseas port charges, agents, and carriers in EUR and USD. Also invoice clients in GBP for overseas shipments.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / multi-currency freight and port costs",
+        "ideal_company_profile": "",
         "category_priority_score": 75,
         "micro_categories": [
           {
@@ -4394,13 +5091,20 @@
               "logistics company"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK freight forwarders & logistics companies with FX exposure",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-02T23:29:27.776Z"
   },
   "evergreen-2026-W23-2": {
     "id": "evergreen-2026-W23-2",
@@ -4411,24 +5115,50 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK machinery, components & industrial importers",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Machinery & Industrial Components Distributors",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR",
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / EUR-USD supplier costs",
         "why_affected": "Source machinery and industrial components from European manufacturers in EUR. USD for US/Asian sources.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR-USD supplier costs",
+        "ideal_company_profile": "",
         "category_priority_score": 85,
         "micro_categories": [
           {
@@ -4479,18 +5209,31 @@
               "valve importer"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "Chemicals & Raw Materials Importers",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR",
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / EUR-USD raw material costs",
         "why_affected": "Buy chemicals and raw materials priced in EUR or USD from European and US producers.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR-USD raw material costs",
+        "ideal_company_profile": "",
         "category_priority_score": 80,
         "micro_categories": [
           {
@@ -4529,17 +5272,30 @@
               "polymer distributor"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "Packaging & Materials Importers",
+        "business_model": "",
         "exposure_level": "Medium",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
-        "affected_payment_flow": "GBP revenue / EUR packaging costs",
         "why_affected": "Source packaging materials from European suppliers in EUR.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR packaging costs",
+        "ideal_company_profile": "",
         "category_priority_score": 75,
         "micro_categories": [
           {
@@ -4566,13 +5322,18 @@
               "glass importer"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK machinery, components & industrial importers",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:05:47.046Z"
   },
@@ -4585,24 +5346,50 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK furniture, textiles & consumer goods importers",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Furniture & Interiors Importers",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR",
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / EUR-USD sourcing costs",
         "why_affected": "Source furniture and interiors from European or Asian manufacturers. Prices in EUR or USD.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR-USD sourcing costs",
+        "ideal_company_profile": "",
         "category_priority_score": 80,
         "micro_categories": [
           {
@@ -4629,18 +5416,31 @@
               "interiors importer"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "Textile & Clothing Importers",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR",
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / EUR-USD sourcing costs",
         "why_affected": "Source garments and fabrics from European or Asian manufacturers. EUR for EU mills, USD for Asia.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR-USD sourcing costs",
+        "ideal_company_profile": "",
         "category_priority_score": 76,
         "micro_categories": [
           {
@@ -4679,13 +5479,18 @@
               "apparel importer"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK furniture, textiles & consumer goods importers",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:06:24.694Z"
   },
@@ -4698,23 +5503,49 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK automotive parts & electronics distributors",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Automotive Parts Distributors",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
-        "affected_payment_flow": "GBP revenue / EUR parts costs",
         "why_affected": "Source automotive parts from European manufacturers in EUR.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / EUR parts costs",
+        "ideal_company_profile": "",
         "category_priority_score": 78,
         "micro_categories": [
           {
@@ -4741,17 +5572,30 @@
               "parts distributor"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "Electronics & Technology Distributors",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / USD component costs",
         "why_affected": "Source electronics and components priced in USD from US or Asian suppliers.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / USD component costs",
+        "ideal_company_profile": "",
         "category_priority_score": 76,
         "micro_categories": [
           {
@@ -4778,13 +5622,18 @@
               "AV distributor"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK automotive parts & electronics distributors",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:07:06.208Z"
   },
@@ -4797,26 +5646,51 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK Microsoft & cloud partners paying USD/EUR licensing costs",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Microsoft & Cloud Partners",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD",
           "GBP/EUR"
         ],
-        "affected_payment_flow": "GBP revenue / USD-EUR software licensing costs",
         "why_affected": "Pay Microsoft, AWS, Google Cloud, and Cisco licensing fees in USD or EUR. Every GBP/USD move hits margin on renewals and resale.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / USD-EUR software licensing costs",
+        "ideal_company_profile": "",
         "category_priority_score": 88,
-        "sales_angle": "USD licensing cost review. Rate lock on upcoming Microsoft/AWS renewals.",
         "micro_categories": [
           {
             "name": "Microsoft Gold & Silver Partners UK",
@@ -4854,20 +5728,32 @@
               "network solutions"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "USD licensing cost review. Rate lock on upcoming Microsoft/AWS renewals.",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "IT Managed Service Providers",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD",
           "GBP/EUR"
         ],
-        "affected_payment_flow": "GBP monthly recurring revenue / USD-EUR vendor costs",
         "why_affected": "MSPs pay monthly stack costs (RMM tools, security vendors, cloud) in USD. Margins squeezed when GBP/USD falls.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP monthly recurring revenue / USD-EUR vendor costs",
+        "ideal_company_profile": "",
         "category_priority_score": 85,
-        "sales_angle": "Stack cost FX exposure — USD tool spend vs GBP contract revenue.",
         "micro_categories": [
           {
             "name": "IT managed service providers UK SME",
@@ -4905,13 +5791,18 @@
               "managed IT"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "Stack cost FX exposure — USD tool spend vs GBP contract revenue.",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK Microsoft & cloud partners paying USD/EUR licensing costs",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:15:13.274Z"
   },
@@ -4924,25 +5815,50 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK software resellers & value-added resellers paying USD costs",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Software Resellers & VARs",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / USD software vendor costs",
         "why_affected": "Buy software licences from US vendors in USD and resell in GBP to UK businesses. Every GBP/USD move changes margin on every deal.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / USD software vendor costs",
+        "ideal_company_profile": "",
         "category_priority_score": 86,
-        "sales_angle": "USD software cost hedging — rate review before renewal season.",
         "micro_categories": [
           {
             "name": "Value-added resellers UK IT",
@@ -4980,20 +5896,32 @@
               "IT distributor"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "USD software cost hedging — rate review before renewal season.",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "IT Hardware Distributors",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD",
           "GBP/EUR"
         ],
-        "affected_payment_flow": "GBP revenue / USD-EUR hardware procurement costs",
         "why_affected": "Source servers, networking, and end-user devices from US and European manufacturers. Hardware priced in USD.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / USD-EUR hardware procurement costs",
+        "ideal_company_profile": "",
         "category_priority_score": 80,
-        "sales_angle": "Hardware procurement FX review — USD buying costs vs GBP contract bids.",
         "micro_categories": [
           {
             "name": "Server & storage distributors UK",
@@ -5031,13 +5959,18 @@
               "IT equipment"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "Hardware procurement FX review — USD buying costs vs GBP contract bids.",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK software resellers & value-added resellers paying USD costs",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:16:03.647Z"
   },
@@ -5050,25 +5983,50 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK cloud migration & digital transformation firms with USD exposure",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Cloud Migration & Digital Transformation",
+        "business_model": "",
         "exposure_level": "Medium",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP project revenue / USD cloud platform costs",
         "why_affected": "Run client workloads on AWS/Azure during migration projects; cloud costs billed in USD against GBP fixed-price contracts.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP project revenue / USD cloud platform costs",
+        "ideal_company_profile": "",
         "category_priority_score": 78,
-        "sales_angle": "Cloud cost FX risk on fixed-price projects — USD overage vs GBP contract.",
         "micro_categories": [
           {
             "name": "Cloud migration consultancies UK",
@@ -5106,19 +6064,31 @@
               "platform engineering"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "Cloud cost FX risk on fixed-price projects — USD overage vs GBP contract.",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "Cybersecurity Companies",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / USD security vendor costs",
         "why_affected": "Buy US-priced security platforms (Palo Alto, CrowdStrike, SentinelOne, Fortinet) in USD; bill UK clients in GBP.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / USD security vendor costs",
+        "ideal_company_profile": "",
         "category_priority_score": 82,
-        "sales_angle": "USD security vendor cost review — rate lock before licence renewal.",
         "micro_categories": [
           {
             "name": "Cybersecurity resellers & MSSPs UK",
@@ -5144,13 +6114,18 @@
               "security consultancy"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "USD security vendor cost review — rate lock before licence renewal.",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK cloud migration & digital transformation firms with USD exposure",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:16:17.958Z"
   },
@@ -5163,24 +6138,50 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK freight forwarders & logistics companies with FX exposure",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Freight Forwarders & Logistics",
+        "business_model": "",
         "exposure_level": "Medium",
         "exposure_type": "multi_currency",
         "likely_currency_pairs": [
           "GBP/EUR",
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / multi-currency freight and port costs",
         "why_affected": "Pay overseas port charges, agents, and carriers in EUR and USD. Also invoice clients in GBP for overseas shipments.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / multi-currency freight and port costs",
+        "ideal_company_profile": "",
         "category_priority_score": 75,
         "micro_categories": [
           {
@@ -5207,13 +6208,18 @@
               "logistics company"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK freight forwarders & logistics companies with FX exposure",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:16:28.712Z"
   },
@@ -5226,25 +6232,50 @@
     "status": "ready",
     "event_type": "evergreen",
     "event_breadth": "broad_macro",
-    "trigger_strength": "strong",
-    "discovery_mode": "full",
-    "trigger_score": 80,
-    "recommended_query_budget": 20,
+    "currency_pairs": [],
     "urgency_score": 5,
     "commercial_relevance": 8,
     "commercial_relevance_reason": "evergreen_playbook",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 20,
+    "likely_affected_businesses": [],
+    "why_now": "",
+    "confidence_level": "low",
+    "confidence_reason": "",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "overall_sales_angle": "",
+    "summary": "Evergreen: UK cloud migration & digital transformation firms with USD exposure",
+    "ai_provider": "",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "Cloud Migration & Digital Transformation",
+        "business_model": "",
         "exposure_level": "Medium",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP project revenue / USD cloud platform costs",
         "why_affected": "Run client workloads on AWS/Azure during migration projects; cloud costs billed in USD against GBP fixed-price contracts.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP project revenue / USD cloud platform costs",
+        "ideal_company_profile": "",
         "category_priority_score": 78,
-        "sales_angle": "Cloud cost FX risk on fixed-price projects — USD overage vs GBP contract.",
         "micro_categories": [
           {
             "name": "Cloud migration consultancies UK",
@@ -5282,19 +6313,31 @@
               "platform engineering"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "Cloud cost FX risk on fixed-price projects — USD overage vs GBP contract.",
+        "exposure_thesis_template": ""
       },
       {
         "segment_name": "Cybersecurity Companies",
+        "business_model": "",
         "exposure_level": "High",
         "exposure_type": "import_costs",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
-        "affected_payment_flow": "GBP revenue / USD security vendor costs",
         "why_affected": "Buy US-priced security platforms (Palo Alto, CrowdStrike, SentinelOne, Fortinet) in USD; bill UK clients in GBP.",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "",
+        "margin_risk": "",
+        "payment_timing_risk": "",
+        "affected_payment_flow": "GBP revenue / USD security vendor costs",
+        "ideal_company_profile": "",
         "category_priority_score": 82,
-        "sales_angle": "USD security vendor cost review — rate lock before licence renewal.",
         "micro_categories": [
           {
             "name": "Cybersecurity resellers & MSSPs UK",
@@ -5320,13 +6363,18 @@
               "security consultancy"
             ]
           }
-        ]
+        ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [],
+        "segment_signals": [],
+        "avoid_segments": [],
+        "sales_angle": "USD security vendor cost review — rate lock before licence renewal.",
+        "exposure_thesis_template": ""
       }
     ],
-    "summary": "Evergreen: UK cloud migration & digital transformation firms with USD exposure",
-    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
-    "sales_angle": "Rate review on recurring foreign currency payments.",
-    "fallback_mode": false,
+    "companies_house_terms": [],
+    "all_search_queries": [],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T21:16:34.702Z"
   },
