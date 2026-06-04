@@ -2907,6 +2907,1575 @@
       "route grade D \u2014 need A or B (named FD/MD + contact)"
     ]
   },
+  "03fcb55658a51057": {
+    "id": "03fcb55658a51057",
+    "event_id": "96740ed36b5aee94",
+    "linked_event_ids": [
+      "96740ed36b5aee94"
+    ],
+    "created_at": "2026-06-04T08:47:20.632Z",
+    "rescored_at": "2026-06-04T09:10:02.454Z",
+    "company_name": "A&M STEEL LIMITED",
+    "company_number": "11963906",
+    "company_status": "active",
+    "company_type": null,
+    "address": "Second Floor, Kirkland House, Harrow, HA1 2AX",
+    "incorporated": "2019-04-25",
+    "sic_codes": [
+      "25110"
+    ],
+    "director_name": "Anthony Edward HARRIS",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": null,
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "collision_stripped",
+    "discovery_path": "ch_fallback",
+    "source_query": "high-value steel exporter UK",
+    "source_segment": "UK Steel Exporters to the EU",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [
+      "export",
+      "exports",
+      "global trade",
+      "international supplier"
+    ],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [
+      "asia",
+      "euro",
+      "europe",
+      "european",
+      "export",
+      "global",
+      "international",
+      "north america",
+      "procurement",
+      "shipping",
+      "south america",
+      "supplier",
+      "supply chain",
+      "trading"
+    ],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 18,
+    "company_source": "companies_house",
+    "segment_name": "UK Steel Exporters to the EU",
+    "segment_business_model": "UK-based steel manufacturers exporting to EU countries, potentially facing higher tariffs and reduced competitiveness",
+    "exposure_level": "Very High",
+    "exposure_type": "Tariff exposure on steel exports to the EU",
+    "why_affected": "A&M STEEL LIMITED exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 tariff increases directly affect profitability",
+    "payment_timing_risk": "Medium to High, depending on payment terms and contract renegotiations",
+    "affected_payment_flow": "Steel exports from the UK to the EU, with potential impacts on cash flow and revenue",
+    "trigger_headline": "UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas",
+    "event_type": "",
+    "business_impact_summary": "UK steel exporters face higher tariffs on their exports to the EU, potentially reducing their competitiveness and revenue. This change may also affect the pricing strategies of UK steel importers and the broader manufacturing sector.",
+    "fx_exposure": "GBP/BRL",
+    "fx_payment_logic": "Direct impact from tariff changes on export revenue and competitiveness, with potential secondary effects on FX exposure through changes in import costs or export pricing strategies",
+    "fx_reason": "",
+    "exposure_thesis": "A&M STEEL LIMITED exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "exposure_confidence": "medium",
+    "score": 49,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "Direct FX payment signals: export, exports, global trade",
+      "International activity signals (14)",
+      "SIC tier 2 (manufacturing): 25110",
+      "Segment exposure: Very High \u2014 Tariff exposure on steel exports to the ",
+      "High urgency event (score 9/10)",
+      "Established company (+2) \u2014 incorporated 2019",
+      "Director found: Anthony Edward HARRIS",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 Website collision (steel.com) \u2014 stripped, QUEUE cap"
+    ],
+    "ready_score": 71,
+    "lead_type": "evergreen_saving",
+    "awareness_level": "high",
+    "saving_opportunity": "high",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "The EU's planned tariff changes on steel imports could significantly impact your export business. Reviewing your strategy and exploring mitigation options is crucial.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mr please? I'm calling from a currency brokerage \u2014 it looks like A&M Steel has export operations, and given UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, it might be worth a quick conversation about the rate you're getting on those EUR payments.",
+    "email_draft": "Subject: A&M Steel \u2014 EUR exposure\n\nHi Mr,\n\nI came across A&M Steel \u2014 it looks like you Steel has export operations.\n\nGiven UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, that may create margin pressure around upcoming EUR payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mr \u2014 I came across A&M Steel and thought the UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas might be relevant if you have EUR payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 64,
+    "industry_label": "FX Discovery",
+    "contact_phone": null,
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Anthony Edward HARRIS (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mr Harris",
+        "first_name": "Mr",
+        "last_name": "Harris",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2019-04-25",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mr.harris@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrharris@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mharris@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.harris@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr_harris@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr-harris@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrh@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr.h@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "harris@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "harris.mr@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hmr@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mr.harris@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Harris%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Harris",
+        "google_email_search": "https://www.google.com/search?q=\"Mr%20Harris\"+\"%40steel.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Advanced Search",
+        "first_name": "Advanced",
+        "last_name": "Search",
+        "role": "md",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "advanced.search@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanced@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advancedsearch@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "asearch@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.search@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanced_search@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanced-search@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanceds@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanced.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "search@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "search.advanced@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sadvanced@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "advanced.search@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Advanced%20Search%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Advanced%20Search",
+        "google_email_search": "https://www.google.com/search?q=\"Advanced%20Search\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Edit Balfour",
+        "first_name": "Edit",
+        "last_name": "Balfour",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "edit.balfour@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editbalfour@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ebalfour@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "e.balfour@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit_balfour@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit-balfour@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editb@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit.b@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour.edit@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "bedit@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "edit.balfour@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Edit%20Balfour%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Edit%20Balfour",
+        "google_email_search": "https://www.google.com/search?q=\"Edit%20Balfour\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Philip Hoare",
+        "first_name": "Philip",
+        "last_name": "Hoare",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "philip.hoare@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philiphoare@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "phoare@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "p.hoare@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip_hoare@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip-hoare@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philiph@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip.h@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hoare@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hoare.philip@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hphilip@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "philip.hoare@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Philip%20Hoare%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Philip%20Hoare",
+        "google_email_search": "https://www.google.com/search?q=\"Philip%20Hoare\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Balfour Beatty",
+        "first_name": "Balfour",
+        "last_name": "Beatty",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "balfour.beatty@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfourbeatty@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "bbeatty@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "b.beatty@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour_beatty@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour-beatty@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfourb@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour.b@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "beatty@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "beatty.balfour@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "bbalfour@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "balfour.beatty@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Balfour%20Beatty%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Balfour%20Beatty",
+        "google_email_search": "https://www.google.com/search?q=\"Balfour%20Beatty\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Nick Crossfield",
+        "first_name": "Nick",
+        "last_name": "Crossfield",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "nick.crossfield@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nick@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nickcrossfield@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ncrossfield@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "n.crossfield@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nick_crossfield@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nick-crossfield@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nickc@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nick.c@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "crossfield@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "crossfield.nick@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "cnick@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "nick.crossfield@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Nick%20Crossfield%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Nick%20Crossfield",
+        "google_email_search": "https://www.google.com/search?q=\"Nick%20Crossfield\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Edit As",
+        "first_name": "Edit",
+        "last_name": "As",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "edit.as@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editas@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "eas@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "e.as@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit_as@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit-as@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edita@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit.a@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "as@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "as.edit@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "aedit@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "edit.as@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Edit%20As%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Edit%20As",
+        "google_email_search": "https://www.google.com/search?q=\"Edit%20As\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Julie Sweet",
+        "first_name": "Julie",
+        "last_name": "Sweet",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "julie.sweet@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julie@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "juliesweet@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jsweet@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "j.sweet@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julie_sweet@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julie-sweet@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julies@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julie.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sweet@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sweet.julie@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sjulie@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "julie.sweet@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Julie%20Sweet%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Julie%20Sweet",
+        "google_email_search": "https://www.google.com/search?q=\"Julie%20Sweet\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Edit National",
+        "first_name": "Edit",
+        "last_name": "National",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "Secondary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "edit.national@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editnational@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "enational@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "e.national@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit_national@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit-national@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editn@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit.n@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national.edit@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nedit@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "edit.national@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Edit%20National%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Edit%20National",
+        "google_email_search": "https://www.google.com/search?q=\"Edit%20National\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Celebrates Growth",
+        "first_name": "Celebrates",
+        "last_name": "Growth",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "Secondary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "celebrates.growth@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebrates@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebratesgrowth@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "cgrowth@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "c.growth@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebrates_growth@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebrates-growth@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebratesg@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebrates.g@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "growth@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "growth.celebrates@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "gcelebrates@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "celebrates.growth@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Celebrates%20Growth%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Celebrates%20Growth",
+        "google_email_search": "https://www.google.com/search?q=\"Celebrates%20Growth\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Area Doctor",
+        "first_name": "Area",
+        "last_name": "Doctor",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "Secondary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "area.doctor@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "area@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "areadoctor@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "adoctor@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.doctor@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "area_doctor@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "area-doctor@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "aread@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "area.d@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "doctor@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "doctor.area@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "darea@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "area.doctor@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Area%20Doctor%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Area%20Doctor",
+        "google_email_search": "https://www.google.com/search?q=\"Area%20Doctor\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "National Vision",
+        "first_name": "National",
+        "last_name": "Vision",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "Secondary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "national.vision@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nationalvision@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nvision@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "n.vision@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national_vision@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national-vision@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nationalv@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national.v@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "vision@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "vision.national@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "vnational@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "national.vision@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=National%20Vision%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=National%20Vision",
+        "google_email_search": "https://www.google.com/search?q=\"National%20Vision\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Anthony Harris",
+        "first_name": "Anthony",
+        "last_name": "Harris",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2019-04-25",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "anthony.harris@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "anthony@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "anthonyharris@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "aharris@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.harris@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "anthony_harris@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "anthony-harris@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "anthonyh@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "anthony.h@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "harris@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "harris.anthony@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hanthony@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "anthony.harris@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Anthony%20Harris%20A%26M%20Steel",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Anthony%20Harris",
+        "google_email_search": "https://www.google.com/search?q=\"Anthony%20Harris\"+\"%40steel.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=A%26M%20Steel",
+    "company_name_clean": "A&M Steel",
+    "fx_evidence_snippets": [
+      "Edit The subsidiary entered into an agreement with an international supplier for the purchase of photovoltaic panels for the LAVENDER project for $73\u201377 million. (OY Nofar Energy Ltd) Public Technologies 04 Jun 2026 )."
+    ],
+    "country_evidence": [
+      "Ireland",
+      "USA",
+      "China",
+      "Hong Kong",
+      "India",
+      "Canada",
+      "Australia",
+      "Brazil",
+      "Asia",
+      "Global"
+    ],
+    "supplier_evidence": [
+      "fruit, vegetable and mushroom suppliers across Australia , helping them understand and enforce their rights under the\u2026"
+    ],
+    "import_export_evidence": [
+      "suppliers across Australia"
+    ],
+    "inferred_currency_pairs": [
+      "GBP/EUR",
+      "GBP/USD",
+      "GBP/INR",
+      "GBP/CAD",
+      "GBP/AUD",
+      "GBP/BRL"
+    ],
+    "currency_reason": "Website mentions Ireland, USA, China in a sourcing/trade context \u2192 likely GBP/EUR exposure",
+    "size_signals": [
+      "nationwide"
+    ],
+    "tech_signals": [],
+    "fx_likelihood_score": 54,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22A%26M%20Steel%22",
+    "press_search_url": "https://www.google.com/search?q=%22A%26M%20Steel%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK Manufacturers of Specialty Steels",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-04T08:48:20.329Z",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "accounts_type": "micro-entity",
+    "last_accounts_date": "2025-04-30",
+    "accounts_source": "ch_ixbrl",
+    "company_size_band": "<\u00a31m",
+    "total_assets": 7167.0,
+    "employee_count": 1,
+    "employee_band": "1\u20134",
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (49)",
+      "website confidence unknown \u2014 need high/medium",
+      "no website"
+    ]
+  },
   "041e152f1b711284d633ba1f": {
     "id": "041e152f1b711284d633ba1f",
     "event_id": "sic-discovery-46520",
@@ -36882,9 +38451,7 @@
     "inferred_currency_pairs": [],
     "currency_reason": "",
     "size_signals": [],
-    "tech_signals": [
-      "google-tag-manager"
-    ],
+    "tech_signals": [],
     "fx_likelihood_score": 0,
     "website_confidence_reason": "High confidence: discovered via domain guess; domain name matches company name",
     "trustpilot_reviews": null,
@@ -79800,6 +81367,2019 @@
     "ready_reason": "No FX confidence signals found",
     "accounts_type": "dormant"
   },
+  "43745540b4b82367": {
+    "id": "43745540b4b82367",
+    "event_id": "96740ed36b5aee94",
+    "linked_event_ids": [
+      "96740ed36b5aee94"
+    ],
+    "created_at": "2026-06-04T08:47:20.963Z",
+    "rescored_at": "2026-06-04T09:10:02.458Z",
+    "company_name": "A & W STEEL LIMITED",
+    "company_number": "SC355100",
+    "company_status": "active",
+    "company_type": null,
+    "address": "37 Portland Road, Kilmarnock, KA1 2DJ",
+    "incorporated": "2009-02-16",
+    "sic_codes": [
+      "01410"
+    ],
+    "director_name": "Ann Agnes STEEL",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://steel.com",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "high-value steel exporter UK",
+    "source_segment": "UK Steel Exporters to the EU",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [
+      "export",
+      "exports",
+      "global trade",
+      "international supplier"
+    ],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [
+      "asia",
+      "euro",
+      "europe",
+      "european",
+      "export",
+      "global",
+      "international",
+      "north america",
+      "procurement",
+      "shipping",
+      "south america",
+      "supplier",
+      "supply chain",
+      "trading"
+    ],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 18,
+    "company_source": "companies_house",
+    "segment_name": "UK Steel Exporters to the EU",
+    "segment_business_model": "UK-based steel manufacturers exporting to EU countries, potentially facing higher tariffs and reduced competitiveness",
+    "exposure_level": "Very High",
+    "exposure_type": "Tariff exposure on steel exports to the EU",
+    "why_affected": "A & W STEEL LIMITED exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 tariff increases directly affect profitability",
+    "payment_timing_risk": "Medium to High, depending on payment terms and contract renegotiations",
+    "affected_payment_flow": "Steel exports from the UK to the EU, with potential impacts on cash flow and revenue",
+    "trigger_headline": "UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas",
+    "event_type": "",
+    "business_impact_summary": "UK steel exporters face higher tariffs on their exports to the EU, potentially reducing their competitiveness and revenue. This change may also affect the pricing strategies of UK steel importers and the broader manufacturing sector.",
+    "fx_exposure": "GBP/BRL",
+    "fx_payment_logic": "Direct impact from tariff changes on export revenue and competitiveness, with potential secondary effects on FX exposure through changes in import costs or export pricing strategies",
+    "fx_reason": "",
+    "exposure_thesis": "A & W STEEL LIMITED exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "exposure_confidence": "medium",
+    "score": 94,
+    "priority": "HOT",
+    "scoring_reasons": [
+      "Direct FX payment signals: export, exports, global trade",
+      "International activity signals (14)",
+      "Segment exposure: Very High \u2014 Tariff exposure on steel exports to the ",
+      "High urgency event (score 9/10)",
+      "Established company (+5) \u2014 incorporated 2009",
+      "Director found: Ann Agnes STEEL",
+      "Website confirmed",
+      "Active on Companies House"
+    ],
+    "ready_score": 73,
+    "lead_type": "evergreen_saving",
+    "awareness_level": "high",
+    "saving_opportunity": "high",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "The EU's planned tariff changes on steel imports could significantly impact your export business. Reviewing your strategy and exploring mitigation options is crucial.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mrs please? I'm calling from a currency brokerage \u2014 it looks like A & W Steel has export operations, and given UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, it might be worth a quick conversation about the rate you're getting on those EUR payments.",
+    "email_draft": "Subject: A & W Steel \u2014 EUR exposure\n\nHi Mrs,\n\nI came across A & W Steel \u2014 it looks like you & W Steel has export operations.\n\nGiven UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, that may create margin pressure around upcoming EUR payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mrs \u2014 I came across A & W Steel and thought the UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas might be relevant if you have EUR payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 37,
+    "industry_label": "FX Discovery",
+    "contact_phone": "01563 540621",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Ann Agnes STEEL (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mrs Steel",
+        "first_name": "Mrs",
+        "last_name": "Steel",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2016-04-06",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mrs.steel@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrssteel@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "msteel@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.steel@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs_steel@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs-steel@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrss@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel.mrs@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "smrs@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mrs.steel@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mrs%20Steel%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mrs%20Steel",
+        "google_email_search": "https://www.google.com/search?q=\"Mrs%20Steel\"+\"%40steel.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Mr Steel",
+        "first_name": "Mr",
+        "last_name": "Steel",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2016-04-06",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mr.steel@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrsteel@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "msteel@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.steel@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr_steel@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr-steel@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel.mr@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "smr@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mr.steel@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Steel%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Steel",
+        "google_email_search": "https://www.google.com/search?q=\"Mr%20Steel\"+\"%40steel.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Advanced Search",
+        "first_name": "Advanced",
+        "last_name": "Search",
+        "role": "md",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "advanced.search@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanced@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advancedsearch@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "asearch@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.search@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanced_search@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanced-search@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanceds@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "advanced.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "search@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "search.advanced@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sadvanced@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "advanced.search@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Advanced%20Search%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Advanced%20Search",
+        "google_email_search": "https://www.google.com/search?q=\"Advanced%20Search\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Edit Balfour",
+        "first_name": "Edit",
+        "last_name": "Balfour",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "edit.balfour@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editbalfour@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ebalfour@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "e.balfour@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit_balfour@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit-balfour@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editb@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit.b@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour.edit@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "bedit@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "edit.balfour@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Edit%20Balfour%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Edit%20Balfour",
+        "google_email_search": "https://www.google.com/search?q=\"Edit%20Balfour\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Philip Hoare",
+        "first_name": "Philip",
+        "last_name": "Hoare",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "philip.hoare@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philiphoare@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "phoare@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "p.hoare@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip_hoare@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip-hoare@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philiph@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip.h@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hoare@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hoare.philip@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hphilip@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "philip.hoare@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Philip%20Hoare%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Philip%20Hoare",
+        "google_email_search": "https://www.google.com/search?q=\"Philip%20Hoare\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Balfour Beatty",
+        "first_name": "Balfour",
+        "last_name": "Beatty",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "balfour.beatty@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfourbeatty@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "bbeatty@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "b.beatty@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour_beatty@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour-beatty@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfourb@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "balfour.b@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "beatty@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "beatty.balfour@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "bbalfour@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "balfour.beatty@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Balfour%20Beatty%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Balfour%20Beatty",
+        "google_email_search": "https://www.google.com/search?q=\"Balfour%20Beatty\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Nick Crossfield",
+        "first_name": "Nick",
+        "last_name": "Crossfield",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "nick.crossfield@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nick@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nickcrossfield@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ncrossfield@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "n.crossfield@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nick_crossfield@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nick-crossfield@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nickc@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nick.c@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "crossfield@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "crossfield.nick@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "cnick@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "nick.crossfield@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Nick%20Crossfield%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Nick%20Crossfield",
+        "google_email_search": "https://www.google.com/search?q=\"Nick%20Crossfield\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Edit As",
+        "first_name": "Edit",
+        "last_name": "As",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "edit.as@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editas@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "eas@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "e.as@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit_as@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit-as@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edita@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit.a@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "as@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "as.edit@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "aedit@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "edit.as@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Edit%20As%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Edit%20As",
+        "google_email_search": "https://www.google.com/search?q=\"Edit%20As\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Julie Sweet",
+        "first_name": "Julie",
+        "last_name": "Sweet",
+        "role": "CEO",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "julie.sweet@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julie@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "juliesweet@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jsweet@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "j.sweet@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julie_sweet@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julie-sweet@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julies@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "julie.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sweet@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sweet.julie@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sjulie@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "julie.sweet@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Julie%20Sweet%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Julie%20Sweet",
+        "google_email_search": "https://www.google.com/search?q=\"Julie%20Sweet\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Edit National",
+        "first_name": "Edit",
+        "last_name": "National",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "Secondary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "edit.national@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editnational@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "enational@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "e.national@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit_national@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit-national@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "editn@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "edit.n@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national.edit@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nedit@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "edit.national@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Edit%20National%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Edit%20National",
+        "google_email_search": "https://www.google.com/search?q=\"Edit%20National\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Celebrates Growth",
+        "first_name": "Celebrates",
+        "last_name": "Growth",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "Secondary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "celebrates.growth@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebrates@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebratesgrowth@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "cgrowth@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "c.growth@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebrates_growth@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebrates-growth@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebratesg@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "celebrates.g@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "growth@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "growth.celebrates@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "gcelebrates@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "celebrates.growth@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Celebrates%20Growth%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Celebrates%20Growth",
+        "google_email_search": "https://www.google.com/search?q=\"Celebrates%20Growth\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Area Doctor",
+        "first_name": "Area",
+        "last_name": "Doctor",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "Secondary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "area.doctor@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "area@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "areadoctor@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "adoctor@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.doctor@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "area_doctor@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "area-doctor@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "aread@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "area.d@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "doctor@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "doctor.area@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "darea@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "area.doctor@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Area%20Doctor%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Area%20Doctor",
+        "google_email_search": "https://www.google.com/search?q=\"Area%20Doctor\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "National Vision",
+        "first_name": "National",
+        "last_name": "Vision",
+        "role": "General Manager",
+        "tier": 2,
+        "tier_label": "Secondary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "national.vision@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nationalvision@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nvision@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "n.vision@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national_vision@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national-vision@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nationalv@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "national.v@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "vision@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "vision.national@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "vnational@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "national.vision@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=National%20Vision%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=National%20Vision",
+        "google_email_search": "https://www.google.com/search?q=\"National%20Vision\"+\"%40steel.com\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Thomas Steel",
+        "first_name": "Thomas",
+        "last_name": "Steel",
+        "role": "secretary",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2009-02-16",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "thomas.steel@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomas@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomassteel@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tsteel@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "t.steel@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomas_steel@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomas-steel@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomass@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomas.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel.thomas@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sthomas@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "thomas.steel@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Thomas%20Steel%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Thomas%20Steel",
+        "google_email_search": "https://www.google.com/search?q=\"Thomas%20Steel\"+\"%40steel.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Ann Steel",
+        "first_name": "Ann",
+        "last_name": "Steel",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2009-02-16",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "ann.steel@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ann@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "annsteel@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "asteel@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.steel@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ann_steel@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ann-steel@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "anns@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ann.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel.ann@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sann@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "ann.steel@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Ann%20Steel%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Ann%20Steel",
+        "google_email_search": "https://www.google.com/search?q=\"Ann%20Steel\"+\"%40steel.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Callum Steel",
+        "first_name": "Callum",
+        "last_name": "Steel",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2021-06-18",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "callum.steel@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "callum@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "callumsteel@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "csteel@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "c.steel@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "callum_steel@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "callum-steel@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "callums@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "callum.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel.callum@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scallum@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "callum.steel@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Callum%20Steel%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Callum%20Steel",
+        "google_email_search": "https://www.google.com/search?q=\"Callum%20Steel\"+\"%40steel.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Thomas Steel",
+        "first_name": "Thomas",
+        "last_name": "Steel",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2009-02-16",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "thomas.steel@steel.com",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomas@steel.com",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomassteel@steel.com",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tsteel@steel.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "t.steel@steel.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomas_steel@steel.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomas-steel@steel.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomass@steel.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "thomas.s@steel.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel@steel.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steel.thomas@steel.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sthomas@steel.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "thomas.steel@steel.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Thomas%20Steel%20A%20%26%20W",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Thomas%20Steel",
+        "google_email_search": "https://www.google.com/search?q=\"Thomas%20Steel\"+\"%40steel.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=A%20%26%20W%20Steel",
+    "company_name_clean": "A & W Steel",
+    "fx_evidence_snippets": [
+      "Edit The subsidiary entered into an agreement with an international supplier for the purchase of photovoltaic panels for the LAVENDER project for $73\u201377 million. (OY Nofar Energy Ltd) Public Technologies 04 Jun 2026 )."
+    ],
+    "country_evidence": [
+      "Ireland",
+      "USA",
+      "China",
+      "Hong Kong",
+      "India",
+      "Canada",
+      "Australia",
+      "Brazil",
+      "Asia",
+      "Global"
+    ],
+    "supplier_evidence": [
+      "fruit, vegetable and mushroom suppliers across Australia , helping them understand and enforce their rights under the\u2026"
+    ],
+    "import_export_evidence": [
+      "suppliers across Australia"
+    ],
+    "inferred_currency_pairs": [
+      "GBP/EUR",
+      "GBP/USD",
+      "GBP/INR",
+      "GBP/CAD",
+      "GBP/AUD",
+      "GBP/BRL"
+    ],
+    "currency_reason": "Website mentions Ireland, USA, China in a sourcing/trade context \u2192 likely GBP/EUR exposure",
+    "size_signals": [
+      "nationwide"
+    ],
+    "tech_signals": [],
+    "fx_likelihood_score": 54,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22A%20%26%20W%20Steel%22",
+    "press_search_url": "https://www.google.com/search?q=%22A%20%26%20W%20Steel%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK Manufacturers of Specialty Steels",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-04T08:48:23.076Z",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "accounts_type": "abridged",
+    "last_accounts_date": "2025-03-31",
+    "accounts_source": "ch_ixbrl",
+    "company_size_band": "\u00a31m\u2013\u00a35m",
+    "net_assets": 1718483.0,
+    "total_assets": 1951270.0,
+    "employee_count": 2,
+    "employee_band": "1\u20134",
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "01563 540621",
+      "01563 539010",
+      "01563 340065",
+      "01563 481865",
+      "01563 340316",
+      "01284 811363",
+      "020 7960 3300",
+      "01625 573366",
+      "020 7486 6338",
+      "01778 501826",
+      "07894 237556",
+      "07572 467686"
+    ],
+    "call_readiness": "REVIEW",
+    "call_readiness_reasons": [
+      "website confidence unknown \u2014 need high/medium"
+    ]
+  },
   "447900c3d6ba0966": {
     "id": "447900c3d6ba0966",
     "event_id": "evt_tariff_whisky_005",
@@ -82320,6 +85900,476 @@
     "foreign_psc": true,
     "ready": "yes",
     "ready_reason": "FX confidence: high | Contact: phone: 01394 763239"
+  },
+  "488ef1f8aadfe03a": {
+    "id": "488ef1f8aadfe03a",
+    "event_id": "96740ed36b5aee94",
+    "linked_event_ids": [
+      "96740ed36b5aee94"
+    ],
+    "created_at": "2026-06-04T08:47:20.955Z",
+    "rescored_at": "2026-06-04T09:10:02.456Z",
+    "company_name": "A. & P.J. STEELS LIMITED",
+    "company_number": "01315902",
+    "company_status": "active",
+    "company_type": null,
+    "address": "Bromley Street, Stourbridge, DY9 8HU",
+    "incorporated": "1977-06-02",
+    "sic_codes": [
+      "24100"
+    ],
+    "director_name": "Philip George JONES",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://steels.com",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "high-value steel exporter UK",
+    "source_segment": "UK Steel Exporters to the EU",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 0,
+    "company_source": "companies_house",
+    "segment_name": "UK Steel Exporters to the EU",
+    "segment_business_model": "UK-based steel manufacturers exporting to EU countries, potentially facing higher tariffs and reduced competitiveness",
+    "exposure_level": "Very High",
+    "exposure_type": "Tariff exposure on steel exports to the EU",
+    "why_affected": "A. & P.J. STEELS LIMITED exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 tariff increases directly affect profitability",
+    "payment_timing_risk": "Medium to High, depending on payment terms and contract renegotiations",
+    "affected_payment_flow": "Steel exports from the UK to the EU, with potential impacts on cash flow and revenue",
+    "trigger_headline": "UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas",
+    "event_type": "",
+    "business_impact_summary": "UK steel exporters face higher tariffs on their exports to the EU, potentially reducing their competitiveness and revenue. This change may also affect the pricing strategies of UK steel importers and the broader manufacturing sector.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Direct impact from tariff changes on export revenue and competitiveness, with potential secondary effects on FX exposure through changes in import costs or export pricing strategies",
+    "fx_reason": "",
+    "exposure_thesis": "A. & P.J. STEELS LIMITED exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "exposure_confidence": "low",
+    "score": 55,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "SIC tier 2 (manufacturing): 24100",
+      "Segment exposure: Very High \u2014 Tariff exposure on steel exports to the ",
+      "High urgency event (score 9/10)",
+      "Established company (+8) \u2014 incorporated 1977",
+      "Director found: Philip George JONES",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+    ],
+    "ready_score": 0,
+    "lead_type": "unknown",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "The EU's planned tariff changes on steel imports could significantly impact your export business. Reviewing your strategy and exploring mitigation options is crucial.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mr please? I'm calling from a currency brokerage \u2014 it looks like A. & P.J. Steels may have steel exports from the uk to the eu, with potential impacts on cash flow and revenue, and given UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: A. & P.J. Steels \u2014 USD exposure\n\nHi Mr,\n\nI came across A. & P.J. Steels \u2014 it looks like you & P.J. Steels may have steel exports from the uk to the eu, with potential impacts on cash flow and revenue.\n\nGiven UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mr \u2014 I came across A. & P.J. Steels and thought the UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 25,
+    "industry_label": "FX Discovery",
+    "contact_phone": "020 7004 1709",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Philip George JONES (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mr Jones",
+        "first_name": "Mr",
+        "last_name": "Jones",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2016-04-06",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mr.jones@steels.com",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr@steels.com",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrjones@steels.com",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mjones@steels.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.jones@steels.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr_jones@steels.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr-jones@steels.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrj@steels.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr.j@steels.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jones@steels.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jones.mr@steels.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jmr@steels.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mr.jones@steels.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Jones%20A.%20%26%20P.J.",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Jones",
+        "google_email_search": "https://www.google.com/search?q=\"Mr%20Jones\"+\"%40steels.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "April Knight",
+        "first_name": "April",
+        "last_name": "Knight",
+        "role": "secretary",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2002-05-10",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "april.knight@steels.com",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "april@steels.com",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "aprilknight@steels.com",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "aknight@steels.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.knight@steels.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "april_knight@steels.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "april-knight@steels.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "aprilk@steels.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "april.k@steels.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "knight@steels.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "knight.april@steels.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kapril@steels.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "april.knight@steels.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=April%20Knight%20A.%20%26%20P.J.",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=April%20Knight",
+        "google_email_search": "https://www.google.com/search?q=\"April%20Knight\"+\"%40steels.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Philip Jones",
+        "first_name": "Philip",
+        "last_name": "Jones",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "philip.jones@steels.com",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip@steels.com",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philipjones@steels.com",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "pjones@steels.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "p.jones@steels.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip_jones@steels.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip-jones@steels.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philipj@steels.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "philip.j@steels.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jones@steels.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jones.philip@steels.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jphilip@steels.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "philip.jones@steels.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Philip%20Jones%20A.%20%26%20P.J.",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Philip%20Jones",
+        "google_email_search": "https://www.google.com/search?q=\"Philip%20Jones\"+\"%40steels.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=A.%20%26%20P.J.%20Steels",
+    "company_name_clean": "A. & P.J. Steels",
+    "fx_evidence_snippets": [],
+    "country_evidence": [
+      "USA"
+    ],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [
+      "GBP/USD"
+    ],
+    "currency_reason": "Website mentions USA in a sourcing/trade context \u2192 likely GBP/USD exposure",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 13,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22A.%20%26%20P.J.%20Steels%22",
+    "press_search_url": "https://www.google.com/search?q=%22A.%20%26%20P.J.%20Steels%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK Manufacturers of Specialty Steels",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-04T08:48:00.492Z",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "accounts_type": "abridged",
+    "last_accounts_date": "2024-12-31",
+    "accounts_source": "ch_ixbrl",
+    "company_size_band": "unknown",
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "020 7004 1709",
+      "0115 930 0901",
+      "020 7147 9949",
+      "020 8986 3333",
+      "0151 677 5756",
+      "020 8423 2218",
+      "01394 411500",
+      "01580 765078",
+      "024 1666 6666",
+      "07971 073272",
+      "07887 552424"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (55)",
+      "FX evidence weak (fx_likelihood=13% signals=0) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium"
+    ]
   },
   "48bebaccdd209754": {
     "id": "48bebaccdd209754",
@@ -193224,6 +197274,479 @@
     "ready": "no",
     "ready_reason": "Company not suitable (dormant/micro/no CH number)"
   },
+  "a2c354eb98cf804c": {
+    "id": "a2c354eb98cf804c",
+    "event_id": "96740ed36b5aee94",
+    "linked_event_ids": [
+      "96740ed36b5aee94"
+    ],
+    "created_at": "2026-06-04T08:47:19.733Z",
+    "rescored_at": "2026-06-04T09:10:02.452Z",
+    "company_name": "AFRICA SPECIALTY RISKS LTD",
+    "company_number": "12395404",
+    "company_status": "active",
+    "company_type": null,
+    "address": "88 Leadenhall Street, London, EC3A 3BP",
+    "incorporated": "2020-01-09",
+    "sic_codes": [
+      "65120"
+    ],
+    "director_name": "Ciaran O'DONNELL",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://africaspecialtyrisks.com",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "specialty steel manufacturer UK",
+    "source_segment": "UK Steel Exporters to the EU",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [
+      "distribution",
+      "global",
+      "worldwide"
+    ],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 3,
+    "company_source": "companies_house",
+    "segment_name": "UK Steel Exporters to the EU",
+    "segment_business_model": "UK-based steel manufacturers exporting to EU countries, potentially facing higher tariffs and reduced competitiveness",
+    "exposure_level": "Very High",
+    "exposure_type": "Tariff exposure on steel exports to the EU",
+    "why_affected": "AFRICA SPECIALTY RISKS LTD exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 tariff increases directly affect profitability",
+    "payment_timing_risk": "Medium to High, depending on payment terms and contract renegotiations",
+    "affected_payment_flow": "Steel exports from the UK to the EU, with potential impacts on cash flow and revenue",
+    "trigger_headline": "UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas",
+    "event_type": "",
+    "business_impact_summary": "UK steel exporters face higher tariffs on their exports to the EU, potentially reducing their competitiveness and revenue. This change may also affect the pricing strategies of UK steel importers and the broader manufacturing sector.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Direct impact from tariff changes on export revenue and competitiveness, with potential secondary effects on FX exposure through changes in import costs or export pricing strategies",
+    "fx_reason": "",
+    "exposure_thesis": "AFRICA SPECIALTY RISKS LTD exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "exposure_confidence": "low",
+    "score": 63,
+    "priority": "WARM",
+    "scoring_reasons": [
+      "International activity signals (3)",
+      "Segment exposure: Very High \u2014 Tariff exposure on steel exports to the ",
+      "High urgency event (score 9/10)",
+      "Established company (+2) \u2014 incorporated 2020",
+      "Director found: Ciaran O'DONNELL",
+      "Website confirmed",
+      "Active on Companies House"
+    ],
+    "ready_score": 0,
+    "lead_type": "unknown",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "The EU's planned tariff changes on steel imports could significantly impact your export business. Reviewing your strategy and exploring mitigation options is crucial.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Ciaran please? I'm calling from a currency brokerage \u2014 it looks like Africa Specialty Risks may have steel exports from the uk to the eu, with potential impacts on cash flow and revenue, and given UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: Africa Specialty Risks \u2014 USD exposure\n\nHi Ciaran,\n\nI came across Africa Specialty Risks \u2014 it looks like you Specialty Risks may have steel exports from the uk to the eu, with potential impacts on cash flow and revenue.\n\nGiven UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Ciaran \u2014 I came across Africa Specialty Risks and thought the UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 20,
+    "industry_label": "FX Discovery",
+    "contact_phone": "020 7799 2000",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Ciaran O'DONNELL (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Ciaran O'Donnell",
+        "first_name": "Ciaran",
+        "last_name": "O'Donnell",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2022-12-05",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "ciaran.odonnell@africaspecialtyrisks.com",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ciaran@africaspecialtyrisks.com",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ciaranodonnell@africaspecialtyrisks.com",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "codonnell@africaspecialtyrisks.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "c.odonnell@africaspecialtyrisks.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ciaran_odonnell@africaspecialtyrisks.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ciaran-odonnell@africaspecialtyrisks.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ciarano@africaspecialtyrisks.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ciaran.o@africaspecialtyrisks.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "odonnell@africaspecialtyrisks.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "odonnell.ciaran@africaspecialtyrisks.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ociaran@africaspecialtyrisks.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "ciaran.odonnell@africaspecialtyrisks.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Ciaran%20O'Donnell%20Africa%20Specialty%20Risks",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Ciaran%20O'Donnell",
+        "google_email_search": "https://www.google.com/search?q=\"Ciaran%20O'Donnell\"+\"%40africaspecialtyrisks.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Raj Rupal",
+        "first_name": "Raj",
+        "last_name": "Rupal",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2020-01-09",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "raj.rupal@africaspecialtyrisks.com",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "raj@africaspecialtyrisks.com",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "rajrupal@africaspecialtyrisks.com",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "rrupal@africaspecialtyrisks.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "r.rupal@africaspecialtyrisks.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "raj_rupal@africaspecialtyrisks.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "raj-rupal@africaspecialtyrisks.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "rajr@africaspecialtyrisks.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "raj.r@africaspecialtyrisks.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "rupal@africaspecialtyrisks.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "rupal.raj@africaspecialtyrisks.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "rraj@africaspecialtyrisks.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "raj.rupal@africaspecialtyrisks.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Raj%20Rupal%20Africa%20Specialty%20Risks",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Raj%20Rupal",
+        "google_email_search": "https://www.google.com/search?q=\"Raj%20Rupal\"+\"%40africaspecialtyrisks.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Mikir Shah",
+        "first_name": "Mikir",
+        "last_name": "Shah",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2020-10-29",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mikir.shah@africaspecialtyrisks.com",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mikir@africaspecialtyrisks.com",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mikirshah@africaspecialtyrisks.com",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mshah@africaspecialtyrisks.com",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.shah@africaspecialtyrisks.com",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mikir_shah@africaspecialtyrisks.com",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mikir-shah@africaspecialtyrisks.com",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mikirs@africaspecialtyrisks.com",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mikir.s@africaspecialtyrisks.com",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "shah@africaspecialtyrisks.com",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "shah.mikir@africaspecialtyrisks.com",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "smikir@africaspecialtyrisks.com",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mikir.shah@africaspecialtyrisks.com",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mikir%20Shah%20Africa%20Specialty%20Risks",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mikir%20Shah",
+        "google_email_search": "https://www.google.com/search?q=\"Mikir%20Shah\"+\"%40africaspecialtyrisks.com\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 24,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=Africa%20Specialty%20Risks",
+    "company_name_clean": "Africa Specialty Risks",
+    "fx_evidence_snippets": [],
+    "country_evidence": [
+      "Middle East",
+      "Global"
+    ],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [
+      "GBP/USD"
+    ],
+    "currency_reason": "Website mentions Middle East, Global in a sourcing/trade context \u2192 likely GBP/USD exposure",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 18,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22Africa%20Specialty%20Risks%22",
+    "press_search_url": "https://www.google.com/search?q=%22Africa%20Specialty%20Risks%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK Manufacturers of Specialty Steels",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-04T08:48:06.787Z",
+    "switchboard_hint": "Likely UK switchboard prefix: 020 (from 88 Leadenhall Street, London, EC3A 3BP)",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "accounts_type": "small",
+    "last_accounts_date": "2024-12-31",
+    "accounts_source": "ch_filing_description",
+    "company_size_band": "unknown",
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "020 7799 2000",
+      "020 7138 0920",
+      "020 3909 0419",
+      "020 3838 9107",
+      "0118 979 3282",
+      "01733 459145",
+      "024 7644 9072",
+      "0131 243 2698",
+      "0131 551 5550",
+      "0118 976 7544",
+      "07792 739759"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "website confidence unknown \u2014 need high/medium"
+    ]
+  },
   "a2d176651c01c045": {
     "id": "a2d176651c01c045",
     "event_id": "7a0e087eb196fcaf",
@@ -237584,6 +242107,368 @@
     "call_readiness_reasons": [
       "score too low (55)",
       "FX evidence weak (fx_likelihood=0% signals=1) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium"
+    ]
+  },
+  "d24abb0c23c25140": {
+    "id": "d24abb0c23c25140",
+    "event_id": "96740ed36b5aee94",
+    "linked_event_ids": [
+      "96740ed36b5aee94"
+    ],
+    "created_at": "2026-06-04T08:47:20.627Z",
+    "rescored_at": "2026-06-04T09:10:02.453Z",
+    "company_name": "A & A STEELWORKS LTD",
+    "company_number": "13778096",
+    "company_status": "active",
+    "company_type": null,
+    "address": "258 Merton Road, London, SW18 5JL",
+    "incorporated": "2021-12-02",
+    "sic_codes": [
+      "24100",
+      "25110"
+    ],
+    "director_name": "Gary KNIGHTS",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://steelworks.co.uk",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "high-value steel exporter UK",
+    "source_segment": "UK Steel Exporters to the EU",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 0,
+    "company_source": "companies_house",
+    "segment_name": "UK Steel Exporters to the EU",
+    "segment_business_model": "UK-based steel manufacturers exporting to EU countries, potentially facing higher tariffs and reduced competitiveness",
+    "exposure_level": "Very High",
+    "exposure_type": "Tariff exposure on steel exports to the EU",
+    "why_affected": "A & A STEELWORKS LTD exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 tariff increases directly affect profitability",
+    "payment_timing_risk": "Medium to High, depending on payment terms and contract renegotiations",
+    "affected_payment_flow": "Steel exports from the UK to the EU, with potential impacts on cash flow and revenue",
+    "trigger_headline": "UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas",
+    "event_type": "",
+    "business_impact_summary": "UK steel exporters face higher tariffs on their exports to the EU, potentially reducing their competitiveness and revenue. This change may also affect the pricing strategies of UK steel importers and the broader manufacturing sector.",
+    "fx_exposure": "",
+    "fx_payment_logic": "Direct impact from tariff changes on export revenue and competitiveness, with potential secondary effects on FX exposure through changes in import costs or export pricing strategies",
+    "fx_reason": "",
+    "exposure_thesis": "A & A STEELWORKS LTD exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+    "exposure_confidence": "low",
+    "score": 55,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "SIC tier 2 (manufacturing): 24100, 25110",
+      "Segment exposure: Very High \u2014 Tariff exposure on steel exports to the ",
+      "High urgency event (score 9/10)",
+      "Established company (+2) \u2014 incorporated 2021",
+      "Director found: Gary KNIGHTS",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+    ],
+    "ready_score": 0,
+    "lead_type": "unknown",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "The EU's planned tariff changes on steel imports could significantly impact your export business. Reviewing your strategy and exploring mitigation options is crucial.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Miranda please? I'm calling from a currency brokerage \u2014 it looks like A & A Steelworks may have steel exports from the uk to the eu, with potential impacts on cash flow and revenue, and given UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, it might be worth a quick conversation about the rate you're getting on those payments.",
+    "email_draft": "Subject: A & A Steelworks \u2014 FX exposure\n\nHi Miranda,\n\nI came across A & A Steelworks \u2014 it looks like you & A Steelworks may have steel exports from the uk to the eu, with potential impacts on cash flow and revenue.\n\nGiven UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas, that may create margin pressure around upcoming FX payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Miranda \u2014 I came across A & A Steelworks and thought the UK to challenge EU over \u2018devastating\u2019 plans to almost halve tariff-free steel import quotas might be relevant if you have FX payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 40,
+    "industry_label": "FX Discovery",
+    "contact_phone": "020 8396 6456",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Gary KNIGHTS (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Miranda Knights",
+        "first_name": "Miranda",
+        "last_name": "Knights",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2021-12-02",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "miranda.knights@steelworks.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "miranda@steelworks.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mirandaknights@steelworks.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mknights@steelworks.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.knights@steelworks.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "miranda_knights@steelworks.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "miranda-knights@steelworks.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mirandak@steelworks.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "miranda.k@steelworks.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "knights@steelworks.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "knights.miranda@steelworks.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kmiranda@steelworks.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "miranda.knights@steelworks.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Miranda%20Knights%20A%20%26%20A",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Miranda%20Knights",
+        "google_email_search": "https://www.google.com/search?q=\"Miranda%20Knights\"+\"%40steelworks.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Gary Knights",
+        "first_name": "Gary",
+        "last_name": "Knights",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2021-12-02",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "gary.knights@steelworks.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "gary@steelworks.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "garyknights@steelworks.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "gknights@steelworks.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "g.knights@steelworks.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "gary_knights@steelworks.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "gary-knights@steelworks.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "garyk@steelworks.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "gary.k@steelworks.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "knights@steelworks.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "knights.gary@steelworks.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kgary@steelworks.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "gary.knights@steelworks.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Gary%20Knights%20A%20%26%20A",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Gary%20Knights",
+        "google_email_search": "https://www.google.com/search?q=\"Gary%20Knights\"+\"%40steelworks.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=A%20%26%20A%20Steelworks",
+    "company_name_clean": "A & A Steelworks",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22A%20%26%20A%20Steelworks%22",
+    "press_search_url": "https://www.google.com/search?q=%22A%20%26%20A%20Steelworks%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK Manufacturers of Specialty Steels",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-04T08:47:41.544Z",
+    "switchboard_hint": "Likely UK switchboard prefix: 020 (from 258 Merton Road, London, SW18 5JL)",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "accounts_type": "full",
+    "last_accounts_date": "2024-12-31",
+    "accounts_source": "ch_ixbrl",
+    "company_size_band": "unknown",
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "020 8396 6456",
+      "020 8396 6165",
+      "020 8396 7114",
+      "020 7222 3002",
+      "020 8396 6545",
+      "020 3743 3663",
+      "020 3743 0755",
+      "020 8396 6543",
+      "020 3744 6967",
+      "020 3743 0764",
+      "020 3282 5365",
+      "08007 720761"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (55)",
+      "FX evidence weak (fx_likelihood=0% signals=0) \u2014 need confirmed/likelihood\u226545/signals\u22653",
       "website confidence unknown \u2014 need high/medium"
     ]
   },

@@ -4804,6 +4804,186 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:45.710Z"
   },
+  "96740ed36b5aee94": {
+    "id": "96740ed36b5aee94",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/2026/jun/04/uk-challenge-eu--new-tariff-free-steel-import-quotas",
+    "headline": "UK to challenge EU over ‘devastating’ plans to almost halve tariff-free steel import quotas",
+    "raw_summary": "Business secretary to meet European counterpart on Friday as EU industry leaders worry about retaliatory measures by UK The UK business secretary, Peter Kyle, is to raise concerns about EU plans to dramatically reduce tariff-free imports of British steel with its trade commissioner, Maroš Šefčovič, in Brussels on Friday. The UK steel industry has previously warned of “devastating” consequences from the new quota system being planned by the EU, which will cut overall tariff-free imports from non-EU countries by 47% on 2024 levels from 1 July. Continue reading...",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +4 \\buk business|\\buk compan|\\buk",
+    "detected_at": "2026-06-04T08:47:05.706Z",
+    "event_type": "Tariff announcement",
+    "event_breadth": "sector_specific",
+    "summary": "The EU plans to cut tariff-free steel import quotas from the UK by 47%, affecting UK steel exporters and potentially the broader manufacturing and construction sectors. This change necessitates a review of export strategies and cost structures for affected businesses.",
+    "currency_pairs": [],
+    "urgency_score": 9,
+    "commercial_relevance": 9,
+    "commercial_relevance_reason": "Tariff changes on steel imports directly impact UK businesses' costs and competitiveness",
+    "trigger_strength": "strong",
+    "trigger_score": 92,
+    "discovery_mode": "full",
+    "recommended_query_budget": 35,
+    "likely_affected_businesses": [
+      "UK steel manufacturers",
+      "UK steel exporters",
+      "UK construction and manufacturing firms dependent on steel imports"
+    ],
+    "why_now": "The EU's planned reduction in tariff-free steel import quotas starting 1 July creates an immediate need for affected UK businesses to reassess their export strategies, pricing, and potentially seek tariff mitigation strategies",
+    "discovery_recommendation": "Full discovery run to identify UK steel exporters and importers affected by the tariff changes, considering the sector's complexity and the potential for significant financial impacts",
+    "confidence_level": "high",
+    "confidence_reason": "Concrete tariff changes with a clear timeline for implementation affect specific UK industries",
+    "what_happened": "EU plans to reduce tariff-free steel import quotas from non-EU countries, including the UK, by 47% from 2024 levels starting 1 July",
+    "what_changed_financially": "Tariff-free import quotas for steel from the UK to the EU will significantly decrease",
+    "who_pays_more": "UK steel exporters to the EU, as they will face higher tariffs on a larger portion of their exports",
+    "who_receives_less": "None directly, but UK steel importers from the EU might see reduced competition, potentially affecting their pricing strategy",
+    "margin_risk": "High",
+    "payment_timing_risk": "Medium to High, depending on existing contracts and payment terms",
+    "affected_payment_flow": "UK steel exports to the EU, with potential impacts on pricing, competitiveness, and revenue",
+    "fx_payment_logic": "While the event is primarily about tariffs, the impact on UK businesses' competitiveness and pricing strategies could have secondary effects on their FX exposure, particularly if they import components or raw materials from the EU or export finished goods",
+    "sales_angle": "The upcoming reduction in tariff-free steel import quotas from the UK to the EU may significantly impact your business's competitiveness and bottom line. Reviewing your export strategy and exploring tariff mitigation options could be crucial.",
+    "business_impact_summary": "UK steel exporters face higher tariffs on their exports to the EU, potentially reducing their competitiveness and revenue. This change may also affect the pricing strategies of UK steel importers and the broader manufacturing sector.",
+    "exposure_types": [
+      "Tariff exposure",
+      "Competitiveness risk"
+    ],
+    "overall_sales_angle": "The EU's tariff changes on steel imports present a significant challenge for UK steel exporters and potentially the broader manufacturing sector, necessitating a review of their strategies to maintain competitiveness.",
+    "target_segments": [
+      {
+        "segment_name": "UK Steel Exporters to the EU",
+        "category_priority_score": 95,
+        "business_model": "UK-based steel manufacturers exporting to EU countries, potentially facing higher tariffs and reduced competitiveness",
+        "exposure_level": "Very High",
+        "exposure_type": "Tariff exposure on steel exports to the EU",
+        "likely_currency_pairs": [],
+        "fx_payment_logic": "Direct impact from tariff changes on export revenue and competitiveness, with potential secondary effects on FX exposure through changes in import costs or export pricing strategies",
+        "margin_risk": "High — tariff increases directly affect profitability",
+        "payment_timing_risk": "Medium to High, depending on payment terms and contract renegotiations",
+        "affected_payment_flow": "Steel exports from the UK to the EU, with potential impacts on cash flow and revenue",
+        "website_validation_signals": [
+          "steel exporter",
+          "EU market",
+          "exports to Europe"
+        ],
+        "avoid_segments": [
+          "Non-steel exporters",
+          "Purely domestic UK steel producers"
+        ],
+        "sales_angle": "The EU's planned tariff changes on steel imports could significantly impact your export business. Reviewing your strategy and exploring mitigation options is crucial.",
+        "exposure_thesis_template": "This company exports steel to the EU and will be directly affected by the reduction in tariff-free import quotas, facing higher tariffs and potential competitiveness issues.",
+        "micro_categories": [
+          {
+            "name": "UK Manufacturers of Specialty Steels",
+            "why": "High-value steel products exported to the EU may face significant tariff increases, affecting profitability and competitiveness",
+            "search_queries": [
+              "specialty steel manufacturer UK",
+              "high-value steel exporter UK",
+              "UK steel producer for EU market"
+            ],
+            "companies_house_terms": [
+              "specialty steel",
+              "high-value steel",
+              "steel exporter"
+            ]
+          },
+          {
+            "name": "UK Producers of Construction Steels",
+            "why": "Construction steel exports to the EU will be impacted by tariff changes, potentially affecting demand and pricing in the construction sector",
+            "search_queries": [
+              "construction steel UK",
+              "steel exporter to EU construction",
+              "UK steel for building"
+            ],
+            "companies_house_terms": [
+              "construction steel",
+              "steel for building",
+              "exporter to EU"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "steel exporter",
+          "EU market",
+          "exports to Europe"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "specialty steel",
+      "high-value steel",
+      "steel exporter",
+      "construction steel",
+      "steel for building",
+      "exporter to EU"
+    ],
+    "all_search_queries": [
+      "specialty steel manufacturer UK",
+      "high-value steel exporter UK",
+      "UK steel producer for EU market",
+      "construction steel UK",
+      "steel exporter to EU construction",
+      "UK steel for building"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-04T08:47:22.105Z"
+  },
+  "9711da1445de5ed0": {
+    "id": "9711da1445de5ed0",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/us-dollar-north-asia-fx-misalignment-risks-bny-202606040810",
+    "headline": "US Dollar: North Asia FX misalignment risks – BNY",
+    "raw_summary": "BNY’s Geoff Yu notes that the US Dollar has strengthened more against a North Asia import-weighted basket than against traditional currencies, raising concerns for US inflation. He highlights that CNY, JPY, TWD and KRW have lagged fundamentals despite large trade surpluses with the U.S.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-06-04T08:47:12.769Z",
+    "event_type": "FX analysis",
+    "event_breadth": "broad_macro",
+    "summary": "US Dollar strengthened against North Asia currencies, potentially affecting UK importers and exporters. No immediate UK B2B FX hook but worth monitoring.",
+    "currency_pairs": [
+      "USD/CNY",
+      "USD/JPY",
+      "USD/TWD",
+      "USD/KRW"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US Dollar strength against North Asia currencies could affect UK businesses importing from these regions",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of electronics from North Asia",
+      "UK businesses trading with North Asian partners"
+    ],
+    "why_now": "Monitoring USD strength against North Asia currencies for potential trade implications",
+    "discovery_recommendation": "Context only — no immediate UK B2B FX hook but worth monitoring for broader trade implications",
+    "confidence_level": "medium",
+    "confidence_reason": "FX misalignment could impact trade flows but lacks direct UK B2B FX hook",
+    "what_happened": "BNY's Geoff Yu noted the US Dollar has strengthened more against a North Asia import-weighted basket",
+    "what_changed_financially": "US Dollar strength against North Asia currencies could affect trade dynamics",
+    "who_pays_more": "UK businesses importing from North Asia might face higher costs due to USD strength",
+    "who_receives_less": "None directly, but UK exporters to these regions might see reduced demand",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "USD-dominated trade with North Asia",
+    "fx_payment_logic": "UK businesses importing from North Asia might pay in USD, facing higher costs due to USD strength against local currencies",
+    "sales_angle": "If you import from North Asia, the USD strength could impact your costs, worth reviewing your trade flows.",
+    "business_impact_summary": "UK businesses importing from North Asia might face higher costs due to USD strength. Exporters might see reduced demand.",
+    "exposure_types": [
+      "USD strength against North Asia currencies"
+    ],
+    "overall_sales_angle": "Monitoring USD strength against North Asia currencies for potential trade implications",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "a74f6a1bd5f9205d": {
     "id": "a74f6a1bd5f9205d",
     "headline": "British Pound: Softer UK inflation weighs on Pound – BBH",
