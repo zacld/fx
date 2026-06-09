@@ -3389,16 +3389,13 @@
   },
   "546df6bb0af5e426": {
     "id": "546df6bb0af5e426",
+    "headline": "China's May trade balance, exports and imports all higher than expected",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/chinas-may-trade-balance-exports-and-imports-all-higher-than-expected-20260609/",
-    "headline": "China's May trade balance, exports and imports all higher than expected",
-    "raw_summary": "Exports +19.4% y/y exp. +15.0%, prior +14.1% Imports +27.4% y/y, a solid result pointing to a pickup in domestic demand and stockpiling activity. exp. +25.0%, prior +25.3% Trade balance +$105.43B, the strongest surplus reading in recent months. exp. +$92.1B, prior +$84.82B The export beat is likely to draw attention from trade-sensitive markets and trading partners already watching China's external position closely. The acceleration from April's 14.1% pace suggests Chinese manufacturers are finding ways to sustain overseas shipments despite the broader global uncertainty created by the US-Iran",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu",
     "detected_at": "2026-06-09T07:49:51.927Z",
+    "status": "context_only",
     "event_type": "Trade data",
     "event_breadth": "broad_macro",
-    "summary": "China's strong trade data may influence global commodity prices and trade flows, indirectly affecting UK businesses importing from or exporting to China.",
     "currency_pairs": [
       "USD/CNY",
       "GBP/CNY"
@@ -3415,29 +3412,33 @@
       "UK exporters to China"
     ],
     "why_now": "The trade data may influence global commodity prices and trade flows, making it a contextually relevant event for UK businesses with international trade exposure.",
-    "discovery_recommendation": "Context only — the event has indirect relevance to UK B2B FX and requires additional context to establish a clear payment-flow hook.",
     "confidence_level": "medium",
     "confidence_reason": "While the event is relevant to global trade, its direct impact on UK B2B FX is indirect and requires additional context to establish a clear payment-flow hook.",
+    "discovery_recommendation": "Context only — the event has indirect relevance to UK B2B FX and requires additional context to establish a clear payment-flow hook.",
     "what_happened": "China's May trade balance, exports, and imports were higher than expected.",
     "what_changed_financially": "China's export growth and trade surplus may influence global commodity prices and trade flows.",
     "who_pays_more": "UK businesses importing from China may face higher costs if commodity prices rise.",
     "who_receives_less": "UK businesses exporting to China may benefit from increased demand, but this is speculative without direct UK-China trade data.",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP or USD payments to Chinese suppliers, or GBP revenue from Chinese customers.",
     "fx_payment_logic": "UK businesses importing from China may face higher costs if commodity prices rise, while exporters may benefit from increased demand, but this requires direct UK-China trade data to establish a clear payment-flow hook.",
-    "sales_angle": "China's trade data may impact global commodity prices, which could influence your business's import costs or export revenue.",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK businesses with international trade exposure, particularly those importing from or exporting to China, may be indirectly affected by China's trade data.",
+    "sales_angle": "China's trade data may impact global commodity prices, which could influence your business's import costs or export revenue.",
+    "overall_sales_angle": "China's trade data may have indirect implications for your business's international trade exposure.",
+    "summary": "China's strong trade data may influence global commodity prices and trade flows, indirectly affecting UK businesses importing from or exporting to China.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Exports +19.4% y/y exp. +15.0%, prior +14.1% Imports +27.4% y/y, a solid result pointing to a pickup in domestic demand and stockpiling activity. exp. +25.0%, prior +25.3% Trade balance +$105.43B, the strongest surplus reading in recent months. exp. +$92.1B, prior +$84.82B The export beat is likely to draw attention from trade-sensitive markets and trading partners already watching China's external position closely. The acceleration from April's 14.1% pace suggests Chinese manufacturers are finding ways to sustain overseas shipments despite the broader global uncertainty created by the US-Iran",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu",
     "exposure_types": [
       "Commodity price exposure",
       "Trade flow exposure"
     ],
-    "overall_sales_angle": "China's trade data may have indirect implications for your business's international trade exposure.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "55038a8ac0b1b9ce": {
@@ -6138,6 +6139,178 @@
     "pre_relevance_score": 4,
     "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\bimport|\\bexport\\b",
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "a713daeb71b3ee01": {
+    "id": "a713daeb71b3ee01",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/why-is-the-british-pound-struggling-when-the-boe-is-considering-rate-hikes-202606090721",
+    "headline": "Why is the British Pound struggling when the BoE is considering rate hikes?",
+    "raw_summary": "The British Pound (GBP) is struggling as mounting political uncertainty and deteriorating economic indicators complicate the United Kingdom's outlook.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
+    "detected_at": "2026-06-09T08:30:18.236Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "GBP weakened despite potential BoE rate hikes. UK businesses paying EUR supplier invoices face higher GBP cost. Exporters receiving EUR revenue see a modest benefit on conversion.",
+    "currency_pairs": [
+      "GBP/EUR"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "GBP weakness despite potential BoE rate hikes affects UK importers and exporters with EUR exposure",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK European food importers",
+      "UK machinery importers from EU",
+      "UK exporters with EUR customer revenue"
+    ],
+    "why_now": "EUR supplier invoices placed before the GBP move now cost more to settle",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "GBP move is driven by political and economic uncertainty, not a central bank decision",
+    "what_happened": "GBP struggles despite potential BoE rate hikes due to UK political uncertainty and economic concerns",
+    "what_changed_financially": "GBP/EUR rate moved, impacting UK importers paying EUR suppliers and exporters receiving EUR revenue",
+    "who_pays_more": "UK importers with outstanding EUR supplier invoices",
+    "who_receives_less": "UK exporters converting EUR customer payments back to GBP",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs EUR supplier costs",
+    "fx_payment_logic": "UK importers order goods priced in EUR, invoice arrives, they convert GBP to EUR to pay, and GBP has weakened, requiring more GBP per EUR",
+    "sales_angle": "If you have upcoming EUR supplier payments, the current rate is worse than it was last week.",
+    "business_impact_summary": "UK importers of European goods face higher landed costs on recent orders. Exporters receiving EUR revenue see a modest benefit on conversion.",
+    "exposure_types": [
+      "EUR supplier payment exposure",
+      "EUR revenue conversion"
+    ],
+    "overall_sales_angle": "GBP slippage means upcoming EUR invoices cost more — worth reviewing the rate.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of European manufactured goods",
+        "category_priority_score": 75,
+        "business_model": "UK wholesaler/distributor buying from EU manufacturers, paying EUR invoices, selling GBP to UK trade",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EUR invoice arrives, UK business converts GBP, GBP weaker, margin compressed",
+        "margin_risk": "Medium — 1.2% GBP/EUR move on £250k annual buy ≈ £3k extra cost if unhedged",
+        "payment_timing_risk": "Medium — typical 30-60 day payment terms",
+        "affected_payment_flow": "EUR payments to EU manufacturers, typically £25k-£250k per shipment",
+        "website_validation_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming EUR supplier invoices are costing more in GBP than they were last month.",
+        "exposure_thesis_template": "This company imports manufactured goods from EU. GBP/EUR move increases GBP cost of EUR supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK importers of Italian machinery parts",
+            "why": "Pay EUR to EU manufacturers — direct exposure to GBP/EUR move on component costs",
+            "search_queries": [
+              "\"machinery importer\" UK European",
+              "\"Italian machinery\" UK distributor"
+            ],
+            "companies_house_terms": [
+              "machinery imports",
+              "european parts"
+            ]
+          },
+          {
+            "name": "UK distributors of European consumer goods",
+            "why": "EUR-priced branded goods from EU — margin hit when GBP weakens at order-to-payment stage",
+            "search_queries": [
+              "European goods distributor UK",
+              "\"exclusive distributor\" European UK"
+            ],
+            "companies_house_terms": [
+              "european goods",
+              "continental imports"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ]
+      },
+      {
+        "segment_name": "UK exporters receiving EUR customer revenue",
+        "category_priority_score": 65,
+        "business_model": "UK manufacturer or service firm selling to EU customers in EUR, converting receipts back to GBP",
+        "exposure_level": "Medium",
+        "exposure_type": "Revenue conversion — EUR receipts into GBP",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EU customer pays EUR, UK exporter receives EUR, converts to GBP, weaker GBP = slightly more GBP per EUR received",
+        "margin_risk": "Low to medium — GBP weakness is a marginal benefit on EUR receipts but creates pricing pressure on future EUR quotes",
+        "payment_timing_risk": "Medium — EUR revenue sitting unconverted faces rate risk on timing of conversion",
+        "affected_payment_flow": "EUR receipts from EU customers, converting to GBP",
+        "website_validation_signals": [
+          "export",
+          "European customers",
+          "EU market",
+          "sold throughout Europe"
+        ],
+        "avoid_segments": [
+          "pure domestic UK sellers",
+          "businesses with no EU customer base"
+        ],
+        "sales_angle": "If you're receiving EUR from EU customers, the conversion timing can make a meaningful difference.",
+        "exposure_thesis_template": "This company exports to EU customers in EUR. GBP/EUR moves affect GBP value of incoming EUR receipts.",
+        "micro_categories": [
+          {
+            "name": "UK manufacturers exporting to EU buyers",
+            "why": "Invoice EU customers in EUR — GBP/EUR rate on conversion date affects GBP revenue",
+            "search_queries": [
+              "UK manufacturer \"export to Europe\""
+            ],
+            "companies_house_terms": [
+              "exports europe",
+              "uk manufacturer export"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "export",
+          "European customers",
+          "EU market",
+          "sold throughout Europe"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "machinery imports",
+      "european parts",
+      "european goods",
+      "continental imports",
+      "exports europe",
+      "uk manufacturer export"
+    ],
+    "all_search_queries": [
+      "\"machinery importer\" UK European",
+      "\"Italian machinery\" UK distributor",
+      "European goods distributor UK",
+      "\"exclusive distributor\" European UK",
+      "UK manufacturer \"export to Europe\""
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-09T08:30:22.774Z"
   },
   "a74f6a1bd5f9205d": {
     "id": "a74f6a1bd5f9205d",
