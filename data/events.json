@@ -677,37 +677,35 @@
     "raw_summary": "Prior month -$60.3B revised to -$56.6B Good trade balance (R) -$-83.01B vs -$82.4B (Prelim). Prior -$85.30B Exports $327.1 Billion,+2.6%° Imports $327.1 Billion,+2.0%° Looking at the 3 month average of the goods and services trade deficit, is steady. Headline Numbers Exports: $327.1 billion Up $8.3 billion from March Imports: $383.0 billion Up $7.6 billion from March Trade Deficit: -$55.9 billion Improved from March as exports rose slightly more than imports Monthly Changes Goods Deficit: Decreased $2.4 billion to -$83.7 billion Services Surplus: Decreased $1.7 billion to +$27.8 billion The ov",
     "pre_relevance_score": 8,
     "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-06-10T06:26:48.865Z",
+    "detected_at": "2026-06-10T08:08:27.166Z",
     "event_type": "Trade balance report",
     "event_breadth": "macro",
-    "summary": "The US trade balance report showed a slight improvement in the deficit, which might have indirect implications for global trade and currency markets, but lacks a direct impact on UK businesses' FX exposure",
-    "currency_pairs": [
-      "USD"
-    ],
+    "summary": "US trade balance report shows a slight improvement, but it has no direct relevance to UK B2B FX decisions",
+    "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "US trade balance has indirect implications for global trade and potentially USD strength, but lacks a direct UK B2B FX hook",
+    "commercial_relevance_reason": "US trade balance has minimal direct impact on UK B2B FX decisions",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
-    "why_now": "The report might influence broader USD strength or weakness, indirectly affecting UK businesses, but lacks a direct trigger for action",
-    "discovery_recommendation": "Context only — US trade balance has no direct UK B2B FX hook but can inform broader market context",
-    "confidence_level": "medium",
-    "confidence_reason": "The event is a US trade balance report, which, while relevant for global trade trends, does not directly impact UK businesses' FX exposure without further context",
-    "what_happened": "The US international trade balance for April was reported at -$55.9B, slightly better than the estimate of -$56.1B",
-    "what_changed_financially": "The trade deficit narrowed slightly as exports rose more than imports",
+    "why_now": "No immediate reason for UK businesses to adjust FX strategies based on this report",
+    "discovery_recommendation": "Context only — no direct UK B2B FX hook",
+    "confidence_level": "high",
+    "confidence_reason": "The event is a US-focused trade balance report with no clear implications for UK businesses' FX exposure",
+    "what_happened": "US international trade balance for April was -$55.9B",
+    "what_changed_financially": "US trade deficit narrowed slightly, but this has no direct UK B2B FX implications",
     "who_pays_more": "None directly",
     "who_receives_less": "None directly",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
     "affected_payment_flow": "None directly",
-    "fx_payment_logic": "The US trade balance report influences the USD's value, which can indirectly affect UK businesses' FX exposure, particularly those dealing with USD-denominated transactions, but this is a secondary effect rather than a direct trigger",
-    "sales_angle": "While the US trade balance report does not directly impact your business, it's part of the broader economic context that can influence currency markets",
-    "business_impact_summary": "The US trade balance report has indirect implications for global trade and currency markets, but lacks a direct impact on UK businesses' FX exposure, making it more of a contextual piece of information rather than a trigger for action",
+    "fx_payment_logic": "No direct FX payment logic applies to UK businesses from this event",
+    "sales_angle": "No specific angle based on this event alone",
+    "business_impact_summary": "No direct impact on UK businesses' FX exposure or strategies",
     "exposure_types": [],
-    "overall_sales_angle": "The US trade balance report is part of the broader economic context, but it does not directly trigger a need for FX action for UK businesses",
+    "overall_sales_angle": "No sharp reason to call based on this US trade balance report",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -3958,6 +3956,58 @@
     "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "5b5cc3a6a1552c38": {
+    "id": "5b5cc3a6a1552c38",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/us-cpi-data-set-to-show-inflation-at-three-year-high-in-may-backing-fed-hawkish-tilt-202606100400",
+    "headline": "US CPI data set to show acceleration in inflation as markets price in Fed rate hikes",
+    "raw_summary": "The US Bureau of Labor Statistics (BLS) will publish the May Consumer Price Index (CPI) data on Wednesday. The report is expected to show another step up in consumer inflation, driven by the persistently high Oil prices due to the ongoing crisis in the Middle East.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-06-10T08:08:31.501Z",
+    "event_type": "Economic data release",
+    "event_breadth": "broad_macro",
+    "summary": "US CPI data may indicate higher inflation, potentially leading to Fed rate hikes and impacting USD. UK businesses with USD exposure may face changes in costs or revenue.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "US inflation data may influence Fed rate decisions, which can impact USD strength and, by extension, affect UK businesses with USD exposure",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of USD-priced goods",
+      "UK businesses with USD-denominated debt"
+    ],
+    "why_now": "The upcoming CPI data release may provide insight into future Fed policy, which could impact USD and, consequently, GBP/USD exchange rates",
+    "discovery_recommendation": "Context only — while the event has some FX relevance, it is not directly tied to a specific UK B2B payment flow",
+    "confidence_level": "medium",
+    "confidence_reason": "While US CPI data is relevant to global markets, its direct impact on UK B2B FX payment flows is indirect and depends on subsequent Fed actions",
+    "what_happened": "US CPI data is expected to show an increase in inflation, potentially leading to Fed rate hikes",
+    "what_changed_financially": "Expected increase in US inflation, potential for higher interest rates",
+    "who_pays_more": "UK businesses with USD-priced imports or USD-denominated debt may face higher costs if USD strengthens",
+    "who_receives_less": "UK exporters receiving USD may see a decrease in GBP value of their exports if USD weakens",
+    "margin_risk": "Low to Medium",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP/USD transactions, particularly for businesses with USD exposure",
+    "fx_payment_logic": "UK businesses with USD exposure may see changes in their costs or revenue due to potential USD strength or weakness following the CPI data release and subsequent Fed actions",
+    "sales_angle": "If you have USD exposure, the upcoming CPI data and potential Fed rate hikes could impact your costs or revenue.",
+    "business_impact_summary": "UK businesses with USD exposure may face higher costs or lower revenue due to potential changes in USD strength following the US CPI data release and Fed actions.",
+    "exposure_types": [
+      "USD import cost exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "USD exposure may be impacted by the upcoming CPI data and potential Fed actions.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "5c6bedca60023091": {
     "id": "5c6bedca60023091",
     "headline": "EUR/USD Price Forecast: 1.1600 support holds as bearish momentum lingers",
@@ -4306,16 +4356,13 @@
   },
   "5ff4be1384571a10": {
     "id": "5ff4be1384571a10",
+    "headline": "US CPI data expected to show inflation rose further in May, reinforcing bets of Fed rate hikes",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/us-cpi-data-set-to-show-inflation-at-three-year-high-in-may-backing-fed-hawkish-tilt-202606100400",
-    "headline": "US CPI data expected to show inflation rose further in May, reinforcing bets of Fed rate hikes",
-    "raw_summary": "The US Bureau of Labor Statistics (BLS) will publish the May Consumer Price Index (CPI) data on Wednesday. The report is expected to show another step up in consumer inflation, driven by the persistently high Oil prices due to the ongoing crisis in the Middle East.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-06-10T06:26:55.639Z",
+    "status": "context_only",
     "event_type": "Economic data release",
     "event_breadth": "broad_macro",
-    "summary": "US CPI data expected to show higher inflation, potentially reinforcing bets on Fed rate hikes and affecting GBP/USD. UK importers and exporters may see indirect effects on their USD transactions.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -4331,28 +4378,32 @@
       "UK exporters with USD revenue"
     ],
     "why_now": "Upcoming US CPI data release may influence near-term GBP/USD exchange rates",
-    "discovery_recommendation": "Context only — indirect FX relevance, not a strong trigger for immediate discovery",
     "confidence_level": "medium",
     "confidence_reason": "The connection between US CPI, Fed rate expectations, and GBP/USD is indirect and influenced by multiple factors",
+    "discovery_recommendation": "Context only — indirect FX relevance, not a strong trigger for immediate discovery",
     "what_happened": "US CPI data expected to show increased inflation in May",
     "what_changed_financially": "Potential for increased expectations of Fed rate hikes, affecting USD and indirectly GBP",
     "who_pays_more": "UK businesses importing USD-priced goods or services may face higher costs if GBP/USD weakens",
     "who_receives_less": "UK exporters receiving USD may see a slight decrease in GBP value of their USD revenue",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP/USD exchange for import/export transactions",
     "fx_payment_logic": "US CPI data release may influence Fed rate expectations, which in turn can affect the USD and GBP exchange rate, impacting UK businesses with USD transactions",
-    "sales_angle": "The upcoming US CPI data may impact your USD transactions. Are you prepared for potential GBP/USD moves?",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK businesses with USD transactions may face indirect effects from the US CPI data release through changes in the GBP/USD exchange rate",
-    "exposure_types": [
-      "USD transaction exposure"
-    ],
+    "sales_angle": "The upcoming US CPI data may impact your USD transactions. Are you prepared for potential GBP/USD moves?",
     "overall_sales_angle": "Keep an eye on the US CPI data release for potential impacts on your USD transactions and GBP/USD exchange rates",
+    "summary": "US CPI data expected to show higher inflation, potentially reinforcing bets on Fed rate hikes and affecting GBP/USD. UK importers and exporters may see indirect effects on their USD transactions.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "The US Bureau of Labor Statistics (BLS) will publish the May Consumer Price Index (CPI) data on Wednesday. The report is expected to show another step up in consumer inflation, driven by the persistently high Oil prices due to the ongoing crisis in the Middle East.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "USD transaction exposure"
+    ],
     "ai_model": "llama-3.3-70b-versatile"
   },
   "602f2881f886b53b": {
@@ -4858,6 +4909,52 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-03T09:24:32.121Z"
+  },
+  "70753f6ae3c06cad": {
+    "id": "70753f6ae3c06cad",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/euro-flatlines-against-british-pound-as-traders-brace-for-ecb-rate-decision-202606100656",
+    "headline": "Euro flatlines against British Pound as traders brace for ECB rate decision",
+    "raw_summary": "The EUR/GBP cross trades on a flat note near 0.8625 during the early European trading hours on Wednesday. Traders prefer to wait on the sidelines ahead of the European Central Bank (ECB) interest rate decision on Thursday.",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-06-10T08:08:29.085Z",
+    "event_type": "Central Bank Decision",
+    "event_breadth": "broad_macro",
+    "summary": "EUR/GBP flat ahead of ECB rate decision. Decision could impact UK businesses with EUR/GBP exposure.",
+    "currency_pairs": [
+      "EUR/GBP"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Awaiting ECB rate decision, potential for rate move or change in forward guidance that could impact EUR/GBP",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "ECB rate decision on Thursday could move EUR/GBP",
+    "discovery_recommendation": "Context only — awaiting ECB decision for potential impact",
+    "confidence_level": "medium",
+    "confidence_reason": "Event is ECB rate decision which can impact currency, but no specific move has occurred yet",
+    "what_happened": "EUR/GBP trading flat ahead of ECB rate decision",
+    "what_changed_financially": "No change yet, awaiting ECB decision",
+    "who_pays_more": "None yet, pending ECB decision",
+    "who_receives_less": "None yet, pending ECB decision",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly impacted yet",
+    "fx_payment_logic": "No direct impact yet, but ECB decision could change EUR/GBP, affecting UK businesses with cross-border payments",
+    "sales_angle": "The ECB rate decision could impact your EUR/GBP payments. Worth reviewing your exposure ahead of the decision.",
+    "business_impact_summary": "No direct impact yet, but potential for change after ECB decision. UK businesses with EUR/GBP exposure should be aware.",
+    "exposure_types": [],
+    "overall_sales_angle": "ECB decision could move EUR/GBP, impacting cross-border payments",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "72838d82725c1064": {
     "id": "72838d82725c1064",
@@ -5880,16 +5977,13 @@
   },
   "8fd05b2d13844d95": {
     "id": "8fd05b2d13844d95",
+    "headline": "investingLive Asia-Pacific FX news wrap: The day the war ceasefire really hit the fan.",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/investinglive-asia-pacific-fx-news-wrap-the-day-the-war-ceasefire-really-hit-the-fan-20260610/",
-    "headline": "investingLive Asia-Pacific FX news wrap: The day the war ceasefire really hit the fan.",
-    "raw_summary": "War news dominated, read from the bottom up for chronology: Iran strikes US bases in Jordan, Kuwait and Bahrain as retaliation widens across region Iran attacks US Fifth Fleet in Bahrain after American strikes target Hormuz defense CENTCOM declares Iran strikes complete after three waves targeting Hormuz defenses Oil has risen as the US has launched wave after wave after wave of attacks on Iran US launches third wave of Iran strikes as ballistic missiles fired from Isfahan Second wave of US attacks on Iran said to be underway Iran foreign minister Araqchi warns US to leave region, pledges resp",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-06-10T06:26:53.206Z",
+    "status": "ready",
     "event_type": "Geopolitical event",
     "event_breadth": "broad_macro",
-    "summary": "Geopolitical tensions in the Middle East have escalated, affecting oil prices and currency markets. UK businesses importing oil or exporting to the region may face higher costs or reduced revenue.",
     "currency_pairs": [
       "USD/GBP",
       "USD/EUR",
@@ -5907,28 +6001,26 @@
       "UK exporters to the Middle East"
     ],
     "why_now": "The current conflict escalation directly impacts oil prices and currency exchange rates, affecting upcoming payments",
-    "discovery_recommendation": "Full run — clear geopolitical impact on oil prices and currency markets, multiple identifiable niches",
     "confidence_level": "high",
     "confidence_reason": "Direct military action and retaliation in the region impacts global oil supply and currency markets",
+    "discovery_recommendation": "Full run — clear geopolitical impact on oil prices and currency markets, multiple identifiable niches",
     "what_happened": "Iran strikes US bases in Jordan, Kuwait, and Bahrain, leading to US retaliation",
     "what_changed_financially": "Oil prices rose due to the conflict, affecting currency markets",
     "who_pays_more": "Importers of oil and related products, potentially affecting their currency exchange needs",
     "who_receives_less": "Exporters to the region may face reduced demand or payment delays",
-    "margin_risk": "High",
-    "payment_timing_risk": "High",
     "affected_payment_flow": "USD and EUR payments for oil and related products, as well as regional trade",
     "fx_payment_logic": "UK importers of oil pay in USD or EUR, and the current conflict affects the exchange rate, increasing costs. Exporters to the region may face reduced demand or payment delays, impacting their revenue.",
-    "sales_angle": "The current conflict in the Middle East is affecting oil prices and currency exchange rates, which may impact your business's upcoming payments.",
+    "margin_risk": "High",
+    "payment_timing_risk": "High",
     "business_impact_summary": "UK importers of oil and related products face higher costs due to the conflict, while exporters to the region may face reduced demand or payment delays.",
-    "exposure_types": [
-      "Oil price exposure",
-      "Geopolitical risk"
-    ],
+    "sales_angle": "The current conflict in the Middle East is affecting oil prices and currency exchange rates, which may impact your business's upcoming payments.",
     "overall_sales_angle": "The Middle East conflict is impacting oil prices and currency markets, making it essential to review your business's currency exchange needs.",
+    "summary": "Geopolitical tensions in the Middle East have escalated, affecting oil prices and currency markets. UK businesses importing oil or exporting to the region may face higher costs or reduced revenue.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK oil importers",
-        "category_priority_score": 95,
         "business_model": "UK businesses importing oil and related products, paying in USD or EUR",
         "exposure_level": "Very High",
         "exposure_type": "Oil price exposure — USD or EUR payments for oil imports",
@@ -5936,21 +6028,14 @@
           "USD/GBP",
           "EUR/GBP"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK importer pays in USD or EUR for oil, and the current conflict affects the exchange rate, increasing costs",
         "margin_risk": "High — oil price increase directly impacts profit margins",
         "payment_timing_risk": "High — payment terms may not account for sudden oil price increases",
         "affected_payment_flow": "USD or EUR payments for oil imports, typically £100k-£1m per shipment",
-        "website_validation_signals": [
-          "oil importer",
-          "petroleum products",
-          "energy sector"
-        ],
-        "avoid_segments": [
-          "UK oil producers",
-          "businesses without oil imports"
-        ],
-        "sales_angle": "The current conflict in the Middle East is affecting oil prices, which may impact your business's upcoming payments.",
-        "exposure_thesis_template": "This company imports oil and related products, and the current conflict affects their currency exchange needs.",
+        "ideal_company_profile": "",
+        "category_priority_score": 95,
         "micro_categories": [
           {
             "name": "UK importers of crude oil",
@@ -5981,15 +6066,27 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "oil importer",
+          "petroleum products",
+          "energy sector"
+        ],
         "segment_signals": [
           "oil importer",
           "petroleum products",
           "energy sector"
-        ]
+        ],
+        "avoid_segments": [
+          "UK oil producers",
+          "businesses without oil imports"
+        ],
+        "sales_angle": "The current conflict in the Middle East is affecting oil prices, which may impact your business's upcoming payments.",
+        "exposure_thesis_template": "This company imports oil and related products, and the current conflict affects their currency exchange needs."
       },
       {
         "segment_name": "UK exporters to the Middle East",
-        "category_priority_score": 80,
         "business_model": "UK businesses exporting goods to the Middle East, receiving payment in USD or EUR",
         "exposure_level": "High",
         "exposure_type": "Geopolitical risk — payment delays or reduced demand",
@@ -5997,21 +6094,14 @@
           "USD/GBP",
           "EUR/GBP"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK exporter receives payment in USD or EUR for goods, and the current conflict affects payment timing or demand",
         "margin_risk": "Medium — payment delays or reduced demand impact revenue",
         "payment_timing_risk": "High — payment terms may be affected by the conflict",
         "affected_payment_flow": "USD or EUR receipts from Middle Eastern customers, typically £50k-£500k per shipment",
-        "website_validation_signals": [
-          "export to Middle East",
-          "Middle Eastern customers",
-          "international trade"
-        ],
-        "avoid_segments": [
-          "UK businesses without exports to the Middle East",
-          "pure domestic UK sellers"
-        ],
-        "sales_angle": "The current conflict in the Middle East may impact your business's payments from customers in the region.",
-        "exposure_thesis_template": "This company exports goods to the Middle East, and the current conflict affects their payment timing or demand.",
+        "ideal_company_profile": "",
+        "category_priority_score": 80,
         "micro_categories": [
           {
             "name": "UK manufacturers exporting to the Middle East",
@@ -6028,11 +6118,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "export to Middle East",
+          "Middle Eastern customers",
+          "international trade"
+        ],
         "segment_signals": [
           "export to Middle East",
           "Middle Eastern customers",
           "international trade"
-        ]
+        ],
+        "avoid_segments": [
+          "UK businesses without exports to the Middle East",
+          "pure domestic UK sellers"
+        ],
+        "sales_angle": "The current conflict in the Middle East may impact your business's payments from customers in the region.",
+        "exposure_thesis_template": "This company exports goods to the Middle East, and the current conflict affects their payment timing or demand."
       }
     ],
     "companies_house_terms": [
@@ -6057,8 +6160,13 @@
       "\"Middle Eastern customers\" UK",
       "UK international trade"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "War news dominated, read from the bottom up for chronology: Iran strikes US bases in Jordan, Kuwait and Bahrain as retaliation widens across region Iran attacks US Fifth Fleet in Bahrain after American strikes target Hormuz defense CENTCOM declares Iran strikes complete after three waves targeting Hormuz defenses Oil has risen as the US has launched wave after wave after wave of attacks on Iran US launches third wave of Iran strikes as ballistic missiles fired from Isfahan Second wave of US attacks on Iran said to be underway Iran foreign minister Araqchi warns US to leave region, pledges resp",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "Oil price exposure",
+      "Geopolitical risk"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-10T06:27:04.045Z"
@@ -6544,6 +6652,50 @@
     "exposure_types": [
       "USD strength against North Asia currencies"
     ],
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "99ce03e96abd02c5": {
+    "id": "99ce03e96abd02c5",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/what-is-the-distribution-of-forecasts-for-the-us-cpi-20260610/",
+    "headline": "What is the distribution of forecasts for the US CPI?",
+    "raw_summary": "The ranges of estimates are important in terms of market reaction because when the actual data deviates from the expectations, it creates a surprise effect. Another important input in market's reaction is the distribution of forecasts. In fact, although we can have a range of estimates, most forecasts might be clustered on the upper bound of the range, so even if the data comes out inside the range of estimates but on the lower bound of the range, it can still create a surprise effect. CPI Y/Y 4.3% (21%) 4.2% (60%) - consensus 4.1% (19%) CPI M/M 0.7% (2%) 0.6% (20%) 0.5% (63%) - consensus 0.4%",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-06-10T08:08:35.275Z",
+    "event_type": "Economic forecast",
+    "event_breadth": "macro",
+    "summary": "The distribution of forecasts for the US CPI was reported. While this information can influence market expectations, it does not directly impact UK B2B FX transactions.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US CPI forecast distribution has indirect implications for global markets, including potential FX rate movements, but lacks a direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "The information about the distribution of forecasts could influence market sentiment, but it does not provide a direct reason for UK businesses to review their FX exposure today",
+    "discovery_recommendation": "Context only — the event lacks a direct UK B2B FX hook but can be used as background information",
+    "confidence_level": "medium",
+    "confidence_reason": "While US CPI data can influence global market trends, including FX rates, its direct relevance to specific UK B2B FX transactions is limited without additional context",
+    "what_happened": "Distribution of forecasts for the US CPI was reported, showing a range of estimates",
+    "what_changed_financially": "The distribution of forecasts may influence market expectations and potentially impact FX rates, but no direct financial change occurred",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX payment logic applies, as the event is about economic forecasts rather than actual FX transactions or changes in FX rates",
+    "sales_angle": "Today's US CPI forecast distribution might influence broader market trends, but it doesn't directly affect your FX exposure.",
+    "business_impact_summary": "The event has no direct impact on specific UK businesses' FX exposure or payment flows.",
+    "exposure_types": [],
+    "overall_sales_angle": "The US CPI forecast distribution is a macroeconomic indicator that may influence market trends but does not directly affect UK B2B FX transactions.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "9c20f822d97e14c1": {
@@ -7563,6 +7715,52 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "bb1a6807e8700932": {
+    "id": "bb1a6807e8700932",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/euro-strengthens-against-japanese-yen-due-to-ecb-rate-hike-odds-202606100653",
+    "headline": "Euro strengthens against Japanese Yen due to ECB rate hike odds",
+    "raw_summary": "EUR/JPY extends its gains for the third successive day, trading around 185.30 during the early European hours on Wednesday.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-06-10T08:08:33.152Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "The Euro strengthened against the Japanese Yen due to ECB rate hike odds. This move has limited direct impact on UK businesses.",
+    "currency_pairs": [
+      "EUR/JPY"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "EUR/JPY move has limited direct impact on UK B2B FX payment flows",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate reason for UK businesses to act, as the move is not directly related to GBP",
+    "discovery_recommendation": "Context only — no direct UK B2B FX hook",
+    "confidence_level": "medium",
+    "confidence_reason": "The ECB rate hike odds are driving the EUR, but the impact on UK businesses is indirect and not immediately actionable",
+    "what_happened": "The Euro strengthened against the Japanese Yen due to ECB rate hike odds",
+    "what_changed_financially": "The EUR/JPY rate moved, potentially affecting businesses with exposure to this currency pair",
+    "who_pays_more": "None directly, as this is not a GBP-related move",
+    "who_receives_less": "None directly, as this is not a GBP-related move",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX payment flow impact on UK businesses from this EUR/JPY move",
+    "sales_angle": "No immediate sales angle, as the move is not directly related to GBP",
+    "business_impact_summary": "No direct impact on UK businesses from this EUR/JPY move",
+    "exposure_types": [],
+    "overall_sales_angle": "No immediate reason to call UK businesses about this event",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "c4ecb0d629ab74ca": {
     "id": "c4ecb0d629ab74ca",
     "headline": "China's SAIC Motor to build first EU electric vehicle factory in Europe (Spain)",
@@ -8139,16 +8337,13 @@
   },
   "d5d582fa7f015563": {
     "id": "d5d582fa7f015563",
+    "headline": "British Pound gains ground to near 1.3400 ahead of US CPI release",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/british-pound-gains-ground-to-near-13400-ahead-of-us-cpi-release-202606100554",
-    "headline": "British Pound gains ground to near 1.3400 ahead of US CPI release",
-    "raw_summary": "The GBP/USD pair trades in positive territory around 1.3390 during the early European trading hours on Wednesday. Markets might turn cautious later in the day ahead of the US May Consumer Price Index (CPI) inflation report.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
     "detected_at": "2026-06-10T06:26:58.818Z",
+    "status": "ready",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "GBP/USD moved ahead of US CPI release, potentially affecting UK businesses with USD exposure. The move may impact import costs and export revenue.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -8164,49 +8359,40 @@
       "UK exporters to US customers"
     ],
     "why_now": "Upcoming US CPI release may cause further GBP/USD volatility, impacting UK businesses with USD exposure",
-    "discovery_recommendation": "Limited run — moderate currency move with potential impact on UK businesses with USD transactions",
     "confidence_level": "medium",
     "confidence_reason": "Currency move is moderate but driven by anticipation of economic data, not a central bank decision",
+    "discovery_recommendation": "Limited run — moderate currency move with potential impact on UK businesses with USD transactions",
     "what_happened": "GBP/USD pair gained ground to near 1.3400 ahead of US CPI release",
     "what_changed_financially": "GBP/USD rate moved, potentially affecting UK businesses with USD-denominated transactions",
     "who_pays_more": "UK importers with USD-denominated invoices may face higher costs if the rate moves against them",
     "who_receives_less": "UK exporters receiving USD revenue may see a slight decrease in GBP value if the rate moves against them",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs USD supplier costs or revenue",
     "fx_payment_logic": "UK businesses with USD-denominated transactions may face higher costs or lower revenue due to the GBP/USD move",
-    "sales_angle": "If you have USD-denominated transactions, the current GBP/USD move may impact your costs or revenue.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses with USD exposure may face higher import costs or lower export revenue due to the GBP/USD move.",
-    "exposure_types": [
-      "USD supplier payment exposure",
-      "USD revenue conversion"
-    ],
+    "sales_angle": "If you have USD-denominated transactions, the current GBP/USD move may impact your costs or revenue.",
     "overall_sales_angle": "GBP/USD move may impact your USD transactions — worth reviewing the rate.",
+    "summary": "GBP/USD moved ahead of US CPI release, potentially affecting UK businesses with USD exposure. The move may impact import costs and export revenue.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of US goods",
-        "category_priority_score": 72,
         "business_model": "UK importer buying from US suppliers, paying USD invoices, selling GBP to UK trade",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — USD supplier payments vs GBP revenue",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "USD invoice arrives → UK business converts GBP → GBP weakened → margin compressed",
         "margin_risk": "Medium — 1% GBP/USD move on £200k annual buy ≈ £2k extra cost if unhedged",
         "payment_timing_risk": "Medium — typical 30-60 day payment terms",
         "affected_payment_flow": "USD payments to US suppliers, typically £20k-£200k per shipment",
-        "website_validation_signals": [
-          "imported from USA",
-          "US supplier",
-          "sourced from America"
-        ],
-        "avoid_segments": [
-          "pure UK domestic manufacturers",
-          "retailers without own import ops"
-        ],
-        "sales_angle": "Your upcoming USD supplier invoices are costing more in GBP than they were last month.",
-        "exposure_thesis_template": "This company imports goods from US. GBP/USD move increases GBP cost of USD supplier invoices.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of US machinery parts",
@@ -8221,11 +8407,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from USA",
+          "US supplier",
+          "sourced from America"
+        ],
         "segment_signals": [
           "imported from USA",
           "US supplier",
           "sourced from America"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming USD supplier invoices are costing more in GBP than they were last month.",
+        "exposure_thesis_template": "This company imports goods from US. GBP/USD move increases GBP cost of USD supplier invoices."
       }
     ],
     "companies_house_terms": [
@@ -8236,8 +8435,13 @@
       "\"US machinery importer\" UK",
       "\"US parts\" UK distributor"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "The GBP/USD pair trades in positive territory around 1.3390 during the early European trading hours on Wednesday. Markets might turn cautious later in the day ahead of the US May Consumer Price Index (CPI) inflation report.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-10T06:27:04.244Z"
@@ -8600,6 +8804,50 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-02T23:29:28.204Z"
+  },
+  "e7c8f994dba389e4": {
+    "id": "e7c8f994dba389e4",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/live/2026/jun/10/asian-stocks-fall-us-iran-exchange-fire-middle-east-strait-of-hormuz-oil-prices-latest-news-updates",
+    "headline": "Asian stocks fall as US and Iran exchange fire – business live",
+    "raw_summary": "Rolling coverage of the latest economic and financial news European stock markets have opened broadly flat, as investors look ahead to a key US inflation reading due later this afternoon. The UK’s blue chip FTSE 100 index has ticked up 0.1%. The German Dax and the French Cac 40 are also up by about 0.1%. The Stoxx Europe 600, which tracks the biggest companies on the continent, is up 0.07%. US May inflation data is due out later today, with economists expecting both core and headline inflation to tick up. Consensus is for headline CPI inflation to reach 4.2%, which would be the highest it’s be",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|; -2 \\bftse\\b",
+    "detected_at": "2026-06-10T08:08:37.141Z",
+    "event_type": "Economic data release",
+    "event_breadth": "macro",
+    "summary": "US-Iran tensions and upcoming US inflation data have global market implications but lack a direct UK B2B FX hook",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US inflation data may influence global interest rates and currency markets indirectly, but has no direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "US inflation data may influence global market sentiment, but lacks a direct UK B2B FX hook",
+    "discovery_recommendation": "Context only — no direct payment-flow relevance",
+    "confidence_level": "medium",
+    "confidence_reason": "US inflation data affects global markets but lacks a clear, direct link to specific UK business FX payment flows",
+    "what_happened": "US and Iran exchanged fire, and US May inflation data is due out later today",
+    "what_changed_financially": "Global markets are watching the US-Iran situation and awaiting US inflation data",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No direct FX payment logic applies to this event",
+    "sales_angle": "Global market volatility may impact currency markets, but this event lacks a direct UK B2B FX angle",
+    "business_impact_summary": "No specific UK businesses are directly affected by this event in terms of FX payment flows",
+    "exposure_types": [],
+    "overall_sales_angle": "No direct UK B2B FX hook exists for this event",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "e8d2b3e74cb462f0": {
     "id": "e8d2b3e74cb462f0",
