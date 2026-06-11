@@ -1869,6 +1869,58 @@
     "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d",
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "27c9a7a8c44fcbb4": {
+    "id": "27c9a7a8c44fcbb4",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/taiwan-dollar-tech-outflows-and-rising-inflation-weigh-on-twd-commerzbank-202606111619",
+    "headline": "Taiwan Dollar: Tech outflows and rising inflation weigh on TWD – Commerzbank",
+    "raw_summary": "Commerzbank notes that USD/TWD has risen for five consecutive sessions to 31.68, driven by foreign equity outflows as global tech stocks correct. Taiwan’s exports and imports are surging on AI-related demand, while CPI has moved above the central bank’s 2% target.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-06-11T23:16:16.623Z",
+    "event_type": "Currency move",
+    "event_breadth": "emerging_market_currency",
+    "summary": "Taiwan Dollar weakened due to tech outflows and rising inflation. While not directly affecting UK businesses, it could influence import costs or competitiveness for those dealing with Taiwanese tech companies.",
+    "currency_pairs": [
+      "USD/TWD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Taiwan Dollar movement has indirect implications for UK businesses importing tech components from Taiwan or competing with Taiwanese tech exporters",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK tech importers from Taiwan",
+      "UK businesses competing with Taiwanese tech exporters"
+    ],
+    "why_now": "Recent surge in Taiwanese exports and imports due to AI-related demand might indirectly affect UK businesses",
+    "discovery_recommendation": "Context only — no direct UK B2B FX hook but could be used as background for outreach to relevant businesses",
+    "confidence_level": "low",
+    "confidence_reason": "Event is more relevant to Taiwanese economy and global tech market than to specific UK B2B FX payment flows",
+    "what_happened": "Taiwan Dollar weakened against USD due to tech outflows and rising inflation",
+    "what_changed_financially": "USD/TWD rate increased, affecting Taiwanese export and import costs",
+    "who_pays_more": "Taiwanese importers of USD-priced goods, potentially affecting their export pricing to UK",
+    "who_receives_less": "Taiwanese exporters selling in USD, possibly impacting their competitiveness in the UK market",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "USD/TWD cross-border payments, potentially influencing GBP/TWD or GBP/USD for UK businesses",
+    "fx_payment_logic": "Taiwanese companies pay USD for imports or receive USD for exports, which could impact their pricing strategy for the UK market, indirectly affecting UK businesses through trade.",
+    "sales_angle": "If you import tech components from Taiwan or compete with Taiwanese exporters, recent currency moves might be worth monitoring for potential implications on your costs or competitiveness.",
+    "business_impact_summary": "UK businesses importing from Taiwan or competing with Taiwanese tech exporters might see indirect effects from the Taiwan Dollar's movement against the USD, potentially altering their costs or market positioning.",
+    "exposure_types": [
+      "Indirect import cost exposure via Taiwanese suppliers",
+      "Competitiveness exposure due to Taiwanese export pricing"
+    ],
+    "overall_sales_angle": "Taiwanese currency movements could have a ripple effect on UK businesses dealing with Taiwanese tech companies, making it a background factor to consider in their FX strategy.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "299b69e987a9d92d": {
     "id": "299b69e987a9d92d",
     "headline": "US Dollar: Resilience and geopolitical risks – MUFG",
@@ -2732,6 +2784,50 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:52:22.180Z"
+  },
+  "404aaa3d6f241623": {
+    "id": "404aaa3d6f241623",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-may-ppi-65-yy-vs-64-expected-20260611/",
+    "headline": "US May PPI +6.5% y/y vs +6.4% expected",
+    "raw_summary": "Prior was +6.0% (revised to +5.7%) PPI +1.1% m/m vs +0.7% expected Prior m/m reading was +1.4% Ex food and energy +4.9% y/y vs +5.4% expected Ex food and energy +0.4% m/m vs +0.5% expected Prior m/m ex food and energy +1.0% (revised to +0.7%) Ex food, energy and trade +5.1% vs +4.4% prior Ex food, energy and trade +0.8% vs +0.5% prior The headline highlights the pipeline problem for US inflation as the Iran war continues and it will feed into PCE inflation next week. The market will take some solace in the downward revisions and the core readings. They offer a similar take to CPI, which showed",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d",
+    "detected_at": "2026-06-11T23:16:20.101Z",
+    "event_type": "inflation data",
+    "event_breadth": "macro",
+    "summary": "US PPI data shows higher-than-expected inflation, which may influence global economic trends but lacks direct relevance for UK B2B FX decisions",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US PPI data has indirect implications for global inflation and potentially FX, but lacks a direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "US inflation data may have long-term implications for global trade and FX, but lacks immediate relevance for UK B2B FX decisions",
+    "discovery_recommendation": "Context only — no direct UK B2B FX hook, but may inform broader market context",
+    "confidence_level": "medium",
+    "confidence_reason": "While US inflation data can influence global economic trends, its direct impact on UK businesses' foreign currency payment flows is limited and indirect",
+    "what_happened": "US May PPI increased by 6.5% y/y, higher than expected",
+    "what_changed_financially": "US inflation data may influence future monetary policy decisions and global economic trends",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "None directly applicable",
+    "sales_angle": "While not directly relevant, global inflation trends can impact UK businesses. Let's discuss how to navigate potential FX implications",
+    "business_impact_summary": "US inflation data may have indirect implications for UK businesses through global economic trends, but lacks a direct FX payment flow hook",
+    "exposure_types": [],
+    "overall_sales_angle": "Global economic trends, including US inflation, can impact UK businesses. It's essential to consider potential FX implications",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
   },
   "40a21a245d2fb7c5": {
     "id": "40a21a245d2fb7c5",
@@ -3671,6 +3767,50 @@
       "CAD payment exposure for European oil importers",
       "EUR revenue conversion for Canadian oil exporters"
     ],
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "51a7f57e052ba5d8": {
+    "id": "51a7f57e052ba5d8",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-fx-news-wrap-another-day-another-deal-soon-this-time-for-sure-20260611/",
+    "headline": "investingLive Americas FX news wrap: Another day, another 'deal soon'. This time for sure?",
+    "raw_summary": "US-Iran Schrödinger's cat deal: signed and unsigned at once. Where are we at? Markets surge as Trump announces deal with Iran Breaking: Trump cancels scheduled attacks on Iran today, says there is an agreement US sells 30-year bonds at 5.020% vs 5.008% WI US 30 year fixed-rate mortgage averages 6.52% up from 6.48% last week ECB sources report: Policymakers see July pause if energy prices stay where they are World Bank cuts 2026 global GDP growth to 2.5% from 2.6% ECB's Lagarde: Risks to the growth outlook are to the downside Trump says Iran will be hit hard and \"at some point\" the US will take",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-06-11T23:16:14.023Z",
+    "event_type": "Geopolitical/Economic Indicators",
+    "event_breadth": "broad_macro",
+    "summary": "Geopolitical developments and economic indicators can influence market sentiment and potentially currency markets, but the direct impact on UK B2B FX transactions is not clear",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Global events and economic indicators can influence currency markets, but direct UK B2B FX hook is indirect",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "Market sentiment and economic indicators can influence currency markets, but the direct impact is not immediate or clear",
+    "discovery_recommendation": "Context only — keep for messaging context, but no direct UK B2B FX hook",
+    "confidence_level": "medium",
+    "confidence_reason": "While the news involves international relations and economic indicators, the direct impact on UK B2B FX transactions is not clear",
+    "what_happened": "US-Iran deal negotiations and global economic indicators influenced market sentiment",
+    "what_changed_financially": "Global market sentiment shifted due to geopolitical developments and economic forecasts",
+    "who_pays_more": "None directly identified",
+    "who_receives_less": "None directly identified",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly identified",
+    "fx_payment_logic": "No direct FX payment logic identified from the given information",
+    "sales_angle": "Global economic indicators and geopolitical events can impact currency markets, but the relevance to specific UK businesses is not direct",
+    "business_impact_summary": "The impact on UK businesses is not directly identifiable from the information provided",
+    "exposure_types": [],
+    "overall_sales_angle": "While global events can influence currency markets, the direct relevance to UK B2B FX transactions is not clear",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "546df6bb0af5e426": {
@@ -5385,6 +5525,161 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-11T08:47:17.126Z"
   },
+  "7ca9609f8ea914be": {
+    "id": "7ca9609f8ea914be",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/british-pound-slips-as-war-driven-ppi-fuels-us-dollar-rebound-202606111534",
+    "headline": "British Pound slips as war-driven PPI fuels US Dollar rebound",
+    "raw_summary": "The Pound Sterling (GBP) registers losses of 0.19% on Thursday after the latest US inflation report reflected the impact of the Iran war on producer prices, while an escalation of hostilities between Washington and Tehran triggered a recovery in Oil prices.",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-06-11T23:16:12.123Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "GBP weakened against USD and EUR on geopolitical uncertainty. UK businesses paying USD or EUR supplier invoices face higher GBP cost.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "GBP weakness driven by external geopolitical factors — affects UK importers and exporters with USD or EUR exposure",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK importers of US goods",
+      "UK exporters with USD customer revenue",
+      "UK European food importers"
+    ],
+    "why_now": "USD or EUR supplier invoices placed before the GBP dip now cost more to settle",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "Currency move is driven by geopolitical noise, not a central bank decision — moderate urgency",
+    "what_happened": "GBP slipped against USD and EUR following geopolitical tensions and US inflation report",
+    "what_changed_financially": "GBP/USD and GBP/EUR rates moved, affecting UK importers and exporters",
+    "who_pays_more": "UK importers with outstanding USD or EUR supplier invoices",
+    "who_receives_less": "UK exporters converting USD or EUR customer payments back to GBP",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs USD or EUR supplier costs",
+    "fx_payment_logic": "UK importers order goods priced in USD or EUR → invoice arrives → they must convert GBP to USD or EUR to pay → GBP has weakened → more GBP required per USD or EUR",
+    "sales_angle": "If you have upcoming USD or EUR supplier payments, the current rate is worse than it was last week.",
+    "business_impact_summary": "UK importers of US or European goods face higher landed costs on recent orders. Exporters receiving USD or EUR revenue see a modest gain on conversion.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "EUR supplier payment exposure"
+    ],
+    "overall_sales_angle": "GBP slippage means upcoming USD or EUR invoices cost more — worth reviewing the rate.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US goods",
+        "category_priority_score": 72,
+        "business_model": "UK wholesaler/distributor buying from US manufacturers, paying USD invoices, selling GBP to UK trade",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure — USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "USD invoice arrives → UK business converts GBP → GBP weaker → margin compressed",
+        "margin_risk": "Medium — 1.2% GBP/USD move on £200k annual buy ≈ £2.4k extra cost if unhedged",
+        "payment_timing_risk": "Medium — typical 30-60 day payment terms",
+        "affected_payment_flow": "USD payments to US manufacturers, typically £20k-£200k per shipment",
+        "website_validation_signals": [
+          "imported from USA",
+          "US supplier",
+          "sourced from America"
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming USD supplier invoices are costing more in GBP than they were last month.",
+        "exposure_thesis_template": "This company imports goods from the US. GBP/USD move increases GBP cost of USD supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK importers of US machinery parts",
+            "why": "Pay USD to US manufacturers — direct exposure to GBP/USD move on component costs",
+            "search_queries": [
+              "\"US machinery importer\" UK",
+              "\"US parts\" UK distributor"
+            ],
+            "companies_house_terms": [
+              "US machinery",
+              "american parts"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from USA",
+          "US supplier",
+          "sourced from America"
+        ]
+      },
+      {
+        "segment_name": "UK importers of European goods",
+        "category_priority_score": 68,
+        "business_model": "UK wholesaler/distributor buying from EU manufacturers, paying EUR invoices, selling GBP to UK trade",
+        "exposure_level": "Medium",
+        "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EUR invoice arrives → UK business converts GBP → GBP weaker → margin compressed",
+        "margin_risk": "Medium — 1% GBP/EUR move on £150k annual buy ≈ £1.5k extra cost if unhedged",
+        "payment_timing_risk": "Medium — typical 30-60 day payment terms",
+        "affected_payment_flow": "EUR payments to EU manufacturers, typically £15k-£150k per shipment",
+        "website_validation_signals": [
+          "imported from Europe",
+          "European supplier",
+          "sourced from EU"
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming EUR supplier invoices are costing more in GBP than they were last month.",
+        "exposure_thesis_template": "This company imports goods from Europe. GBP/EUR move increases GBP cost of EUR supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK importers of Italian food",
+            "why": "Pay EUR to EU manufacturers — direct exposure to GBP/EUR move on food costs",
+            "search_queries": [
+              "\"Italian food importer\" UK",
+              "\"European food\" UK distributor"
+            ],
+            "companies_house_terms": [
+              "Italian food",
+              "European cuisine"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from Europe",
+          "European supplier",
+          "sourced from EU"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "US machinery",
+      "american parts",
+      "Italian food",
+      "European cuisine"
+    ],
+    "all_search_queries": [
+      "\"US machinery importer\" UK",
+      "\"US parts\" UK distributor",
+      "\"Italian food importer\" UK",
+      "\"European food\" UK distributor"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-11T23:16:30.289Z"
+  },
   "7d6b4ac1e310e58c": {
     "id": "7d6b4ac1e310e58c",
     "headline": "Australia Q1 GDP slows to 0.3% as data centre imports drag on growth",
@@ -6249,6 +6544,50 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-08T23:09:12.211Z"
   },
+  "8ea3742b6f33e913": {
+    "id": "8ea3742b6f33e913",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-treasury-to-auction-off-22-billion-of-30-year-bonds-at-the-top-of-the-hour-20260611/",
+    "headline": "U.S. Treasury to auction off $22 billion of 30 year bonds at the top of the hour",
+    "raw_summary": "The US treasury will auction off $22 billion of 30 year bonds at the top of the hour. The auction is the third of three coupon auctions this week. The three year note auction was met with average demand. The 10 year auction was met with strong international demand which led to a solid (grade A-) distribution (negative tail, higher than average bid to cover, lower dealer support needed). The 30 year bond auction will determine the overall success of the issuance this week. The 30-year Treasury bond is important because it reflects the market's view of long-term growth, inflation, and U.S. fisca",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-06-11T23:16:18.225Z",
+    "event_type": "Bond auction",
+    "event_breadth": "macro",
+    "summary": "US Treasury's 30-year bond auction may impact long-term interest rates and inflation expectations, but it has no direct UK B2B FX implications",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US Treasury bond auction has indirect implications for global interest rates and potentially FX, but no direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "The auction's outcome may influence market sentiment and interest rates, but it's not a direct reason to call UK businesses today",
+    "discovery_recommendation": "Context only — keep for messaging context, no discovery effort",
+    "confidence_level": "medium",
+    "confidence_reason": "The event is a scheduled auction and its impact on FX is indirect and dependent on various market factors",
+    "what_happened": "US Treasury to auction $22 billion of 30-year bonds",
+    "what_changed_financially": "Potential impact on long-term interest rates and inflation expectations",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "None",
+    "sales_angle": "None",
+    "business_impact_summary": "The auction's outcome may have indirect implications for UK businesses, but it's not a direct reason to review FX exposure",
+    "exposure_types": [],
+    "overall_sales_angle": "None",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "8fd05b2d13844d95": {
     "id": "8fd05b2d13844d95",
     "headline": "investingLive Asia-Pacific FX news wrap: The day the war ceasefire really hit the fan.",
@@ -6928,96 +7267,6 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "98a19c3b341754be": {
-    "id": "98a19c3b341754be",
-    "source": "FXStreet",
-    "source_url": "https://www.fxstreet.com/news/canadian-dollar-boc-keeps-options-open-on-energy-and-trade-deutsche-bank-202606110840",
-    "headline": "Canadian Dollar: BoC keeps options open on energy and trade – Deutsche Bank",
-    "raw_summary": "Deutsche Bank highlights that the Bank of Canada left its policy rate unchanged at 2.25% but stressed flexibility. Governor Macklem indicated that sustained higher energy prices could require consecutive rate hikes, while potential US trade restrictions might instead justify rate cuts.",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-06-11T09:11:28.510Z",
-    "event_type": "Monetary policy",
-    "event_breadth": "country_specific",
-    "summary": "The Bank of Canada's decision to keep rates unchanged with an emphasis on flexibility does not directly impact UK businesses' foreign currency payment flows",
-    "currency_pairs": [
-      "CAD/USD"
-    ],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "No direct UK B2B FX hook from BoC policy stance",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "No immediate reason for UK businesses to adjust their FX strategies based on this event",
-    "discovery_recommendation": "Context only — no direct UK B2B FX implications",
-    "confidence_level": "high",
-    "confidence_reason": "The event is about Canadian monetary policy and its potential implications on the Canadian Dollar, which does not directly affect UK businesses' foreign currency payment flows",
-    "what_happened": "The Bank of Canada kept its policy rate unchanged but emphasized flexibility in response to potential changes in energy prices and trade policies",
-    "what_changed_financially": "The BoC's stance on potential rate hikes or cuts based on energy prices and trade policies",
-    "who_pays_more": "None directly in the UK",
-    "who_receives_less": "None directly in the UK",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly",
-    "fx_payment_logic": "No direct FX payment logic applies to UK businesses from this event",
-    "sales_angle": "No immediate sales angle based on this event",
-    "business_impact_summary": "No direct impact on UK businesses from the BoC's policy stance",
-    "exposure_types": [],
-    "overall_sales_angle": "No sharp reason to call UK businesses today based on this event",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
-  },
-  "99ce03e96abd02c5": {
-    "id": "99ce03e96abd02c5",
-    "source": "ForexLive",
-    "source_url": "https://investinglive.com/news/what-is-the-distribution-of-forecasts-for-the-us-cpi-20260610/",
-    "headline": "What is the distribution of forecasts for the US CPI?",
-    "raw_summary": "The ranges of estimates are important in terms of market reaction because when the actual data deviates from the expectations, it creates a surprise effect. Another important input in market's reaction is the distribution of forecasts. In fact, although we can have a range of estimates, most forecasts might be clustered on the upper bound of the range, so even if the data comes out inside the range of estimates but on the lower bound of the range, it can still create a surprise effect. CPI Y/Y 4.3% (21%) 4.2% (60%) - consensus 4.1% (19%) CPI M/M 0.7% (2%) 0.6% (20%) 0.5% (63%) - consensus 0.4%",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-06-11T09:11:33.018Z",
-    "event_type": "Economic forecast",
-    "event_breadth": "macro",
-    "summary": "The distribution of forecasts for the US CPI indicates a potential for market surprise. However, this has no direct impact on UK B2B FX decisions.",
-    "currency_pairs": [],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "US CPI forecast distribution has indirect implications for global markets, including potential FX movements, but lacks a direct UK B2B FX hook",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "The information on CPI forecast distribution might influence market expectations and potentially impact future FX rates, but it does not directly affect current UK B2B FX decisions",
-    "discovery_recommendation": "Context only — the event lacks a direct UK B2B FX payment-flow hook",
-    "confidence_level": "medium",
-    "confidence_reason": "While the CPI forecast distribution is crucial for market reactions, its direct relevance to UK B2B FX decisions is limited",
-    "what_happened": "Distribution of forecasts for the US CPI was reported",
-    "what_changed_financially": "Potential for surprise effect in market reactions based on the distribution of CPI forecasts",
-    "who_pays_more": "None directly",
-    "who_receives_less": "None directly",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None",
-    "fx_payment_logic": "No direct FX payment logic applies as the event does not involve a specific currency pair or payment flow relevant to UK B2B transactions",
-    "sales_angle": "Today's CPI forecast distribution might influence future market trends, but it does not directly impact your current FX needs.",
-    "business_impact_summary": "The US CPI forecast distribution has indirect implications for global market trends but does not directly affect UK businesses' FX exposures.",
-    "exposure_types": [],
-    "overall_sales_angle": "The CPI forecast distribution is a macroeconomic indicator that might influence future FX trends, but it does not currently affect UK B2B FX decisions.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
-  },
   "9b868611f84bdcd6": {
     "id": "9b868611f84bdcd6",
     "source": "ForexLive",
@@ -7026,35 +7275,35 @@
     "raw_summary": "The US treasury will auction off $39 billion of 10 year notes at the top of the hour. The current 10 year yield is at 4.534%. At the last auction the yield was set at 4.468%. Since the war started on February 28, the low yield was at 3.926% on March 2, the high was reached at 4.687% on May 19. The corrective low reached since the high has dipped to 4.422% reached last week. Why the 10-Year Yield Matters Mortgage Rates – Higher yields usually lead to higher mortgage rates, which can slow home sales and construction. Business Borrowing – Companies pay more to borrow when yields rise, potentially",
     "pre_relevance_score": 4,
     "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
-    "detected_at": "2026-06-11T09:11:30.940Z",
-    "event_type": "US Treasury Auction",
+    "detected_at": "2026-06-11T23:16:22.288Z",
+    "event_type": "US treasury auction",
     "event_breadth": "macro_economic",
-    "summary": "The US treasury's auction of 10-year notes may influence global interest rates and economic conditions, but does not directly impact UK businesses' foreign exchange exposure",
+    "summary": "US treasury auction of 10-year notes may influence global interest rates, but lacks direct relevance to UK B2B FX payment flows",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "US treasury auction of 10-year notes has indirect implications for FX through potential influence on global interest rates and economic conditions, but lacks a direct UK B2B FX hook",
+    "commercial_relevance_reason": "US treasury auction of 10-year notes has indirect implications for UK businesses through potential impact on global interest rates and mortgage rates, but lacks direct FX payment flow relevance",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
-    "why_now": "The auction's outcome could have long-term implications for global economic conditions, but lacks a direct and immediate UK B2B FX hook",
-    "discovery_recommendation": "Context only — the event lacks a direct UK B2B FX payment flow hook but can be used as background information for outreach",
-    "confidence_level": "high",
-    "confidence_reason": "The event, while significant for US financial markets, does not directly impact UK businesses' foreign exchange exposure in a manner that warrants immediate discovery or outreach",
-    "what_happened": "The US treasury is auctioning $39 billion of 10-year notes",
-    "what_changed_financially": "The yield on the 10-year notes could influence global interest rates and economic conditions",
-    "who_pays_more": "None directly, but potentially US and global businesses through higher borrowing costs if yields rise",
-    "who_receives_less": "None directly, but potentially US and global businesses if higher yields lead to reduced borrowing and spending",
+    "why_now": "The auction's outcome could influence global interest rates, but the direct impact on UK B2B FX payment flows is minimal",
+    "discovery_recommendation": "Context only — keep for messaging context, no direct FX hook",
+    "confidence_level": "medium",
+    "confidence_reason": "While the US treasury auction has broad economic implications, its direct connection to UK B2B FX payment flows is tenuous and not immediately actionable",
+    "what_happened": "US treasury to auction $39 billion of 10-year notes",
+    "what_changed_financially": "Potential impact on US and global interest rates, which could influence mortgage rates and business borrowing costs",
+    "who_pays_more": "None directly, but potentially UK businesses with USD exposure through higher borrowing costs if yields rise",
+    "who_receives_less": "None directly",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
     "affected_payment_flow": "None directly",
-    "fx_payment_logic": "None directly applicable",
-    "sales_angle": "Today's US treasury auction could have implications for global economic conditions, but how does it relate to your business's foreign exchange needs?",
-    "business_impact_summary": "The auction's outcome may indirectly affect UK businesses through changes in global economic conditions, but lacks a direct and immediate impact on their foreign exchange exposure",
+    "fx_payment_logic": "No direct FX payment flow logic applies, as the event's primary impact is on US interest rates and mortgage rates",
+    "sales_angle": "While not directly relevant, changes in global interest rates can have broad economic implications, including potential impacts on FX rates and borrowing costs",
+    "business_impact_summary": "The auction's outcome may have indirect implications for UK businesses through changes in global interest rates, but direct FX payment flow impact is minimal",
     "exposure_types": [],
-    "overall_sales_angle": "The US treasury auction is a significant event, but its implications for your business's foreign exchange needs are indirect at best",
+    "overall_sales_angle": "Global economic events like the US treasury auction can have far-reaching implications, but this specific event lacks a direct FX hook",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -10579,6 +10828,193 @@
       "EUR revenue conversion"
     ],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "fc19ffcab923d71f": {
+    "id": "fc19ffcab923d71f",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/2026/jun/11/ecb-eurozone-interest-rates-iran-war-inflation",
+    "headline": "ECB raises eurozone interest rates as Iran war stokes inflation",
+    "raw_summary": "European Central Bank increases main deposit rate to 2.25%, with two further rises expected by next spring Business live – latest updates The European Central Bank has raised interest rates for the first time since 2023 in response to higher inflation caused by the war in Iran. The ECB raised its main deposit rate from 2% to 2.25% in a move that financial markets expect to be the first of three rises by next spring. Continue reading...",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-06-11T23:16:26.407Z",
+    "event_type": "Central Bank Decision",
+    "event_breadth": "broad_macro",
+    "summary": "The ECB's interest rate hike in response to higher inflation caused by the war in Iran affects UK businesses with EUR-denominated transactions. The strengthened EUR may increase costs for UK importers and decrease revenue for UK exporters.",
+    "currency_pairs": [
+      "GBP/EUR",
+      "EUR/USD"
+    ],
+    "urgency_score": 9,
+    "commercial_relevance": 9,
+    "commercial_relevance_reason": "ECB interest rate hike affects eurozone inflation and currency valuation, impacting UK businesses with EUR-denominated transactions",
+    "trigger_strength": "strong",
+    "trigger_score": 92,
+    "discovery_mode": "full",
+    "recommended_query_budget": 35,
+    "likely_affected_businesses": [
+      "UK importers of European goods",
+      "UK exporters with EUR customer revenue",
+      "UK businesses with EUR-denominated loans"
+    ],
+    "why_now": "The ECB's rate hike decision has immediate implications for UK businesses with EUR payment flows, making it essential to review and adjust their currency strategies",
+    "discovery_recommendation": "Full discovery run to identify UK businesses with significant EUR payment flows and assess their exposure to the ECB's rate hike decision",
+    "confidence_level": "high",
+    "confidence_reason": "ECB's explicit rate hike decision has direct implications for EUR currency valuation and UK businesses with EUR payment flows",
+    "what_happened": "The European Central Bank raised its main deposit rate to 2.25% in response to higher inflation caused by the war in Iran",
+    "what_changed_financially": "The ECB's main deposit rate increased by 0.25%, affecting eurozone inflation and currency valuation",
+    "who_pays_more": "UK businesses with EUR-denominated supplier invoices or loans may face higher costs due to the strengthened EUR",
+    "who_receives_less": "UK businesses with EUR-denominated revenue may receive less GBP upon conversion due to the strengthened EUR",
+    "margin_risk": "High",
+    "payment_timing_risk": "High",
+    "affected_payment_flow": "EUR-denominated transactions, including supplier invoices and loans",
+    "fx_payment_logic": "UK businesses with EUR-denominated transactions may face higher costs or lower revenue due to the strengthened EUR, highlighting the need for effective currency risk management strategies",
+    "sales_angle": "The ECB's rate hike decision may impact your business's EUR-denominated transactions, and it's essential to review your currency strategy to mitigate potential losses",
+    "business_impact_summary": "UK businesses with EUR payment flows may face higher costs or lower revenue due to the strengthened EUR, emphasizing the need for proactive currency risk management",
+    "exposure_types": [
+      "EUR supplier payment exposure",
+      "EUR revenue conversion"
+    ],
+    "overall_sales_angle": "The ECB's rate hike decision has significant implications for UK businesses with EUR payment flows, making it crucial to assess and manage their currency exposure",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of European goods",
+        "category_priority_score": 95,
+        "business_model": "UK businesses importing goods from European suppliers, paying EUR invoices, and selling GBP to UK trade",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EUR invoice arrives → UK business converts GBP → EUR strengthened → more GBP required per EUR",
+        "margin_risk": "High — 2% GBP/EUR move on £500k annual buy ≈ £10k extra cost if unhedged",
+        "payment_timing_risk": "High — typical 30-90 day payment terms",
+        "affected_payment_flow": "EUR payments to European suppliers, typically £50k-£500k per shipment",
+        "website_validation_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming EUR supplier invoices may cost more in GBP due to the ECB's rate hike decision",
+        "exposure_thesis_template": "This company imports goods from European suppliers. The ECB's rate hike decision increases the GBP cost of EUR supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK importers of German machinery parts",
+            "why": "Pay EUR to German manufacturers — direct exposure to GBP/EUR move on component costs",
+            "search_queries": [
+              "\"German machinery importer\" UK",
+              "\"machinery parts\" UK distributor",
+              "German equipment UK supplier"
+            ],
+            "companies_house_terms": [
+              "German machinery",
+              "machinery imports",
+              "equipment supplier"
+            ]
+          },
+          {
+            "name": "UK distributors of French consumer goods",
+            "why": "EUR-priced branded goods from France — margin hit when GBP weakens at order-to-payment stage",
+            "search_queries": [
+              "\"French goods distributor\" UK",
+              "\"exclusive distributor\" French UK",
+              "French consumer goods UK importer"
+            ],
+            "companies_house_terms": [
+              "French goods",
+              "consumer imports",
+              "French distributor"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ]
+      },
+      {
+        "segment_name": "UK exporters with EUR customer revenue",
+        "category_priority_score": 85,
+        "business_model": "UK businesses exporting goods or services to European customers, receiving EUR revenue, and converting to GBP",
+        "exposure_level": "High",
+        "exposure_type": "Revenue conversion — EUR receipts into GBP",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EU customer pays EUR → UK exporter receives EUR → converts to GBP → EUR strengthened → less GBP per EUR received",
+        "margin_risk": "Medium — EUR strengthening is a marginal benefit on EUR receipts but creates pricing pressure on future EUR quotes",
+        "payment_timing_risk": "Medium — EUR revenue sitting unconverted faces rate risk on timing of conversion",
+        "affected_payment_flow": "EUR receipts from European customers, converting to GBP",
+        "website_validation_signals": [
+          "export",
+          "European customers",
+          "EU market",
+          "sold throughout Europe"
+        ],
+        "avoid_segments": [
+          "pure domestic UK sellers",
+          "businesses with no EU customer base"
+        ],
+        "sales_angle": "If you're receiving EUR from European customers, the conversion timing can make a meaningful difference due to the ECB's rate hike decision",
+        "exposure_thesis_template": "This company exports to European customers in EUR. The ECB's rate hike decision affects the GBP value of incoming EUR receipts.",
+        "micro_categories": [
+          {
+            "name": "UK manufacturers exporting to EU buyers",
+            "why": "Invoice EU customers in EUR — GBP/EUR rate on conversion date affects GBP revenue",
+            "search_queries": [
+              "UK manufacturer \"export to Europe\"",
+              "\"European customers\" UK manufacturer",
+              "UK exporter EU market"
+            ],
+            "companies_house_terms": [
+              "exports europe",
+              "uk manufacturer export",
+              "european sales"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "export",
+          "European customers",
+          "EU market",
+          "sold throughout Europe"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "German machinery",
+      "machinery imports",
+      "equipment supplier",
+      "French goods",
+      "consumer imports",
+      "French distributor",
+      "exports europe",
+      "uk manufacturer export",
+      "european sales"
+    ],
+    "all_search_queries": [
+      "\"German machinery importer\" UK",
+      "\"machinery parts\" UK distributor",
+      "German equipment UK supplier",
+      "\"French goods distributor\" UK",
+      "\"exclusive distributor\" French UK",
+      "French consumer goods UK importer",
+      "UK manufacturer \"export to Europe\"",
+      "\"European customers\" UK manufacturer",
+      "UK exporter EU market"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-11T23:16:31.993Z"
   },
   "fc513b03f590b2a4": {
     "id": "fc513b03f590b2a4",
