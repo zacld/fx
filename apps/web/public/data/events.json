@@ -635,35 +635,35 @@
     "raw_summary": "Details of the deal here A memorandum of understanding (MoU) between the United States and Iran could be signed as soon as Sunday in Geneva, according to Bloomberg. Trump unexpectedly called off planned strikes on Iran yesterday and instead announced that Washington had reached the framework of a deal with Tehran (which is exactly the same they've been negotiating on for months). Under the proposed MoU, the US would commit to lifting its naval blockade around Iran, likely within a defined timeframe tied to implementation benchmarks. In exchange, Iran would reopen the Strait of Hormuz and resto",
     "pre_relevance_score": 5,
     "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
-    "detected_at": "2026-06-12T23:09:32.542Z",
+    "detected_at": "2026-06-13T02:33:40.693Z",
     "event_type": "Geopolitical event",
-    "event_breadth": "broad_geopolitics",
-    "summary": "A potential US-Iran MoU lacks direct UK B2B FX implications. The event may have indirect effects on oil prices and global trade, but these are speculative at this stage.",
+    "event_breadth": "global",
+    "summary": "US and Iran may sign an MoU, potentially reducing tensions and oil price volatility. No direct UK B2B FX impact.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "US-Iran MoU may have indirect implications on global oil prices and trade, but lacks a direct UK B2B FX hook",
+    "commercial_relevance_reason": "Potential for reduced oil price volatility, but no direct UK B2B FX hook",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
-    "why_now": "Event is speculative and lacks a clear UK B2B FX angle",
-    "discovery_recommendation": "Context only — keep for messaging context, but do not generate new leads from this event",
+    "why_now": "No immediate FX relevance, but potential for future commodity price impacts",
+    "discovery_recommendation": "Context only — no direct payment-flow hook",
     "confidence_level": "medium",
-    "confidence_reason": "Event is more geopolitical than directly FX-relevant; potential oil price implications are speculative at this stage",
-    "what_happened": "US and Iran may sign a memorandum of understanding (MoU) as early as Sunday",
-    "what_changed_financially": "Potential for reduced tensions and possible impact on global oil prices, but no direct financial change yet",
+    "confidence_reason": "Event is geopolitical and may have indirect effects on commodity prices, but lacks clear payment-flow relevance",
+    "what_happened": "US and Iran may sign a memorandum of understanding (MoU) as soon as Sunday",
+    "what_changed_financially": "Potential for reduced tensions and oil price volatility",
     "who_pays_more": "None directly",
     "who_receives_less": "None directly",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "None identified",
-    "fx_payment_logic": "No direct FX payment logic applies to this event",
-    "sales_angle": "No specific sales angle is applicable due to the lack of direct UK B2B FX relevance",
-    "business_impact_summary": "The event has no clear, direct impact on UK businesses in terms of FX payments or revenue",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "No direct FX payment logic applies",
+    "sales_angle": "No immediate sales angle due to lack of direct FX relevance",
+    "business_impact_summary": "No direct business impact expected from this event",
     "exposure_types": [],
-    "overall_sales_angle": "No sharp angle; event kept for general context",
+    "overall_sales_angle": "No sharp sales angle due to indirect and speculative nature of the event",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -1426,16 +1426,13 @@
   },
   "18af209047a1fb46": {
     "id": "18af209047a1fb46",
+    "headline": "UK to set end date for imports of Russian diesel and jet fuel via third countries",
     "source": "GOV.UK Trade",
     "source_url": "https://www.gov.uk/government/news/uk-to-set-end-date-for-imports-of-russian-diesel-and-jet-fuel-via-third-countries",
-    "headline": "UK to set end date for imports of Russian diesel and jet fuel via third countries",
-    "raw_summary": "The Government has today confirmed the timeline for phasing in its ban on imports of refined oil derived from Russia, as part of the recently announced package of sanctions to further squeeze Putin’s war machine.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-06-12T23:09:48.634Z",
+    "status": "ready",
     "event_type": "Sanctions and trade restrictions",
     "event_breadth": "sector_specific",
-    "summary": "The UK government's ban on Russian diesel and jet fuel imports via third countries may create supply chain and FX challenges for UK businesses. Those with direct exposure to these imports should review their arrangements and consider the FX implications.",
     "currency_pairs": [
       "GBP/USD",
       "GBP/RUB"
@@ -1453,28 +1450,26 @@
       "UK logistics and transportation companies"
     ],
     "why_now": "The announced timeline for the ban creates a deadline for UK businesses to adjust their supply chains and consider FX implications",
-    "discovery_recommendation": "Limited run — focus on UK businesses directly importing Russian diesel and jet fuel via third countries",
     "confidence_level": "medium",
     "confidence_reason": "Government announcement on sanctions creates a clear timeline for change, but the FX impact is indirect and depends on third-country involvement",
+    "discovery_recommendation": "Limited run — focus on UK businesses directly importing Russian diesel and jet fuel via third countries",
     "what_happened": "UK government sets end date for imports of Russian diesel and jet fuel via third countries",
     "what_changed_financially": "Refined oil imports from Russia via third countries will be banned, affecting UK businesses reliant on these supplies",
     "who_pays_more": "UK businesses importing Russian diesel and jet fuel via third countries may face higher costs or FX risks due to supply chain changes",
     "who_receives_less": "Russian oil exporters and third-country intermediaries may see reduced revenue",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP payments for diesel and jet fuel imports from third countries, potentially involving USD or RUB",
     "fx_payment_logic": "UK businesses importing Russian diesel and jet fuel via third countries may face FX risks due to changes in supply chain and potential involvement of USD or RUB in transactions",
-    "sales_angle": "If you import diesel or jet fuel from Russia via third countries, the upcoming ban may impact your supply chain and FX exposure.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses relying on Russian diesel and jet fuel imports via third countries face potential supply chain disruptions and FX risks. They should assess their exposure and consider mitigating strategies.",
-    "exposure_types": [
-      "Supply chain disruption",
-      "FX exposure due to third-country involvement"
-    ],
+    "sales_angle": "If you import diesel or jet fuel from Russia via third countries, the upcoming ban may impact your supply chain and FX exposure.",
     "overall_sales_angle": "The UK's ban on Russian diesel and jet fuel imports via third countries may require UK businesses to adapt their supply chains and manage FX risks.",
+    "summary": "The UK government's ban on Russian diesel and jet fuel imports via third countries may create supply chain and FX challenges for UK businesses. Those with direct exposure to these imports should review their arrangements and consider the FX implications.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK fuel importers",
-        "category_priority_score": 72,
         "business_model": "UK companies importing diesel and jet fuel from Russia via third countries, potentially involving USD or RUB payments",
         "exposure_level": "High",
         "exposure_type": "Supply chain disruption and FX exposure",
@@ -1482,21 +1477,14 @@
           "GBP/USD",
           "GBP/RUB"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK fuel importers may face FX risks due to changes in supply chain and potential involvement of USD or RUB in transactions",
         "margin_risk": "Medium — supply chain disruptions and FX risks may impact margins",
         "payment_timing_risk": "Medium — payment terms and timing may be affected by supply chain changes",
         "affected_payment_flow": "GBP payments for diesel and jet fuel imports from third countries",
-        "website_validation_signals": [
-          "fuel imports",
-          "Russian diesel",
-          "jet fuel supplies"
-        ],
-        "avoid_segments": [
-          "UK fuel producers",
-          "companies without Russian imports"
-        ],
-        "sales_angle": "The UK's ban on Russian diesel and jet fuel imports via third countries may impact your supply chain and FX exposure.",
-        "exposure_thesis_template": "This company imports diesel and jet fuel from Russia via third countries, facing potential supply chain disruptions and FX risks.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of Russian diesel",
@@ -1523,11 +1511,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "fuel imports",
+          "Russian diesel",
+          "jet fuel supplies"
+        ],
         "segment_signals": [
           "fuel imports",
           "Russian diesel",
           "jet fuel supplies"
-        ]
+        ],
+        "avoid_segments": [
+          "UK fuel producers",
+          "companies without Russian imports"
+        ],
+        "sales_angle": "The UK's ban on Russian diesel and jet fuel imports via third countries may impact your supply chain and FX exposure.",
+        "exposure_thesis_template": "This company imports diesel and jet fuel from Russia via third countries, facing potential supply chain disruptions and FX risks."
       }
     ],
     "companies_house_terms": [
@@ -1542,8 +1543,13 @@
       "UK jet fuel imports from Russia",
       "Russian jet fuel suppliers UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "The Government has today confirmed the timeline for phasing in its ban on imports of refined oil derived from Russia, as part of the recently announced package of sanctions to further squeeze Putin’s war machine.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "Supply chain disruption",
+      "FX exposure due to third-country involvement"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-12T23:10:01.517Z"
@@ -4132,16 +4138,13 @@
   },
   "506010f65aa30474": {
     "id": "506010f65aa30474",
+    "headline": "UK to set end date for imports of Russian diesel and jet fuel via third countries",
     "source": "GOV.UK Export",
     "source_url": "https://www.gov.uk/government/news/uk-to-set-end-date-for-imports-of-russian-diesel-and-jet-fuel-via-third-countries",
-    "headline": "UK to set end date for imports of Russian diesel and jet fuel via third countries",
-    "raw_summary": "The Government has today confirmed the timeline for phasing in its ban on imports of refined oil derived from Russia, as part of the recently announced package of sanctions to further squeeze Putin’s war machine.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-06-12T23:09:55.025Z",
+    "status": "ready",
     "event_type": "Trade disruption",
     "event_breadth": "sector_specific",
-    "summary": "The UK government announced a ban on imports of Russian diesel and jet fuel via third countries, with a confirmed timeline for phasing in the ban. UK businesses importing Russian diesel and jet fuel via third countries may face supply chain disruptions and potential FX implications.",
     "currency_pairs": [
       "GBP/USD",
       "GBP/RUB"
@@ -4159,28 +4162,26 @@
       "UK logistics companies"
     ],
     "why_now": "The ban on Russian oil imports has a confirmed timeline, and UK businesses should review their supply chains and payment flows to mitigate potential disruptions and FX implications",
-    "discovery_recommendation": "Limited run — the ban on Russian oil imports has a clear timeline, but the FX implications are indirect and depend on the specific supply chains and payment flows of affected businesses",
     "confidence_level": "medium",
     "confidence_reason": "The ban on Russian oil imports has a clear timeline, but the FX implications are indirect and depend on the specific supply chains and payment flows of affected businesses",
+    "discovery_recommendation": "Limited run — the ban on Russian oil imports has a clear timeline, but the FX implications are indirect and depend on the specific supply chains and payment flows of affected businesses",
     "what_happened": "The UK government announced a ban on imports of Russian diesel and jet fuel via third countries, with a confirmed timeline for phasing in the ban",
     "what_changed_financially": "The ban may lead to supply chain disruptions and potential FX implications for UK businesses importing Russian diesel and jet fuel",
     "who_pays_more": "UK businesses importing Russian diesel and jet fuel via third countries may face higher costs due to supply chain disruptions and potential FX implications",
     "who_receives_less": "None",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP payments for diesel and jet fuel imports from third countries, potentially involving USD or RUB",
     "fx_payment_logic": "UK businesses importing Russian diesel and jet fuel via third countries may face FX implications due to supply chain disruptions and potential changes in payment flows, involving GBP, USD, or RUB",
-    "sales_angle": "If you're importing diesel or jet fuel from Russia via third countries, you should review your supply chain and payment flows to mitigate potential disruptions and FX implications",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses importing Russian diesel and jet fuel via third countries may face supply chain disruptions and potential FX implications, including higher costs and margin compression",
-    "exposure_types": [
-      "supply chain disruption",
-      "FX implications"
-    ],
+    "sales_angle": "If you're importing diesel or jet fuel from Russia via third countries, you should review your supply chain and payment flows to mitigate potential disruptions and FX implications",
     "overall_sales_angle": "The ban on Russian oil imports has a confirmed timeline, and UK businesses should review their supply chains and payment flows to mitigate potential disruptions and FX implications",
+    "summary": "The UK government announced a ban on imports of Russian diesel and jet fuel via third countries, with a confirmed timeline for phasing in the ban. UK businesses importing Russian diesel and jet fuel via third countries may face supply chain disruptions and potential FX implications.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK fuel importers",
-        "category_priority_score": 72,
         "business_model": "UK companies importing diesel and jet fuel from Russia via third countries, paying in GBP, USD, or RUB",
         "exposure_level": "High",
         "exposure_type": "Supply chain disruption and FX implications",
@@ -4188,21 +4189,14 @@
           "GBP/USD",
           "GBP/RUB"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK fuel importers may face FX implications due to supply chain disruptions and potential changes in payment flows, involving GBP, USD, or RUB",
         "margin_risk": "Medium — supply chain disruptions and FX implications may lead to higher costs and margin compression",
         "payment_timing_risk": "Medium — payment terms and timing may be affected by supply chain disruptions",
         "affected_payment_flow": "GBP payments for diesel and jet fuel imports from third countries, potentially involving USD or RUB",
-        "website_validation_signals": [
-          "fuel importer",
-          "diesel importer",
-          "jet fuel importer"
-        ],
-        "avoid_segments": [
-          "pure UK domestic fuel producers",
-          "fuel retailers without import operations"
-        ],
-        "sales_angle": "If you're importing diesel or jet fuel from Russia via third countries, you should review your supply chain and payment flows to mitigate potential disruptions and FX implications",
-        "exposure_thesis_template": "This company imports diesel and jet fuel from Russia via third countries. The ban on Russian oil imports may lead to supply chain disruptions and FX implications.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK diesel importers",
@@ -4233,11 +4227,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "fuel importer",
+          "diesel importer",
+          "jet fuel importer"
+        ],
         "segment_signals": [
           "fuel importer",
           "diesel importer",
           "jet fuel importer"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic fuel producers",
+          "fuel retailers without import operations"
+        ],
+        "sales_angle": "If you're importing diesel or jet fuel from Russia via third countries, you should review your supply chain and payment flows to mitigate potential disruptions and FX implications",
+        "exposure_thesis_template": "This company imports diesel and jet fuel from Russia via third countries. The ban on Russian oil imports may lead to supply chain disruptions and FX implications."
       }
     ],
     "companies_house_terms": [
@@ -4256,8 +4263,13 @@
       "UK jet fuel import",
       "Russian jet fuel UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "The Government has today confirmed the timeline for phasing in its ban on imports of refined oil derived from Russia, as part of the recently announced package of sanctions to further squeeze Putin’s war machine.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "supply chain disruption",
+      "FX implications"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-12T23:10:02.326Z"
@@ -4309,16 +4321,13 @@
   },
   "52f3d8c975eb504e": {
     "id": "52f3d8c975eb504e",
+    "headline": "British Pound: Steady against US Dollar before key BoE and data – Scotiabank",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/british-pound-steady-against-us-dollar-before-key-boe-and-data-scotiabank-202606121503",
-    "headline": "British Pound: Steady against US Dollar before key BoE and data – Scotiabank",
-    "raw_summary": "Scotiabank strategists Shaun Osborne and Eric Theoret note that the British Pound (GBP) is consolidating recent gains around 1.3400, with domestic risk elevated ahead of next week’s CPI, labour data and the Bank of England decision.",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
     "detected_at": "2026-06-12T23:09:30.615Z",
+    "status": "context_only",
     "event_type": "Currency consolidation",
     "event_breadth": "broad_currency",
-    "summary": "GBP is steady against USD ahead of key BoE decision and data releases, which may influence future rate changes affecting UK businesses with USD exposure.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -4334,29 +4343,33 @@
       "UK exporters receiving USD revenue"
     ],
     "why_now": "Anticipation of BoE decision and data releases may lead to future rate changes affecting UK businesses",
-    "discovery_recommendation": "Context only — no immediate payment-flow hook, but potential for future impact",
     "confidence_level": "medium",
     "confidence_reason": "Event is more about anticipation of future moves rather than a current significant change in rates",
+    "discovery_recommendation": "Context only — no immediate payment-flow hook, but potential for future impact",
     "what_happened": "GBP is steady against USD ahead of key BoE decision and data releases",
     "what_changed_financially": "GBP/USD rate is stable but anticipation of future changes may impact businesses",
     "who_pays_more": "None at the moment, but potential future changes could affect UK importers or exporters",
     "who_receives_less": "None at the moment, but potential future changes could affect UK exporters receiving USD",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP/USD transactions",
     "fx_payment_logic": "UK businesses with USD exposure may face changes in their payment flows depending on future GBP/USD rate changes.",
-    "sales_angle": "The upcoming BoE decision and data releases may impact your USD-denominated transactions.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "While there is no immediate impact, potential future rate changes could affect UK importers and exporters with USD exposure.",
+    "sales_angle": "The upcoming BoE decision and data releases may impact your USD-denominated transactions.",
+    "overall_sales_angle": "Keep an eye on the upcoming BoE decision and data releases for potential impacts on your USD transactions.",
+    "summary": "GBP is steady against USD ahead of key BoE decision and data releases, which may influence future rate changes affecting UK businesses with USD exposure.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Scotiabank strategists Shaun Osborne and Eric Theoret note that the British Pound (GBP) is consolidating recent gains around 1.3400, with domestic risk elevated ahead of next week’s CPI, labour data and the Bank of England decision.",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
     "exposure_types": [
       "USD supplier payment exposure",
       "USD revenue conversion"
     ],
-    "overall_sales_angle": "Keep an eye on the upcoming BoE decision and data releases for potential impacts on your USD transactions.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "546df6bb0af5e426": {
@@ -5104,16 +5117,13 @@
   },
   "5f6314aa9c29cc03": {
     "id": "5f6314aa9c29cc03",
+    "headline": "UK to set end date for imports of Russian diesel and jet fuel via third countries",
     "source": "GOV.UK Tariffs",
     "source_url": "https://www.gov.uk/government/news/uk-to-set-end-date-for-imports-of-russian-diesel-and-jet-fuel-via-third-countries",
-    "headline": "UK to set end date for imports of Russian diesel and jet fuel via third countries",
-    "raw_summary": "The Government has today confirmed the timeline for phasing in its ban on imports of refined oil derived from Russia, as part of the recently announced package of sanctions to further squeeze Putin’s war machine.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-06-12T23:09:51.688Z",
+    "status": "ready",
     "event_type": "Sanctions and trade restrictions",
     "event_breadth": "sector_specific",
-    "summary": "UK government sets end date for imports of Russian diesel and jet fuel via third countries, creating potential supply chain disruptions and FX implications for UK businesses",
     "currency_pairs": [
       "GBP/USD",
       "GBP/RUB"
@@ -5131,27 +5141,26 @@
       "UK logistics companies"
     ],
     "why_now": "Upcoming end date for imports of Russian diesel and jet fuel via third countries creates urgency for affected businesses to review their supply chains and FX strategies",
-    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "confidence_level": "medium",
     "confidence_reason": "Government announcement provides clarity on the timeline for phasing in the ban, but FX implications depend on the specifics of individual businesses' supply chains and hedging strategies",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "what_happened": "UK government sets end date for imports of Russian diesel and jet fuel via third countries",
     "what_changed_financially": "Potential supply chain disruptions and FX implications for UK businesses importing Russian diesel and jet fuel",
     "who_pays_more": "UK businesses importing Russian diesel and jet fuel via third countries",
     "who_receives_less": "None",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP payments for diesel and jet fuel imports",
     "fx_payment_logic": "UK businesses importing Russian diesel and jet fuel via third countries pay in GBP, but may face FX implications if they need to switch to alternative suppliers in different currencies",
-    "sales_angle": "If you're importing Russian diesel and jet fuel via third countries, you should review your supply chain and FX strategy ahead of the upcoming end date",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses importing Russian diesel and jet fuel via third countries face potential supply chain disruptions and FX implications, and should review their strategies ahead of the upcoming end date",
-    "exposure_types": [
-      "FX implications of supply chain disruptions"
-    ],
+    "sales_angle": "If you're importing Russian diesel and jet fuel via third countries, you should review your supply chain and FX strategy ahead of the upcoming end date",
     "overall_sales_angle": "Review your supply chain and FX strategy ahead of the upcoming end date for imports of Russian diesel and jet fuel via third countries",
+    "summary": "UK government sets end date for imports of Russian diesel and jet fuel via third countries, creating potential supply chain disruptions and FX implications for UK businesses",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK fuel distributors",
-        "category_priority_score": 72,
         "business_model": "UK fuel distributors importing Russian diesel and jet fuel via third countries, selling to UK customers in GBP",
         "exposure_level": "High",
         "exposure_type": "Supply chain disruption and FX implications",
@@ -5159,21 +5168,14 @@
           "GBP/USD",
           "GBP/RUB"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK fuel distributors pay in GBP, but may face FX implications if they need to switch to alternative suppliers in different currencies",
         "margin_risk": "Medium — potential supply chain disruptions and FX implications may affect margins",
         "payment_timing_risk": "Medium — upcoming end date for imports of Russian diesel and jet fuel via third countries creates urgency",
         "affected_payment_flow": "GBP payments for diesel and jet fuel imports",
-        "website_validation_signals": [
-          "fuel distributor",
-          "Russian diesel",
-          "jet fuel imports"
-        ],
-        "avoid_segments": [
-          "pure UK domestic fuel producers",
-          "fuel retailers without import operations"
-        ],
-        "sales_angle": "If you're importing Russian diesel and jet fuel via third countries, you should review your supply chain and FX strategy ahead of the upcoming end date",
-        "exposure_thesis_template": "This company imports Russian diesel and jet fuel via third countries. The upcoming end date for imports creates potential supply chain disruptions and FX implications.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK diesel distributors",
@@ -5204,11 +5206,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "fuel distributor",
+          "Russian diesel",
+          "jet fuel imports"
+        ],
         "segment_signals": [
           "fuel distributor",
           "Russian diesel",
           "jet fuel imports"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic fuel producers",
+          "fuel retailers without import operations"
+        ],
+        "sales_angle": "If you're importing Russian diesel and jet fuel via third countries, you should review your supply chain and FX strategy ahead of the upcoming end date",
+        "exposure_thesis_template": "This company imports Russian diesel and jet fuel via third countries. The upcoming end date for imports creates potential supply chain disruptions and FX implications."
       }
     ],
     "companies_house_terms": [
@@ -5226,8 +5241,12 @@
       "Russian jet fuel imports UK",
       "jet fuel importer UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "The Government has today confirmed the timeline for phasing in its ban on imports of refined oil derived from Russia, as part of the recently announced package of sanctions to further squeeze Putin’s war machine.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "FX implications of supply chain disruptions"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-12T23:10:01.916Z"
@@ -5887,35 +5906,40 @@
     "raw_summary": "CPI +3.2% vs +3.2% y/y prelim Prior +3.2% HICP +3.6% vs +3.6% y/y prelim Prior +3.5%; revised to +3.6% Core CPI +3.0% y/y Prior +2.8% Spanish headline inflation is confirmed to hold above 3% in May but the real issue is the pick up in core prices once again. Core annual inflation is seen ticking higher and is touching the 3% mark now and reaffirms the broader trend across the region. As the Middle East conflict drags on, higher oil and gas prices will become more entrenched and that adds to further issues with raw material shortages and supply chain disruptions. Everything put together just po",
     "pre_relevance_score": 6,
     "pre_relevance_reason": "+4 \\bshipping cost|\\bfreight|\\bsu; +3 \\benergy price|\\bgas price|\\bf",
-    "detected_at": "2026-06-12T23:09:28.434Z",
-    "event_type": "Inflation data",
-    "event_breadth": "macro",
-    "summary": "Spanish inflation and core prices have risen, but there's no direct impact on UK B2B FX payments. This could contribute to broader economic trends affecting supply chains and costs.",
+    "detected_at": "2026-06-13T02:33:38.976Z",
+    "event_type": "inflation",
+    "event_breadth": "country_specific",
+    "summary": "Spanish inflation increased in May, with core prices also rising. While this has indirect implications for UK businesses, it lacks a direct FX payment flow hook.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "Spanish inflation and core prices rising, but no direct UK B2B FX hook",
+    "commercial_relevance_reason": "Spanish inflation increase has indirect implications for UK businesses importing from Spain or dependent on Spanish supply chains, but lacks a direct FX payment flow hook",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "No immediate reason for UK businesses to act, but could be part of broader economic trends",
-    "discovery_recommendation": "Context only — no direct FX or payment-flow hook",
+    "likely_affected_businesses": [
+      "UK importers of Spanish goods",
+      "UK businesses dependent on Spanish supply chains"
+    ],
+    "why_now": "The increase in Spanish inflation might lead to higher costs for UK importers, but the effect is indirect and lacks urgency",
+    "discovery_recommendation": "Context only — keep for messaging context, but do not generate new leads from this event",
     "confidence_level": "medium",
-    "confidence_reason": "Inflation data is relevant for broader economic context but lacks a direct payment-flow angle for UK businesses",
-    "what_happened": "Spanish inflation picks up in May, with core prices also rising",
-    "what_changed_financially": "Spanish CPI and core prices increased, indicating potential for higher costs in the supply chain",
-    "who_pays_more": "None directly, but potentially UK importers of Spanish goods if prices rise due to inflation",
-    "who_receives_less": "None directly",
+    "confidence_reason": "Inflation increase in Spain may influence broader European economic conditions, but its direct impact on UK B2B FX is minimal and indirect",
+    "what_happened": "Spanish inflation rose in May, with core prices also increasing",
+    "what_changed_financially": "Spanish CPI and core inflation rates increased, potentially affecting supply chain costs and prices for UK importers",
+    "who_pays_more": "UK businesses importing goods from Spain or dependent on Spanish supply chains might face higher costs",
+    "who_receives_less": "None directly, but UK exporters to Spain might face pricing pressures due to increased costs",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly",
-    "fx_payment_logic": "No direct FX payment logic applies as this event lacks a specific UK B2B payment-flow angle",
-    "sales_angle": "No immediate sales angle due to the lack of a direct UK B2B FX hook",
-    "business_impact_summary": "No direct business impact, but could be part of broader economic trends affecting supply chains and costs",
-    "exposure_types": [],
-    "overall_sales_angle": "No immediate reason to call due to the indirect nature of the event",
+    "affected_payment_flow": "Indirectly affects UK importers paying for Spanish goods or services, but lacks a direct FX payment flow",
+    "fx_payment_logic": "No direct FX payment flow is affected by the increase in Spanish inflation, making it a weak trigger for UK B2B FX",
+    "sales_angle": "Spanish inflation is rising, which might indirectly affect your import costs or supply chain pricing. Worth monitoring, but not an immediate concern.",
+    "business_impact_summary": "UK businesses importing from Spain or dependent on Spanish supply chains might face higher costs due to increased inflation, but the effect is indirect and not immediate.",
+    "exposure_types": [
+      "indirect supply chain cost exposure"
+    ],
+    "overall_sales_angle": "Monitor Spanish inflation for potential indirect effects on your supply chain costs, but do not expect an immediate impact on your FX payments.",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -7956,16 +7980,13 @@
   },
   "9a351b15a8e4a31c": {
     "id": "9a351b15a8e4a31c",
+    "headline": "UK vows to phase out Russian diesel and jet fuel imports by new year",
     "source": "BBC Business",
     "source_url": "https://www.bbc.com/news/articles/ceqdl8xre7qo?at_medium=RSS&at_campaign=rss",
-    "headline": "UK vows to phase out Russian diesel and jet fuel imports by new year",
-    "raw_summary": "The ban forms part of the government's package of sanctions on Moscow due to the ongoing war with Ukraine.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-06-12T23:09:40.965Z",
+    "status": "ready",
     "event_type": "Trade disruption",
     "event_breadth": "sector_specific",
-    "summary": "The UK ban on Russian diesel and jet fuel imports will require businesses to find alternative suppliers, potentially affecting their FX exposure and costs",
     "currency_pairs": [
       "GBP/RUB",
       "GBP/USD"
@@ -7982,27 +8003,26 @@
       "UK logistics and transportation companies"
     ],
     "why_now": "The ban on Russian diesel and jet fuel imports will require UK businesses to find alternative suppliers, potentially affecting their FX exposure and costs",
-    "discovery_recommendation": "Limited run — identify UK businesses importing diesel and jet fuel and assess their potential FX exposure",
     "confidence_level": "medium",
     "confidence_reason": "The ban is announced but its impact on UK businesses will depend on their ability to find alternative suppliers and manage potential FX risks",
+    "discovery_recommendation": "Limited run — identify UK businesses importing diesel and jet fuel and assess their potential FX exposure",
     "what_happened": "The UK government announced a ban on Russian diesel and jet fuel imports by the new year",
     "what_changed_financially": "UK businesses importing Russian diesel and jet fuel will need to find alternative suppliers, potentially affecting their costs and FX exposure",
     "who_pays_more": "UK businesses importing diesel and jet fuel from alternative suppliers, potentially facing higher costs and FX risks",
     "who_receives_less": "Russian diesel and jet fuel exporters to the UK",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP payments for alternative diesel and jet fuel imports",
     "fx_payment_logic": "UK businesses will need to pay for alternative diesel and jet fuel imports in GBP, potentially facing FX risks if prices are denominated in other currencies",
-    "sales_angle": "If you're a UK business importing diesel and jet fuel, the ban on Russian imports may affect your FX exposure and costs",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses importing diesel and jet fuel will need to find alternative suppliers, potentially facing higher costs and FX risks",
-    "exposure_types": [
-      "FX risk on alternative fuel imports"
-    ],
+    "sales_angle": "If you're a UK business importing diesel and jet fuel, the ban on Russian imports may affect your FX exposure and costs",
     "overall_sales_angle": "The UK ban on Russian diesel and jet fuel imports may affect your business's FX exposure and costs — it's worth reviewing your fuel import strategy",
+    "summary": "The UK ban on Russian diesel and jet fuel imports will require businesses to find alternative suppliers, potentially affecting their FX exposure and costs",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK fuel importers",
-        "category_priority_score": 72,
         "business_model": "UK businesses importing diesel and jet fuel for resale or use in their operations",
         "exposure_level": "High",
         "exposure_type": "FX risk on alternative fuel imports",
@@ -8010,21 +8030,14 @@
           "GBP/USD",
           "GBP/RUB"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK fuel importers will need to pay for alternative diesel and jet fuel imports in GBP, potentially facing FX risks if prices are denominated in other currencies",
         "margin_risk": "Medium — the ban on Russian imports may lead to higher fuel costs and FX risks for UK businesses",
         "payment_timing_risk": "Medium — UK businesses will need to manage their fuel imports and FX risks in a timely manner",
         "affected_payment_flow": "GBP payments for alternative diesel and jet fuel imports",
-        "website_validation_signals": [
-          "fuel imports",
-          "diesel imports",
-          "jet fuel imports"
-        ],
-        "avoid_segments": [
-          "UK fuel producers",
-          "businesses without fuel import operations"
-        ],
-        "sales_angle": "If you're a UK fuel importer, the ban on Russian imports may affect your FX exposure and costs",
-        "exposure_thesis_template": "This company imports diesel and jet fuel, potentially facing FX risks on alternative imports",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK diesel importers",
@@ -8051,11 +8064,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "fuel imports",
+          "diesel imports",
+          "jet fuel imports"
+        ],
         "segment_signals": [
           "fuel imports",
           "diesel imports",
           "jet fuel imports"
-        ]
+        ],
+        "avoid_segments": [
+          "UK fuel producers",
+          "businesses without fuel import operations"
+        ],
+        "sales_angle": "If you're a UK fuel importer, the ban on Russian imports may affect your FX exposure and costs",
+        "exposure_thesis_template": "This company imports diesel and jet fuel, potentially facing FX risks on alternative imports"
       }
     ],
     "companies_house_terms": [
@@ -8070,8 +8096,12 @@
       "UK jet fuel importer",
       "jet fuel imports UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "The ban forms part of the government's package of sanctions on Moscow due to the ongoing war with Ukraine.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "FX risk on alternative fuel imports"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-12T23:10:00.331Z"
@@ -8232,50 +8262,6 @@
     "exposure_types": [
       "USD import exposure for European businesses"
     ],
-    "ai_model": "llama-3.3-70b-versatile"
-  },
-  "a1951b219ed299d4": {
-    "id": "a1951b219ed299d4",
-    "source": "CityAM",
-    "source_url": "https://www.cityam.com/inflation-expectations-at-record-high-in-interest-rates-signal/",
-    "headline": "Inflation expectations at record high in interest rates signal",
-    "raw_summary": "Inflation expectations hit a record high in the second quarter of the year, which could rattle Bank of England policymakers and build the case for an interest rate hike.&#160; The Bank’s joint survey with Ipsos found that, on average, households believe inflation will rise by 3.9 per cent over the next five years.&#160; It was [...]",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-06-12T23:09:37.968Z",
-    "event_type": "Inflation expectations",
-    "event_breadth": "macro",
-    "summary": "Inflation expectations are at a record high, which might lead to an interest rate hike and indirectly affect FX through monetary policy decisions.",
-    "currency_pairs": [],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "Inflation expectations may influence future interest rate decisions, indirectly affecting FX through monetary policy",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "The survey's findings could build the case for an interest rate hike, which might have a future impact on FX",
-    "discovery_recommendation": "Context only — keep for messaging context, but do not generate new leads from this event",
-    "confidence_level": "medium",
-    "confidence_reason": "Survey indicates high inflation expectations, which could influence BoE policy, but the FX impact is indirect and not immediate",
-    "what_happened": "Inflation expectations reached a record high in Q2, potentially influencing BoE interest rate decisions",
-    "what_changed_financially": "Household inflation expectations rose to 3.9% over the next five years",
-    "who_pays_more": "None directly, but potential interest rate hikes could affect borrowing costs",
-    "who_receives_less": "None directly",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly",
-    "fx_payment_logic": "The potential for higher interest rates due to high inflation expectations could influence FX rates indirectly through monetary policy decisions.",
-    "sales_angle": "Inflation expectations are high, which might lead to interest rate changes, affecting your business's borrowing costs and potentially your FX exposure.",
-    "business_impact_summary": "High inflation expectations could lead to interest rate hikes, affecting borrowing costs and potentially FX rates, but the impact is indirect and not immediate.",
-    "exposure_types": [],
-    "overall_sales_angle": "Keep an eye on inflation expectations as they might influence future interest rate decisions and indirectly affect your FX exposure.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "a214f5d50a8ac034": {
@@ -8727,35 +8713,35 @@
     "raw_summary": "Iran not to restore Hormuz Strait status to pre-war level Framework text nearly finalized Text awaits final decision Under the MoU with the US, Iran makes no commitment regarding the transfer of management of the Strait of Hormuz The future administration of the strait will be resolved as a regional matter through dialogue and joint decision-making between Tehran and Oman No agreement is made regarding the nuclear file in the current memorandum Nuclear talks will take place within a 60-day period after signing Iranian state media IRNA says that Tehran has made no commitment to restore the Stra",
     "pre_relevance_score": 6,
     "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu",
-    "detected_at": "2026-06-12T23:09:26.275Z",
-    "event_type": "Geopolitical event",
-    "event_breadth": "broad_geopolitics",
-    "summary": "Iran's decision on the Strait of Hormuz may contribute to geopolitical uncertainty but lacks a direct UK B2B FX impact. The event may indirectly affect oil prices and global shipping, but this is speculative and not a clear reason for UK businesses to adjust their FX strategies immediately.",
+    "detected_at": "2026-06-13T02:33:36.688Z",
+    "event_type": "Geopolitical",
+    "event_breadth": "broad_geopolitical",
+    "summary": "Iran will not restore the Strait of Hormuz to its pre-war status, potentially increasing regional tensions, but there's no direct impact on UK B2B FX payment flows",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
-    "commercial_relevance_reason": "Geopolitical event in the Strait of Hormuz may indirectly affect global oil prices and shipping, but lacks a direct UK B2B FX hook",
+    "commercial_relevance_reason": "Geopolitical event with indirect potential impact on oil prices and shipping lanes, but no direct UK B2B FX hook",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
-    "why_now": "No immediate reason for UK businesses to act based on this event alone",
-    "discovery_recommendation": "Context only — event lacks direct payment-flow hook but may contribute to broader market context",
+    "why_now": "No immediate reason for UK businesses to act on this news from an FX perspective",
+    "discovery_recommendation": "Context only — no direct FX hook, but may be useful for background or follow-up",
     "confidence_level": "medium",
-    "confidence_reason": "While the event has geopolitical implications, its direct impact on UK businesses with foreign-currency payment flows is indirect and speculative",
-    "what_happened": "Iran announced it will not restore the Strait of Hormuz status to pre-war level",
-    "what_changed_financially": "Potential for increased uncertainty in global oil prices and shipping due to geopolitical tensions",
-    "who_pays_more": "None directly identified",
-    "who_receives_less": "None directly identified",
+    "confidence_reason": "Event is geopolitical and may have indirect effects on global trade and commodity prices, but lacks a clear FX payment-flow angle for UK businesses",
+    "what_happened": "Iran announced it will not restore the Strait of Hormuz to its pre-war status",
+    "what_changed_financially": "Potential for increased tensions in the region, possibly affecting oil prices and shipping",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly identified",
-    "fx_payment_logic": "No direct FX payment logic applies as the event does not directly impact UK businesses with foreign-currency payment flows",
-    "sales_angle": "While geopolitical events like this can contribute to market uncertainty, there's no direct reason to discuss FX strategies based on this news alone.",
-    "business_impact_summary": "The decision by Iran regarding the Strait of Hormuz is a geopolitical event that may have indirect implications for global trade and oil prices but does not directly affect UK businesses with foreign-currency payment flows",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "No specific FX payment logic applies as this event lacks a direct UK B2B FX hook",
+    "sales_angle": "No immediate sales angle as this event does not directly impact UK businesses' FX payment flows",
+    "business_impact_summary": "This geopolitical event may have indirect effects on global trade and commodity prices, but it does not directly affect UK businesses' FX exposure",
     "exposure_types": [],
-    "overall_sales_angle": "No sharp angle — event is more about geopolitical context than direct FX impact",
+    "overall_sales_angle": "No sharp reason to call today based on this event",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -9357,16 +9343,13 @@
   },
   "b76d9ff9b2df75ce": {
     "id": "b76d9ff9b2df75ce",
+    "headline": "Oil prices plunge after Iran confirms details of the deal with the US",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/oil-prices-plunge-after-iran-confirms-details-of-the-deal-with-the-us-20260612/",
-    "headline": "Oil prices plunge after Iran confirms details of the deal with the US",
-    "raw_summary": "WTI crude is now down over 4% on the day, accelerating a drop after yesterday's dive lower. The drop yesterday was somewhat arrested near the 100-day moving average (red line). But now, we're seeing a firm break below that and could point to further declines in oil prices after the earlier headlines. Of note, we're seeing price action also break out of its triangle/wedge/flag pattern and that's something that could give sellers added momentum in chasing price to the downside. It will mark the first time since January that oil prices drop back below either of its key daily moving averages. So, ",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-06-12T23:09:35.761Z",
+    "status": "ready",
     "event_type": "Commodity price move",
     "event_breadth": "commodity",
-    "summary": "Oil prices dropped after Iran-US deal news, affecting UK businesses with USD-priced oil imports or exports. The drop may impact their margins and payment flows.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -9383,49 +9366,40 @@
       "UK logistics and transportation companies"
     ],
     "why_now": "Oil price drop may impact upcoming USD-priced oil imports or exports, affecting UK businesses' margins",
-    "discovery_recommendation": "Limited run — focus on UK businesses with USD-priced oil imports or exports",
     "confidence_level": "medium",
     "confidence_reason": "Oil price move is real but its impact on UK businesses depends on their specific payment flows",
+    "discovery_recommendation": "Limited run — focus on UK businesses with USD-priced oil imports or exports",
     "what_happened": "Oil prices dropped after Iran confirmed details of a deal with the US",
     "what_changed_financially": "WTI crude price moved down, affecting USD-priced oil imports and exports",
     "who_pays_more": "UK businesses importing USD-priced oil or related products",
     "who_receives_less": "UK businesses exporting oil or related products priced in USD",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs USD oil import costs",
     "fx_payment_logic": "UK businesses importing USD-priced oil or related products must convert GBP to USD, and the oil price drop affects their costs and margins",
-    "sales_angle": "If you import USD-priced oil or related products, the current price drop may impact your costs and margins.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK oil importers and manufacturers face potential margin compression due to the oil price drop, while exporters may see a slight benefit on USD-priced sales.",
-    "exposure_types": [
-      "USD oil import exposure",
-      "USD oil export revenue"
-    ],
+    "sales_angle": "If you import USD-priced oil or related products, the current price drop may impact your costs and margins.",
     "overall_sales_angle": "Oil price drop affects UK businesses with USD-priced oil imports or exports — worth reviewing their payment flows and margins.",
+    "summary": "Oil prices dropped after Iran-US deal news, affecting UK businesses with USD-priced oil imports or exports. The drop may impact their margins and payment flows.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK oil importers and petroleum product manufacturers",
-        "category_priority_score": 72,
         "business_model": "UK businesses importing USD-priced oil or related products, selling in GBP to UK trade",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — USD oil prices vs GBP revenue",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "USD-priced oil imports → GBP conversion → oil price drop affects import costs and margins",
         "margin_risk": "Medium — 5% oil price drop on £100k monthly imports ≈ £5k extra cost if unhedged",
         "payment_timing_risk": "Medium — typical 30-60 day payment terms for oil imports",
         "affected_payment_flow": "USD payments for oil imports, typically £50k-£500k per shipment",
-        "website_validation_signals": [
-          "oil imports",
-          "petroleum products",
-          "USD pricing"
-        ],
-        "avoid_segments": [
-          "pure UK domestic oil producers",
-          "retailers without own import operations"
-        ],
-        "sales_angle": "Your USD-priced oil imports may be costing more in GBP due to the oil price drop.",
-        "exposure_thesis_template": "This company imports USD-priced oil or related products. Oil price moves affect GBP costs of USD-priced imports.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK oil importers",
@@ -9456,11 +9430,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "oil imports",
+          "petroleum products",
+          "USD pricing"
+        ],
         "segment_signals": [
           "oil imports",
           "petroleum products",
           "USD pricing"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic oil producers",
+          "retailers without own import operations"
+        ],
+        "sales_angle": "Your USD-priced oil imports may be costing more in GBP due to the oil price drop.",
+        "exposure_thesis_template": "This company imports USD-priced oil or related products. Oil price moves affect GBP costs of USD-priced imports."
       }
     ],
     "companies_house_terms": [
@@ -9478,8 +9465,13 @@
       "\"oil-based products\" UK producer",
       "UK fuel manufacturing"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "WTI crude is now down over 4% on the day, accelerating a drop after yesterday's dive lower. The drop yesterday was somewhat arrested near the 100-day moving average (red line). But now, we're seeing a firm break below that and could point to further declines in oil prices after the earlier headlines. Of note, we're seeing price action also break out of its triangle/wedge/flag pattern and that's something that could give sellers added momentum in chasing price to the downside. It will mark the first time since January that oil prices drop back below either of its key daily moving averages. So, ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "USD oil import exposure",
+      "USD oil export revenue"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-12T23:09:58.757Z"
@@ -11268,16 +11260,13 @@
   },
   "ed3cc9ff75ec9a33": {
     "id": "ed3cc9ff75ec9a33",
+    "headline": "Euro supported by hawkish ECB rhetoric as British Pound struggles after weak GDP",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/euro-supported-by-hawkish-ecb-rhetoric-as-british-pound-struggles-after-weak-gdp-202606121454",
-    "headline": "Euro supported by hawkish ECB rhetoric as British Pound struggles after weak GDP",
-    "raw_summary": "EUR/GBP holds firm on Friday, with the Euro (EUR) modestly outperforming the British Pound (GBP) as weak UK Gross Domestic Product (GDP) data reinforced signs of a slowing economy. At the time of writing, the cross trades around 0.8633, up from an intraday low of 0.8625.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
     "detected_at": "2026-06-12T23:09:45.316Z",
+    "status": "ready",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "GBP weakened against EUR on weak UK GDP data. UK businesses paying EUR supplier invoices face higher GBP cost. Exporters receiving EUR revenue see a modest benefit on conversion.",
     "currency_pairs": [
       "GBP/EUR"
     ],
@@ -11294,50 +11283,40 @@
       "UK exporters with EUR customer revenue"
     ],
     "why_now": "EUR supplier invoices placed before the GBP dip now cost more to settle",
-    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "confidence_level": "medium",
     "confidence_reason": "GBP/EUR move driven by economic data, but not a central bank decision",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "what_happened": "GBP weakened against EUR following weak UK GDP data",
     "what_changed_financially": "GBP/EUR rate moved, increasing cost of EUR-denominated supplier invoices for UK importers",
     "who_pays_more": "UK importers with outstanding EUR supplier invoices",
     "who_receives_less": "UK exporters converting EUR customer payments back to GBP",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs EUR supplier costs",
     "fx_payment_logic": "UK importers order goods priced in EUR → invoice arrives → they must convert GBP to EUR to pay → GBP has weakened → more GBP required per EUR",
-    "sales_angle": "If you have upcoming EUR supplier payments, the current rate is worse than it was last week.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers of European goods face higher landed costs on recent orders. Exporters receiving EUR revenue see a modest benefit on conversion.",
-    "exposure_types": [
-      "EUR supplier payment exposure",
-      "EUR revenue conversion"
-    ],
+    "sales_angle": "If you have upcoming EUR supplier payments, the current rate is worse than it was last week.",
     "overall_sales_angle": "GBP slippage means upcoming EUR invoices cost more — worth reviewing the rate.",
+    "summary": "GBP weakened against EUR on weak UK GDP data. UK businesses paying EUR supplier invoices face higher GBP cost. Exporters receiving EUR revenue see a modest benefit on conversion.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of European manufactured goods",
-        "category_priority_score": 72,
         "business_model": "UK wholesaler/distributor buying from EU manufacturers, paying EUR invoices, selling GBP to UK trade",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — EUR supplier payments vs GBP revenue",
         "likely_currency_pairs": [
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "EUR invoice arrives → UK business converts GBP → GBP weaker → margin compressed",
         "margin_risk": "Medium — 1.2% GBP/EUR move on £200k annual buy ≈ £2.4k extra cost if unhedged",
         "payment_timing_risk": "Medium — typical 30-60 day payment terms",
         "affected_payment_flow": "EUR payments to EU manufacturers, typically £20k-£200k per shipment",
-        "website_validation_signals": [
-          "imported from",
-          "European supplier",
-          "sourced from",
-          "manufacturer in"
-        ],
-        "avoid_segments": [
-          "pure UK domestic manufacturers",
-          "retailers without own import ops"
-        ],
-        "sales_angle": "Your upcoming EUR supplier invoices are costing more in GBP than they were last month.",
-        "exposure_thesis_template": "This company imports manufactured goods from EU. GBP/EUR move increases GBP cost of EUR supplier invoices.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of Italian machinery parts",
@@ -11352,12 +11331,26 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from",
+          "European supplier",
+          "sourced from",
+          "manufacturer in"
+        ],
         "segment_signals": [
           "imported from",
           "European supplier",
           "sourced from",
           "manufacturer in"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming EUR supplier invoices are costing more in GBP than they were last month.",
+        "exposure_thesis_template": "This company imports manufactured goods from EU. GBP/EUR move increases GBP cost of EUR supplier invoices."
       }
     ],
     "companies_house_terms": [
@@ -11368,8 +11361,13 @@
       "\"machinery importer\" UK European",
       "\"Italian machinery\" UK distributor"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "EUR/GBP holds firm on Friday, with the Euro (EUR) modestly outperforming the British Pound (GBP) as weak UK Gross Domestic Product (GDP) data reinforced signs of a slowing economy. At the time of writing, the cross trades around 0.8633, up from an intraday low of 0.8625.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
+    "exposure_types": [
+      "EUR supplier payment exposure",
+      "EUR revenue conversion"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-12T23:10:01.125Z"
@@ -12503,16 +12501,13 @@
   },
   "ff7f77487b5fedbd": {
     "id": "ff7f77487b5fedbd",
+    "headline": "Forecasting the upcoming week: Fed, BoJ, BoE and RBA decisions take center stage",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/forecasting-the-upcoming-week-fed-boj-boe-and-rba-decisions-take-center-stage-202606122039",
-    "headline": "Forecasting the upcoming week: Fed, BoJ, BoE and RBA decisions take center stage",
-    "raw_summary": "The US Dollar Index (DXY) lost ground during the week, down 0.27% to trade near the 99.80 level as investors prepared for a heavy central bank calendar the following week.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba",
     "detected_at": "2026-06-12T23:09:43.132Z",
+    "status": "context_only",
     "event_type": "Central bank forecast",
     "event_breadth": "broad_macro",
-    "summary": "The US Dollar Index declined ahead of central bank decisions. While this may influence currency markets, there's no direct UK B2B FX hook.",
     "currency_pairs": [
       "USD"
     ],
@@ -12525,26 +12520,30 @@
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
     "why_now": "The upcoming central bank decisions may influence currency markets, but there's no immediate UK B2B FX hook",
-    "discovery_recommendation": "Context only — the event lacks direct UK B2B FX relevance but can be used as background information",
     "confidence_level": "medium",
     "confidence_reason": "The event's relevance to UK businesses is indirect, as it focuses on global central bank decisions without explicit UK B2B FX implications",
+    "discovery_recommendation": "Context only — the event lacks direct UK B2B FX relevance but can be used as background information",
     "what_happened": "The US Dollar Index (DXY) declined 0.27% ahead of central bank decisions",
     "what_changed_financially": "The value of the US Dollar Index changed, potentially affecting USD-related transactions",
     "who_pays_more": "None directly, but potentially USD importers or those with USD exposure if the dollar strengthens",
     "who_receives_less": "None directly, but potentially USD exporters or those with USD revenue if the dollar weakens",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "None directly related to UK B2B FX",
     "fx_payment_logic": "The event's impact on UK businesses is indirect and speculative, lacking a clear FX payment flow",
-    "sales_angle": "The upcoming central bank decisions might affect currency markets, but there's no immediate reason for UK businesses to act.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "The event has no direct impact on UK businesses, but central bank decisions can influence currency markets.",
-    "exposure_types": [],
+    "sales_angle": "The upcoming central bank decisions might affect currency markets, but there's no immediate reason for UK businesses to act.",
     "overall_sales_angle": "The event serves as background information rather than a direct sales hook.",
+    "summary": "The US Dollar Index declined ahead of central bank decisions. While this may influence currency markets, there's no direct UK B2B FX hook.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "The US Dollar Index (DXY) lost ground during the week, down 0.27% to trade near the 99.80 level as investors prepared for a heavy central bank calendar the following week.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba",
+    "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
   "ff96cfed71bb8ccd": {
