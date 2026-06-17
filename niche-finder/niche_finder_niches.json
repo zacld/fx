@@ -162,6 +162,42 @@
     "overlaps_with": ""
   },
   {
+    "niche": "UK aerospace component suppliers to Boeing and Airbus",
+    "branch": "contingent",
+    "mechanism": "boeing_(us-domiciled)_pays_uk_tier-1_and",
+    "mechanism_display": "Boeing (US-domiciled) pays UK tier-1 and tier-2 aerospace component suppliers in USD; Airbus (EUR-denominated supply chain) pays EUR — determine which relationship has stronger verifiable evidence and what the dominant currency exposure is",
+    "mechanism_strength": "strong_inferred",
+    "evidence_type": "company_filing",
+    "evidence_source": "Senior plc's 2025 Annual Results and Interim Results explicitly state their 'principal foreign exchange translation exposure is to the US Dollar' and Rolls-Royce's financial statements reference 'USD hedge book cash costs,' indicating direct foreign currency exposure for UK aerospace suppliers transacting with international OEMs.",
+    "payer_profile": "",
+    "competition": "moderate",
+    "competition_checked_at": "2026-06-17T21:57:19.501277+00:00",
+    "effective_volume_raw": 1500,
+    "effective_volume_bucket": "capped",
+    "call_style": "assertive",
+    "fx_direction": "receives_foreign",
+    "notes": "UK aerospace component suppliers primarily receive USD from Boeing and EUR from Airbus, with stronger verifiable evidence found for USD exposure from Boeing transactions.",
+    "overlaps_with": "adjacent to: UK streaming subtitling and dubbing studios (overlap detector error — different mechanism: manufacturing supply chain USD vs creative services USD)"
+  },
+  {
+    "niche": "UK medical and dental tourism booking brokers for Turkey clinics",
+    "branch": "contingent",
+    "mechanism": "uk_companies_facilitating_patient_travel",
+    "mechanism_display": "UK companies facilitating patient travel to Turkish dental or cosmetic clinics — specifically determine whether the model with public evidence is (a) brokers who take direct GBP payment from UK patients then pay Turkish clinics in TRY or USD creating real FX exposure or (b) pure referral affiliates who earn GBP commission without handling clinic payments — these are two different FX exposure profiles and should not be collapsed into one answer",
+    "mechanism_strength": "moderate_inferred",
+    "evidence_type": "company_website",
+    "evidence_source": "MedAway's 'About' page states that a booking fee is paid to MedAway, with the remainder paid to the medical service provider in Turkey. Formedi Clinic, a UK-registered company, explicitly mentions payment by UK or Turkey bank transfer and an 8% commission on card payments, indicating foreign currency transactions.",
+    "payer_profile": "",
+    "competition": "moderate",
+    "competition_checked_at": "2026-06-17T21:57:24.299284+00:00",
+    "effective_volume_raw": 200,
+    "effective_volume_bucket": "excellent",
+    "call_style": "qualifying",
+    "fx_direction": "pays_foreign",
+    "notes": "UK medical and dental tourism booking brokers for Turkey clinics typically receive a deposit in GBP from UK patients, with the remaining balance paid directly to Turkish clinics in foreign currency (TRY or USD) upon arrival, creating FX exposure for the broker if they intermediate the full payment or manage associated package costs in Turkey.",
+    "overlaps_with": "adjacent to: UK software development agencies with offshore teams (overlap detector error — different mechanism: broker paying foreign clinic in TRY vs agency paying offshore labour in INR/PLN)"
+  },
+  {
     "niche": "UK food & beverage manufacturers",
     "branch": "structural",
     "mechanism": "overseas_equipment",
@@ -321,6 +357,24 @@
     "call_style": "assertive",
     "fx_direction": "both",
     "notes": "Foreign-currency receivables and loan books create direct balance-sheet FX exposure; larger ticket sizes than typical SME FX but relationship is often with the FD rather than a dedicated treasury team",
+    "overlaps_with": ""
+  },
+  {
+    "niche": "UK streaming subtitling and dubbing studios",
+    "branch": "contingent",
+    "mechanism": "netflix_disney+_amazon_prime_video_and_a",
+    "mechanism_display": "Netflix Disney+ Amazon Prime Video and Apple TV+ commission UK localisation studios in USD for subtitling dubbing and audio description work — ZOO Digital and VSI Group are publicly named examples",
+    "mechanism_strength": "strong_inferred",
+    "evidence_type": "company_filing",
+    "evidence_source": "ZOO Digital Group plc's Annual Report to 31 March 2025 (and 2024) explicitly states that the Group's functional and presentation currency is US dollars, and that the majority of its revenue and receivables are denominated in US dollars due to its primary client base, which includes major Hollywood studios and streaming services such as Netflix and Disney.",
+    "payer_profile": "Hollywood / OTT Studios",
+    "competition": "high",
+    "competition_checked_at": "2026-06-17T21:55:46.782242+00:00",
+    "effective_volume_raw": 40,
+    "effective_volume_bucket": "small",
+    "call_style": "assertive",
+    "fx_direction": "receives_foreign",
+    "notes": "UK streaming subtitling and dubbing studios, as exemplified by ZOO Digital Group plc, receive payments in USD from major Hollywood/OTT studios for their localisation services.",
     "overlaps_with": ""
   }
 ]
