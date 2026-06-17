@@ -1,0 +1,87 @@
+name: Niche Finder — Deploy to GitHub Pages
+
+# Deploys the static niche-finder dashboard to GitHub Pages.
+#
+# Default run: structural niches only (no API key needed).
+# Set ANTHROPIC_API_KEY in repo secrets to also run competition checks.
+#
+# To enable GitHub Pages:
+#   Repo → Settings → Pages → Source: "GitHub Actions"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'niche-finder/**'
+      - '.github/workflows/niche-finder-pages.yml'
+  workflow_dispatch:
+    inputs:
+      check_competition:
+        description: 'Run competition check (requires ANTHROPIC_API_KEY secret)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: niche-finder-pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: niche-finder/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r niche-finder/requirements.txt
+
+      - name: Generate structural niches
+        working-directory: niche-finder
+        run: python main.py --out niche_finder --no-dashboard-copy
+
+      - name: Run competition check (if key is set)
+        if: ${{ github.event.inputs.check_competition == 'true' || secrets.ANTHROPIC_API_KEY != '' }}
+        working-directory: niche-finder
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY is set — running competition recheck…"
+            python main.py --recheck-competition --older-than-days 30 --out niche_finder --no-dashboard-copy
+          else
+            echo "ANTHROPIC_API_KEY not set — skipping competition check."
+          fi
+
+      - name: Assemble dashboard
+        working-directory: niche-finder
+        run: |
+          mkdir -p dashboard/data
+          cp niche_finder_niches.json dashboard/data/niches.json
+          cp data/payer_profiles.json dashboard/data/payer_profiles.json
+          echo "Dashboard data:"
+          wc -l dashboard/data/niches.json
+          wc -l dashboard/data/payer_profiles.json
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: niche-finder/dashboard
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
