@@ -2,11 +2,14 @@ name: Niche Finder — Deploy to GitHub Pages
 
 # Deploys the static niche-finder dashboard to GitHub Pages.
 #
-# Default run: structural niches only (no API key needed).
-# Set ANTHROPIC_API_KEY in repo secrets to also run competition checks.
+# The committed dashboard/data/niches.json already contains real competition
+# scores from the last local run. The workflow serves that data as-is by default.
 #
-# To enable GitHub Pages:
-#   Repo → Settings → Pages → Source: "GitHub Actions"
+# If GEMINI_API_KEY or ANTHROPIC_API_KEY is set in repo secrets, the workflow
+# will also run a competition recheck for stale niches (> 30 days old) and
+# serve the freshened data.
+#
+# GitHub Pages must be enabled: Repo → Settings → Pages → Source: GitHub Actions
 
 on:
   push:
@@ -15,8 +18,7 @@ on:
       - 'niche-finder/**'
       - '.github/workflows/niche-finder-pages.yml'
   workflow_dispatch:
-    # Manual trigger — set GEMINI_API_KEY or ANTHROPIC_API_KEY in repo secrets
-    # for competition checks to run automatically.
+    # Manual trigger. Set GEMINI_API_KEY in repo secrets to refresh competition scores.
 
 concurrency:
   group: niche-finder-pages
@@ -37,45 +39,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: pip
-          cache-dependency-path: niche-finder/requirements.txt
-
-      - name: Install dependencies
-        run: pip install -r niche-finder/requirements.txt
-
-      - name: Generate structural niches
-        working-directory: niche-finder
-        run: python main.py --out niche_finder --no-dashboard-copy
-
-      - name: Run competition check (if key is set)
-        working-directory: niche-finder
+      - name: Refresh competition scores (if API key is set)
+        # Only installs Python and runs the recheck when a key is available.
+        # Otherwise the committed dashboard/data/niches.json is used unchanged.
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           if [ -n "$GEMINI_API_KEY" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
-            echo "API key found — running competition recheck…"
-            python main.py --recheck-competition --older-than-days 30 --out niche_finder --no-dashboard-copy
+            echo "API key found — refreshing stale competition scores…"
+            pip install -r niche-finder/requirements.txt -q
+            cd niche-finder
+            # Recheck works on the existing committed JSON, then copies result to dashboard/data/
+            python main.py --recheck-competition --older-than-days 30 --out niche_finder
           else
-            echo "No API key set — serving committed competition data as-is."
+            echo "No API key — serving committed competition data (has real scores from last local run)."
           fi
-
-      - name: Assemble dashboard
-        working-directory: niche-finder
-        run: |
-          mkdir -p dashboard/data
-          # Prefer freshly generated JSON; fall back to committed version
-          if [ -f niche_finder_niches.json ]; then
-            cp niche_finder_niches.json dashboard/data/niches.json
-          fi
-          cp data/payer_profiles.json dashboard/data/payer_profiles.json
-          echo "Dashboard data:"
-          wc -l dashboard/data/niches.json
-          wc -l dashboard/data/payer_profiles.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
