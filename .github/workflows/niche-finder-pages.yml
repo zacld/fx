@@ -15,11 +15,8 @@ on:
       - 'niche-finder/**'
       - '.github/workflows/niche-finder-pages.yml'
   workflow_dispatch:
-    inputs:
-      check_competition:
-        description: 'Run competition check (requires ANTHROPIC_API_KEY secret)'
-        type: boolean
-        default: false
+    # Manual trigger — set GEMINI_API_KEY or ANTHROPIC_API_KEY in repo secrets
+    # for competition checks to run automatically.
 
 concurrency:
   group: niche-finder-pages
@@ -55,23 +52,26 @@ jobs:
         run: python main.py --out niche_finder --no-dashboard-copy
 
       - name: Run competition check (if key is set)
-        if: ${{ github.event.inputs.check_competition == 'true' || secrets.ANTHROPIC_API_KEY != '' }}
         working-directory: niche-finder
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          if [ -n "$ANTHROPIC_API_KEY" ]; then
-            echo "ANTHROPIC_API_KEY is set — running competition recheck…"
+          if [ -n "$GEMINI_API_KEY" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "API key found — running competition recheck…"
             python main.py --recheck-competition --older-than-days 30 --out niche_finder --no-dashboard-copy
           else
-            echo "ANTHROPIC_API_KEY not set — skipping competition check."
+            echo "No API key set — serving committed competition data as-is."
           fi
 
       - name: Assemble dashboard
         working-directory: niche-finder
         run: |
           mkdir -p dashboard/data
-          cp niche_finder_niches.json dashboard/data/niches.json
+          # Prefer freshly generated JSON; fall back to committed version
+          if [ -f niche_finder_niches.json ]; then
+            cp niche_finder_niches.json dashboard/data/niches.json
+          fi
           cp data/payer_profiles.json dashboard/data/payer_profiles.json
           echo "Dashboard data:"
           wc -l dashboard/data/niches.json
