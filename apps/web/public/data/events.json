@@ -627,6 +627,58 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "0797f6c1626ad2e3": {
+    "id": "0797f6c1626ad2e3",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/british-pound-sterling-coils-before-inflation-and-a-fed-reckoning-202606162251",
+    "headline": "British Pound Sterling coils before inflation and a Fed reckoning",
+    "raw_summary": "GBP/USD spent Tuesday going almost nowhere, closing fractionally higher near the middle of a range it has refused to leave for months. The stillness is not for lack of news; it is the calm of a market that has read Wednesday's calendar and decided to wait.",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b",
+    "detected_at": "2026-06-17T02:48:27.186Z",
+    "event_type": "Currency stability",
+    "event_breadth": "broad_currency",
+    "summary": "GBP/USD stability ahead of key economic announcements. Potential for future volatility affects UK businesses with USD exposure.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "GBP/USD stability ahead of inflation data and Fed decision — indirect impact on UK businesses with USD exposure",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of USD-priced goods",
+      "UK exporters with USD revenue"
+    ],
+    "why_now": "Anticipation of potential rate changes following the Fed decision and inflation data release",
+    "discovery_recommendation": "Context only — no immediate payment flow impact, but useful for messaging context",
+    "confidence_level": "medium",
+    "confidence_reason": "Market calm before potential volatility — waiting for clearer direction",
+    "what_happened": "GBP/USD remained stable on Tuesday, awaiting Wednesday's inflation data and Fed decision",
+    "what_changed_financially": "No significant change in GBP/USD rate, but anticipation of potential future moves",
+    "who_pays_more": "None directly, due to the lack of movement",
+    "who_receives_less": "None directly, due to the stability",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP/USD transactions, but no immediate impact",
+    "fx_payment_logic": "UK businesses with USD exposure may see future changes in their GBP/USD transactions, but current stability means no immediate action is required.",
+    "sales_angle": "The upcoming Fed decision and inflation data could impact your USD transactions — it's a good time to review your currency strategy.",
+    "business_impact_summary": "UK businesses with USD exposure should be aware of potential future changes in the GBP/USD rate, but there's no immediate financial impact.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "Potential for future GBP/USD volatility means UK businesses should consider their USD exposure.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "081539bb1142ed3f": {
     "id": "081539bb1142ed3f",
     "headline": "The US-Iran MoU could be signed as soon as Sunday in Geneva - BBG",
@@ -2279,48 +2331,118 @@
     "raw_summary": "Prior was +1.9% (revised to +2.0%) Import prices up 6.7% y/y Export prices +1.3% vs +1.2% expected Prior export prices +3.3% (revised to +3.5%) The US dollar is relatively flat today ahead of the data as we wait for Wednesday's FOMC decision. This report will give them a bit extra to think about on the inflation side as prices continue to rise for imported goods. The big caveat is that WTI crude is down to $77.64, which is the lowest since March 10. That should lead to a material drop in the upcoming m/m readings. In terms of details, imported fuel prices rose 12.5% in May on top of 18.6% in A",
     "pre_relevance_score": 8,
     "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
-    "detected_at": "2026-06-16T23:18:51.348Z",
-    "event_type": "Economic data release",
-    "event_breadth": "macro",
-    "summary": "US import prices have risen, which may have an indirect impact on UK businesses importing from the US. However, the effect is uncertain and influenced by multiple factors including commodity prices and currency movements.",
+    "detected_at": "2026-06-17T02:48:20.655Z",
+    "event_type": "Import price increase",
+    "event_breadth": "broad_macro",
+    "summary": "US import prices rose 1.9% in May, exceeding expectations. UK businesses importing goods from the US may face higher costs, particularly if those goods are priced in USD. The impact on UK businesses will depend on various factors, including their hedging strategies and the specific goods being imported.",
     "currency_pairs": [
-      "USD"
+      "GBP/USD"
     ],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "US import price rise may influence UK businesses importing from the US, but the impact is indirect and depends on various factors including commodity prices and currency movements",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
+    "urgency_score": 4,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "US import price increase could impact UK businesses importing from the US, particularly those with USD-denominated costs",
+    "trigger_strength": "medium",
+    "trigger_score": 58,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
     "likely_affected_businesses": [
       "UK importers of US goods",
-      "UK businesses with US supply chains"
+      "UK businesses with USD-denominated costs"
     ],
-    "why_now": "The increase in US import prices could lead to higher costs for UK businesses that import goods from the US, but the impact is speculative and depends on various factors",
-    "discovery_recommendation": "Context only — the event has some relevance but is not a strong trigger for immediate discovery",
+    "why_now": "The import price increase could lead to higher costs for UK businesses in the near term, particularly if they have upcoming USD-denominated payments",
+    "discovery_recommendation": "Limited run — focus on identifying UK businesses with USD-denominated costs or those that import goods from the US",
     "confidence_level": "medium",
-    "confidence_reason": "The data on US import prices is relevant but its direct impact on UK businesses is uncertain and requires further analysis",
-    "what_happened": "US May import prices rose 1.9%, exceeding expectations",
-    "what_changed_financially": "Increased import prices in the US may lead to higher costs for UK businesses importing from the US, but the effect is indirect and influenced by multiple factors",
-    "who_pays_more": "UK businesses importing goods from the US may face higher costs if the prices of these goods increase due to higher US import prices",
-    "who_receives_less": "None directly, but UK exporters to the US may face pricing pressure if their US customers are experiencing higher import costs",
-    "margin_risk": "Low to Medium",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "USD payments for imports from the US",
-    "fx_payment_logic": "UK businesses importing from the US may face higher costs in USD, which could be mitigated or exacerbated by currency movements, but the direct impact is speculative",
-    "sales_angle": "If you import goods from the US, you might want to review your supply chain costs in light of the recent increase in US import prices.",
-    "business_impact_summary": "The increase in US import prices may lead to higher costs for UK businesses with US supply chains, but the impact is indirect and requires further analysis",
+    "confidence_reason": "The import price increase is a real event, but its impact on UK businesses may be indirect and dependent on various factors, including the specific goods being imported and the businesses' hedging strategies",
+    "what_happened": "US May import prices rose 1.9%, exceeding expectations of 1.0% and indicating continued inflationary pressure",
+    "what_changed_financially": "The increase in US import prices could lead to higher costs for UK businesses that import goods from the US, particularly if those goods are priced in USD",
+    "who_pays_more": "UK businesses importing goods from the US, particularly those with USD-denominated costs",
+    "who_receives_less": "None directly, but UK exporters to the US may face increased competition or pricing pressure if their US-based competitors benefit from lower input costs",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs USD costs for UK importers",
+    "fx_payment_logic": "UK importers of US goods may face higher costs due to the increase in US import prices, particularly if those goods are priced in USD. This could lead to margin compression if the businesses are unable to pass on the increased costs to their customers.",
+    "sales_angle": "If you're importing goods from the US, the recent increase in US import prices could impact your costs. Are you prepared to manage this increased expense?",
+    "business_impact_summary": "UK businesses importing goods from the US may face higher costs due to the increase in US import prices. The impact will depend on various factors, including the businesses' hedging strategies and the specific goods being imported.",
     "exposure_types": [
-      "USD import cost exposure"
+      "USD-denominated cost exposure",
+      "import cost exposure"
     ],
-    "overall_sales_angle": "US import price increase may affect your business if you import from the US — worth reviewing your costs and supply chain",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
+    "overall_sales_angle": "The increase in US import prices could lead to higher costs for UK businesses importing goods from the US. Is your business prepared to manage this increased expense?",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US goods",
+        "category_priority_score": 72,
+        "business_model": "UK businesses importing goods from the US, with USD-denominated costs",
+        "exposure_level": "Medium",
+        "exposure_type": "Import cost exposure — USD-denominated costs",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "UK importers of US goods may face higher costs due to the increase in US import prices, particularly if those goods are priced in USD",
+        "margin_risk": "Medium — the increase in US import prices could lead to higher costs for UK businesses, particularly if they are unable to pass on the increased costs to their customers",
+        "payment_timing_risk": "Medium — the timing of USD-denominated payments could impact the businesses' cash flow and profitability",
+        "affected_payment_flow": "GBP revenue vs USD costs for UK importers",
+        "website_validation_signals": [
+          "imported from US",
+          "US goods",
+          "USD pricing"
+        ],
+        "avoid_segments": [
+          "pure UK domestic businesses",
+          "businesses with no US imports"
+        ],
+        "sales_angle": "If you're importing goods from the US, the recent increase in US import prices could impact your costs. Are you prepared to manage this increased expense?",
+        "exposure_thesis_template": "This company imports goods from the US, with USD-denominated costs. The increase in US import prices could lead to higher costs for the business.",
+        "micro_categories": [
+          {
+            "name": "UK importers of US machinery parts",
+            "why": "Pay USD to US manufacturers — direct exposure to USD-denominated costs",
+            "search_queries": [
+              "\"US machinery parts\" UK importer",
+              "\"US equipment\" UK distributor"
+            ],
+            "companies_house_terms": [
+              "US machinery",
+              "US equipment"
+            ]
+          },
+          {
+            "name": "UK distributors of US consumer goods",
+            "why": "USD-priced goods from US — margin hit when USD strengthens at order-to-payment stage",
+            "search_queries": [
+              "\"US consumer goods\" UK distributor",
+              "\"US products\" UK importer"
+            ],
+            "companies_house_terms": [
+              "US consumer goods",
+              "US products"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from US",
+          "US goods",
+          "USD pricing"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "US machinery",
+      "US equipment",
+      "US consumer goods",
+      "US products"
+    ],
+    "all_search_queries": [
+      "\"US machinery parts\" UK importer",
+      "\"US equipment\" UK distributor",
+      "\"US consumer goods\" UK distributor",
+      "\"US products\" UK importer"
+    ],
+    "status": "ready",
     "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-17T02:48:38.831Z"
   },
   "20cfb96aa2096ccd": {
     "id": "20cfb96aa2096ccd",
@@ -2382,124 +2504,113 @@
     "raw_summary": "An article published by the Wall Street Journal (WSJ) reported that, within the US-Iran deal, Tehran will be allowed to sell Oil immediately. Alongside this, the deal waives sanctions on banking and transport to facilitate transactions.",
     "pre_relevance_score": 4,
     "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\boil price|\\bcrude oil|\\bwti|",
-    "detected_at": "2026-06-16T23:19:05.091Z",
+    "detected_at": "2026-06-17T02:48:30.821Z",
     "event_type": "Commodity price move",
-    "event_breadth": "broad_commodity",
-    "summary": "The US-Iran deal allowing Tehran to sell oil immediately has led to a drop in WTI oil prices. This could affect UK businesses importing oil or related products, altering their cost structures and margins.",
+    "event_breadth": "commodity",
+    "summary": "The US-Iran deal allowing Tehran to sell oil immediately has led to a drop in WTI oil prices. This could impact UK businesses importing oil or using oil as a raw material, affecting their costs and margins.",
     "currency_pairs": [],
-    "urgency_score": 4,
+    "urgency_score": 5,
     "commercial_relevance": 5,
-    "commercial_relevance_reason": "Oil price drop affects UK businesses importing oil or related products, potentially altering their cost structures and margins",
+    "commercial_relevance_reason": "Oil price drop affects UK businesses importing oil or oil-related products, potentially impacting their costs and margins",
     "trigger_strength": "medium",
-    "trigger_score": 58,
+    "trigger_score": 62,
     "discovery_mode": "limited",
     "recommended_query_budget": 10,
     "likely_affected_businesses": [
       "UK oil importers",
-      "UK businesses with oil-related costs"
+      "UK businesses using oil as a raw material"
     ],
-    "why_now": "The immediate sale of oil by Tehran could lead to a sustained drop in oil prices, affecting UK businesses' cost structures and margins",
-    "discovery_recommendation": "Limited run — focus on UK businesses with direct or indirect exposure to oil prices",
+    "why_now": "The immediate sale of oil by Tehran could lead to increased oil supply, further affecting oil prices and thus impacting UK businesses",
+    "discovery_recommendation": "Limited run — focusing on UK businesses with direct exposure to oil prices",
     "confidence_level": "medium",
-    "confidence_reason": "The impact of the oil price drop on UK businesses is indirect but tangible, especially for those with exposure to oil prices",
-    "what_happened": "WTI oil price plunged due to reports of a US-Iran deal allowing Tehran to sell oil immediately",
-    "what_changed_financially": "Oil price dropped, potentially affecting businesses with oil-related costs or revenues",
-    "who_pays_more": "None directly, but businesses with hedged oil prices or contracts may face losses if they have to rebuy at lower prices",
-    "who_receives_less": "UK businesses importing oil or oil-related products may benefit from lower costs",
+    "confidence_reason": "The report of the US-Iran deal allowing immediate oil sales by Tehran is a significant geopolitical event, but its direct impact on UK businesses is indirect through oil prices",
+    "what_happened": "WTI oil price plunges following reports of a US-Iran deal allowing Tehran to sell oil immediately",
+    "what_changed_financially": "Oil prices dropped, potentially affecting the costs of UK businesses importing oil or oil-related products",
+    "who_pays_more": "None directly, but UK businesses may face changes in their oil-related costs",
+    "who_receives_less": "UK businesses selling oil or oil-related products may receive less revenue",
     "margin_risk": "Medium",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "USD or other currency payments for oil imports, potentially affecting GBP costs for UK importers",
-    "fx_payment_logic": "UK businesses importing oil or related products may face altered costs due to the drop in oil prices, potentially impacting their GBP expenses if they buy oil in USD or other currencies",
+    "payment_timing_risk": "Low to medium",
+    "affected_payment_flow": "GBP payments for oil imports or related products",
+    "fx_payment_logic": "UK businesses importing oil or oil-related products may face changes in their costs due to the drop in oil prices, but the FX impact is indirect through commodity prices rather than currency exchange rates",
     "sales_angle": "If your business is exposed to oil prices, the recent drop could impact your costs and margins.",
-    "business_impact_summary": "UK businesses with oil-related costs may see a reduction in expenses due to the drop in oil prices. However, those with hedged positions or contracts may face losses.",
+    "business_impact_summary": "UK businesses importing oil or using oil as a raw material may face decreased costs, while those selling oil or oil-related products may face decreased revenue due to the drop in oil prices",
     "exposure_types": [
-      "Oil price exposure",
-      "Commodity cost exposure"
+      "Commodity price exposure"
     ],
-    "overall_sales_angle": "The drop in oil prices could alter your business's cost structure and margins if you're exposed to oil prices.",
+    "overall_sales_angle": "The drop in oil prices could impact your business's costs or revenue, depending on your exposure to oil prices",
     "target_segments": [
       {
-        "segment_name": "UK oil importers and distributors",
+        "segment_name": "UK oil importers and refiners",
         "category_priority_score": 72,
-        "business_model": "UK businesses importing and distributing oil or oil-related products, potentially facing altered costs due to the oil price drop",
+        "business_model": "UK businesses importing oil for refining or resale, with direct exposure to oil prices",
         "exposure_level": "High",
-        "exposure_type": "Commodity cost exposure — oil price drop",
-        "likely_currency_pairs": [
-          "GBP/USD"
-        ],
-        "fx_payment_logic": "UK oil importers buy oil in USD or other currencies, facing potential FX risk on top of commodity price risk",
-        "margin_risk": "Medium — oil price drop directly affects margins, but FX risk can add complexity",
-        "payment_timing_risk": "Low — payment terms for oil imports are typically short",
-        "affected_payment_flow": "USD or other currency payments for oil imports",
+        "exposure_type": "Commodity price exposure — oil imports",
+        "likely_currency_pairs": [],
+        "fx_payment_logic": "Oil price drop directly affects the cost of imports, potentially impacting margins",
+        "margin_risk": "High — a significant drop in oil prices could lead to substantial cost savings or losses, depending on hedging strategies",
+        "payment_timing_risk": "Medium — payment terms for oil imports can vary, creating timing risks for unhedged positions",
+        "affected_payment_flow": "GBP payments for oil imports",
         "website_validation_signals": [
-          "oil importer",
-          "petroleum distributor",
-          "energy supplier"
+          "oil imports",
+          "refining",
+          "petroleum products"
         ],
         "avoid_segments": [
-          "purely domestic UK oil producers",
-          "businesses without oil-related activities"
+          "pure domestic oil producers",
+          "businesses without oil import operations"
         ],
-        "sales_angle": "The recent oil price drop could impact your business's cost structure and margins, especially if you import oil in USD or other currencies.",
-        "exposure_thesis_template": "This company imports oil or oil-related products, facing potential costs and margin impacts from the oil price drop and related FX exposures.",
+        "sales_angle": "The recent drop in oil prices could significantly impact your import costs and margins.",
+        "exposure_thesis_template": "This company imports oil, and the drop in oil prices affects its costs and potentially its margins.",
         "micro_categories": [
           {
-            "name": "UK fuel distributors",
-            "why": "Import and distribute fuel, facing direct exposure to oil prices and potential FX risk",
+            "name": "UK crude oil importers",
+            "why": "Directly exposed to oil prices, with potential for significant cost savings or losses",
             "search_queries": [
-              "fuel distributor UK",
-              "oil importer UK",
-              "petroleum supplier UK"
+              "crude oil importer UK",
+              "UK oil refining"
             ],
             "companies_house_terms": [
-              "fuel distributor",
-              "oil importer",
-              "petroleum supplier"
+              "crude oil",
+              "oil refining"
             ]
           },
           {
-            "name": "UK energy suppliers",
-            "why": "Provide energy solutions, potentially including oil or oil-related products, and face exposure to commodity prices and FX",
+            "name": "UK petroleum product importers",
+            "why": "Exposed to oil prices through the import of petroleum products, with potential impacts on costs and margins",
             "search_queries": [
-              "energy supplier UK",
-              "oil energy UK",
-              "petroleum energy UK"
+              "petroleum products importer UK",
+              "UK fuel imports"
             ],
             "companies_house_terms": [
-              "energy supplier",
-              "oil energy",
-              "petroleum energy"
+              "petroleum products",
+              "fuel imports"
             ]
           }
         ],
         "segment_signals": [
-          "oil importer",
-          "petroleum distributor",
-          "energy supplier"
+          "oil imports",
+          "refining",
+          "petroleum products"
         ]
       }
     ],
     "companies_house_terms": [
-      "fuel distributor",
-      "oil importer",
-      "petroleum supplier",
-      "energy supplier",
-      "oil energy",
-      "petroleum energy"
+      "crude oil",
+      "oil refining",
+      "petroleum products",
+      "fuel imports"
     ],
     "all_search_queries": [
-      "fuel distributor UK",
-      "oil importer UK",
-      "petroleum supplier UK",
-      "energy supplier UK",
-      "oil energy UK",
-      "petroleum energy UK"
+      "crude oil importer UK",
+      "UK oil refining",
+      "petroleum products importer UK",
+      "UK fuel imports"
     ],
     "status": "ready",
     "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
-    "web_discovery_at": "2026-06-16T23:19:18.217Z"
+    "web_discovery_at": "2026-06-17T02:48:40.262Z"
   },
   "244b021c3e68c817": {
     "id": "244b021c3e68c817",
@@ -2547,24 +2658,46 @@
   },
   "252ba83cc005f004": {
     "id": "252ba83cc005f004",
+    "headline": "New Zealand Dollar trades sideways ahead of Fed rate decision",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/new-zealand-dollar-trades-sideways-ahead-of-fed-rate-decision-202606162132",
-    "headline": "New Zealand Dollar trades sideways ahead of Fed rate decision",
-    "raw_summary": "The NZD/USD pair trades sideways near the 0.5830 region on Wednesday, as the New Zealand Dollar (NZD) finds mild support from a softer US Dollar, while traders remain cautious ahead of the Federal Reserve’s (Fed) policy decision.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
     "detected_at": "2026-06-16T23:19:01.169Z",
     "status": "low_relevance",
+    "event_type": "",
+    "event_breadth": "sector_specific",
+    "currency_pairs": [],
+    "urgency_score": 1,
+    "commercial_relevance": 1,
+    "commercial_relevance_reason": "The event involves the New Zealand Dollar and US Dollar, with no direct UK B2B FX hook.",
     "trigger_strength": "reject",
     "trigger_score": 5,
     "discovery_mode": "reject",
     "recommended_query_budget": 0,
-    "urgency_score": 1,
-    "commercial_relevance": 1,
-    "commercial_relevance_reason": "The event involves the New Zealand Dollar and US Dollar, with no direct UK B2B FX hook.",
+    "likely_affected_businesses": [],
+    "why_now": "",
     "confidence_level": "high",
     "confidence_reason": "The event does not involve the GBP and has no clear connection to UK businesses with foreign-currency payment flows.",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "",
+    "sales_angle": "",
+    "overall_sales_angle": "",
+    "summary": "",
     "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "The NZD/USD pair trades sideways near the 0.5830 region on Wednesday, as the New Zealand Dollar (NZD) finds mild support from a softer US Dollar, while traders remain cautious ahead of the Federal Reserve’s (Fed) policy decision.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "299b69e987a9d92d": {
@@ -4638,58 +4771,6 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "4c41b2739dff04e6": {
-    "id": "4c41b2739dff04e6",
-    "source": "FXStreet",
-    "source_url": "https://www.fxstreet.com/news/british-pound-recovers-as-japanese-yen-struggles-to-capitalize-on-bank-of-japans-hawkish-rate-hike-202606161324",
-    "headline": "British Pound recovers as Japanese Yen struggles to capitalize on Bank of Japan's hawkish rate hike",
-    "raw_summary": "GBP/JPY rebounds after a short-lived pullback on Tuesday as traders digest the Bank of Japan's (BoJ) decision to raise interest rates. At the time of writing, the cross is trading around 215.10, recovering from an intraday low of 214.53.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-06-16T23:19:09.238Z",
-    "event_type": "Currency move",
-    "event_breadth": "specific_currency",
-    "summary": "GBP/JPY has moved following the Bank of Japan's rate hike decision. While this has implications for FX markets, its direct relevance to most UK businesses is limited.",
-    "currency_pairs": [
-      "GBP/JPY"
-    ],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "GBP/JPY move has limited direct relevance to most UK businesses due to the specific currency pair and the nature of the event",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [
-      "UK importers of Japanese goods",
-      "UK exporters to Japan"
-    ],
-    "why_now": "The recent move in GBP/JPY could impact upcoming payments or receipts in JPY",
-    "discovery_recommendation": "Context only — the event is not broadly relevant to most UK businesses due to the specific currencies involved",
-    "confidence_level": "medium",
-    "confidence_reason": "The event, while relevant to FX markets, does not directly impact a broad range of UK businesses due to the specific currencies involved",
-    "what_happened": "GBP/JPY rebounded after the Bank of Japan's decision to raise interest rates",
-    "what_changed_financially": "The GBP/JPY rate moved, potentially affecting businesses with exposure to this specific currency pair",
-    "who_pays_more": "UK businesses importing from Japan or with JPY-denominated costs",
-    "who_receives_less": "UK businesses exporting to Japan or with JPY revenue streams",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "GBP revenue vs JPY costs or revenue",
-    "fx_payment_logic": "UK businesses with direct exposure to JPY, either through imports from Japan or exports to Japan, may see changes in their costs or revenue due to the GBP/JPY move.",
-    "sales_angle": "If your business has exposure to the Japanese Yen, recent changes in the GBP/JPY rate could affect your costs or revenue.",
-    "business_impact_summary": "The impact is primarily on businesses with direct trade relationships with Japan, affecting their profitability due to the exchange rate movement.",
-    "exposure_types": [
-      "JPY supplier payment exposure",
-      "JPY revenue conversion"
-    ],
-    "overall_sales_angle": "For businesses with JPY exposure, reviewing the current GBP/JPY rate in the context of upcoming payments or receipts could be beneficial.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
-  },
   "4d47fb7c7500756b": {
     "id": "4d47fb7c7500756b",
     "headline": "Euro remains stronger against Canadian Dollar as oil prices ease",
@@ -6654,16 +6735,13 @@
   },
   "6676228d8723b4c3": {
     "id": "6676228d8723b4c3",
+    "headline": "Chinese export flood puts EU tariff wall firmly on G7 agenda in France",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/chinese-export-flood-puts-eu-tariff-wall-firmly-on-g7-agenda-in-france-20260616/",
-    "headline": "Chinese export flood puts EU tariff wall firmly on G7 agenda in France",
-    "raw_summary": "A coordinated G7 move toward higher tariffs on Chinese goods would represent a significant escalation in the global trade war, with direct implications for supply chains in EVs, batteries, solar and advanced machinery. European equities with China exposure, particularly German industrials and automakers already under pressure from Chinese competition, face added downside risk if Brussels moves to broaden its tariff regime beyond current sector-specific measures. Chinese export-oriented sectors and yuan-sensitive assets could reprice on any firm summit communique. The prospect of a China-EU tra",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-06-16T23:19:12.858Z",
+    "status": "ready",
     "event_type": "Trade policy",
     "event_breadth": "tariff",
-    "summary": "G7 discussions on higher tariffs for Chinese goods could impact UK importers and businesses competing with Chinese exports. Tariff changes could increase import costs and affect pricing strategies.",
     "currency_pairs": [
       "EUR/CNY",
       "GBP/CNY"
@@ -6681,28 +6759,26 @@
       "UK solar panel importers"
     ],
     "why_now": "Potential tariff changes could impact upcoming import costs and pricing strategies",
-    "discovery_recommendation": "Limited run — potential tariff changes justify targeting specific import-oriented niches",
     "confidence_level": "medium",
     "confidence_reason": "G7 discussions on tariffs are speculative but could have significant trade implications if implemented",
+    "discovery_recommendation": "Limited run — potential tariff changes justify targeting specific import-oriented niches",
     "what_happened": "G7 considers higher tariffs on Chinese goods",
     "what_changed_financially": "Potential increase in tariffs on Chinese imports to the EU",
     "who_pays_more": "UK businesses importing from China or competing with Chinese exports",
     "who_receives_less": "None directly, but Chinese exporters may face reduced demand",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Low to medium",
     "affected_payment_flow": "GBP or EUR payments for Chinese imports",
     "fx_payment_logic": "UK businesses importing from China pay in GBP or EUR, which could be affected by changes in tariffs and yuan exchange rates",
-    "sales_angle": "If you import from China, potential EU tariff changes could increase your costs and require a review of your pricing strategy.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Low to medium",
     "business_impact_summary": "UK importers of Chinese goods face potential increases in import costs due to higher tariffs. Businesses competing with Chinese exports may see a relative advantage if tariffs are implemented.",
-    "exposure_types": [
-      "Import cost exposure — Chinese goods",
-      "Competitive exposure — Chinese exports"
-    ],
+    "sales_angle": "If you import from China, potential EU tariff changes could increase your costs and require a review of your pricing strategy.",
     "overall_sales_angle": "Potential EU tariff changes on Chinese goods could impact your import costs and require a review of your pricing strategy.",
+    "summary": "G7 discussions on higher tariffs for Chinese goods could impact UK importers and businesses competing with Chinese exports. Tariff changes could increase import costs and affect pricing strategies.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of Chinese machinery and automotive parts",
-        "category_priority_score": 72,
         "business_model": "UK businesses importing machinery or automotive parts from China, selling in the UK market",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — Chinese goods",
@@ -6710,21 +6786,14 @@
           "GBP/CNY",
           "EUR/CNY"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK importers pay in GBP or EUR for Chinese goods, exposed to changes in tariffs and yuan exchange rates",
         "margin_risk": "Medium — potential tariff increases could compress margins",
         "payment_timing_risk": "Low to medium — payment terms may provide some buffer against immediate tariff changes",
         "affected_payment_flow": "GBP or EUR payments for Chinese imports",
-        "website_validation_signals": [
-          "imported from China",
-          "Chinese machinery",
-          "automotive parts from China"
-        ],
-        "avoid_segments": [
-          "pure UK domestic manufacturers",
-          "businesses without Chinese imports"
-        ],
-        "sales_angle": "Potential EU tariff changes could increase your import costs from China.",
-        "exposure_thesis_template": "This company imports machinery or automotive parts from China. Tariff changes could increase import costs and affect pricing strategies.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of Chinese industrial machinery",
@@ -6751,11 +6820,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from China",
+          "Chinese machinery",
+          "automotive parts from China"
+        ],
         "segment_signals": [
           "imported from China",
           "Chinese machinery",
           "automotive parts from China"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "businesses without Chinese imports"
+        ],
+        "sales_angle": "Potential EU tariff changes could increase your import costs from China.",
+        "exposure_thesis_template": "This company imports machinery or automotive parts from China. Tariff changes could increase import costs and affect pricing strategies."
       }
     ],
     "companies_house_terms": [
@@ -6770,8 +6852,13 @@
       "\"automotive parts importer\" China UK",
       "\"Chinese auto parts\" UK distributor"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "A coordinated G7 move toward higher tariffs on Chinese goods would represent a significant escalation in the global trade war, with direct implications for supply chains in EVs, batteries, solar and advanced machinery. European equities with China exposure, particularly German industrials and automakers already under pressure from Chinese competition, face added downside risk if Brussels moves to broaden its tariff regime beyond current sector-specific measures. Chinese export-oriented sectors and yuan-sensitive assets could reprice on any firm summit communique. The prospect of a China-EU tra",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "Import cost exposure — Chinese goods",
+      "Competitive exposure — Chinese exports"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-16T23:19:18.647Z"
@@ -7102,16 +7189,13 @@
   },
   "6bfe1b9216f56025": {
     "id": "6bfe1b9216f56025",
+    "headline": "British Pound holds 1.3400 as Fed’s rate decision looms",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/british-pound-holds-13400-as-feds-decision-looms-202606161500",
-    "headline": "British Pound holds 1.3400 as Fed’s rate decision looms",
-    "raw_summary": "The Pound Sterling (GBP) holds firm above the 1.3400 level on Tuesday as the US Dollar (USD) recovers some ground, even as geopolitical tensions ease following the US-Iran peace agreement. At the time of writing, the GBP/USD pair trades with minimal losses of 0.03%",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\binterest rate|\\brate decisio",
     "detected_at": "2026-06-16T23:18:53.421Z",
+    "status": "context_only",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "GBP/USD holds above 1.3400. Minor move lacks direct UK business impact but may be relevant for businesses with USD exposure.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -7127,28 +7211,32 @@
       "UK exporters with USD customer revenue"
     ],
     "why_now": "Fed's rate decision may impact USD and thus GBP/USD, but the current move lacks urgency",
-    "discovery_recommendation": "Context only — minor move without a direct and immediate UK business hook",
     "confidence_level": "medium",
     "confidence_reason": "GBP/USD move is minor and lacks a clear driver for immediate UK business impact",
+    "discovery_recommendation": "Context only — minor move without a direct and immediate UK business hook",
     "what_happened": "GBP/USD holds above 1.3400 ahead of the Fed's rate decision",
     "what_changed_financially": "GBP/USD rate moved slightly, affecting UK businesses with USD-denominated transactions",
     "who_pays_more": "UK businesses with USD-denominated costs or USD-priced imports",
     "who_receives_less": "UK exporters receiving USD payments and converting to GBP",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP revenue vs USD costs or revenue",
     "fx_payment_logic": "UK businesses with USD transactions face exchange rate risk, but the current move is minor.",
-    "sales_angle": "If you have USD exposure, keep an eye on the GBP/USD rate ahead of the Fed's decision.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK businesses with USD transactions may face minor impacts from the current GBP/USD move.",
-    "exposure_types": [
-      "USD transaction exposure"
-    ],
+    "sales_angle": "If you have USD exposure, keep an eye on the GBP/USD rate ahead of the Fed's decision.",
     "overall_sales_angle": "GBP/USD move is minor, but worth monitoring ahead of the Fed's rate decision for potential future impacts.",
+    "summary": "GBP/USD holds above 1.3400. Minor move lacks direct UK business impact but may be relevant for businesses with USD exposure.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "The Pound Sterling (GBP) holds firm above the 1.3400 level on Tuesday as the US Dollar (USD) recovers some ground, even as geopolitical tensions ease following the US-Iran peace agreement. At the time of writing, the GBP/USD pair trades with minimal losses of 0.03%",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\binterest rate|\\brate decisio",
+    "exposure_types": [
+      "USD transaction exposure"
+    ],
     "ai_model": "llama-3.3-70b-versatile"
   },
   "70753f6ae3c06cad": {
@@ -9659,16 +9747,13 @@
   },
   "a33506c59f2f6efb": {
     "id": "a33506c59f2f6efb",
+    "headline": "Euro: Limited upside versus Dollar – NBC",
     "source": "FXStreet",
     "source_url": "https://www.fxstreet.com/news/euro-limited-upside-versus-dollar-nbc-202606161329",
-    "headline": "Euro: Limited upside versus Dollar – NBC",
-    "raw_summary": "National Bank of Canada (NBC) argues that Euro upside against the Dollar is likely to be limited, as relative growth and interest rate differentials still favor the United States.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
     "detected_at": "2026-06-16T23:19:06.960Z",
+    "status": "context_only",
     "event_type": "Forecast",
     "event_breadth": "broad_currency",
-    "summary": "NBC forecasted limited Euro upside against the Dollar, citing growth and interest rate differentials. This has no direct UK B2B FX hook.",
     "currency_pairs": [
       "EUR/USD"
     ],
@@ -9681,26 +9766,30 @@
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
     "why_now": "No immediate reason to call, as this is a forecast without current market impact",
-    "discovery_recommendation": "Context only — no direct UK B2B FX payment flow hook",
     "confidence_level": "medium",
     "confidence_reason": "NBC forecast is an opinion piece without immediate market-moving potential",
+    "discovery_recommendation": "Context only — no direct UK B2B FX payment flow hook",
     "what_happened": "National Bank of Canada forecasted limited Euro upside against the Dollar",
     "what_changed_financially": "EUR/USD rate forecast, but no immediate change in rates or tariffs",
     "who_pays_more": "None directly, as this is a forecast without immediate impact",
     "who_receives_less": "None directly, as this is a forecast without immediate impact",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "None directly, as this is a forecast without immediate impact",
     "fx_payment_logic": "No direct FX payment logic, as this is a forecast without immediate impact on UK businesses",
-    "sales_angle": "No immediate sales angle, as this is a forecast without current market relevance",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "No direct business impact, as this is a forecast without immediate effect on UK companies",
-    "exposure_types": [],
+    "sales_angle": "No immediate sales angle, as this is a forecast without current market relevance",
     "overall_sales_angle": "No sharp reason to call, given the lack of immediate market impact",
+    "summary": "NBC forecasted limited Euro upside against the Dollar, citing growth and interest rate differentials. This has no direct UK B2B FX hook.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "National Bank of Canada (NBC) argues that Euro upside against the Dollar is likely to be limited, as relative growth and interest rate differentials still favor the United States.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
   "a37cd3c36ff29a00": {
@@ -9745,6 +9834,101 @@
     "raw_summary": "SPARE a thought for 29-year-old local jockey Angus Chung when he arrives at Sha Tin on Sunday. The two-pound claiming rider, retained by the Tony Cruz stable with 23 winners to his name this season, has only four rides on the card but more importantly has lost two plum rides on the programme. Unfortunately, despite [...]",
     "pre_relevance_score": 4,
     "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\bimport|\\bexport\\b",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "a4e989eb85ce2c50": {
+    "id": "a4e989eb85ce2c50",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/euro-holds-steady-above-11600-ahead-of-fed-rate-decision-202606170011",
+    "headline": "Euro holds steady above 1.1600 ahead of Fed rate decision",
+    "raw_summary": "The EUR/USD pair holds steady near 1.1610 during the early Asian session on Wednesday. Traders prefer to wait on the sidelines ahead of the US Federal Reserve (Fed) interest rate decision later in the day. Also, the US May Retail Sales will be published.",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-06-17T02:48:25.044Z",
+    "event_type": "Currency stability",
+    "event_breadth": "broad_currency",
+    "summary": "EUR/USD held steady ahead of Fed rate decision. UK businesses with USD exposure may face future changes, but no immediate action required.",
+    "currency_pairs": [
+      "EUR/USD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "EUR/USD stability ahead of Fed rate decision has indirect implications for UK businesses with USD exposure",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of USD-priced goods",
+      "UK exporters receiving USD revenue"
+    ],
+    "why_now": "Fed rate decision may impact future currency movements, but no immediate action required",
+    "discovery_recommendation": "Context only — no direct UK B2B FX hook, but may inform future outreach",
+    "confidence_level": "medium",
+    "confidence_reason": "Fed decision may impact currency markets, but direct UK B2B FX hook is indirect",
+    "what_happened": "EUR/USD held steady near 1.1610 ahead of the US Federal Reserve interest rate decision",
+    "what_changed_financially": "No significant change, but anticipation of Fed decision may influence future currency movements",
+    "who_pays_more": "None directly, but UK businesses with USD exposure may face future changes",
+    "who_receives_less": "None directly, but UK businesses with USD revenue may face future changes",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "Indirect impact on UK businesses with USD exposure",
+    "fx_payment_logic": "UK businesses with USD exposure may face changes in currency movements, but no direct impact from current EUR/USD stability",
+    "sales_angle": "If you have USD exposure, the upcoming Fed rate decision may impact your currency costs.",
+    "business_impact_summary": "UK businesses with USD exposure may face future changes in currency costs, but no immediate action required.",
+    "exposure_types": [
+      "USD exposure"
+    ],
+    "overall_sales_angle": "Fed rate decision may impact USD costs for UK businesses with USD exposure.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "a6c3891d9ffadb5c": {
+    "id": "a6c3891d9ffadb5c",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/singapore-may-exports-surge-384-biggest-jump-in-20-years-on-ai-demand-20260617/",
+    "headline": "Singapore May exports surge 38.4%, biggest jump in 20 years on AI demand",
+    "raw_summary": "The scale of the beat, nearly 7 percentage points above consensus, underscores how concentrated Singapore's export boom is in AI-driven electronics, with integrated circuits, disk media and PCs doing the heavy lifting. The 303% surge in electronics exports to the US and 218% to Taiwan highlights the semiconductor supply chain intensity of the move and raises questions about sustainability if US tariff proposals proceed. A 12.5% additional levy on Singaporean goods, if enacted, could affect around a third of the city-state's direct US exports, introducing a meaningful headwind to what is otherw",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-06-17T02:48:33.612Z",
+    "event_type": "Export statistics",
+    "event_breadth": "sector_specific",
+    "summary": "Singapore's export surge, driven by AI electronics, highlights sector growth but also vulnerability to external factors like tariffs, which could indirectly affect UK importers of these goods.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "While Singapore's export boom is significant, the direct UK B2B FX hook is indirect and speculative, focusing on potential US tariffs affecting Singapore's exports, which may have a second-order impact on UK businesses importing electronics or components from Singapore or the US.",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "The potential for US tariffs on Singaporean goods could introduce a headwind to Singapore's export boom, but the direct relevance to UK B2B FX is speculative and not immediate.",
+    "discovery_recommendation": "Context only — the event lacks a direct UK B2B FX hook.",
+    "confidence_level": "low",
+    "confidence_reason": "The connection to UK B2B FX exposure is speculative and relies on multiple steps: potential US tariffs on Singaporean goods, the impact on Singapore's electronics exports, and then the effect on UK importers of these goods.",
+    "what_happened": "Singapore's May exports surged 38.4%, the biggest jump in 20 years, driven by AI demand, especially in electronics.",
+    "what_changed_financially": "The significant increase in electronics exports, particularly to the US and Taiwan, underscores the sector's growth but also its vulnerability to external factors like US tariff proposals.",
+    "who_pays_more": "None directly, but potentially UK importers of electronics or components if US tariffs affect Singapore's exports and lead to price increases.",
+    "who_receives_less": "None directly, but potentially Singaporean exporters if tariffs are imposed, which could have a second-order effect on their UK customers or partners.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None directly, but potentially USD or SGD payments for electronics imports.",
+    "fx_payment_logic": "No direct FX payment logic applies to UK businesses based on this event alone.",
+    "sales_angle": "While not directly relevant, changes in global trade patterns and tariffs can impact UK businesses importing electronics or components, suggesting a review of supply chain risks.",
+    "business_impact_summary": "The event has no direct impact on UK businesses but could signal potential future risks in electronics supply chains due to tariff proposals.",
+    "exposure_types": [],
+    "overall_sales_angle": "The potential for tariffs affecting electronics exports from Singapore to the US could have a second-order impact on UK importers, suggesting a review of supply chain and FX risks.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "a713daeb71b3ee01": {
@@ -11473,44 +11657,35 @@
     "raw_summary": "Country acts amid Iran war inflation pressures, but US Fed and Bank of England expected to hold rates Business live – latest updates The Bank of Japan (BoJ) has raised interest rates to a 31-year high as it tries to dampen inflationary pressures created by the Iran war. Policymakers in Tokyo raised the BoJ’s short-term policy rate by a quarter of one percentage point, to 1% from 0.75% , and warned that companies were passing on rising oil costs to each other at a “relatively fast pace”. Continue reading...",
     "pre_relevance_score": 6,
     "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-06-16T23:18:55.909Z",
-    "event_type": "Central bank decision",
+    "detected_at": "2026-06-17T02:48:23.207Z",
+    "event_type": "Central bank rate decision",
     "event_breadth": "global_macro",
-    "summary": "The Bank of Japan raised interest rates to combat inflation pressures, which might have indirect effects on global commodity prices and currency exchange rates, potentially impacting UK businesses",
-    "currency_pairs": [
-      "JPY/USD",
-      "JPY/GBP"
-    ],
+    "summary": "The Bank of Japan has raised interest rates to combat inflation, but this has limited direct implications for UK B2B FX payment flows. The move could contribute to global inflationary pressures, potentially affecting commodity prices and, by extension, UK businesses with international supply chains or exports.",
+    "currency_pairs": [],
     "urgency_score": 2,
-    "commercial_relevance": 3,
-    "commercial_relevance_reason": "Interest rate change in Japan may influence global monetary policy, indirectly affecting UK businesses through currency and commodity price changes",
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "BoJ rate hike has indirect implications for global inflation and potentially commodity prices, but lacks a direct UK B2B FX hook",
     "trigger_strength": "weak",
     "trigger_score": 22,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
-    "likely_affected_businesses": [
-      "UK exporters to Japan",
-      "UK importers of Japanese goods"
-    ],
-    "why_now": "The rate change might influence global monetary policy and commodity prices, indirectly affecting UK businesses",
-    "discovery_recommendation": "Context only — the event is more about global macro context than direct UK B2B FX relevance",
+    "likely_affected_businesses": [],
+    "why_now": "Inflationary pressures and potential commodity price impacts could have a secondary effect on UK businesses, but this is not a primary FX concern",
+    "discovery_recommendation": "Context only — keep as background information for potential follow-up discussions",
     "confidence_level": "medium",
-    "confidence_reason": "The event itself is significant but its direct impact on UK B2B FX is indirect and requires further steps to establish relevance",
-    "what_happened": "The Bank of Japan raised its interest rate to a 31-year high of 1%",
-    "what_changed_financially": "The BoJ's short-term policy rate increased by 0.25 percentage points",
-    "who_pays_more": "None directly, but potential implications for global commodity prices and currency exchange rates",
-    "who_receives_less": "None directly, but UK exporters to Japan might face altered market conditions",
+    "confidence_reason": "While the BoJ rate hike has global implications, its direct impact on UK B2B FX payment flows is limited and indirect",
+    "what_happened": "Bank of Japan raised interest rates to 1%, a 31-year high, to combat inflationary pressures",
+    "what_changed_financially": "BoJ's short-term policy rate increased by 0.25 percentage points",
+    "who_pays_more": "None directly, but potential for increased costs due to inflationary pressures",
+    "who_receives_less": "None directly",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly, potential indirect effects on commodity prices and currency exchange rates",
-    "fx_payment_logic": "The BoJ's rate change may influence global interest rates and commodity prices, which in turn could affect currency exchange rates and thus impact UK businesses with international transactions",
-    "sales_angle": "The recent interest rate change by the Bank of Japan might have implications for your business through changes in global commodity prices and currency exchange rates",
-    "business_impact_summary": "While the direct impact is minimal, UK businesses, especially those trading with Japan or affected by global commodity prices, should be aware of potential indirect effects on their operations and profitability",
-    "exposure_types": [
-      "Indirect commodity price exposure",
-      "Potential currency exchange rate changes"
-    ],
-    "overall_sales_angle": "The global economic landscape is shifting; let's discuss how recent central bank decisions might affect your business",
+    "affected_payment_flow": "None directly",
+    "fx_payment_logic": "The BoJ rate hike is primarily aimed at managing domestic inflation and has an indirect impact on global economic conditions, including potential effects on commodity prices and supply chains. However, it does not directly influence UK B2B FX payment flows.",
+    "sales_angle": "While not directly relevant to your current FX exposures, global economic shifts like the BoJ's rate hike can signal broader trends that might impact your business in the future.",
+    "business_impact_summary": "The BoJ's decision to raise interest rates is part of a global response to inflationary pressures. While it does not directly affect UK B2B FX payment flows, it could contribute to increased costs or pricing pressures in certain industries, particularly those heavily reliant on commodities or international supply chains.",
+    "exposure_types": [],
+    "overall_sales_angle": "Global economic shifts, like the BoJ rate hike, can have indirect implications for UK businesses, particularly those with international operations or supply chains.",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -15414,16 +15589,13 @@
   },
   "f73799f0051ef6c7": {
     "id": "f73799f0051ef6c7",
+    "headline": "European parliament finally approves Trump tariff deal",
     "source": "The Guardian Biz",
     "source_url": "https://www.theguardian.com/world/2026/jun/16/european-parliament-finally-approves-trump-tariff-deal",
-    "headline": "European parliament finally approves Trump tariff deal",
-    "raw_summary": "MEPs agree to implement deal almost 12 months after it was proposed and just days before deadline of US threat to raise tariffs The European parliament has given its final approval to implement last July’s tariff agreement with Donald Trump. Facing a threat of increased tariffs if the deal was not sanctioned by 4 July, MEPs agreed to approve the deal, with two main provisos. Continue reading...",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +4 \\bsanction|\\btrade ban|\\btrade",
     "detected_at": "2026-06-16T23:19:00.120Z",
+    "status": "ready",
     "event_type": "Tariff agreement",
     "event_breadth": "tariff",
-    "summary": "The EU-US tariff agreement affects UK businesses importing from or exporting to the US. The deal reduces or eliminates tariffs on certain goods, changing the cost structure for these businesses.",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -15440,49 +15612,40 @@
       "UK exporters to the US"
     ],
     "why_now": "The approved tariff deal changes the cost structure for UK businesses trading with the US, making it a good time to review their FX exposure",
-    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "confidence_level": "medium",
     "confidence_reason": "The tariff deal is now approved, but its impact on UK businesses depends on their specific trade flows with the US and the EU",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
     "what_happened": "European parliament approved the tariff agreement with the US",
     "what_changed_financially": "Tariffs on certain goods will be reduced or eliminated, affecting the cost of imports and exports for UK businesses",
     "who_pays_more": "UK businesses importing goods from the US that were previously subject to higher tariffs",
     "who_receives_less": "UK businesses exporting goods to the US that were previously subject to higher tariffs",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP or EUR payments for US imports or exports",
     "fx_payment_logic": "UK businesses importing from the US will pay less in tariffs, but may still face FX risk on their USD payments. UK businesses exporting to the US may receive more in GBP terms due to the reduced tariffs, but face FX risk on their USD receipts.",
-    "sales_angle": "If you import from or export to the US, the new tariff agreement may change your cost structure and FX exposure.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses trading with the US face changes in their cost structure due to the tariff agreement. They should review their FX exposure and consider hedging strategies to manage their risk.",
-    "exposure_types": [
-      "USD payment exposure",
-      "USD revenue conversion"
-    ],
+    "sales_angle": "If you import from or export to the US, the new tariff agreement may change your cost structure and FX exposure.",
     "overall_sales_angle": "The EU-US tariff agreement changes the cost structure for UK businesses trading with the US, making it a good time to review their FX exposure and consider hedging strategies.",
+    "summary": "The EU-US tariff agreement affects UK businesses importing from or exporting to the US. The deal reduces or eliminates tariffs on certain goods, changing the cost structure for these businesses.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of US goods",
-        "category_priority_score": 72,
         "business_model": "UK business importing goods from the US, paying in USD",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — USD payments",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK business pays USD for US goods, facing FX risk on the payment",
         "margin_risk": "Medium — tariff changes affect the cost of goods, and FX risk affects the GBP cost",
         "payment_timing_risk": "Medium — payment terms and FX risk timing affect the overall cost",
         "affected_payment_flow": "USD payments for US imports",
-        "website_validation_signals": [
-          "import from US",
-          "US goods",
-          "dollar-priced imports"
-        ],
-        "avoid_segments": [
-          "pure UK domestic businesses",
-          "businesses without US imports"
-        ],
-        "sales_angle": "If you import from the US, the new tariff agreement and FX rates may change your cost structure.",
-        "exposure_thesis_template": "This company imports goods from the US, facing USD payment exposure and FX risk.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK importers of US machinery parts",
@@ -15497,36 +15660,41 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "import from US",
+          "US goods",
+          "dollar-priced imports"
+        ],
         "segment_signals": [
           "import from US",
           "US goods",
           "dollar-priced imports"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic businesses",
+          "businesses without US imports"
+        ],
+        "sales_angle": "If you import from the US, the new tariff agreement and FX rates may change your cost structure.",
+        "exposure_thesis_template": "This company imports goods from the US, facing USD payment exposure and FX risk."
       },
       {
         "segment_name": "UK exporters to the US",
-        "category_priority_score": 65,
         "business_model": "UK business exporting goods to the US, receiving USD payments",
         "exposure_level": "Medium",
         "exposure_type": "Revenue conversion — USD receipts",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "UK business receives USD for US sales, facing FX risk on conversion to GBP",
         "margin_risk": "Low to medium — FX risk affects the GBP value of USD receipts",
         "payment_timing_risk": "Medium — conversion timing affects the overall revenue",
         "affected_payment_flow": "USD receipts from US customers",
-        "website_validation_signals": [
-          "export to US",
-          "US customers",
-          "dollar-priced exports"
-        ],
-        "avoid_segments": [
-          "pure UK domestic businesses",
-          "businesses without US exports"
-        ],
-        "sales_angle": "If you export to the US, the new tariff agreement and FX rates may change your revenue structure.",
-        "exposure_thesis_template": "This company exports goods to the US, facing USD revenue conversion and FX risk.",
+        "ideal_company_profile": "",
+        "category_priority_score": 65,
         "micro_categories": [
           {
             "name": "UK manufacturers exporting to the US",
@@ -15541,11 +15709,24 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "export to US",
+          "US customers",
+          "dollar-priced exports"
+        ],
         "segment_signals": [
           "export to US",
           "US customers",
           "dollar-priced exports"
-        ]
+        ],
+        "avoid_segments": [
+          "pure UK domestic businesses",
+          "businesses without US exports"
+        ],
+        "sales_angle": "If you export to the US, the new tariff agreement and FX rates may change your revenue structure.",
+        "exposure_thesis_template": "This company exports goods to the US, facing USD revenue conversion and FX risk."
       }
     ],
     "companies_house_terms": [
@@ -15560,8 +15741,13 @@
       "\"export to US\" UK manufacturer",
       "\"US customers\" UK exporter"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "MEPs agree to implement deal almost 12 months after it was proposed and just days before deadline of US threat to raise tariffs The European parliament has given its final approval to implement last July’s tariff agreement with Donald Trump. Facing a threat of increased tariffs if the deal was not sanctioned by 4 July, MEPs agreed to approve the deal, with two main provisos. Continue reading...",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +4 \\bsanction|\\btrade ban|\\btrade",
+    "exposure_types": [
+      "USD payment exposure",
+      "USD revenue conversion"
+    ],
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-16T23:19:16.896Z"
