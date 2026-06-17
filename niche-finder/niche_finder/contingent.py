@@ -81,12 +81,49 @@ Known payer profiles whose currency is already established:
 
 # ── Score one contingent candidate ─────────────────────────────────────────
 
-def score_contingent(row: dict, payer_profiles: dict, client) -> Optional[Niche]:
+def _call_anthropic(prompt: str, client) -> str:
+    """Score via claude-sonnet-4-6 + web_search_20250305."""
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1200,
+        tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 4}],
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return "\n".join(
+        block.text for block in response.content
+        if hasattr(block, "text") and block.text
+    ).strip()
+
+
+def _call_gemini(prompt: str, competition_client: dict) -> str:
+    """Score via Gemini + built-in Google Search grounding."""
+    from google.genai import types
+    gemini_client = competition_client["gemini_client"]
+    model_name = competition_client["gemini_model_name"]
+    response = gemini_client.models.generate_content(
+        model=model_name,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            tools=[types.Tool(google_search=types.GoogleSearch())]
+        ),
+    )
+    return response.text or ""
+
+
+def score_contingent(
+    row: dict,
+    payer_profiles: dict,
+    client,                          # anthropic.Anthropic OR None
+    competition_client: dict = None, # provider dict used as fallback
+) -> Optional[Niche]:
     """
     Score a single contingent candidate row.
 
-    Returns a Niche on success, or None if the niche is rejected or the call fails.
-    row must have keys: niche, mechanism_hypothesis, payer_profile_hint (optional).
+    Accepts either an Anthropic client (uses web_search_20250305) or a
+    Gemini provider dict (uses built-in Google Search grounding) — both do
+    real live web searches; the results surface in evidence_source.
+
+    Returns a Niche on success, or None if rejected or an error occurs.
     """
     niche_name = row.get("niche", "").strip()
     mechanism_hypothesis = row.get("mechanism_hypothesis", "").strip()
@@ -106,19 +143,15 @@ def score_contingent(row: dict, payer_profiles: dict, client) -> Optional[Niche]
     )
 
     try:
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=800,
-            tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 3}],
-            messages=[{"role": "user", "content": prompt}],
-        )
+        if client is not None:
+            raw_text = _call_anthropic(prompt, client)
+            logger.debug("Used Anthropic for %r", niche_name)
+        elif competition_client is not None:
+            raw_text = _call_gemini(prompt, competition_client)
+            logger.debug("Used Gemini for %r", niche_name)
+        else:
+            raise ValueError("No API client provided — pass client or competition_client")
 
-        text_parts = [
-            block.text
-            for block in response.content
-            if hasattr(block, "text") and block.text
-        ]
-        raw_text = "\n".join(text_parts).strip()
         parsed = _extract_json(raw_text)
 
         strength = parsed.get("mechanism_strength", "").strip().lower()
@@ -223,7 +256,7 @@ def score_contingent_batch(
 
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
-            pool.submit(score_contingent, row, payer_profiles, client): row
+            pool.submit(score_contingent, row, payer_profiles, client, competition_client): row
             for row in rows
         }
         for future in as_completed(futures):

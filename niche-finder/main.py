@@ -229,8 +229,26 @@ def main() -> None:
     logger.info("  %d structural niches generated", len(niches))
 
     if args.contingent:
-        anthropic_client = _require_anthropic_client()
         competition_client_for_overlap = _require_competition_client()
+        # Use Anthropic for web_search_20250305 if available; fall back to
+        # Gemini Google Search grounding (same real-search capability).
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+        if anthropic_key:
+            try:
+                import anthropic as _ant
+                anthropic_client = _ant.Anthropic(api_key=anthropic_key)
+                logger.info("Contingent scoring: Anthropic (claude-sonnet-4-6 + web_search)")
+            except ImportError:
+                anthropic_client = None
+        else:
+            anthropic_client = None
+        if anthropic_client is None:
+            logger.info(
+                "Contingent scoring: Gemini (%s) + Google Search grounding "
+                "(ANTHROPIC_API_KEY not set)",
+                os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+            )
+
         from niche_finder.contingent import load_candidates_csv, score_contingent_batch
         rows = load_candidates_csv(args.contingent)
         logger.info("Scoring %d contingent candidates (with overlap detection)…", len(rows))
@@ -238,9 +256,9 @@ def main() -> None:
         contingent = score_contingent_batch(
             rows,
             payer_profiles,
-            anthropic_client,
+            anthropic_client,                      # None if using Gemini
             max_workers=args.workers,
-            existing_niches=list(niches),          # pass structural niches for overlap check
+            existing_niches=list(niches),
             competition_client=competition_client_for_overlap,
         )
         niches.extend(contingent)
