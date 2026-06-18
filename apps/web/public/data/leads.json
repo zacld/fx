@@ -16594,9 +16594,7 @@
     "inferred_currency_pairs": [],
     "currency_reason": "",
     "size_signals": [],
-    "tech_signals": [
-      "google-tag-manager"
-    ],
+    "tech_signals": [],
     "fx_likelihood_score": 0,
     "website_confidence_reason": "High confidence: discovered via domain guess",
     "trustpilot_reviews": null,
@@ -301659,7 +301657,9 @@
     "inferred_currency_pairs": [],
     "currency_reason": "",
     "size_signals": [],
-    "tech_signals": [],
+    "tech_signals": [
+      "google-tag-manager"
+    ],
     "fx_likelihood_score": 0,
     "website_confidence_reason": "High confidence: discovered via domain guess; domain name matches company name",
     "trustpilot_reviews": null,
