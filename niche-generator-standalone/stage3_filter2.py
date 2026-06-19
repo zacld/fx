@@ -179,8 +179,64 @@ def main():
         w.writerow(["sector_name", "mechanism", "filter_reason"])
         w.writerows(final_rows)
 
+    # Build source lookup from niches_generated.csv
+    source_map: dict[str, str] = {}
+    try:
+        with open(IN, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                source_map[row["sector_name"]] = row.get("source", "")
+    except Exception:
+        pass
+
+    # Derive fx_direction from mechanism text
+    def fx_direction(mech: str) -> str:
+        m = mech.lower()
+        has_pays     = "pays" in m
+        has_receives = "receives" in m or "trades" in m
+        if has_pays and has_receives:
+            return "both"
+        if has_receives:
+            return "receives"
+        return "pays"
+
+    # Count source rows for meta
+    sectors_raw_count = 0
+    try:
+        with open("sectors_raw.csv", newline="", encoding="utf-8") as f:
+            sectors_raw_count = sum(1 for _ in csv.reader(f)) - 1
+    except Exception:
+        pass
+
+    import datetime
+    payload = {
+        "meta": {
+            "generated_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "sectors_raw": sectors_raw_count,
+            "first_filter": len(sectors),
+            "final": len(final_rows),
+        },
+        "niches": [
+            {
+                "sector_name": name,
+                "mechanism": mech,
+                "filter_reason": reason,
+                "source": source_map.get(name, ""),
+                "fx_direction": fx_direction(mech),
+            }
+            for name, mech, reason in final_rows
+        ],
+    }
+
+    import pathlib
+    data_dir = pathlib.Path("dashboard") / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    json_path = data_dir / "niches.json"
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+
     print(f"\nTotal passing second filter: {len(final_rows)} / {len(sectors)}")
     print(f"Output: {OUT}")
+    print(f"Dashboard data: {json_path}")
 
     print("\n--- FIRST 10 ROWS (raw) ---")
     for row in final_rows[:10]:
