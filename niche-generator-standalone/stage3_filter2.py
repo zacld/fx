@@ -41,6 +41,43 @@ IN   = "niches_generated.csv"
 OUT  = "niches_final.csv"
 BATCH = 20
 
+# Wikipedia source: map each association/body name to the actual underlying sector
+# it represents. Only entries with a confident FX-relevant sector mapping are kept.
+# Everything NOT in this dict is dropped before the gate prompt — the association
+# name is evidence, never the subject of a row.
+WIKI_ASSOCIATION_MAP: dict[str, str] = {
+    "ABTA (trade association)":
+        "UK outbound tour operators and travel agencies",
+    "ADS Group":
+        "UK aerospace and defence equipment manufacturers",
+    "Antiquarian Booksellers' Association":
+        "UK antiquarian and rare book dealers",
+    "Association of Independent Tour Operators":
+        "UK independent tour operators",
+    "British Constructional Steelwork Association":
+        "UK structural steelwork fabricators and contractors",
+    "Chemical Industries Association":
+        "UK specialty chemical manufacturers and importers",
+    "Confederation of Forest Industries":
+        "UK timber importers and wood product processors",
+    "Federation of Manufacturing Opticians":
+        "UK optical lens and frame manufacturers",
+    "Fuels Industry UK":
+        "UK fuel importers and oil product distributors",
+    "Oil & Gas UK (OGUK)":
+        "UK oil and gas operators",
+    "The Publishers Association":
+        "UK book publishers licensing international rights",
+    "Society of British and International Interior Design":
+        "UK interior design studios sourcing furniture and materials from overseas",
+    "Timber Trade Federation":
+        "UK timber importers and merchants",
+    "The Association for UK Interactive Entertainment":
+        "UK video game publishers and developers",
+    "Wine and Spirit Trade Association":
+        "UK wine and spirits importers and wholesalers",
+}
+
 
 PROMPT_TEMPLATE = """\
 You are a UK FX sales analyst. Apply THREE gates in order. A sector must pass \
@@ -55,10 +92,34 @@ in this sector with real turnover? If the sector is dominated by public \
 institutions, large multinationals with centralised treasury, or charities — \
 answer NO.
 
+GATE 1 AUTOMATIC REJECT — reject immediately, do not check Gates 2 or 3:
+  • The sector name IS a trade association, trade body, trade federation, \
+    industry council, or membership organisation — these are associations OF \
+    companies, not trading companies themselves. No amount of FX exposure in \
+    member companies makes the association itself a valid sector. If the name \
+    contains "Association", "Federation", "Council", "Institute", "Bureau", \
+    "Alliance", "Union", "Society" or similar — reject unless it is clearly \
+    describing a type of trading business (e.g. "building societies" describes \
+    businesses; "Building Societies Association" is the trade body).
+  • Performing arts, theatre, opera, ballet, live music venues, arts centres \
+    (SIC 90010, 90030, 90040) — in the UK these are overwhelmingly charitable \
+    trusts or Arts Council-funded bodies, not private trading SMEs with a \
+    recurring foreign currency P&L.
+  • Museums, commercial galleries, heritage sites, historic monuments, \
+    libraries, archives (SIC 91020, 91030, 91040) — overwhelmingly public \
+    bodies or charitable trusts.
+  • Regulatory bodies, professional institutes, quangos, government agencies.
+
 GATE 2 — FD ACTIVELY MANAGES THE FX (apply second, reject if it fails):
 Would a UK Finance Director or MD at a typical SME in this sector have a \
 RECURRING, MATERIAL foreign currency line in their P&L or cash flow that they \
 personally manage? Answer NO if:
+  - The SME buys inputs through a UK distributor, merchant, or wholesaler who \
+    reprices in GBP — the FX is absorbed upstream before it reaches the SME, \
+    even if the underlying commodity is globally priced somewhere further \
+    upstream. The test is: does this SME's FD personally write a payment in a \
+    foreign currency to an overseas counterparty? If a UK intermediary stands \
+    between the SME and the overseas price, the answer is NO.
   - FX is absorbed upstream (the SME buys in GBP from a UK importer/wholesaler \
     who takes the currency risk)
   - The exposure is incidental or one-off, not structural to recurring \
@@ -141,9 +202,26 @@ REJECT at Gate 3 — "often/commonly/tend to" language:
     international sellers." The word "often" signals preference, not structural \
     necessity. FAIL Gate 3.
 
-REJECT at Gate 1 — not a private trading company, fewer than 20 UK SMEs:
-  • "Internet Advertising Bureau" — this is a trade association. The association \
-    itself does not buy advertising placements. FAIL Gate 1.
+REJECT at Gate 2 — FX absorbed upstream through UK merchant / distributor:
+  • "Commercial printing" — UK printers buy paper and board from UK paper \
+    merchants (Antalis, Premier Paper, Robert Horne) priced in GBP. The \
+    printer's FD does not pay Scandinavian mills in EUR or SEK directly. \
+    FAIL Gate 2.
+  • "Timber frame construction / carpentry contractors" — UK contractors buy \
+    timber from UK builders' merchants (Travis Perkins, Jewson, Buildbase) \
+    who price in GBP. The contractor's FD never sees a SEK invoice from a \
+    Nordic sawmill. FAIL Gate 2.
+
+REJECT at Gate 1 — trade association or arts/heritage body, not a trading company:
+  • "Internet Advertising Bureau" — trade association. The IAB itself does not \
+    buy advertising placements. FAIL Gate 1.
+  • "Wine and Spirit Trade Association" — trade association representing wine \
+    importers. The WSTA is not itself an importer. FAIL Gate 1.
+  • "Performing arts (SIC 90010 / Artistic creation SIC 90030)" — in the UK \
+    these are overwhelmingly Arts Council-funded charitable trusts, not \
+    private trading SMEs managing foreign currency. FAIL Gate 1.
+  • "Operation of arts facilities (SIC 90040)" — arts venues are almost \
+    exclusively charities or publicly funded bodies in the UK. FAIL Gate 1.
 ─────────────────────────────────────────────────────────────────────────────
 
 For each sector passing ALL THREE gates, output exactly one line:
@@ -346,13 +424,28 @@ def main():
         reader = csv.DictReader(f)
         raw = [(row["sector_name"], row["source"]) for row in reader]
 
-    # Step A: clean TAF entries
+    # Step A: map Wikipedia association names to underlying sectors (or drop).
+    # Step B: clean TAF entries.
+    wiki_dropped = 0
+    wiki_mapped = 0
     sectors: list[tuple[str, str]] = []
     for name, src in raw:
-        if src == "taf":
+        if src == "wikipedia":
+            if name in WIKI_ASSOCIATION_MAP:
+                mapped = WIKI_ASSOCIATION_MAP[name]
+                sectors.append((mapped, src))
+                wiki_mapped += 1
+            else:
+                wiki_dropped += 1  # can't derive sector — drop
+        elif src == "taf":
             name = clean_taf_name(name)
-        if name:
+            if name:
+                sectors.append((name, src))
+        else:
             sectors.append((name, src))
+
+    print(f"Wikipedia source: {wiki_mapped} mapped, {wiki_dropped} dropped "
+          f"(association name only — no confident sector derivable)")
 
     print(f"Stage 3 — second filter: {len(sectors)} sectors in batches of {BATCH}")
 
@@ -460,13 +553,9 @@ def main():
         w.writerows(final_rows)
 
     # ── Build JSON for dashboard ───────────────────────────────────────────────
-    source_map: dict[str, str] = {}
-    try:
-        with open(IN, newline="", encoding="utf-8") as f:
-            for row in csv.DictReader(f):
-                source_map[row["sector_name"]] = row.get("source", "")
-    except Exception:
-        pass
+    # Build source_map from the already-processed sectors list (handles Wikipedia
+    # name remapping — the original CSV has association names, not sector names).
+    source_map: dict[str, str] = {name: src for name, src in sectors}
 
     def fx_direction(mech: str) -> str:
         m = mech.lower()
