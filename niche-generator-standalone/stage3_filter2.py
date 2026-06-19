@@ -34,33 +34,43 @@ BATCH = 20
 
 
 PROMPT_TEMPLATE = """\
-You are a UK FX sales analyst building a list of sectors where SME businesses \
-genuinely need FX risk management services.
+You are a UK FX sales analyst. Your job is to identify sectors where UK TRADING \
+SMEs (private companies with an FD or MD making active financial decisions) have \
+STRUCTURAL, RECURRING foreign currency payment flows large enough to justify a \
+conversation about FX risk management.
 
-For each numbered sector below, apply TWO filters:
+For each numbered sector below, apply TWO filters strictly:
 
-Q1 — SCALE: Are there genuinely 20+ active UK companies operating in this sector \
-at material scale (real employees, real revenue — not micro-businesses or \
-theoretical participants)?
+Q1 — REAL SME SCALE: Are there genuinely 20+ active UK PRIVATE TRADING COMPANIES \
+(not charities, not public bodies, not government agencies, not arts/heritage \
+organisations, not professional associations themselves) operating in this sector \
+with real turnover? Answer NO if the sector is dominated by public bodies, \
+museums, universities, charities, or membership organisations.
 
-Q2 — FD MANAGES: Is the FX exposure in this sector something a UK Finance \
-Director or MD at an SME would actively manage themselves — i.e. it is a \
-real, recurring, visible cost or revenue line in their P&L or cash flow \
-statement? Answer NO if: the FX is absorbed into a supplier's price and \
-never seen directly (e.g. a UK retailer who buys in GBP from a UK \
-distributor who handles the import); or the company uses a large parent's \
-treasury function; or the amounts are so small they're treated as noise.
+Q2 — FD ACTIVELY MANAGES THE FX: Would a UK Finance Director or MD at a \
+typical SME in this sector have a RECURRING, MATERIAL foreign currency line in \
+their P&L or cash flow that they personally manage? Answer NO if:
+  - FX is absorbed upstream (they buy in GBP from a UK intermediary)
+  - The exposure is incidental or one-off, not structural
+  - The sector's FX is driven mainly by occasional international visitors \
+    or tourism (e.g. ticket sales to foreign tourists — the venue doesn't \
+    manage this as a currency position)
+  - The sector is professional services (law, accountancy, consulting, tax) \
+    where international clients exist but the FX exposure is typically small, \
+    irregular, and not managed as a currency risk
+  - The company is typically a subsidiary of a large group with centralised treasury
 
-For each sector that passes BOTH Q1 AND Q2, output exactly one line in this format:
+For each sector passing BOTH filters, output exactly one line:
 <number>|<mechanism>|<reason>
 
-Where:
-  <number>   = the sector's 1-based position from the input list
-  <mechanism> = 4-6 words describing the FX payment flow (e.g. "pays EUR to European suppliers" or "receives USD from US clients")
-  <reason>   = one sentence (max 20 words) explaining specifically why this sector passed both filters
+  <number>    = 1-based position in the input list
+  <mechanism> = 4-7 words describing the specific FX payment flow \
+                (e.g. "pays EUR to European suppliers" or "receives USD from US buyers")
+  <reason>    = one complete sentence, max 20 words, explaining why this specific \
+                sector has structural, SME-managed FX exposure
 
-Output ONLY the passing lines, nothing else. No headers, no commentary.
-If no sectors pass: output nothing.
+Output ONLY passing lines. No headers, no commentary, no partial lines.
+If nothing passes: output nothing.
 
 Sectors:
 {sectors}
