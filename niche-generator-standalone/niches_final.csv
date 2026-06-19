@@ -1,79 +1,89 @@
 sector_name,mechanism,filter_reason
-Growing of grapes (SIC 1210),pays EUR for specialist equipment and supplies,"UK vineyards import specialist equipment and supplies from Europe, creating recurring FX exposure."
-Plant propagation (SIC 1300),pays EUR for specialist plant material,Plant propagation SMEs often import specialist seeds and plant material from European suppliers.
-Marine fishing (SIC 3110),receives EUR from European buyers,"UK fishing SMEs often land catches in European ports, receiving recurring EUR payments."
-Marine aquaculture (SIC 3210),receives EUR/USD from international buyers,"UK aquaculture SMEs frequently export products like salmon, generating recurring foreign currency income."
-Processing and preserving of meat (SIC 10110),pays EUR/USD for raw materials,"UK meat processors import significant volumes of meat and ingredients, creating recurring FX payments."
-"Processing and preserving of fish, crustaceans and molluscs (SIC 10200)",pays NOK/USD/EUR for imported seafood,"UK processors import significant volumes of globally sourced fish and seafood, creating recurring FX exposure."
-Manufacture of fruit and vegetable juice (SIC 10320),pays EUR/USD for imported fruit concentrates,"UK juice manufacturers import fruit concentrates and raw materials from global suppliers, leading to structural FX exposure."
-Other processing and preserving of fruit and vegetables (SIC 10390),pays EUR/USD for imported ingredients and produce,"UK processors import diverse fruits,"
-Manufacture of homogenized food preparations and dietetic food (SIC 10860),pays USD/EUR for specialist ingredients,SMEs import niche ingredients and export specialist food products regularly.
-Manufacture of other food products n.e.c. (SIC 10890),pays USD/EUR for raw materials,SMEs import diverse ingredients and export various food products regularly.
-Manufacture of prepared feeds for farm animals (SIC 10910),pays USD/EUR for feed ingredients,SMEs import grains and proteins for animal feed production regularly.
-Manufacture of other technical and industrial textiles (SIC 13960),pays EUR/USD for specialised raw materials,"Importing niche industrial materials from global suppliers creates recurring, material FX payment obligations for SMEs."
-Manufacture of other textiles n.e.c. (SIC 13990),pays EUR/USD for imported textile raw materials,Sourcing diverse textile inputs globally leads to recurring foreign currency payments managed by the FD.
-Manufacture of leather clothes (SIC 14110),pays EUR/USD for imported leather hides/materials,Importing specialised leather from international tanneries
-"Manufacture of corrugated paper and paperboard, sacks and bags (SIC 17211)",pays EUR/USD for raw materials,"SMEs import pulp and specialised paper, creating recurring FX payment exposure."
-Manufacture of other paper and paperboard containers (SIC 17219),pays EUR/USD for raw materials,"SMEs import specialised paper and board, creating recurring FX payment exposure."
-Manufacture of household and sanitary goods and of toilet requisites (SIC 17220),pays EUR/USD for raw materials,"SMEs import pulp, fabrics, and chemicals, creating recurring FX payment exposure."
-"Manufacture of paints, varnishes and similar coatings, mastics and sealants (SIC 20301)","pays EUR/USD for raw materials, receives EUR/USD for exports","SMEs in this sector regularly import raw materials and export finished products, creating structural FX exposure."
-Manufacture of printing ink (SIC 20302),"pays EUR/USD for raw materials, receives EUR/USD for exports","Printing ink SMEs frequently import specialist raw materials and export products, leading to recurring FX exposure."
-Manufacture of flat glass (SIC 23110),"pays EUR for specialised glass, raw materials","SMEs import specialised glass and raw materials, creating recurring FX exposure for their FDs."
-"Manufacture and processing of other glass, including technical glassware (SIC 23190)","pays EUR for specialised materials, exports USD","SMEs import unique materials and export technical glass, leading to structural FX management by FDs."
-Manufacture of refractory products (SIC 23200),"pays USD for raw materials, exports EUR",SMEs import specialised raw materials and
-"Manufacture of tubes, pipes, hollow profiles and related fittings, of steel (SIC 24200)",pays EUR/USD for steel inputs; receives EUR/USD from sales,"SMEs import specialist steel and export finished products, creating recurring FX exposure."
-Cold drawing of bars (SIC 24310),pays EUR/USD for steel bar inputs; receives EUR/USD from sales,"SMEs import raw materials and export finished products, leading to recurring FX exposure."
-"Forging, pressing, stamping and roll-forming of metal; powder metallurgy (SIC 25500)",pays EUR/USD for raw materials/machinery,"SMEs import specialised metals and machinery, and export finished products, creating recurring FX exposure."
-Manufacture of steel drums and similar containers (SIC 25910),pays EUR/USD for steel raw materials,"SMEs import steel and components, and export containers, leading to recurring FX exposure."
-Manufacture of light metal packaging (SIC 25920),pays EUR/USD for raw materials/components,"SMEs import metals and specialised components, and"
-"Manufacture of electric motors, generators and transformers (SIC 27110)","Pays EUR/USD for components, receives EUR/USD from exports","SMEs import specialised parts and export finished industrial equipment, creating recurring FX exposure."
-Manufacture of electricity distribution and control apparatus (SIC 27120),"Pays EUR/USD for components, receives EUR/USD from exports","SMEs import electrical components and export control apparatus, leading to recurring, managed FX flows."
-Manufacture of agricultural and forestry machinery other than tractors (SIC 28302),"pays EUR/USD for components, receives EUR/USD from exports","SMEs in this sector frequently import specialised parts and export finished machinery, creating structural FX exposure."
-Manufacture of metal forming machinery (SIC 28410),"pays EUR/USD for components, receives EUR/USD from exports","UK SMEs in this sector import specialised parts and export bespoke machinery, leading to recurring FX flows."
-Building of pleasure and sporting boats (SIC 30120),"pays EUR/USD for components, receives EUR/USD from buyers","UK boat builders import specialised parts and export finished products, creating structural FX exposure."
-Manufacture of motorcycles (SIC 30910),pays EUR/USD for engines and components,"Motorcycle manufacturers import specialised parts and may export, creating recurring FX exposure."
-Manufacture of bicycles and invalid carriages (SIC 30920),pays USD/EUR for bicycle components,Bicycle manufacturers import significant components from Asia and
-Repair of electronic and optical equipment (SIC 33130),pays EUR/USD for specialist parts,SMEs import specialist components and tools directly from international manufacturers.
-Repair of electrical equipment (SIC 33140),pays EUR/USD for specialist parts,SMEs import specialist components and systems directly from international manufacturers.
-Repair and maintenance of ships and boats (SIC 33150),pays EUR/USD for marine parts,SMEs import specialist marine components and equipment directly from international suppliers.
-Repair and maintenance of other transport equipment n.e.c. (SIC 33170),pays EUR/USD for specialist parts,SMEs
-Construction of utility projects for electricity and telecommunications (SIC 42220),pays EUR/USD for specialist equipment,"SMEs import specific components and machinery for utility projects, creating recurring FX exposure."
-Construction of water projects (SIC 42910),pays EUR/USD for specialist water equipment,"SMEs import specific pumps, valves, and treatment components for water infrastructure projects."
-Construction of other civil engineering projects n.e.c. (SIC 42990),pays EUR/USD for specialist materials/machinery,SMEs import unique construction materials and machinery for diverse civil engineering projects.
-Wholesale of fruit and vegetables (SIC 46310),pays EUR/USD to overseas growers/suppliers,"SMEs directly import fresh produce from international markets, creating recurring FX payment needs."
-Wholesale of meat and meat products (SIC 46320),pays EUR to European meat suppliers,"SMEs import specific meat products from international suppliers, leading to recurring foreign currency payments."
-"Wholesale of dairy products, eggs and edible oils and fats (SIC 46330)",pays EUR/USD to international food producers,"SMEs import specialised dairy, oils, or fats from overseas, generating recurring"
-Wholesale of household goods (other than musical instruments) n.e.c (SIC 46499),pays USD/EUR/CNY to overseas suppliers,"SMEs import diverse household goods directly from international manufacturers, creating recurring FX exposure."
-"Wholesale of computers, computer peripheral equipment and software (SIC 46510)",pays USD/EUR to international manufacturers,"SMEs import computer hardware and software components directly from global suppliers, incurring regular FX costs."
-Wholesale of electronic and telecommunications equipment and parts (SIC 46520),pays USD/EUR/CNY to overseas manufacturers,SMEs import specialised electronic and telecom
-Other retail sale in non-specialised stores (SIC 47190),pays USD/EUR to overseas suppliers,SMEs in this sector often import diverse goods directly from international manufacturers for better margins.
-"Retail sale of computers, peripheral units and software in specialised stores (SIC 47410)",pays USD/EUR to international distributors,SMEs in this sector frequently source hardware directly from global distributors or manufacturers.
-Retail sale of audio and video equipment in specialised stores (SIC 47430),pays EUR/USD to European/US manufacturers,Specialist retailers often import high-end audio/video equipment directly from
-Other retail sale of new goods in specialised stores (not commercial art galleries and opticians) (SIC 47789),pays USD/EUR to international suppliers,"Specialised retailers often import unique goods directly, creating recurring foreign currency payables."
-Retail sale via mail order houses or via Internet (SIC 47910),"pays USD/EUR for imported goods, receives EUR/USD from international sales","E-commerce SMEs frequently import goods and sell globally, generating significant recurring FX flows."
-Cargo handling for air transport activities (SIC 52242),pays/receives various foreign currencies for international logistics services,International air cargo operations involve significant recurring cross-border payments and receipts.
-Licensed carriers (SIC 53201),pays foreign partners for international delivery services,International courier SMEs incur recurring foreign currency costs for cross-border logistics and last-mile delivery.
-Book publishing (SIC 58110),pays foreign publishers for translation rights,Book publishers acquire international rights and pay authors/publishers in
-Video distribution activities (SIC 59132),Pays USD/EUR for content rights,"SMEs regularly acquire international video content licenses, creating recurring foreign currency outflows."
-Television programme distribution activities (SIC 59133),Pays/receives USD/EUR for programme rights,"SMEs frequently license TV programmes internationally, generating significant recurring foreign currency flows."
-Sound recording and music publishing activities (SIC 59200),Pays/receives USD/EUR for royalties/licensing,Independent labels and publishers manage recurring international royalty payments and licensing
-Security dealing on own account (SIC 64991),trades foreign currency denominated securities,Proprietary trading firms actively manage foreign currency positions as a core part of their recurring business.
-Factoring (SIC 64992),buys foreign currency denominated invoices,"Factoring companies regularly acquire foreign currency receivables from UK exporters, necessitating active FX management."
-Architectural activities (SIC 71111),receives EUR/USD from international clients,"UK architectural firms frequently undertake international projects, generating recurring foreign currency revenues."
-Urban planning and landscape architectural activities (SIC 71112),receives EUR/USD from international clients,"UK urban planning and landscape firms often secure international projects, creating recurring foreign currency income."
-Engineering design activities for industrial process and production (SIC 71121),receives USD/EUR from international clients,"UK engineering design SMEs frequently engage in global industrial projects, leading to structural"
-Renting and leasing of media entertainment equipment (SIC 77291),pays USD/EUR for equipment purchases/leases,"SMEs in this sector regularly acquire specialist equipment from international suppliers, creating recurring foreign currency outflows."
-Renting and leasing of construction and civil engineering machinery and equipment (SIC 77320),pays USD/EUR for machinery purchases/leases,"SMEs regularly acquire heavy machinery and parts from international manufacturers, leading to recurring foreign currency outflows."
-Renting and leasing of passenger water transport equipment (SIC 77341),pays EUR/USD for vessel purchases/leases,SMEs in this sector
-Investigation activities (SIC 80300),pays foreign agents for international investigations,"International investigations require payments to overseas partners and data sources, creating recurring FX exposure."
-Activities of call centres (SIC 82200),receives USD/EUR from international clients or pays foreign outsourcing partners,Serving international clients or outsourcing operations creates recurring foreign currency income or expenditure.
-Activities of exhibition and fair organisers (SIC 82301),pays foreign venues/suppliers; receives foreign currency from international exhibitors,Organising international events involves significant foreign currency payments for
-Gambling and betting activities (SIC 92000),receives/pays various currencies for online betting,"Online gambling SMEs have recurring international payment flows for customers, suppliers, and affiliates."
-Activities of racehorse owners (SIC 93191),pays/receives EUR/USD for horse purchases/sales,"Racehorse owners frequently engage in international transactions for horses, training, and prize money."
-Other sports activities (SIC 93199),pays USD/EUR for imported sports equipment,Many SMEs in this sector import specialised sports
-The Underfloor Heating Manufacturers Association,pays EUR/USD for imported components,"UK manufacturers import raw materials and components, creating recurring FX payables."
-The UK Vending Association,pays EUR/USD for imported vending machines,"UK vending companies frequently import machines and parts from overseas suppliers, creating recurring FX payables."
-Welsh Automotive Forum,pays EUR/USD for imported raw materials/components,"Welsh automotive SMEs import materials and export components, leading to significant recurring"
-Confederation of Forest Industries,pays EUR for imported machinery/timber,"UK forestry SMEs import specialised machinery and export timber products, creating recurring EUR flows."
-Federation of Environmental Trade Associations,pays EUR/USD for imported components,Environmental trade SMEs import components and finished goods from Europe and Asia.
-Federation of Manufacturing Opticians,pays EUR/USD for raw materials/machinery,Manufacturing opticians import raw materials and specialised machinery for production.
+Growing of grapes (SIC 1210),"pays EUR for vineyard equipment, vines","UK vineyards regularly import specialised equipment and vines from Europe, creating recurring EUR payment flows."
+Growing of pome fruits and stone fruits (SIC 1240),"pays EUR for orchard machinery, trees","UK orchards regularly import specialised machinery and tree stock from Europe, creating recurring EUR payment flows."
+Growing of other tree and bush fruits and nuts (SIC 1250),"pays EUR for growing equipment, plants",UK berry and nut growers regularly import specialised equipment and plants from
+Seed processing for propagation (SIC 1640),pays EUR for imported seeds,SMEs in this sector frequently import specialised seeds from European breeders.
+Marine aquaculture (SIC 3210),pays EUR for imported feed,Aquaculture SMEs often import significant quantities of specialised fish feed from European suppliers.
+Processing and preserving of meat (SIC 10110),pays EUR for imported meat,Meat processors frequently import specific cuts or types of meat from European suppliers.
+Processing and preserving of poultry meat (SIC 10120),pays EUR for imported poultry,Poultry processors
+Manufacture of fruit and vegetable juice (SIC 10320),pays EUR for fruit concentrates,"Juice manufacturers import specific fruit concentrates and ingredients from Europe, creating recurring FX exposure."
+Other processing and preserving of fruit and vegetables (SIC 10390),pays USD for exotic ingredients,"Processors import specialist fruits, vegetables, and spices from global markets, requiring active FX management."
+Manufacture of oils and fats (SIC 10410),pays USD for raw oils,"Manufacturers import global commodity oils like olive or palm oil, leading to recurring foreign currency payments."
+Manufacture of other food products n.e.c. (SIC 10890),pays EUR/USD for imported ingredients and packaging,"UK food manufacturers frequently import specialist ingredients and export products, creating recurring FX exposure."
+Manufacture of prepared feeds for farm animals (SIC 10910),pays USD/EUR for imported grains and feed additives,"Animal feed producers import significant volumes of raw materials, leading to structural, recurring FX payments."
+Manufacture of prepared pet foods (SIC 10920),pays EUR/USD for imported ingredients and packaging,Pet food manufacturers import raw materials and export finished
+Manufacture of other textiles n.e.c. (SIC 13990),Pays USD/EUR for raw materials,"UK textile manufacturers regularly import specialised fibres and chemicals, creating recurring FX payment needs."
+Manufacture of leather clothes (SIC 14110),Pays EUR/USD for leather hides,"UK leather clothing manufacturers import raw leather from overseas, leading to structural foreign currency payments."
+Manufacture of workwear (SIC 14120),Pays USD/EUR for fabrics and components,"Workwear manufacturers regularly import specialised textiles and components, creating recurring FX payment"
+Manufacture of other paper and paperboard containers (SIC 17219),pays EUR/USD for raw materials,"SMEs import paper/board and other inputs, creating recurring FX payables."
+Manufacture of household and sanitary goods and of toilet requisites (SIC 17220),"pays EUR/USD for chemicals, packaging","SMEs import raw materials and components, leading to recurring FX payables."
+Manufacture of paper stationery (SIC 17230),"pays EUR/USD for paper, inks, materials","SMEs import paper and other inputs, creating recurring FX payables."
+Manufacture of pesticides and other agrochemical products (SIC 20200),pays EUR for chemical ingredients,"SMEs import raw materials from Europe for production, creating recurring FX exposure."
+"Manufacture of paints, varnishes and similar coatings, mastics and sealants (SIC 20301)",pays USD for raw materials,"SMEs import pigments and resins globally, leading to recurring foreign currency payments."
+Manufacture of printing ink (SIC 20302),pays EUR for raw materials,"SMEs import specialised chemicals and pigments from Europe, creating recurring FX payments."
+Manufacture of soap and detergents (SIC 20411),pays USD for ingredients,SMEs
+"Manufacture and processing of other glass, including technical glassware (SIC 23190)",pays EUR/USD for raw materials/machinery,SMEs import specialised inputs and export finished technical glass products.
+Manufacture of refractory products (SIC 23200),pays EUR/USD for specialised raw materials,SMEs import specific minerals and export heat-resistant products to industrial clients.
+Manufacture of ceramic tiles and flags (SIC 23310),pays EUR/USD for raw materials/machinery,"SMEs import clays, glazes, and machinery for tile production and"
+Casting of iron (SIC 24510),"pays EUR/USD for raw materials, receives EUR/USD for exports","UK iron foundries import specialist materials and export finished castings, creating recurring FX exposure."
+Casting of steel (SIC 24520),"pays EUR/USD for raw materials, receives EUR/USD for exports","UK steel foundries import specialist alloys and export high-value castings, creating recurring FX exposure."
+Manufacture of fasteners and screw machine products (SIC 25940),pays EUR/USD for raw materials and exports,"SMEs import specialised materials and export finished products, creating recurring FX exposure."
+Manufacture of other fabricated metal products n.e.c. (SIC 25990),pays EUR/USD for raw materials and exports,"SMEs import raw materials and export finished metal products, creating recurring FX exposure."
+Manufacture of electronic components (SIC 26110),pays USD/EUR for raw materials and exports,"SMEs import specialised components and export finished products, creating significant"
+Manufacture of fibre optic cables (SIC 27310),pays EUR for components,UK manufacturers import specialised parts from Europe for their fibre optic cable production.
+Manufacture of electric domestic appliances (SIC 27510),pays USD for raw materials,UK manufacturers import components and raw materials from global suppliers for appliance production.
+Manufacture of non-electric domestic appliances (SIC 27520),pays EUR for raw materials,UK manufacturers import components and raw materials from global suppliers for appliance production.
+Manufacture of other electrical equipment (SIC 27900),pays USD for components,UK manufacturers import specialised parts
+Manufacture of machinery for metallurgy (SIC 28910),pays EUR for specialised components,"SMEs import high-value components and export bespoke machinery, creating recurring FX exposure."
+Manufacture of machinery for mining (SIC 28921),receives USD from international mining clients,"SMEs export specialised mining machinery globally, generating significant recurring foreign currency revenue."
+Manufacture of earthmoving equipment (SIC 28922),exports equipment to global construction projects,"SMEs export specialised earthmoving equipment and components, leading to recurring foreign currency receipts."
+Manufacture of motorcycles (SIC 30910),pays EUR for imported components,"SMEs import specialised parts and export finished motorcycles, creating recurring FX exposure."
+Manufacture of bicycles and invalid carriages (SIC 30920),pays USD/EUR for imported components,"SMEs import parts from global suppliers and export bikes, leading to structural FX flows."
+Manufacture of other transport equipment n.e.c. (SIC 30990),pays EUR for imported specialised parts,"SMEs import components and export niche transport equipment, creating regular FX exposure."
+Repair and maintenance of other transport equipment n.e.c. (SIC 33170),pays EUR for specialist parts,SMEs import specialist parts for complex transport equipment from European manufacturers.
+Repair of other equipment (SIC 33190),pays USD for specialist parts,SMEs import specialist parts for industrial and electronic equipment from global manufacturers.
+Treatment and disposal of hazardous waste (SIC 38220),pays EUR for specialist chemicals,SMEs import specialist chemicals or equipment for treating hazardous waste from European suppliers.
+Recovery of sorted materials (SIC 38320),receives USD from international buyers,SMEs export sorted
+"Sale, maintenance and repair of motorcycles and related parts and accessories (SIC 45400)","pays EUR, JPY, USD to overseas manufacturers","Independent motorcycle dealers import vehicles and parts directly, creating recurring foreign currency payment obligations."
+"Agents selling agricultural raw materials, livestock, textile raw materials and semi-finished goods (SIC 46110)","pays USD, EUR to international raw material suppliers","Agents in raw materials often import goods directly, incurring recurring foreign currency payment obligations."
+"Agents involved in the sale of fuels, ores, metals and industrial chemicals (SIC 46120)","pays USD, EUR for imported fuels, metals, chemicals","SME agents in commodities frequently import directly,"
+Wholesale of sugar and chocolate and sugar confectionery (SIC 46360),pays EUR/USD to international suppliers,"SMEs import confectionery products and raw materials from overseas, creating recurring FX exposure."
+"Wholesale of coffee, tea, cocoa and spices (SIC 46370)",pays USD/EUR to international growers/importers,"SMEs import raw coffee, tea, cocoa, and spices from global markets, incurring significant recurring FX costs."
+"Wholesale of other food, including fish, crustaceans and molluscs (SIC 46380)",pays EUR/USD to international food suppliers,SMEs import diverse food products
+Wholesale of machinery for the textile industry and of sewing and knitting machines (SIC 46640),pays EUR/USD to overseas suppliers,"UK wholesalers frequently import specialised machinery from Europe and Asia, creating recurring FX exposure."
+Wholesale of office furniture (SIC 46650),pays EUR/USD to overseas suppliers,"UK wholesalers regularly import office furniture from European and Asian manufacturers, requiring active FX management."
+Wholesale of other office machinery and equipment (SIC 46660),pays EUR/USD to overseas suppliers,"UK wholesalers frequently import office machinery from global manufacturers, leading to recurring FX payments"
+Retail sale of musical instruments and scores (SIC 47591),pays EUR/USD to international suppliers,"UK music shops frequently import instruments directly from European and US manufacturers, creating recurring FX exposure."
+"Retail of furniture, lighting, and similar (not musical instruments or scores) in specialised store (SIC 47599)",pays EUR/USD to international suppliers,"Independent furniture and lighting retailers frequently import goods from Europe and Asia, creating recurring FX exposure."
+"Retail sale of sports goods, fishing gear, camping goods, boats and bicycles (SIC 47640)",pays EUR/USD to international suppliers,"UK sports, bike, and outdoor retailers frequently import goods directly"
+Non-scheduled passenger air transport (SIC 51102),pays USD for fuel and aircraft parts,"UK non-scheduled air transport SMEs regularly import fuel and parts, creating structural USD payment exposure."
+Service activities incidental to water transportation (SIC 52220),pays USD for ship supplies and crew wages,"UK marine service SMEs regularly purchase international supplies and pay foreign crew, creating structural USD payment exposure."
+Service activities incidental to air transportation (SIC 52230),pays USD for aircraft parts and equipment,UK aircraft maintenance SMEs regularly import specialised parts
+Publishing of consumer and business journals and periodicals (SIC 58142),receives USD/EUR from international subscribers/advertisers,"SMEs in this sector often sell subscriptions and advertising globally, creating recurring FX inflows."
+Other publishing activities (SIC 58190),"pays USD/EUR to international authors/illustrators, receives from rights sales","Independent publishers frequently manage recurring FX for international royalties, rights, and distribution."
+Business and domestic software development (SIC 62012),receives USD/EUR from international clients; pays USD for cloud services,"Global software sales and international cloud infrastructure costs create recurring, material FX exposure for SMEs."
+"Data processing, hosting and related activities (SIC 63110)",pays USD/EUR for international server infrastructure; receives USD from global clients,"Reliance on international data centre infrastructure and global client base creates significant, recurring FX exposure."
+Security and commodity contracts dealing activities (SIC 66120),trades foreign currency instruments,SMEs in this sector actively manage foreign currency positions as their core business.
+Fund management activities (SIC 66300),invests in foreign currency denominated assets,Fund managers actively manage foreign currency exposure from international investments and client portfolios.
+Engineering design activities for industrial process and production (SIC 71121),receives foreign currency for international projects,"Engineering design SMEs often undertake international projects, receiving payment in foreign currencies."
+Technical testing and analysis (SIC 71200),pays USD/EUR for specialist equipment,SMEs in this sector often serve global markets or procure specialist equipment internationally.
+Research and experimental development on biotechnology (SIC 72110),pays USD/EUR for specialist equipment,Biotech SMEs frequently procure specialist materials and equipment from global suppliers.
+Renting and leasing of media entertainment equipment (SIC 77291),pays USD/EUR for specialist equipment,"SMEs in this sector frequently purchase high-value, specialist equipment from international manufacturers."
+Temporary employment agency activities (SIC 78200),Pays EUR/USD to international contractors/clients,"UK agencies often place staff internationally, generating recurring foreign currency receivables or payables."
+Travel agency activities (SIC 79110),Pays EUR/USD to international hotels/airlines,UK travel agencies regularly purchase foreign currency denominated accommodation and transport services for their clients.
+Tour operator activities (SIC 79120),Pays EUR/USD to international hotels/suppliers,"UK tour operators contract directly with foreign suppliers, creating"
+Specialists medical practice activities (SIC 86220),pays EUR/USD for specialist medical equipment and consumables,UK private clinics regularly import high-value medical supplies and equipment directly from international manufacturers.
+Support activities to performing arts (SIC 90020),pays EUR/USD for specialist stage equipment and technology,UK technical support companies regularly import high-value audio-visual and staging equipment from international suppliers.
+Gambling and betting activities (SIC 92000),receives USD/EUR from international online bettors,UK online gambling
+Repair of furniture and home furnishings (SIC 95240),pays EUR for specialist fabrics,SMEs in furniture repair and upholstery frequently import specialist fabrics and components from European suppliers.
+"Repair of watches, clocks and jewellery (SIC 95250)",pays CHF for watch movements,"SMEs in watch, clock, and jewellery repair often import high-value components like watch movements from Switzerland."
+British Frozen Food Federation,pays EUR for frozen food imports,"UK frozen food SMEs regularly import products from European suppliers, creating"
+National Association of Jewellers,pays foreign suppliers for materials,"Jewellery manufacturers and retailers frequently import precious metals, gemstones, or finished goods from overseas."
+"PAGB, the Consumer Healthcare Association",pays foreign suppliers for ingredients,"Consumer healthcare manufacturers import raw materials, APIs, and packaging from international suppliers."
+Professional Publishers Association,receives foreign currency from sales,"Publishers sell books and content internationally and license rights, receiving foreign currency."
+Chemical Industries Association,pays EUR/USD for raw materials,"Chemical SMEs import raw materials and export products, creating recurring FX exposure."
+Confederation of Forest Industries,"pays EUR for timber/machinery, receives EUR/USD","Forestry SMEs import specialized timber/machinery and export products, creating recurring FX exposure."
+Construction Products Association,pays EUR/USD for raw materials/components,"Construction product SMEs import raw materials and components,"
+Oil & Gas UK (OGUK),pays EUR/USD for imported timber,"Timber importers face recurring, material FX exposure from overseas suppliers."
+The Publishers Association,receives USD/EUR from international sales,Publishers regularly receive foreign currency for international rights and book sales.
+RenewableUK,pays EUR/USD for imported components,Renewable energy SMEs frequently import specialised equipment and components from abroad.
