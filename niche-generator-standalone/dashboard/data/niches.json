@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-06-19T15:21:45Z",
+    "generated_at": "2026-06-19T15:38:35Z",
     "first_filter": 551,
-    "final": 97
+    "final": 90
   },
   "niches": [
     {
@@ -111,13 +111,6 @@
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Manufacture of tobacco products (SIC 12000)",
-      "mechanism": "Pays foreign currency for imported tobacco leaf.",
-      "filter_reason": "Tobacco leaf, the primary raw material, is only grown outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
       "sector_name": "Manufacture of corrugated paper and paperboard, sacks and bags (SIC 17211)",
       "mechanism": "Pays USD/EUR for imported paperboard and pulp.",
       "filter_reason": "The core raw materials, paperboard and pulp, are globally traded commodities priced in foreign currencies.",
@@ -147,20 +140,6 @@
     },
     {
       "sector_name": "Reproduction of sound recording (SIC 18201)",
-      "mechanism": "Pays USD/EUR for imported polycarbonate granules.",
-      "filter_reason": "Polycarbonate granules, a core raw material, are not manufactured in the United Kingdom.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Reproduction of video recording (SIC 18202)",
-      "mechanism": "Pays USD/EUR for imported polycarbonate granules.",
-      "filter_reason": "Polycarbonate granules, a core raw material, are not manufactured in the United Kingdom.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Reproduction of computer media (SIC 18203)",
       "mechanism": "Pays USD/EUR for imported polycarbonate granules.",
       "filter_reason": "Polycarbonate granules, a core raw material, are not manufactured in the United Kingdom.",
       "source": "ons_sic",
@@ -212,13 +191,6 @@
       "sector_name": "Manufacture of fasteners and screw machine products (SIC 25940)",
       "mechanism": "Pays EUR/USD for specialized steel alloys or wire rod.",
       "filter_reason": "The sector's core input, specialized steel alloys or wire rod, is priced globally in foreign currency by market standard with no GBP equivalent.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other fabricated metal products n.e.c. (SIC 25990)",
-      "mechanism": "Pays EUR/USD for specialized metal sheets or profiles.",
-      "filter_reason": "The sector's core input, specialized metal sheets or profiles, is priced globally in foreign currency by market standard with no GBP equivalent.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
@@ -461,13 +433,6 @@
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Retail sale of flowers, plants, seeds, fertilizers, pet animals and pet food in specialised stores (SIC 47760)",
-      "mechanism": "Pays EUR for cut flowers from European growers.",
-      "filter_reason": "The entire input category of diverse cut flowers in the required volume and year-round availability is not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
       "sector_name": "Retail sale in commercial art galleries (SIC 47781)",
       "mechanism": "Pays EUR/USD for unique artworks from international artists.",
       "filter_reason": "Unique artworks by specific international artists represent a genuine single source of supply only available outside the UK.",
@@ -601,13 +566,6 @@
       "fx_direction": "receives"
     },
     {
-      "sector_name": "UK outbound tour operators and travel agencies",
-      "mechanism": "Pays foreign currency to overseas hotels and transport providers.",
-      "filter_reason": "The sector structurally requires paying for accommodation and services that are only available outside the UK.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
       "sector_name": "UK aerospace and defence equipment manufacturers",
       "mechanism": "Pays foreign currency for specialised aerospace components and materials.",
       "filter_reason": "The sector structurally requires specific high-performance components and materials that are not manufactured in the UK.",
@@ -639,13 +597,6 @@
       "sector_name": "UK specialty chemical manufacturers and importers",
       "mechanism": "Pays overseas suppliers for unique chemical precursors.",
       "filter_reason": "The sector structurally requires foreign currency payments because specific specialty chemical raw materials or intermediates are genuinely only produced by overseas manufacturers with no domestic equivalent.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "UK timber importers and wood product processors",
-      "mechanism": "Pays overseas sawmills for imported timber and wood products.",
-      "filter_reason": "The sector structurally requires foreign currency payments because the UK's domestic timber production cannot meet the demand for all types and volumes of timber required by the processing industry.",
       "source": "wikipedia",
       "fx_direction": "pays"
     },
