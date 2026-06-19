@@ -1,0 +1,826 @@
+sector_name,source
+"Growing of cereals (except rice), leguminous crops and oil seeds (SIC 1110)",ons_sic
+Growing of rice (SIC 1120),ons_sic
+"Growing of vegetables and melons, roots and tubers (SIC 1130)",ons_sic
+Growing of sugar cane (SIC 1140),ons_sic
+Growing of tobacco (SIC 1150),ons_sic
+Growing of fibre crops (SIC 1160),ons_sic
+Growing of other non-perennial crops (SIC 1190),ons_sic
+Growing of grapes (SIC 1210),ons_sic
+Growing of tropical and subtropical fruits (SIC 1220),ons_sic
+Growing of citrus fruits (SIC 1230),ons_sic
+Growing of pome fruits and stone fruits (SIC 1240),ons_sic
+Growing of other tree and bush fruits and nuts (SIC 1250),ons_sic
+Growing of oleaginous fruits (SIC 1260),ons_sic
+Growing of beverage crops (SIC 1270),ons_sic
+"Growing of spices, aromatic, drug and pharmaceutical crops (SIC 1280)",ons_sic
+Growing of other perennial crops (SIC 1290),ons_sic
+Plant propagation (SIC 1300),ons_sic
+Raising of dairy cattle (SIC 1410),ons_sic
+Raising of other cattle and buffaloes (SIC 1420),ons_sic
+Raising of horses and other equines (SIC 1430),ons_sic
+Raising of camels and camelids (SIC 1440),ons_sic
+Raising of sheep and goats (SIC 1450),ons_sic
+Raising of swine/pigs (SIC 1460),ons_sic
+Raising of poultry (SIC 1470),ons_sic
+Raising of other animals (SIC 1490),ons_sic
+Mixed farming (SIC 1500),ons_sic
+Support activities for crop production (SIC 1610),ons_sic
+Farm animal boarding and care (SIC 1621),ons_sic
+Support activities for animal production (other than farm animal boarding and care) n.e.c. (SIC 1629),ons_sic
+Post-harvest crop activities (SIC 1630),ons_sic
+Seed processing for propagation (SIC 1640),ons_sic
+"Hunting, trapping and related service activities (SIC 1700)",ons_sic
+Silviculture and other forestry activities (SIC 2100),ons_sic
+Logging (SIC 2200),ons_sic
+Gathering of wild growing non-wood products (SIC 2300),ons_sic
+Support services to forestry (SIC 2400),ons_sic
+Marine fishing (SIC 3110),ons_sic
+Freshwater fishing (SIC 3120),ons_sic
+Marine aquaculture (SIC 3210),ons_sic
+Freshwater aquaculture (SIC 3220),ons_sic
+Deep coal mines (SIC 5101),ons_sic
+Open cast coal working (SIC 5102),ons_sic
+Mining of lignite (SIC 5200),ons_sic
+Extraction of crude petroleum (SIC 6100),ons_sic
+Extraction of natural gas (SIC 6200),ons_sic
+Mining of iron ores (SIC 7100),ons_sic
+Mining of uranium and thorium ores (SIC 7210),ons_sic
+Mining of other non-ferrous metal ores (SIC 7290),ons_sic
+"Quarrying of ornamental and building stone, limestone, gypsum, chalk and slate (SIC 8110)",ons_sic
+Operation of gravel and sand pits; mining of clays and kaolin (SIC 8120),ons_sic
+Mining of chemical and fertilizer minerals (SIC 8910),ons_sic
+Extraction of peat (SIC 8920),ons_sic
+Extraction of salt (SIC 8930),ons_sic
+Other mining and quarrying n.e.c. (SIC 8990),ons_sic
+Support activities for petroleum and natural gas mining (SIC 9100),ons_sic
+Support activities for other mining and quarrying (SIC 9900),ons_sic
+Processing and preserving of meat (SIC 10110),ons_sic
+Processing and preserving of poultry meat (SIC 10120),ons_sic
+Production of meat and poultry meat products (SIC 10130),ons_sic
+"Processing and preserving of fish, crustaceans and molluscs (SIC 10200)",ons_sic
+Processing and preserving of potatoes (SIC 10310),ons_sic
+Manufacture of fruit and vegetable juice (SIC 10320),ons_sic
+Other processing and preserving of fruit and vegetables (SIC 10390),ons_sic
+Manufacture of oils and fats (SIC 10410),ons_sic
+Manufacture of margarine and similar edible fats (SIC 10420),ons_sic
+Liquid milk and cream production (SIC 10511),ons_sic
+Butter and cheese production (SIC 10512),ons_sic
+Manufacture of other milk products (SIC 10519),ons_sic
+Manufacture of ice cream (SIC 10520),ons_sic
+Grain milling (SIC 10611),ons_sic
+Manufacture of breakfast cereals and cereals-based food (SIC 10612),ons_sic
+Manufacture of starches and starch products (SIC 10620),ons_sic
+Manufacture of bread; manufacture of fresh pastry goods and cakes (SIC 10710),ons_sic
+Manufacture of rusks and biscuits; manufacture of preserved pastry goods and cakes (SIC 10720),ons_sic
+"Manufacture of macaroni, noodles, couscous and similar farinaceous products (SIC 10730)",ons_sic
+Manufacture of sugar (SIC 10810),ons_sic
+Manufacture of cocoa and chocolate confectionery (SIC 10821),ons_sic
+Manufacture of sugar confectionery (SIC 10822),ons_sic
+Tea processing (SIC 10831),ons_sic
+Production of coffee and coffee substitutes (SIC 10832),ons_sic
+Manufacture of condiments and seasonings (SIC 10840),ons_sic
+Manufacture of prepared meals and dishes (SIC 10850),ons_sic
+Manufacture of homogenized food preparations and dietetic food (SIC 10860),ons_sic
+Manufacture of other food products n.e.c. (SIC 10890),ons_sic
+Manufacture of prepared feeds for farm animals (SIC 10910),ons_sic
+Manufacture of prepared pet foods (SIC 10920),ons_sic
+"Distilling, rectifying and blending of spirits (SIC 11010)",ons_sic
+Manufacture of wine from grape (SIC 11020),ons_sic
+Manufacture of cider and other fruit wines (SIC 11030),ons_sic
+Manufacture of other non-distilled fermented beverages (SIC 11040),ons_sic
+Manufacture of beer (SIC 11050),ons_sic
+Manufacture of malt (SIC 11060),ons_sic
+Manufacture of soft drinks; production of mineral waters and other bottled waters (SIC 11070),ons_sic
+Manufacture of tobacco products (SIC 12000),ons_sic
+Preparation and spinning of textile fibres (SIC 13100),ons_sic
+Weaving of textiles (SIC 13200),ons_sic
+Finishing of textiles (SIC 13300),ons_sic
+Manufacture of knitted and crocheted fabrics (SIC 13910),ons_sic
+Manufacture of soft furnishings (SIC 13921),ons_sic
+"Manufacture of canvas goods, sacks, etc. (SIC 13922)",ons_sic
+Manufacture of household textiles (SIC 13923),ons_sic
+Manufacture of woven or tufted carpets and rugs (SIC 13931),ons_sic
+Manufacture of other carpets and rugs (SIC 13939),ons_sic
+"Manufacture of cordage, rope, twine and netting (SIC 13940)",ons_sic
+"Manufacture of non-wovens and articles made from non-wovens, except apparel (SIC 13950)",ons_sic
+Manufacture of other technical and industrial textiles (SIC 13960),ons_sic
+Manufacture of other textiles n.e.c. (SIC 13990),ons_sic
+Manufacture of leather clothes (SIC 14110),ons_sic
+Manufacture of workwear (SIC 14120),ons_sic
+Manufacture of other men's outerwear (SIC 14131),ons_sic
+Manufacture of other women's outerwear (SIC 14132),ons_sic
+Manufacture of men's underwear (SIC 14141),ons_sic
+Manufacture of women's underwear (SIC 14142),ons_sic
+Manufacture of other wearing apparel and accessories n.e.c. (SIC 14190),ons_sic
+Manufacture of articles of fur (SIC 14200),ons_sic
+Manufacture of knitted and crocheted hosiery (SIC 14310),ons_sic
+Manufacture of other knitted and crocheted apparel (SIC 14390),ons_sic
+Tanning and dressing of leather; dressing and dyeing of fur (SIC 15110),ons_sic
+"Manufacture of luggage, handbags and the like, saddlery and harness (SIC 15120)",ons_sic
+Manufacture of footwear (SIC 15200),ons_sic
+Sawmilling and planing of wood (SIC 16100),ons_sic
+Manufacture of veneer sheets and wood-based panels (SIC 16210),ons_sic
+Manufacture of assembled parquet floors (SIC 16220),ons_sic
+Manufacture of other builders' carpentry and joinery (SIC 16230),ons_sic
+Manufacture of wooden containers (SIC 16240),ons_sic
+"Manufacture of other products of wood; manufacture of articles of cork, straw and plaiting materials (SIC 16290)",ons_sic
+Manufacture of pulp (SIC 17110),ons_sic
+Manufacture of paper and paperboard (SIC 17120),ons_sic
+"Manufacture of corrugated paper and paperboard, sacks and bags (SIC 17211)",ons_sic
+Manufacture of other paper and paperboard containers (SIC 17219),ons_sic
+Manufacture of household and sanitary goods and of toilet requisites (SIC 17220),ons_sic
+Manufacture of paper stationery (SIC 17230),ons_sic
+Manufacture of wallpaper (SIC 17240),ons_sic
+Manufacture of other articles of paper and paperboard n.e.c. (SIC 17290),ons_sic
+Printing of newspapers (SIC 18110),ons_sic
+Manufacture of printed labels (SIC 18121),ons_sic
+Printing n.e.c. (SIC 18129),ons_sic
+Pre-press and pre-media services (SIC 18130),ons_sic
+Binding and related services (SIC 18140),ons_sic
+Reproduction of sound recording (SIC 18201),ons_sic
+Reproduction of video recording (SIC 18202),ons_sic
+Reproduction of computer media (SIC 18203),ons_sic
+Manufacture of coke oven products (SIC 19100),ons_sic
+Mineral oil refining (SIC 19201),ons_sic
+Other treatment of petroleum products (excluding petrochemicals manufacture) (SIC 19209),ons_sic
+Manufacture of industrial gases (SIC 20110),ons_sic
+Manufacture of dyes and pigments (SIC 20120),ons_sic
+Manufacture of other inorganic basic chemicals (SIC 20130),ons_sic
+Manufacture of other organic basic chemicals (SIC 20140),ons_sic
+Manufacture of fertilizers and nitrogen compounds (SIC 20150),ons_sic
+Manufacture of plastics in primary forms (SIC 20160),ons_sic
+Manufacture of synthetic rubber in primary forms (SIC 20170),ons_sic
+Manufacture of pesticides and other agrochemical products (SIC 20200),ons_sic
+"Manufacture of paints, varnishes and similar coatings, mastics and sealants (SIC 20301)",ons_sic
+Manufacture of printing ink (SIC 20302),ons_sic
+Manufacture of soap and detergents (SIC 20411),ons_sic
+Manufacture of cleaning and polishing preparations (SIC 20412),ons_sic
+Manufacture of perfumes and toilet preparations (SIC 20420),ons_sic
+Manufacture of explosives (SIC 20510),ons_sic
+Manufacture of glues (SIC 20520),ons_sic
+Manufacture of essential oils (SIC 20530),ons_sic
+Manufacture of other chemical products n.e.c. (SIC 20590),ons_sic
+Manufacture of man-made fibres (SIC 20600),ons_sic
+Manufacture of basic pharmaceutical products (SIC 21100),ons_sic
+Manufacture of pharmaceutical preparations (SIC 21200),ons_sic
+Manufacture of rubber tyres and tubes; retreading and rebuilding of rubber tyres (SIC 22110),ons_sic
+Manufacture of other rubber products (SIC 22190),ons_sic
+"Manufacture of plastic plates, sheets, tubes and profiles (SIC 22210)",ons_sic
+Manufacture of plastic packing goods (SIC 22220),ons_sic
+Manufacture of builders ware of plastic (SIC 22230),ons_sic
+Manufacture of other plastic products (SIC 22290),ons_sic
+Manufacture of flat glass (SIC 23110),ons_sic
+Shaping and processing of flat glass (SIC 23120),ons_sic
+Manufacture of hollow glass (SIC 23130),ons_sic
+Manufacture of glass fibres (SIC 23140),ons_sic
+"Manufacture and processing of other glass, including technical glassware (SIC 23190)",ons_sic
+Manufacture of refractory products (SIC 23200),ons_sic
+Manufacture of ceramic tiles and flags (SIC 23310),ons_sic
+"Manufacture of bricks, tiles and construction products, in baked clay (SIC 23320)",ons_sic
+Manufacture of ceramic household and ornamental articles (SIC 23410),ons_sic
+Manufacture of ceramic sanitary fixtures (SIC 23420),ons_sic
+Manufacture of ceramic insulators and insulating fittings (SIC 23430),ons_sic
+Manufacture of other technical ceramic products (SIC 23440),ons_sic
+Manufacture of other ceramic products n.e.c. (SIC 23490),ons_sic
+Manufacture of cement (SIC 23510),ons_sic
+Manufacture of lime and plaster (SIC 23520),ons_sic
+Manufacture of concrete products for construction purposes (SIC 23610),ons_sic
+Manufacture of plaster products for construction purposes (SIC 23620),ons_sic
+Manufacture of ready-mixed concrete (SIC 23630),ons_sic
+Manufacture of mortars (SIC 23640),ons_sic
+Manufacture of fibre cement (SIC 23650),ons_sic
+"Manufacture of other articles of concrete, plaster and cement (SIC 23690)",ons_sic
+"Cutting, shaping and finishing of stone (SIC 23700)",ons_sic
+Production of abrasive products (SIC 23910),ons_sic
+Manufacture of other non-metallic mineral products n.e.c. (SIC 23990),ons_sic
+Manufacture of basic iron and steel and of ferro-alloys (SIC 24100),ons_sic
+"Manufacture of tubes, pipes, hollow profiles and related fittings, of steel (SIC 24200)",ons_sic
+Cold drawing of bars (SIC 24310),ons_sic
+Cold rolling of narrow strip (SIC 24320),ons_sic
+Cold forming or folding (SIC 24330),ons_sic
+Cold drawing of wire (SIC 24340),ons_sic
+Precious metals production (SIC 24410),ons_sic
+Aluminium production (SIC 24420),ons_sic
+"Lead, zinc and tin production (SIC 24430)",ons_sic
+Copper production (SIC 24440),ons_sic
+Other non-ferrous metal production (SIC 24450),ons_sic
+Processing of nuclear fuel (SIC 24460),ons_sic
+Casting of iron (SIC 24510),ons_sic
+Casting of steel (SIC 24520),ons_sic
+Casting of light metals (SIC 24530),ons_sic
+Casting of other non-ferrous metals (SIC 24540),ons_sic
+Manufacture of metal structures and parts of structures (SIC 25110),ons_sic
+Manufacture of doors and windows of metal (SIC 25120),ons_sic
+Manufacture of central heating radiators and boilers (SIC 25210),ons_sic
+"Manufacture of other tanks, reservoirs and containers of metal (SIC 25290)",ons_sic
+"Manufacture of steam generators, except central heating hot water boilers (SIC 25300)",ons_sic
+Manufacture of weapons and ammunition (SIC 25400),ons_sic
+"Forging, pressing, stamping and roll-forming of metal; powder metallurgy (SIC 25500)",ons_sic
+Treatment and coating of metals (SIC 25610),ons_sic
+Machining (SIC 25620),ons_sic
+Manufacture of cutlery (SIC 25710),ons_sic
+Manufacture of locks and hinges (SIC 25720),ons_sic
+Manufacture of tools (SIC 25730),ons_sic
+Manufacture of steel drums and similar containers (SIC 25910),ons_sic
+Manufacture of light metal packaging (SIC 25920),ons_sic
+"Manufacture of wire products, chain and springs (SIC 25930)",ons_sic
+Manufacture of fasteners and screw machine products (SIC 25940),ons_sic
+Manufacture of other fabricated metal products n.e.c. (SIC 25990),ons_sic
+Manufacture of electronic components (SIC 26110),ons_sic
+Manufacture of loaded electronic boards (SIC 26120),ons_sic
+Manufacture of computers and peripheral equipment (SIC 26200),ons_sic
+Manufacture of telegraph and telephone apparatus and equipment (SIC 26301),ons_sic
+"Manufacture of communication equipment other than telegraph, and telephone apparatus and equipment (SIC 26309)",ons_sic
+Manufacture of consumer electronics (SIC 26400),ons_sic
+"Manufacture of electronic measuring, testing etc. equipment, not for industrial process control (SIC 26511)",ons_sic
+Manufacture of electronic industrial process control equipment (SIC 26512),ons_sic
+"Manufacture of non-electronic measuring, testing etc. equipment, not for industrial process control (SIC 26513)",ons_sic
+Manufacture of non-electronic industrial process control equipment (SIC 26514),ons_sic
+Manufacture of watches and clocks (SIC 26520),ons_sic
+"Manufacture of irradiation, electromedical and electrotherapeutic equipment (SIC 26600)",ons_sic
+Manufacture of optical precision instruments (SIC 26701),ons_sic
+Manufacture of photographic and cinematographic equipment (SIC 26702),ons_sic
+Manufacture of magnetic and optical media (SIC 26800),ons_sic
+"Manufacture of electric motors, generators and transformers (SIC 27110)",ons_sic
+Manufacture of electricity distribution and control apparatus (SIC 27120),ons_sic
+Manufacture of batteries and accumulators (SIC 27200),ons_sic
+Manufacture of fibre optic cables (SIC 27310),ons_sic
+Manufacture of other electronic and electric wires and cables (SIC 27320),ons_sic
+Manufacture of wiring devices (SIC 27330),ons_sic
+Manufacture of electric lighting equipment (SIC 27400),ons_sic
+Manufacture of electric domestic appliances (SIC 27510),ons_sic
+Manufacture of non-electric domestic appliances (SIC 27520),ons_sic
+Manufacture of other electrical equipment (SIC 27900),ons_sic
+"Manufacture of engines and turbines, except aircraft, vehicle and cycle engines (SIC 28110)",ons_sic
+Manufacture of fluid power equipment (SIC 28120),ons_sic
+Manufacture of pumps (SIC 28131),ons_sic
+Manufacture of compressors (SIC 28132),ons_sic
+Manufacture of taps and valves (SIC 28140),ons_sic
+"Manufacture of bearings, gears, gearing and driving elements (SIC 28150)",ons_sic
+"Manufacture of ovens, furnaces and furnace burners (SIC 28210)",ons_sic
+Manufacture of lifting and handling equipment (SIC 28220),ons_sic
+Manufacture of office machinery and equipment (except computers and peripheral equipment) (SIC 28230),ons_sic
+Manufacture of power-driven hand tools (SIC 28240),ons_sic
+Manufacture of non-domestic cooling and ventilation equipment (SIC 28250),ons_sic
+Manufacture of other general-purpose machinery n.e.c. (SIC 28290),ons_sic
+Manufacture of agricultural tractors (SIC 28301),ons_sic
+Manufacture of agricultural and forestry machinery other than tractors (SIC 28302),ons_sic
+Manufacture of metal forming machinery (SIC 28410),ons_sic
+Manufacture of other machine tools (SIC 28490),ons_sic
+Manufacture of machinery for metallurgy (SIC 28910),ons_sic
+Manufacture of machinery for mining (SIC 28921),ons_sic
+Manufacture of earthmoving equipment (SIC 28922),ons_sic
+Manufacture of equipment for concrete crushing and screening and roadworks (SIC 28923),ons_sic
+"Manufacture of machinery for food, beverage and tobacco processing (SIC 28930)",ons_sic
+"Manufacture of machinery for textile, apparel and leather production (SIC 28940)",ons_sic
+Manufacture of machinery for paper and paperboard production (SIC 28950),ons_sic
+Manufacture of plastics and rubber machinery (SIC 28960),ons_sic
+Manufacture of other special-purpose machinery n.e.c. (SIC 28990),ons_sic
+Manufacture of motor vehicles (SIC 29100),ons_sic
+Manufacture of bodies (coachwork) for motor vehicles (except caravans) (SIC 29201),ons_sic
+Manufacture of trailers and semi-trailers (SIC 29202),ons_sic
+Manufacture of caravans (SIC 29203),ons_sic
+Manufacture of electrical and electronic equipment for motor vehicles and their engines (SIC 29310),ons_sic
+Manufacture of other parts and accessories for motor vehicles (SIC 29320),ons_sic
+Building of ships and floating structures (SIC 30110),ons_sic
+Building of pleasure and sporting boats (SIC 30120),ons_sic
+Manufacture of railway locomotives and rolling stock (SIC 30200),ons_sic
+Manufacture of air and spacecraft and related machinery (SIC 30300),ons_sic
+Manufacture of military fighting vehicles (SIC 30400),ons_sic
+Manufacture of motorcycles (SIC 30910),ons_sic
+Manufacture of bicycles and invalid carriages (SIC 30920),ons_sic
+Manufacture of other transport equipment n.e.c. (SIC 30990),ons_sic
+Manufacture of office and shop furniture (SIC 31010),ons_sic
+Manufacture of kitchen furniture (SIC 31020),ons_sic
+Manufacture of mattresses (SIC 31030),ons_sic
+Manufacture of other furniture (SIC 31090),ons_sic
+Striking of coins (SIC 32110),ons_sic
+Manufacture of jewellery and related articles (SIC 32120),ons_sic
+Manufacture of imitation jewellery and related articles (SIC 32130),ons_sic
+Manufacture of musical instruments (SIC 32200),ons_sic
+Manufacture of sports goods (SIC 32300),ons_sic
+Manufacture of professional and arcade games and toys (SIC 32401),ons_sic
+"Manufacture of other games and toys, n.e.c. (SIC 32409)",ons_sic
+Manufacture of medical and dental instruments and supplies (SIC 32500),ons_sic
+Manufacture of brooms and brushes (SIC 32910),ons_sic
+Other manufacturing n.e.c. (SIC 32990),ons_sic
+Repair of fabricated metal products (SIC 33110),ons_sic
+Repair of machinery (SIC 33120),ons_sic
+Repair of electronic and optical equipment (SIC 33130),ons_sic
+Repair of electrical equipment (SIC 33140),ons_sic
+Repair and maintenance of ships and boats (SIC 33150),ons_sic
+Repair and maintenance of aircraft and spacecraft (SIC 33160),ons_sic
+Repair and maintenance of other transport equipment n.e.c. (SIC 33170),ons_sic
+Repair of other equipment (SIC 33190),ons_sic
+Installation of industrial machinery and equipment (SIC 33200),ons_sic
+Production of electricity (SIC 35110),ons_sic
+Transmission of electricity (SIC 35120),ons_sic
+Distribution of electricity (SIC 35130),ons_sic
+Trade of electricity (SIC 35140),ons_sic
+Manufacture of gas (SIC 35210),ons_sic
+Distribution of gaseous fuels through mains (SIC 35220),ons_sic
+Trade of gas through mains (SIC 35230),ons_sic
+Steam and air conditioning supply remediation activities (SIC 35300),ons_sic
+"Water collection, treatment and supply (SIC 36000)",ons_sic
+Sewerage (SIC 37000),ons_sic
+Collection of non-hazardous waste (SIC 38110),ons_sic
+Collection of hazardous waste (SIC 38120),ons_sic
+Treatment and disposal of non-hazardous waste (SIC 38210),ons_sic
+Treatment and disposal of hazardous waste (SIC 38220),ons_sic
+Dismantling of wrecks (SIC 38310),ons_sic
+Recovery of sorted materials (SIC 38320),ons_sic
+Remediation activities and other waste management services (SIC 39000),ons_sic
+Development of building projects (SIC 41100),ons_sic
+Construction of commercial buildings (SIC 41201),ons_sic
+Construction of domestic buildings (SIC 41202),ons_sic
+Construction of roads and motorways (SIC 42110),ons_sic
+Construction of railways and underground railways (SIC 42120),ons_sic
+Construction of bridges and tunnels (SIC 42130),ons_sic
+Construction of utility projects for fluids (SIC 42210),ons_sic
+Construction of utility projects for electricity and telecommunications (SIC 42220),ons_sic
+Construction of water projects (SIC 42910),ons_sic
+Construction of other civil engineering projects n.e.c. (SIC 42990),ons_sic
+Demolition (SIC 43110),ons_sic
+Site preparation (SIC 43120),ons_sic
+Test drilling and boring (SIC 43130),ons_sic
+Electrical installation (SIC 43210),ons_sic
+"Plumbing, heat and air-conditioning installation (SIC 43220)",ons_sic
+Other construction installation (SIC 43290),ons_sic
+Plastering (SIC 43310),ons_sic
+Joinery installation (SIC 43320),ons_sic
+Floor and wall covering (SIC 43330),ons_sic
+Painting (SIC 43341),ons_sic
+Glazing (SIC 43342),ons_sic
+Other building completion and finishing (SIC 43390),ons_sic
+Roofing activities (SIC 43910),ons_sic
+Scaffold erection (SIC 43991),ons_sic
+Other specialised construction activities n.e.c. motorcycles (SIC 43999),ons_sic
+Sale of new cars and light motor vehicles (SIC 45111),ons_sic
+Sale of used cars and light motor vehicles (SIC 45112),ons_sic
+Sale of other motor vehicles (SIC 45190),ons_sic
+Maintenance and repair of motor vehicles (SIC 45200),ons_sic
+Wholesale trade of motor vehicle parts and accessories (SIC 45310),ons_sic
+Retail trade of motor vehicle parts and accessories (SIC 45320),ons_sic
+"Sale, maintenance and repair of motorcycles and related parts and accessories (SIC 45400)",ons_sic
+"Agents selling agricultural raw materials, livestock, textile raw materials and semi-finished goods (SIC 46110)",ons_sic
+"Agents involved in the sale of fuels, ores, metals and industrial chemicals (SIC 46120)",ons_sic
+Agents involved in the sale of timber and building materials (SIC 46130),ons_sic
+"Agents involved in the sale of machinery, industrial equipment, ships and aircraft (SIC 46140)",ons_sic
+"Agents involved in the sale of furniture, household goods, hardware and ironmongery (SIC 46150)",ons_sic
+"Agents involved in the sale of textiles, clothing, fur, footwear and leather goods (SIC 46160)",ons_sic
+"Agents involved in the sale of food, beverages and tobacco (SIC 46170)",ons_sic
+Agents specialised in the sale of other particular products (SIC 46180),ons_sic
+Agents involved in the sale of a variety of goods (SIC 46190),ons_sic
+"Wholesale of grain, unmanufactured tobacco, seeds and animal feeds (SIC 46210)",ons_sic
+Wholesale of flowers and plants (SIC 46220),ons_sic
+Wholesale of live animals (SIC 46230),ons_sic
+"Wholesale of hides, skins and leather (SIC 46240)",ons_sic
+Wholesale of fruit and vegetables (SIC 46310),ons_sic
+Wholesale of meat and meat products (SIC 46320),ons_sic
+"Wholesale of dairy products, eggs and edible oils and fats (SIC 46330)",ons_sic
+"Wholesale of fruit and vegetable juices, mineral water and soft drinks (SIC 46341)",ons_sic
+"Wholesale of wine, beer, spirits and other alcoholic beverages (SIC 46342)",ons_sic
+Wholesale of tobacco products (SIC 46350),ons_sic
+Wholesale of sugar and chocolate and sugar confectionery (SIC 46360),ons_sic
+"Wholesale of coffee, tea, cocoa and spices (SIC 46370)",ons_sic
+"Wholesale of other food, including fish, crustaceans and molluscs (SIC 46380)",ons_sic
+"Non-specialised wholesale of food, beverages and tobacco (SIC 46390)",ons_sic
+Wholesale of textiles (SIC 46410),ons_sic
+Wholesale of clothing and footwear (SIC 46420),ons_sic
+"Wholesale of audio tapes, records, CDs and video tapes and the equipment on which these are played (SIC 46431)",ons_sic
+"Wholesale of radio, television goods & electrical household appliances (other than records, tapes, CD's & video tapes and the equipment used for playing them) (SIC 46439)",ons_sic
+Wholesale of china and glassware and cleaning materials (SIC 46440),ons_sic
+Wholesale of perfume and cosmetics (SIC 46450),ons_sic
+Wholesale of pharmaceutical goods (SIC 46460),ons_sic
+"Wholesale of furniture, carpets and lighting equipment (SIC 46470)",ons_sic
+Wholesale of watches and jewellery (SIC 46480),ons_sic
+Wholesale of musical instruments (SIC 46491),ons_sic
+Wholesale of household goods (other than musical instruments) n.e.c (SIC 46499),ons_sic
+"Wholesale of computers, computer peripheral equipment and software (SIC 46510)",ons_sic
+Wholesale of electronic and telecommunications equipment and parts (SIC 46520),ons_sic
+"Wholesale of agricultural machinery, equipment and supplies (SIC 46610)",ons_sic
+Wholesale of machine tools (SIC 46620),ons_sic
+"Wholesale of mining, construction and civil engineering machinery (SIC 46630)",ons_sic
+Wholesale of machinery for the textile industry and of sewing and knitting machines (SIC 46640),ons_sic
+Wholesale of office furniture (SIC 46650),ons_sic
+Wholesale of other office machinery and equipment (SIC 46660),ons_sic
+Wholesale of other machinery and equipment (SIC 46690),ons_sic
+Wholesale of petroleum and petroleum products (SIC 46711),ons_sic
+Wholesale of other fuels and related products (SIC 46719),ons_sic
+Wholesale of metals and metal ores (SIC 46720),ons_sic
+"Wholesale of wood, construction materials and sanitary equipment (SIC 46730)",ons_sic
+"Wholesale of hardware, plumbing and heating equipment and supplies (SIC 46740)",ons_sic
+Wholesale of chemical products (SIC 46750),ons_sic
+Wholesale of other intermediate products (SIC 46760),ons_sic
+Wholesale of waste and scrap (SIC 46770),ons_sic
+Non-specialised wholesale trade (SIC 46900),ons_sic
+"Retail sale in non-specialised stores with food, beverages or tobacco predominating (SIC 47110)",ons_sic
+Other retail sale in non-specialised stores (SIC 47190),ons_sic
+Retail sale of fruit and vegetables in specialised stores (SIC 47210),ons_sic
+Retail sale of meat and meat products in specialised stores (SIC 47220),ons_sic
+"Retail sale of fish, crustaceans and molluscs in specialised stores (SIC 47230)",ons_sic
+"Retail sale of bread, cakes, flour confectionery and sugar confectionery in specialised stores (SIC 47240)",ons_sic
+Retail sale of beverages in specialised stores (SIC 47250),ons_sic
+Retail sale of tobacco products in specialised stores (SIC 47260),ons_sic
+Other retail sale of food in specialised stores (SIC 47290),ons_sic
+Retail sale of automotive fuel in specialised stores (SIC 47300),ons_sic
+"Retail sale of computers, peripheral units and software in specialised stores (SIC 47410)",ons_sic
+Retail sale of mobile telephones (SIC 47421),ons_sic
+Retail sale of telecommunications equipment other than mobile telephones (SIC 47429),ons_sic
+Retail sale of audio and video equipment in specialised stores (SIC 47430),ons_sic
+Retail sale of textiles in specialised stores (SIC 47510),ons_sic
+"Retail sale of hardware, paints and glass in specialised stores (SIC 47520)",ons_sic
+"Retail sale of carpets, rugs, wall and floor coverings in specialised stores (SIC 47530)",ons_sic
+Retail sale of electrical household appliances in specialised stores (SIC 47540),ons_sic
+Retail sale of musical instruments and scores (SIC 47591),ons_sic
+"Retail of furniture, lighting, and similar (not musical instruments or scores) in specialised store (SIC 47599)",ons_sic
+Retail sale of books in specialised stores (SIC 47610),ons_sic
+Retail sale of newspapers and stationery in specialised stores (SIC 47620),ons_sic
+Retail sale of music and video recordings in specialised stores (SIC 47630),ons_sic
+"Retail sale of sports goods, fishing gear, camping goods, boats and bicycles (SIC 47640)",ons_sic
+Retail sale of games and toys in specialised stores (SIC 47650),ons_sic
+Retail sale of clothing in specialised stores (SIC 47710),ons_sic
+Retail sale of footwear in specialised stores (SIC 47721),ons_sic
+Retail sale of leather goods in specialised stores (SIC 47722),ons_sic
+Dispensing chemist in specialised stores (SIC 47730),ons_sic
+Retail sale of hearing aids (SIC 47741),ons_sic
+Retail sale of medical and orthopaedic goods in specialised stores (not incl. hearing aids) n.e.c. (SIC 47749),ons_sic
+Retail sale of cosmetic and toilet articles in specialised stores (SIC 47750),ons_sic
+"Retail sale of flowers, plants, seeds, fertilizers, pet animals and pet food in specialised stores (SIC 47760)",ons_sic
+Retail sale of watches and jewellery in specialised stores (SIC 47770),ons_sic
+Retail sale in commercial art galleries (SIC 47781),ons_sic
+Retail sale by opticians (SIC 47782),ons_sic
+Other retail sale of new goods in specialised stores (not commercial art galleries and opticians) (SIC 47789),ons_sic
+Retail sale of antiques including antique books in stores (SIC 47791),ons_sic
+Retail sale of other second-hand goods in stores (not incl. antiques) (SIC 47799),ons_sic
+"Retail sale via stalls and markets of food, beverages and tobacco products (SIC 47810)",ons_sic
+"Retail sale via stalls and markets of textiles, clothing and footwear (SIC 47820)",ons_sic
+Retail sale via stalls and markets of other goods (SIC 47890),ons_sic
+Retail sale via mail order houses or via Internet (SIC 47910),ons_sic
+"Other retail sale not in stores, stalls or markets (SIC 47990)",ons_sic
+"Passenger rail transport, interurban (SIC 49100)",ons_sic
+Freight rail transport (SIC 49200),ons_sic
+"Urban and suburban passenger railway transportation by underground, metro and similar systems (SIC 49311)",ons_sic
+"Other urban, suburban or metropolitan passenger land transport (not underground, metro or similar) (SIC 49319)",ons_sic
+Taxi operation (SIC 49320),ons_sic
+Other passenger land transport (SIC 49390),ons_sic
+Freight transport by road (SIC 49410),ons_sic
+Removal services (SIC 49420),ons_sic
+Transport via pipeline (SIC 49500),ons_sic
+Sea and coastal passenger water transport (SIC 50100),ons_sic
+Sea and coastal freight water transport (SIC 50200),ons_sic
+Inland passenger water transport (SIC 50300),ons_sic
+Inland freight water transport (SIC 50400),ons_sic
+Scheduled passenger air transport (SIC 51101),ons_sic
+Non-scheduled passenger air transport (SIC 51102),ons_sic
+Freight air transport (SIC 51210),ons_sic
+Space transport (SIC 51220),ons_sic
+Operation of warehousing and storage facilities for water transport activities (SIC 52101),ons_sic
+Operation of warehousing and storage facilities for air transport activities (SIC 52102),ons_sic
+Operation of warehousing and storage facilities for land transport activities (SIC 52103),ons_sic
+Operation of rail freight terminals (SIC 52211),ons_sic
+Operation of rail passenger facilities at railway stations (SIC 52212),ons_sic
+Operation of bus and coach passenger facilities at bus and coach stations (SIC 52213),ons_sic
+"Other service activities incidental to land transportation, n.e.c. (SIC 52219)",ons_sic
+Service activities incidental to water transportation (SIC 52220),ons_sic
+Service activities incidental to air transportation (SIC 52230),ons_sic
+Cargo handling for water transport activities (SIC 52241),ons_sic
+Cargo handling for air transport activities (SIC 52242),ons_sic
+Cargo handling for land transport activities (SIC 52243),ons_sic
+Other transportation support activities (SIC 52290),ons_sic
+Postal activities under universal service obligation (SIC 53100),ons_sic
+Licensed carriers (SIC 53201),ons_sic
+Unlicensed carriers (SIC 53202),ons_sic
+Hotels and similar accommodation (SIC 55100),ons_sic
+Holiday centres and villages (SIC 55201),ons_sic
+Youth hostels (SIC 55202),ons_sic
+Other holiday and other collective accommodation (SIC 55209),ons_sic
+"Recreational vehicle parks, trailer parks and camping grounds (SIC 55300)",ons_sic
+Other accommodation (SIC 55900),ons_sic
+Licenced restaurants (SIC 56101),ons_sic
+Unlicenced restaurants and cafes (SIC 56102),ons_sic
+Take-away food shops and mobile food stands (SIC 56103),ons_sic
+Event catering activities (SIC 56210),ons_sic
+Other food services (SIC 56290),ons_sic
+Licenced clubs (SIC 56301),ons_sic
+Public houses and bars (SIC 56302),ons_sic
+Book publishing (SIC 58110),ons_sic
+Publishing of directories and mailing lists (SIC 58120),ons_sic
+Publishing of newspapers (SIC 58130),ons_sic
+Publishing of learned journals (SIC 58141),ons_sic
+Publishing of consumer and business journals and periodicals (SIC 58142),ons_sic
+Other publishing activities (SIC 58190),ons_sic
+Publishing of computer games (SIC 58210),ons_sic
+Other software publishing (SIC 58290),ons_sic
+Motion picture production activities (SIC 59111),ons_sic
+Video production activities (SIC 59112),ons_sic
+Television programme production activities (SIC 59113),ons_sic
+"Motion picture, video and television programme post- production activities (SIC 59120)",ons_sic
+Motion picture distribution activities (SIC 59131),ons_sic
+Video distribution activities (SIC 59132),ons_sic
+Television programme distribution activities (SIC 59133),ons_sic
+Motion picture projection activities (SIC 59140),ons_sic
+Sound recording and music publishing activities (SIC 59200),ons_sic
+Radio broadcasting (SIC 60100),ons_sic
+Television programming and broadcasting activities (SIC 60200),ons_sic
+Wired telecommunications activities (SIC 61100),ons_sic
+Wireless telecommunications activities (SIC 61200),ons_sic
+Satellite telecommunications activities (SIC 61300),ons_sic
+Other telecommunications activities (SIC 61900),ons_sic
+Ready-made interactive leisure and entertainment software development (SIC 62011),ons_sic
+Business and domestic software development (SIC 62012),ons_sic
+Information technology consultancy activities (SIC 62020),ons_sic
+Computer facilities management activities (SIC 62030),ons_sic
+Other information technology service activities (SIC 62090),ons_sic
+"Data processing, hosting and related activities (SIC 63110)",ons_sic
+Web portals (SIC 63120),ons_sic
+News agency activities (SIC 63910),ons_sic
+Other information service activities n.e.c. (SIC 63990),ons_sic
+Central banking (SIC 64110),ons_sic
+Banks (SIC 64191),ons_sic
+Building societies (SIC 64192),ons_sic
+Activities of agricultural holding companies (SIC 64201),ons_sic
+Activities of production holding companies (SIC 64202),ons_sic
+Activities of construction holding companies (SIC 64203),ons_sic
+Activities of distribution holding companies (SIC 64204),ons_sic
+Activities of financial services holding companies (SIC 64205),ons_sic
+Activities of other holding companies n.e.c. (SIC 64209),ons_sic
+Activities of investment trusts (SIC 64301),ons_sic
+Activities of unit trusts (SIC 64302),ons_sic
+Activities of venture and development capital companies (SIC 64303),ons_sic
+Activities of open-ended investment companies (SIC 64304),ons_sic
+Activities of property unit trusts (SIC 64305),ons_sic
+Activities of real estate investment trusts (SIC 64306),ons_sic
+Financial leasing (SIC 64910),ons_sic
+Credit granting by non-deposit taking finance houses and other specialist consumer credit grantors (SIC 64921),ons_sic
+Activities of mortgage finance companies (SIC 64922),ons_sic
+Other credit granting n.e.c. (SIC 64929),ons_sic
+Security dealing on own account (SIC 64991),ons_sic
+Factoring (SIC 64992),ons_sic
+Financial intermediation not elsewhere classified (SIC 64999),ons_sic
+Life insurance (SIC 65110),ons_sic
+Non-life insurance (SIC 65120),ons_sic
+Life reinsurance (SIC 65201),ons_sic
+Non-life reinsurance (SIC 65202),ons_sic
+Pension funding (SIC 65300),ons_sic
+Administration of financial markets (SIC 66110),ons_sic
+Security and commodity contracts dealing activities (SIC 66120),ons_sic
+Activities auxiliary to financial intermediation n.e.c. (SIC 66190),ons_sic
+Risk and damage evaluation (SIC 66210),ons_sic
+Activities of insurance agents and brokers (SIC 66220),ons_sic
+Other activities auxiliary to insurance and pension funding (SIC 66290),ons_sic
+Fund management activities (SIC 66300),ons_sic
+Buying and selling of own real estate (SIC 68100),ons_sic
+Renting and operating of Housing Association real estate (SIC 68201),ons_sic
+Letting and operating of conference and exhibition centres (SIC 68202),ons_sic
+Other letting and operating of own or leased real estate (SIC 68209),ons_sic
+Real estate agencies (SIC 68310),ons_sic
+Management of real estate on a fee or contract basis (SIC 68320),ons_sic
+Barristers at law (SIC 69101),ons_sic
+Solicitors (SIC 69102),ons_sic
+Activities of patent and copyright agents; other legal activities n.e.c. (SIC 69109),ons_sic
+Accounting and auditing activities (SIC 69201),ons_sic
+Bookkeeping activities (SIC 69202),ons_sic
+Tax consultancy (SIC 69203),ons_sic
+Activities of head offices (SIC 70100),ons_sic
+Public relations and communications activities (SIC 70210),ons_sic
+Financial management (SIC 70221),ons_sic
+Management consultancy activities other than financial management (SIC 70229),ons_sic
+Architectural activities (SIC 71111),ons_sic
+Urban planning and landscape architectural activities (SIC 71112),ons_sic
+Engineering design activities for industrial process and production (SIC 71121),ons_sic
+Engineering related scientific and technical consulting activities (SIC 71122),ons_sic
+Other engineering activities (SIC 71129),ons_sic
+Technical testing and analysis (SIC 71200),ons_sic
+Research and experimental development on biotechnology (SIC 72110),ons_sic
+Other research and experimental development on natural sciences and engineering (SIC 72190),ons_sic
+Research and experimental development on social sciences and humanities (SIC 72200),ons_sic
+Advertising agencies (SIC 73110),ons_sic
+Media representation services (SIC 73120),ons_sic
+Market research and public opinion polling (SIC 73200),ons_sic
+specialised design activities (SIC 74100),ons_sic
+Portrait photographic activities (SIC 74201),ons_sic
+Other specialist photography (SIC 74202),ons_sic
+Film processing (SIC 74203),ons_sic
+Photographic activities not elsewhere classified (SIC 74209),ons_sic
+Translation and interpretation activities (SIC 74300),ons_sic
+Environmental consulting activities (SIC 74901),ons_sic
+Quantity surveying activities (SIC 74902),ons_sic
+"Other professional, scientific and technical activities n.e.c. (SIC 74909)",ons_sic
+Non-trading company non trading (SIC 74990),ons_sic
+Veterinary activities (SIC 75000),ons_sic
+Renting and leasing of cars and light motor vehicles (SIC 77110),ons_sic
+Renting and leasing of trucks and other heavy vehicles (SIC 77120),ons_sic
+Renting and leasing of recreational and sports goods (SIC 77210),ons_sic
+Renting of video tapes and disks (SIC 77220),ons_sic
+Renting and leasing of media entertainment equipment (SIC 77291),ons_sic
+Renting and leasing of other personal and household goods (SIC 77299),ons_sic
+Renting and leasing of agricultural machinery and equipment (SIC 77310),ons_sic
+Renting and leasing of construction and civil engineering machinery and equipment (SIC 77320),ons_sic
+Renting and leasing of office machinery and equipment (including computers) (SIC 77330),ons_sic
+Renting and leasing of passenger water transport equipment (SIC 77341),ons_sic
+Renting and leasing of freight water transport equipment (SIC 77342),ons_sic
+Renting and leasing of air passenger transport equipment (SIC 77351),ons_sic
+Renting and leasing of freight air transport equipment (SIC 77352),ons_sic
+"Renting and leasing of other machinery, equipment and tangible goods n.e.c. (SIC 77390)",ons_sic
+"Leasing of intellectual property and similar products, except copyright works (SIC 77400)",ons_sic
+"Motion picture, television and other theatrical casting activities (SIC 78101)",ons_sic
+Other activities of employment placement agencies (SIC 78109),ons_sic
+Temporary employment agency activities (SIC 78200),ons_sic
+Human resources provision and management of human resources functions (SIC 78300),ons_sic
+Travel agency activities (SIC 79110),ons_sic
+Tour operator activities (SIC 79120),ons_sic
+Activities of tourist guides (SIC 79901),ons_sic
+Other reservation service activities n.e.c. (SIC 79909),ons_sic
+Private security activities (SIC 80100),ons_sic
+Security systems service activities (SIC 80200),ons_sic
+Investigation activities (SIC 80300),ons_sic
+Combined facilities support activities (SIC 81100),ons_sic
+General cleaning of buildings (SIC 81210),ons_sic
+Window cleaning services (SIC 81221),ons_sic
+Specialised cleaning services (SIC 81222),ons_sic
+Furnace and chimney cleaning services (SIC 81223),ons_sic
+Other building and industrial cleaning activities (SIC 81229),ons_sic
+Disinfecting and exterminating services (SIC 81291),ons_sic
+Other cleaning services (SIC 81299),ons_sic
+Landscape service activities (SIC 81300),ons_sic
+Combined office administrative service activities (SIC 82110),ons_sic
+"Photocopying, document preparation and other specialised office support activities (SIC 82190)",ons_sic
+Activities of call centres (SIC 82200),ons_sic
+Activities of exhibition and fair organisers (SIC 82301),ons_sic
+Activities of conference organisers (SIC 82302),ons_sic
+Activities of collection agencies (SIC 82911),ons_sic
+Activities of credit bureaus (SIC 82912),ons_sic
+Packaging activities (SIC 82920),ons_sic
+Other business support service activities n.e.c. security (SIC 82990),ons_sic
+General public administration activities (SIC 84110),ons_sic
+"Regulation of health care, education, cultural and other social services, not incl. social security (SIC 84120)",ons_sic
+Regulation of and contribution to more efficient operation of businesses (SIC 84130),ons_sic
+Foreign affairs (SIC 84210),ons_sic
+Defence activities (SIC 84220),ons_sic
+Justice and judicial activities (SIC 84230),ons_sic
+Public order and safety activities (SIC 84240),ons_sic
+Fire service activities (SIC 84250),ons_sic
+Compulsory social security activities (SIC 84300),ons_sic
+Pre-primary education (SIC 85100),ons_sic
+Primary education (SIC 85200),ons_sic
+General secondary education (SIC 85310),ons_sic
+Technical and vocational secondary education (SIC 85320),ons_sic
+Post-secondary non-tertiary education (SIC 85410),ons_sic
+First-degree level higher education (SIC 85421),ons_sic
+Post-graduate level higher education (SIC 85422),ons_sic
+Sports and recreation education (SIC 85510),ons_sic
+Cultural education (SIC 85520),ons_sic
+Driving school activities (SIC 85530),ons_sic
+Other education n.e.c. (SIC 85590),ons_sic
+Educational support services (SIC 85600),ons_sic
+Hospital activities (SIC 86101),ons_sic
+Medical nursing home activities (SIC 86102),ons_sic
+General medical practice activities (SIC 86210),ons_sic
+Specialists medical practice activities (SIC 86220),ons_sic
+Dental practice activities (SIC 86230),ons_sic
+Other human health activities (SIC 86900),ons_sic
+Residential nursing care facilities (SIC 87100),ons_sic
+"Residential care activities for learning difficulties, mental health and substance abuse (SIC 87200)",ons_sic
+Residential care activities for the elderly and disabled (SIC 87300),ons_sic
+Other residential care activities n.e.c. (SIC 87900),ons_sic
+Social work activities without accommodation for the elderly and disabled (SIC 88100),ons_sic
+Child day-care activities (SIC 88910),ons_sic
+Other social work activities without accommodation n.e.c. (SIC 88990),ons_sic
+Performing arts (SIC 90010),ons_sic
+Support activities to performing arts (SIC 90020),ons_sic
+Artistic creation (SIC 90030),ons_sic
+Operation of arts facilities (SIC 90040),ons_sic
+Library activities (SIC 91011),ons_sic
+Archives activities (SIC 91012),ons_sic
+Museums activities (SIC 91020),ons_sic
+Operation of historical sites and buildings and similar visitor attractions (SIC 91030),ons_sic
+Botanical and zoological gardens and nature reserves activities (SIC 91040),ons_sic
+Gambling and betting activities (SIC 92000),ons_sic
+Operation of sports facilities (SIC 93110),ons_sic
+Activities of sport clubs (SIC 93120),ons_sic
+Fitness facilities (SIC 93130),ons_sic
+Activities of racehorse owners (SIC 93191),ons_sic
+Other sports activities (SIC 93199),ons_sic
+Activities of amusement parks and theme parks (SIC 93210),ons_sic
+Other amusement and recreation activities n.e.c. (SIC 93290),ons_sic
+Activities of business and employers membership organisations (SIC 94110),ons_sic
+Activities of professional membership organisations (SIC 94120),ons_sic
+Activities of trade unions (SIC 94200),ons_sic
+Activities of religious organisations (SIC 94910),ons_sic
+Activities of political organisations (SIC 94920),ons_sic
+Activities of other membership organisations n.e.c. (SIC 94990),ons_sic
+Repair of computers and peripheral equipment (SIC 95110),ons_sic
+Repair of communication equipment (SIC 95120),ons_sic
+Repair of consumer electronics (SIC 95210),ons_sic
+Repair of household appliances and home and garden equipment (SIC 95220),ons_sic
+Repair of footwear and leather goods (SIC 95230),ons_sic
+Repair of furniture and home furnishings (SIC 95240),ons_sic
+"Repair of watches, clocks and jewellery (SIC 95250)",ons_sic
+Repair of personal and household goods n.e.c. (SIC 95290),ons_sic
+Washing and (dry-)cleaning of textile and fur products (SIC 96010),ons_sic
+Hairdressing and other beauty treatment (SIC 96020),ons_sic
+Funeral and related activities (SIC 96030),ons_sic
+Physical well-being activities (SIC 96040),ons_sic
+Other service activities n.e.c. goods- and services-producing activities of households for own use (SIC 96090),ons_sic
+Activities of households as employers of domestic personnel (SIC 97000),ons_sic
+Residents property management (SIC 98000),ons_sic
+Undifferentiated goods-producing activities of private households for own use (SIC 98100),ons_sic
+Undifferentiated service-producing activities of private households for own use bodies (SIC 98200),ons_sic
+Activities of extraterritorial organisations and bodies (SIC 99000),ons_sic
+Dormant Company (SIC 99999),ons_sic
+"Therefore, I cannot extract and list all the association names as requested.",taf
+British Frozen Food Federation,taf
+Entertainment Retailers Association,taf
+Federation of Environmental Trade Associations [cite: 13 in previous turn],taf
+Road Haulage Association,taf
+Scaffolding Association,taf
+Society of Independent Brewers & Associates,taf
+The Tile Association,taf
+The Timber Trade Federation,taf
+The Travel Association,taf
+The Textile Services Association,taf
+The Underfloor Heating Manufacturers Association,taf
+UK Warehousing Association,taf
+The UK Vending Association,taf
+Vehicle Remarketing Association,taf
+Water UK,taf
+Welsh Automotive Forum,taf
+The Wine and Spirit Trade Association,taf
+Waste Management Association,taf
+The Welding Institute,taf
+The Yacht Harbour Association,taf
+Youth Hostel Association (England & Wales),taf
+Zinc and Lead Association,taf
+ABTA (trade association),wikipedia
+ADS Group,wikipedia
+Advertising Association,wikipedia
+Airport Operators Association,wikipedia
+Alliance of Independent Authors,wikipedia
+Antiquarian Booksellers' Association,wikipedia
+Arboricultural Association,wikipedia
+Association for Consultancy and Engineering,wikipedia
+Association for Decentralised Energy,wikipedia
+Association for Renewable Energy and Clean Technology,wikipedia
+The Association for UK Interactive Entertainment,wikipedia
+Association of British Insurers,wikipedia
+Association of Electrical and Mechanical Trades,wikipedia
+Association of Electricity Producers,wikipedia
+Association of Independent Tour Operators,wikipedia
+Association of Investment Companies,wikipedia
+Association of Photographers,wikipedia
+Association of Professional Recording Services,wikipedia
+British Apples and Pears,wikipedia
+British Beer & Pub Association,wikipedia
+British Chambers of Commerce (BCC),wikipedia
+British Meat Processors Association,wikipedia
+British Retail Consortium (BRC),wikipedia
+British Sandwich & Food to Go Association,wikipedia
+Chartered Institute of Environmental Health,wikipedia
+Chartered Institute of Public Relations,wikipedia
+Chartered Trading Standards Institute,wikipedia
+Chemical Industries Association,wikipedia
+Cinema Exhibitors' Association,wikipedia
+Co-operatives UK,wikipedia
+Confederation of British Industry (CBI),wikipedia
+Confederation of Forest Industries,wikipedia
+Confederation of UK Coal Producers,wikipedia
+Construction Industry Council (CIC),wikipedia
+Cutlery and Allied Trades Research Association,wikipedia
+Federation of Awarding Bodies,wikipedia
+Federation of Bakers,wikipedia
+Federation of Environmental Trade Associations,wikipedia
+Federation of Licensed Victuallers Associations,wikipedia
+Federation of Manufacturing Opticians,wikipedia
+Federation of Small Businesses (FSB),wikipedia
+Finance and Leasing Association,wikipedia
+Fire Extinguishing Trades Association,wikipedia
+Fire Industry Association,wikipedia
+Food and Drink Federation,wikipedia
+Fuels Industry UK,wikipedia
+Furniture & Home Improvement Ombudsman,wikipedia
+Institute of Directors (IoD),wikipedia
+Make UK (previously EEF),wikipedia
+Mineral Products Association,wikipedia
+National Association of Care Catering,wikipedia
+National Association of Cider Makers,wikipedia
+National Federation of Fish Friers,wikipedia
+National Federation of Fishermen's Organisations,wikipedia
+Oil & Gas UK (OGUK),wikipedia
+The Publishers Association,wikipedia
+RenewableUK,wikipedia
+TechUK,wikipedia
+UK Cleaning Products Industry Association,wikipedia
+UK Finance,wikipedia
+UK Petroleum Industry Association,wikipedia
+UK Screen Alliance,wikipedia
+UK Theatre,wikipedia
+Ukactive,wikipedia
+National Access and Scaffolding Confederation,wikipedia
+National Association of British Manufacturers,wikipedia
+National Federation of Builders,wikipedia
+National Federation of Demolition Contractors,wikipedia
+National House Building Council,wikipedia
+National Union of Scalemakers,wikipedia
+NRG Networks,wikipedia
