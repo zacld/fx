@@ -1,34 +1,36 @@
 sector_name,source
 "Growing of cereals (except rice), leguminous crops and oil seeds (SIC 1110)",ons_sic
-Growing of rice (SIC 1120),ons_sic
-Growing of sugar cane (SIC 1140),ons_sic
-Growing of tobacco (SIC 1150),ons_sic
+"Growing of vegetables and melons, roots and tubers (SIC 1130)",ons_sic
 Growing of fibre crops (SIC 1160),ons_sic
+Growing of other non-perennial crops (SIC 1190),ons_sic
 Growing of grapes (SIC 1210),ons_sic
-Growing of tropical and subtropical fruits (SIC 1220),ons_sic
-Growing of citrus fruits (SIC 1230),ons_sic
 Growing of pome fruits and stone fruits (SIC 1240),ons_sic
 Growing of other tree and bush fruits and nuts (SIC 1250),ons_sic
-Growing of oleaginous fruits (SIC 1260),ons_sic
-Growing of beverage crops (SIC 1270),ons_sic
 "Growing of spices, aromatic, drug and pharmaceutical crops (SIC 1280)",ons_sic
 Growing of other perennial crops (SIC 1290),ons_sic
 Plant propagation (SIC 1300),ons_sic
 Raising of dairy cattle (SIC 1410),ons_sic
 Raising of other cattle and buffaloes (SIC 1420),ons_sic
 Raising of horses and other equines (SIC 1430),ons_sic
-Raising of camels and camelids (SIC 1440),ons_sic
 Raising of sheep and goats (SIC 1450),ons_sic
 Raising of swine/pigs (SIC 1460),ons_sic
+Raising of poultry (SIC 1470),ons_sic
+Raising of other animals (SIC 1490),ons_sic
+Mixed farming (SIC 1500),ons_sic
+Post-harvest crop activities (SIC 1630),ons_sic
 Seed processing for propagation (SIC 1640),ons_sic
+Silviculture and other forestry activities (SIC 2100),ons_sic
+Logging (SIC 2200),ons_sic
 Marine fishing (SIC 3110),ons_sic
 Marine aquaculture (SIC 3210),ons_sic
+Deep coal mines (SIC 5101),ons_sic
+Open cast coal working (SIC 5102),ons_sic
+Mining of lignite (SIC 5200),ons_sic
 Extraction of crude petroleum (SIC 6100),ons_sic
 Extraction of natural gas (SIC 6200),ons_sic
 Mining of iron ores (SIC 7100),ons_sic
 Mining of uranium and thorium ores (SIC 7210),ons_sic
 Mining of other non-ferrous metal ores (SIC 7290),ons_sic
-Operation of gravel and sand pits; mining of clays and kaolin (SIC 8120),ons_sic
 Mining of chemical and fertilizer minerals (SIC 8910),ons_sic
 Extraction of salt (SIC 8930),ons_sic
 Other mining and quarrying n.e.c. (SIC 8990),ons_sic
@@ -72,7 +74,6 @@ Manufacture of soft drinks; production of mineral waters and other bottled water
 Manufacture of tobacco products (SIC 12000),ons_sic
 Preparation and spinning of textile fibres (SIC 13100),ons_sic
 Weaving of textiles (SIC 13200),ons_sic
-Finishing of textiles (SIC 13300),ons_sic
 Manufacture of household textiles (SIC 13923),ons_sic
 Manufacture of woven or tufted carpets and rugs (SIC 13931),ons_sic
 Manufacture of other carpets and rugs (SIC 13939),ons_sic
@@ -138,7 +139,6 @@ Manufacture of other rubber products (SIC 22190),ons_sic
 Manufacture of plastic packing goods (SIC 22220),ons_sic
 Manufacture of builders ware of plastic (SIC 22230),ons_sic
 Manufacture of other plastic products (SIC 22290),ons_sic
-Manufacture of flat glass (SIC 23110),ons_sic
 "Manufacture and processing of other glass, including technical glassware (SIC 23190)",ons_sic
 Manufacture of refractory products (SIC 23200),ons_sic
 Manufacture of ceramic tiles and flags (SIC 23310),ons_sic
@@ -199,7 +199,6 @@ Manufacture of magnetic and optical media (SIC 26800),ons_sic
 "Manufacture of electric motors, generators and transformers (SIC 27110)",ons_sic
 Manufacture of electricity distribution and control apparatus (SIC 27120),ons_sic
 Manufacture of batteries and accumulators (SIC 27200),ons_sic
-Manufacture of fibre optic cables (SIC 27310),ons_sic
 Manufacture of electric domestic appliances (SIC 27510),ons_sic
 Manufacture of non-electric domestic appliances (SIC 27520),ons_sic
 Manufacture of other electrical equipment (SIC 27900),ons_sic
@@ -348,15 +347,21 @@ Retail sale of music and video recordings in specialised stores (SIC 47630),ons_
 Retail sale of games and toys in specialised stores (SIC 47650),ons_sic
 Retail sale of clothing in specialised stores (SIC 47710),ons_sic
 Retail sale of footwear in specialised stores (SIC 47721),ons_sic
-Retail sale of automotive fuel in specialised stores (SIC 47300),ons_sic
+Retail sale of leather goods in specialised stores (SIC 47722),ons_sic
+Retail sale of hearing aids (SIC 47741),ons_sic
+Retail sale of medical and orthopaedic goods in specialised stores (not incl. hearing aids) n.e.c. (SIC 47749),ons_sic
+Retail sale of cosmetic and toilet articles in specialised stores (SIC 47750),ons_sic
+"Retail sale of flowers, plants, seeds, fertilizers, pet animals and pet food in specialised stores (SIC 47760)",ons_sic
 Retail sale in commercial art galleries (SIC 47781),ons_sic
+Retail sale by opticians (SIC 47782),ons_sic
+Other retail sale of new goods in specialised stores (not commercial art galleries and opticians) (SIC 47789),ons_sic
 Retail sale of antiques including antique books in stores (SIC 47791),ons_sic
 Retail sale via mail order houses or via Internet (SIC 47910),ons_sic
-"Passenger rail transport, interurban (SIC 49100)",ons_sic
 Freight rail transport (SIC 49200),ons_sic
 Other passenger land transport (SIC 49390),ons_sic
 Freight transport by road (SIC 49410),ons_sic
 Removal services (SIC 49420),ons_sic
+Transport via pipeline (SIC 49500),ons_sic
 Sea and coastal passenger water transport (SIC 50100),ons_sic
 Sea and coastal freight water transport (SIC 50200),ons_sic
 Scheduled passenger air transport (SIC 51101),ons_sic
@@ -393,7 +398,6 @@ Motion picture distribution activities (SIC 59131),ons_sic
 Video distribution activities (SIC 59132),ons_sic
 Television programme distribution activities (SIC 59133),ons_sic
 Sound recording and music publishing activities (SIC 59200),ons_sic
-Television programming and broadcasting activities (SIC 60200),ons_sic
 Wired telecommunications activities (SIC 61100),ons_sic
 Wireless telecommunications activities (SIC 61200),ons_sic
 Satellite telecommunications activities (SIC 61300),ons_sic
@@ -411,6 +415,10 @@ Central banking (SIC 64110),ons_sic
 Banks (SIC 64191),ons_sic
 Activities of agricultural holding companies (SIC 64201),ons_sic
 Activities of production holding companies (SIC 64202),ons_sic
+Activities of construction holding companies (SIC 64203),ons_sic
+Activities of distribution holding companies (SIC 64204),ons_sic
+Activities of financial services holding companies (SIC 64205),ons_sic
+Activities of other holding companies n.e.c. (SIC 64209),ons_sic
 Activities of open-ended investment companies (SIC 64304),ons_sic
 Financial leasing (SIC 64910),ons_sic
 Other credit granting n.e.c. (SIC 64929),ons_sic
@@ -424,7 +432,6 @@ Non-life reinsurance (SIC 65202),ons_sic
 Pension funding (SIC 65300),ons_sic
 Security and commodity contracts dealing activities (SIC 66120),ons_sic
 Fund management activities (SIC 66300),ons_sic
-Management of real estate on a fee or contract basis (SIC 68320),ons_sic
 Barristers at law (SIC 69101),ons_sic
 Solicitors (SIC 69102),ons_sic
 Activities of patent and copyright agents; other legal activities n.e.c. (SIC 69109),ons_sic
@@ -441,6 +448,11 @@ Engineering related scientific and technical consulting activities (SIC 71122),o
 Other engineering activities (SIC 71129),ons_sic
 Technical testing and analysis (SIC 71200),ons_sic
 Research and experimental development on biotechnology (SIC 72110),ons_sic
+Other research and experimental development on natural sciences and engineering (SIC 72190),ons_sic
+Research and experimental development on social sciences and humanities (SIC 72200),ons_sic
+Advertising agencies (SIC 73110),ons_sic
+Media representation services (SIC 73120),ons_sic
+Real estate agencies (SIC 68310),ons_sic
 specialised design activities (SIC 74100),ons_sic
 Other specialist photography (SIC 74202),ons_sic
 Film processing (SIC 74203),ons_sic
@@ -544,7 +556,6 @@ Cinema Exhibitors' Association,wikipedia
 Confederation of Forest Industries,wikipedia
 Confederation of UK Coal Producers,wikipedia
 Construction Products Association,wikipedia
-Electrical Contractors' Association of Scotland,wikipedia
 Federation of Environmental Trade Associations,wikipedia
 Federation of Manufacturing Opticians,wikipedia
 Finance and Leasing Association,wikipedia
@@ -565,11 +576,12 @@ RenewableUK,wikipedia
 TechUK,wikipedia
 UK Finance,wikipedia
 National Association of British Manufacturers,wikipedia
+National Union of Scalemakers,wikipedia
+NRG Networks,wikipedia
 Nuclear Institute,wikipedia
 Open to Export,wikipedia
 Palestine British Business Council,wikipedia
 RenewableUK Cymru,wikipedia
-Royal Society of Ulster Architects,wikipedia
 Society of British and International Interior Design,wikipedia
 Society of Trust and Estate Practitioners,wikipedia
 Timber Trade Federation,wikipedia
