@@ -4,22 +4,28 @@ Stage 3 — clean TAF entries, then run the structural-necessity second filter.
 
 Step A: strip embedded URLs and phone numbers from TAF sector names.
 
-Step B: for each sector, ask Gemini whether the business model STRUCTURALLY
-REQUIRES crossing a currency boundary — meaning there is a specific, nameable
-reason no domestic-currency alternative exists.
+Step B: for each sector, ask Gemini (with worked reject examples) whether the
+business model STRUCTURALLY REQUIRES crossing a currency boundary.  The output
+format is extended to include the gate letter: <pos>|<gate>|<mechanism>|<reason>
+
+Step C: for any sector that passed on Gate D ("structural supply-chain absence"),
+run a web-search verification via Gemini with Google Search grounding.  If any
+UK manufacturer of the claimed input is found, the D claim is automatically
+rejected regardless of the model's initial reasoning.  Gate A and C claims are
+not searched (they are market-structure claims, not UK-manufacturing claims).
 
 Acceptable structural reasons:
   A. Global pricing convention (e.g. commodities priced in USD by market standard)
   B. Genuine single-source-of-supply (input only manufactured abroad, not just
      "commonly sourced" internationally)
   C. Regulatory or contractual requirement mandating foreign currency settlement
-  D. Structural absence of any UK-based supply-chain equivalent
+  D. Structural absence of any UK-based supply-chain equivalent — verified by
+     web search to have no UK manufacturer before row is accepted
 
-"Often imports / frequently sources / commonly purchases" is NOT a structural
-reason — if that is the only justification, the answer is NO.
+Output format per passing sector (one line, internal):
+  <position>|<gate>|<mechanism>|<structural_reason>
 
-Output format per passing sector (one line):
-  <position>|<mechanism>|<structural_reason>
+Final CSV/JSON output: sector_name, mechanism, filter_reason  (gate not stored)
 
 Input:  niches_generated.csv
 Output: niches_final.csv   columns: sector_name, mechanism, filter_reason
@@ -76,9 +82,9 @@ ACCEPTABLE structural reasons (one must clearly apply):
      unavailable domestically
   C. Regulatory or contractual requirement mandating foreign currency \
      settlement
-  D. Structural supply-chain absence — the entire input category does not \
-     exist in the UK (e.g. certain rare earths, specific pharmaceutical APIs \
-     with no UK producer)
+  D. Structural supply-chain absence — the ENTIRE input category does not \
+     exist in the UK — you must name a SPECIFIC input and be CERTAIN no UK \
+     manufacturer produces it; if there is any doubt, answer NO
 
 REJECT AT GATE 3 if:
   - The only justification is "often imports", "frequently sources", \
@@ -87,11 +93,64 @@ REJECT AT GATE 3 if:
     not necessity)
   - The sector's FX exposure is through buying goods that HAPPEN to be \
     available from abroad rather than being unavailable domestically
+  - For reason D: if you are not certain no UK manufacturer exists, reject
+
+─────────────────────────────────────────────────────────────────────────────
+WORKED REJECT EXAMPLES — calibration from verified false positives.
+If your reasoning resembles one of these, apply the same rejection.
+
+REJECT at Gate 2 — FX absorbed upstream by UK distributor:
+  • "Repair of consumer electronics" — repair shops buy spare parts from UK \
+    electronics distributors priced in GBP. The repair shop FD has no foreign \
+    currency line. FAIL Gate 2.
+  • "Retail sale of sports goods" — independent sports retailers buy branded \
+    goods from UK wholesale distributors (Shimano UK, Specialized UK, Trek UK) \
+    who price in GBP. FX is absorbed upstream before it reaches the retailer. \
+    FAIL Gate 2.
+  • "Retail sale by opticians" — UK optical frame distributors (Safilo UK, \
+    Silhouette UK) price frames in GBP to optical practices. The optician's FD \
+    does not see a EUR invoice. FAIL Gate 2.
+  • "Manufacture of power-driven hand tools" — UK hand-tool brands (Stanley, \
+    Draper) source finished goods from overseas factories but sell through UK \
+    trade distributors who absorb the FX. The brand FD does not personally \
+    manage the USD invoice if sourcing is via a UK buying agent. FAIL Gate 2.
+
+REJECT at Gate 3, reason D — a UK manufacturer exists and invalidates the claim:
+  • "OFTEC" — claimed no UK oil boiler manufacturer. WRONG: Worcester Bosch \
+    manufactures oil-fired boilers at their facility in Worcester, UK. FAIL D.
+  • "British Constructional Steelwork Association" — claimed constructional \
+    steel not made in UK. WRONG: Tata Steel UK manufactures structural steel \
+    sections at Scunthorpe and Port Talbot. FAIL D.
+  • "Film processing (SIC 74203)" — claimed photographic film only made abroad. \
+    WRONG: ILFORD Photo manufactures photographic film and darkroom chemicals \
+    in Mobberley, Cheshire, UK. FAIL D.
+  • "Manufacture of bearings (SIC 28150)" — claimed high-grade bearing steels \
+    only from Japan. WRONG: RHP Bearings (owned by NSK) manufactures bearings \
+    in Newark, UK. FAIL D.
+
+REJECT at Gate 3, reason B — UK domestic source exists:
+  • "Growing of other perennial crops (SIC 1290)" — claimed hop rhizomes only \
+    outside UK. WRONG: hops are grown commercially in Herefordshire and \
+    Worcestershire, UK. FAIL B.
+  • "Wholesale of live animals (SIC 46230)" — claimed specific pedigree breeds \
+    only from abroad. WRONG: UK has registered pedigree cattle and sheep breeds \
+    (Hereford, Aberdeen Angus, Suffolk) available domestically. FAIL B.
+
+REJECT at Gate 3 — "often/commonly/tend to" language:
+  • "Retail sale of antiques" — reason stated "often only available from \
+    international sellers." The word "often" signals preference, not structural \
+    necessity. FAIL Gate 3.
+
+REJECT at Gate 1 — not a private trading company, fewer than 20 UK SMEs:
+  • "Internet Advertising Bureau" — this is a trade association. The association \
+    itself does not buy advertising placements. FAIL Gate 1.
+─────────────────────────────────────────────────────────────────────────────
 
 For each sector passing ALL THREE gates, output exactly one line:
-<number>|<mechanism>|<reason>
+<number>|<gate>|<mechanism>|<reason>
 
   <number>    = 1-based position in the input list
+  <gate>      = A, B, C, or D — the single letter of the applicable structural reason
   <mechanism> = 4-7 words describing the specific FX payment flow, ending \
                 with a full stop \
                 (e.g. "Pays USD to LME commodity exchanges." or \
@@ -134,6 +193,80 @@ def gemini(prompt: str) -> str:
     return ""
 
 
+def gemini_with_search(prompt: str) -> tuple[str, list[str]]:
+    """Call Gemini with Google Search grounding. Returns (response_text, search_queries_used)."""
+    body = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}],
+        "tools": [{"google_search": {}}],
+        "generationConfig": {"temperature": 0.0, "maxOutputTokens": 300},
+    }).encode()
+    url = f"{GEMINI_URL}?key={GEMINI_KEY}"
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                resp = json.loads(r.read())
+                candidate = resp["candidates"][0]
+                parts = candidate["content"]["parts"]
+                text = "".join(p.get("text", "") for p in parts)
+                metadata = candidate.get("groundingMetadata", {})
+                queries = metadata.get("webSearchQueries", [])
+                return text.strip(), queries
+        except urllib.error.HTTPError as e:
+            err = e.read().decode(errors="replace")
+            print(f"  SEARCH HTTP {e.code} (attempt {attempt+1}): {err[:120]}", file=sys.stderr)
+            wait = 15 * (attempt + 1) if e.code == 429 else 3
+            time.sleep(wait)
+        except Exception as e:
+            print(f"  SEARCH Error (attempt {attempt+1}): {e}", file=sys.stderr)
+            time.sleep(4)
+    return "", []
+
+
+def verify_d_claim(sector_name: str, reason: str) -> tuple[bool, str, str]:
+    """
+    Verify a Gate D claim using Gemini with Google Search grounding.
+    D asserts the entire input category does not exist in the UK.
+    We search for any evidence of a UK manufacturer.
+
+    Returns: (claim_holds, search_query_used, verdict_line)
+      True  = no UK producer found — D claim stands — keep row
+      False = UK producer found   — D claim refuted — reject row
+
+    On search failure, returns True (conservative: don't auto-reject).
+    """
+    prompt = f"""Sector: {sector_name}
+Gate D claim to verify: {reason}
+
+Search the web: does any UK-based company currently manufacture or produce \
+the specific material, component, or product described in the claim above?
+
+If you find a UK-based manufacturer or producer, write exactly one line:
+UK_FOUND: [company name] in [UK location] makes [specific item]
+
+If after searching you confirm no UK-based manufacturer exists, write exactly one line:
+NO_UK_PRODUCER: [item searched for]
+
+Output exactly one line. No other text."""
+
+    text, queries = gemini_with_search(prompt)
+    text = text.strip()
+    # Take first non-empty line only
+    for line in text.splitlines():
+        line = line.strip()
+        if line:
+            text = line
+            break
+
+    query_used = queries[0] if queries else "(no query logged)"
+
+    if text.upper().startswith("UK_FOUND"):
+        return False, query_used, text
+    else:
+        return True, query_used, text
+
+
 def clean_taf_name(name: str) -> str:
     """Strip URLs, phone numbers, and stray digits from TAF sector names."""
     name = re.sub(r'https?://\S+', '', name)
@@ -149,11 +282,13 @@ def ends_properly(s: str) -> bool:
     return bool(s) and s.rstrip()[-1] in '.!?'
 
 
-def parse_response(text: str, batch: list[tuple[str, str]]) -> tuple[list[tuple[str, str, str]], list[str]]:
+def parse_response(
+    text: str, batch: list[tuple[str, str]]
+) -> tuple[list[tuple[str, str, str, str]], list[str]]:
     """
-    Parse pipe-delimited lines: <pos>|<mechanism>|<reason>
+    Parse pipe-delimited lines: <pos>|<gate>|<mechanism>|<reason>
     Returns (results, warnings).
-      results  — list of (sector_name, mechanism, filter_reason)
+      results  — list of (sector_name, gate, mechanism, filter_reason)
       warnings — list of truncation/quality warnings
     """
     results = []
@@ -162,8 +297,8 @@ def parse_response(text: str, batch: list[tuple[str, str]]) -> tuple[list[tuple[
         line = line.strip()
         if not line or line.startswith('#'):
             continue
-        parts = line.split('|', 2)
-        if len(parts) < 3:
+        parts = line.split('|', 3)
+        if len(parts) < 4:
             continue
         try:
             pos = int(parts[0].strip())
@@ -171,15 +306,16 @@ def parse_response(text: str, batch: list[tuple[str, str]]) -> tuple[list[tuple[
             continue
         if not (1 <= pos <= len(batch)):
             continue
-        mechanism = parts[1].strip()
-        reason = parts[2].strip()
+        gate = parts[1].strip().upper()
+        if gate not in ('A', 'B', 'C', 'D'):
+            continue
+        mechanism = parts[2].strip()
+        reason = parts[3].strip()
         if not mechanism or not reason:
             continue
 
         sector_name = batch[pos - 1][0]
 
-        # Auto-append period to mechanism if it's a complete phrase missing one.
-        # If it ends mid-word or in a comma, that's genuine truncation — warn but don't patch.
         if mechanism and not ends_properly(mechanism):
             if mechanism[-1].isalpha() or mechanism[-1] in ')%':
                 warnings.append(
@@ -196,7 +332,7 @@ def parse_response(text: str, batch: list[tuple[str, str]]) -> tuple[list[tuple[
                 f"TRUNCATED reason for '{sector_name}': does not end in punctuation — '{reason}'"
             )
 
-        results.append((sector_name, mechanism, reason))
+        results.append((sector_name, gate, mechanism, reason))
 
     return results, warnings
 
@@ -220,10 +356,11 @@ def main():
 
     print(f"Stage 3 — second filter: {len(sectors)} sectors in batches of {BATCH}")
 
-    final_rows: list[tuple[str, str, str]] = []
+    classified_rows: list[tuple[str, str, str, str]] = []  # (name, gate, mech, reason)
     all_warnings: list[str] = []
     total_batches = (len(sectors) + BATCH - 1) // BATCH
 
+    # ── Phase 1: batch classification ─────────────────────────────────────────
     for b in range(total_batches):
         batch = sectors[b * BATCH : (b + 1) * BATCH]
         numbered = "\n".join(f"{i+1}. {name}" for i, (name, _) in enumerate(batch))
@@ -237,11 +374,54 @@ def main():
                 print(f"  WARN: {w}", file=sys.stderr)
             all_warnings.extend(warnings)
 
-        print(f"  Batch {b+1}/{total_batches}: {len(results)}/{len(batch)} passed")
-        final_rows.extend(results)
+        print(f"  Batch {b+1}/{total_batches}: {len(results)}/{len(batch)} passed classification")
+        classified_rows.extend(results)
         time.sleep(0.4)
 
-    # ── Truncation validation ────────────────────────────────────────────────
+    d_rows = [(n, g, m, r) for n, g, m, r in classified_rows if g == 'D']
+    non_d_rows = [(n, g, m, r) for n, g, m, r in classified_rows if g != 'D']
+    print(f"\nClassification complete: {len(classified_rows)} passed "
+          f"({len(non_d_rows)} via A/B/C, {len(d_rows)} via D pending verification)")
+
+    # ── Phase 2: Gate D web-search verification ────────────────────────────────
+    print(f"\n--- GATE D VERIFICATION ({len(d_rows)} searches) ---")
+    search_log: list[tuple[str, str, str, bool]] = []  # (name, query, verdict, passed)
+    verified_d_rows: list[tuple[str, str, str, str]] = []
+
+    first_proof_printed = False
+
+    for name, gate, mech, reason in d_rows:
+        claim_holds, query, verdict = verify_d_claim(name, reason)
+        search_log.append((name, query, verdict, claim_holds))
+
+        if not first_proof_printed:
+            print(f"\n  [FIRST SEARCH — PROOF OF FIRING]")
+            print(f"  Sector : {name}")
+            print(f"  Query  : {query}")
+            print(f"  Verdict: {verdict}")
+            first_proof_printed = True
+
+        status = "D-PASS" if claim_holds else "D-FAIL"
+        print(f"  {status}: {name}")
+        if not claim_holds:
+            print(f"    → {verdict}")
+
+        if claim_holds:
+            verified_d_rows.append((name, gate, mech, reason))
+        time.sleep(0.5)
+
+    # Combine verified rows (A/B/C + verified D), preserving original order
+    name_to_verified = {n: (n, g, m, r) for n, g, m, r in non_d_rows + verified_d_rows}
+    final_classified = [name_to_verified[n] for n, _, _, _ in classified_rows if n in name_to_verified]
+
+    # Strip gate letter for final output
+    final_rows: list[tuple[str, str, str]] = [(n, m, r) for n, _, m, r in final_classified]
+
+    d_passed = sum(1 for _, _, _, p in search_log if p)
+    d_failed = len(d_rows) - d_passed
+    print(f"\nGate D: {len(d_rows)} verified — {d_passed} held, {d_failed} rejected by search")
+
+    # ── Truncation validation ──────────────────────────────────────────────────
     print("\n--- TRUNCATION VALIDATION ---")
     truncated = [
         (name, mech, reason)
@@ -258,7 +438,7 @@ def main():
     else:
         print(f"  OK — all {len(final_rows)} rows end in proper punctuation.")
 
-    # ── Wikipedia spot-check ─────────────────────────────────────────────────
+    # ── Wikipedia spot-check ───────────────────────────────────────────────────
     wiki_rows = [
         (name, mech, reason)
         for name, mech, reason in final_rows
@@ -273,13 +453,13 @@ def main():
     else:
         print("\n--- WIKIPEDIA SPOT-CHECK: 0 Wikipedia rows passed ---")
 
-    # ── Write CSV ─────────────────────────────────────────────────────────────
+    # ── Write CSV ──────────────────────────────────────────────────────────────
     with open(OUT, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["sector_name", "mechanism", "filter_reason"])
         w.writerows(final_rows)
 
-    # ── Build source lookup ───────────────────────────────────────────────────
+    # ── Build JSON for dashboard ───────────────────────────────────────────────
     source_map: dict[str, str] = {}
     try:
         with open(IN, newline="", encoding="utf-8") as f:
@@ -337,13 +517,22 @@ def main():
     print(f"Dashboard data: {json_path}")
 
     if all_warnings:
-        print(f"\n*** {len(all_warnings)} truncation warning(s) fired during generation — see WARN lines ***")
+        print(f"\n*** {len(all_warnings)} truncation warning(s) fired — see WARN lines ***")
     else:
         print("\n*** No truncation warnings during generation ***")
 
     print("\n--- ALL ROWS (raw) ---")
     for row in final_rows:
         print(f"  {row[0]} | {row[1]} | {row[2]}")
+
+    # ── Full Gate D search log ─────────────────────────────────────────────────
+    if search_log:
+        print(f"\n--- GATE D SEARCH LOG ({len(search_log)} searches) ---")
+        for name, query, verdict, passed in search_log:
+            status = "PASS" if passed else "FAIL"
+            print(f"  [{status}] {name}")
+            print(f"    Query  : {query}")
+            print(f"    Verdict: {verdict}")
 
 
 if __name__ == "__main__":
