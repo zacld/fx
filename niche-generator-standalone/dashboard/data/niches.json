@@ -1,1625 +1,757 @@
 {
   "meta": {
-    "generated_at": "2026-06-19T13:38:03Z",
+    "generated_at": "2026-06-19T14:42:55Z",
     "sectors_raw": 852,
     "first_filter": 591,
-    "final": 231
+    "final": 107
   },
   "niches": [
     {
-      "sector_name": "Growing of other non-perennial crops (SIC 1190)",
-      "mechanism": "Pays EUR for specialist flower bulbs and young plants.",
-      "filter_reason": "Genuine single-source-of-supply for specific flower bulbs and young plants, which are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
       "sector_name": "Growing of grapes (SIC 1210)",
-      "mechanism": "Pays EUR for specialist grape vines and rootstocks.",
-      "filter_reason": "Genuine single-source-of-supply for specific grape vine clones and rootstocks, which are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Growing of pome fruits and stone fruits (SIC 1240)",
-      "mechanism": "Pays EUR for specialist fruit tree saplings and rootstocks.",
-      "filter_reason": "Genuine single-source-of-supply for specific fruit tree varieties and rootstocks, which are only produced outside the UK with no domestic equivalent whatsoever.",
+      "mechanism": "Pays EUR to specialist EU grapevine nurseries.",
+      "filter_reason": "Specific certified wine grape clones and rootstocks are genuinely only produced by specialist nurseries outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Growing of other tree and bush fruits and nuts (SIC 1250)",
-      "mechanism": "Pays EUR for specialist berry and nut plant stock.",
-      "filter_reason": "Genuine single-source-of-supply for specific berry and nut plant stock, which is only produced outside the UK with no domestic equivalent whatsoever.",
+      "mechanism": "Pays EUR to specialist EU berry plant nurseries.",
+      "filter_reason": "Specific certified disease-free berry plant varieties are genuinely only produced by specialist nurseries outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Growing of other perennial crops (SIC 1290)",
-      "mechanism": "Pays EUR/USD for specialist hop rhizomes.",
-      "filter_reason": "Genuine single-source-of-supply for specific hop varieties and rhizomes, which are only produced outside the UK with no domestic equivalent whatsoever.",
+      "mechanism": "Pays DKK or EUR to specialist EU Christmas tree nurseries.",
+      "filter_reason": "Specific provenances of Nordmann Fir Christmas tree seedlings are genuinely only produced by specialist nurseries outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Plant propagation (SIC 1300)",
-      "mechanism": "Pays EUR/USD for specialist parent plant stock and seeds.",
-      "filter_reason": "Genuine single-source-of-supply for specific parent plant stock and seeds, which are only produced outside the UK with no domestic equivalent whatsoever.",
+      "mechanism": "Pays EUR or USD for proprietary plant parent stock.",
+      "filter_reason": "Specific patented or proprietary plant varieties as parent stock or seeds are genuinely only produced by international breeders with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Raising of dairy cattle (SIC 1410)",
-      "mechanism": "Pays USD/EUR for specialist dairy breeding genetics.",
-      "filter_reason": "Genuine single-source-of-supply for specific high-genetic-merit dairy breeding genetics, which are only produced outside the UK with no domestic equivalent whatsoever.",
+      "mechanism": "Pays USD or EUR for high-genetic-merit dairy semen.",
+      "filter_reason": "Specific high-genetic-merit dairy semen from top-performing bulls is genuinely only produced by specialist breeding companies outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Raising of other cattle and buffaloes (SIC 1420)",
-      "mechanism": "Pays USD/EUR for specialist beef breeding genetics.",
-      "filter_reason": "Genuine single-source-of",
+      "sector_name": "Raising of horses and other equines (SIC 1430)",
+      "mechanism": "Pays EUR for high-genetic-merit equine semen or breeding stock.",
+      "filter_reason": "Specific high-genetic-merit equine semen or breeding stock is genuinely only produced by specialist breeding studs outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Processing and preserving of fish, crustaceans and molluscs (SIC 10200)",
-      "mechanism": "Pays EUR/USD for imported fish and shellfish.",
-      "filter_reason": "Genuine single-source-of-supply applies because many specific species of fish, crustaceans, and molluscs are not available from UK waters.",
+      "sector_name": "Raising of swine/pigs (SIC 1460)",
+      "mechanism": "Pays USD or EUR for high-genetic-merit pig semen or breeding stock.",
+      "filter_reason": "Specific high-genetic-merit pig semen or breeding stock is genuinely only produced by specialist international breeding companies with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Manufacture of fruit and vegetable juice (SIC 10320)",
-      "mechanism": "Pays EUR/USD for imported fruit concentrates.",
-      "filter_reason": "Genuine single-source-of-supply applies because many specific fruit concentrates, such as orange or pineapple, are not produced in the UK.",
+      "sector_name": "Support activities for petroleum and natural gas mining (SIC 9100)",
+      "mechanism": "Receives USD from international oil and gas clients.",
+      "filter_reason": "The global oil and gas industry uses USD as the standard pricing and settlement currency for services.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Production of meat and poultry meat products (SIC 10130)",
+      "mechanism": "Pays USD/EUR for imported spices.",
+      "filter_reason": "Specific spices essential for meat product manufacturing are only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Other processing and preserving of fruit and vegetables (SIC 10390)",
-      "mechanism": "Pays EUR/USD for imported fruit and vegetables.",
-      "filter_reason": "Genuine single-source-of-supply applies because many specific fruits and vegetables, such as tinned tomatoes or exotic fruits, are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of oils and fats (SIC 10410)",
-      "mechanism": "Pays USD/EUR for imported crude oils.",
-      "filter_reason": "Genuine single-source-of-supply applies because raw materials for oils like palm oil and olive oil are not grown in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of margarine and similar edible fats (SIC 10420)",
-      "mechanism": "Pays USD/EUR for imported vegetable oils.",
-      "filter_reason": "Genuine single-source-of-supply applies because raw materials for key vegetable oils used in margarine are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of ice cream (SIC 10520)",
-      "mechanism": "Pays USD/EUR for imported flavourings and cocoa.",
-      "filter_reason": "Genuine single-source-of-supply applies because key flavourings like vanilla and cocoa are derived from raw materials not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of breakfast cereals and cereals-based food (SIC 10612)",
-      "mechanism": "Pays USD/EUR for imported grains, fruits, and nuts.",
-      "filter_reason": "Genuine single-source-of-supply applies because certain grains like corn, and specific dried fruits and nuts, are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of starches and starch products (SIC 10620)",
-      "mechanism": "Pays USD for imported corn (maize).",
-      "filter_reason": "Genuine single-source-of-supply applies because corn, a primary raw material for corn starch, is not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of cocoa and chocolate confectionery (SIC 10821)",
-      "mechanism": "Pays USD/EUR for imported cocoa beans.",
-      "filter_reason": "Genuine single-source-of-supply applies because cocoa beans, the primary raw material, are exclusively grown in tropical regions outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Tea processing (SIC 10831)",
-      "mechanism": "Pays USD/EUR for imported tea leaves.",
-      "filter_reason": "Genuine single-source-of-supply applies because tea leaves, the primary raw material, are exclusively grown in specific tropical and subtropical regions outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Production of coffee and coffee substitutes (SIC 10832)",
-      "mechanism": "Pays USD/EUR for imported green coffee beans.",
-      "filter_reason": "Genuine single-source-of-supply applies because green coffee beans, the primary raw material, are exclusively grown in specific tropical and subtropical regions outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of condiments and seasonings (SIC 10840)",
-      "mechanism": "Pays USD/EUR for imported spices and ingredients.",
-      "filter_reason": "Genuine single-source-of-supply applies because many specific spices and exotic ingredients are not grown in the UK.",
+      "sector_name": "Manufacture of prepared meals and dishes (SIC 10850)",
+      "mechanism": "Pays USD/EUR for cocoa beans.",
+      "filter_reason": "Cocoa beans are a specific input only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of prepared feeds for farm animals (SIC 10910)",
-      "mechanism": "Pays USD for imported soy meal and other feed ingredients.",
-      "filter_reason": "Soybeans and soy meal, critical protein inputs, are globally traded commodities primarily sourced from outside the UK and priced in foreign currencies.",
+      "mechanism": "Pays USD for bulk soya meal.",
+      "filter_reason": "Soya meal is a core input priced in USD by global market standard with no GBP equivalent.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of prepared pet foods (SIC 10920)",
-      "mechanism": "Pays USD/EUR for imported protein meals and specialised additives.",
-      "filter_reason": "Specific protein sources, grains, and specialised additives are globally traded commodities or inputs not produced domestically in sufficient quantities.",
+      "mechanism": "Pays USD for bulk fish meal.",
+      "filter_reason": "Fish meal is a core input priced in USD by global market standard with no GBP equivalent.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Distilling, rectifying and blending of spirits (SIC 11010)",
-      "mechanism": "Pays USD/EUR for imported molasses, agave, or botanicals.",
-      "filter_reason": "Specific raw materials like molasses for rum, agave for tequila, or certain botanicals for gin are not produced in the UK.",
+      "mechanism": "Pays USD/EUR for bulk molasses.",
+      "filter_reason": "Molasses is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of other non-distilled fermented beverages (SIC 11040)",
+      "mechanism": "Pays JPY/USD for sake rice.",
+      "filter_reason": "Rice for sake production is a specific input category that does not exist in the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of beer (SIC 11050)",
-      "mechanism": "Pays USD/EUR for imported specialist hops and malts.",
-      "filter_reason": "Specific hop varieties and specialist malts, essential for distinct beer styles, are only produced outside the UK.",
+      "mechanism": "Pays USD/EUR for specific hop varieties.",
+      "filter_reason": "Specific hop varieties, such as Cascade or Hallertau, are only produced outside the UK with no domestic equivalent whatsoever.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of soft drinks; production of mineral waters and other bottled waters (SIC 11070)",
+      "mechanism": "Pays USD/EUR for orange juice concentrate.",
+      "filter_reason": "Orange juice concentrate is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Preparation and spinning of textile fibres (SIC 13100)",
-      "mechanism": "Pays USD/EUR for imported raw cotton and synthetic fibres.",
-      "filter_reason": "Raw materials like cotton and silk fibres are not produced in the UK and must be imported.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Weaving of textiles (SIC 13200)",
-      "mechanism": "Pays EUR/USD for imported specialist yarns and threads.",
-      "filter_reason": "Specialist yarns and threads, derived from fibres not produced in the UK, are only available from overseas suppliers.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of household textiles (SIC 13923)",
-      "mechanism": "Pays USD/EUR for imported cotton fabrics and yarns.",
-      "filter_reason": "Raw materials like cotton, essential for many household textiles, are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of woven or tufted carpets and rugs (SIC 13931)",
-      "mechanism": "Pays USD/EUR for imported jute and synthetic carpet yarns.",
-      "filter_reason": "Raw materials such as jute for carpet backings and specific synthetic fibres are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other carpets and rugs (SIC 13939)",
-      "mechanism": "Pays USD/EUR for imported jute and synthetic carpet yarns.",
-      "filter_reason": "Raw materials such as jute for carpet backings and specific synthetic fibres are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of cordage, rope, twine and netting (SIC 13940)",
-      "mechanism": "Pays USD/EUR for imported natural and synthetic fibres.",
-      "filter_reason": "Natural fibres like sisal, hemp, and coir, essential for cordage, are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of non-wovens and articles made from non-wovens, except apparel (SIC 13950)",
-      "mechanism": "Pays USD/EUR for imported synthetic and natural fibres.",
-      "filter_reason": "Specific synthetic fibres and natural fibres like cotton or rayon, essential for non-wovens, are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other technical and industrial textiles (SIC 13960)",
-      "mechanism": "Pays USD for raw cotton and specialised fibres.",
+      "mechanism": "Pays USD for raw cotton bales.",
       "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other textiles n.e.c. (SIC 13990)",
-      "mechanism": "Pays USD for raw cotton and specific dyes.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of workwear (SIC 14120)",
-      "mechanism": "Pays USD for raw cotton and synthetic fibres.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other men's outerwear (SIC 14131)",
-      "mechanism": "Pays USD for raw cotton and synthetic fibres.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other women's outerwear (SIC 14132)",
-      "mechanism": "Pays USD for raw cotton and synthetic fibres.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of men's underwear (SIC 14141)",
-      "mechanism": "Pays USD for raw cotton and synthetic fibres.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of women's underwear (SIC 14142)",
-      "mechanism": "Pays USD for raw cotton and synthetic fibres.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other wearing apparel and accessories n.e.c. (SIC 14190)",
-      "mechanism": "Pays USD for raw cotton and specific fibres.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of articles of fur (SIC 14200)",
-      "mechanism": "Pays EUR for raw furs and processed pelts.",
-      "filter_reason": "Specific types of raw fur are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of knitted and crocheted hosiery (SIC 14310)",
-      "mechanism": "Pays USD for raw cotton and synthetic yarns.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other knitted and crocheted apparel (SIC 14390)",
-      "mechanism": "Pays USD for raw cotton and synthetic yarns.",
-      "filter_reason": "Raw cotton is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Tanning and dressing of leather; dressing and dyeing of fur (SIC 15110)",
-      "mechanism": "Pays EUR for raw furs and specific chemicals.",
-      "filter_reason": "Specific types of raw fur are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of footwear (SIC 15200)",
-      "mechanism": "Pays USD for natural rubber and specific leathers.",
-      "filter_reason": "Natural rubber is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Sawmilling and planing of wood (SIC 16100)",
-      "mechanism": "Pays EUR for specific timber logs and hardwoods.",
-      "filter_reason": "Specific types of tropical hardwood are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of veneer sheets and wood-based panels (SIC 16210)",
-      "mechanism": "Pays EUR for specific timber logs and exotic veneers.",
-      "filter_reason": "Specific types of exotic timber are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other products of wood; manufacture of articles of cork, straw and plaiting materials (SIC 16290)",
-      "mechanism": "Pays EUR for raw cork and cork products.",
-      "filter_reason": "Raw cork is a specific input only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of paper and paperboard (SIC 17120)",
-      "mechanism": "Pays EUR for specific wood pulp and chemicals.",
-      "filter_reason": "Specific types of wood pulp are an entire input category that does not exist in the UK in sufficient quantities or specific qualities.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of corrugated paper and paperboard, sacks and bags (SIC 17211)",
-      "mechanism": "Pays EUR/USD for imported wood pulp.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of industrial-grade wood pulp to meet the manufacturing sector's demand.",
+      "mechanism": "Pays USD/EUR for imported virgin wood pulp.",
+      "filter_reason": "Virgin wood pulp, a primary input for paper and paperboard manufacturing, is a globally traded commodity priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of other paper and paperboard containers (SIC 17219)",
-      "mechanism": "Pays EUR/USD for imported paperboard.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of industrial-grade paperboard to meet the manufacturing sector's demand.",
+      "mechanism": "Pays USD/EUR for imported specialised paperboard.",
+      "filter_reason": "Specialised paperboard, a primary input for paper and paperboard containers, is a globally traded commodity priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of household and sanitary goods and of toilet requisites (SIC 17220)",
-      "mechanism": "Pays EUR/USD for imported wood pulp.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of industrial-grade wood pulp to meet the manufacturing sector's demand.",
+      "mechanism": "Pays USD/EUR for imported virgin wood pulp.",
+      "filter_reason": "Virgin wood pulp, a primary input for household and sanitary goods, is a globally traded commodity priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of paper stationery (SIC 17230)",
-      "mechanism": "Pays EUR/USD for imported paper stock.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of industrial-grade paper stock to meet the manufacturing sector's demand.",
+      "mechanism": "Pays EUR/USD for imported printing paper.",
+      "filter_reason": "Printing paper, a primary input for paper stationery, is a globally traded commodity priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of wallpaper (SIC 17240)",
-      "mechanism": "Pays EUR for imported wallpaper base paper.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of specialised wallpaper base paper to meet manufacturing demand.",
+      "mechanism": "Pays EUR for imported non-woven wallpaper substrates.",
+      "filter_reason": "Specialised non-woven wallpaper substrates, a primary input for wallpaper manufacturing, are globally traded commodities priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of other articles of paper and paperboard n.e.c. (SIC 17290)",
-      "mechanism": "Pays EUR/USD for imported paper and pulp.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of industrial-grade paper and pulp to meet the manufacturing sector's demand.",
+      "mechanism": "Pays EUR/USD for imported specialised paper grades.",
+      "filter_reason": "Specialised paper and paperboard grades, primary inputs for these articles, are globally traded commodities priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Printing of newspapers (SIC 18110)",
-      "mechanism": "Pays EUR/USD for imported newsprint.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of newsprint to meet the printing sector's demand.",
+      "mechanism": "Pays USD/EUR for imported newsprint paper.",
+      "filter_reason": "Newsprint paper, a primary input for newspaper printing, is a globally traded commodity priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of printed labels (SIC 18121)",
       "mechanism": "Pays EUR for imported specialised label stock.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of specialised label substrates to meet the manufacturing sector's demand.",
+      "filter_reason": "Specialised label stock, a primary input for printed labels, is a globally traded commodity priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Printing n.e.c. (SIC 18129)",
       "mechanism": "Pays EUR/USD for imported printing paper.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of industrial-grade printing paper to meet the printing sector's demand.",
+      "filter_reason": "Printing paper, a primary input for general commercial printing, is a globally traded commodity priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Reproduction of sound recording (SIC 18201)",
-      "mechanism": "Pays EUR/USD for imported polycarbonate granules.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of specialised polycarbonate granules for media reproduction.",
+      "mechanism": "Pays USD for imported polycarbonate granules.",
+      "filter_reason": "Polycarbonate granules, a primary input for CD manufacturing, are globally traded commodities priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Reproduction of video recording (SIC 18202)",
-      "mechanism": "Pays EUR/USD for imported polycarbonate granules.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of specialised polycarbonate granules for media reproduction.",
+      "mechanism": "Pays USD for imported polycarbonate granules.",
+      "filter_reason": "Polycarbonate granules, a primary input for DVD/Blu-ray manufacturing, are globally traded commodities priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Reproduction of computer media (SIC 18203)",
-      "mechanism": "Pays EUR/USD for imported polycarbonate granules.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of specialised polycarbonate granules for media reproduction.",
+      "mechanism": "Pays USD for imported polycarbonate granules.",
+      "filter_reason": "Polycarbonate granules, a primary input for computer media manufacturing, are globally traded commodities priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Other treatment of petroleum products (excluding petrochemicals manufacture) (SIC 19209)",
-      "mechanism": "Pays USD for imported base oils.",
-      "filter_reason": "A. Crude oil, the primary input for base oils and other petroleum products, is priced globally in USD by market standard.",
+      "mechanism": "Pays USD for imported base oils and additives.",
+      "filter_reason": "Base oils and petroleum additives, primary inputs for petroleum product treatment, are globally traded commodities priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of dyes and pigments (SIC 20120)",
       "mechanism": "Pays EUR/USD for imported chemical intermediates.",
-      "filter_reason": "D. The UK lacks sufficient domestic production of specific chemical intermediates required for dye and pigment manufacturing.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of synthetic rubber in primary forms (SIC 20170)",
-      "mechanism": "Pays USD for petrochemical monomer feedstocks.",
-      "filter_reason": "Global pricing convention dictates that key petrochemical monomers are priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of pesticides and other agrochemical products (SIC 20200)",
-      "mechanism": "Pays USD for active agrochemical ingredients.",
-      "filter_reason": "Structural supply-chain absence means specific active agrochemical ingredients are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of paints, varnishes and similar coatings, mastics and sealants (SIC 20301)",
-      "mechanism": "Pays USD for titanium dioxide pigments.",
-      "filter_reason": "Global pricing convention dictates that titanium dioxide is priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of printing ink (SIC 20302)",
-      "mechanism": "Pays USD for carbon black pigments.",
-      "filter_reason": "Global pricing convention dictates that carbon black is priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of soap and detergents (SIC 20411)",
-      "mechanism": "Pays USD for palm and coconut oils.",
-      "filter_reason": "Genuine single-source-of-supply means palm and coconut oils are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of perfumes and toilet preparations (SIC 20420)",
-      "mechanism": "Pays EUR for essential oils and compounds.",
-      "filter_reason": "Genuine single-source-of-supply means many essential oils are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of essential oils (SIC 20530)",
-      "mechanism": "Pays USD for raw plant materials.",
-      "filter_reason": "Genuine single-source-of-supply means many raw plant materials are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of pharmaceutical preparations (SIC 21200)",
-      "mechanism": "Pays USD for active pharmaceutical ingredients.",
-      "filter_reason": "Structural supply-chain absence means specific active pharmaceutical ingredients are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other rubber products (SIC 22190)",
-      "mechanism": "Pays USD for natural rubber and carbon black.",
-      "filter_reason": "Genuine single-source-of-supply means natural rubber is only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of plastic plates, sheets, tubes and profiles (SIC 22210)",
-      "mechanism": "Pays USD for primary plastic polymers.",
-      "filter_reason": "Global pricing convention dictates that primary plastic polymers are priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of plastic packing goods (SIC 22220)",
-      "mechanism": "Pays USD for primary plastic polymers.",
-      "filter_reason": "Global pricing convention dictates that primary plastic polymers are priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of builders ware of plastic (SIC 22230)",
-      "mechanism": "Pays USD for primary plastic polymers.",
-      "filter_reason": "Global pricing convention dictates that primary plastic",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture and processing of other glass, including technical glassware (SIC 23190)",
-      "mechanism": "Pays EUR for imported boron compounds.",
-      "filter_reason": "Structural supply-chain absence means boron compounds required for technical glass are not produced in the UK.",
+      "filter_reason": "Specialised chemical intermediates, primary inputs for dye and pigment manufacturing, are globally traded commodities priced in foreign currencies by international market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of refractory products (SIC 23200)",
-      "mechanism": "Pays USD for imported bauxite and magnesia.",
-      "filter_reason": "Genuine single-source-of-supply means essential raw materials like bauxite and magnesia are only produced outside the UK.",
+      "mechanism": "Pays USD/EUR for high-purity refractory minerals.",
+      "filter_reason": "High-purity alumina, magnesia, and chromite, essential raw materials for refractory products, are not mined or processed in the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of ceramic insulators and insulating fittings (SIC 23430)",
-      "mechanism": "Pays EUR for high-purity alumina powders.",
-      "filter_reason": "Structural supply-chain absence means high-purity alumina powders required for ceramic insulators are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other technical ceramic products (SIC 23440)",
-      "mechanism": "Pays USD for advanced ceramic powders.",
-      "filter_reason": "Structural supply-chain absence means advanced ceramic powders like zirconia and silicon nitride are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of fibre cement (SIC 23650)",
-      "mechanism": "Pays SEK for imported cellulose fibres.",
-      "filter_reason": "Structural supply-chain absence means specific grades of cellulose fibres required for fibre cement are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Cutting, shaping and finishing of stone (SIC 23700)",
-      "mechanism": "Pays EUR for imported marble and granite.",
-      "filter_reason": "Genuine single-source-of-supply means specific types of marble and granite are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Production of abrasive products (SIC 23910)",
-      "mechanism": "Pays USD for imported silicon carbide and alumina.",
-      "filter_reason": "Structural supply-chain absence means essential abrasive materials like silicon carbide and fused alumina are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of basic iron and steel and of ferro-alloys (SIC 24100)",
-      "mechanism": "Pays USD for imported iron ore and coking coal.",
-      "filter_reason": "Global pricing convention means essential raw materials like iron ore and coking coal are priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of tubes, pipes, hollow profiles and related fittings, of steel (SIC 24200)",
-      "mechanism": "Pays EUR for imported steel coils and billets.",
-      "filter_reason": "Global pricing convention means steel inputs are priced in foreign currency by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Cold drawing of bars (SIC 24310)",
-      "mechanism": "Pays EUR for imported steel bars.",
-      "filter_reason": "Global pricing convention means steel inputs are priced in foreign currency by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Cold rolling of narrow strip (SIC 24320)",
-      "mechanism": "Pays EUR for imported steel coils.",
-      "filter_reason": "Global pricing convention means steel inputs are priced in foreign currency by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Cold forming or folding (SIC 24330)",
-      "mechanism": "Pays EUR for imported metal sheets.",
-      "filter_reason": "Global pricing convention means metal inputs are priced in foreign currency by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Cold drawing of wire (SIC 24340)",
-      "mechanism": "Pays EUR for imported steel wire rod.",
-      "filter_reason": "Global pricing convention means steel wire rod inputs are priced in foreign currency by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Precious metals production (SIC 24410)",
-      "mechanism": "Pays USD for raw precious metal inputs.",
-      "filter_reason": "Global pricing convention means precious metals are priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Aluminium production (SIC 24420)",
-      "mechanism": "Pays USD to LME for aluminium ingots.",
-      "filter_reason": "Global pricing convention means aluminium is priced in USD by market standard.",
+      "mechanism": "Pays EUR/USD for high-performance ceramic raw materials.",
+      "filter_reason": "Specific high-purity alumina and steatite, essential for high-performance ceramic insulators, are not produced in the UK to the required specifications.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Lead, zinc and tin production (SIC 24430)",
-      "mechanism": "Pays USD for LME-traded metal inputs.",
-      "filter_reason": "The sector's core inputs, refined lead, zinc, and tin, are priced in USD by global market standard on the London Metal Exchange.",
+      "mechanism": "Pays USD for LME-priced raw materials.",
+      "filter_reason": "The sector's core inputs and outputs are priced in USD by global market standard on the London Metal Exchange.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Copper production (SIC 24440)",
-      "mechanism": "Pays USD for LME-traded copper inputs.",
-      "filter_reason": "The sector's core input, refined copper, is priced in USD by global market standard on the London Metal Exchange.",
+      "mechanism": "Pays USD for LME-priced raw materials.",
+      "filter_reason": "The sector's core inputs and outputs are priced in USD by global market standard on the London Metal Exchange.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Other non-ferrous metal production (SIC 24450)",
-      "mechanism": "Pays USD for LME-traded metal inputs.",
-      "filter_reason": "Many non-ferrous metals, including aluminium and nickel, are priced in USD by global market standard on the London Metal Exchange.",
+      "mechanism": "Pays USD for LME-priced raw materials.",
+      "filter_reason": "Many non-ferrous metals are globally priced in USD by market standard on exchanges like the London Metal Exchange.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Casting of iron (SIC 24510)",
+      "mechanism": "Pays USD/EUR for specialist ferroalloys.",
+      "filter_reason": "The sector structurally requires importing specific grades of ferroalloys which are not produced in the UK.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Casting of steel (SIC 24520)",
+      "mechanism": "Pays USD/EUR for specialist ferroalloys.",
+      "filter_reason": "The sector structurally requires importing specific grades of ferroalloys and alloying elements which are not produced in the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Casting of light metals (SIC 24530)",
-      "mechanism": "Pays USD for LME-traded aluminium ingots.",
-      "filter_reason": "The sector's core input, primary aluminium, is priced in USD by global market standard on the London Metal Exchange.",
+      "mechanism": "Pays USD for primary aluminium or magnesium ingots.",
+      "filter_reason": "The sector's core input of primary aluminium and magnesium ingots is priced in USD by global market standard on the London Metal Exchange.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Casting of other non-ferrous metals (SIC 24540)",
-      "mechanism": "Pays USD for LME-traded metal inputs.",
-      "filter_reason": "Many non-ferrous metals, including copper and zinc, are priced in USD by global market standard on the London Metal Exchange.",
+      "mechanism": "Pays USD for primary copper, zinc, or tin ingots.",
+      "filter_reason": "The sector's core inputs of primary copper, zinc, and tin ingots are priced in USD by global market standard on the London Metal Exchange.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Manufacture of electronic components (SIC 26110)",
-      "mechanism": "Pays USD/EUR for semiconductor wafers and specialised materials.",
-      "filter_reason": "D. The entire input category of advanced semiconductor wafers and specific rare earth elements does not exist in the UK.",
+      "sector_name": "Manufacture of other tanks, reservoirs and containers of metal (SIC 25290)",
+      "mechanism": "Pays EUR/USD for specialist pressure vessel steel plates.",
+      "filter_reason": "The sector structurally requires importing specific high-grade pressure vessel steels or very large dished ends which are not produced in the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Manufacture of loaded electronic boards (SIC 26120)",
-      "mechanism": "Pays USD/EUR for integrated circuits and electronic components.",
-      "filter_reason": "D. The entire input category of advanced integrated circuits, microcontrollers, and memory chips does not exist in the UK.",
+      "sector_name": "Manufacture of cutlery (SIC 25710)",
+      "mechanism": "Pays EUR/USD for specialist cutlery stainless steel.",
+      "filter_reason": "The sector structurally requires importing specific high-grade cutlery stainless steels and exotic handle materials which are not produced in the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Manufacture of computers and peripheral equipment (SIC 26200)",
       "mechanism": "Pays USD for CPUs, GPUs, and memory modules.",
-      "filter_reason": "D. The entire input category of central processing units, graphics processing units, and memory modules does not exist in the UK.",
+      "filter_reason": "The sector structurally requires importing central processing units, graphics processing units, and memory modules, which are not manufactured in the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Manufacture of telegraph and telephone apparatus and equipment (SIC 26301)",
-      "mechanism": "Pays USD/EUR for specialised RF components and network processors.",
-      "filter_reason": "D. The entire input category of specialised radio frequency components and network processors does not exist in the UK.",
+      "sector_name": "Production of electricity (SIC 35110)",
+      "mechanism": "Pays EUR for natural gas purchases.",
+      "filter_reason": "Natural gas, a primary input for electricity generation, is priced on international markets with global pricing conventions.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Manufacture of communication equipment other than telegraph, and telephone apparatus and equipment (SIC 26309)",
-      "mechanism": "Pays USD/EUR for specialised communication electronic components.",
-      "filter_reason": "D. The entire input category of specialised electronic components for communication equipment does not exist in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of consumer electronics (SIC 26400)",
-      "mechanism": "Pays USD for advanced displays, processors, and batteries.",
-      "filter_reason": "D. The entire input category of advanced displays, processors, and high-capacity batteries does not exist in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of electronic measuring, testing etc. equipment, not for industrial process control (SIC 26511)",
-      "mechanism": "Pays USD/EUR for high-precision electronic sensors and specialised ICs.",
-      "filter_reason": "D. The entire input category of high-precision electronic sensors and specialised integrated circuits does not exist in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of electronic industrial process control equipment (SIC 26512)",
-      "mechanism": "Pays USD/EUR for industrial-grade sensors and PLCs.",
-      "filter_reason": "D. The entire input category of industrial-grade electronic sensors and programmable logic controllers does not exist in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of watches and clocks (SIC 26520)",
-      "mechanism": "Pays CHF/JPY for watch movements and specialised components.",
-      "filter_reason": "D.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of electric domestic appliances (SIC 27510)",
-      "mechanism": "Pays USD for electronic components.",
-      "filter_reason": "Structural supply-chain absence means many advanced electronic components required for these appliances are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other electrical equipment (SIC 27900)",
-      "mechanism": "Pays USD for electronic components.",
-      "filter_reason": "Structural supply-chain absence means many advanced electronic components and rare earth materials are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of engines and turbines, except aircraft, vehicle and cycle engines (SIC 28110)",
-      "mechanism": "Pays EUR for specialized high-performance alloys.",
-      "filter_reason": "Genuine single-source-of-supply means specific high-performance alloys required for engines and turbines are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of taps and valves (SIC 28140)",
-      "mechanism": "Pays EUR for ceramic tap cartridges.",
-      "filter_reason": "Genuine single-source-of-supply means specific ceramic cartridges for taps are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of bearings, gears, gearing and driving elements (SIC 28150)",
-      "mechanism": "Pays JPY for high-grade bearing steels.",
-      "filter_reason": "Genuine single-source-of-supply means specific high-grade bearing steels are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of ovens, furnaces and furnace burners (SIC 28210)",
-      "mechanism": "Pays USD for specialized refractory materials.",
-      "filter_reason": "Structural supply-chain absence means specific high-temperature refractory materials are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of office machinery and equipment (except computers and peripheral equipment) (SIC 28230)",
-      "mechanism": "Pays USD for electronic control components.",
-      "filter_reason": "Structural supply-chain absence means many advanced electronic control components are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of power-driven hand tools (SIC 28240)",
-      "mechanism": "Pays USD for lithium-ion battery cells.",
-      "filter_reason": "Structural supply-chain absence means lithium-ion battery cells are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of non-domestic cooling and ventilation equipment (SIC 28250)",
-      "mechanism": "Pays EUR for specialized refrigerants.",
-      "filter_reason": "Genuine single-source-of-supply means specific refrigerants are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of agricultural tractors (SIC 28301)",
-      "mechanism": "Pays USD for specialized tractor engines.",
-      "filter_reason": "Genuine single-source-of-supply means specific high-power tractor engines are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of agricultural and forestry machinery other than tractors (SIC 28302)",
-      "mechanism": "Pays EUR for advanced hydraulic systems.",
-      "filter_reason": "Genuine single-source-of-supply means specific advanced hydraulic systems for complex machinery are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of metal forming machinery (SIC 28410)",
-      "mechanism": "Pays JPY for high-precision CNC control systems.",
-      "filter_reason": "Genuine single-source-of-supply means specific high-precision CNC control systems are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of other machine tools (SIC 28490)",
-      "mechanism": "Pays EUR for high-precision machine tool spindles.",
-      "filter_reason": "Genuine single-source-of-supply means specific high-precision machine tool spindles are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of machinery for metallurgy (SIC 28910)",
-      "mechanism": "Pays USD for specialized refractory linings.",
-      "filter_reason": "Structural supply-chain absence means specific high-temperature refractory linings are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Recovery of sorted materials (SIC 38320)",
-      "mechanism": "Receives USD for exported sorted materials.",
-      "filter_reason": "Sorted materials, a core output of this sector, are priced in USD by global market standard.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Wholesale trade of motor vehicle parts and accessories (SIC 45310)",
-      "mechanism": "Pays EUR and USD for imported vehicle parts.",
-      "filter_reason": "The UK supply chain lacks the entire category of specific motor vehicle parts and accessories required.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Sale, maintenance and repair of motorcycles and related parts and accessories (SIC 45400)",
-      "mechanism": "Pays EUR and JPY for imported motorcycle parts.",
-      "filter_reason": "The UK supply chain lacks the entire category of specific motorcycle parts and accessories required.",
+      "sector_name": "Treatment and disposal of hazardous waste (SIC 38220)",
+      "mechanism": "Pays EUR for specialised hazardous waste treatment services.",
+      "filter_reason": "Specific categories of hazardous waste require highly specialised treatment or disposal facilities that are not available within the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Agents selling agricultural raw materials, livestock, textile raw materials and semi-finished goods (SIC 46110)",
-      "mechanism": "Pays USD for imported agricultural raw materials.",
-      "filter_reason": "Genuine single-source-of-supply applies as cocoa beans are not produced in the UK.",
+      "mechanism": "Pays USD for imported cocoa beans.",
+      "filter_reason": "Cocoa beans are a specific input only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Agents involved in the sale of fuels, ores, metals and industrial chemicals (SIC 46120)",
-      "mechanism": "Pays USD for LME-traded metals.",
-      "filter_reason": "Global pricing convention applies because LME metals are priced in USD by market standard.",
+      "mechanism": "Pays USD for LME-traded base metals.",
+      "filter_reason": "Base metals like copper and aluminium are priced in USD by global market convention on the London Metal Exchange.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Agents involved in the sale of timber and building materials (SIC 46130)",
       "mechanism": "Pays USD for imported tropical hardwoods.",
-      "filter_reason": "Genuine single-source-of-supply applies because tropical hardwoods are not grown in the UK.",
+      "filter_reason": "Tropical hardwoods are a specific input only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Agents involved in the sale of machinery, industrial equipment, ships and aircraft (SIC 46140)",
-      "mechanism": "Pays USD for imported specialised industrial equipment.",
-      "filter_reason": "Structural supply-chain absence applies because specific high-tech industrial equipment is not produced in the UK.",
+      "mechanism": "Pays USD for imported commercial aircraft.",
+      "filter_reason": "Commercial aircraft are an entire input category not manufactured in the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Agents involved in the sale of textiles, clothing, fur, footwear and leather goods (SIC 46160)",
       "mechanism": "Pays USD for imported raw cotton.",
-      "filter_reason": "Genuine single-source-of-supply applies because raw cotton is not grown in the UK.",
+      "filter_reason": "Raw cotton is an entire input category not produced in the UK due to climate and land constraints.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Agents involved in the sale of food, beverages and tobacco (SIC 46170)",
-      "mechanism": "Pays USD for imported coffee beans.",
-      "filter_reason": "Genuine single-source-of-supply applies because coffee beans are not grown in the UK.",
+      "mechanism": "Pays USD for imported green coffee beans.",
+      "filter_reason": "Green coffee beans are a specific input only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of grain, unmanufactured tobacco, seeds and animal feeds (SIC 46210)",
       "mechanism": "Pays USD for imported unmanufactured tobacco.",
-      "filter_reason": "Genuine single-source-of-supply applies because unmanufactured tobacco is not grown in the UK.",
+      "filter_reason": "Unmanufactured tobacco is an entire input category not produced in the UK.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of flowers and plants (SIC 46220)",
-      "mechanism": "Pays EUR for imported cut flowers.",
-      "filter_reason": "Genuine single-source-of-supply applies because specific flower varieties are not grown in the UK.",
+      "mechanism": "Pays USD for imported tropical cut flowers.",
+      "filter_reason": "Tropical cut flowers are an entire input category not produced in the UK due to climate constraints.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of live animals (SIC 46230)",
-      "mechanism": "Pays EUR for imported pedigree livestock.",
-      "filter_reason": "Genuine single-source-of-supply applies because specific pedigree livestock breeds are only available from abroad.",
+      "mechanism": "Pays EUR for imported exotic zoo animals.",
+      "filter_reason": "Many exotic zoo animals are a specific input only produced or sourced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of hides, skins and leather (SIC 46240)",
-      "mechanism": "Pays USD for imported exotic skins.",
-      "filter_reason": "Genuine single-source-of-supply applies because specific exotic skins are only available from abroad.",
+      "mechanism": "Pays USD for imported exotic leathers.",
+      "filter_reason": "Exotic leathers are a specific input only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of fruit and vegetables (SIC 46310)",
       "mechanism": "Pays USD for imported tropical fruits.",
-      "filter_reason": "Genuine single-source-of-supply applies because tropical fruits are not grown in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of meat and meat products (SIC 46320)",
-      "mechanism": "Pays EUR for imported specific cured hams.",
-      "filter_reason": "Genuine single-source-of-supply applies because specific",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of coffee, tea, cocoa and spices (SIC 46370)",
-      "mechanism": "Pays USD for raw coffee and cocoa beans.",
-      "filter_reason": "Raw coffee and cocoa beans are agricultural products grown exclusively outside the UK, with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of pharmaceutical goods (SIC 46460)",
-      "mechanism": "Pays EUR for specific pharmaceutical APIs and drugs.",
-      "filter_reason": "Many specific pharmaceutical APIs and patented drug formulations are produced exclusively outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of watches and jewellery (SIC 46480)",
-      "mechanism": "Pays CHF for Swiss watch movements and finished watches.",
-      "filter_reason": "Swiss watch movements and finished watches are produced exclusively in Switzerland with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of computers, computer peripheral equipment and software (SIC 46510)",
-      "mechanism": "Pays USD for computer components and finished hardware.",
-      "filter_reason": "Core computer components and finished hardware from major brands are manufactured exclusively outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of electronic and telecommunications equipment and parts (SIC 46520)",
-      "mechanism": "Pays USD for electronic components and telecom equipment.",
-      "filter_reason": "Core electronic components and telecommunications equipment from major brands are manufactured exclusively outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of agricultural machinery, equipment and supplies (SIC 46610)",
-      "mechanism": "Pays EUR for specialised agricultural machinery and parts.",
-      "filter_reason": "Many specialised agricultural machinery models and their parts are produced exclusively outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of machine tools (SIC 46620)",
-      "mechanism": "Pays EUR for high-precision CNC machine tools.",
-      "filter_reason": "Many high-precision CNC machine tools are produced exclusively outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of mining, construction and civil engineering machinery (SIC 46630)",
-      "mechanism": "Pays USD for heavy construction machinery and parts.",
-      "filter_reason": "Many heavy construction machinery models and their parts are produced exclusively outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of machinery for the textile industry and of sewing and knitting machines (SIC 46640)",
-      "mechanism": "Pays EUR for industrial textile and sewing machines.",
-      "filter_reason": "Many industrial textile and sewing machines are produced exclusively outside the UK with no domestic equivalent whatsoever.",
+      "filter_reason": "Tropical fruits like bananas and pineapples are an entire input category not produced in the UK due to climate constraints.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of petroleum and petroleum products (SIC 46711)",
       "mechanism": "Pays USD for crude oil and refined products.",
-      "filter_reason": "The sector's core input, crude oil and refined petroleum products, is priced in USD by global market standard with no GBP equivalent.",
+      "filter_reason": "The sector's core input, crude oil and refined petroleum products, is priced in US Dollars by global market convention.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of other fuels and related products (SIC 46719)",
-      "mechanism": "Pays EUR for natural gas and other fuels.",
-      "filter_reason": "The sector's core inputs, natural gas and certain other fuels, are priced in foreign currencies by international market standard with no GBP equivalent.",
+      "mechanism": "Pays USD for LPG and international coal.",
+      "filter_reason": "The sector's core inputs, LPG and international coal, are priced in US Dollars by global market convention.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of metals and metal ores (SIC 46720)",
-      "mechanism": "Pays USD for LME metals and metal ores.",
-      "filter_reason": "The sector's core inputs, base metals and metal ores, are priced in USD by global market standard with no GBP equivalent.",
+      "mechanism": "Pays USD for base metals and metal ores.",
+      "filter_reason": "The sector's core inputs, base metals and metal ores, are priced in US Dollars by global market convention on exchanges like the LME.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Wholesale of wood, construction materials and sanitary equipment (SIC 46730)",
+      "mechanism": "Pays USD/EUR for tropical hardwoods and specialist timber.",
+      "filter_reason": "Specific tropical hardwoods are only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of chemical products (SIC 46750)",
-      "mechanism": "Pays EUR for specialised chemical compounds.",
-      "filter_reason": "The sector's specific chemical inputs often have a structural supply-chain absence in the UK, with no domestic producer.",
+      "mechanism": "Pays USD/EUR for basic and speciality chemical compounds.",
+      "filter_reason": "Many basic and speciality chemical compounds are priced in US Dollars or Euros by global market convention.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Wholesale of other intermediate products (SIC 46760)",
+      "mechanism": "Pays USD for natural rubber and specific textile fibres.",
+      "filter_reason": "Natural rubber is only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wholesale of waste and scrap (SIC 46770)",
-      "mechanism": "Receives USD for exported scrap metals.",
-      "filter_reason": "The sector's core output, scrap metals, is priced in USD by global market standard with no GBP equivalent.",
+      "mechanism": "Receives USD/EUR for exported scrap metals and plastics.",
+      "filter_reason": "The sector's core outputs, scrap metals and plastics, are priced in US Dollars or Euros by global market convention.",
       "source": "ons_sic",
       "fx_direction": "receives"
     },
     {
-      "sector_name": "Retail sale of musical instruments and scores (SIC 47591)",
-      "mechanism": "Pays EUR/USD to international instrument manufacturers.",
-      "filter_reason": "Structural supply-chain absence means specific high-demand musical instrument brands and models are exclusively manufactured outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Retail sale of sports goods, fishing gear, camping goods, boats and bicycles (SIC 47640)",
-      "mechanism": "Pays USD/EUR to international sports equipment manufacturers.",
-      "filter_reason": "Structural supply-chain absence means specific high-demand sports goods, bicycles, and fishing gear brands are exclusively manufactured outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
       "sector_name": "Retail sale of hearing aids (SIC 47741)",
       "mechanism": "Pays EUR/USD to international hearing aid manufacturers.",
-      "filter_reason": "Structural supply-chain absence means the core hearing aid devices are exclusively manufactured by international companies outside the UK.",
+      "filter_reason": "The core hearing aid devices are manufactured by a limited number of highly specialised international companies with no domestic UK equivalent.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Retail sale of medical and orthopaedic goods in specialised stores (not incl. hearing aids) n.e.c. (SIC 47749)",
       "mechanism": "Pays EUR/USD to international medical device manufacturers.",
-      "filter_reason": "Structural supply-chain absence means specific high-tech medical and orthopaedic devices are exclusively manufactured by international companies outside the UK.",
+      "filter_reason": "Many highly specialised medical and orthopaedic devices are manufactured by a limited number of international companies with no domestic UK equivalent.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Retail sale of flowers, plants, seeds, fertilizers, pet animals and pet food in specialised stores (SIC 47760)",
-      "mechanism": "Pays EUR to Dutch flower auction houses.",
-      "filter_reason": "Global pricing convention means the international market for cut flowers is primarily settled in EUR through Dutch auction houses.",
+      "mechanism": "Pays EUR to Dutch flower auctions and growers.",
+      "filter_reason": "A diverse range of cut flowers and specialist plants are only available from international hubs like the Netherlands with no domestic UK equivalent in terms of variety or year-round supply.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Retail sale in commercial art galleries (SIC 47781)",
-      "mechanism": "Pays EUR/USD to international artists or galleries.",
-      "filter_reason": "Genuine single-source-of-supply means specific artworks by international artists are only available from foreign sources.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Retail sale by opticians (SIC 47782)",
-      "mechanism": "Pays EUR/USD to international eyewear manufacturers.",
-      "filter_reason": "Structural supply-chain absence means specific high-demand eyewear brands and specialist lens technologies are exclusively manufactured by international companies outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Retail sale of antiques including antique books in stores (SIC 47791)",
-      "mechanism": "Pays EUR/USD to international antique dealers or sellers.",
-      "filter_reason": "Genuine single-source-of-supply means specific antique items are only available from their original foreign source or international sellers.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Freight transport by road (SIC 49410)",
-      "mechanism": "Pays EUR for fuel, tolls, and permits.",
-      "filter_reason": "The sector's operational costs for international services are priced in foreign currencies by market standard in the countries traversed.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Removal services (SIC 49420)",
-      "mechanism": "Pays EUR for fuel, tolls, and ferry services.",
-      "filter_reason": "The sector's operational costs for international services are priced in foreign currencies by market standard in the countries traversed.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Sea and coastal passenger water transport (SIC 50100)",
-      "mechanism": "Pays USD for bunker fuel.",
-      "filter_reason": "The sector's core input, bunker fuel, is priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Sea and coastal freight water transport (SIC 50200)",
-      "mechanism": "Pays USD for bunker fuel.",
-      "filter_reason": "The sector's core input, bunker fuel, is priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Non-scheduled passenger air transport (SIC 51102)",
-      "mechanism": "Pays USD for aviation fuel.",
-      "filter_reason": "The sector's core input, aviation fuel, is priced in USD by market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Service activities incidental to water transportation (SIC 52220)",
-      "mechanism": "Pays USD for international shipping services.",
-      "filter_reason": "International shipping services are priced in USD by market standard, and international contracts mandate USD settlement.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Service activities incidental to air transportation (SIC 52230)",
-      "mechanism": "Pays USD for international air freight services.",
-      "filter_reason": "International air freight services are priced in USD by market standard, and international contracts mandate USD settlement.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Licensed carriers (SIC 53201)",
-      "mechanism": "Pays EUR to international postal network partners.",
-      "filter_reason": "International courier services necessitate payments to foreign partners in their local currency or a common international currency.",
+      "mechanism": "Pays EUR/USD for unique international artworks.",
+      "filter_reason": "Unique artworks from specific international artists or collectors are only available from abroad with no domestic UK equivalent.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Book publishing (SIC 58110)",
-      "mechanism": "Pays USD/EUR for international publishing rights.",
-      "filter_reason": "Contracts for acquiring international publishing rights mandate foreign currency settlement.",
+      "mechanism": "Pays EUR/USD for international publishing rights.",
+      "filter_reason": "Acquiring publishing rights from foreign authors or agents structurally requires payment in foreign currency as per contractual agreements.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Publishing of newspapers (SIC 58130)",
-      "mechanism": "Pays USD/EUR for international syndicated content.",
-      "filter_reason": "Contracts for acquiring international syndicated content mandate foreign currency settlement.",
+      "mechanism": "Pays USD for international news wire subscriptions.",
+      "filter_reason": "Subscriptions to global news wire services are priced in foreign currency by market standard with no GBP equivalent.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Publishing of learned journals (SIC 58141)",
-      "mechanism": "Pays USD/EUR for international author royalties.",
-      "filter_reason": "Contracts for international author royalties mandate foreign currency settlement.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Publishing of consumer and business journals and periodicals (SIC 58142)",
-      "mechanism": "Pays USD/EUR for international content rights.",
-      "filter_reason": "Contracts for acquiring international content rights mandate foreign currency settlement.",
+      "mechanism": "Pays EUR/USD for international academic content rights.",
+      "filter_reason": "Acquiring content and rights from international academics and institutions structurally requires payment in foreign currency as per contractual agreements.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Publishing of computer games (SIC 58210)",
-      "mechanism": "Pays USD for global game engine licenses.",
-      "filter_reason": "Licensing fees for globally dominant game engines are priced in USD by market standard.",
+      "mechanism": "Receives USD/EUR from global digital game stores.",
+      "filter_reason": "Selling computer games globally via international digital distribution platforms structurally requires receiving payments in foreign currencies as per contractual agreements.",
       "source": "ons_sic",
-      "fx_direction": "pays"
+      "fx_direction": "receives"
     },
     {
       "sector_name": "Other software publishing (SIC 58290)",
-      "mechanism": "Pays USD for global software component licenses.",
-      "filter_reason": "Licensing fees for globally dominant software components are priced in USD by market standard.",
+      "mechanism": "Receives USD/EUR from global software license sales.",
+      "filter_reason": "Selling software globally via international distribution channels structurally requires receiving payments in foreign currencies as per contractual agreements.",
       "source": "ons_sic",
-      "fx_direction": "pays"
+      "fx_direction": "receives"
     },
     {
       "sector_name": "Motion picture production activities (SIC 59111)",
-      "mechanism": "Pays USD/EUR for international talent and rights.",
-      "filter_reason": "Contracts for acquiring international talent and content rights mandate foreign currency settlement.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Video production activities (SIC 59112)",
-      "mechanism": "Pays USD/EUR for international talent and rights.",
-      "filter_reason": "Contracts for acquiring international talent and content rights mandate foreign currency settlement.",
+      "mechanism": "Pays EUR/USD for international talent, locations.",
+      "filter_reason": "Motion picture production structurally requires engaging international talent or filming in foreign locations, necessitating payments in foreign currencies as per contractual agreements.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Television programme production activities (SIC 59113)",
-      "mechanism": "Pays USD/EUR for international talent and rights.",
-      "filter_reason": "Contracts for acquiring international talent and content rights mandate foreign currency settlement.",
+      "mechanism": "Pays EUR/USD for international formats, talent.",
+      "filter_reason": "Television programme production structurally requires acquiring international formats or engaging international talent, necessitating payments in foreign currencies as per contractual agreements.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Motion picture distribution activities (SIC 59131)",
-      "mechanism": "Pays USD/EUR for international distribution rights.",
-      "filter_reason": "Contracts for acquiring international distribution rights mandate foreign currency settlement.",
+      "mechanism": "Pays USD/EUR for international film distribution rights.",
+      "filter_reason": "Motion picture distribution structurally requires acquiring distribution rights for foreign films, necessitating payments in foreign currencies as per contractual agreements.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Video distribution activities (SIC 59132)",
-      "mechanism": "Pays USD/EUR for international distribution rights.",
-      "filter_reason": "Contracts for acquiring international distribution rights mandate foreign currency settlement.",
+      "mechanism": "Pays USD/EUR for international video rights.",
+      "filter_reason": "Video distribution structurally requires acquiring distribution rights for foreign video content, necessitating payments in foreign currencies as per contractual agreements.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Television programme distribution activities (SIC 59133)",
-      "mechanism": "Pays USD/EUR for international distribution rights.",
-      "filter_reason": "Contracts for acquiring international distribution rights mandate foreign currency settlement.",
+      "sector_name": "Wireless telecommunications activities (SIC 61200)",
+      "mechanism": "Pays USD/EUR for international network interconnects.",
+      "filter_reason": "International network interconnect agreements with foreign carriers contractually mandate settlement in foreign currency.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Sound recording and music publishing activities (SIC 59200)",
-      "mechanism": "Pays USD/EUR for international artist royalties.",
-      "filter_reason": "Contracts for international artist royalties and music licensing mandate foreign currency settlement.",
+      "sector_name": "Satellite telecommunications activities (SIC 61300)",
+      "mechanism": "Pays USD/EUR for satellite transponder capacity.",
+      "filter_reason": "Satellite transponder capacity, a core input, is priced in foreign currency by global market standard with no GBP equivalent.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Wired telecommunications activities (SIC 61100)",
-      "mechanism": "Pays USD for international bandwidth capacity.",
-      "filter_reason": "Interconnect fees and international bandwidth capacity are priced in USD by market standard.",
+      "sector_name": "Other telecommunications activities (SIC 61900)",
+      "mechanism": "Pays USD/EUR for international voice termination services.",
+      "filter_reason": "International voice termination services involve contractual agreements with foreign carriers mandating foreign currency settlement.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Security dealing on own account (SIC 64991)",
-      "mechanism": "Pays USD for US equity purchases.",
-      "filter_reason": "Dealing in foreign securities structurally requires foreign currency settlement as there is no domestic GBP alternative for direct market access.",
+      "sector_name": "Ready-made interactive leisure and entertainment software development (SIC 62011)",
+      "mechanism": "Receives USD/EUR from global digital platforms.",
+      "filter_reason": "Global digital distribution platforms contractually mandate payouts in foreign currencies for international sales.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Business and domestic software development (SIC 62012)",
+      "mechanism": "Pays USD for global cloud services and software licenses.",
+      "filter_reason": "Global cloud service providers and international software component vendors contractually mandate payments in foreign currencies.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Data processing, hosting and related activities (SIC 63110)",
+      "mechanism": "Pays USD/EUR for international internet bandwidth.",
+      "filter_reason": "International internet bandwidth and peering agreements with foreign network operators contractually mandate settlement in foreign currencies.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Web portals (SIC 63120)",
+      "mechanism": "Pays USD for global cloud hosting and CDNs.",
+      "filter_reason": "Global cloud hosting services and content delivery networks contractually mandate payments in foreign currencies.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "News agency activities (SIC 63910)",
+      "mechanism": "Pays USD/EUR for international news agency subscriptions.",
+      "filter_reason": "Subscriptions to international news and photo agencies contractually mandate payments in foreign currencies.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Factoring (SIC 64992)",
-      "mechanism": "Receives EUR from factored EU invoices.",
-      "filter_reason": "Factoring international trade invoices structurally requires foreign currency settlement due to contractual requirements of the underlying trade.",
+      "mechanism": "Receives EUR/USD from overseas debtors.",
+      "filter_reason": "The sector structurally requires receiving foreign currency because factored invoices are contractually denominated in foreign currencies.",
       "source": "ons_sic",
       "fx_direction": "receives"
     },
     {
-      "sector_name": "Security and commodity contracts dealing activities (SIC 66120)",
-      "mechanism": "Pays USD to LME commodity exchanges.",
-      "filter_reason": "The sector's core input, LME metals, is priced in USD by market standard with no GBP equivalent.",
+      "sector_name": "Renting and leasing of passenger water transport equipment (SIC 77341)",
+      "mechanism": "Receives EUR/USD from international charter clients.",
+      "filter_reason": "International passenger water transport charters are priced in foreign currency by market standard.",
       "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Fund management activities (SIC 66300)",
-      "mechanism": "Pays USD for international equity investments.",
-      "filter_reason": "Investing in foreign assets structurally requires foreign currency settlement as there is no domestic GBP alternative for direct market access.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Research and experimental development on biotechnology (SIC 72110)",
-      "mechanism": "Pays USD/EUR for specialist reagents and equipment.",
-      "filter_reason": "Structural supply-chain absence means specific advanced research reagents and equipment are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Other research and experimental development on natural sciences and engineering (SIC 72190)",
-      "mechanism": "Pays USD/EUR for advanced scientific instruments.",
-      "filter_reason": "Structural supply-chain absence means specific advanced scientific instruments and components are not produced in the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Film processing (SIC 74203)",
-      "mechanism": "Pays USD/EUR for specialist film stock and chemicals.",
-      "filter_reason": "Genuine single-source-of-supply means specific photographic film stock and processing chemicals are only produced outside the UK.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
+      "fx_direction": "receives"
     },
     {
       "sector_name": "Renting and leasing of freight water transport equipment (SIC 77342)",
-      "mechanism": "Receives USD from international charterers.",
-      "filter_reason": "The sector's core output (international freight chartering) is priced in USD by market standard with no GBP equivalent.",
+      "mechanism": "Receives USD from international freight charterers.",
+      "filter_reason": "International freight water transport charter rates are priced in USD by market standard.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Renting and leasing of air passenger transport equipment (SIC 77351)",
+      "mechanism": "Receives USD from international aircraft lessees.",
+      "filter_reason": "International aircraft leasing and charter rates are priced in USD by market standard.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Renting and leasing of freight air transport equipment (SIC 77352)",
+      "mechanism": "Receives USD from international freight aircraft lessees.",
+      "filter_reason": "International freight aircraft leasing and charter rates are priced in USD by market standard.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Leasing of intellectual property and similar products, except copyright works (SIC 77400)",
+      "mechanism": "Receives USD/EUR from international IP licensees.",
+      "filter_reason": "International intellectual property licensing agreements contractually mandate foreign currency settlement.",
       "source": "ons_sic",
       "fx_direction": "receives"
     },
     {
       "sector_name": "Travel agency activities (SIC 79110)",
-      "mechanism": "Pays EUR/USD to international hotels and airlines.",
-      "filter_reason": "The sector's core inputs (international flights, accommodation) are priced in foreign currencies by market standard with no GBP equivalent.",
+      "mechanism": "Pays EUR/USD to overseas hotels and airlines.",
+      "filter_reason": "International travel services are priced in foreign currency by market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Tour operator activities (SIC 79120)",
-      "mechanism": "Pays EUR/USD to international hotels and transport providers.",
-      "filter_reason": "The sector's core inputs (international accommodation, transport, and services) are priced in foreign currencies by market standard with no GBP equivalent.",
+      "mechanism": "Pays EUR/USD to overseas accommodation and transport.",
+      "filter_reason": "International tour services are priced in foreign currency by market standard.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Gambling and betting activities (SIC 92000)",
-      "mechanism": "Receives EUR from European online customers.",
-      "filter_reason": "Global pricing convention dictates international online gambling platforms accept foreign currencies to serve a global customer base.",
+      "sector_name": "Other reservation service activities n.e.c. (SIC 79909)",
+      "mechanism": "Pays EUR/USD to overseas activity providers.",
+      "filter_reason": "International reservation services are priced in foreign currency by market standard.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Activities of call centres (SIC 82200)",
+      "mechanism": "Receives EUR/USD from international client companies.",
+      "filter_reason": "International call centre service contracts contractually mandate foreign currency settlement.",
       "source": "ons_sic",
       "fx_direction": "receives"
     },
     {
-      "sector_name": "Activities of racehorse owners (SIC 93191)",
-      "mechanism": "Pays EUR for racehorses at international auctions.",
-      "filter_reason": "Genuine single-source-of-supply means specific high-value bloodstock is only available from international breeders or auctions.",
+      "sector_name": "Activities of exhibition and fair organisers (SIC 82301)",
+      "mechanism": "Pays EUR for venue hire in Europe.",
+      "filter_reason": "Organising events in foreign countries structurally requires payment for local services and venues in the local currency, which has no UK domestic alternative.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Other sports activities (SIC 93199)",
-      "mechanism": "Pays EUR for international competition entry fees.",
-      "filter_reason": "Regulatory or contractual requirements mandate foreign currency settlement for participation in international sporting events.",
+      "sector_name": "Activities of conference organisers (SIC 82302)",
+      "mechanism": "Pays USD for conference venue in USA.",
+      "filter_reason": "Organising conferences in foreign countries structurally requires payment for local services and venues in the local currency, which has no UK domestic alternative.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Repair of computers and peripheral equipment (SIC 95110)",
-      "mechanism": "Pays USD for specialised computer components.",
-      "filter_reason": "Structural supply-chain absence means specific high-tech computer components are not manufactured in the UK.",
+      "sector_name": "Other education n.e.c. (SIC 85590)",
+      "mechanism": "Receives EUR from international students for tuition.",
+      "filter_reason": "Attracting international students structurally requires receiving tuition fees in foreign currencies, as there is no domestic-currency alternative for payments from overseas.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Performing arts (SIC 90010)",
+      "mechanism": "Pays EUR for venue hire during European tour.",
+      "filter_reason": "Touring performing arts companies structurally require payment for foreign venues and local services in the local currency, which has no UK domestic alternative.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Repair of communication equipment (SIC 95120)",
-      "mechanism": "Pays USD for specialised communication equipment parts.",
-      "filter_reason": "Structural supply-chain absence means specific high-tech communication components are not manufactured in the UK.",
+      "sector_name": "Support activities to performing arts (SIC 90020)",
+      "mechanism": "Receives USD from international promoters for artist bookings.",
+      "filter_reason": "Artist management agencies structurally require receiving payments from foreign promoters in foreign currencies, as there is no domestic-currency alternative for overseas clients.",
       "source": "ons_sic",
-      "fx_direction": "pays"
+      "fx_direction": "receives"
     },
     {
-      "sector_name": "Repair of consumer electronics (SIC 95210)",
-      "mechanism": "Pays EUR for specialised consumer electronics parts.",
-      "filter_reason": "Structural supply-chain absence means specific consumer electronics components are not manufactured in the UK.",
+      "sector_name": "Artistic creation (SIC 90030)",
+      "mechanism": "Receives USD from international art collectors.",
+      "filter_reason": "Selling unique artworks to international buyers structurally requires receiving payments in foreign currencies, as there is no domestic-currency alternative for overseas clients.",
       "source": "ons_sic",
-      "fx_direction": "pays"
+      "fx_direction": "receives"
     },
     {
-      "sector_name": "Repair of household appliances and home and garden equipment (SIC 95220)",
-      "mechanism": "Pays EUR for specialised appliance replacement parts.",
-      "filter_reason": "Structural supply-chain absence means specific household appliance components are not manufactured in the UK.",
+      "sector_name": "Operation of arts facilities (SIC 90040)",
+      "mechanism": "Receives EUR from international art buyers.",
+      "filter_reason": "Selling artworks to international buyers structurally requires receiving payments in foreign currencies, as there is no domestic-currency alternative for overseas clients.",
       "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Repair of watches, clocks and jewellery (SIC 95250)",
-      "mechanism": "Pays CHF for genuine Swiss watch components.",
-      "filter_reason": "Genuine single-source-of-supply means specific proprietary watch components are only available from international manufacturers.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
+      "fx_direction": "receives"
     },
     {
       "sector_name": "British Florist Association",
-      "mechanism": "Pays EUR to Dutch flower auctions.",
-      "filter_reason": "Tropical flowers are only produced outside the UK with no domestic equivalent whatsoever.",
+      "mechanism": "Pays EUR for fresh cut flowers from Dutch auctions.",
+      "filter_reason": "The UK climate and agricultural capacity do not support the year-round commercial production of the diverse range of fresh cut flowers required by florists.",
       "source": "taf",
       "fx_direction": "pays"
     },
     {
       "sector_name": "British Frozen Food Federation",
-      "mechanism": "Pays USD for imported seafood species.",
-      "filter_reason": "Specific seafood species are only produced outside the UK with no domestic equivalent whatsoever.",
+      "mechanism": "Pays USD/EUR for imported frozen seafood and ingredients.",
+      "filter_reason": "The UK's fishing grounds and agricultural capacity do not provide the full range and volume of specific seafood and produce required for the frozen food industry.",
       "source": "taf",
       "fx_direction": "pays"
     },
     {
       "sector_name": "British Metals Recycling Association",
-      "mechanism": "Receives USD from international buyers.",
-      "filter_reason": "The sector's core output (recycled metals) is priced in a foreign currency by market standard with no GBP equivalent.",
+      "mechanism": "Receives USD/EUR for exported processed scrap metal.",
+      "filter_reason": "The global market for processed scrap metal is priced and settled in foreign currencies, primarily USD, by international convention.",
       "source": "taf",
       "fx_direction": "receives"
     },
     {
       "sector_name": "Chemical Business Association",
-      "mechanism": "Pays EUR for imported chemical feedstocks.",
-      "filter_reason": "Specific chemical feedstocks are only produced outside the UK with no domestic equivalent whatsoever.",
+      "mechanism": "Pays USD/EUR for imported commodity chemical feedstocks.",
+      "filter_reason": "Many bulk commodity chemicals are derived from globally traded feedstocks and are priced in foreign currencies, primarily USD, by international market standard.",
       "source": "taf",
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Fire Door Association",
-      "mechanism": "Pays EUR for specialist fire-resistant components.",
-      "filter_reason": "Specific fire-resistant core materials are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "taf",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Ground Source Heat Pump Association",
-      "mechanism": "Pays EUR for imported heat pump units.",
-      "filter_reason": "Specific ground source heat pump units are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "taf",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Hydrogen Energy Association",
-      "mechanism": "Pays EUR for imported fuel cell stacks.",
-      "filter_reason": "Specific fuel cell stacks are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "taf",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "National Association of Jewellers",
-      "mechanism": "Pays USD for imported rough diamonds.",
-      "filter_reason": "Rough diamonds are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "taf",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "OFTEC",
-      "mechanism": "Pays EUR for imported oil boiler units.",
-      "filter_reason": "Specific oil boiler units are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "taf",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "PAGB, the Consumer Healthcare Association",
-      "mechanism": "Pays USD for imported Active Pharmaceutical Ingredients.",
-      "filter_reason": "Specific Active Pharmaceutical Ingredients are only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "taf",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "ABTA (trade association)",
-      "mechanism": "Pays EUR for European hotel bookings.",
-      "filter_reason": "International travel services are contractually required to be settled in foreign currencies.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Alliance of Independent Authors",
-      "mechanism": "Receives USD/EUR royalties from global platforms.",
-      "filter_reason": "Global sales platforms pay authors in foreign currencies as a market standard for international transactions.",
-      "source": "wikipedia",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Antiquarian Booksellers' Association",
-      "mechanism": "Pays USD/EUR for unique international book acquisitions.",
-      "filter_reason": "Specific antiquarian books are often only available from international sellers, requiring foreign currency payment.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Association for Decentralised Energy",
-      "mechanism": "Pays EUR/USD for specialised energy system components.",
-      "filter_reason": "Specific advanced components for decentralised energy systems are not produced in the UK, requiring foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Association for Renewable Energy and Clean Technology",
-      "mechanism": "Pays USD/EUR for renewable energy system components.",
-      "filter_reason": "Key components for renewable energy systems are not produced in the UK, necessitating foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "The Association for UK Interactive Entertainment",
-      "mechanism": "Receives USD/EUR from global digital game sales.",
-      "filter_reason": "Global digital storefronts pay game developers in foreign currencies as a market standard for international sales.",
-      "source": "wikipedia",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Association of Independent Tour Operators",
-      "mechanism": "Pays EUR/USD for international accommodation and services.",
-      "filter_reason": "International accommodation and services are priced and settled in foreign currencies as a market standard.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "British Constructional Steelwork Association",
-      "mechanism": "Pays EUR/USD for specific imported steel products.",
-      "filter_reason": "Specific grades or dimensions of constructional steel are not produced in the UK, requiring foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Building Engineering Services Association",
-      "mechanism": "Pays EUR/USD for specialised building engineering components.",
-      "filter_reason": "Specific advanced components for building engineering systems are not produced in the UK, requiring foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Chemical Industries Association",
-      "mechanism": "Pays USD/EUR for imported chemical raw materials and intermediates.",
-      "filter_reason": "Specific chemical raw materials and intermediates are not produced in the UK, necessitating foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Confederation of Forest Industries",
-      "mechanism": "Pays USD/EUR for imported specialist timber and machinery.",
-      "filter_reason": "Specific types of timber and specialised processing machinery are not produced in the UK, requiring foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Construction Products Association",
-      "mechanism": "Pays EUR/USD for imported raw materials and machinery.",
-      "filter_reason": "Specific raw materials and specialised machinery for construction products are not produced in the UK, necessitating foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Federation of Environmental Trade Associations",
-      "mechanism": "Pays USD/EUR for specialised environmental technology.",
-      "filter_reason": "Specific advanced environmental technologies and machinery are not produced in the UK, requiring foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Federation of Manufacturing Opticians",
-      "mechanism": "Pays EUR/USD for imported optical raw materials and machinery.",
-      "filter_reason": "Specific optical raw materials and specialised manufacturing machinery are not produced in the UK, necessitating foreign currency payments.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Fuels Industry UK",
-      "mechanism": "Pays USD for imported crude oil and refined products.",
-      "filter_reason": "The sector's core input, crude oil, is priced in USD by market standard with no GBP equivalent.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Institute of Refrigeration",
-      "mechanism": "Pays EUR for imported specialized compressors and refrigerants.",
-      "filter_reason": "The sector requires specific high-performance compressors and refrigerants for which no UK producer exists.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "International Federation of the Phonographic Industry",
-      "mechanism": "Pays USD for international artist royalties and licensing fees.",
-      "filter_reason": "International licensing agreements and royalty structures contractually require foreign currency settlement.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "International Financial Services London",
-      "mechanism": "Receives/pays various currencies for international financial transactions.",
-      "filter_reason": "International financial instruments are priced in foreign currencies by market standard, and international transactions require foreign currency settlement.",
-      "source": "wikipedia",
-      "fx_direction": "both"
-    },
-    {
-      "sector_name": "Internet Advertising Bureau",
-      "mechanism": "Pays USD for international advertising platform placements.",
-      "filter_reason": "Major international advertising platforms price their services in foreign currencies by market standard.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Internet Service Providers Association (United Kingdom)",
-      "mechanism": "Pays USD for international bandwidth and peering services.",
-      "filter_reason": "International bandwidth and peering services are priced in USD by market standard.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Internet Telephony Services Providers' Association",
-      "mechanism": "Pays USD for international call termination services.",
-      "filter_reason": "International call termination services are priced in USD or EUR by market standard.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Investment Association",
-      "mechanism": "Trades various currencies for international asset investments.",
-      "filter_reason": "International securities are priced in their respective foreign currencies by market standard.",
-      "source": "wikipedia",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Oil & Gas UK (OGUK)",
-      "mechanism": "Pays USD for specialized offshore drilling equipment and services.",
-      "filter_reason": "The sector requires highly specialized offshore equipment for which no UK producer exists.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "The Publishers Association",
-      "mechanism": "Pays USD for international author royalties and foreign rights.",
-      "filter_reason": "International author contracts and foreign rights sales contractually require foreign currency settlement.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "RenewableUK",
-      "mechanism": "Pays EUR for imported wind turbines and solar panels.",
-      "filter_reason": "The sector requires large-scale wind turbines and advanced solar panels for which no UK producer exists.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "UK Private Capital",
-      "mechanism": "Pays USD/EUR for international investment acquisitions.",
-      "filter_reason": "Investment agreements for international acquisitions contractually mandate settlement in foreign currencies.",
+      "sector_name": "Timber Trade Federation",
+      "mechanism": "Pays EUR/USD for imported construction-grade softwood.",
+      "filter_reason": "The UK domestic supply chain cannot meet the demand for specific types and volumes of construction-grade softwood required by the industry.",
       "source": "wikipedia",
       "fx_direction": "pays"
     },
     {
       "sector_name": "Wine and Spirit Trade Association",
-      "mechanism": "Pays EUR/USD/AUD for imported wines and spirits.",
-      "filter_reason": "Many specific wines and spirits are geographically protected and can only be produced in specific foreign regions, with no domestic equivalent whatsoever.",
+      "mechanism": "Pays EUR/USD for imported wines and spirits.",
+      "filter_reason": "Specific wines from appellations and spirits from designated regions are geographically unique and cannot be produced in the UK.",
       "source": "wikipedia",
       "fx_direction": "pays"
     }
