@@ -1,0 +1,626 @@
+{
+  "meta": {
+    "generated_at": "2026-06-19T10:20:11Z",
+    "sectors_raw": 852,
+    "first_filter": 579,
+    "final": 88
+  },
+  "niches": [
+    {
+      "sector_name": "Growing of grapes (SIC 1210)",
+      "mechanism": "pays EUR for vineyard equipment, vines",
+      "filter_reason": "UK vineyards regularly import specialised equipment and vines from Europe, creating recurring EUR payment flows.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Growing of pome fruits and stone fruits (SIC 1240)",
+      "mechanism": "pays EUR for orchard machinery, trees",
+      "filter_reason": "UK orchards regularly import specialised machinery and tree stock from Europe, creating recurring EUR payment flows.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Growing of other tree and bush fruits and nuts (SIC 1250)",
+      "mechanism": "pays EUR for growing equipment, plants",
+      "filter_reason": "UK berry and nut growers regularly import specialised equipment and plants from",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Seed processing for propagation (SIC 1640)",
+      "mechanism": "pays EUR for imported seeds",
+      "filter_reason": "SMEs in this sector frequently import specialised seeds from European breeders.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Marine aquaculture (SIC 3210)",
+      "mechanism": "pays EUR for imported feed",
+      "filter_reason": "Aquaculture SMEs often import significant quantities of specialised fish feed from European suppliers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Processing and preserving of meat (SIC 10110)",
+      "mechanism": "pays EUR for imported meat",
+      "filter_reason": "Meat processors frequently import specific cuts or types of meat from European suppliers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Processing and preserving of poultry meat (SIC 10120)",
+      "mechanism": "pays EUR for imported poultry",
+      "filter_reason": "Poultry processors",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of fruit and vegetable juice (SIC 10320)",
+      "mechanism": "pays EUR for fruit concentrates",
+      "filter_reason": "Juice manufacturers import specific fruit concentrates and ingredients from Europe, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Other processing and preserving of fruit and vegetables (SIC 10390)",
+      "mechanism": "pays USD for exotic ingredients",
+      "filter_reason": "Processors import specialist fruits, vegetables, and spices from global markets, requiring active FX management.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of oils and fats (SIC 10410)",
+      "mechanism": "pays USD for raw oils",
+      "filter_reason": "Manufacturers import global commodity oils like olive or palm oil, leading to recurring foreign currency payments.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of other food products n.e.c. (SIC 10890)",
+      "mechanism": "pays EUR/USD for imported ingredients and packaging",
+      "filter_reason": "UK food manufacturers frequently import specialist ingredients and export products, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of prepared feeds for farm animals (SIC 10910)",
+      "mechanism": "pays USD/EUR for imported grains and feed additives",
+      "filter_reason": "Animal feed producers import significant volumes of raw materials, leading to structural, recurring FX payments.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of prepared pet foods (SIC 10920)",
+      "mechanism": "pays EUR/USD for imported ingredients and packaging",
+      "filter_reason": "Pet food manufacturers import raw materials and export finished",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of other textiles n.e.c. (SIC 13990)",
+      "mechanism": "Pays USD/EUR for raw materials",
+      "filter_reason": "UK textile manufacturers regularly import specialised fibres and chemicals, creating recurring FX payment needs.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of leather clothes (SIC 14110)",
+      "mechanism": "Pays EUR/USD for leather hides",
+      "filter_reason": "UK leather clothing manufacturers import raw leather from overseas, leading to structural foreign currency payments.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of workwear (SIC 14120)",
+      "mechanism": "Pays USD/EUR for fabrics and components",
+      "filter_reason": "Workwear manufacturers regularly import specialised textiles and components, creating recurring FX payment",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of other paper and paperboard containers (SIC 17219)",
+      "mechanism": "pays EUR/USD for raw materials",
+      "filter_reason": "SMEs import paper/board and other inputs, creating recurring FX payables.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of household and sanitary goods and of toilet requisites (SIC 17220)",
+      "mechanism": "pays EUR/USD for chemicals, packaging",
+      "filter_reason": "SMEs import raw materials and components, leading to recurring FX payables.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of paper stationery (SIC 17230)",
+      "mechanism": "pays EUR/USD for paper, inks, materials",
+      "filter_reason": "SMEs import paper and other inputs, creating recurring FX payables.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of pesticides and other agrochemical products (SIC 20200)",
+      "mechanism": "pays EUR for chemical ingredients",
+      "filter_reason": "SMEs import raw materials from Europe for production, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of paints, varnishes and similar coatings, mastics and sealants (SIC 20301)",
+      "mechanism": "pays USD for raw materials",
+      "filter_reason": "SMEs import pigments and resins globally, leading to recurring foreign currency payments.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of printing ink (SIC 20302)",
+      "mechanism": "pays EUR for raw materials",
+      "filter_reason": "SMEs import specialised chemicals and pigments from Europe, creating recurring FX payments.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of soap and detergents (SIC 20411)",
+      "mechanism": "pays USD for ingredients",
+      "filter_reason": "SMEs",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture and processing of other glass, including technical glassware (SIC 23190)",
+      "mechanism": "pays EUR/USD for raw materials/machinery",
+      "filter_reason": "SMEs import specialised inputs and export finished technical glass products.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of refractory products (SIC 23200)",
+      "mechanism": "pays EUR/USD for specialised raw materials",
+      "filter_reason": "SMEs import specific minerals and export heat-resistant products to industrial clients.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of ceramic tiles and flags (SIC 23310)",
+      "mechanism": "pays EUR/USD for raw materials/machinery",
+      "filter_reason": "SMEs import clays, glazes, and machinery for tile production and",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Casting of iron (SIC 24510)",
+      "mechanism": "pays EUR/USD for raw materials, receives EUR/USD for exports",
+      "filter_reason": "UK iron foundries import specialist materials and export finished castings, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "both"
+    },
+    {
+      "sector_name": "Casting of steel (SIC 24520)",
+      "mechanism": "pays EUR/USD for raw materials, receives EUR/USD for exports",
+      "filter_reason": "UK steel foundries import specialist alloys and export high-value castings, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "both"
+    },
+    {
+      "sector_name": "Manufacture of fasteners and screw machine products (SIC 25940)",
+      "mechanism": "pays EUR/USD for raw materials and exports",
+      "filter_reason": "SMEs import specialised materials and export finished products, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of other fabricated metal products n.e.c. (SIC 25990)",
+      "mechanism": "pays EUR/USD for raw materials and exports",
+      "filter_reason": "SMEs import raw materials and export finished metal products, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of electronic components (SIC 26110)",
+      "mechanism": "pays USD/EUR for raw materials and exports",
+      "filter_reason": "SMEs import specialised components and export finished products, creating significant",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of fibre optic cables (SIC 27310)",
+      "mechanism": "pays EUR for components",
+      "filter_reason": "UK manufacturers import specialised parts from Europe for their fibre optic cable production.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of electric domestic appliances (SIC 27510)",
+      "mechanism": "pays USD for raw materials",
+      "filter_reason": "UK manufacturers import components and raw materials from global suppliers for appliance production.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of non-electric domestic appliances (SIC 27520)",
+      "mechanism": "pays EUR for raw materials",
+      "filter_reason": "UK manufacturers import components and raw materials from global suppliers for appliance production.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of other electrical equipment (SIC 27900)",
+      "mechanism": "pays USD for components",
+      "filter_reason": "UK manufacturers import specialised parts",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of machinery for metallurgy (SIC 28910)",
+      "mechanism": "pays EUR for specialised components",
+      "filter_reason": "SMEs import high-value components and export bespoke machinery, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of machinery for mining (SIC 28921)",
+      "mechanism": "receives USD from international mining clients",
+      "filter_reason": "SMEs export specialised mining machinery globally, generating significant recurring foreign currency revenue.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Manufacture of earthmoving equipment (SIC 28922)",
+      "mechanism": "exports equipment to global construction projects",
+      "filter_reason": "SMEs export specialised earthmoving equipment and components, leading to recurring foreign currency receipts.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of motorcycles (SIC 30910)",
+      "mechanism": "pays EUR for imported components",
+      "filter_reason": "SMEs import specialised parts and export finished motorcycles, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of bicycles and invalid carriages (SIC 30920)",
+      "mechanism": "pays USD/EUR for imported components",
+      "filter_reason": "SMEs import parts from global suppliers and export bikes, leading to structural FX flows.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Manufacture of other transport equipment n.e.c. (SIC 30990)",
+      "mechanism": "pays EUR for imported specialised parts",
+      "filter_reason": "SMEs import components and export niche transport equipment, creating regular FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Repair and maintenance of other transport equipment n.e.c. (SIC 33170)",
+      "mechanism": "pays EUR for specialist parts",
+      "filter_reason": "SMEs import specialist parts for complex transport equipment from European manufacturers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Repair of other equipment (SIC 33190)",
+      "mechanism": "pays USD for specialist parts",
+      "filter_reason": "SMEs import specialist parts for industrial and electronic equipment from global manufacturers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Treatment and disposal of hazardous waste (SIC 38220)",
+      "mechanism": "pays EUR for specialist chemicals",
+      "filter_reason": "SMEs import specialist chemicals or equipment for treating hazardous waste from European suppliers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Recovery of sorted materials (SIC 38320)",
+      "mechanism": "receives USD from international buyers",
+      "filter_reason": "SMEs export sorted",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Sale, maintenance and repair of motorcycles and related parts and accessories (SIC 45400)",
+      "mechanism": "pays EUR, JPY, USD to overseas manufacturers",
+      "filter_reason": "Independent motorcycle dealers import vehicles and parts directly, creating recurring foreign currency payment obligations.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Agents selling agricultural raw materials, livestock, textile raw materials and semi-finished goods (SIC 46110)",
+      "mechanism": "pays USD, EUR to international raw material suppliers",
+      "filter_reason": "Agents in raw materials often import goods directly, incurring recurring foreign currency payment obligations.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Agents involved in the sale of fuels, ores, metals and industrial chemicals (SIC 46120)",
+      "mechanism": "pays USD, EUR for imported fuels, metals, chemicals",
+      "filter_reason": "SME agents in commodities frequently import directly,",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Wholesale of sugar and chocolate and sugar confectionery (SIC 46360)",
+      "mechanism": "pays EUR/USD to international suppliers",
+      "filter_reason": "SMEs import confectionery products and raw materials from overseas, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Wholesale of coffee, tea, cocoa and spices (SIC 46370)",
+      "mechanism": "pays USD/EUR to international growers/importers",
+      "filter_reason": "SMEs import raw coffee, tea, cocoa, and spices from global markets, incurring significant recurring FX costs.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Wholesale of other food, including fish, crustaceans and molluscs (SIC 46380)",
+      "mechanism": "pays EUR/USD to international food suppliers",
+      "filter_reason": "SMEs import diverse food products",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Wholesale of machinery for the textile industry and of sewing and knitting machines (SIC 46640)",
+      "mechanism": "pays EUR/USD to overseas suppliers",
+      "filter_reason": "UK wholesalers frequently import specialised machinery from Europe and Asia, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Wholesale of office furniture (SIC 46650)",
+      "mechanism": "pays EUR/USD to overseas suppliers",
+      "filter_reason": "UK wholesalers regularly import office furniture from European and Asian manufacturers, requiring active FX management.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Wholesale of other office machinery and equipment (SIC 46660)",
+      "mechanism": "pays EUR/USD to overseas suppliers",
+      "filter_reason": "UK wholesalers frequently import office machinery from global manufacturers, leading to recurring FX payments",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Retail sale of musical instruments and scores (SIC 47591)",
+      "mechanism": "pays EUR/USD to international suppliers",
+      "filter_reason": "UK music shops frequently import instruments directly from European and US manufacturers, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Retail of furniture, lighting, and similar (not musical instruments or scores) in specialised store (SIC 47599)",
+      "mechanism": "pays EUR/USD to international suppliers",
+      "filter_reason": "Independent furniture and lighting retailers frequently import goods from Europe and Asia, creating recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Retail sale of sports goods, fishing gear, camping goods, boats and bicycles (SIC 47640)",
+      "mechanism": "pays EUR/USD to international suppliers",
+      "filter_reason": "UK sports, bike, and outdoor retailers frequently import goods directly",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Non-scheduled passenger air transport (SIC 51102)",
+      "mechanism": "pays USD for fuel and aircraft parts",
+      "filter_reason": "UK non-scheduled air transport SMEs regularly import fuel and parts, creating structural USD payment exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Service activities incidental to water transportation (SIC 52220)",
+      "mechanism": "pays USD for ship supplies and crew wages",
+      "filter_reason": "UK marine service SMEs regularly purchase international supplies and pay foreign crew, creating structural USD payment exposure.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Service activities incidental to air transportation (SIC 52230)",
+      "mechanism": "pays USD for aircraft parts and equipment",
+      "filter_reason": "UK aircraft maintenance SMEs regularly import specialised parts",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Publishing of consumer and business journals and periodicals (SIC 58142)",
+      "mechanism": "receives USD/EUR from international subscribers/advertisers",
+      "filter_reason": "SMEs in this sector often sell subscriptions and advertising globally, creating recurring FX inflows.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Other publishing activities (SIC 58190)",
+      "mechanism": "pays USD/EUR to international authors/illustrators, receives from rights sales",
+      "filter_reason": "Independent publishers frequently manage recurring FX for international royalties, rights, and distribution.",
+      "source": "ons_sic",
+      "fx_direction": "both"
+    },
+    {
+      "sector_name": "Business and domestic software development (SIC 62012)",
+      "mechanism": "receives USD/EUR from international clients; pays USD for cloud services",
+      "filter_reason": "Global software sales and international cloud infrastructure costs create recurring, material FX exposure for SMEs.",
+      "source": "ons_sic",
+      "fx_direction": "both"
+    },
+    {
+      "sector_name": "Data processing, hosting and related activities (SIC 63110)",
+      "mechanism": "pays USD/EUR for international server infrastructure; receives USD from global clients",
+      "filter_reason": "Reliance on international data centre infrastructure and global client base creates significant, recurring FX exposure.",
+      "source": "ons_sic",
+      "fx_direction": "both"
+    },
+    {
+      "sector_name": "Security and commodity contracts dealing activities (SIC 66120)",
+      "mechanism": "trades foreign currency instruments",
+      "filter_reason": "SMEs in this sector actively manage foreign currency positions as their core business.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Fund management activities (SIC 66300)",
+      "mechanism": "invests in foreign currency denominated assets",
+      "filter_reason": "Fund managers actively manage foreign currency exposure from international investments and client portfolios.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Engineering design activities for industrial process and production (SIC 71121)",
+      "mechanism": "receives foreign currency for international projects",
+      "filter_reason": "Engineering design SMEs often undertake international projects, receiving payment in foreign currencies.",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Technical testing and analysis (SIC 71200)",
+      "mechanism": "pays USD/EUR for specialist equipment",
+      "filter_reason": "SMEs in this sector often serve global markets or procure specialist equipment internationally.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Research and experimental development on biotechnology (SIC 72110)",
+      "mechanism": "pays USD/EUR for specialist equipment",
+      "filter_reason": "Biotech SMEs frequently procure specialist materials and equipment from global suppliers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Renting and leasing of media entertainment equipment (SIC 77291)",
+      "mechanism": "pays USD/EUR for specialist equipment",
+      "filter_reason": "SMEs in this sector frequently purchase high-value, specialist equipment from international manufacturers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Temporary employment agency activities (SIC 78200)",
+      "mechanism": "Pays EUR/USD to international contractors/clients",
+      "filter_reason": "UK agencies often place staff internationally, generating recurring foreign currency receivables or payables.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Travel agency activities (SIC 79110)",
+      "mechanism": "Pays EUR/USD to international hotels/airlines",
+      "filter_reason": "UK travel agencies regularly purchase foreign currency denominated accommodation and transport services for their clients.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Tour operator activities (SIC 79120)",
+      "mechanism": "Pays EUR/USD to international hotels/suppliers",
+      "filter_reason": "UK tour operators contract directly with foreign suppliers, creating",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Specialists medical practice activities (SIC 86220)",
+      "mechanism": "pays EUR/USD for specialist medical equipment and consumables",
+      "filter_reason": "UK private clinics regularly import high-value medical supplies and equipment directly from international manufacturers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Support activities to performing arts (SIC 90020)",
+      "mechanism": "pays EUR/USD for specialist stage equipment and technology",
+      "filter_reason": "UK technical support companies regularly import high-value audio-visual and staging equipment from international suppliers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Gambling and betting activities (SIC 92000)",
+      "mechanism": "receives USD/EUR from international online bettors",
+      "filter_reason": "UK online gambling",
+      "source": "ons_sic",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Repair of furniture and home furnishings (SIC 95240)",
+      "mechanism": "pays EUR for specialist fabrics",
+      "filter_reason": "SMEs in furniture repair and upholstery frequently import specialist fabrics and components from European suppliers.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Repair of watches, clocks and jewellery (SIC 95250)",
+      "mechanism": "pays CHF for watch movements",
+      "filter_reason": "SMEs in watch, clock, and jewellery repair often import high-value components like watch movements from Switzerland.",
+      "source": "ons_sic",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "British Frozen Food Federation",
+      "mechanism": "pays EUR for frozen food imports",
+      "filter_reason": "UK frozen food SMEs regularly import products from European suppliers, creating",
+      "source": "taf",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "National Association of Jewellers",
+      "mechanism": "pays foreign suppliers for materials",
+      "filter_reason": "Jewellery manufacturers and retailers frequently import precious metals, gemstones, or finished goods from overseas.",
+      "source": "taf",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "PAGB, the Consumer Healthcare Association",
+      "mechanism": "pays foreign suppliers for ingredients",
+      "filter_reason": "Consumer healthcare manufacturers import raw materials, APIs, and packaging from international suppliers.",
+      "source": "taf",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Professional Publishers Association",
+      "mechanism": "receives foreign currency from sales",
+      "filter_reason": "Publishers sell books and content internationally and license rights, receiving foreign currency.",
+      "source": "taf",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "Chemical Industries Association",
+      "mechanism": "pays EUR/USD for raw materials",
+      "filter_reason": "Chemical SMEs import raw materials and export products, creating recurring FX exposure.",
+      "source": "wikipedia",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Confederation of Forest Industries",
+      "mechanism": "pays EUR for timber/machinery, receives EUR/USD",
+      "filter_reason": "Forestry SMEs import specialized timber/machinery and export products, creating recurring FX exposure.",
+      "source": "wikipedia",
+      "fx_direction": "both"
+    },
+    {
+      "sector_name": "Construction Products Association",
+      "mechanism": "pays EUR/USD for raw materials/components",
+      "filter_reason": "Construction product SMEs import raw materials and components,",
+      "source": "wikipedia",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "Oil & Gas UK (OGUK)",
+      "mechanism": "pays EUR/USD for imported timber",
+      "filter_reason": "Timber importers face recurring, material FX exposure from overseas suppliers.",
+      "source": "wikipedia",
+      "fx_direction": "pays"
+    },
+    {
+      "sector_name": "The Publishers Association",
+      "mechanism": "receives USD/EUR from international sales",
+      "filter_reason": "Publishers regularly receive foreign currency for international rights and book sales.",
+      "source": "wikipedia",
+      "fx_direction": "receives"
+    },
+    {
+      "sector_name": "RenewableUK",
+      "mechanism": "pays EUR/USD for imported components",
+      "filter_reason": "Renewable energy SMEs frequently import specialised equipment and components from abroad.",
+      "source": "wikipedia",
+      "fx_direction": "pays"
+    }
+  ]
+}

@@ -1,13 +1,8 @@
-name: Niche Finder — Deploy to GitHub Pages
+name: Deploy to GitHub Pages
 
-# Deploys the static niche-finder dashboard to GitHub Pages.
-#
-# The committed dashboard/data/niches.json already contains real competition
-# scores from the last local run. The workflow serves that data as-is by default.
-#
-# If GEMINI_API_KEY or ANTHROPIC_API_KEY is set in repo secrets, the workflow
-# will also run a competition recheck for stale niches (> 30 days old) and
-# serve the freshened data.
+# Serves two dashboards from one Pages deployment:
+#   /            → niche-finder dashboard (existing)
+#   /niche-generator/ → niche-generator-standalone dashboard (new)
 #
 # GitHub Pages must be enabled: Repo → Settings → Pages → Source: GitHub Actions
 
@@ -16,9 +11,9 @@ on:
     branches: [main]
     paths:
       - 'niche-finder/**'
+      - 'niche-generator-standalone/dashboard/**'
       - '.github/workflows/niche-finder-pages.yml'
   workflow_dispatch:
-    # Manual trigger. Set GEMINI_API_KEY in repo secrets to refresh competition scores.
 
 concurrency:
   group: niche-finder-pages
@@ -40,8 +35,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Refresh competition scores (if API key is set)
-        # Only installs Python and runs the recheck when a key is available.
-        # Otherwise the committed dashboard/data/niches.json is used unchanged.
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -50,16 +43,21 @@ jobs:
             echo "API key found — refreshing stale competition scores…"
             pip install -r niche-finder/requirements.txt -q
             cd niche-finder
-            # Recheck works on the existing committed JSON, then copies result to dashboard/data/
             python main.py --recheck-competition --older-than-days 30 --out niche_finder
           else
-            echo "No API key — serving committed competition data (has real scores from last local run)."
+            echo "No API key — serving committed competition data."
           fi
+
+      - name: Build combined Pages artifact
+        run: |
+          mkdir -p _site/niche-generator
+          cp -r niche-finder/dashboard/. _site/
+          cp -r niche-generator-standalone/dashboard/. _site/niche-generator/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: niche-finder/dashboard
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
