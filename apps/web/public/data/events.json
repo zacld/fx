@@ -7079,7 +7079,7 @@
     "summary": "Hormuz crisis leads to soaring shipping costs, impacting UK importers with international supply chains. Potential higher US tariffs on imported goods as of July 1 creates urgency to review supply chains and payment flows.",
     "currency_pairs": [
       "GBP/USD",
-      "GBP/EUR"
+      "USD/EUR"
     ],
     "urgency_score": 9,
     "commercial_relevance": 9,
@@ -7114,7 +7114,7 @@
     "overall_sales_angle": "Soaring shipping costs and potential tariffs mean UK importers should review their supply chains and payment flows to mitigate risks.",
     "target_segments": [
       {
-        "segment_name": "UK importers of US goods",
+        "segment_name": "UK importers of container cargo",
         "category_priority_score": 95,
         "business_model": "UK importer buying from US suppliers, paying in USD, selling in GBP. Soaring shipping costs and potential higher US tariffs increase the GBP cost of these imports.",
         "exposure_level": "Very High",

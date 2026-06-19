@@ -1167,7 +1167,7 @@
     "fx_reason": "",
     "exposure_thesis": "FARM MACHINERY PARTS NI LIMITED imports goods from the US. The proposed US tariffs will increase the cost of these imports.",
     "exposure_confidence": "low",
-    "score": 59,
+    "score": 55,
     "priority": "QUEUE",
     "scoring_reasons": [
       "SIC tier 2 (manufacturing): 33120, 46610",
@@ -1177,8 +1177,7 @@
       "Director found: Alan Cyril IRVINE",
       "Website confirmed",
       "Active on Companies House",
-      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)",
-      "Multi-event trigger: 2 separate events flag this company (+4)"
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
     ],
     "ready_score": 0,
     "lead_type": "both",
@@ -16126,7 +16125,9 @@
     "inferred_currency_pairs": [],
     "currency_reason": "",
     "size_signals": [],
-    "tech_signals": [],
+    "tech_signals": [
+      "google-tag-manager"
+    ],
     "fx_likelihood_score": 0,
     "website_confidence_reason": "High confidence: discovered via domain guess",
     "trustpilot_reviews": null,
@@ -23313,7 +23314,8 @@
       "4127914d06790338",
       "9ea95f7a99e6477f",
       "c7ff85f7ae7e6042",
-      "f331b436003d3abe"
+      "f331b436003d3abe",
+      "59fec8d0a5442d20"
     ],
     "created_at": "2026-05-20T14:04:56.917Z",
     "rescored_at": "2026-06-19T09:31:02.246Z",
@@ -23484,6 +23486,13 @@
         "source_query": "\"machinery importer\" UK European",
         "source_segment": "UK importers of European manufactured goods",
         "source_micro_category": "UK importers of Italian machinery parts"
+      },
+      {
+        "source_query": "\"electronics importer\" UK",
+        "source_segment": "UK importers of container cargo",
+        "source_micro_category": "UK importers of electronics from Asia",
+        "website_source": "ch_keyword",
+        "discovery_path": "ch_fallback"
       }
     ],
     "fx_payment_signals": [],
@@ -23511,7 +23520,7 @@
     "fx_reason": "",
     "exposure_thesis": "AC IMPORTERS LIMITED imports manufactured goods from EU. GBP/EUR move decreases GBP cost of EUR supplier invoices.",
     "exposure_confidence": "low",
-    "score": 55,
+    "score": 59,
     "priority": "QUEUE",
     "scoring_reasons": [
       "SIC tier 2 (manufacturing): 46900",
@@ -23521,14 +23530,15 @@
       "Director found: Simon Peter HARRISON",
       "Website confirmed",
       "Active on Companies House",
-      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)",
+      "Multi-event trigger: 2 separate events flag this company (+4)"
     ],
     "ready_score": 0,
     "lead_type": "both",
     "awareness_level": "low",
     "saving_opportunity": "low",
     "multi_event_trigger": true,
-    "multi_event_count": 3,
+    "multi_event_count": 2,
     "sales_angle": "Your upcoming EUR supplier invoices are costing less in GBP than they were last month.",
     "suggested_next_step": "",
     "guessed_emails": [],
@@ -23788,12 +23798,12 @@
     "contact_phones_e164": [],
     "contact_phone_types": [],
     "linked_segments": [
-      "UK importers of European manufactured goods"
+      "UK importers of European manufactured goods",
+      "UK importers of container cargo"
     ],
     "linked_event_headlines": [
       "British Pound outperforms Euro as traders reassess ECB and BoE outlook after inflation data",
-      "Euro rallies against the British Pound as BoE leaves rates unchanged",
-      "Euro set for weakness as BoE, SNB, Norges Bank and Riksbank leave the ECB hiking alone"
+      "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade"
     ],
     "last_accounts_date": "2022-04-30",
     "accounts_source": "ch_ixbrl",
@@ -87321,6 +87331,462 @@
     "ready_reason": "No FX confidence signals found",
     "accounts_type": "full"
   },
+  "44a49506cd64403e": {
+    "id": "44a49506cd64403e",
+    "event_id": "59fec8d0a5442d20",
+    "linked_event_ids": [
+      "59fec8d0a5442d20"
+    ],
+    "created_at": "2026-06-19T09:27:39.571Z",
+    "rescored_at": "2026-06-19T09:52:21.030Z",
+    "company_name": "ELECTRONICS AND VAPES LTD",
+    "company_number": "13809799",
+    "company_status": "active",
+    "company_type": null,
+    "address": "15-17 Edgware Road, London, W2 2JE",
+    "incorporated": "2021-12-20",
+    "sic_codes": [
+      "47260",
+      "95210"
+    ],
+    "director_name": "Hassan Jamil FAKHOURI",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": null,
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "collision_stripped",
+    "discovery_path": "ch_fallback",
+    "source_query": "UK importer electronics",
+    "source_segment": "UK importers of container cargo",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [
+      "global",
+      "sourcing"
+    ],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 2,
+    "company_source": "companies_house",
+    "segment_name": "UK importers of container cargo",
+    "segment_business_model": "UK importer buying goods from international suppliers, paying in USD for container cargo or bunker fuel, and selling in GBP to UK trade.",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD payments for container cargo or bunker fuel",
+    "why_affected": "ELECTRONICS AND VAPES LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 5% increase in shipping costs on \u00a31 million annual imports \u2248 \u00a350,000 extra cost if not hedged",
+    "payment_timing_risk": "High \u2014 30-90 day payment terms create an open FX window between order and payment",
+    "affected_payment_flow": "USD payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly",
+    "trigger_headline": "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+    "event_type": "",
+    "business_impact_summary": "UK importers face higher costs due to increased shipping expenses and potential tariff changes. Reviewing payment flows and supply chain costs is crucial to mitigate the impact of the Hormuz crisis.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Importer pays USD for container cargo or bunker fuel \u2192 increased shipping costs due to the Hormuz crisis \u2192 higher USD costs \u2192 more GBP required per USD",
+    "fx_reason": "",
+    "exposure_thesis": "ELECTRONICS AND VAPES LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "exposure_confidence": "low",
+    "score": 49,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "International activity signals (2)",
+      "SIC tier 3 (logistics/retail): 47260, 95210",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD payments for ",
+      "High urgency event (score 9/10)",
+      "Established company (+2) \u2014 incorporated 2021",
+      "Director found: Hassan Jamil FAKHOURI",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)",
+      "\u26a0 Website collision (electronics.co.uk) \u2014 stripped, QUEUE cap"
+    ],
+    "ready_score": 0,
+    "lead_type": "trigger_exposed",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "If you're importing container cargo, the increased shipping costs due to the Hormuz crisis should be reviewed to understand the impact on your business.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mr please? I'm calling from a currency brokerage \u2014 it looks like Electronics And Vapes may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly, and given Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: Electronics And Vapes \u2014 USD exposure\n\nHi Mr,\n\nI came across Electronics And Vapes \u2014 it looks like you And Vapes may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mr \u2014 I came across Electronics And Vapes and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 40,
+    "industry_label": "FX Discovery",
+    "contact_phone": null,
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Hassan Jamil FAKHOURI (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mr Fakhouri",
+        "first_name": "Mr",
+        "last_name": "Fakhouri",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2021-12-20",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mr.fakhouri@electronics.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr@electronics.co.uk",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrfakhouri@electronics.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mfakhouri@electronics.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.fakhouri@electronics.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr_fakhouri@electronics.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr-fakhouri@electronics.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrf@electronics.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr.f@electronics.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "fakhouri@electronics.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "fakhouri.mr@electronics.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "fmr@electronics.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mr.fakhouri@electronics.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Fakhouri%20Electronics%20And%20Vapes",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Fakhouri",
+        "google_email_search": "https://www.google.com/search?q=\"Mr%20Fakhouri\"+\"%40electronics.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Steven Terence",
+        "first_name": "Steven",
+        "last_name": "Terence",
+        "role": "owner",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "steven.terence@electronics.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steven@electronics.co.uk",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steventerence@electronics.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sterence@electronics.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "s.terence@electronics.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steven_terence@electronics.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steven-terence@electronics.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "stevent@electronics.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steven.t@electronics.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "terence@electronics.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "terence.steven@electronics.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tsteven@electronics.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "steven.terence@electronics.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Steven%20Terence%20Electronics%20And%20Vapes",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Steven%20Terence",
+        "google_email_search": "https://www.google.com/search?q=\"Steven%20Terence\"+\"%40electronics.co.uk\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Hassan Fakhouri",
+        "first_name": "Hassan",
+        "last_name": "Fakhouri",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2021-12-20",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "hassan.fakhouri@electronics.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hassan@electronics.co.uk",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hassanfakhouri@electronics.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hfakhouri@electronics.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "h.fakhouri@electronics.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hassan_fakhouri@electronics.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hassan-fakhouri@electronics.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hassanf@electronics.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "hassan.f@electronics.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "fakhouri@electronics.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "fakhouri.hassan@electronics.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "fhassan@electronics.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "hassan.fakhouri@electronics.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Hassan%20Fakhouri%20Electronics%20And%20Vapes",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Hassan%20Fakhouri",
+        "google_email_search": "https://www.google.com/search?q=\"Hassan%20Fakhouri\"+\"%40electronics.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=Electronics%20And%20Vapes",
+    "company_name_clean": "Electronics And Vapes",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22Electronics%20And%20Vapes%22",
+    "press_search_url": "https://www.google.com/search?q=%22Electronics%20And%20Vapes%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK importers of electronics from Asia",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-19T09:30:23.698Z",
+    "switchboard_hint": "Likely UK switchboard prefix: 020 (from 15-17 Edgware Road, London, W2 2JE)",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "accounts_type": "dormant",
+    "last_accounts_date": "2024-12-31",
+    "accounts_source": "ch_filing_description",
+    "company_size_band": "dormant",
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (49)",
+      "FX evidence weak (fx_likelihood=0% signals=2) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium",
+      "no website"
+    ]
+  },
   "45398700b3877135": {
     "id": "45398700b3877135",
     "event_id": "evt_tariff_whisky_005",
@@ -96499,6 +96965,1108 @@
     "dm_enriched_at": "2026-06-02T23:30:27.226Z",
     "call_readiness": "READY",
     "call_readiness_reasons": []
+  },
+  "4e492a970f21d1a9": {
+    "id": "4e492a970f21d1a9",
+    "event_id": "59fec8d0a5442d20",
+    "linked_event_ids": [
+      "59fec8d0a5442d20"
+    ],
+    "created_at": "2026-06-19T09:27:38.213Z",
+    "rescored_at": "2026-06-19T09:52:21.026Z",
+    "company_name": "ARDBLAIR SPORTS IMPORTERS LIMITED",
+    "company_number": "SC062120",
+    "company_status": "active",
+    "company_type": null,
+    "address": "Blairgowrie, PH10 6NW",
+    "incorporated": "1977-04-04",
+    "sic_codes": [
+      "46420"
+    ],
+    "director_name": "Duncan Clayton RYAN",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://ardblair.co.uk",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "\"electronics importer\" UK",
+    "source_segment": "UK importers of container cargo",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 0,
+    "company_source": "companies_house",
+    "segment_name": "UK importers of container cargo",
+    "segment_business_model": "UK importer buying goods from international suppliers, paying in USD for container cargo or bunker fuel, and selling in GBP to UK trade.",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD payments for container cargo or bunker fuel",
+    "why_affected": "ARDBLAIR SPORTS IMPORTERS LIMITED imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 5% increase in shipping costs on \u00a31 million annual imports \u2248 \u00a350,000 extra cost if not hedged",
+    "payment_timing_risk": "High \u2014 30-90 day payment terms create an open FX window between order and payment",
+    "affected_payment_flow": "USD payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly",
+    "trigger_headline": "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+    "event_type": "",
+    "business_impact_summary": "UK importers face higher costs due to increased shipping expenses and potential tariff changes. Reviewing payment flows and supply chain costs is crucial to mitigate the impact of the Hormuz crisis.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Importer pays USD for container cargo or bunker fuel \u2192 increased shipping costs due to the Hormuz crisis \u2192 higher USD costs \u2192 more GBP required per USD",
+    "fx_reason": "",
+    "exposure_thesis": "ARDBLAIR SPORTS IMPORTERS LIMITED imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "exposure_confidence": "low",
+    "score": 55,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "SIC tier 1 (core trade/wholesale): 46420",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD payments for ",
+      "High urgency event (score 9/10)",
+      "Company name signals trade/international activity (+3)",
+      "Established company (+8) \u2014 incorporated 1977",
+      "Director found: Duncan Clayton RYAN",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+    ],
+    "ready_score": 0,
+    "lead_type": "trigger_exposed",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "If you're importing container cargo, the increased shipping costs due to the Hormuz crisis should be reviewed to understand the impact on your business.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Dameck please? I'm calling from a currency brokerage \u2014 it looks like Ardblair Sports Importers may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly, and given Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: Ardblair Sports Importers \u2014 USD exposure\n\nHi Dameck,\n\nI came across Ardblair Sports Importers \u2014 it looks like you Sports Importers may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Dameck \u2014 I came across Ardblair Sports Importers and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 25,
+    "industry_label": "FX Discovery",
+    "contact_phone": "01778 610021",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Duncan Clayton RYAN (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Dameck Limited",
+        "first_name": "Dameck",
+        "last_name": "Limited",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2019-09-11",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "dameck.limited@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "dameck@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "damecklimited@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "dlimited@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "d.limited@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "dameck_limited@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "dameck-limited@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "dameckl@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "dameck.l@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "limited@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "limited.dameck@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ldameck@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "dameck.limited@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Dameck%20Limited%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Dameck%20Limited",
+        "google_email_search": "https://www.google.com/search?q=\"Dameck%20Limited\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Duncan Ryan",
+        "first_name": "Duncan",
+        "last_name": "Ryan",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2013-02-01",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "duncan.ryan@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "duncan@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "duncanryan@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "dryan@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "d.ryan@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "duncan_ryan@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "duncan-ryan@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "duncanr@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "duncan.r@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ryan@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ryan.duncan@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "rduncan@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "duncan.ryan@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Duncan%20Ryan%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Duncan%20Ryan",
+        "google_email_search": "https://www.google.com/search?q=\"Duncan%20Ryan\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Kirsten Ryan",
+        "first_name": "Kirsten",
+        "last_name": "Ryan",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "1999-11-18",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "kirsten.ryan@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kirsten@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kirstenryan@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kryan@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "k.ryan@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kirsten_ryan@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kirsten-ryan@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kirstenr@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "kirsten.r@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ryan@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ryan.kirsten@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "rkirsten@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "kirsten.ryan@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Kirsten%20Ryan%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Kirsten%20Ryan",
+        "google_email_search": "https://www.google.com/search?q=\"Kirsten%20Ryan\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Arnold Scott",
+        "first_name": "Arnold",
+        "last_name": "Scott",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "arnold.scott@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "arnold@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "arnoldscott@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ascott@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.scott@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "arnold_scott@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "arnold-scott@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "arnolds@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "arnold.s@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott.arnold@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sarnold@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "arnold.scott@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Arnold%20Scott%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Arnold%20Scott",
+        "google_email_search": "https://www.google.com/search?q=\"Arnold%20Scott\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Ashley Scott",
+        "first_name": "Ashley",
+        "last_name": "Scott",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2013-02-01",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "ashley.scott@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ashley@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ashleyscott@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ascott@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.scott@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ashley_scott@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ashley-scott@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ashleys@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ashley.s@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott.ashley@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sashley@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "ashley.scott@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Ashley%20Scott%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Ashley%20Scott",
+        "google_email_search": "https://www.google.com/search?q=\"Ashley%20Scott\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Clare Scott",
+        "first_name": "Clare",
+        "last_name": "Scott",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2013-02-01",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "clare.scott@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "clare@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "clarescott@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "cscott@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "c.scott@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "clare_scott@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "clare-scott@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "clares@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "clare.s@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott.clare@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sclare@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "clare.scott@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Clare%20Scott%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Clare%20Scott",
+        "google_email_search": "https://www.google.com/search?q=\"Clare%20Scott\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Craig Scott",
+        "first_name": "Craig",
+        "last_name": "Scott",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "1999-11-18",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "craig.scott@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "craig@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "craigscott@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "cscott@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "c.scott@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "craig_scott@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "craig-scott@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "craigs@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "craig.s@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott.craig@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scraig@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "craig.scott@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Craig%20Scott%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Craig%20Scott",
+        "google_email_search": "https://www.google.com/search?q=\"Craig%20Scott\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Ewan Scott",
+        "first_name": "Ewan",
+        "last_name": "Scott",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "1999-11-18",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "ewan.scott@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ewan@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ewanscott@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "escott@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "e.scott@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ewan_scott@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ewan-scott@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ewans@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ewan.s@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott.ewan@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sewan@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "ewan.scott@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Ewan%20Scott%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Ewan%20Scott",
+        "google_email_search": "https://www.google.com/search?q=\"Ewan%20Scott\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Murray Scott",
+        "first_name": "Murray",
+        "last_name": "Scott",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "1999-11-18",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "murray.scott@ardblair.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "murray@ardblair.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "murrayscott@ardblair.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mscott@ardblair.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.scott@ardblair.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "murray_scott@ardblair.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "murray-scott@ardblair.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "murrays@ardblair.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "murray.s@ardblair.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott@ardblair.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "scott.murray@ardblair.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "smurray@ardblair.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "murray.scott@ardblair.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Murray%20Scott%20Ardblair%20Sports%20Importers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Murray%20Scott",
+        "google_email_search": "https://www.google.com/search?q=\"Murray%20Scott\"+\"%40ardblair.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=Ardblair%20Sports%20Importers",
+    "company_name_clean": "Ardblair Sports Importers",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22Ardblair%20Sports%20Importers%22",
+    "press_search_url": "https://www.google.com/search?q=%22Ardblair%20Sports%20Importers%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK importers of electronics from Asia",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-19T09:28:23.300Z",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "accounts_type": "small",
+    "last_accounts_date": "2025-01-31",
+    "accounts_source": "ch_ixbrl",
+    "company_size_band": "unknown",
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "01778 610021",
+      "01778 610229",
+      "01778 422567",
+      "07789 546145"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (55)",
+      "FX evidence weak (fx_likelihood=0% signals=0) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium"
+    ]
   },
   "4f5056b210593d2b": {
     "id": "4f5056b210593d2b",
@@ -160614,6 +162182,364 @@
     "ready": "no",
     "ready_reason": "Company not suitable (dormant/micro/no CH number)"
   },
+  "80ec156b7f9931b9": {
+    "id": "80ec156b7f9931b9",
+    "event_id": "59fec8d0a5442d20",
+    "linked_event_ids": [
+      "59fec8d0a5442d20"
+    ],
+    "created_at": "2026-06-19T09:27:39.034Z",
+    "rescored_at": "2026-06-19T09:52:21.028Z",
+    "company_name": "AFRICAN AND ASIAN MARKET LTD",
+    "company_number": "17140384",
+    "company_status": "active",
+    "company_type": null,
+    "address": "483 West Derby Road, Liverpool, L6 4BW",
+    "incorporated": "2026-04-07",
+    "sic_codes": [
+      "47110"
+    ],
+    "director_name": "Filmon TESFAMARIAM",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://african.co.uk",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "\"Asian electronics\" UK distributor",
+    "source_segment": "UK importers of container cargo",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 0,
+    "company_source": "companies_house",
+    "segment_name": "UK importers of container cargo",
+    "segment_business_model": "UK importer buying goods from international suppliers, paying in USD for container cargo or bunker fuel, and selling in GBP to UK trade.",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD payments for container cargo or bunker fuel",
+    "why_affected": "AFRICAN AND ASIAN MARKET LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 5% increase in shipping costs on \u00a31 million annual imports \u2248 \u00a350,000 extra cost if not hedged",
+    "payment_timing_risk": "High \u2014 30-90 day payment terms create an open FX window between order and payment",
+    "affected_payment_flow": "USD payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly",
+    "trigger_headline": "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+    "event_type": "",
+    "business_impact_summary": "UK importers face higher costs due to increased shipping expenses and potential tariff changes. Reviewing payment flows and supply chain costs is crucial to mitigate the impact of the Hormuz crisis.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Importer pays USD for container cargo or bunker fuel \u2192 increased shipping costs due to the Hormuz crisis \u2192 higher USD costs \u2192 more GBP required per USD",
+    "fx_reason": "",
+    "exposure_thesis": "AFRICAN AND ASIAN MARKET LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "exposure_confidence": "low",
+    "score": 55,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "SIC tier 3 (logistics/retail): 47110",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD payments for ",
+      "High urgency event (score 9/10)",
+      "Company name signals trade/international activity (+8)",
+      "Very new company (-5) \u2014 incorporated 2026",
+      "Director found: Filmon TESFAMARIAM",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+    ],
+    "ready_score": 0,
+    "lead_type": "trigger_exposed",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "If you're importing container cargo, the increased shipping costs due to the Hormuz crisis should be reviewed to understand the impact on your business.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mr please? I'm calling from a currency brokerage \u2014 it looks like African And Asian Market may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly, and given Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: African And Asian Market \u2014 USD exposure\n\nHi Mr,\n\nI came across African And Asian Market \u2014 it looks like you And Asian Market may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mr \u2014 I came across African And Asian Market and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 35,
+    "industry_label": "FX Discovery",
+    "contact_phone": "0151 515 2249",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Filmon TESFAMARIAM (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mr Tesfamariam",
+        "first_name": "Mr",
+        "last_name": "Tesfamariam",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2026-04-07",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mr.tesfamariam@african.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr@african.co.uk",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrtesfamariam@african.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mtesfamariam@african.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.tesfamariam@african.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr_tesfamariam@african.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr-tesfamariam@african.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrt@african.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr.t@african.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tesfamariam@african.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tesfamariam.mr@african.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tmr@african.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mr.tesfamariam@african.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Tesfamariam%20African%20And%20Asian",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Tesfamariam",
+        "google_email_search": "https://www.google.com/search?q=\"Mr%20Tesfamariam\"+\"%40african.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Filmon Tesfamariam",
+        "first_name": "Filmon",
+        "last_name": "Tesfamariam",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2026-04-07",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "filmon.tesfamariam@african.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "filmon@african.co.uk",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "filmontesfamariam@african.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ftesfamariam@african.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "f.tesfamariam@african.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "filmon_tesfamariam@african.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "filmon-tesfamariam@african.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "filmont@african.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "filmon.t@african.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tesfamariam@african.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tesfamariam.filmon@african.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tfilmon@african.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "filmon.tesfamariam@african.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Filmon%20Tesfamariam%20African%20And%20Asian",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Filmon%20Tesfamariam",
+        "google_email_search": "https://www.google.com/search?q=\"Filmon%20Tesfamariam\"+\"%40african.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=African%20And%20Asian%20Market",
+    "company_name_clean": "African And Asian Market",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22African%20And%20Asian%20Market%22",
+    "press_search_url": "https://www.google.com/search?q=%22African%20And%20Asian%20Market%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK importers of electronics from Asia",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-19T09:28:52.229Z",
+    "switchboard_hint": "Likely UK switchboard prefix: 0151 (from 483 West Derby Road, Liverpool, L6 4BW)",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "0151 515 2249",
+      "0151 430 0041",
+      "0113 263 3556",
+      "0116 234 0519",
+      "0116 216 6734",
+      "01526 860432",
+      "01526 860735",
+      "0116 262 6037",
+      "01582 380122",
+      "01582 493385",
+      "0113 263 3030",
+      "07498 811521"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (55)",
+      "FX evidence weak (fx_likelihood=0% signals=0) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium"
+    ]
+  },
   "8115748b4632800d": {
     "id": "8115748b4632800d",
     "event_id": "evt_gbp_record_short_002",
@@ -167328,6 +169254,363 @@
       "020 7201 9322",
       "01861 098709",
       "07429 497976"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (55)",
+      "FX evidence weak (fx_likelihood=0% signals=0) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium"
+    ]
+  },
+  "84610e5301d70d41": {
+    "id": "84610e5301d70d41",
+    "event_id": "59fec8d0a5442d20",
+    "linked_event_ids": [
+      "59fec8d0a5442d20"
+    ],
+    "created_at": "2026-06-19T09:27:38.763Z",
+    "rescored_at": "2026-06-19T09:52:21.027Z",
+    "company_name": "AARADHYA ASIAN SUPERMARKET LTD",
+    "company_number": "17082148",
+    "company_status": "active",
+    "company_type": null,
+    "address": "25 Station Road, Rickmansworth, WD3 1QP",
+    "incorporated": "2026-03-10",
+    "sic_codes": [
+      "47210"
+    ],
+    "director_name": "Niroja NIRUJAN",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://aaradhya.co.uk",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "\"Asian electronics\" UK distributor",
+    "source_segment": "UK importers of container cargo",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 0,
+    "company_source": "companies_house",
+    "segment_name": "UK importers of container cargo",
+    "segment_business_model": "UK importer buying goods from international suppliers, paying in USD for container cargo or bunker fuel, and selling in GBP to UK trade.",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD payments for container cargo or bunker fuel",
+    "why_affected": "AARADHYA ASIAN SUPERMARKET LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 5% increase in shipping costs on \u00a31 million annual imports \u2248 \u00a350,000 extra cost if not hedged",
+    "payment_timing_risk": "High \u2014 30-90 day payment terms create an open FX window between order and payment",
+    "affected_payment_flow": "USD payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly",
+    "trigger_headline": "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+    "event_type": "",
+    "business_impact_summary": "UK importers face higher costs due to increased shipping expenses and potential tariff changes. Reviewing payment flows and supply chain costs is crucial to mitigate the impact of the Hormuz crisis.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Importer pays USD for container cargo or bunker fuel \u2192 increased shipping costs due to the Hormuz crisis \u2192 higher USD costs \u2192 more GBP required per USD",
+    "fx_reason": "",
+    "exposure_thesis": "AARADHYA ASIAN SUPERMARKET LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "exposure_confidence": "low",
+    "score": 55,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "SIC tier 3 (logistics/retail): 47210",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD payments for ",
+      "High urgency event (score 9/10)",
+      "Company name signals trade/international activity (+4)",
+      "Very new company (-5) \u2014 incorporated 2026",
+      "Director found: Niroja NIRUJAN",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+    ],
+    "ready_score": 0,
+    "lead_type": "trigger_exposed",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "If you're importing container cargo, the increased shipping costs due to the Hormuz crisis should be reviewed to understand the impact on your business.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mrs please? I'm calling from a currency brokerage \u2014 it looks like Aaradhya Asian Supermarket may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly, and given Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: Aaradhya Asian Supermarket \u2014 USD exposure\n\nHi Mrs,\n\nI came across Aaradhya Asian Supermarket \u2014 it looks like you Asian Supermarket may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mrs \u2014 I came across Aaradhya Asian Supermarket and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 35,
+    "industry_label": "FX Discovery",
+    "contact_phone": "020 7849 6094",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Niroja NIRUJAN (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mrs Nirujan",
+        "first_name": "Mrs",
+        "last_name": "Nirujan",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2026-03-10",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mrs.nirujan@aaradhya.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs@aaradhya.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrsnirujan@aaradhya.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mnirujan@aaradhya.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.nirujan@aaradhya.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs_nirujan@aaradhya.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs-nirujan@aaradhya.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrsn@aaradhya.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs.n@aaradhya.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nirujan@aaradhya.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nirujan.mrs@aaradhya.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nmrs@aaradhya.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mrs.nirujan@aaradhya.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mrs%20Nirujan%20Aaradhya%20Asian%20Supermarket",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mrs%20Nirujan",
+        "google_email_search": "https://www.google.com/search?q=\"Mrs%20Nirujan\"+\"%40aaradhya.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Niroja Nirujan",
+        "first_name": "Niroja",
+        "last_name": "Nirujan",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2026-03-10",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "niroja.nirujan@aaradhya.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "niroja@aaradhya.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nirojanirujan@aaradhya.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nnirujan@aaradhya.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "n.nirujan@aaradhya.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "niroja_nirujan@aaradhya.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "niroja-nirujan@aaradhya.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nirojan@aaradhya.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "niroja.n@aaradhya.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nirujan@aaradhya.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nirujan.niroja@aaradhya.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nniroja@aaradhya.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "niroja.nirujan@aaradhya.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Niroja%20Nirujan%20Aaradhya%20Asian%20Supermarket",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Niroja%20Nirujan",
+        "google_email_search": "https://www.google.com/search?q=\"Niroja%20Nirujan\"+\"%40aaradhya.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=Aaradhya%20Asian%20Supermarket",
+    "company_name_clean": "Aaradhya Asian Supermarket",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22Aaradhya%20Asian%20Supermarket%22",
+    "press_search_url": "https://www.google.com/search?q=%22Aaradhya%20Asian%20Supermarket%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK importers of electronics from Asia",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-19T09:28:25.969Z",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "020 7849 6094",
+      "020 3012 0016",
+      "020 8396 6918",
+      "020 3633 1692",
+      "020 8753 0000",
+      "020 7820 4900",
+      "01403 268251",
+      "01635 202267",
+      "0191 284 6250",
+      "07826 166539",
+      "08001 337987",
+      "09891 701256"
     ],
     "call_readiness": "HOLD",
     "call_readiness_reasons": [
@@ -179939,6 +182222,368 @@
     "ready": "no",
     "ready_reason": "No FX confidence signals found"
   },
+  "8b5fedd6e0ae43ac": {
+    "id": "8b5fedd6e0ae43ac",
+    "event_id": "59fec8d0a5442d20",
+    "linked_event_ids": [
+      "59fec8d0a5442d20"
+    ],
+    "created_at": "2026-06-19T09:27:39.441Z",
+    "rescored_at": "2026-06-19T09:52:21.029Z",
+    "company_name": "ELECTRONICS AND GOODS LTD",
+    "company_number": "16910594",
+    "company_status": "active",
+    "company_type": null,
+    "address": "33 Wallace Road, Birmingham, B29 7ND",
+    "incorporated": "2025-12-15",
+    "sic_codes": [
+      "47910"
+    ],
+    "director_name": "Steven Terence",
+    "director_role": "owner",
+    "is_large_org": false,
+    "website": "https://electronics.co.uk",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "UK importer electronics",
+    "source_segment": "UK importers of container cargo",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [
+      "global",
+      "sourcing"
+    ],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 2,
+    "company_source": "companies_house",
+    "segment_name": "UK importers of container cargo",
+    "segment_business_model": "UK importer buying goods from international suppliers, paying in USD for container cargo or bunker fuel, and selling in GBP to UK trade.",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD payments for container cargo or bunker fuel",
+    "why_affected": "ELECTRONICS AND GOODS LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 5% increase in shipping costs on \u00a31 million annual imports \u2248 \u00a350,000 extra cost if not hedged",
+    "payment_timing_risk": "High \u2014 30-90 day payment terms create an open FX window between order and payment",
+    "affected_payment_flow": "USD payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly",
+    "trigger_headline": "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+    "event_type": "",
+    "business_impact_summary": "UK importers face higher costs due to increased shipping expenses and potential tariff changes. Reviewing payment flows and supply chain costs is crucial to mitigate the impact of the Hormuz crisis.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Importer pays USD for container cargo or bunker fuel \u2192 increased shipping costs due to the Hormuz crisis \u2192 higher USD costs \u2192 more GBP required per USD",
+    "fx_reason": "",
+    "exposure_thesis": "ELECTRONICS AND GOODS LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "exposure_confidence": "low",
+    "score": 55,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "International activity signals (2)",
+      "SIC tier 3 (logistics/retail): 47910",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD payments for ",
+      "High urgency event (score 9/10)",
+      "Very new company (-5) \u2014 incorporated 2025",
+      "Director found: Steven Terence",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+    ],
+    "ready_score": 0,
+    "lead_type": "trigger_exposed",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "If you're importing container cargo, the increased shipping costs due to the Hormuz crisis should be reviewed to understand the impact on your business.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Sidratel please? I'm calling from a currency brokerage \u2014 it looks like Electronics And Goods may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly, and given Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: Electronics And Goods \u2014 USD exposure\n\nHi Sidratel,\n\nI came across Electronics And Goods \u2014 it looks like you And Goods may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Sidratel \u2014 I came across Electronics And Goods and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 35,
+    "industry_label": "FX Discovery",
+    "contact_phone": "020 3916 5324",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Steven Terence (owner) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Steven Terence",
+        "first_name": "Steven",
+        "last_name": "Terence",
+        "role": "owner",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": null,
+        "email": null,
+        "email_source": null,
+        "email_verified": false,
+        "email_guesses": [
+          {
+            "email": "steven.terence@electronics.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steven@electronics.co.uk",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steventerence@electronics.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sterence@electronics.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "s.terence@electronics.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steven_terence@electronics.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steven-terence@electronics.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "stevent@electronics.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "steven.t@electronics.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "terence@electronics.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "terence.steven@electronics.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "tsteven@electronics.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "steven.terence@electronics.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Steven%20Terence%20Electronics%20And%20Goods",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Steven%20Terence",
+        "google_email_search": "https://www.google.com/search?q=\"Steven%20Terence\"+\"%40electronics.co.uk\"",
+        "source": "website_only",
+        "dm_valid": true,
+        "dm_confidence": "medium"
+      },
+      {
+        "name": "Sidratel Muntaha",
+        "first_name": "Sidratel",
+        "last_name": "Muntaha",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2025-12-15",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "sidratel.muntaha@electronics.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sidratel@electronics.co.uk",
+            "pattern": "first",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sidratelmuntaha@electronics.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": false,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "smuntaha@electronics.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "s.muntaha@electronics.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sidratel_muntaha@electronics.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sidratel-muntaha@electronics.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sidratelm@electronics.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sidratel.m@electronics.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "muntaha@electronics.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "muntaha.sidratel@electronics.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "msidratel@electronics.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "sidratel.muntaha@electronics.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Sidratel%20Muntaha%20Electronics%20And%20Goods",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Sidratel%20Muntaha",
+        "google_email_search": "https://www.google.com/search?q=\"Sidratel%20Muntaha\"+\"%40electronics.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=Electronics%20And%20Goods",
+    "company_name_clean": "Electronics And Goods",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22Electronics%20And%20Goods%22",
+    "press_search_url": "https://www.google.com/search?q=%22Electronics%20And%20Goods%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK importers of electronics from Asia",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-19T09:30:06.352Z",
+    "switchboard_hint": "Likely UK switchboard prefix: 0121 (from 33 Wallace Road, Birmingham, B29 7ND)",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "020 3916 5324",
+      "020 8088 5241",
+      "020 7183 0288",
+      "020 3916 5263",
+      "01695 554080",
+      "01282 870930",
+      "01282 862509",
+      "020 3916 5498",
+      "01813 630976",
+      "07957 335035",
+      "07692 307692",
+      "08453 035855",
+      "08456 520697"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (55)",
+      "FX evidence weak (fx_likelihood=0% signals=2) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium"
+    ]
+  },
   "8b66d92237ecf7f5": {
     "id": "8b66d92237ecf7f5",
     "event_id": "c83d378134f1d94f",
@@ -190258,7 +192903,7 @@
       "\u26a0 Micro-entity accounts filer (likely <\u00a3632k turnover) \u2014 capped at QUEUE"
     ],
     "ready_score": 0,
-    "lead_type": "unknown",
+    "lead_type": "trigger_exposed",
     "awareness_level": "low",
     "saving_opportunity": "low",
     "multi_event_trigger": false,
@@ -200518,7 +203163,8 @@
     "linked_event_ids": [
       "623dbae244628c9d",
       "8fd05b2d13844d95",
-      "4127914d06790338"
+      "4127914d06790338",
+      "59fec8d0a5442d20"
     ],
     "created_at": "2026-05-20T23:54:29.338Z",
     "rescored_at": "2026-06-19T09:31:02.421Z",
@@ -200556,6 +203202,13 @@
         "source_query": "\"machinery importer\" UK from USA",
         "source_segment": "UK importers of US goods and services",
         "source_micro_category": "UK importers of US electronics and machinery"
+      },
+      {
+        "source_query": "\"electronics importer\" UK",
+        "source_segment": "UK importers of container cargo",
+        "source_micro_category": "UK importers of electronics from Asia",
+        "website_source": "ch_keyword",
+        "discovery_path": "ch_fallback"
       }
     ],
     "fx_payment_signals": [],
@@ -200583,7 +203236,7 @@
     "fx_reason": "",
     "exposure_thesis": "ALLAN & ANDERSON (IMPORTERS) LIMITED imports goods from Gulf suppliers. GBP/AED and GBP/SAR moves affect GBP cost of supplier invoices.",
     "exposure_confidence": "low",
-    "score": 55,
+    "score": 59,
     "priority": "QUEUE",
     "scoring_reasons": [
       "SIC tier 2 (manufacturing): 46170",
@@ -200593,7 +203246,8 @@
       "Director found: Alistair Simpson BANKS",
       "Website confirmed",
       "Active on Companies House",
-      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)",
+      "Multi-event trigger: 2 separate events flag this company (+4)"
     ],
     "ready_score": 0,
     "lead_type": "both",
@@ -201213,11 +203867,11 @@
     ],
     "linked_segments": [
       "UK importers of Gulf goods",
-      "UK importers of US goods and services"
+      "UK importers of container cargo"
     ],
     "linked_event_headlines": [
       "UK and Gulf strike historic multi-billion-pound trade deal",
-      "British Pound craters as Warsh\u2019s guidance void fuels US Dollar rally"
+      "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade"
     ]
   },
   "9b93986288d75c34": {
@@ -241530,7 +244184,7 @@
       "\u26a0 No B2B/trade evidence on website \u2014 capped below WARM"
     ],
     "ready_score": 0,
-    "lead_type": "unknown",
+    "lead_type": "trigger_exposed",
     "awareness_level": "medium",
     "saving_opportunity": "low",
     "multi_event_trigger": false,
@@ -251500,6 +254154,493 @@
       "Evergreen: UK wine, spirits & drinks importers"
     ]
   },
+  "c658bf677e53adf8": {
+    "id": "c658bf677e53adf8",
+    "event_id": "59fec8d0a5442d20",
+    "linked_event_ids": [
+      "59fec8d0a5442d20",
+      "30ecfdf142561afd"
+    ],
+    "created_at": "2026-06-19T09:27:39.029Z",
+    "rescored_at": "2026-06-19T09:52:21.028Z",
+    "company_name": "AFRO ASIAN AIRLINES LTD",
+    "company_number": "14561919",
+    "company_status": "active",
+    "company_type": null,
+    "address": "128 City Road, London, EC1V 2NX",
+    "incorporated": "2022-12-29",
+    "sic_codes": [
+      "30910",
+      "51101",
+      "51102",
+      "51210"
+    ],
+    "director_name": "Abdelwahab Karam Abdelwahab MOUSTAFA ELHALAWY",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://afro.co.uk",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "\"Asian electronics\" UK distributor",
+    "source_segment": "UK importers of container cargo",
+    "website_snippet": "",
+    "duplicate_sources": [
+      {
+        "website_source": "domain_guess",
+        "source_query": "",
+        "source_segment": "",
+        "source_micro_category": ""
+      }
+    ],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 0,
+    "company_source": "companies_house",
+    "segment_name": "UK importers of container cargo",
+    "segment_business_model": "UK importer buying goods from international suppliers, paying in USD for container cargo or bunker fuel, and selling in GBP to UK trade.",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD payments for container cargo or bunker fuel",
+    "why_affected": "AFRO ASIAN AIRLINES LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 5% increase in shipping costs on \u00a31 million annual imports \u2248 \u00a350,000 extra cost if not hedged",
+    "payment_timing_risk": "High \u2014 30-90 day payment terms create an open FX window between order and payment",
+    "affected_payment_flow": "USD payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly",
+    "trigger_headline": "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+    "event_type": "",
+    "business_impact_summary": "UK importers face higher costs due to increased shipping expenses and potential tariff changes. Reviewing payment flows and supply chain costs is crucial to mitigate the impact of the Hormuz crisis.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Importer pays USD for container cargo or bunker fuel \u2192 increased shipping costs due to the Hormuz crisis \u2192 higher USD costs \u2192 more GBP required per USD",
+    "fx_reason": "",
+    "exposure_thesis": "AFRO ASIAN AIRLINES LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "exposure_confidence": "low",
+    "score": 59,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "SIC tier 2 (manufacturing): 30910, 51101",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD payments for ",
+      "High urgency event (score 9/10)",
+      "Company name signals trade/international activity (+4)",
+      "Director found: Abdelwahab Karam Abdelwahab MOUSTAFA ELHALAWY",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)",
+      "Multi-event trigger: 2 separate events flag this company (+4)"
+    ],
+    "ready_score": 0,
+    "lead_type": "trigger_exposed",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": true,
+    "multi_event_count": 2,
+    "sales_angle": "If you're importing container cargo, the increased shipping costs due to the Hormuz crisis should be reviewed to understand the impact on your business.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mr please? I'm calling from a currency brokerage \u2014 it looks like Afro Asian Airlines may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly, and given Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: Afro Asian Airlines \u2014 USD exposure\n\nHi Mr,\n\nI came across Afro Asian Airlines \u2014 it looks like you Asian Airlines may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mr \u2014 I came across Afro Asian Airlines and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 50,
+    "industry_label": "FX Discovery",
+    "contact_phone": "020 7856 0488",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Abdelwahab Karam Abdelwahab MOUSTAFA ELHALAWY (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mr Elhalawy",
+        "first_name": "Mr",
+        "last_name": "Elhalawy",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2022-12-29",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mr.elhalawy@afro.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr@afro.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrelhalawy@afro.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "melhalawy@afro.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.elhalawy@afro.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr_elhalawy@afro.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr-elhalawy@afro.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mre@afro.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr.e@afro.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "elhalawy@afro.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "elhalawy.mr@afro.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "emr@afro.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mr.elhalawy@afro.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Elhalawy%20Afro%20Asian%20Airlines",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Elhalawy",
+        "google_email_search": "https://www.google.com/search?q=\"Mr%20Elhalawy\"+\"%40afro.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Chen Xizhu",
+        "first_name": "Chen",
+        "last_name": "Xizhu",
+        "role": "secretary",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2026-01-10",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "chen.xizhu@afro.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "chen@afro.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "chenxizhu@afro.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "cxizhu@afro.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "c.xizhu@afro.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "chen_xizhu@afro.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "chen-xizhu@afro.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "chenx@afro.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "chen.x@afro.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "xizhu@afro.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "xizhu.chen@afro.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "xchen@afro.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "chen.xizhu@afro.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Chen%20Xizhu%20Afro%20Asian%20Airlines",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Chen%20Xizhu",
+        "google_email_search": "https://www.google.com/search?q=\"Chen%20Xizhu\"+\"%40afro.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Abdelwahab Moustafa Elhalawy",
+        "first_name": "Abdelwahab",
+        "last_name": "Moustafa Elhalawy",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2022-12-29",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "abdelwahab.moustafaelhalawy@afro.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "abdelwahab@afro.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "abdelwahabmoustafaelhalawy@afro.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "amoustafaelhalawy@afro.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "a.moustafaelhalawy@afro.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "abdelwahab_moustafaelhalawy@afro.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "abdelwahab-moustafaelhalawy@afro.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "abdelwahabm@afro.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "abdelwahab.m@afro.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "moustafaelhalawy@afro.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "moustafaelhalawy.abdelwahab@afro.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mabdelwahab@afro.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "abdelwahab.moustafaelhalawy@afro.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Abdelwahab%20Moustafa%20Elhalawy%20Afro%20Asian%20Airlines",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Abdelwahab%20Moustafa%20Elhalawy",
+        "google_email_search": "https://www.google.com/search?q=\"Abdelwahab%20Moustafa%20Elhalawy\"+\"%40afro.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=Afro%20Asian%20Airlines",
+    "company_name_clean": "Afro Asian Airlines",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22Afro%20Asian%20Airlines%22",
+    "press_search_url": "https://www.google.com/search?q=%22Afro%20Asian%20Airlines%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK importers of electronics from Asia",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-19T09:28:49.281Z",
+    "switchboard_hint": "Likely UK switchboard prefix: 020 (from 128 City Road, London, EC1V 2NX)",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "linked_segments": [
+      "UK importers of container cargo",
+      "UK Commercial Passenger Airlines"
+    ],
+    "linked_event_headlines": [
+      "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+      "British Airways fares to rise in attempt to offset \u00a31.7bn fuel cost hit"
+    ],
+    "accounts_type": "micro-entity",
+    "last_accounts_date": "2025-12-31",
+    "accounts_source": "ch_ixbrl",
+    "company_size_band": "<\u00a31m",
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "020 7856 0488",
+      "020 7404 7280",
+      "020 3909 0419",
+      "020 3846 4007",
+      "020 7242 1886",
+      "020 7553 9370",
+      "020 7415 7098",
+      "020 3129 6444",
+      "020 8261 7494",
+      "07947 881712",
+      "07632 969685"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (59)",
+      "FX evidence weak (fx_likelihood=0% signals=0) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium"
+    ]
+  },
   "c699e35cb189c1d0": {
     "id": "c699e35cb189c1d0",
     "event_id": "evergreen-2026-W23-4",
@@ -256257,7 +259398,8 @@
       "623dbae244628c9d",
       "fc513b03f590b2a4",
       "8fd05b2d13844d95",
-      "4f43c7901d25dfb5"
+      "4f43c7901d25dfb5",
+      "59fec8d0a5442d20"
     ],
     "created_at": "2026-06-17T23:18:34.552Z",
     "rescored_at": "2026-06-19T09:31:02.476Z",
@@ -256289,6 +259431,13 @@
         "source_query": "\"diesel importer\" UK",
         "source_segment": "UK importers of jet fuel and diesel",
         "source_micro_category": "UK logistics companies importing diesel"
+      },
+      {
+        "source_query": "\"electronics importer\" UK",
+        "source_segment": "UK importers of container cargo",
+        "source_micro_category": "UK importers of electronics from Asia",
+        "website_source": "ch_keyword",
+        "discovery_path": "ch_fallback"
       }
     ],
     "fx_payment_signals": [],
@@ -256321,8 +259470,8 @@
     "fx_reason": "",
     "exposure_thesis": "ALEXANDER HADLEIGH WINE MERCHANTS AND IMPORTERS LIMITED imports goods/services from the US, paying in USD. The GBP/USD rate affects the GBP cost of these imports.",
     "exposure_confidence": "low",
-    "score": 79,
-    "priority": "WARM",
+    "score": 83,
+    "priority": "HOT",
     "scoring_reasons": [
       "International activity signals (4)",
       "SIC tier 1 (core trade/wholesale): 46342, 47250",
@@ -256333,7 +259482,8 @@
       "Director found: David Graham DUNNE",
       "Website confirmed",
       "Active on Companies House",
-      "\u26a0 HOT capped \u2192 WARM: no real website FX signal (secondary/segment signals don't count for HOT)"
+      "\u26a0 HOT capped \u2192 WARM: no real website FX signal (secondary/segment signals don't count for HOT)",
+      "Multi-event trigger: 2 separate events flag this company (+4)"
     ],
     "ready_score": 0,
     "lead_type": "both",
@@ -259072,11 +262222,11 @@
     "contact_phone_types": [],
     "linked_segments": [
       "UK importers of US goods and services",
-      "UK importers of jet fuel and diesel"
+      "UK importers of container cargo"
     ],
     "linked_event_headlines": [
       "British Pound craters as Warsh\u2019s guidance void fuels US Dollar rally",
-      "UK relaxes strict sanctions on Russian crude as oil costs soar"
+      "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade"
     ],
     "accounts_type": "full",
     "last_accounts_date": "2025-04-30",
@@ -260299,6 +263449,348 @@
     "foreign_psc": false,
     "ready": "no",
     "ready_reason": "No FX confidence signals found"
+  },
+  "ce8a625488959d51": {
+    "id": "ce8a625488959d51",
+    "event_id": "59fec8d0a5442d20",
+    "linked_event_ids": [
+      "59fec8d0a5442d20"
+    ],
+    "created_at": "2026-06-19T09:27:39.036Z",
+    "rescored_at": "2026-06-19T09:52:21.028Z",
+    "company_name": "AFRO ASIAN GROCERS LTD",
+    "company_number": "16303014",
+    "company_status": "active",
+    "company_type": null,
+    "address": "290-292 Heathway, Dagenham, RM10 8QS",
+    "incorporated": "2025-03-10",
+    "sic_codes": [
+      "47110",
+      "47210",
+      "47220"
+    ],
+    "director_name": "Javad BEHMANESH",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": null,
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "collision_stripped",
+    "discovery_path": "ch_fallback",
+    "source_query": "\"Asian electronics\" UK distributor",
+    "source_segment": "UK importers of container cargo",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 0,
+    "company_source": "companies_house",
+    "segment_name": "UK importers of container cargo",
+    "segment_business_model": "UK importer buying goods from international suppliers, paying in USD for container cargo or bunker fuel, and selling in GBP to UK trade.",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD payments for container cargo or bunker fuel",
+    "why_affected": "AFRO ASIAN GROCERS LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 5% increase in shipping costs on \u00a31 million annual imports \u2248 \u00a350,000 extra cost if not hedged",
+    "payment_timing_risk": "High \u2014 30-90 day payment terms create an open FX window between order and payment",
+    "affected_payment_flow": "USD payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly",
+    "trigger_headline": "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+    "event_type": "",
+    "business_impact_summary": "UK importers face higher costs due to increased shipping expenses and potential tariff changes. Reviewing payment flows and supply chain costs is crucial to mitigate the impact of the Hormuz crisis.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Importer pays USD for container cargo or bunker fuel \u2192 increased shipping costs due to the Hormuz crisis \u2192 higher USD costs \u2192 more GBP required per USD",
+    "fx_reason": "",
+    "exposure_thesis": "AFRO ASIAN GROCERS LTD imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "exposure_confidence": "low",
+    "score": 49,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "SIC tier 3 (logistics/retail): 47110, 47210",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD payments for ",
+      "High urgency event (score 9/10)",
+      "Company name signals trade/international activity (+4)",
+      "Very new company (-5) \u2014 incorporated 2025",
+      "Director found: Javad BEHMANESH",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)",
+      "\u26a0 Website collision (afro.co.uk) \u2014 stripped, QUEUE cap"
+    ],
+    "ready_score": 0,
+    "lead_type": "trigger_exposed",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "If you're importing container cargo, the increased shipping costs due to the Hormuz crisis should be reviewed to understand the impact on your business.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mr please? I'm calling from a currency brokerage \u2014 it looks like Afro Asian Grocers may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly, and given Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: Afro Asian Grocers \u2014 USD exposure\n\nHi Mr,\n\nI came across Afro Asian Grocers \u2014 it looks like you Asian Grocers may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mr \u2014 I came across Afro Asian Grocers and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 40,
+    "industry_label": "FX Discovery",
+    "contact_phone": null,
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Javad BEHMANESH (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mr Behmanesh",
+        "first_name": "Mr",
+        "last_name": "Behmanesh",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2025-03-10",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mr.behmanesh@afro.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr@afro.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrbehmanesh@afro.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mbehmanesh@afro.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.behmanesh@afro.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr_behmanesh@afro.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr-behmanesh@afro.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrb@afro.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mr.b@afro.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "behmanesh@afro.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "behmanesh.mr@afro.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "bmr@afro.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mr.behmanesh@afro.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Behmanesh%20Afro%20Asian%20Grocers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mr%20Behmanesh",
+        "google_email_search": "https://www.google.com/search?q=\"Mr%20Behmanesh\"+\"%40afro.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Javad Behmanesh",
+        "first_name": "Javad",
+        "last_name": "Behmanesh",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2025-03-10",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "javad.behmanesh@afro.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "javad@afro.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "javadbehmanesh@afro.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "jbehmanesh@afro.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "j.behmanesh@afro.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "javad_behmanesh@afro.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "javad-behmanesh@afro.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "javadb@afro.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "javad.b@afro.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "behmanesh@afro.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "behmanesh.javad@afro.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "bjavad@afro.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "javad.behmanesh@afro.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Javad%20Behmanesh%20Afro%20Asian%20Grocers",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Javad%20Behmanesh",
+        "google_email_search": "https://www.google.com/search?q=\"Javad%20Behmanesh\"+\"%40afro.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=Afro%20Asian%20Grocers",
+    "company_name_clean": "Afro Asian Grocers",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22Afro%20Asian%20Grocers%22",
+    "press_search_url": "https://www.google.com/search?q=%22Afro%20Asian%20Grocers%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK importers of electronics from Asia",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-19T09:29:03.223Z",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (49)",
+      "FX evidence weak (fx_likelihood=0% signals=0) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium",
+      "no website"
+    ]
   },
   "ce9b838c4a85ab39": {
     "id": "ce9b838c4a85ab39",
@@ -265595,8 +269087,7 @@
       "Director found: George Peter Humphreys",
       "Website found \u2014 low confidence (domain_guess)",
       "Active on Companies House",
-      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)",
-      "Multi-event trigger: 2 separate events flag this company (+4)"
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
     ],
     "ready_score": 0,
     "lead_type": "both",
@@ -286711,6 +290202,471 @@
       "route grade D \u2014 need A or B (named FD/MD + contact)"
     ]
   },
+  "e6300d5d3b3c68c6": {
+    "id": "e6300d5d3b3c68c6",
+    "event_id": "59fec8d0a5442d20",
+    "linked_event_ids": [
+      "59fec8d0a5442d20"
+    ],
+    "created_at": "2026-06-19T09:27:38.765Z",
+    "rescored_at": "2026-06-19T09:52:21.027Z",
+    "company_name": "AFC - ASIAN FOOD CENTRE LIMITED",
+    "company_number": "07830392",
+    "company_status": "active",
+    "company_type": null,
+    "address": "133 Heston Road, Hounslow, TW5 0RD",
+    "incorporated": "2011-11-01",
+    "sic_codes": [
+      "47190"
+    ],
+    "director_name": "Nadeem AHMED",
+    "director_role": "director",
+    "is_large_org": false,
+    "website": "https://theafc.co.uk",
+    "website_domain": "",
+    "website_confidence": null,
+    "website_source": "ch_keyword",
+    "discovery_path": "ch_fallback",
+    "source_query": "\"Asian electronics\" UK distributor",
+    "source_segment": "UK importers of container cargo",
+    "website_snippet": "",
+    "duplicate_sources": [],
+    "fx_payment_signals": [],
+    "fx_origin_hints": [],
+    "b2b_signals": [],
+    "secondary_signals": [],
+    "segment_signals": [],
+    "pays_fx_confirmed": false,
+    "signal_count": 0,
+    "company_source": "companies_house",
+    "segment_name": "UK importers of container cargo",
+    "segment_business_model": "UK importer buying goods from international suppliers, paying in USD for container cargo or bunker fuel, and selling in GBP to UK trade.",
+    "exposure_level": "Very High",
+    "exposure_type": "Import cost exposure \u2014 USD payments for container cargo or bunker fuel",
+    "why_affected": "AFC - ASIAN FOOD CENTRE LIMITED imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "why_financially_exposed": "",
+    "margin_risk": "High \u2014 5% increase in shipping costs on \u00a31 million annual imports \u2248 \u00a350,000 extra cost if not hedged",
+    "payment_timing_risk": "High \u2014 30-90 day payment terms create an open FX window between order and payment",
+    "affected_payment_flow": "USD payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly",
+    "trigger_headline": "Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade",
+    "event_type": "",
+    "business_impact_summary": "UK importers face higher costs due to increased shipping expenses and potential tariff changes. Reviewing payment flows and supply chain costs is crucial to mitigate the impact of the Hormuz crisis.",
+    "fx_exposure": "GBP/USD",
+    "fx_payment_logic": "Importer pays USD for container cargo or bunker fuel \u2192 increased shipping costs due to the Hormuz crisis \u2192 higher USD costs \u2192 more GBP required per USD",
+    "fx_reason": "",
+    "exposure_thesis": "AFC - ASIAN FOOD CENTRE LIMITED imports container cargo, paying in USD. The Hormuz crisis has increased shipping costs, affecting their USD payment flows and margins.",
+    "exposure_confidence": "low",
+    "score": 55,
+    "priority": "QUEUE",
+    "scoring_reasons": [
+      "SIC tier 3 (logistics/retail): 47190",
+      "Segment exposure: Very High \u2014 Import cost exposure \u2014 USD payments for ",
+      "High urgency event (score 9/10)",
+      "Company name signals trade/international activity (+4)",
+      "Established company (+5) \u2014 incorporated 2011",
+      "Director found: Nadeem AHMED",
+      "Website confirmed",
+      "Active on Companies House",
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
+    ],
+    "ready_score": 0,
+    "lead_type": "trigger_exposed",
+    "awareness_level": "low",
+    "saving_opportunity": "low",
+    "multi_event_trigger": false,
+    "multi_event_count": 1,
+    "sales_angle": "If you're importing container cargo, the increased shipping costs due to the Hormuz crisis should be reviewed to understand the impact on your business.",
+    "suggested_next_step": "",
+    "guessed_emails": [],
+    "generic_emails": [],
+    "call_opener": "Hi, could I speak to Mrs please? I'm calling from a currency brokerage \u2014 it looks like Afc may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly, and given Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, it might be worth a quick conversation about the rate you're getting on those USD payments.",
+    "email_draft": "Subject: Afc \u2014 USD exposure\n\nHi Mrs,\n\nI came across Afc \u2014 it looks like you may have usd payments for container cargo or bunker fuel, typically \u00a350,000-\u00a3500,000 per shipment, quarterly.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming USD payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
+    "linkedin_note": "Hi Mrs \u2014 I came across Afc and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have USD payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
+    "status": "new",
+    "fx_exposure_score": 50,
+    "industry_label": "FX Discovery",
+    "contact_phone": "020 3744 3596",
+    "contact_phones": [],
+    "contact_email": null,
+    "contact_emails_found": [],
+    "contact_page": null,
+    "about_page": null,
+    "team_page": null,
+    "best_contact_route": "Look up Nadeem AHMED (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "decision_makers": [
+      {
+        "name": "Mrs Ahmed",
+        "first_name": "Mrs",
+        "last_name": "Ahmed",
+        "role": "Person with Significant Control",
+        "tier": 1,
+        "tier_label": "Primary",
+        "appointed_on": "2023-06-06",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "mrs.ahmed@theafc.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs@theafc.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrsahmed@theafc.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mahmed@theafc.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "m.ahmed@theafc.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs_ahmed@theafc.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs-ahmed@theafc.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrsa@theafc.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "mrs.a@theafc.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ahmed@theafc.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ahmed.mrs@theafc.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "amrs@theafc.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "mrs.ahmed@theafc.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Mrs%20Ahmed%20Afc",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Mrs%20Ahmed",
+        "google_email_search": "https://www.google.com/search?q=\"Mrs%20Ahmed\"+\"%40theafc.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Nadeem Ahmed",
+        "first_name": "Nadeem",
+        "last_name": "Ahmed",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2025-07-23",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "nadeem.ahmed@theafc.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nadeem@theafc.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nadeemahmed@theafc.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nahmed@theafc.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "n.ahmed@theafc.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nadeem_ahmed@theafc.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nadeem-ahmed@theafc.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nadeema@theafc.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "nadeem.a@theafc.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ahmed@theafc.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ahmed.nadeem@theafc.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "anadeem@theafc.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "nadeem.ahmed@theafc.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Nadeem%20Ahmed%20Afc",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Nadeem%20Ahmed",
+        "google_email_search": "https://www.google.com/search?q=\"Nadeem%20Ahmed\"+\"%40theafc.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      },
+      {
+        "name": "Saira Ahmed",
+        "first_name": "Saira",
+        "last_name": "Ahmed",
+        "role": "director",
+        "tier": 3,
+        "tier_label": "Fallback",
+        "appointed_on": "2022-04-01",
+        "email": null,
+        "email_source": null,
+        "email_verified": null,
+        "email_guesses": [
+          {
+            "email": "saira.ahmed@theafc.co.uk",
+            "pattern": "first.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "saira@theafc.co.uk",
+            "pattern": "first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sairaahmed@theafc.co.uk",
+            "pattern": "firstlast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sahmed@theafc.co.uk",
+            "pattern": "flast",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "s.ahmed@theafc.co.uk",
+            "pattern": "f.last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "saira_ahmed@theafc.co.uk",
+            "pattern": "first_last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "saira-ahmed@theafc.co.uk",
+            "pattern": "first-last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "sairaa@theafc.co.uk",
+            "pattern": "firstl",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "saira.a@theafc.co.uk",
+            "pattern": "first.l",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ahmed@theafc.co.uk",
+            "pattern": "last",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "ahmed.saira@theafc.co.uk",
+            "pattern": "last.first",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          },
+          {
+            "email": "asaira@theafc.co.uk",
+            "pattern": "lfirst",
+            "smtp_verified": null,
+            "catch_all": false,
+            "pattern_confidence": 0
+          }
+        ],
+        "email_candidate": "saira.ahmed@theafc.co.uk",
+        "email_confidence": "guessed",
+        "phone": null,
+        "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=Saira%20Ahmed%20Afc",
+        "linkedin_name_only": "https://www.linkedin.com/search/results/people/?keywords=Saira%20Ahmed",
+        "google_email_search": "https://www.google.com/search?q=\"Saira%20Ahmed\"+\"%40theafc.co.uk\"",
+        "source": "companies_house",
+        "dm_valid": true,
+        "dm_confidence": "high"
+      }
+    ],
+    "route_grade": "B",
+    "contact_confidence": 49,
+    "company_linkedin": "https://www.linkedin.com/search/results/companies/?keywords=Afc",
+    "company_name_clean": "Afc",
+    "fx_evidence_snippets": [],
+    "country_evidence": [],
+    "supplier_evidence": [],
+    "import_export_evidence": [],
+    "inferred_currency_pairs": [],
+    "currency_reason": "",
+    "size_signals": [],
+    "tech_signals": [],
+    "fx_likelihood_score": 0,
+    "website_confidence_reason": "Unknown: website confidence not assessed",
+    "trustpilot_reviews": null,
+    "trustpilot_score": null,
+    "trustpilot_search_url": "https://www.google.com/search?q=site:trustpilot.com+%22Afc%22",
+    "press_search_url": "https://www.google.com/search?q=%22Afc%22+(news+OR+announces+OR+launches)&tbs=qdr:y",
+    "source_micro_category": "UK importers of electronics from Asia",
+    "negative_signals": [],
+    "why_affected_from_segment": "",
+    "dm_enriched_at": "2026-06-19T09:28:49.996Z",
+    "contact_phones_e164": [],
+    "contact_phone_types": [],
+    "accounts_type": "micro-entity",
+    "last_accounts_date": "2025-03-31",
+    "accounts_source": "ch_ixbrl",
+    "company_size_band": "<\u00a31m",
+    "net_assets": 136067.0,
+    "total_assets": 138493.0,
+    "employee_count": 11,
+    "employee_band": "10\u201324",
+    "phone_source": "hotfrog",
+    "phone_source_count": 1,
+    "phone_sources": [
+      "Hotfrog"
+    ],
+    "all_phones_found": [
+      "020 3744 3596",
+      "020 7222 8694",
+      "020 3988 5022",
+      "020 7836 7395",
+      "01909 482626"
+    ],
+    "call_readiness": "HOLD",
+    "call_readiness_reasons": [
+      "score too low (55)",
+      "FX evidence weak (fx_likelihood=0% signals=0) \u2014 need confirmed/likelihood\u226545/signals\u22653",
+      "website confidence unknown \u2014 need high/medium"
+    ]
+  },
   "e6a5499763a2702e": {
     "id": "e6a5499763a2702e",
     "event_id": "evergreen-2026-W23-4",
@@ -291286,7 +295242,7 @@
       "\u26a0 HOT capped \u2192 WARM: no real website FX signal (secondary/segment signals don't count for HOT)"
     ],
     "ready_score": 0,
-    "lead_type": "unknown",
+    "lead_type": "both",
     "awareness_level": "low",
     "saving_opportunity": "medium",
     "multi_event_trigger": false,
@@ -291299,7 +295255,7 @@
     "email_draft": "Subject: Ctl Machinery Parts \u2014 EUR exposure\n\nHi Mr,\n\nI came across Ctl Machinery Parts \u2014 it looks like you Machinery Parts may have gbp payments for us imports, typically $50,000-$500,000 per shipment.\n\nGiven Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade, that may create margin pressure around upcoming EUR payments. A lot of businesses in this space don't always realise there's often a better rate available outside their bank.\n\nWorth a quick chat to see whether there's a better way to manage the rate or timing?\n\nBest,\nZac",
     "linkedin_note": "Hi Mr \u2014 I came across Ctl Machinery Parts and thought the Shipping Costs Soar as Hormuz Crisis Reshapes Global Trade might be relevant if you have EUR payments. Worth a quick chat? I work with a number of similar businesses on the rate side.",
     "status": "new",
-    "fx_exposure_score": 40,
+    "fx_exposure_score": 46,
     "industry_label": "FX Discovery",
     "contact_phone": "020 8396 6165",
     "contact_phones": [],
@@ -291308,7 +295264,7 @@
     "contact_page": null,
     "about_page": null,
     "team_page": null,
-    "best_contact_route": "Look up Avram BALABANOVIC (director) on LinkedIn (or use the Companies-House director route), then call the switchboard.",
+    "best_contact_route": "Call the switchboard on 020 8396 6165 \u2014 ask for Avram BALABANOVIC (director).",
     "decision_makers": [
       {
         "name": "Mr Balabanovic",
@@ -293165,8 +297121,8 @@
     "last_accounts_date": "2025-10-31",
     "accounts_source": "ch_ixbrl",
     "company_size_band": "<\u00a31m",
-    "net_assets": 63225.0,
-    "total_assets": 63515.0,
+    "net_assets": 63225,
+    "total_assets": 63515,
     "phone_source": "hotfrog",
     "phone_source_count": 1,
     "phone_sources": [
@@ -313410,7 +317366,7 @@
     "fx_reason": "",
     "exposure_thesis": "JAVED IQBAL MACHINERY AND CRANE SPARE PARTS TRADING COMPANY LTD imports goods from the US. The proposed US tariffs will increase the cost of these imports.",
     "exposure_confidence": "low",
-    "score": 59,
+    "score": 55,
     "priority": "QUEUE",
     "scoring_reasons": [
       "SIC tier 1 (core trade/wholesale): 45310, 45320",
@@ -313420,8 +317376,7 @@
       "Director found: Zeeshan ALI",
       "Website confirmed",
       "Active on Companies House",
-      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)",
-      "Multi-event trigger: 2 separate events flag this company (+4)"
+      "\u26a0 No website FX signals \u2014 QUEUE cap (SIC only)"
     ],
     "ready_score": 0,
     "lead_type": "both",
