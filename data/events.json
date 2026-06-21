@@ -15023,50 +15023,6 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "d54ccfe1a67b5cda": {
-    "id": "d54ccfe1a67b5cda",
-    "source": "ForexLive",
-    "source_url": "https://investinglive.com/news/uk-consumer-confidence-masks-growing-cracks-beneath-steady-headline-20260618/",
-    "headline": "UK consumer confidence masks growing cracks beneath steady headline",
-    "raw_summary": "Sterling faces a modest negative undercurrent from the data, not from the headline number, which came in marginally better than forecast, but from the sub-index deterioration that points to softening domestic demand ahead. Major purchase intentions sitting at joint-lowest levels since January 2025 is a quiet signal for retailers and discretionary spending. For the Bank of England, the youth pessimism data adds a nuanced wrinkle: a headline that holds steady gives little cover for either hawks or doves, but the underlying trend is clearly not improving. --- UK GfK consumer confidence held at -2",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
-    "detected_at": "2026-06-20T07:50:47.389Z",
-    "event_type": "Economic data release",
-    "event_breadth": "macro",
-    "summary": "UK consumer confidence held steady, but underlying trends suggest softening domestic demand. This has no direct impact on FX payment flows for UK businesses.",
-    "currency_pairs": [],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "While consumer confidence data has implications for the broader economy, it lacks direct FX relevance for UK businesses with foreign-currency payment flows.",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "There is no immediate reason for UK businesses with foreign-currency payment flows to act based on this data.",
-    "discovery_recommendation": "Context only — the event lacks direct FX relevance for UK businesses.",
-    "confidence_level": "medium",
-    "confidence_reason": "The data on consumer confidence, while useful for understanding domestic demand, does not directly impact FX decisions or currency movements in a way that would necessitate immediate action from businesses.",
-    "what_happened": "UK GfK consumer confidence remained steady at -2, with underlying sub-indexes showing deterioration.",
-    "what_changed_financially": "There was no direct financial change from this event that affects FX payment flows.",
-    "who_pays_more": "None directly",
-    "who_receives_less": "None directly",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None",
-    "fx_payment_logic": "There is no specific FX payment logic directly related to this event.",
-    "sales_angle": "No immediate action is recommended based on this consumer confidence data.",
-    "business_impact_summary": "The data may indicate future trends in domestic demand, but it does not currently affect FX exposure for UK businesses.",
-    "exposure_types": [],
-    "overall_sales_angle": "No direct FX hook exists in this consumer confidence data.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
-  },
   "d5d582fa7f015563": {
     "id": "d5d582fa7f015563",
     "headline": "British Pound gains ground to near 1.3400 ahead of US CPI release",
@@ -16653,49 +16609,1297 @@
     "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
     "ai_model": "llama-3.3-70b-versatile"
   },
-  "eeb185ac6f27897d": {
-    "id": "eeb185ac6f27897d",
-    "source": "The Guardian Biz",
-    "source_url": "https://www.theguardian.com/business/2026/jun/17/uk-inflation-rate-softer-iran-war-hit-than-expected",
-    "headline": "Surprisingly benign UK inflation data signals a softer Iran war hit than feared",
-    "raw_summary": "Impact of war on UK cost of living more muted than first forecast suggesting fuel price rises have failed to spill out more widely across UK plc UK inflation stays at 2.8% as slowing food prices offset transport costs As soon as Iran choked off oil supplies through the strait of Hormuz at the start of March, there were dire warnings about rocketing UK inflation and the drastic action the Bank of England might take to rein it in. At one point, investors were expecting as many as three quarter-point rises in interest rates before the end of the year – a sharp turnaround from earlier forecasts of",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-06-20T07:50:45.341Z",
-    "event_type": "inflation data",
-    "event_breadth": "macro",
-    "summary": "UK inflation remains steady at 2.8%, suggesting a softer impact from the Iran war on the UK cost of living than initially feared. This may lead to a reevaluation of expected interest rate hikes.",
-    "currency_pairs": [],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "UK inflation data has indirect implications for monetary policy and thus FX, but the current data does not directly impact FX rates or payment flows",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [],
-    "why_now": "The event is more about future monetary policy implications rather than immediate FX or payment flow concerns",
-    "discovery_recommendation": "Context only — the event does not directly impact current FX rates or payment flows but may influence future monetary policy decisions",
-    "confidence_level": "medium",
-    "confidence_reason": "The inflation data, while relevant for monetary policy, does not directly influence current FX rates or immediate payment flows for UK businesses",
-    "what_happened": "UK inflation data showed a more muted impact from the Iran war than initially feared, with inflation staying at 2.8% due to offsetting factors in food and transport costs",
-    "what_changed_financially": "Expectations for interest rate hikes may have decreased, potentially influencing long-term monetary policy decisions",
-    "who_pays_more": "None directly, as the inflation rate did not significantly increase",
-    "who_receives_less": "None directly, as the inflation rate stability does not directly reduce revenue",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "affected_payment_flow": "None directly affected by this specific event",
-    "fx_payment_logic": "The current inflation data does not directly influence FX payment flows or rates, but future monetary policy decisions based on inflation trends could have an indirect impact",
-    "sales_angle": "While today's inflation data does not directly affect your FX payments, changes in monetary policy can influence future exchange rates and your business's bottom line",
-    "business_impact_summary": "The stable inflation rate suggests that, for now, businesses may not face significant increases in costs due to inflation. However, they should remain aware of potential future changes in monetary policy that could affect exchange rates and their international transactions",
-    "exposure_types": [],
-    "overall_sales_angle": "Keep an eye on how inflation trends and monetary policy decisions might influence your business's international transactions and bottom line in the future",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
-    "ai_model": "llama-3.3-70b-versatile"
+  "evergreen-2026-W25-0": {
+    "id": "evergreen-2026-W25-0",
+    "headline": "Evergreen: UK wine, spirits & drinks importers",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Wine & Spirits Importers",
+        "exposure_level": "Very High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR supplier costs",
+        "why_affected": "Pay EUR invoices to European producers. GBP/EUR moves directly compress margin on every shipment.",
+        "category_priority_score": 95,
+        "sales_angle": "EUR invoice costs. Rate review on upcoming payments.",
+        "micro_categories": [
+          {
+            "name": "Italian wine importers UK",
+            "why": "",
+            "search_queries": [
+              "Italian wine importer UK wholesale",
+              "wine importer Italy UK trade"
+            ],
+            "companies_house_terms": [
+              "wine importer",
+              "wine distributor"
+            ]
+          },
+          {
+            "name": "French wine & champagne importers UK",
+            "why": "",
+            "search_queries": [
+              "French wine importer UK wholesale",
+              "champagne importer UK trade"
+            ],
+            "companies_house_terms": [
+              "wine importer",
+              "champagne importer"
+            ]
+          },
+          {
+            "name": "Spirits & whisky importers UK",
+            "why": "",
+            "search_queries": [
+              "spirits importer UK wholesale",
+              "European spirits distributor UK"
+            ],
+            "companies_house_terms": [
+              "spirits importer",
+              "spirits distributor"
+            ]
+          },
+          {
+            "name": "Natural & independent wine importers UK",
+            "why": "",
+            "search_queries": [
+              "natural wine importer UK",
+              "independent wine merchant importer UK"
+            ],
+            "companies_house_terms": [
+              "wine merchant",
+              "wine importer"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "Specialty Beer & Craft Drinks Importers",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR supplier costs",
+        "why_affected": "Import craft beer and drinks from European breweries in EUR.",
+        "category_priority_score": 78,
+        "micro_categories": [
+          {
+            "name": "Craft beer importers UK",
+            "why": "",
+            "search_queries": [
+              "craft beer importer UK wholesale",
+              "European beer importer UK"
+            ],
+            "companies_house_terms": [
+              "beer importer",
+              "beer distributor"
+            ]
+          },
+          {
+            "name": "Soft drinks & mixer importers UK",
+            "why": "",
+            "search_queries": [
+              "soft drink importer UK wholesale",
+              "premium mixer importer UK"
+            ],
+            "companies_house_terms": [
+              "drinks importer",
+              "beverage importer"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK wine, spirits & drinks importers",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false,
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-21T06:56:00.837Z"
+  },
+  "evergreen-2026-W25-1": {
+    "id": "evergreen-2026-W25-1",
+    "headline": "Evergreen: UK food importers & continental food distributors",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Italian & Continental Food Importers",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR supplier costs",
+        "why_affected": "Buy produce, deli goods, and specialty foods from Italian, French, Spanish producers in EUR.",
+        "category_priority_score": 90,
+        "micro_categories": [
+          {
+            "name": "Italian food importers UK",
+            "why": "",
+            "search_queries": [
+              "Italian food importer UK wholesale",
+              "Italian deli food distributor UK"
+            ],
+            "companies_house_terms": [
+              "food importer",
+              "Italian food"
+            ]
+          },
+          {
+            "name": "European specialty food importers",
+            "why": "",
+            "search_queries": [
+              "European food importer UK wholesale",
+              "continental food importer UK"
+            ],
+            "companies_house_terms": [
+              "specialty food importer",
+              "food distributor"
+            ]
+          },
+          {
+            "name": "Charcuterie & cheese importers UK",
+            "why": "",
+            "search_queries": [
+              "cheese importer UK wholesale",
+              "charcuterie importer UK"
+            ],
+            "companies_house_terms": [
+              "cheese importer",
+              "charcuterie importer"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "Seafood & Fresh Produce Importers",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR",
+          "GBP/NOK"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR and NOK supplier costs",
+        "why_affected": "Import seafood and fresh produce from European and Norwegian sources in EUR/NOK.",
+        "category_priority_score": 82,
+        "micro_categories": [
+          {
+            "name": "Seafood importers UK",
+            "why": "",
+            "search_queries": [
+              "seafood importer UK wholesale",
+              "fish importer UK trade"
+            ],
+            "companies_house_terms": [
+              "seafood importer",
+              "fish importer"
+            ]
+          },
+          {
+            "name": "Fresh produce importers UK",
+            "why": "",
+            "search_queries": [
+              "fresh produce importer UK wholesale",
+              "fruit vegetable importer UK"
+            ],
+            "companies_house_terms": [
+              "produce importer",
+              "fresh food importer"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK food importers & continental food distributors",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false,
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-21T06:56:01.838Z"
+  },
+  "evergreen-2026-W25-10": {
+    "id": "evergreen-2026-W25-10",
+    "headline": "Evergreen: UK freight forwarders & logistics companies with FX exposure",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Freight Forwarders & Logistics",
+        "exposure_level": "Medium",
+        "exposure_type": "multi_currency",
+        "likely_currency_pairs": [
+          "GBP/EUR",
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP revenue / multi-currency freight and port costs",
+        "why_affected": "Pay overseas port charges, agents, and carriers in EUR and USD. Also invoice clients in GBP for overseas shipments.",
+        "category_priority_score": 75,
+        "micro_categories": [
+          {
+            "name": "UK freight forwarders",
+            "why": "",
+            "search_queries": [
+              "freight forwarder UK import export",
+              "customs broker UK trade"
+            ],
+            "companies_house_terms": [
+              "freight forwarder",
+              "customs broker"
+            ]
+          },
+          {
+            "name": "Shipping & logistics UK",
+            "why": "",
+            "search_queries": [
+              "shipping agent UK import export",
+              "logistics company UK overseas freight"
+            ],
+            "companies_house_terms": [
+              "shipping agent",
+              "logistics company"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK freight forwarders & logistics companies with FX exposure",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false
+  },
+  "evergreen-2026-W25-2": {
+    "id": "evergreen-2026-W25-2",
+    "headline": "Evergreen: UK machinery, components & industrial importers",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Machinery & Industrial Components Distributors",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR",
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR-USD supplier costs",
+        "why_affected": "Source machinery and industrial components from European manufacturers in EUR. USD for US/Asian sources.",
+        "category_priority_score": 85,
+        "micro_categories": [
+          {
+            "name": "Industrial machinery importers UK",
+            "why": "",
+            "search_queries": [
+              "industrial machinery importer UK",
+              "machinery distributor UK European"
+            ],
+            "companies_house_terms": [
+              "machinery importer",
+              "machinery distributor"
+            ]
+          },
+          {
+            "name": "Pneumatic & hydraulic components UK",
+            "why": "",
+            "search_queries": [
+              "pneumatic components distributor UK",
+              "hydraulic parts importer UK"
+            ],
+            "companies_house_terms": [
+              "components distributor",
+              "hydraulic importer"
+            ]
+          },
+          {
+            "name": "CNC & engineering components UK",
+            "why": "",
+            "search_queries": [
+              "engineering components importer UK",
+              "CNC tooling distributor UK"
+            ],
+            "companies_house_terms": [
+              "engineering components",
+              "tooling distributor"
+            ]
+          },
+          {
+            "name": "Pumps & valves importers UK",
+            "why": "",
+            "search_queries": [
+              "pump importer UK distributor",
+              "valve importer UK industrial"
+            ],
+            "companies_house_terms": [
+              "pump distributor",
+              "valve importer"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "Chemicals & Raw Materials Importers",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR",
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR-USD raw material costs",
+        "why_affected": "Buy chemicals and raw materials priced in EUR or USD from European and US producers.",
+        "category_priority_score": 80,
+        "micro_categories": [
+          {
+            "name": "Specialty chemicals importers UK",
+            "why": "",
+            "search_queries": [
+              "specialty chemical importer UK",
+              "chemical distributor UK European"
+            ],
+            "companies_house_terms": [
+              "chemical importer",
+              "chemical distributor"
+            ]
+          },
+          {
+            "name": "Food ingredient importers UK",
+            "why": "",
+            "search_queries": [
+              "food ingredient importer UK wholesale",
+              "food additive importer UK"
+            ],
+            "companies_house_terms": [
+              "food ingredient importer",
+              "ingredient distributor"
+            ]
+          },
+          {
+            "name": "Plastics & polymer importers UK",
+            "why": "",
+            "search_queries": [
+              "plastic raw material importer UK",
+              "polymer distributor UK"
+            ],
+            "companies_house_terms": [
+              "plastics importer",
+              "polymer distributor"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "Packaging & Materials Importers",
+        "exposure_level": "Medium",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR packaging costs",
+        "why_affected": "Source packaging materials from European suppliers in EUR.",
+        "category_priority_score": 75,
+        "micro_categories": [
+          {
+            "name": "Packaging materials importers UK",
+            "why": "",
+            "search_queries": [
+              "packaging importer UK wholesale",
+              "packaging materials distributor UK European"
+            ],
+            "companies_house_terms": [
+              "packaging importer",
+              "packaging distributor"
+            ]
+          },
+          {
+            "name": "Glass & bottle importers UK",
+            "why": "",
+            "search_queries": [
+              "glass bottle importer UK",
+              "wine bottle supplier UK European"
+            ],
+            "companies_house_terms": [
+              "bottle importer",
+              "glass importer"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK machinery, components & industrial importers",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false,
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-21T06:56:03.670Z"
+  },
+  "evergreen-2026-W25-3": {
+    "id": "evergreen-2026-W25-3",
+    "headline": "Evergreen: UK furniture, textiles & consumer goods importers",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Furniture & Interiors Importers",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR",
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR-USD sourcing costs",
+        "why_affected": "Source furniture and interiors from European or Asian manufacturers. Prices in EUR or USD.",
+        "category_priority_score": 80,
+        "micro_categories": [
+          {
+            "name": "Contract furniture importers UK",
+            "why": "",
+            "search_queries": [
+              "furniture importer UK wholesale trade",
+              "contract furniture distributor UK European"
+            ],
+            "companies_house_terms": [
+              "furniture importer",
+              "furniture distributor"
+            ]
+          },
+          {
+            "name": "Lighting & home interiors importers UK",
+            "why": "",
+            "search_queries": [
+              "lighting importer UK wholesale",
+              "interiors importer UK trade"
+            ],
+            "companies_house_terms": [
+              "lighting importer",
+              "interiors importer"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "Textile & Clothing Importers",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR",
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR-USD sourcing costs",
+        "why_affected": "Source garments and fabrics from European or Asian manufacturers. EUR for EU mills, USD for Asia.",
+        "category_priority_score": 76,
+        "micro_categories": [
+          {
+            "name": "Wholesale clothing importers UK",
+            "why": "",
+            "search_queries": [
+              "clothing importer UK wholesale",
+              "garment importer UK trade"
+            ],
+            "companies_house_terms": [
+              "clothing importer",
+              "garment importer"
+            ]
+          },
+          {
+            "name": "Fabric & textile importers UK",
+            "why": "",
+            "search_queries": [
+              "fabric importer UK wholesale",
+              "textile importer UK European"
+            ],
+            "companies_house_terms": [
+              "textile importer",
+              "fabric importer"
+            ]
+          },
+          {
+            "name": "Fashion & apparel distributors UK",
+            "why": "",
+            "search_queries": [
+              "fashion importer UK wholesale trade",
+              "apparel distributor UK European"
+            ],
+            "companies_house_terms": [
+              "fashion importer",
+              "apparel importer"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK furniture, textiles & consumer goods importers",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false,
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-21T06:56:04.683Z"
+  },
+  "evergreen-2026-W25-4": {
+    "id": "evergreen-2026-W25-4",
+    "headline": "Evergreen: UK automotive parts & electronics distributors",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Automotive Parts Distributors",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP revenue / EUR parts costs",
+        "why_affected": "Source automotive parts from European manufacturers in EUR.",
+        "category_priority_score": 78,
+        "micro_categories": [
+          {
+            "name": "Automotive parts importers UK",
+            "why": "",
+            "search_queries": [
+              "automotive parts importer UK wholesale",
+              "car parts distributor UK European"
+            ],
+            "companies_house_terms": [
+              "automotive parts importer",
+              "parts distributor"
+            ]
+          },
+          {
+            "name": "Commercial vehicle parts UK",
+            "why": "",
+            "search_queries": [
+              "truck parts importer UK",
+              "commercial vehicle parts distributor UK"
+            ],
+            "companies_house_terms": [
+              "vehicle parts importer",
+              "parts distributor"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "Electronics & Technology Distributors",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP revenue / USD component costs",
+        "why_affected": "Source electronics and components priced in USD from US or Asian suppliers.",
+        "category_priority_score": 76,
+        "micro_categories": [
+          {
+            "name": "Electronic components distributors UK",
+            "why": "",
+            "search_queries": [
+              "electronic components distributor UK",
+              "electronics importer UK wholesale"
+            ],
+            "companies_house_terms": [
+              "electronic components",
+              "electronics distributor"
+            ]
+          },
+          {
+            "name": "AV & technology equipment importers UK",
+            "why": "",
+            "search_queries": [
+              "AV equipment importer UK",
+              "technology equipment distributor UK"
+            ],
+            "companies_house_terms": [
+              "technology importer",
+              "AV distributor"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK automotive parts & electronics distributors",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false,
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-06-21T06:56:08.967Z"
+  },
+  "evergreen-2026-W25-5": {
+    "id": "evergreen-2026-W25-5",
+    "headline": "Evergreen: UK Microsoft & cloud partners paying USD/EUR licensing costs",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Microsoft & Cloud Partners",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP revenue / USD-EUR software licensing costs",
+        "why_affected": "Pay Microsoft, AWS, Google Cloud, and Cisco licensing fees in USD or EUR. Every GBP/USD move hits margin on renewals and resale.",
+        "category_priority_score": 88,
+        "sales_angle": "USD licensing cost review. Rate lock on upcoming Microsoft/AWS renewals.",
+        "micro_categories": [
+          {
+            "name": "Microsoft Gold & Silver Partners UK",
+            "why": "Pay Microsoft licensing in USD; resell to SMEs in GBP",
+            "search_queries": [
+              "Microsoft Gold Partner UK IT services",
+              "Microsoft 365 reseller UK mid-market"
+            ],
+            "companies_house_terms": [
+              "Microsoft partner",
+              "IT solutions"
+            ]
+          },
+          {
+            "name": "AWS & Azure cloud partners UK",
+            "why": "AWS and Azure fees billed in USD; clients pay GBP",
+            "search_queries": [
+              "AWS partner managed cloud services UK",
+              "Azure partner UK IT mid-market"
+            ],
+            "companies_house_terms": [
+              "cloud services",
+              "IT managed services"
+            ]
+          },
+          {
+            "name": "Cisco & network infrastructure partners UK",
+            "why": "Cisco hardware and licensing costs in USD",
+            "search_queries": [
+              "Cisco partner UK IT infrastructure",
+              "Cisco reseller UK network solutions"
+            ],
+            "companies_house_terms": [
+              "Cisco partner",
+              "network solutions"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "IT Managed Service Providers",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP monthly recurring revenue / USD-EUR vendor costs",
+        "why_affected": "MSPs pay monthly stack costs (RMM tools, security vendors, cloud) in USD. Margins squeezed when GBP/USD falls.",
+        "category_priority_score": 85,
+        "sales_angle": "Stack cost FX exposure — USD tool spend vs GBP contract revenue.",
+        "micro_categories": [
+          {
+            "name": "IT managed service providers UK SME",
+            "why": "Monthly USD tool costs against GBP MRR",
+            "search_queries": [
+              "IT managed service provider UK SME",
+              "MSP UK managed IT support"
+            ],
+            "companies_house_terms": [
+              "managed services",
+              "IT support"
+            ]
+          },
+          {
+            "name": "Cybersecurity managed service providers UK",
+            "why": "US-priced security tools; GBP-billed clients",
+            "search_queries": [
+              "cybersecurity managed services UK business",
+              "cyber security MSP UK mid-market"
+            ],
+            "companies_house_terms": [
+              "cybersecurity",
+              "security services"
+            ]
+          },
+          {
+            "name": "IT outsourcing companies UK",
+            "why": "Offshore staff costs in USD/EUR; GBP client contracts",
+            "search_queries": [
+              "IT outsourcing company UK B2B",
+              "IT services outsourcing UK mid-market"
+            ],
+            "companies_house_terms": [
+              "IT outsourcing",
+              "managed IT"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK Microsoft & cloud partners paying USD/EUR licensing costs",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false
+  },
+  "evergreen-2026-W25-6": {
+    "id": "evergreen-2026-W25-6",
+    "headline": "Evergreen: UK software resellers & value-added resellers paying USD costs",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Software Resellers & VARs",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP revenue / USD software vendor costs",
+        "why_affected": "Buy software licences from US vendors in USD and resell in GBP to UK businesses. Every GBP/USD move changes margin on every deal.",
+        "category_priority_score": 86,
+        "sales_angle": "USD software cost hedging — rate review before renewal season.",
+        "micro_categories": [
+          {
+            "name": "Value-added resellers UK IT",
+            "why": "Hardware + software bundles sourced in USD",
+            "search_queries": [
+              "VAR value added reseller UK IT solutions",
+              "IT reseller UK B2B mid-market"
+            ],
+            "companies_house_terms": [
+              "IT reseller",
+              "value added reseller"
+            ]
+          },
+          {
+            "name": "SaaS & cloud software resellers UK",
+            "why": "Resell US SaaS platforms to UK SMEs in GBP",
+            "search_queries": [
+              "SaaS reseller UK B2B",
+              "cloud software reseller UK business"
+            ],
+            "companies_house_terms": [
+              "software reseller",
+              "SaaS distributor"
+            ]
+          },
+          {
+            "name": "Enterprise software distributors UK",
+            "why": "Buy enterprise licences in USD; invoice clients in GBP",
+            "search_queries": [
+              "enterprise software distributor UK",
+              "software distributor UK B2B mid-market"
+            ],
+            "companies_house_terms": [
+              "software distributor",
+              "IT distributor"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "IT Hardware Distributors",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP revenue / USD-EUR hardware procurement costs",
+        "why_affected": "Source servers, networking, and end-user devices from US and European manufacturers. Hardware priced in USD.",
+        "category_priority_score": 80,
+        "sales_angle": "Hardware procurement FX review — USD buying costs vs GBP contract bids.",
+        "micro_categories": [
+          {
+            "name": "Server & storage distributors UK",
+            "why": "HPE, Dell, NetApp priced in USD",
+            "search_queries": [
+              "server storage distributor UK mid-market",
+              "HPE Dell reseller UK B2B"
+            ],
+            "companies_house_terms": [
+              "server distributor",
+              "IT hardware"
+            ]
+          },
+          {
+            "name": "Networking equipment distributors UK",
+            "why": "Cisco, Juniper, Palo Alto USD pricing",
+            "search_queries": [
+              "networking equipment distributor UK",
+              "network hardware reseller UK B2B"
+            ],
+            "companies_house_terms": [
+              "networking distributor",
+              "network reseller"
+            ]
+          },
+          {
+            "name": "Endpoint & device resellers UK",
+            "why": "Laptops, PCs, tablets sourced from US/Asian suppliers",
+            "search_queries": [
+              "laptop device reseller UK B2B",
+              "endpoint device distributor UK mid-market"
+            ],
+            "companies_house_terms": [
+              "device reseller",
+              "IT equipment"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK software resellers & value-added resellers paying USD costs",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false
+  },
+  "evergreen-2026-W25-7": {
+    "id": "evergreen-2026-W25-7",
+    "headline": "Evergreen: UK ERP, CRM & enterprise software implementation partners",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "ERP & Business Software Partners",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP project revenue / USD-EUR software licensing costs",
+        "why_affected": "Pay SAP, Oracle, Sage, Microsoft Dynamics, NetSuite licence fees in USD or EUR; bill UK clients in GBP on fixed-price projects.",
+        "category_priority_score": 84,
+        "sales_angle": "ERP licence renewal FX review — USD cost lock before renewal window.",
+        "micro_categories": [
+          {
+            "name": "Microsoft Dynamics & Business Central partners UK",
+            "why": "USD Dynamics licence costs; GBP-billed implementations",
+            "search_queries": [
+              "Microsoft Dynamics partner UK SME",
+              "Business Central implementation partner UK"
+            ],
+            "companies_house_terms": [
+              "Dynamics partner",
+              "ERP implementation"
+            ]
+          },
+          {
+            "name": "Sage & Xero implementation partners UK",
+            "why": "Pay USD/EUR platform fees; bill UK accountancy clients in GBP",
+            "search_queries": [
+              "Sage implementation partner UK B2B",
+              "Xero Gold partner UK accounting software"
+            ],
+            "companies_house_terms": [
+              "Sage partner",
+              "accounting software"
+            ]
+          },
+          {
+            "name": "Salesforce & CRM implementation partners UK",
+            "why": "Salesforce USD licensing passed to UK SME clients",
+            "search_queries": [
+              "Salesforce partner UK SME B2B",
+              "CRM implementation company UK mid-market"
+            ],
+            "companies_house_terms": [
+              "Salesforce partner",
+              "CRM consultancy"
+            ]
+          },
+          {
+            "name": "NetSuite & Oracle partners UK",
+            "why": "USD NetSuite/Oracle licensing costs; GBP project contracts",
+            "search_queries": [
+              "NetSuite partner UK mid-market",
+              "Oracle partner UK business software"
+            ],
+            "companies_house_terms": [
+              "NetSuite partner",
+              "Oracle partner"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "IT Recruitment & Staffing Agencies",
+        "exposure_level": "Medium",
+        "exposure_type": "multi_currency",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP revenue / USD-EUR contractor and overseas payroll costs",
+        "why_affected": "Pay offshore IT contractors in USD or EUR; bill UK tech clients in GBP. FX moves squeeze margins on offshore delivery models.",
+        "category_priority_score": 76,
+        "sales_angle": "Offshore contractor payroll FX review — USD/EUR cost hedging for recurring payments.",
+        "micro_categories": [
+          {
+            "name": "IT staffing & technology recruitment agencies UK",
+            "why": "USD/EUR offshore IT contractor costs; GBP client billing",
+            "search_queries": [
+              "IT recruitment agency UK technology staffing",
+              "technology staffing company UK mid-market"
+            ],
+            "companies_house_terms": [
+              "IT recruitment",
+              "technology staffing"
+            ]
+          },
+          {
+            "name": "Nearshore software development companies UK",
+            "why": "EUR nearshore dev team costs; GBP client revenue",
+            "search_queries": [
+              "nearshore software development company UK",
+              "offshore software development UK mid-market"
+            ],
+            "companies_house_terms": [
+              "software development",
+              "nearshore development"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK ERP, CRM & enterprise software implementation partners",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false
+  },
+  "evergreen-2026-W25-8": {
+    "id": "evergreen-2026-W25-8",
+    "headline": "Evergreen: UK telecoms resellers & UCaaS providers with USD carrier costs",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Telecoms Resellers & UCaaS Providers",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "affected_payment_flow": "GBP subscription revenue / USD-EUR carrier and platform costs",
+        "why_affected": "Pay US carrier interconnect fees and UCaaS platform costs (Teams, Zoom, RingCentral) in USD; sell UK telecoms services in GBP on monthly contracts.",
+        "category_priority_score": 80,
+        "sales_angle": "Monthly USD carrier cost review — fix exchange rate on recurring telecoms carrier spend.",
+        "micro_categories": [
+          {
+            "name": "Microsoft Teams direct routing & UC providers UK",
+            "why": "USD Teams/SBC carrier costs; GBP SME contract revenue",
+            "search_queries": [
+              "Microsoft Teams direct routing provider UK",
+              "Teams voice reseller UK B2B"
+            ],
+            "companies_house_terms": [
+              "telecoms",
+              "UC provider"
+            ]
+          },
+          {
+            "name": "VoIP & hosted phone system resellers UK",
+            "why": "Pay USD carrier interconnects; resell phone systems in GBP",
+            "search_queries": [
+              "VoIP reseller UK business phone systems",
+              "hosted phone system provider UK mid-market"
+            ],
+            "companies_house_terms": [
+              "VoIP reseller",
+              "telecoms reseller"
+            ]
+          },
+          {
+            "name": "Managed connectivity & SD-WAN providers UK",
+            "why": "International circuit costs in USD; GBP client contracts",
+            "search_queries": [
+              "SD-WAN managed connectivity provider UK",
+              "managed WAN services UK business"
+            ],
+            "companies_house_terms": [
+              "connectivity provider",
+              "network services"
+            ]
+          },
+          {
+            "name": "Broadband & SIP trunk resellers UK",
+            "why": "Wholesale SIP and broadband costs partially in USD/EUR",
+            "search_queries": [
+              "SIP trunk reseller UK B2B",
+              "business broadband reseller UK"
+            ],
+            "companies_house_terms": [
+              "SIP reseller",
+              "broadband reseller"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "Backup, DR & Data Centre Services",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP MRR / USD cloud storage and DR platform costs",
+        "why_affected": "Pay AWS S3, Azure Blob, Veeam, and Zerto licences in USD; bill UK clients monthly in GBP. Every GBP/USD move directly hits per-GB storage margins.",
+        "category_priority_score": 78,
+        "sales_angle": "USD cloud storage cost review — forward cover on AWS/Azure storage spend.",
+        "micro_categories": [
+          {
+            "name": "Backup & disaster recovery service providers UK",
+            "why": "Veeam, Zerto, Datto USD licences; GBP-billed clients",
+            "search_queries": [
+              "backup disaster recovery service provider UK",
+              "managed backup services UK SME"
+            ],
+            "companies_house_terms": [
+              "backup services",
+              "DR provider"
+            ]
+          },
+          {
+            "name": "Data centre colocation providers UK",
+            "why": "Power and interconnect costs tied to USD wholesale prices",
+            "search_queries": [
+              "data centre colocation UK mid-market",
+              "co-location provider UK B2B"
+            ],
+            "companies_house_terms": [
+              "data centre",
+              "colocation"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK telecoms resellers & UCaaS providers with USD carrier costs",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false
+  },
+  "evergreen-2026-W25-9": {
+    "id": "evergreen-2026-W25-9",
+    "headline": "Evergreen: UK cloud migration & digital transformation firms with USD exposure",
+    "source": "evergreen_playbook",
+    "source_url": "",
+    "detected_at": "2026-06-21T06:55:55.666Z",
+    "status": "ready",
+    "event_type": "evergreen",
+    "event_breadth": "broad_macro",
+    "trigger_strength": "strong",
+    "discovery_mode": "full",
+    "trigger_score": 80,
+    "recommended_query_budget": 20,
+    "urgency_score": 5,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "evergreen_playbook",
+    "target_segments": [
+      {
+        "segment_name": "Cloud Migration & Digital Transformation",
+        "exposure_level": "Medium",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP project revenue / USD cloud platform costs",
+        "why_affected": "Run client workloads on AWS/Azure during migration projects; cloud costs billed in USD against GBP fixed-price contracts.",
+        "category_priority_score": 78,
+        "sales_angle": "Cloud cost FX risk on fixed-price projects — USD overage vs GBP contract.",
+        "micro_categories": [
+          {
+            "name": "Cloud migration consultancies UK",
+            "why": "AWS/Azure usage costs in USD during migration",
+            "search_queries": [
+              "cloud migration services UK business",
+              "AWS Azure migration company UK"
+            ],
+            "companies_house_terms": [
+              "cloud migration",
+              "cloud consultancy"
+            ]
+          },
+          {
+            "name": "Digital transformation agencies UK",
+            "why": "US platform and tooling costs vs GBP project budgets",
+            "search_queries": [
+              "digital transformation company UK B2B",
+              "digital transformation consultancy UK mid-market"
+            ],
+            "companies_house_terms": [
+              "digital transformation",
+              "technology consultancy"
+            ]
+          },
+          {
+            "name": "DevOps & platform engineering firms UK",
+            "why": "Cloud-native tooling in USD; GBP-billed client retainers",
+            "search_queries": [
+              "DevOps consultancy UK B2B",
+              "platform engineering company UK mid-market"
+            ],
+            "companies_house_terms": [
+              "DevOps",
+              "platform engineering"
+            ]
+          }
+        ]
+      },
+      {
+        "segment_name": "Cybersecurity Companies",
+        "exposure_level": "High",
+        "exposure_type": "import_costs",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "affected_payment_flow": "GBP revenue / USD security vendor costs",
+        "why_affected": "Buy US-priced security platforms (Palo Alto, CrowdStrike, SentinelOne, Fortinet) in USD; bill UK clients in GBP.",
+        "category_priority_score": 82,
+        "sales_angle": "USD security vendor cost review — rate lock before licence renewal.",
+        "micro_categories": [
+          {
+            "name": "Cybersecurity resellers & MSSPs UK",
+            "why": "Palo Alto, CrowdStrike, Fortinet USD licensing",
+            "search_queries": [
+              "managed security services UK mid-market",
+              "MSSP UK cybersecurity company"
+            ],
+            "companies_house_terms": [
+              "cybersecurity",
+              "managed security"
+            ]
+          },
+          {
+            "name": "Penetration testing & security consultancies UK",
+            "why": "US tooling costs in USD; GBP-billed engagements",
+            "search_queries": [
+              "penetration testing company UK B2B",
+              "cybersecurity consultancy UK mid-market"
+            ],
+            "companies_house_terms": [
+              "penetration testing",
+              "security consultancy"
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": "Evergreen: UK cloud migration & digital transformation firms with USD exposure",
+    "business_impact_summary": "Recurring FX payment exposure — evergreen prospect discovery.",
+    "sales_angle": "Rate review on recurring foreign currency payments.",
+    "fallback_mode": false
   },
   "f07d71a3a0d89014": {
     "id": "f07d71a3a0d89014",
