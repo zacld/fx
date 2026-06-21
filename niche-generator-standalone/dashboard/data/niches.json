@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-06-19T15:38:35Z",
+    "generated_at": "2026-06-21T17:07:12Z",
     "first_filter": 551,
-    "final": 90
+    "final": 75
   },
   "niches": [
     {
@@ -244,69 +244,6 @@
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Manufacture of agricultural tractors (SIC 28301)",
-      "mechanism": "Pays EUR for heavy-duty transmissions.",
-      "filter_reason": "The UK does not have a domestic manufacturing base for heavy-duty agricultural tractor transmissions, making overseas sourcing a structural necessity.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of machinery for mining (SIC 28921)",
-      "mechanism": "Receives foreign currency from international mining companies.",
-      "filter_reason": "The global market for mining machinery dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Manufacture of earthmoving equipment (SIC 28922)",
-      "mechanism": "Receives foreign currency from international construction companies.",
-      "filter_reason": "The global market for earthmoving equipment dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Manufacture of equipment for concrete crushing and screening and roadworks (SIC 28923)",
-      "mechanism": "Receives foreign currency from international quarrying and construction firms.",
-      "filter_reason": "The global market for crushing and screening equipment dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Manufacture of machinery for food, beverage and tobacco processing (SIC 28930)",
-      "mechanism": "Receives foreign currency from international food and beverage manufacturers.",
-      "filter_reason": "The global market for food processing machinery dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Manufacture of machinery for textile, apparel and leather production (SIC 28940)",
-      "mechanism": "Receives foreign currency from international textile and apparel manufacturers.",
-      "filter_reason": "The global market for textile machinery dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Manufacture of machinery for paper and paperboard production (SIC 28950)",
-      "mechanism": "Receives foreign currency from international paper and board mills.",
-      "filter_reason": "The global market for paper production machinery dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Manufacture of plastics and rubber machinery (SIC 28960)",
-      "mechanism": "Receives foreign currency from international plastics and rubber manufacturers.",
-      "filter_reason": "The global market for plastics and rubber machinery dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Manufacture of other special-purpose machinery n.e.c. (SIC 28990)",
-      "mechanism": "Receives foreign currency from international specialist manufacturing clients.",
-      "filter_reason": "The global market for special-purpose machinery dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
       "sector_name": "Manufacture of motor vehicles (SIC 29100)",
       "mechanism": "Receives foreign currency from international vehicle distributors and customers.",
       "filter_reason": "The global market for motor vehicles dictates sales are denominated in foreign currencies.",
@@ -319,13 +256,6 @@
       "filter_reason": "The global market for specialised vehicle coachwork dictates sales are denominated in foreign currencies.",
       "source": "ons_sic",
       "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Agents selling agricultural raw materials, livestock, textile raw materials and semi-finished goods (SIC 46110)",
-      "mechanism": "Pays USD for globally priced agricultural commodities.",
-      "filter_reason": "Many agricultural raw materials and textile raw materials are priced in USD by global market standard.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
     },
     {
       "sector_name": "Agents involved in the sale of fuels, ores, metals and industrial chemicals (SIC 46120)",
@@ -366,13 +296,6 @@
       "sector_name": "Wholesale of grain, unmanufactured tobacco, seeds and animal feeds (SIC 46210)",
       "mechanism": "Pays USD/EUR for imported unmanufactured tobacco.",
       "filter_reason": "Unmanufactured tobacco is only produced outside the UK with no domestic equivalent whatsoever.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Wholesale of live animals (SIC 46230)",
-      "mechanism": "Pays EUR/USD for imported exotic animals or aquaculture species.",
-      "filter_reason": "Specific exotic animals for zoos or certain aquaculture species are only produced outside the UK with no domestic equivalent whatsoever.",
       "source": "ons_sic",
       "fx_direction": "pays"
     },
@@ -503,13 +426,6 @@
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Tour operator activities (SIC 79120)",
-      "mechanism": "Pays foreign currency to overseas hotels and providers.",
-      "filter_reason": "International tour services are priced in local or major foreign currencies as a global pricing convention.",
-      "source": "ons_sic",
-      "fx_direction": "pays"
-    },
-    {
       "sector_name": "Other reservation service activities n.e.c. (SIC 79909)",
       "mechanism": "Pays foreign currency to overseas activity and event providers.",
       "filter_reason": "International reservation services are priced in local or major foreign currencies as a global pricing convention.",
@@ -545,20 +461,6 @@
       "fx_direction": "pays"
     },
     {
-      "sector_name": "Other education n.e.c. (SIC 85590)",
-      "mechanism": "Receives USD from international students for tuition fees.",
-      "filter_reason": "The sector structurally requires accepting foreign currency payments from international students, as their home currency is foreign.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Educational support services (SIC 85600)",
-      "mechanism": "Receives EUR from international students for programme fees.",
-      "filter_reason": "The sector structurally requires accepting foreign currency payments from international students, as their home currency is foreign.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
       "sector_name": "Support activities to performing arts (SIC 90020)",
       "mechanism": "Receives USD from overseas promoters for artist fees.",
       "filter_reason": "The sector structurally requires foreign currency settlement when managing international artists, as the overseas promoter's operating currency is foreign.",
@@ -585,13 +487,6 @@
       "filter_reason": "The sector's core output, digital game sales, is priced and settled in major foreign currencies by global market convention.",
       "source": "wikipedia",
       "fx_direction": "receives"
-    },
-    {
-      "sector_name": "UK independent tour operators",
-      "mechanism": "Pays overseas hotels and transport in foreign currencies.",
-      "filter_reason": "The sector structurally requires foreign currency settlement for services provided by overseas suppliers, as there is no domestic alternative for international travel and accommodation.",
-      "source": "wikipedia",
-      "fx_direction": "pays"
     },
     {
       "sector_name": "UK specialty chemical manufacturers and importers",
