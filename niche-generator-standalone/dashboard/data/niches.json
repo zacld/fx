@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-06-21T17:07:12Z",
+    "generated_at": "2026-06-21T17:18:36Z",
     "first_filter": 551,
-    "final": 75
+    "final": 73
   },
   "niches": [
     {
@@ -242,20 +242,6 @@
       "filter_reason": "The UK does not have a domestic manufacturing base for ceramic cartridges used in modern taps, making overseas sourcing a structural necessity.",
       "source": "ons_sic",
       "fx_direction": "pays"
-    },
-    {
-      "sector_name": "Manufacture of motor vehicles (SIC 29100)",
-      "mechanism": "Receives foreign currency from international vehicle distributors and customers.",
-      "filter_reason": "The global market for motor vehicles dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
-    },
-    {
-      "sector_name": "Manufacture of bodies (coachwork) for motor vehicles (except caravans) (SIC 29201)",
-      "mechanism": "Receives foreign currency from international vehicle manufacturers and operators.",
-      "filter_reason": "The global market for specialised vehicle coachwork dictates sales are denominated in foreign currencies.",
-      "source": "ons_sic",
-      "fx_direction": "receives"
     },
     {
       "sector_name": "Agents involved in the sale of fuels, ores, metals and industrial chemicals (SIC 46120)",
