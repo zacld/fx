@@ -1,0 +1,667 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Specific FX-exposed UK business niches for cold-call targeting. Each niche represents a distinct buyer type with identifiable currency exposure.",
+    "size_fit": "£10m-£300m",
+    "generated": "2026-06-22"
+  },
+  "niches": [
+    {
+      "id": "european-charcuterie-importers",
+      "name": "European Charcuterie Importers",
+      "sic_codes": ["46320", "46390"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK specialist charcuterie importers buy prosciutto, salami, and cured meats from Italian and Spanish producers in EUR, while selling to UK retailers and restaurants in GBP.",
+      "call_angle": "With EUR strengthening against GBP, your EUR invoices from Italian or Spanish suppliers are costing more in sterling — worth a quick conversation about your upcoming order cycle?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "italian-olive-oil-importers",
+      "name": "Italian & Spanish Olive Oil Importers",
+      "sic_codes": ["46390", "46170"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK olive oil importers source bulk and bottled olive oil from Italian and Spanish producers paying in EUR, with revenue entirely in GBP.",
+      "call_angle": "Olive oil prices are already elevated after poor harvests — if EUR/GBP moves further against you, your cost base takes a double hit. Are you managing that exposure ahead of your next shipment?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "continental-cheese-importers",
+      "name": "Continental Cheese Importers & Wholesalers",
+      "sic_codes": ["46330", "46390"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "Importers of French, Italian, and Dutch cheeses buy in EUR from dairies and co-operatives and sell in GBP to UK retailers, delis, and food-service.",
+      "call_angle": "Cheese margins are tight enough without currency drift — if you're invoiced in EUR and your last hedge ran out, it's worth a quick check before the next order lands.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "european-wine-importers",
+      "name": "European Wine Importers & Négociants",
+      "sic_codes": ["46341", "46342"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK wine importers buy French, Italian, Spanish, and German wines in EUR and sell to UK on-trade and retail in GBP, with contracts often locked 6–18 months ahead.",
+      "call_angle": "With contracts running months ahead, a move in EUR/GBP between en primeur purchase and delivery can wipe out margin — is that exposure something you're actively managing?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "spirits-importers",
+      "name": "European & American Spirits Importers",
+      "sic_codes": ["46342", "46341"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK spirits importers pay EUR for French cognac and Italian grappa, and USD for American bourbon and Caribbean rum, while revenues are sterling-denominated.",
+      "call_angle": "You're carrying EUR and USD payables at the same time — if both move against GBP in the same quarter, the P&L impact compounds quickly. Are you looking at that risk together?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "specialty-coffee-importers",
+      "name": "Specialty Coffee Importers & Green Bean Traders",
+      "sic_codes": ["46370", "46390"],
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "Green coffee beans are traded in USD on ICE Futures; UK specialty roasters and importers pay USD for origin-direct or broker purchases while selling finished product in GBP.",
+      "call_angle": "Coffee is priced in dollars and you're selling in sterling — if you're forward-buying green beans, the FX leg on that contract matters as much as the commodity price.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "cocoa-chocolate-ingredient-importers",
+      "name": "Cocoa & Chocolate Ingredient Importers",
+      "sic_codes": ["46370", "10820"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK cocoa processors and chocolate manufacturers buy cocoa beans in USD (ICE-priced) and European semi-finished couverture in EUR, with UK retail revenues in GBP.",
+      "call_angle": "Cocoa hit record highs priced in dollars — if you're buying spot rather than hedged, every GBP/USD move feeds straight into your input cost. Worth talking through your cover position?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "nordic-frozen-seafood-importers",
+      "name": "Norwegian & Icelandic Frozen Seafood Importers",
+      "sic_codes": ["46380", "46390"],
+      "currency_pairs": ["NOK/GBP", "EUR/GBP"],
+      "exposure_reason": "UK seafood importers and fish processors buy salmon, cod, and haddock from Norwegian and Icelandic suppliers, typically invoiced in NOK or EUR, selling to UK retailers and food-service in GBP.",
+      "call_angle": "Norwegian krone is thinly traded and can gap — if your salmon invoices are in NOK, you may be taking more currency risk than you realise between order and delivery.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "mediterranean-fresh-produce-importers",
+      "name": "Mediterranean Fresh Produce Importers",
+      "sic_codes": ["46310", "46390"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK importers of Spanish tomatoes, Moroccan citrus, and Italian vegetables pay EUR or pegged currencies and sell to UK supermarkets in GBP on narrow margin.",
+      "call_angle": "Fresh produce margins are already paper-thin — if your EUR payables aren't covered and the rate moves a few cents, that's the margin gone. Are you hedging the next season's contracts?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "tropical-fruit-importers",
+      "name": "Tropical Fruit Importers & Ripeners",
+      "sic_codes": ["46310", "46390"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK banana and exotic fruit importers buy from Central American and West African suppliers in USD or EUR, then sell to UK supermarket and wholesale customers in GBP.",
+      "call_angle": "Banana supply contracts are long-dated and dollar-denominated — if you're not covering the FX leg over that same horizon, you're carrying open currency risk for months at a time.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "german-austrian-machinery-importers",
+      "name": "German & Austrian Industrial Machinery Importers",
+      "sic_codes": ["46610", "46690"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK distributors of German and Austrian capital equipment pay EUR for machines and spare parts while billing UK manufacturers in GBP, often with extended payment terms.",
+      "call_angle": "Capital equipment contracts run for months between order and delivery — if EUR has moved against you by the time the machine arrives, that margin hit isn't recoverable.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "italian-ceramic-tile-importers",
+      "name": "Italian Ceramic & Porcelain Tile Importers",
+      "sic_codes": ["46730", "46900"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK tile importers and distributors buy Italian and Spanish ceramic and porcelain tiles in EUR and sell to UK housebuilders, contractors, and retailers in GBP.",
+      "call_angle": "Tile orders are typically large-volume and lead-time is long — by the time the container lands, EUR/GBP could be somewhere different. Are you pricing with that currency risk in mind?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "scandinavian-timber-importers",
+      "name": "Scandinavian Softwood Timber Importers",
+      "sic_codes": ["46730", "46900"],
+      "currency_pairs": ["SEK/GBP", "EUR/GBP"],
+      "exposure_reason": "UK timber merchants import Swedish and Finnish softwood structural timber in SEK or EUR, selling to UK builders merchants and construction companies in GBP.",
+      "call_angle": "Swedish krona is one of the more volatile Scandinavian currencies and doesn't get much attention — if your timber invoices are in SEK, it's worth checking whether you have any cover in place.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "dutch-horticultural-importers",
+      "name": "Dutch Horticultural & Flower Importers",
+      "sic_codes": ["46220", "46900"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK flower and plant importers buy from Dutch auction houses and growers in EUR, with the auction price plus logistics all EUR-denominated, selling to UK supermarkets and florists in GBP.",
+      "call_angle": "Cut flowers have almost zero shelf life — you can't hold stock to wait for a better rate. If EUR/GBP moves between purchase and delivery, there's no way to recover it.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "european-steel-service-centres",
+      "name": "European Steel & Aluminium Service Centres",
+      "sic_codes": ["46720", "46900"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK steel and aluminium service centres import European mill-origin coil, sheet, and sections in EUR, processing and selling to UK manufacturers in GBP.",
+      "call_angle": "Steel is a commodity and margins are already compressed — if you're buying EUR-priced coil and haven't hedged the next quarter, a rate move could turn a small margin into a loss.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "electronic-component-distributors",
+      "name": "Electronic Component Distributors",
+      "sic_codes": ["46520", "46900"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK electronics component distributors buy semiconductors, passives, and connectors from US, Asian, and European manufacturers in USD or EUR, selling to UK engineering firms in GBP.",
+      "call_angle": "Component pricing is almost entirely in dollars — if you're holding inventory bought at one USD/GBP rate and the market moves before you bill the customer, there's a hidden FX loss baked into every order.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "medical-device-importers",
+      "name": "Medical Device Importers & UK Distributors",
+      "sic_codes": ["46460", "46900"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK medical device importers distribute German, US, and Japanese diagnostic and surgical equipment paid in EUR or USD, with NHS and private hospital revenues in GBP.",
+      "call_angle": "NHS procurement timelines are long and budgets are fixed in sterling — if your EUR or USD costs drift upward between tender and delivery, the margin impact is permanent.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "pharmaceutical-api-importers",
+      "name": "Pharmaceutical API & Ingredient Importers",
+      "sic_codes": ["46460", "21200"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK pharma manufacturers and contract manufacturers import active pharmaceutical ingredients from India, China, and Europe in USD or EUR, with regulated UK product revenues in GBP.",
+      "call_angle": "API costs from India or China are typically dollar-denominated — with USD/GBP uncertainty and long procurement lead times, is your cost-of-goods protected for the next production run?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "specialty-chemical-distributors",
+      "name": "Specialty Chemical Distributors",
+      "sic_codes": ["46750", "46900"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK specialty chemical distributors source performance chemicals, adhesives, and coatings from European and US producers in EUR or USD, selling to UK industrial users in GBP.",
+      "call_angle": "Specialty chemicals often come from a single-source European supplier — if that relationship is EUR-invoiced and you don't have forward cover, you're exposed every time you reorder.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "european-automotive-oem-parts",
+      "name": "European Automotive OEM Parts Distributors",
+      "sic_codes": ["45310", "46900"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK distributors of German and French OEM automotive parts buy in EUR from manufacturers or their UK-based subsidiaries' parent pricing, selling to UK garages and dealers in GBP.",
+      "call_angle": "OEM parts pricing is set in euros and reviewed quarterly — if EUR/GBP has moved since the last price list, your landed cost is already different from what you quoted on.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "laboratory-scientific-instrument-importers",
+      "name": "Laboratory & Scientific Instrument Importers",
+      "sic_codes": ["46690", "46460"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK distributors of German, US, and Japanese analytical and laboratory instruments pay in EUR or USD and sell to UK universities, NHS labs, and industrial users in GBP.",
+      "call_angle": "Scientific instrument contracts often run to tens of thousands per unit — if it's EUR-priced and you quoted in GBP six months ago, the margin could already be underwater.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "italian-portuguese-fabric-importers",
+      "name": "Italian & Portuguese Premium Fabric Importers",
+      "sic_codes": ["46410", "46900"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK fashion fabric importers source Italian technical fabrics and Portuguese jersey from mills invoiced in EUR, selling to UK fashion brands and garment makers in GBP.",
+      "call_angle": "Italian mills often invoice in euros and expect prompt payment — if you're not covering the FX between fabric order and customer payment, the margin on a seasonal range can disappear quietly.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "far-east-garment-importers",
+      "name": "Far East Garment Importers & UK Fashion Brands",
+      "sic_codes": ["46410", "14190"],
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "UK fashion brands and garment importers source from Bangladesh, Vietnam, and China with factory invoices denominated in USD, while UK wholesale and retail revenues are in GBP.",
+      "call_angle": "Garment lead times are 4–6 months from order to delivery — if you're paying USD for a spring collection you haven't hedged, every cent of USD/GBP movement hits the margin.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "european-footwear-importers",
+      "name": "European & Asian Footwear Importers",
+      "sic_codes": ["46420", "46900"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK footwear brands and distributors import from Italian, Portuguese, and Portuguese factories in EUR, and from Chinese and Vietnamese factories in USD, selling to UK retail in GBP.",
+      "call_angle": "Footwear is ordered by season, months ahead of delivery — if you haven't locked in the rate on your EUR and USD factory orders, you're carrying open FX risk for an entire range.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "agrochemical-importers",
+      "name": "Agrochemical & Crop Protection Importers",
+      "sic_codes": ["46750", "46900"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK agrochemical distributors import active ingredients and formulated pesticides from European and non-EU producers in USD or EUR, selling to UK farmers and distributors in GBP.",
+      "call_angle": "Agrochemical licensing and active ingredient costs are predominantly dollar-based globally — if your formulated products are bought in USD and sold in GBP, what does your FX cover look like for this season?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "fertiliser-importers",
+      "name": "Fertiliser Importers & UK Distributors",
+      "sic_codes": ["46750", "20150"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK fertiliser importers buy urea, ammonium nitrate, and potash in USD (global commodity pricing) from Eastern European and Middle Eastern producers, selling to UK farmers in GBP.",
+      "call_angle": "Fertiliser trades in dollars globally — if you're buying at spot and a late spring USD/GBP move catches you before you've billed farmers, there's nowhere to recover that cost.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "printing-packaging-machinery-importers",
+      "name": "Printing & Packaging Machinery Importers",
+      "sic_codes": ["46610", "46690"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK distributors of German and Italian printing, labelling, and packaging machinery pay EUR to manufacturers and bill UK printers and FMCG companies in GBP.",
+      "call_angle": "Capital equipment contracts are signed months before delivery — if you quoted in GBP last quarter and EUR has moved since, does the margin still stack up on delivery day?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "pet-food-ingredient-importers",
+      "name": "Pet Food Ingredient Importers",
+      "sic_codes": ["10910", "46390"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK pet food manufacturers import meat meals, fish meal, and vitamin premixes from global suppliers in USD or EUR, with UK retail and private-label revenues in GBP.",
+      "call_angle": "Fish meal and meat proteins are globally priced in dollars — if your ingredient buy isn't hedged and USD firms up, your cost of goods moves before you can pass it on in product pricing.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "nutraceutical-ingredient-importers",
+      "name": "Nutraceutical & Health Ingredient Importers",
+      "sic_codes": ["46460", "46390"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK nutraceutical manufacturers and supplement brands import botanical extracts, vitamins, and amino acids from US, European, and Asian suppliers in USD or EUR, selling to UK health retail in GBP.",
+      "call_angle": "Supplement ingredients from US suppliers are dollar-priced — if you're formulating a product range 6 months out and haven't covered the ingredient cost in FX terms, the margin on that range is already uncertain.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "scotch-whisky-distillers",
+      "name": "Scotch Whisky Distillers & Export Bottlers",
+      "sic_codes": ["11010", "11020"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK whisky distillers and independent bottlers export to US and European markets in USD and EUR, with production costs in GBP, creating reverse exposure as the pound strengthens.",
+      "call_angle": "When GBP strengthens against USD or EUR, your export revenue translates back to fewer pounds — if you're not locking in rates on US or EU distribution contracts, the P&L swings with every currency move.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "craft-gin-distillers",
+      "name": "Craft Gin & Premium Spirit Distillers",
+      "sic_codes": ["11010", "11020"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK craft gin distillers with European distribution receive EUR payments from foreign distributors and face EUR costs for imported botanicals, creating two-sided currency exposure.",
+      "call_angle": "You're paying EUR for imported botanicals and receiving EUR from European distributors — those two flows might offset each other, or they might both move against you. Worth mapping that?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "pharma-manufacturers-exporters",
+      "name": "UK Pharmaceutical Manufacturers & Exporters",
+      "sic_codes": ["21100", "21200"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK pharma manufacturers exporting to EU and US markets invoice in EUR and USD, with GBP-denominated manufacturing costs, creating exposure when sterling strengthens.",
+      "call_angle": "If you're invoicing EU customers in euros and GBP has been strengthening, the sterling value of those export receipts is quietly shrinking — are you converting at spot or is there a forward programme in place?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "defence-aerospace-subcontractors",
+      "name": "Defence & Aerospace Subcontractors",
+      "sic_codes": ["30300", "25400"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK defence and aerospace subcontractors supply US primes and NATO programmes, with long-term contracts denominated in USD or EUR against GBP cost bases.",
+      "call_angle": "Defence contracts can run for years — if you're locked into a USD-denominated supply agreement and haven't protected the rate, every GBP/USD move for the life of that contract erodes your margin.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "precision-engineering-exporters",
+      "name": "Precision Engineering & CNC Machining Exporters",
+      "sic_codes": ["25620", "28410"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK precision engineering firms supplying European and US OEM customers invoice in EUR or USD, with UK labour, tooling, and material costs in GBP.",
+      "call_angle": "You might be quoting in euros but your cost base is sterling — if GBP strengthens between quote and invoice, is the margin still there, or are you repricing every tender?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "specialty-food-manufacturers-exporters",
+      "name": "Specialty Food Manufacturers & Exporters",
+      "sic_codes": ["10890", "10820"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK specialty food manufacturers exporting biscuits, condiments, and ambient goods to EU and US markets invoice in EUR and USD, with UK production costs in GBP.",
+      "call_angle": "If your EU distributor pays in euros and GBP firms up between shipment and settlement, the conversion back to sterling delivers less than you planned — is there a forward contract sitting behind those receivables?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "cosmetics-skincare-exporters",
+      "name": "UK Cosmetics & Skincare Exporters",
+      "sic_codes": ["20420", "46450"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK prestige and independent skincare brands exporting to EU, US, and Gulf markets invoice in EUR and USD against GBP manufacturing and R&D costs.",
+      "call_angle": "Beauty brands often have long payment terms with international distributors — if you're invoiced in EUR or USD and GBP moves during that credit period, the FX hit lands on top of already-stretched working capital.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "academic-publishers",
+      "name": "Academic & Professional Publishers",
+      "sic_codes": ["58110", "58120"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK academic publishers receive subscription and licence fees in EUR and USD from European and North American institutions, with UK editorial and technology costs in GBP.",
+      "call_angle": "Journal subscription revenue in euros lands in your account and then needs converting — if you're doing that ad hoc at spot, you may be giving up meaningful value versus a structured forward programme.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "music-rights-companies",
+      "name": "Music Rights & Royalty Companies",
+      "sic_codes": ["59200", "74900"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK music publishers and record labels receive streaming royalties and sync fees in USD and EUR from global platforms, converting to GBP for artist payments and operating costs.",
+      "call_angle": "Streaming royalties arrive in dollars and euros at different times through the quarter — if you're converting ad hoc at spot, you're taking a different rate each time. Worth thinking about a more systematic approach?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "video-game-studios",
+      "name": "UK Video Game Studios & Publishers",
+      "sic_codes": ["58210", "62010"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK game studios receive platform fees and digital sales revenue in USD from Steam, PlayStation, and Xbox marketplaces, with GBP development and studio costs.",
+      "call_angle": "Platform revenue from Steam or PlayStation hits in dollars — if your studio costs are in pounds and you're not converting on any kind of schedule, each quarterly settlement gives you a different effective rate.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "saas-software-exporters",
+      "name": "UK SaaS & Software Exporters",
+      "sic_codes": ["62010", "62020"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK SaaS companies billing European and North American customers in EUR and USD have GBP-denominated engineering, sales, and operational costs.",
+      "call_angle": "If you're billing European customers in euros on monthly or annual subscriptions and your cost base is sterling, every EUR/GBP move is essentially a hidden price change to your unit economics.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "engineering-consultancies",
+      "name": "UK Engineering & Technical Consultancies",
+      "sic_codes": ["71120", "74900"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK engineering consultancies on European and international infrastructure and energy projects invoice in EUR or USD, with GBP staff costs and UK overhead.",
+      "call_angle": "If you're billing a European client in euros on a project that runs 12 months, the rate you convert at on final invoice could be meaningfully different from what you scoped at tender.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "architecture-firms-international",
+      "name": "Architecture Firms with International Projects",
+      "sic_codes": ["71110", "74900"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP", "AED/GBP"],
+      "exposure_reason": "UK architecture firms with Middle East, European, or US commissions invoice in EUR, USD, or AED, with UK staff and overhead costs in GBP.",
+      "call_angle": "A Dubai commission in dirhams or a European museum project in euros — if the project runs 18 months and you've quoted a fee in foreign currency, the GBP value of that fee isn't fixed until you convert it.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "digital-agencies-international",
+      "name": "Digital Agencies with European & US Clients",
+      "sic_codes": ["73110", "62020"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK digital marketing and creative agencies with European and American clients invoice in EUR or USD, with UK team costs entirely in GBP.",
+      "call_angle": "Agency retainers billed in euros are straightforward until EUR/GBP moves and the monthly conversion starts delivering less to your UK payroll. Are you converting that revenue on a structured basis?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "international-freight-forwarders",
+      "name": "International Freight Forwarders",
+      "sic_codes": ["52290", "52100"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK freight forwarders pay ocean freight, port charges, and overseas agents in USD and EUR while billing UK shipper clients in GBP, often with rate cards updated quarterly.",
+      "call_angle": "Ocean freight is priced in dollars and your rate cards are in pounds — if you're not covering that differential on a rolling basis, every spot-rate spike that you absorb before the next rate card update hits your P&L.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "tour-operators",
+      "name": "UK Outbound Tour Operators",
+      "sic_codes": ["79110", "79120"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK tour operators pay hotels, ground handlers, and airline seats in EUR and USD up to 18 months ahead, while selling packages to UK consumers in GBP.",
+      "call_angle": "You're selling a holiday in pounds 12 months from now and paying for it in euros today — if you haven't locked in the rate, a 5% EUR/GBP move between booking and payment is a five-point margin swing.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "ship-owners-charterers",
+      "name": "UK Ship Owners & Vessel Charterers",
+      "sic_codes": ["50100", "50200"],
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "Shipping revenues and charter rates are denominated globally in USD, while UK-registered ship owners carry GBP-denominated operating costs, crew, and debt service.",
+      "call_angle": "Vessel earnings in dollars against GBP operating costs is a classic cross-currency mismatch — is that exposure managed at the parent level, or is there something sitting open at the vessel-owning entity?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "oil-gas-services",
+      "name": "UK Oil & Gas Services Companies",
+      "sic_codes": ["09100", "71120"],
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "UK oil and gas service companies operating in North Sea and international markets price contracts in USD, with significant GBP-denominated staff, equipment, and UK overhead.",
+      "call_angle": "North Sea contract rates are dollar-denominated but your Aberdeen office costs are in sterling — if GBP strengthens against USD during a long contract, the effective margin shrinks without anyone having made a decision.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "overseas-events-organisers",
+      "name": "Overseas Events & Conference Organisers",
+      "sic_codes": ["82300", "90010"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP", "AED/GBP"],
+      "exposure_reason": "UK conference and events companies staging overseas events pay venue, catering, and AV costs in local currency (EUR, USD, AED) while charging UK corporate clients in GBP.",
+      "call_angle": "If you've confirmed an event in Frankfurt or Dubai and invoiced the client in pounds but haven't bought the euros or dirhams yet, you're carrying the FX risk on the entire venue and production budget.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "international-recruitment-agencies",
+      "name": "International Recruitment Agencies",
+      "sic_codes": ["78200", "78300"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK international recruitment agencies placing contractors in European and US markets invoice client companies in EUR or USD, with UK management costs and contractor payroll potentially in GBP.",
+      "call_angle": "If you're billing a European client in euros on a contractor placement and paying that contractor in sterling, the margin on that placement changes with every EUR/GBP move for the length of the contract.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "jewellery-precious-metals-traders",
+      "name": "Jewellery Manufacturers & Precious Metal Traders",
+      "sic_codes": ["32120", "46480"],
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "UK jewellery manufacturers and gold traders buy gold and platinum in USD (London Bullion Market pricing) and sell finished goods to UK retail and export markets in GBP and other currencies.",
+      "call_angle": "Gold is priced in dollars and you're buying it to make products priced in sterling — if you're not hedging the USD/GBP leg of your metal procurement, your cost of goods moves every day the market is open.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "scandinavian-furniture-importers",
+      "name": "Scandinavian & European Furniture Importers",
+      "sic_codes": ["46650", "47591"],
+      "currency_pairs": ["EUR/GBP", "DKK/GBP"],
+      "exposure_reason": "UK furniture importers and distributors sourcing from Danish, Swedish, and Italian furniture manufacturers pay in EUR or DKK, selling to UK trade and retail customers in GBP.",
+      "call_angle": "Danish krone is pegged to EUR but still needs converting — if you're buying from Danish furniture makers and haven't thought about FX, you may be taking on more volatility than a peg suggests.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "musical-instrument-distributors",
+      "name": "Musical Instrument Distributors",
+      "sic_codes": ["46499", "32200"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP", "JPY/GBP"],
+      "exposure_reason": "UK musical instrument distributors import from European (EUR), American (USD), and Japanese (JPY) manufacturers, carrying multi-currency payables against GBP retail revenues.",
+      "call_angle": "You're buying from Germany in euros, from the US in dollars, and from Japan in yen — all three against GBP. If those cross-rates move in different directions at once, it's hard to hedge mentally. Have you mapped that exposure formally?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "sports-equipment-importers",
+      "name": "Sports Equipment & Outdoor Gear Importers",
+      "sic_codes": ["46499", "32300"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK sports equipment importers source from US brands and Asian manufacturers (USD-priced) and European brands (EUR-priced), selling to UK retail and independent sports shops in GBP.",
+      "call_angle": "Sporting goods orders are placed by season, months before delivery — if the US dollar firms up between your order and the container arriving, that cost increase is locked in before you can adjust retail pricing.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "dental-equipment-importers",
+      "name": "Dental Equipment & Consumable Importers",
+      "sic_codes": ["46460", "46690"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK dental equipment distributors import from German and US dental manufacturers in EUR and USD, selling to NHS and private dental practices in GBP.",
+      "call_angle": "German dental equipment — chairs, units, imaging — is euro-priced and expensive. If you're quoting practices in sterling and the supplier invoice is in euros, a rate move between quote and delivery affects every deal you have in the pipeline.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "consumer-electronics-importers",
+      "name": "Consumer Electronics Importers & Distributors",
+      "sic_codes": ["46520", "47430"],
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "UK consumer electronics distributors import from Asian manufacturers with invoices typically settled in USD, selling to UK retailers and online channels in GBP.",
+      "call_angle": "Electronics margins are already thin and USD/GBP moves directly into your cost of goods — if you're not covering your import orders in FX terms, you're absorbing every dollar move on what could be large-volume inventory.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "overseas-construction-contractors",
+      "name": "UK Construction Contractors with Overseas Projects",
+      "sic_codes": ["41200", "43999"],
+      "currency_pairs": ["AED/GBP", "USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK main contractors and specialist subcontractors working on overseas projects (Middle East, Europe) invoice in AED, USD, or EUR with UK head-office costs and subcontract payments in GBP.",
+      "call_angle": "A two-year construction contract in the Middle East priced in dirhams — if you haven't built an FX strategy into the commercial plan, the currency conversion risk runs for the full project duration.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "international-market-research",
+      "name": "International Market Research & Data Companies",
+      "sic_codes": ["73200", "74900"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK market research companies with European and US client bases invoice in EUR and USD against GBP staff and fieldwork costs.",
+      "call_angle": "A long-running USD research retainer that converts quarterly is essentially a rolling bet on when EUR/GBP lands — is that conversion managed or does it just happen when the payment arrives?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "european-property-investors",
+      "name": "UK Property Companies with European Assets",
+      "sic_codes": ["68100", "68209"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK property companies with European portfolios receive EUR rental income and carry EUR-denominated debt, creating structural translation exposure back to GBP reporting currency.",
+      "call_angle": "If you're receiving euro rents and reporting in sterling, EUR/GBP is embedded in your income statement whether you manage it or not — worth a conversation about whether that's a risk you want to carry?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "asian-restaurant-groups",
+      "name": "Asian Food Import & Restaurant Supply Groups",
+      "sic_codes": ["46390", "46170"],
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "UK importers supplying Asian restaurant trade and ethnic grocery retail import soy sauce, rice, fish sauce, and noodles from Asian producers typically priced in USD, selling in GBP.",
+      "call_angle": "Asian food commodities price in dollars globally — if you're importing at scale for the restaurant trade and not covering USD costs, every rate move feeds straight into your margin on a category where pricing power is limited.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-toy-importers",
+      "name": "UK Toy Importers & Distributors",
+      "sic_codes": ["46499", "47650"],
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "UK toy importers source primarily from Chinese manufacturers with USD-denominated factory invoices, selling to UK retailers and online channels in GBP, with seasonal ordering patterns creating large concentrated exposures.",
+      "call_angle": "Toy orders for Christmas are placed by spring, in dollars — if USD/GBP has moved by the time the containers arrive, the margin on your biggest season of the year is already affected.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-stationery-paper-importers",
+      "name": "Stationery & Office Paper Importers",
+      "sic_codes": ["46490", "17120"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK paper merchants and stationery importers buy European mill-origin copy paper, packaging board, and specialist papers in EUR, selling to UK business and retail customers in GBP.",
+      "call_angle": "European paper mills invoice in euros and forward-book capacity — if you're a paper merchant holding EUR contracts and sterling weakens, every tonne you've committed to gets more expensive in GBP terms.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-paint-coatings-importers",
+      "name": "Industrial Paint & Coatings Importers",
+      "sic_codes": ["46750", "20301"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK distributors of European and US industrial coatings pay EUR or USD to manufacturers and sell to UK engineering, automotive, and construction customers in GBP.",
+      "call_angle": "Coatings are often sole-sourced from a European supplier — if that relationship is EUR-invoiced and you haven't got any forward cover, every reorder is a fresh bet on the rate.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-seed-plant-breeders",
+      "name": "Seed & Plant Breeders with Global Licensing",
+      "sic_codes": ["01190", "46200"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK seed companies and plant breeders receive royalty income in EUR and USD from European and global licensees, with UK breeding and regulatory costs in GBP.",
+      "call_angle": "Royalty payments in euros from European seed licensees flow in at different times through the year — if you're converting at spot each time, the annual equivalent rate varies significantly depending on when each payment lands.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-industrial-gas-importers",
+      "name": "Industrial Gas Importers & Distributors",
+      "sic_codes": ["20110", "46750"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK industrial gas distributors importing European-origin specialist and rare gases from German and French producers pay in EUR against GBP distribution and cylinder depot costs.",
+      "call_angle": "If your specialist gas supply contracts with European producers are in euros and you're billing UK manufacturers in sterling, the margin on that distribution layer moves with EUR/GBP every time you restock.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-coffee-equipment-importers",
+      "name": "Coffee Equipment Importers & Distributors",
+      "sic_codes": ["46690", "46499"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK distributors of Italian and Swiss espresso machines, grinders, and accessories import in EUR and sell to UK cafes, restaurants, and office coffee operators in GBP.",
+      "call_angle": "Italian espresso machines are euro-priced and your UK contracts with operators are sterling — if EUR has moved since you last bought stock, your margin on those units is already different from what you planned.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-craft-beer-importers",
+      "name": "European Craft Beer Importers & Distributors",
+      "sic_codes": ["46341", "46342"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK craft beer importers bring in Belgian, German, and Scandinavian beers priced in EUR, distributing to UK on-trade and specialist retail in GBP.",
+      "call_angle": "Belgian or German craft beer is contracted and shipped in volume — if the EUR invoice value is meaningful and you haven't covered the rate, your landed cost changes with every EUR/GBP tick.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-safety-workwear-importers",
+      "name": "Safety Equipment & Workwear Importers",
+      "sic_codes": ["46490", "46420"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK PPE and safety workwear distributors import from European (EUR) and Asian (USD) manufacturers, selling to UK construction, industrial, and public-sector clients in GBP on framework agreements.",
+      "call_angle": "Framework supply agreements are priced in sterling but your PPE costs are in euros or dollars — if you've committed to a 12-month supply price and EUR or USD has moved, you're absorbing that for the contract term.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-renewable-energy-equipment",
+      "name": "Renewable Energy Equipment Importers",
+      "sic_codes": ["46690", "35110"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "UK solar, wind, and energy storage equipment distributors import European and Chinese-manufactured equipment in EUR and USD, selling to UK developers and installers in GBP.",
+      "call_angle": "Solar panels and inverters are Chinese-manufactured and typically dollar-priced — if you're buying equipment for a UK project and haven't covered the USD cost, the project margin is exposed from day one.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-food-packaging-importers",
+      "name": "Food Packaging & Processing Equipment Importers",
+      "sic_codes": ["46610", "22290"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK distributors of European food processing and packaging machinery (German, Italian, Danish) pay EUR to manufacturers and bill UK food producers in GBP.",
+      "call_angle": "Danish or Italian packaging line — EUR purchase price against GBP sale price, and lead times are typically 6–12 months. If you haven't covered the EUR cost on order confirmation, the margin on that machine sale is floating.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-luxury-goods-importers",
+      "name": "Luxury Goods Importers & Concession Operators",
+      "sic_codes": ["46480", "47770"],
+      "currency_pairs": ["EUR/GBP", "CHF/GBP"],
+      "exposure_reason": "UK luxury goods distributors and concession operators import French fashion, Italian leather goods, and Swiss watches in EUR and CHF, selling to UK retail and duty-free customers in GBP.",
+      "call_angle": "Swiss francs are one of the most stable currencies but they also move — if your watch inventory is CHF-invoiced and you're pricing to UK retail in sterling, the translation difference is running every day you hold stock.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-horticultural-growers-exporters",
+      "name": "UK Horticultural Growers & European Exporters",
+      "sic_codes": ["01130", "01190"],
+      "currency_pairs": ["EUR/GBP"],
+      "exposure_reason": "UK glasshouse growers and nurseries exporting cut flowers, plants, and propagation material to European markets invoice in EUR, with GBP-denominated UK growing costs.",
+      "call_angle": "If you're shipping to Dutch auction or direct to European wholesalers in euros and GBP strengthens, the same volume of sales converts back to fewer pounds — is that export revenue protected over the growing season?",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-education-providers-international",
+      "name": "UK Private Education Providers with International Students",
+      "sic_codes": ["85310", "85320"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "UK independent schools and colleges with significant international student intake receive fees in USD or EUR from overseas families, with GBP teaching, facilities, and administration costs.",
+      "call_angle": "International student fees collected in dollars or euros need converting to sterling to pay staff and suppliers — if you're doing that at spot on receipt, you're getting a different effective fee income every year depending on the rate.",
+      "size_fit": "£10m-£300m"
+    },
+    {
+      "id": "uk-healthcare-providers-international",
+      "name": "Private Healthcare Providers Treating International Patients",
+      "sic_codes": ["86100", "86210"],
+      "currency_pairs": ["EUR/GBP", "USD/GBP", "AED/GBP"],
+      "exposure_reason": "UK private hospitals and clinics treating international patients from the Middle East and Europe receive payment in AED, EUR, or USD while operating with GBP staff and facility costs.",
+      "call_angle": "An AED or USD payment for a complex procedure — if you're converting that to sterling at whatever rate the bank gives you on the day, the GBP value of every international case varies. Is that worth a more structured approach?",
+      "size_fit": "£10m-£300m"
+    }
+  ]
+}
