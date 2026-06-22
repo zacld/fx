@@ -13,6 +13,7 @@ Requirements:
 Usage:
   export CH_API_KEY=your_api_key_here
   python3 generate_call_list.py
+  python3 generate_call_list.py --api-key your_api_key_here
   python3 generate_call_list.py --niches european-charcuterie-importers,italian-olive-oil-importers
   python3 generate_call_list.py --no-accounts-filter   # skip size filtering (faster)
   python3 generate_call_list.py --output results.csv   # custom output filename
@@ -346,16 +347,22 @@ def parse_args() -> argparse.Namespace:
         metavar="FILE",
         help="Path to niches.json (default: niches.json in current directory)",
     )
+    parser.add_argument(
+        "--api-key",
+        metavar="KEY",
+        help="Companies House API key (overrides CH_API_KEY env var)",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
-    api_key = os.environ.get("CH_API_KEY", "").strip()
+    api_key = (args.api_key or os.environ.get("CH_API_KEY", "")).strip()
     if not api_key:
-        print("ERROR: CH_API_KEY environment variable is not set.", file=sys.stderr)
+        print("ERROR: No Companies House API key supplied.", file=sys.stderr)
         print("  export CH_API_KEY=your_api_key_here", file=sys.stderr)
+        print("  or pass: --api-key your_api_key_here", file=sys.stderr)
         sys.exit(1)
 
     niches_file = args.niches_file
