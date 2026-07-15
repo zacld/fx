@@ -1,0 +1,143 @@
+name: FX Discovery
+
+# Daily v2 pipeline (TypeScript monorepo). Imports the committed data/*.json into
+# a throwaway SQLite DB, runs every stage, exports the DB back out to data/*.json,
+# refreshes the dashboard snapshot, and commits the result. The deploy workflows
+# (GitHub Pages / Fly) redeploy the dashboard after this completes.
+#
+# Required repo secrets:
+#   GROQ_API_KEY              (the one AI provider — analyse stage; falls back to a
+#                              rule-based event on 429, so a missing key degrades
+#                              gracefully rather than failing the run)
+#   COMPANIES_HOUSE_API_KEY   (CH validation in discover; optional — discovery still
+#                              works from website evidence without it)
+# Optional: GROQ_MODEL, GEMINI_API_KEY, GEMINI_MODEL (only if AI_PROVIDER=gemini).
+
+on:
+  schedule:
+    - cron: '0 22 * * 1-5'   # 10pm UTC — overnight run 1
+    - cron: '0 0 * * 2-6'    # midnight UTC — overnight run 2
+    - cron: '0 2 * * 2-6'    # 2am UTC  — overnight run 3
+    - cron: '0 4 * * 2-6'    # 4am UTC  — overnight run 4
+    - cron: '0 5 * * 1-5'    # 5am UTC  — final push, list ready by 6am BST
+  workflow_dispatch:
+    # Optional one-off overrides for trigger-quality audits. Blank → use the
+    # scheduled defaults below. Useful when you want Brain 1 to see a wider /
+    # narrower mix of real events than the daily run would catch.
+    inputs:
+      min_relevance:
+        description: "DISCOVERY_MIN_RELEVANCE override (default 4 — lower = broader real-event audit)"
+        required: false
+        default: ""
+      max_events:
+        description: "DISCOVERY_MAX_EVENTS override (default 12 — raise for a wider audit batch)"
+        required: false
+        default: ""
+      industry_preset:
+        description: "INDUSTRY_PRESET override (blank = default FX behaviour; e.g. it_technology, manufacturing, logistics)"
+        required: false
+        default: ""
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install workspace deps
+        run: npm ci
+
+      - name: Run the v2 pipeline (import → analyse → discover → enrich-contacts → enrich-decision-makers → enrich-website-intel → score → dedup → generate-drafts → export)
+        env:
+          AI_PROVIDER:                  groq
+          GROQ_API_KEY:                 ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL:                   ${{ secrets.GROQ_MODEL }}
+          GEMINI_API_KEY:               ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL:                 ${{ secrets.GEMINI_MODEL }}
+          BRAVE_API_KEY:                 ${{ secrets.BRAVE_API_KEY }}
+          COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          # Manual-dispatch overrides win when set, otherwise scheduled defaults.
+          DISCOVERY_MAX_EVENTS:         ${{ inputs.max_events != '' && inputs.max_events || '100' }}
+          DISCOVERY_MIN_RELEVANCE:      ${{ inputs.min_relevance != '' && inputs.min_relevance || '4' }}
+          WEB_MAX_EVENTS:               "100"
+          WEB_MAX_CATEGORIES_TO_SCRAPE: "10"
+          CATEGORY_MIN_SCORE_TO_SCRAPE: "65"
+          WEB_MAX_RESULTS_PER_QUERY:    "8"
+          WEB_MAX_QUERIES_PER_MICRO_CATEGORY: "3"
+          # Port 25 is blocked from GitHub Actions egress, so the SMTP RCPT
+          # probe in enrich-decision-makers can't connect. The verifier falls
+          # back to MX-only checking; verified results from local runs still
+          # serve from data/cache/smtp.json when present.
+          FX_SMTP_DISABLE:              "1"
+          # Per-host fetch politeness — 6 concurrent leads × multiple stages
+          # would otherwise hammer the same domain.
+          FX_HOST_MIN_INTERVAL_MS:      "800"
+          # Optional: set FX_EMAIL_VERIFIER_URL (+ FX_EMAIL_VERIFIER_TOKEN) as
+          # GitHub secrets to route verification through Hunter / Snov /
+          # NeverBounce / a custom worker. When set, takes precedence over the
+          # SMTP_DISABLE branch above.
+          FX_EMAIL_VERIFIER_URL:        ${{ secrets.FX_EMAIL_VERIFIER_URL }}
+          FX_EMAIL_VERIFIER_TOKEN:      ${{ secrets.FX_EMAIL_VERIFIER_TOKEN }}
+          # Optional: push the top-25 daily call list to a Google Sheet at the
+          # end of the run. Skipped silently if either secret is unset.
+          GOOGLE_SHEET_ID:              ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_KEY:   ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          GOOGLE_SHEET_TAB:             ${{ vars.GOOGLE_SHEET_TAB }}
+          NODE_OPTIONS:                 "--max-old-space-size=4096"
+          # Industry preset — blank on scheduled runs (default FX behaviour).
+          # Set via workflow_dispatch input for one-off industry-targeted runs.
+          INDUSTRY_PRESET:              ${{ inputs.industry_preset || '' }}
+        run: npm run pipeline
+
+      # ── Python supplementary scripts ──────────────────────────────────────
+      # The two big enrichments (decision makers, website intelligence) are now
+      # done in TypeScript inside `npm run pipeline` above. These remaining
+      # Python scripts are complementary — they fill in things the TS stages
+      # don't (CH iXBRL accounts, multi-source directory phone cross-reference,
+      # call_readiness derivation, QA audit). The duplicate scripts
+      # (enrich_decision_makers.py, enrich_website_intelligence.py, enrich_contacts.py)
+      # have been moved to scripts/legacy/ and are no longer run.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: pip install requests dnspython --quiet
+
+      - name: Enrich CH accounts (size band, employee count, turnover, accounts type)
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+        run: python3 scripts/enrich_ch_accounts.py
+        continue-on-error: true
+
+      - name: Enrich directories (multi-source phone cross-reference — Yell, Scoot, Thomson, FreeIndex, Cylex)
+        run: python3 scripts/enrich_directories.py
+        continue-on-error: true
+
+      - name: Compute call readiness (READY / REVIEW / HOLD per lead)
+        run: python3 scripts/compute_call_readiness.py
+        continue-on-error: true
+
+      - name: QA audit (summary printed to Actions log — non-blocking)
+        run: python3 scripts/audit_leads.py || true
+
+      - name: Refresh the dashboard data snapshot
+        run: npm run sync-web-data
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "FX Discovery Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/events.json data/leads.json apps/web/public/data/
+          git diff --staged --quiet || git commit -m "data: auto-update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git checkout -- .
+          git pull --rebase -X ours origin main
+          git push

@@ -1,0 +1,64 @@
+name: Deploy to GitHub Pages
+
+# Serves two dashboards from one Pages deployment:
+#   /            → niche-finder dashboard (existing)
+#   /niche-generator/ → niche-generator-standalone dashboard (new)
+#
+# GitHub Pages must be enabled: Repo → Settings → Pages → Source: GitHub Actions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'niche-finder/**'
+      - 'niche-generator-standalone/dashboard/**'
+      - '.github/workflows/niche-finder-pages.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: niche-finder-pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refresh competition scores (if API key is set)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$GEMINI_API_KEY" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "API key found — refreshing stale competition scores…"
+            pip install -r niche-finder/requirements.txt -q
+            cd niche-finder
+            python main.py --recheck-competition --older-than-days 30 --out niche_finder
+          else
+            echo "No API key — serving committed competition data."
+          fi
+
+      - name: Build combined Pages artifact
+        run: |
+          mkdir -p _site/niche-generator
+          cp -r niche-finder/dashboard/. _site/
+          cp -r niche-generator-standalone/dashboard/. _site/niche-generator/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
