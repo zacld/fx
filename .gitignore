@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+*.env.local
+*.env.*.local
+*.pyc
+__pycache__/
+.DS_Store
+.vercel/
+# v2: SQLite (regenerable from data/leads.json|events.json via @fx/core db:import)
+*.db
+*.db-shm
+*.db-wal
+# v2: per-run logs + HTTP/CH caches — local/CI artifacts, not committed
+data/runs/
+data/cache/

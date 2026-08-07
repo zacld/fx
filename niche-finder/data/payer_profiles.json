@@ -1,0 +1,60 @@
+{
+  "profiles": [
+    {
+      "name": "AWS / Azure / GCP",
+      "currency": "USD",
+      "confidence": "confirmed",
+      "evidence": "AWS, Azure (Microsoft), and GCP (Google) all bill UK customers in USD by default, even when an approximate GBP equivalent is shown on the invoice. UK businesses receive USD-denominated invoices and their bank converts at spot unless they manage FX separately.",
+      "source": "AWS Pricing page; Microsoft Azure billing documentation; Google Cloud pricing FAQ. Widely discussed in UK tech finance communities."
+    },
+    {
+      "name": "Salesforce / Oracle / SAP",
+      "currency": "USD",
+      "confidence": "confirmed",
+      "evidence": "Enterprise SaaS licenses from Salesforce, Oracle, and SAP are USD-denominated at the wholesale/partner level. UK value-added resellers (VARs) purchase in USD and carry the currency risk between their USD cost and GBP customer billing.",
+      "source": "Salesforce pricing page (USD list prices); Oracle UK partner agreements; SAP global price list documentation."
+    },
+    {
+      "name": "Hollywood / OTT Studios",
+      "currency": "USD",
+      "confidence": "confirmed",
+      "evidence": "Netflix, Disney+, Apple TV+, Amazon Prime Video, and Warner Bros Discovery pay UK localisation, dubbing, and subtitling vendors in USD. AIM-listed ZOO Digital Group plc explicitly states USD as its functional currency in annual reports, noting that revenue follows its Netflix/Disney/Apple client base.",
+      "source": "ZOO Digital Group plc Annual Reports (2022, 2023, 2024) — see functional currency disclosures. Industry-standard practice confirmed by BAFTA and ScreenSkills UK sector documentation."
+    },
+    {
+      "name": "Netflix",
+      "currency": "USD",
+      "confidence": "confirmed",
+      "evidence": "Netflix pays all content production, localisation, and post-production vendors globally in USD regardless of vendor location. UK studios and dubbing houses billing Netflix invoice in USD.",
+      "source": "ZOO Digital Group plc annual report; Netflix vendor payment terms (widely documented in UK post-production trade press)."
+    },
+    {
+      "name": "LME (London Metal Exchange) commodity benchmarks",
+      "currency": "USD",
+      "confidence": "confirmed",
+      "evidence": "Copper, aluminium, lead, zinc, nickel, and tin prices are set in USD per tonne on the LME. UK metals stockists and traders buy and sell referencing these USD benchmarks, creating direct USD exposure regardless of the GBP domestic sale price.",
+      "source": "LME official pricing documentation; Metals Focus UK market reports; BMMA industry surveys."
+    },
+    {
+      "name": "IATA airfreight rates",
+      "currency": "USD",
+      "confidence": "confirmed",
+      "evidence": "International Air Transport Association (IATA) freight rates are globally published and settled in USD. UK importers managing their own air freight pay USD to airlines and overseas handling agents.",
+      "source": "IATA Rate Construct documentation; air cargo industry standard confirmed by UK Air Cargo Club and BIFA."
+    },
+    {
+      "name": "Brent Crude / TTF Gas benchmarks",
+      "currency": "USD",
+      "confidence": "confirmed",
+      "evidence": "Brent crude oil and TTF natural gas benchmarks are USD-denominated globally. UK independent energy traders and brokers operating against these benchmarks carry USD exposure on every contract regardless of domestic GBP settlement.",
+      "source": "ICE Futures Europe documentation; Ofgem market reports; UK Energy Networks Association."
+    },
+    {
+      "name": "GAFTA (soft commodity) contracts",
+      "currency": "USD",
+      "confidence": "confirmed",
+      "evidence": "GAFTA (Grain and Feed Trade Association) standard contract forms specify USD settlement for traded agricultural commodities including wheat, soya, coffee, and cocoa. UK members trading under GAFTA terms carry USD exposure.",
+      "source": "GAFTA Contract No. 1 (FOSFA contracts); ICE and CBOT commodity benchmark documentation."
+    }
+  ]
+}
