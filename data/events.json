@@ -1006,16 +1006,13 @@
   },
   "035f0fab957d6d7c": {
     "id": "035f0fab957d6d7c",
+    "headline": "Beijing's export engine holds up on AI demand despite fresh US tariffs - July exports beat forecasts",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/beijing-s-export-engine-holds-up-on-ai-demand-despite-fresh-us-tariffs-july-exports-beat-forecasts/",
-    "headline": "Beijing's export engine holds up on AI demand despite fresh US tariffs - July exports beat forecasts",
-    "raw_summary": "The stronger than expected export print, even as growth cooled from June's pace, suggests China's manufacturing base is still finding external demand to lean on despite a soft domestic consumption backdrop and the weakest quarterly GDP growth since late 2022. A narrower but still substantial trade surplus keeps Beijing's rebalancing debate with major trading partners firmly in focus, and the retaliatory exchange around tariffs and drone export restrictions adds a fresh layer of uncertainty just as a bilateral summit was being discussed. Continued strength in AI-linked exports supports the broa",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-08-07T05:39:35.670Z",
+    "status": "context_only",
     "event_type": "Trade data and tariffs",
     "event_breadth": "broad_macro",
-    "summary": "China's export sector showed resilience despite new US tariffs, but the direct impact on UK businesses in terms of FX and payment flows is not clear without further analysis.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
@@ -1029,26 +1026,30 @@
       "Exporters to the US or China"
     ],
     "why_now": "The ongoing trade tensions and tariff changes could lead to future FX and payment flow issues, but the current event is more about trade data than direct FX impact.",
-    "discovery_recommendation": "Context only — the event lacks a clear, direct UK B2B FX hook but can inform broader market context and potential future trends.",
     "confidence_level": "medium",
     "confidence_reason": "The event, though significant for global trade and tariffs, doesn't directly translate into a clear FX payment flow impact for specific UK business types without additional context or steps.",
+    "discovery_recommendation": "Context only — the event lacks a clear, direct UK B2B FX hook but can inform broader market context and potential future trends.",
     "what_happened": "China's exports were stronger than expected in July, despite new US tariffs and a slowing domestic economy.",
     "what_changed_financially": "The US tariffs could potentially affect pricing and demand for certain goods, but the direct financial impact on UK businesses is not clearly defined without further specifics.",
     "who_pays_more": "Potentially, businesses importing goods from China or the US could face higher costs due to tariffs, but this is not exclusively a UK B2B FX issue.",
     "who_receives_less": "None directly, as the impact is more related to trade volumes and tariffs rather than direct currency movements or conversions.",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "None directly identified",
     "fx_payment_logic": "While tariffs can influence pricing and potentially FX through trade flows, the direct link to UK B2B FX decisions is not straightforward from this event alone.",
-    "sales_angle": "The global trade landscape continues to evolve, with potential implications for importers and exporters, but the current event doesn't offer a clear reason to call today based on FX.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "The impact of China's export strength and US tariffs on UK businesses is more about potential future trade and pricing adjustments rather than immediate FX concerns.",
-    "exposure_types": [],
+    "sales_angle": "The global trade landscape continues to evolve, with potential implications for importers and exporters, but the current event doesn't offer a clear reason to call today based on FX.",
     "overall_sales_angle": "Monitoring global trade developments is crucial for importers and exporters, but this specific event does not provide a direct FX-related reason to contact UK businesses today.",
+    "summary": "China's export sector showed resilience despite new US tariffs, but the direct impact on UK businesses in terms of FX and payment flows is not clear without further analysis.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "The stronger than expected export print, even as growth cooled from June's pace, suggests China's manufacturing base is still finding external demand to lean on despite a soft domestic consumption backdrop and the weakest quarterly GDP growth since late 2022. A narrower but still substantial trade surplus keeps Beijing's rebalancing debate with major trading partners firmly in focus, and the retaliatory exchange around tariffs and drone export restrictions adds a fresh layer of uncertainty just as a bilateral summit was being discussed. Continued strength in AI-linked exports supports the broa",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
   "03a02120dfe9077d": {
@@ -7476,6 +7477,50 @@
       "Indirect energy price exposure",
       "Commodity price exposure"
     ],
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "2671e9a51c74f58e": {
+    "id": "2671e9a51c74f58e",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/all-eyes-on-the-us-jobs-report-now/",
+    "headline": "All eyes on the US jobs report now",
+    "raw_summary": "The non-farm payrolls release is the only game in town for markets today, with little else to distract from it. US-Iran developments remain uncertain, awaiting the Strait of Hormuz arrangement between Iran and Oman. Meanwhile, the returning pressure on tech shares will also be under the microscope with investors hoping to get some directional conviction from the jobs data later. After a much softer June figure, the non-farm payrolls estimate for July is expected at +80k. It will be interesting to see if there are any potential effects from the World Cup to boost private payrolls. It wasn't the",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-08-07T22:26:20.899Z",
+    "event_type": "Economic data release",
+    "event_breadth": "broad_macro",
+    "summary": "The US jobs report is anticipated but lacks direct relevance to UK B2B FX payment flows. It may influence broader market trends but does not offer a specific hook for UK businesses with foreign currency exposures.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US jobs report may influence broader market sentiment but lacks direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "The report may influence broader market trends but lacks an immediate FX payment flow hook",
+    "discovery_recommendation": "Context only — the event lacks direct FX relevance to specific UK businesses",
+    "confidence_level": "medium",
+    "confidence_reason": "While the US jobs report is significant for global markets, its direct impact on specific UK B2B FX payment flows is indirect and not immediately actionable",
+    "what_happened": "US jobs report release anticipated with expectations of +80k non-farm payrolls for July",
+    "what_changed_financially": "Potential for market sentiment shift based on jobs data, but no direct currency or tariff movement",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "No direct FX payment flow logic applies as the event is macro-economic and lacks specificity to UK B2B FX transactions",
+    "sales_angle": "Today's US jobs report may impact market sentiment, but its direct relevance to your FX exposures is limited.",
+    "business_impact_summary": "The US jobs report is a significant economic indicator but does not directly impact UK businesses' foreign currency payment flows or exposures.",
+    "exposure_types": [],
+    "overall_sales_angle": "The event is more about general market direction than specific FX payment flows",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
     "ai_model": "llama-3.3-70b-versatile"
   },
   "284623066fbc8ceb": {
@@ -27796,6 +27841,50 @@
     "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "993f3dfd61c2a27a": {
+    "id": "993f3dfd61c2a27a",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/what-is-the-distribution-of-forecasts-for-the-us-nfp/",
+    "headline": "What is the distribution of forecasts for the US NFP?",
+    "raw_summary": "The ranges of estimates are important in terms of market reaction because when the actual data deviates from the expectations, it creates a surprise effect. Another important input in market's reaction is the distribution of forecasts. In fact, although we can have a range of estimates, most forecasts might be clustered on the upper bound of the range, so even if the data comes out inside the range of estimates but on the lower bound of the range, it can still create a surprise effect. Non-Farm Payrolls 10K to 140K range of estimates 70K-80K range most clustered 80K consensus Unemployment Rate",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-08-07T22:26:26.286Z",
+    "event_type": "Economic data release",
+    "event_breadth": "macro",
+    "summary": "The distribution of forecasts for the US NFP is discussed in terms of its potential to create a surprise effect in the market. However, this has no direct relevance to specific UK B2B FX payment flows.",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "US NFP data has indirect influence on global market sentiment and potentially on currency markets, but no direct UK B2B FX hook",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate reason for UK businesses to act based on US NFP forecast distribution",
+    "discovery_recommendation": "Context only — no direct payment-flow hook, but useful for general market context",
+    "confidence_level": "medium",
+    "confidence_reason": "While NFP data can influence market sentiment and currency markets, its direct relevance to specific UK B2B FX payment flows is low",
+    "what_happened": "Discussion on the distribution of forecasts for the US NFP",
+    "what_changed_financially": "No direct financial change, but potential for market sentiment shift based on NFP data release",
+    "who_pays_more": "None directly",
+    "who_receives_less": "None directly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None",
+    "fx_payment_logic": "No direct FX payment logic applies as this event does not directly influence UK B2B FX transactions",
+    "sales_angle": "No specific sales angle as this event does not directly impact UK businesses' FX exposure",
+    "business_impact_summary": "No direct business impact, but general market sentiment could be influenced by the NFP data release",
+    "exposure_types": [],
+    "overall_sales_angle": "No direct reason to call based on this event alone",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "99b88e8c2d7b2cd7": {
     "id": "99b88e8c2d7b2cd7",
     "headline": "Euro softens below 1.1450 as softer Eurozone inflation trims ECB hike bets",
@@ -37183,6 +37272,57 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "d06a1672b21933bc": {
+    "id": "d06a1672b21933bc",
+    "source": "OilPrice.com",
+    "source_url": "https://oilprice.com/Energy/Crude-Oil/Saudi-Arabias-5-Oil-Detour-Is-Expensiveand-Worth-It.html",
+    "headline": "Saudi Arabia’s $5 Oil Detour Is Expensive—and Worth It",
+    "raw_summary": "The latest Saudi oil route looks absurd on a map. Crude moves west across Saudi Arabia to Yanbu, north through the Red Sea to Egypt, across the SUMED pipeline from Ain Sokhna to Sidi Kerir, then west through the Mediterranean before tankers sail around the Cape of Good Hope to reach customers in Asia. Oil that started relatively close to Asia first travels thousands of kilometres in the opposite direction. The detour reportedly adds around $5 per barrel once extra freight, fuel, insurance and pipeline charges are included. For a two-million-barrel…",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bshipping cost|\\bfreight|\\bsu; +4 \\bred sea|\\bsuez|\\bpanama cana",
+    "detected_at": "2026-08-07T22:26:28.392Z",
+    "event_type": "Commodity price impact",
+    "event_breadth": "commodity",
+    "summary": "Saudi Arabia's new oil route adds cost due to a detour, potentially affecting USD-priced oil imports and global oil prices.",
+    "currency_pairs": [
+      "USD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Indirect impact on oil prices and potentially USD-priced oil imports for UK businesses",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK oil importers",
+      "UK petroleum product manufacturers"
+    ],
+    "why_now": "The increased cost of oil transportation might affect future oil prices and USD-priced imports",
+    "discovery_recommendation": "Context only — indirect FX relevance, no clear UK B2B payment flow hook",
+    "confidence_level": "medium",
+    "confidence_reason": "The article discusses an oil transportation route but does not directly relate to UK B2B FX exposure",
+    "what_happened": "Saudi Arabia's new oil route adds $5 per barrel due to detour and extra costs",
+    "what_changed_financially": "Increased cost of oil transportation, potentially affecting USD-priced oil imports",
+    "who_pays_more": "Importers of oil or petroleum products priced in USD",
+    "who_receives_less": "None directly, but potentially exporters if higher oil costs affect global demand",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "USD payments for oil imports",
+    "fx_payment_logic": "UK businesses importing USD-priced oil may face higher costs due to increased oil prices, but the direct FX payment flow is not explicitly impacted by this detour.",
+    "sales_angle": "If you import oil or petroleum products priced in USD, changes in global oil prices can impact your costs.",
+    "business_impact_summary": "The increased cost of oil transportation might indirectly affect UK businesses importing USD-priced oil, but the direct payment flow impact is low.",
+    "exposure_types": [
+      "USD import cost exposure"
+    ],
+    "overall_sales_angle": "Changes in global oil prices can impact your USD-priced imports.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile"
+  },
   "d06ae463f3dcbab0": {
     "id": "d06ae463f3dcbab0",
     "headline": "British Pound remains depressed against US Dollar following soft UK inflation data",
@@ -39122,6 +39262,160 @@
       "EUR transaction exposure"
     ],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "dcdb5a67e6e47c3a": {
+    "id": "dcdb5a67e6e47c3a",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-market-news-wrap-non-farm-payrolls-turn-negative-dollar-drops/",
+    "headline": "investingLive Americas market news wrap: Non-farm payrolls turn negative, dollar drops",
+    "raw_summary": "US July non-farm payrolls -23K vs +80K expected Canada July employment change +75.1K vs +15K expected Canada and the US discussing tariff relief deal Fed's Barkin: We are in a zero-to-modest gain jobs environment New York Fed survey: One year inflation expectations dip to 3.6% from 3.7% Baker Hughes US weekly oil rig count: Unchanged at 588 US official says there is progress on Iran-Oman on Strait of Hormuz Markets: Gold up $106 to $4345 US 10-year yields down 2.8 bps to 4.64% WTI crude oil down 42-cents to $76.87 JPY leads, USD lags S&amp;P 500 up 0.6%. Nasdaq up 1.3% S&amp;P 500 up 3.5% on t",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\boil price|\\bcrude oil|\\bwti|; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
+    "detected_at": "2026-08-07T22:26:24.502Z",
+    "event_type": "Economic data release",
+    "event_breadth": "broad_macro",
+    "summary": "USD weakened on negative non-farm payrolls data. UK businesses with USD exposure may see changes in costs or revenue.",
+    "currency_pairs": [
+      "GBP/USD",
+      "USD/CAD"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "USD drops on non-farm payrolls data, potentially benefiting UK exporters and importers with USD exposure",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 10,
+    "likely_affected_businesses": [
+      "UK importers of USD-priced goods",
+      "UK exporters with USD customer revenue"
+    ],
+    "why_now": "USD drop may affect upcoming USD payments or conversions for UK businesses",
+    "discovery_recommendation": "Limited run — two distinct payment-flow niches worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "Currency move is driven by economic data release, not a central bank decision — moderate urgency",
+    "what_happened": "US non-farm payrolls turned negative, causing the dollar to drop",
+    "what_changed_financially": "USD weakened against major currencies, including GBP",
+    "who_pays_more": "UK importers with USD-priced goods or services",
+    "who_receives_less": "UK exporters receiving USD revenue, now facing a slightly weaker conversion rate",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs USD supplier costs or USD revenue conversion",
+    "fx_payment_logic": "UK importers pay USD for goods → USD weakness → lower GBP cost for upcoming payments. UK exporters receive USD → weaker USD → slightly lower GBP revenue on conversion",
+    "sales_angle": "If you have USD exposure, the current rate change may impact your costs or revenue.",
+    "business_impact_summary": "UK importers of USD-priced goods may benefit from a weaker USD, while exporters face a slightly weaker conversion rate.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "USD move may affect your business — worth reviewing your USD exposure.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of USD-priced goods",
+        "category_priority_score": 72,
+        "business_model": "UK importer buying USD-priced goods, selling in GBP to UK trade",
+        "exposure_level": "Medium",
+        "exposure_type": "Import cost exposure — USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "USD invoice arrives → UK business converts GBP to USD → weaker USD → less GBP required per USD",
+        "margin_risk": "Medium — 1% USD move on £200k annual buy ≈ £2k cost savings if unhedged",
+        "payment_timing_risk": "Medium — typical 30-60 day payment terms",
+        "affected_payment_flow": "USD payments to US suppliers, typically £20k-£200k per shipment",
+        "website_validation_signals": [
+          "imported from USA",
+          "USD pricing",
+          "US supplier"
+        ],
+        "avoid_segments": [
+          "pure UK domestic manufacturers",
+          "retailers without own import ops"
+        ],
+        "sales_angle": "Your upcoming USD supplier invoices may cost less in GBP than they did last month.",
+        "exposure_thesis_template": "This company imports USD-priced goods from the US. GBP/USD move affects GBP cost of USD supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "UK importers of US machinery parts",
+            "why": "Pay USD to US manufacturers — direct exposure to GBP/USD move on component costs",
+            "search_queries": [
+              "\"US machinery importer\" UK",
+              "\"machinery parts from USA\" UK"
+            ],
+            "companies_house_terms": [
+              "US machinery",
+              "USA parts"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from USA",
+          "USD pricing",
+          "US supplier"
+        ]
+      },
+      {
+        "segment_name": "UK exporters with USD customer revenue",
+        "category_priority_score": 65,
+        "business_model": "UK exporter selling to US customers in USD, converting receipts to GBP",
+        "exposure_level": "Medium",
+        "exposure_type": "Revenue conversion — USD receipts into GBP",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "US customer pays USD → UK exporter receives USD → converts to GBP → weaker USD = slightly less GBP per USD received",
+        "margin_risk": "Low to medium — USD weakness is a marginal negative on USD receipts but creates pricing pressure on future USD quotes",
+        "payment_timing_risk": "Medium — USD revenue sitting unconverted faces rate risk on timing of conversion",
+        "affected_payment_flow": "USD receipts from US customers, converting to GBP",
+        "website_validation_signals": [
+          "export to USA",
+          "US customers",
+          "USD pricing"
+        ],
+        "avoid_segments": [
+          "pure domestic UK sellers",
+          "businesses with no US customer base"
+        ],
+        "sales_angle": "If you're receiving USD from US customers, the conversion timing can make a difference.",
+        "exposure_thesis_template": "This company exports to US customers in USD. GBP/USD moves affect GBP value of incoming USD receipts.",
+        "micro_categories": [
+          {
+            "name": "UK manufacturers exporting to US buyers",
+            "why": "Invoice US customers in USD — GBP/USD rate on conversion date affects GBP revenue",
+            "search_queries": [
+              "UK manufacturer \"export to USA\"",
+              "US customers UK manufacturer"
+            ],
+            "companies_house_terms": [
+              "exports USA",
+              "US customers"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "export to USA",
+          "US customers",
+          "USD pricing"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "US machinery",
+      "USA parts",
+      "exports USA",
+      "US customers"
+    ],
+    "all_search_queries": [
+      "\"US machinery importer\" UK",
+      "\"machinery parts from USA\" UK",
+      "UK manufacturer \"export to USA\"",
+      "US customers UK manufacturer"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "llama-3.3-70b-versatile",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-08-07T22:26:37.639Z"
   },
   "dd9575601a31f189": {
     "id": "dd9575601a31f189",
