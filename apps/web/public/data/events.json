@@ -23729,16 +23729,13 @@
   },
   "7c9937de4488ee29": {
     "id": "7c9937de4488ee29",
+    "headline": "investingLive Asia-Pacific market news: Diesel crack hits record $102, gold fell under $4400",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/investinglive-asia-pacific-market-news-diesel-crack-hits-record-102-gold-fell-under-4400/",
-    "headline": "investingLive Asia-Pacific market news: Diesel crack hits record $102, gold fell under $4400",
-    "raw_summary": "Indian rupee intervention returns as USD/INR hovers near all-time high UKMTO report a vessel hit by a projectile while sailing out of the Strait of Hormuz. Analysts say that a surprise China LPR cut cannot be ruled out this week BHP CEO plays down Canada uranium talk, stays focused on four pillars Westpac says dollar's structural headwinds outweigh recent resilience, see EUR/USD and GBP/USD higher ING says heavy tone in Treasuries has further to run as truce lapses ICYMI: ETF flows return to gold as Saxo flags 289-tonne central bank demand Australian consumer sentiment rises 6% to 88.9 but sta",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-08-18T04:34:48.204Z",
+    "status": "ready",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "Indian rupee intervention returns as USD/INR hovers near all-time high UKMTO report a vessel hit by a projectile while sailing out of the Strait of Hormuz. Analysts say that a surprise China LPR cut cannot be ruled out this week BHP CEO plays down Canada uranium talk, stays focused on four pillars Westpac says dollar's structural headwinds outweigh recent resilience, see EUR/USD and GBP/USD higher ING says heavy tone in Treasuries has further to run as truce lapses ICYMI: ETF flows return to gold as Saxo flags 289-tonne central bank demand Australian consumer sentiment rises 6% to 88.9 but sta",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -23755,27 +23752,26 @@
       "UK furniture and homeware importers"
     ],
     "why_now": "Recent currency move may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "what_happened": "investingLive Asia-Pacific market news: Diesel crack hits record $102, gold fell under $4400",
     "what_changed_financially": "Market currency move with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
     "fx_payment_logic": "A currency move directly affects the GBP cost of any overseas supplier invoice or the GBP value of any overseas customer receipt. UK businesses with recurring international payments are immediately exposed.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK businesses with overseas supplier invoices or overseas customer revenue are directly affected — importers face changed input costs, exporters face changed GBP revenue.",
     "sales_angle": "Recent currency move may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent currency move creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Currency move exposure"
-    ],
-    "status": "ready",
+    "summary": "Indian rupee intervention returns as USD/INR hovers near all-time high UKMTO report a vessel hit by a projectile while sailing out of the Strait of Hormuz. Analysts say that a surprise China LPR cut cannot be ruled out this week BHP CEO plays down Canada uranium talk, stays focused on four pillars Westpac says dollar's structural headwinds outweigh recent resilience, see EUR/USD and GBP/USD higher ING says heavy tone in Treasuries has further to run as truce lapses ICYMI: ETF flows return to gold as Saxo flags 289-tonne central bank demand Australian consumer sentiment rises 6% to 88.9 but sta",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK food and drink importers",
         "business_model": "UK importer/distributor buying food/drink from European or international suppliers, selling in GBP",
         "exposure_level": "Very High",
         "exposure_type": "Import cost exposure — EUR/USD supplier payments vs GBP revenue",
@@ -23783,39 +23779,43 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Supplier invoice in EUR/USD → convert GBP to pay → currency move changes GBP cost vs when the order was placed",
         "margin_risk": "High — thin food-distribution margins amplify FX impact",
         "payment_timing_risk": "High — invoices due monthly, often 30-60 day terms",
         "affected_payment_flow": "",
-        "website_validation_signals": [
-          "we import",
-          "imported from",
-          "overseas supplier",
-          "international supplier"
-        ],
+        "ideal_company_profile": "",
+        "micro_categories": [],
         "high_intent_search_queries": [
           "\"food importer\" UK",
           "\"wine importer\" UK",
           "\"seafood importer\" UK"
         ],
-        "sales_angle": "Currency move means upcoming overseas food supplier payments now cost more in GBP than when orders were placed.",
-        "exposure_thesis_template": "This company appears to import food/drink from overseas — currency moves affect the GBP cost of upcoming supplier payments.",
-        "micro_categories": [],
         "companies_house_terms": [
           "food international",
           "wines wholesale",
           "seafood wholesale",
           "foods import"
         ],
-        "segment_name": "UK food and drink importers",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Currency move means upcoming overseas food supplier payments now cost more in GBP than when orders were placed.",
+        "exposure_thesis_template": "This company appears to import food/drink from overseas — currency moves affect the GBP cost of upcoming supplier payments."
       },
       {
+        "segment_name": "UK furniture and homeware importers",
         "business_model": "UK wholesaler/distributor importing furniture, homeware or consumer goods from Europe/Asia, selling to UK trade in GBP",
         "exposure_level": "Very High",
         "exposure_type": "Import cost exposure — EUR/USD vs GBP",
@@ -23823,36 +23823,39 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Furniture/homeware invoice from European/Asian supplier in EUR/USD → GBP conversion at payment → adverse move compresses margin on stock already ordered",
         "margin_risk": "High — furniture margins 25-40% but currency moves can take 10-20% of that",
         "payment_timing_risk": "High — 60-120 day lead times create a long FX window",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"furniture importer\" UK",
+          "\"homeware wholesaler\" UK",
+          "\"furniture distributor\" UK"
+        ],
+        "companies_house_terms": [
+          "furniture wholesale",
+          "furniture import",
+          "homeware wholesale"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"furniture importer\" UK",
-          "\"homeware wholesaler\" UK",
-          "\"furniture distributor\" UK"
-        ],
-        "sales_angle": "Currency moves affect the GBP cost of furniture/homeware importers' overseas stock orders.",
-        "exposure_thesis_template": "This company appears to import furniture/homeware — currency moves affect the GBP cost of upcoming stock orders, especially with long lead times.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "furniture wholesale",
-          "furniture import",
-          "homeware wholesale"
-        ],
-        "segment_name": "UK furniture and homeware importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Currency moves affect the GBP cost of furniture/homeware importers' overseas stock orders.",
+        "exposure_thesis_template": "This company appears to import furniture/homeware — currency moves affect the GBP cost of upcoming stock orders, especially with long lead times."
       }
     ],
     "companies_house_terms": [
@@ -23871,6 +23874,12 @@
       "\"furniture importer\" UK",
       "\"homeware wholesaler\" UK",
       "\"furniture distributor\" UK"
+    ],
+    "raw_summary": "Indian rupee intervention returns as USD/INR hovers near all-time high UKMTO report a vessel hit by a projectile while sailing out of the Strait of Hormuz. Analysts say that a surprise China LPR cut cannot be ruled out this week BHP CEO plays down Canada uranium talk, stays focused on four pillars Westpac says dollar's structural headwinds outweigh recent resilience, see EUR/USD and GBP/USD higher ING says heavy tone in Treasuries has further to run as truce lapses ICYMI: ETF flows return to gold as Saxo flags 289-tonne central bank demand Australian consumer sentiment rises 6% to 88.9 but sta",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "Currency move exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-18T04:35:24.444Z"
