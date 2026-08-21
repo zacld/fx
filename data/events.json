@@ -43439,16 +43439,13 @@
   },
   "bbca9edce158b3b2": {
     "id": "bbca9edce158b3b2",
+    "headline": "investingLive Asia-Pacific market news: Surge for crypto",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/investinglive-asia-pacific-market-news-surge-for-crypto/",
-    "headline": "investingLive Asia-Pacific market news: Surge for crypto",
-    "raw_summary": "Asia shares mixed as Nikkei heads for worst week in a month on oil fears China vice finance minister signals more fiscal support as economy slows USD slammed in Asia Friday: Bitcoin, gold, FX surge as investors hedge against US fiscal credibility concerns Goldman veteran Currie ties gold rally to debasement as commodities capture scarcity premium PBOC sets USD/ CNY reference rate for today at 6.7817 (vs. estimate at 6.7262) Bitcoin price forecasts for year 2027 Flash PMI shows Japan factories leading strongest growth since February Once the world's top gold buyer, Russia's central bank now a s",
-    "pre_relevance_score": 7,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\binterest rate|\\brate decisio; +4 \\bred sea|\\bsuez|\\bpanama cana",
     "detected_at": "2026-08-21T04:37:21.858Z",
+    "status": "ready",
     "event_type": "Commodity",
     "event_breadth": "commodity",
-    "summary": "Asia shares mixed as Nikkei heads for worst week in a month on oil fears China vice finance minister signals more fiscal support as economy slows USD slammed in Asia Friday: Bitcoin, gold, FX surge as investors hedge against US fiscal credibility concerns Goldman veteran Currie ties gold rally to debasement as commodities capture scarcity premium PBOC sets USD/ CNY reference rate for today at 6.7817 (vs. estimate at 6.7262) Bitcoin price forecasts for year 2027 Flash PMI shows Japan factories leading strongest growth since February Once the world's top gold buyer, Russia's central bank now a s",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -43464,100 +43461,106 @@
       "UK chemical and industrial-input importers"
     ],
     "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "what_happened": "investingLive Asia-Pacific market news: Surge for crypto",
     "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
     "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
     "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Commodity exposure"
-    ],
-    "status": "ready",
+    "summary": "Asia shares mixed as Nikkei heads for worst week in a month on oil fears China vice finance minister signals more fiscal support as economy slows USD slammed in Asia Friday: Bitcoin, gold, FX surge as investors hedge against US fiscal credibility concerns Goldman veteran Currie ties gold rally to debasement as commodities capture scarcity premium PBOC sets USD/ CNY reference rate for today at 6.7817 (vs. estimate at 6.7262) Bitcoin price forecasts for year 2027 Flash PMI shows Japan factories leading strongest growth since February Once the world's top gold buyer, Russia's central bank now a s",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK petroleum and fuel importers",
         "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
         "exposure_level": "Very High",
         "exposure_type": "USD commodity pricing exposure",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"fuel importer\" UK",
-          "\"petroleum distributor\" UK",
-          "\"chemical wholesaler\" UK"
-        ],
-        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
-        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "petroleum wholesale",
-          "fuel trading",
-          "chemical supplies"
-        ],
-        "segment_name": "UK petroleum and fuel importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs."
       },
       {
+        "segment_name": "UK chemical and industrial-input importers",
         "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
         "exposure_level": "High",
         "exposure_type": "USD commodity input exposure",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"chemical distributor\" UK",
-          "\"industrial chemical\" wholesale UK"
-        ],
-        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
-        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "chemicals wholesale",
-          "industrial supplies",
-          "plastics wholesale"
-        ],
-        "segment_name": "UK chemical and industrial-input importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs."
       }
     ],
     "companies_house_terms": [
@@ -43574,6 +43577,12 @@
       "\"chemical wholesaler\" UK",
       "\"chemical distributor\" UK",
       "\"industrial chemical\" wholesale UK"
+    ],
+    "raw_summary": "Asia shares mixed as Nikkei heads for worst week in a month on oil fears China vice finance minister signals more fiscal support as economy slows USD slammed in Asia Friday: Bitcoin, gold, FX surge as investors hedge against US fiscal credibility concerns Goldman veteran Currie ties gold rally to debasement as commodities capture scarcity premium PBOC sets USD/ CNY reference rate for today at 6.7817 (vs. estimate at 6.7262) Bitcoin price forecasts for year 2027 Flash PMI shows Japan factories leading strongest growth since February Once the world's top gold buyer, Russia's central bank now a s",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\binterest rate|\\brate decisio; +4 \\bred sea|\\bsuez|\\bpanama cana",
+    "exposure_types": [
+      "Commodity exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-21T04:37:30.338Z"
