@@ -36526,16 +36526,13 @@
   },
   "9a81d0ad90f98c32": {
     "id": "9a81d0ad90f98c32",
+    "headline": "investingLive Americas FX news wrap 21 Aug: Trump folds on beef tariffs.",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/investinglive-americas-fx-news-wrap-21-aug-trump-folds-on-beef-tariffs-0/",
-    "headline": "investingLive Americas FX news wrap 21 Aug: Trump folds on beef tariffs.",
-    "raw_summary": "Nasdaq and S&amp;P indices are settling between risk/bias defining MAs as the week comes to a close Baker Hughes rig count -5 at 588 European stocks rebound Friday, but weekly losses dominate Brazil's Lula and US Pres. Trump held phone call on Friday. Gold surges and breaks away from its 200 day MA SNB Tschudin: Swiss inflation is low because of low inflation expectations Trump: Gets rid of 26.4% tariffs on imported beef and prices will come down by 25% EU consumer confidence -15.5 versus -16.3 expected Canada Retail sales for June 0.6% vs 0.4% estimate Kickstart the North American session: Th",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-08-22T00:41:54.280Z",
+    "status": "ready",
     "event_type": "Tariff",
     "event_breadth": "tariff",
-    "summary": "Nasdaq and S&amp;P indices are settling between risk/bias defining MAs as the week comes to a close Baker Hughes rig count -5 at 588 European stocks rebound Friday, but weekly losses dominate Brazil's Lula and US Pres. Trump held phone call on Friday. Gold surges and breaks away from its 200 day MA SNB Tschudin: Swiss inflation is low because of low inflation expectations Trump: Gets rid of 26.4% tariffs on imported beef and prices will come down by 25% EU consumer confidence -15.5 versus -16.3 expected Canada Retail sales for June 0.6% vs 0.4% estimate Kickstart the North American session: Th",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -36552,27 +36549,26 @@
       "UK manufacturers importing raw materials"
     ],
     "why_now": "Recent tariff may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "what_happened": "investingLive Americas FX news wrap 21 Aug: Trump folds on beef tariffs.",
     "what_changed_financially": "Market tariff with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
     "fx_payment_logic": "New or increased tariffs raise the cost of imported goods. UK businesses buying stock from overseas suppliers face higher landed costs and margin pressure immediately.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers with US or EU suppliers now face higher input costs. Businesses that priced stock before the tariff announcement will see margin compression on committed orders.",
     "sales_angle": "Recent tariff may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent tariff creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Tariff exposure"
-    ],
-    "status": "ready",
+    "summary": "Nasdaq and S&amp;P indices are settling between risk/bias defining MAs as the week comes to a close Baker Hughes rig count -5 at 588 European stocks rebound Friday, but weekly losses dominate Brazil's Lula and US Pres. Trump held phone call on Friday. Gold surges and breaks away from its 200 day MA SNB Tschudin: Swiss inflation is low because of low inflation expectations Trump: Gets rid of 26.4% tariffs on imported beef and prices will come down by 25% EU consumer confidence -15.5 versus -16.3 expected Canada Retail sales for June 0.6% vs 0.4% estimate Kickstart the North American session: Th",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK importers of US/EU goods",
         "business_model": "UK distributor or retailer sourcing stock from US or European suppliers, selling domestically in GBP",
         "exposure_level": "Very High",
         "exposure_type": "Tariff cost exposure",
@@ -36580,38 +36576,42 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Tariff added to import invoice → higher total cost in foreign currency → more GBP needed to pay → margin compressed",
         "margin_risk": "High — tariff applies directly to cost of goods",
         "payment_timing_risk": "High — goods already ordered now cost more",
         "affected_payment_flow": "USD/EUR payments to overseas suppliers, monthly or per-shipment",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"food importer\" UK",
+          "\"product distributor\" UK wholesale",
+          "\"import trading\" UK"
+        ],
+        "companies_house_terms": [
+          "import trading",
+          "distribution international",
+          "foods wholesale"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"food importer\" UK",
-          "\"product distributor\" UK wholesale",
-          "\"import trading\" UK"
-        ],
-        "sales_angle": "With tariffs increasing import costs, businesses may want to review upcoming USD/EUR supplier payments.",
-        "exposure_thesis_template": "This company appears to import goods from overseas and sell in GBP — tariffs increase the GBP cost of upcoming orders.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "import trading",
-          "distribution international",
-          "foods wholesale"
-        ],
-        "segment_name": "UK importers of US/EU goods",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "With tariffs increasing import costs, businesses may want to review upcoming USD/EUR supplier payments.",
+        "exposure_thesis_template": "This company appears to import goods from overseas and sell in GBP — tariffs increase the GBP cost of upcoming orders."
       },
       {
+        "segment_name": "UK manufacturers importing raw materials",
         "business_model": "UK manufacturer sourcing raw materials or components from US/EU, selling finished goods in GBP",
         "exposure_level": "High",
         "exposure_type": "Input cost exposure",
@@ -36619,35 +36619,38 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Tariff on imported components/materials → higher cost per unit → margin compressed on GBP-priced finished goods",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"manufacturer\" UK international supply",
+          "\"components distributor\" UK"
+        ],
+        "companies_house_terms": [
+          "manufacturing international",
+          "components wholesale",
+          "industrial trading"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"manufacturer\" UK international supply",
-          "\"components distributor\" UK"
-        ],
-        "sales_angle": "Tariffs on imported components are increasing production costs for UK manufacturers with overseas supply chains.",
-        "exposure_thesis_template": "This company appears to manufacture using imported materials/components — tariffs raise hard-to-pass-on input costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "manufacturing international",
-          "components wholesale",
-          "industrial trading"
-        ],
-        "segment_name": "UK manufacturers importing raw materials",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Tariffs on imported components are increasing production costs for UK manufacturers with overseas supply chains.",
+        "exposure_thesis_template": "This company appears to manufacture using imported materials/components — tariffs raise hard-to-pass-on input costs."
       }
     ],
     "companies_house_terms": [
@@ -36664,6 +36667,12 @@
       "\"import trading\" UK",
       "\"manufacturer\" UK international supply",
       "\"components distributor\" UK"
+    ],
+    "raw_summary": "Nasdaq and S&amp;P indices are settling between risk/bias defining MAs as the week comes to a close Baker Hughes rig count -5 at 588 European stocks rebound Friday, but weekly losses dominate Brazil's Lula and US Pres. Trump held phone call on Friday. Gold surges and breaks away from its 200 day MA SNB Tschudin: Swiss inflation is low because of low inflation expectations Trump: Gets rid of 26.4% tariffs on imported beef and prices will come down by 25% EU consumer confidence -15.5 versus -16.3 expected Canada Retail sales for June 0.6% vs 0.4% estimate Kickstart the North American session: Th",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "Tariff exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-22T00:42:16.294Z"
