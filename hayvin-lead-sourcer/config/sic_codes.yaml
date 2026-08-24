@@ -1,0 +1,26 @@
+# SIC codes swept for Tier 2/3 leads — regional chains, forecourt groups,
+# independents. Edit freely; each entry is passed straight to the Companies
+# House Advanced Search API (`sic_codes` param).
+
+sic_codes:
+  - code: "47110"
+    label: "Retail sale in non-specialised stores with food/drink predominating"
+    notes: "Supermarkets, convenience stores — regional/independent chains."
+
+  - code: "47300"
+    label: "Retail sale of automotive fuel"
+    notes: "Forecourts — independent and small-group operators."
+
+  - code: "47190"
+    label: "Other retail sale in non-specialised stores"
+    notes: "General/variety retailers, some convenience-adjacent chains."
+
+  - code: "46170"
+    label: "Agents involved in the sale of food, beverages and tobacco"
+    notes: "Some regional food/drink distributors double as retail groups."
+
+# Safety cap: max companies pulled per SIC code per run (paginated).
+max_per_sic: 200
+
+# Only companies with this status are considered.
+company_status: active

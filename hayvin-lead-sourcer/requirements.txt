@@ -1,0 +1,4 @@
+# All HTTP is done via urllib (stdlib) to match the style of the existing
+# scripts in this repo — no `requests` dependency needed.
+PyYAML>=6.0
+pdfplumber>=0.11.0

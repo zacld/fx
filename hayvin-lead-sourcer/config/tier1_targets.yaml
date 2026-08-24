@@ -1,0 +1,113 @@
+# Tier 1 targets — major chains and forecourt groups.
+#
+# These are Hayvin's primary targets: a small, high-value, hand-curated list.
+# Edit freely — add/remove companies or titles as the sales strategy changes.
+#
+# `domain` is used for email-pattern guessing and Hunter.io domain search.
+# `search_names` are alternate names/aliases tried against public-report and
+# press-page search (e.g. a group's press site sometimes uses the parent
+# brand name rather than the trading name).
+
+companies:
+  - name: Tesco
+    domain: tesco.com
+    search_names: ["Tesco PLC", "Tesco Group"]
+    press_url: "https://www.tescoplc.com/news/"
+    sustainability_report_url: "https://www.tescoplc.com/sustainability/"
+
+  - name: "Sainsbury's"
+    domain: sainsburys.co.uk
+    search_names: ["J Sainsbury", "J Sainsbury plc"]
+    press_url: "https://www.about.sainsburys.co.uk/news"
+    sustainability_report_url: "https://www.about.sainsburys.co.uk/sustainability"
+
+  - name: Morrisons
+    domain: morrisons.com
+    search_names: ["Wm Morrison Supermarkets", "WM Morrison"]
+    press_url: "https://www.morrisons-corporate.com/media-centre/"
+    sustainability_report_url: "https://www.morrisons-corporate.com/sustainability/"
+
+  - name: Co-op
+    domain: coop.co.uk
+    search_names: ["Co-operative Group", "The Co-operative Group"]
+    press_url: "https://www.co-operative.coop/media"
+    sustainability_report_url: "https://www.co-operative.coop/sustainability"
+
+  - name: Asda
+    domain: asda.com
+    search_names: ["Asda Stores Limited", "Asda Group"]
+    press_url: "https://your.asda.com/news"
+    sustainability_report_url: "https://your.asda.com/sustainability"
+
+  - name: "Aldi UK"
+    domain: aldi.co.uk
+    search_names: ["Aldi Stores Ltd", "Aldi UK"]
+    press_url: "https://www.aldipresscentre.co.uk/"
+    sustainability_report_url: "https://www.aldi.co.uk/about-aldi/corporate-responsibility"
+
+  - name: "Lidl GB"
+    domain: lidl.co.uk
+    search_names: ["Lidl Great Britain", "Lidl GB"]
+    press_url: "https://corporate.lidl.co.uk/media"
+    sustainability_report_url: "https://corporate.lidl.co.uk/sustainability"
+
+  - name: Boots
+    domain: boots.com
+    search_names: ["Boots UK", "Boots UK Limited"]
+    press_url: "https://www.boots-uk.com/media-centre/"
+    sustainability_report_url: "https://www.boots-uk.com/sustainability/"
+
+  - name: WHSmith
+    domain: whsmith.co.uk
+    search_names: ["WH Smith PLC", "WHSmith PLC"]
+    press_url: "https://www.whsmithplc.co.uk/media"
+    sustainability_report_url: "https://www.whsmithplc.co.uk/responsibility"
+
+  - name: BP
+    domain: bp.com
+    search_names: ["BP plc", "BP UK"]
+    press_url: "https://www.bp.com/en_gb/united-kingdom/home/media.html"
+    sustainability_report_url: "https://www.bp.com/en/global/corporate/sustainability.html"
+
+  - name: "Shell UK"
+    domain: shell.co.uk
+    search_names: ["Shell UK Limited", "Shell UK Oil Products"]
+    press_url: "https://www.shell.co.uk/media.html"
+    sustainability_report_url: "https://www.shell.com/sustainability.html"
+
+  - name: "MFG (Motor Fuel Group)"
+    domain: motorfuelgroup.com
+    search_names: ["Motor Fuel Group", "MFG"]
+    press_url: "https://www.motorfuelgroup.com/news/"
+    sustainability_report_url: "https://www.motorfuelgroup.com/sustainability/"
+
+  - name: "EG Group"
+    domain: eggroup.co.uk
+    search_names: ["EG Group", "Euro Garages"]
+    press_url: "https://www.eg.group/news/"
+    sustainability_report_url: "https://www.eg.group/sustainability/"
+
+  - name: Moto
+    domain: moto-way.com
+    search_names: ["Moto Hospitality", "Moto Hospitality Ltd"]
+    press_url: "https://www.moto-way.com/about-us/news"
+    sustainability_report_url: "https://www.moto-way.com/about-us/sustainability"
+
+  - name: "Welcome Break"
+    domain: welcomebreak.co.uk
+    search_names: ["Welcome Break Group", "Welcome Break Motorway Services"]
+    press_url: "https://www.welcomebreak.co.uk/about-us/news"
+    sustainability_report_url: "https://www.welcomebreak.co.uk/about-us/sustainability"
+
+# Job titles Hayvin wants to reach at each Tier 1 company. Used both to build
+# LinkedIn people-search URLs and as a filter when parsing public reports for
+# named contacts.
+titles:
+  - "Sustainability Manager"
+  - "Head of ESG"
+  - "ESG Manager"
+  - "Waste & Compliance Manager"
+  - "Environment Manager"
+  - "Head of CSR"
+  - "Regional Operations Manager"
+  - "Sustainability Director"
