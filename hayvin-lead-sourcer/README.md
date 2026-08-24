@@ -73,6 +73,46 @@ email, email_source, email_confidence, linkedin_search_url, source_notes, phone
 `phone` is always blank — filled in manually later via free-credit lookups,
 by design.
 
+## Running as a live URL (server.py)
+
+`main.py` is the CLI; `server.py` is a thin stdlib-only HTTP wrapper around
+the same pipeline, for deploying as a live URL (e.g. Fly.io — `fly.toml` and
+`Dockerfile` are set up for that, matching the pattern of the rest of this
+repo). It does **not** run the pipeline on a schedule — the pipeline makes
+real, quota-limited third-party API calls, so runs are only triggered on
+demand.
+
+```bash
+python3 server.py                 # local: listens on :8080 (or $PORT)
+```
+
+Endpoints:
+| | |
+|---|---|
+| `GET /health` | `{"status": "ok"}` |
+| `POST /run` | Kicks off a run in the background. Optional JSON body: `{"tier1_only": bool, "tier2_only": bool, "max_per_sic": int}`. Returns `202` immediately, `409` if a run is already in progress. |
+| `GET /status` | `{"status": "idle\|running\|done\|error", "started_at", "finished_at", "row_count", "error"}` |
+| `GET /leads.csv` | The most recently completed run's CSV. `404` until a run has finished. |
+
+```bash
+curl -X POST -H "X-Trigger-Token: $TRIGGER_TOKEN" https://your-app.fly.dev/run
+curl https://your-app.fly.dev/status
+curl -O https://your-app.fly.dev/leads.csv
+```
+
+Set `TRIGGER_TOKEN` to require a matching `X-Trigger-Token` header on
+`POST /run` — recommended once this is live at a public URL, since an
+untriggered `/run` can burn your Hunter.io/Places quota. Without it, `/run`
+is open to anyone who can reach the URL.
+
+Deploy:
+```bash
+cd hayvin-lead-sourcer
+flyctl launch --no-deploy   # first time only, keeps the fly.toml above
+flyctl secrets set COMPANIES_HOUSE_API_KEY=... GOOGLE_PLACES_API_KEY=... HUNTER_API_KEY=... TRIGGER_TOKEN=...
+flyctl deploy
+```
+
 ## Structure
 
 ```
@@ -83,7 +123,9 @@ sourcer/google_places.py    — trading-status + domain confirmation (Places API
 sourcer/hunter.py           — Hunter.io domain search + email finder
 sourcer/report_scraper.py   — sustainability-report (PDF) + press-page (HTML) contact extraction
 sourcer/email_guesser.py    — fallback UK corporate email-pattern generation
-main.py                     — orchestrates both tiers, writes the CSV
+main.py                     — orchestrates both tiers, writes the CSV (CLI)
+server.py                   — stdlib HTTP wrapper around main.py, for a live URL
+Dockerfile, fly.toml        — deploy server.py to Fly.io
 ```
 
 ## What this tool deliberately does not do

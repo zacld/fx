@@ -315,12 +315,21 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = parse_args()
-
-    if args.tier1_only and args.tier2_only:
-        print("ERROR: --tier1-only and --tier2-only are mutually exclusive.", file=sys.stderr)
-        sys.exit(1)
+def run_pipeline(
+    tier1_only: bool = False,
+    tier2_only: bool = False,
+    tier1_config_path: str = DEFAULT_TIER1_CONFIG,
+    sic_config_path: str = DEFAULT_SIC_CONFIG,
+    max_per_sic: Optional[int] = None,
+) -> list[dict]:
+    """
+    Run the pipeline and return the rows (does not write a CSV — callers
+    decide where output goes). Shared by the CLI (main()) and server.py so
+    the two never drift. Raises FileNotFoundError if a config path is
+    missing; never raises for a missing API key, it just skips that step.
+    """
+    if tier1_only and tier2_only:
+        raise ValueError("tier1_only and tier2_only are mutually exclusive")
 
     print("Hayvin Lead Sourcer")
     print(f"  Companies House key: {'set' if companies_house.get_api_key() else 'MISSING — Tier 2/3 will be skipped'}")
@@ -329,25 +338,25 @@ def main() -> None:
 
     rows: list[dict] = []
 
-    if not args.tier2_only:
-        if not os.path.exists(args.tier1_config):
-            print(f"ERROR: Tier 1 config not found: {args.tier1_config}", file=sys.stderr)
-            sys.exit(1)
-        tier1_config = load_tier1_config(args.tier1_config)
+    if not tier2_only:
+        if not os.path.exists(tier1_config_path):
+            raise FileNotFoundError(f"Tier 1 config not found: {tier1_config_path}")
+        tier1_config = load_tier1_config(tier1_config_path)
         rows.extend(run_tier1(tier1_config))
 
-    if not args.tier1_only:
-        if not os.path.exists(args.sic_config):
-            print(f"ERROR: SIC config not found: {args.sic_config}", file=sys.stderr)
-            sys.exit(1)
-        sic_config = load_sic_config(args.sic_config)
-        rows.extend(run_tier23(sic_config, args.max_per_sic))
+    if not tier1_only:
+        if not os.path.exists(sic_config_path):
+            raise FileNotFoundError(f"SIC config not found: {sic_config_path}")
+        sic_config = load_sic_config(sic_config_path)
+        rows.extend(run_tier23(sic_config, max_per_sic))
 
-    write_csv(rows, args.output)
+    print_summary(rows)
+    return rows
 
+
+def print_summary(rows: list[dict]) -> None:
     print("\n" + "=" * 60)
     print(f"Done — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
-    print(f"Output: {args.output}")
     print(f"Total rows: {len(rows)}")
     by_tier: dict[str, int] = {}
     with_contact = 0
@@ -360,6 +369,25 @@ def main() -> None:
     print(f"  Rows with a named contact: {with_contact}")
     print(f"  Rows needing manual research: {len(rows) - with_contact}")
     print("=" * 60)
+
+
+def main() -> None:
+    args = parse_args()
+
+    try:
+        rows = run_pipeline(
+            tier1_only=args.tier1_only,
+            tier2_only=args.tier2_only,
+            tier1_config_path=args.tier1_config,
+            sic_config_path=args.sic_config,
+            max_per_sic=args.max_per_sic,
+        )
+    except (ValueError, FileNotFoundError) as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    write_csv(rows, args.output)
+    print(f"Output: {args.output}")
 
 
 if __name__ == "__main__":
