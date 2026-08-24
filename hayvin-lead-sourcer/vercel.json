@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/run.py": {
+      "maxDuration": 60
+    },
+    "api/health.py": {
+      "maxDuration": 10
+    }
+  }
+}

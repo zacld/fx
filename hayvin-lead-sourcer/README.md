@@ -108,10 +108,60 @@ is open to anyone who can reach the URL.
 Deploy:
 ```bash
 cd hayvin-lead-sourcer
-flyctl launch --no-deploy   # first time only, keeps the fly.toml above
+flyctl launch --no-deploy
 flyctl secrets set COMPANIES_HOUSE_API_KEY=... GOOGLE_PLACES_API_KEY=... HUNTER_API_KEY=... TRIGGER_TOKEN=...
 flyctl deploy
 ```
+(Fly's free trial requires a payment method on file before it will assign a
+region — if you'd rather not add one, use the Vercel deployment below
+instead.)
+
+## Running on Vercel instead (api/run.py)
+
+`api/run.py` and `api/health.py` are Vercel Python functions covering the
+same pipeline, for a deploy target that doesn't need a Fly.io payment method.
+
+**This is a different shape than `server.py`, not just a different host.**
+Vercel Python functions are stateless request/response — no persistent
+background thread, no in-memory state across invocations, and each
+invocation has a hard execution-time cap (`vercel.json` sets
+`maxDuration: 60` for `api/run.py`; your plan may allow more or cap you
+lower). So there's no `/status` polling here:
+
+| | |
+|---|---|
+| `GET /api/health` | `{"status": "ok"}` |
+| `GET /api/run` | Usage info |
+| `POST /api/run` | Runs the pipeline **synchronously in the request** and returns the CSV directly. Same optional JSON body as the Fly version: `{"tier1_only": bool, "tier2_only": bool, "max_per_sic": int}`. |
+
+Keep runs small enough to finish inside the timeout — `tier1_only: true`,
+or a low `max_per_sic` for Tier 2/3 — otherwise the function is killed
+mid-run with nothing returned.
+
+```bash
+curl -X POST \
+  -H "X-Trigger-Token: $TRIGGER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"tier1_only": true}' \
+  https://your-project.vercel.app/api/run \
+  -o hayvin_leads.csv
+```
+
+Deploy:
+```bash
+npm install -g vercel
+cd hayvin-lead-sourcer
+vercel login
+vercel link
+vercel env add COMPANIES_HOUSE_API_KEY
+vercel env add GOOGLE_PLACES_API_KEY
+vercel env add HUNTER_API_KEY
+vercel env add TRIGGER_TOKEN
+vercel deploy --prod
+```
+`vercel env add` prompts you to paste the value and pick which
+environments (Production/Preview/Development) it applies to — every key is
+optional except Companies House, same as everywhere else in this tool.
 
 ## Structure
 
@@ -124,8 +174,10 @@ sourcer/hunter.py           — Hunter.io domain search + email finder
 sourcer/report_scraper.py   — sustainability-report (PDF) + press-page (HTML) contact extraction
 sourcer/email_guesser.py    — fallback UK corporate email-pattern generation
 main.py                     — orchestrates both tiers, writes the CSV (CLI)
-server.py                   — stdlib HTTP wrapper around main.py, for a live URL
+server.py                   — stdlib HTTP wrapper around main.py, for a live URL (Fly.io)
 Dockerfile, fly.toml        — deploy server.py to Fly.io
+api/run.py, api/health.py   — Vercel Python functions covering the same pipeline
+vercel.json                 — Vercel deploy config (function timeouts)
 ```
 
 ## What this tool deliberately does not do

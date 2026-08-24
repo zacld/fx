@@ -1,0 +1,9 @@
+output
+*.csv
+__pycache__
+**/__pycache__
+*.pyc
+.env
+.env.*
+fly.toml
+Dockerfile
