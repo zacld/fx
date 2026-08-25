@@ -20,9 +20,11 @@ list of target job titles. For each company:
 **Tier 2/3 — regional chains, forecourt groups, independents**
 (`config/sic_codes.yaml`): a Companies House SIC-code sweep (same pattern as
 `call-list-generator/generate_call_list.py`), with the officer/director list
-as the contact-of-record fallback, cross-referenced against Google Places to
-confirm the business is still trading and to pull its website domain (never
-its phone field).
+as the contact-of-record fallback. No domain/email source for this tier —
+Tier 1's named chains are the real target, so Tier 2/3 rows ship with
+company name, Companies House number, director name/role, and a LinkedIn
+search URL only; domain and email are always blank, flagged for manual
+research.
 
 ## Email resolution
 
@@ -42,7 +44,6 @@ needed".
 pip install -r requirements.txt
 
 export COMPANIES_HOUSE_API_KEY=...   # required for Tier 2/3 (free)
-export GOOGLE_PLACES_API_KEY=...     # optional — domain/trading confirmation
 export HUNTER_API_KEY=...            # optional — free tier: 25 searches + 1000 verifications/month
 ```
 
@@ -102,14 +103,14 @@ curl -O https://your-app.fly.dev/leads.csv
 
 Set `TRIGGER_TOKEN` to require a matching `X-Trigger-Token` header on
 `POST /run` — recommended once this is live at a public URL, since an
-untriggered `/run` can burn your Hunter.io/Places quota. Without it, `/run`
+untriggered `/run` can burn your Hunter.io quota. Without it, `/run`
 is open to anyone who can reach the URL.
 
 Deploy:
 ```bash
 cd hayvin-lead-sourcer
 flyctl launch --no-deploy
-flyctl secrets set COMPANIES_HOUSE_API_KEY=... GOOGLE_PLACES_API_KEY=... HUNTER_API_KEY=... TRIGGER_TOKEN=...
+flyctl secrets set COMPANIES_HOUSE_API_KEY=... HUNTER_API_KEY=... TRIGGER_TOKEN=...
 flyctl deploy
 ```
 (Fly's free trial requires a payment method on file before it will assign a
@@ -154,7 +155,6 @@ cd hayvin-lead-sourcer
 vercel login
 vercel link
 vercel env add COMPANIES_HOUSE_API_KEY
-vercel env add GOOGLE_PLACES_API_KEY
 vercel env add HUNTER_API_KEY
 vercel env add TRIGGER_TOKEN
 vercel deploy --prod
@@ -169,7 +169,6 @@ optional except Companies House, same as everywhere else in this tool.
 config/tier1_targets.yaml   — editable company + title list
 config/sic_codes.yaml       — editable SIC code list for Tier 2/3
 sourcer/companies_house.py  — CH Advanced Search + officers API
-sourcer/google_places.py    — trading-status + domain confirmation (Places API, new)
 sourcer/hunter.py           — Hunter.io domain search + email finder
 sourcer/report_scraper.py   — sustainability-report (PDF) + press-page (HTML) contact extraction
 sourcer/email_guesser.py    — fallback UK corporate email-pattern generation

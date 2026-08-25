@@ -16,8 +16,8 @@ Endpoints:
   GET  /leads.csv          -> the most recently completed run's CSV (404 if none yet)
 
 Runs are triggered on demand rather than continuously — this pipeline makes
-real, quota-limited third-party API calls (Companies House, Google Places,
-Hunter.io), so nothing here polls or auto-runs on a schedule.
+real, quota-limited third-party API calls (Companies House, Hunter.io), so
+nothing here polls or auto-runs on a schedule.
 
 If TRIGGER_TOKEN is set, POST /run requires a matching `X-Trigger-Token`
 header — this guards against a public URL silently burning your API quota.

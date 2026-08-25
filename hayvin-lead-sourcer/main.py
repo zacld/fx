@@ -11,8 +11,10 @@ Two tiers:
            contacts, LinkedIn search URLs generated for manual lookup.
   Tier 2/3 — regional chains, forecourt groups, independents, swept from
            Companies House by SIC code (config/sic_codes.yaml), with
-           Companies House officers as the contact-of-record fallback and
-           Google Places used only to confirm trading status + domain.
+           Companies House officers as the contact-of-record fallback.
+           No domain/email source for this tier — Tier 1's named chains are
+           the real target, so rows ship with company/contact/LinkedIn URL
+           only and are flagged for manual research.
 
 Deliberately does NOT look up phone numbers anywhere — that's out of scope
 for this tool and handled separately. `phone` is always left blank in the
@@ -20,7 +22,6 @@ output CSV.
 
 Usage:
   export COMPANIES_HOUSE_API_KEY=...   # required for Tier 2/3
-  export GOOGLE_PLACES_API_KEY=...     # optional — domain/trading confirmation
   export HUNTER_API_KEY=...            # optional — verified email lookup
   python3 main.py
   python3 main.py --tier1-only
@@ -41,7 +42,7 @@ from typing import Optional
 
 import yaml
 
-from sourcer import companies_house, email_guesser, google_places, hunter, report_scraper
+from sourcer import companies_house, email_guesser, hunter, report_scraper
 
 CSV_FIELDS = [
     "tier",
@@ -248,49 +249,37 @@ def run_tier23(config: dict, max_per_sic_override: Optional[int]) -> list[dict]:
 
     print(f"  Unique companies after SIC merge: {len(seen)}")
 
+    # No domain source for Tier 2/3 (Companies House doesn't return a website,
+    # and Google Places isn't used here — Tier 1's named chains are the real
+    # target, so it's not worth the extra dependency for a volume-play tier).
+    # Domain and email are always blank; contact/role still comes from
+    # Companies House officers, so the row is still useful for manual research.
     rows: list[dict] = []
     for cn, item in seen.items():
         name = item.get("company_name", "")
-        address = item.get("registered_office_address") or {}
-        locality = address.get("locality", "UK")
-
-        # Google Places: confirm still trading + pull domain. Never reads phone.
-        places_hit = google_places.find_company(name, locality or "UK")
-        domain = places_hit["domain"] if places_hit else ""
-        trading_note = "confirmed trading (Google Places)" if places_hit else "trading status not confirmed"
 
         directors = companies_house.get_active_directors(cn, ch_key)
 
         if directors:
             top = directors[0]
-            first, last = split_name(top["name"])
-            email, email_source, email_confidence = resolve_email(first, last, domain)
             rows.append(new_row(
                 tier="2/3",
                 company_name=name,
                 companies_house_number=cn,
-                domain=domain,
                 contact_name=top["name"],
                 role_title=f"{top['role']} (Companies House officer)",
-                email=email,
-                email_source=email_source,
-                email_confidence=email_confidence,
                 linkedin_search_url=linkedin_search_url(name, top["role"]),
-                source_notes=f"companies_house_officer; appointed {top.get('appointed_on', 'unknown')}; {trading_note}",
+                source_notes=f"companies_house_officer; appointed {top.get('appointed_on', 'unknown')}; domain/email not sourced — manual research needed",
             ))
         else:
             rows.append(new_row(
                 tier="2/3",
                 company_name=name,
                 companies_house_number=cn,
-                domain=domain,
                 contact_name="",
                 role_title="Director/Owner (research needed)",
-                email="",
-                email_source="",
-                email_confidence="",
                 linkedin_search_url=linkedin_search_url(name, "Director"),
-                source_notes=f"no active director found via Companies House officers API; {trading_note}",
+                source_notes="no active director found via Companies House officers API; domain/email not sourced — manual research needed",
             ))
 
     return rows
@@ -333,7 +322,6 @@ def run_pipeline(
 
     print("Hayvin Lead Sourcer")
     print(f"  Companies House key: {'set' if companies_house.get_api_key() else 'MISSING — Tier 2/3 will be skipped'}")
-    print(f"  Google Places key:   {'set' if google_places.get_api_key() else 'not set — domain/trading confirmation skipped'}")
     print(f"  Hunter.io key:       {'set' if hunter.get_api_key() else 'not set — emails will be unverified guesses'}")
 
     rows: list[dict] = []
