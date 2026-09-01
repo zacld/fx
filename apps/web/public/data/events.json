@@ -6248,6 +6248,147 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "16671182049faabf": {
+    "id": "16671182049faabf",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/italy-august-preliminary-cpi-xx-vs-3-3-y-y-expected/",
+    "headline": "Italy August preliminary CPI +3.3% vs +3.3% y/y expected",
+    "raw_summary": "Prior +2.9% HICP +3.2% vs +3.4% y/y expected Prior +2.9% Italy's inflation rate accelerated in August 2026, driven primarily by a sharp increase in energy costs.&nbsp;The Consumer Price Index rose by 0.5% compared with July and increased by 3.3% on an annual basis, up from 2.9% in the previous month. The main driver behind the acceleration was the energy sector. Prices for non-regulated energy products climbed 16.9% y/y, accelerating from 11.4% in July. Meanwhile, regulated energy products rose 18.8% annually, compared with 14.8% in the previous month. The strong rise in energy prices contribu",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-09-01T09:44:36.382Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "Prior +2.9% HICP +3.2% vs +3.4% y/y expected Prior +2.9% Italy's inflation rate accelerated in August 2026, driven primarily by a sharp increase in energy costs.&nbsp;The Consumer Price Index rose by 0.5% compared with July and increased by 3.3% on an annual basis, up from 2.9% in the previous month. The main driver behind the acceleration was the energy sector. Prices for non-regulated energy products climbed 16.9% y/y, accelerating from 11.4% in July. Meanwhile, regulated energy products rose 18.8% annually, compared with 14.8% in the previous month. The strong rise in energy prices contribu",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 7,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "medium",
+    "trigger_score": 55,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "what_happened": "Italy August preliminary CPI +3.3% vs +3.3% y/y expected",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "segment_name": "UK petroleum and fuel importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "segment_name": "UK chemical and industrial-input importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T09:44:44.667Z"
+  },
   "1672cfe7fccd5f0f": {
     "id": "1672cfe7fccd5f0f",
     "headline": "US S&P Global composite index for June 51.9 versus 52.2 preliminary and 51.5 last month",
