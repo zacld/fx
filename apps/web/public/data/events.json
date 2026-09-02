@@ -6250,16 +6250,13 @@
   },
   "16671182049faabf": {
     "id": "16671182049faabf",
+    "headline": "Italy August preliminary CPI +3.3% vs +3.3% y/y expected",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/italy-august-preliminary-cpi-xx-vs-3-3-y-y-expected/",
-    "headline": "Italy August preliminary CPI +3.3% vs +3.3% y/y expected",
-    "raw_summary": "Prior +2.9% HICP +3.2% vs +3.4% y/y expected Prior +2.9% Italy's inflation rate accelerated in August 2026, driven primarily by a sharp increase in energy costs.&nbsp;The Consumer Price Index rose by 0.5% compared with July and increased by 3.3% on an annual basis, up from 2.9% in the previous month. The main driver behind the acceleration was the energy sector. Prices for non-regulated energy products climbed 16.9% y/y, accelerating from 11.4% in July. Meanwhile, regulated energy products rose 18.8% annually, compared with 14.8% in the previous month. The strong rise in energy prices contribu",
-    "pre_relevance_score": 7,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-09-01T09:44:36.382Z",
+    "status": "ready",
     "event_type": "Commodity",
     "event_breadth": "commodity",
-    "summary": "Prior +2.9% HICP +3.2% vs +3.4% y/y expected Prior +2.9% Italy's inflation rate accelerated in August 2026, driven primarily by a sharp increase in energy costs.&nbsp;The Consumer Price Index rose by 0.5% compared with July and increased by 3.3% on an annual basis, up from 2.9% in the previous month. The main driver behind the acceleration was the energy sector. Prices for non-regulated energy products climbed 16.9% y/y, accelerating from 11.4% in July. Meanwhile, regulated energy products rose 18.8% annually, compared with 14.8% in the previous month. The strong rise in energy prices contribu",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -6275,100 +6272,106 @@
       "UK chemical and industrial-input importers"
     ],
     "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "what_happened": "Italy August preliminary CPI +3.3% vs +3.3% y/y expected",
     "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
     "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
     "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Commodity exposure"
-    ],
-    "status": "ready",
+    "summary": "Prior +2.9% HICP +3.2% vs +3.4% y/y expected Prior +2.9% Italy's inflation rate accelerated in August 2026, driven primarily by a sharp increase in energy costs.&nbsp;The Consumer Price Index rose by 0.5% compared with July and increased by 3.3% on an annual basis, up from 2.9% in the previous month. The main driver behind the acceleration was the energy sector. Prices for non-regulated energy products climbed 16.9% y/y, accelerating from 11.4% in July. Meanwhile, regulated energy products rose 18.8% annually, compared with 14.8% in the previous month. The strong rise in energy prices contribu",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK petroleum and fuel importers",
         "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
         "exposure_level": "Very High",
         "exposure_type": "USD commodity pricing exposure",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"fuel importer\" UK",
-          "\"petroleum distributor\" UK",
-          "\"chemical wholesaler\" UK"
-        ],
-        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
-        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "petroleum wholesale",
-          "fuel trading",
-          "chemical supplies"
-        ],
-        "segment_name": "UK petroleum and fuel importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs."
       },
       {
+        "segment_name": "UK chemical and industrial-input importers",
         "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
         "exposure_level": "High",
         "exposure_type": "USD commodity input exposure",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"chemical distributor\" UK",
-          "\"industrial chemical\" wholesale UK"
-        ],
-        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
-        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "chemicals wholesale",
-          "industrial supplies",
-          "plastics wholesale"
-        ],
-        "segment_name": "UK chemical and industrial-input importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs."
       }
     ],
     "companies_house_terms": [
@@ -6385,6 +6388,12 @@
       "\"chemical wholesaler\" UK",
       "\"chemical distributor\" UK",
       "\"industrial chemical\" wholesale UK"
+    ],
+    "raw_summary": "Prior +2.9% HICP +3.2% vs +3.4% y/y expected Prior +2.9% Italy's inflation rate accelerated in August 2026, driven primarily by a sharp increase in energy costs.&nbsp;The Consumer Price Index rose by 0.5% compared with July and increased by 3.3% on an annual basis, up from 2.9% in the previous month. The main driver behind the acceleration was the energy sector. Prices for non-regulated energy products climbed 16.9% y/y, accelerating from 11.4% in July. Meanwhile, regulated energy products rose 18.8% annually, compared with 14.8% in the previous month. The strong rise in energy prices contribu",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
+    "exposure_types": [
+      "Commodity exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-01T09:44:44.667Z"
@@ -10196,6 +10205,147 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "210f4a741fdba0f2": {
+    "id": "210f4a741fdba0f2",
+    "source": "OilPrice.com",
+    "source_url": "https://oilprice.com/Energy/Crude-Oil/US-Iran-Strikes-Put-100-Oil-Back-in-Focus.html",
+    "headline": "U.S.-Iran Strikes Put $100 Oil Back in Focus",
+    "raw_summary": "U.S.-Iran strikes reignite fears of a prolonged Middle East conflict as Hormuz tensions push regional oil benchmarks above $100. Rising Bond Yields Turn Oil’s Rally Into a Demand Risk - Global bond yields have surged to their highest since 2008, as rising oil prices perpetuate fears of longer-than-assumed inflation, in turn creating a cycle of lower demand further down the road. - The rally in bond yields started in earnest after new Federal Reserve chairman Kevin Walsh vowed to finally tame US inflation, currently at 3.4%, sending…",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-09-01T23:42:01.555Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "U.S.-Iran strikes reignite fears of a prolonged Middle East conflict as Hormuz tensions push regional oil benchmarks above $100. Rising Bond Yields Turn Oil’s Rally Into a Demand Risk - Global bond yields have surged to their highest since 2008, as rising oil prices perpetuate fears of longer-than-assumed inflation, in turn creating a cycle of lower demand further down the road. - The rally in bond yields started in earnest after new Federal Reserve chairman Kevin Walsh vowed to finally tame US inflation, currently at 3.4%, sending…",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "weak",
+    "trigger_score": 30,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "what_happened": "U.S.-Iran Strikes Put $100 Oil Back in Focus",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "segment_name": "UK petroleum and fuel importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "segment_name": "UK chemical and industrial-input importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T23:42:25.782Z"
+  },
   "21e824156e14675d": {
     "id": "21e824156e14675d",
     "headline": "Australian Dollar flat as Oil spike, Fed hawkish bets keep traders cautious",
@@ -11465,6 +11615,104 @@
     "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "26abd578a896edd3": {
+    "id": "26abd578a896edd3",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/s-p-global-manufacturing-pmi-final-for-august-53-9-versus-53-2-preliminary/",
+    "headline": "S&P global manufacturing PMI final for August 53.9 versus 53.2 preliminary",
+    "raw_summary": "Prior month&nbsp;53.9 Preliminary estimate for manufacturing PMI 53.2 S&amp;P global manufacturing PMI final 53.9 Details from S&amp;P Global on the survey report: S&amp;P Global US manufacturing PMI held at 53.9 in August, signaling another solid expansion in operating conditions. Production increased for the 15th consecutive month, but growth slowed to its weakest pace since February as higher prices and tight supplies weighed. New orders rose at a solid pace, little changed from July, with demand largely driven by the domestic market. Export orders declined for the 14th consecutive month. T",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-09-01T23:42:01.555Z",
+    "event_type": "Macro data",
+    "event_breadth": "broad_macro",
+    "summary": "Prior month&nbsp;53.9 Preliminary estimate for manufacturing PMI 53.2 S&amp;P global manufacturing PMI final 53.9 Details from S&amp;P Global on the survey report: S&amp;P Global US manufacturing PMI held at 53.9 in August, signaling another solid expansion in operating conditions. Production increased for the 15th consecutive month, but growth slowed to its weakest pace since February as higher prices and tight supplies weighed. New orders rose at a solid pace, little changed from July, with demand largely driven by the domestic market. Export orders declined for the 14th consecutive month. T",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "weak",
+    "trigger_score": 30,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK businesses with regular overseas payments"
+    ],
+    "why_now": "Recent macro data may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "what_happened": "S&P global manufacturing PMI final for August 53.9 versus 53.2 preliminary",
+    "what_changed_financially": "Market macro data with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
+    "fx_payment_logic": "Macro events can shift currency values and affect UK businesses with overseas payment obligations or overseas revenue.",
+    "business_impact_summary": "Macro data may move GBP — UK businesses with overseas supplier payments or overseas customer revenue could be affected.",
+    "sales_angle": "Recent macro data may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent macro data creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Macro data exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK importer or exporter with recurring FX payments or receipts",
+        "exposure_level": "High",
+        "exposure_type": "Currency exposure — GBP vs overseas currencies",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Macro data shifts GBP expectations → currency moves → GBP cost of overseas payments or GBP value of overseas receipts changes",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"importer\" UK",
+          "\"exporter\" UK international"
+        ],
+        "sales_angle": "Macro uncertainty affecting GBP is a good time to review FX exposure on upcoming international payments.",
+        "exposure_thesis_template": "This company appears to have overseas payment obligations or international revenue — macro-driven GBP moves affect those FX transactions.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "food international",
+          "import trading",
+          "international trading"
+        ],
+        "segment_name": "UK businesses with regular overseas payments",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "food international",
+      "import trading",
+      "international trading"
+    ],
+    "all_search_queries": [
+      "\"importer\" UK",
+      "\"exporter\" UK international"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T23:42:25.530Z"
   },
   "27025bc06edac536": {
     "id": "27025bc06edac536",
@@ -14060,6 +14308,147 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-21T22:16:06.391Z"
+  },
+  "32320993e0fd90eb": {
+    "id": "32320993e0fd90eb",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/crude-oil-moves-higher-stocks-move-lower-as-reports-of-an-american-attack-on-iran/",
+    "headline": "Crude oil moves higher. Stocks move lower as reports of an American attack on Iran",
+    "raw_summary": "The price of crude oil is moving higher and stocks are moving lower on reports of an&nbsp;American attack on Iran. There are sounds of&nbsp;explosions heard in Chabahar and Bandar Abbas&nbsp;according to&nbsp; local reports. A rundown of the most recent tensions shows: Direct military exchanges resumed: The U.S. struck Iran’s Larak Island on Sunday, August 30. Iran responded with missile attacks against two U.S. air bases in Jordan—the first direct exchanges since late July. Trump warned of another response, although he said the situation did not represent a return to full-scale war. Two tanke",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-09-01T23:42:01.554Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "The price of crude oil is moving higher and stocks are moving lower on reports of an&nbsp;American attack on Iran. There are sounds of&nbsp;explosions heard in Chabahar and Bandar Abbas&nbsp;according to&nbsp; local reports. A rundown of the most recent tensions shows: Direct military exchanges resumed: The U.S. struck Iran’s Larak Island on Sunday, August 30. Iran responded with missile attacks against two U.S. air bases in Jordan—the first direct exchanges since late July. Trump warned of another response, although he said the situation did not represent a return to full-scale war. Two tanke",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "weak",
+    "trigger_score": 30,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "what_happened": "Crude oil moves higher. Stocks move lower as reports of an American attack on Iran",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "segment_name": "UK petroleum and fuel importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "segment_name": "UK chemical and industrial-input importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T23:42:24.773Z"
   },
   "32739346519f3f65": {
     "id": "32739346519f3f65",
@@ -17354,16 +17743,13 @@
   },
   "3bcb0cc0a8309189": {
     "id": "3bcb0cc0a8309189",
+    "headline": "Euro area inflation climbs above 3% in August on higher energy prices",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/euro-area-inflation-climbs-above-3-in-august-on-higher-energy-prices/",
-    "headline": "Euro area inflation climbs above 3% in August on higher energy prices",
-    "raw_summary": "Eurozone August preliminary CPI +3.3% vs +3.3% y/y expected Prior +2.9% Eurozone August preliminary core CPI +2.4% vs +2.5% y/y expected Prior +2.5% No surprises there as headline annual inflation jumps back up above the 3% mark again - the first time since May. This is largely led by a surge in energy price inflation, which clocked in at 14.3% in August. That is seen way up from 10.3% in July. Even on the monthly estimate, energy prices were seen shooting up by 2.9%. That is what is pushing up monthly headline inflation by 0.4% in August. Besides that, services inflation was up 0.1% on the mo",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-09-01T09:12:22.224Z",
+    "status": "ready",
     "event_type": "Commodity",
     "event_breadth": "commodity",
-    "summary": "Eurozone August preliminary CPI +3.3% vs +3.3% y/y expected Prior +2.9% Eurozone August preliminary core CPI +2.4% vs +2.5% y/y expected Prior +2.5% No surprises there as headline annual inflation jumps back up above the 3% mark again - the first time since May. This is largely led by a surge in energy price inflation, which clocked in at 14.3% in August. That is seen way up from 10.3% in July. Even on the monthly estimate, energy prices were seen shooting up by 2.9%. That is what is pushing up monthly headline inflation by 0.4% in August. Besides that, services inflation was up 0.1% on the mo",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -17379,10 +17765,265 @@
       "UK chemical and industrial-input importers"
     ],
     "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
+    "what_happened": "Euro area inflation climbs above 3% in August on higher energy prices",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "summary": "Eurozone August preliminary CPI +3.3% vs +3.3% y/y expected Prior +2.9% Eurozone August preliminary core CPI +2.4% vs +2.5% y/y expected Prior +2.5% No surprises there as headline annual inflation jumps back up above the 3% mark again - the first time since May. This is largely led by a surge in energy price inflation, which clocked in at 14.3% in August. That is seen way up from 10.3% in July. Even on the monthly estimate, energy prices were seen shooting up by 2.9%. That is what is pushing up monthly headline inflation by 0.4% in August. Besides that, services inflation was up 0.1% on the mo",
+    "ai_provider": "",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "segment_name": "UK petroleum and fuel importers",
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "why_affected": "",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "avoid_segments": [],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs."
+      },
+      {
+        "segment_name": "UK chemical and industrial-input importers",
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "why_affected": "",
+        "why_financially_exposed": "",
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs."
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "raw_summary": "Eurozone August preliminary CPI +3.3% vs +3.3% y/y expected Prior +2.9% Eurozone August preliminary core CPI +2.4% vs +2.5% y/y expected Prior +2.5% No surprises there as headline annual inflation jumps back up above the 3% mark again - the first time since May. This is largely led by a surge in energy price inflation, which clocked in at 14.3% in August. That is seen way up from 10.3% in July. Even on the monthly estimate, energy prices were seen shooting up by 2.9%. That is what is pushing up monthly headline inflation by 0.4% in August. Besides that, services inflation was up 0.1% on the mo",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T09:12:30.326Z"
+  },
+  "3c4335af3fa7e572": {
+    "id": "3c4335af3fa7e572",
+    "headline": "Canadian Dollar edges higher ahead of BoC rate decision",
+    "source": "FXStreet",
+    "source_url": "https://www.fxstreet.com/news/canadian-dollar-edges-higher-ahead-of-boc-rate-decision-202607150614",
+    "detected_at": "2026-07-15T07:13:22.269Z",
+    "status": "context_only",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "currency_pairs": [
+      "USD/CAD"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "USD/CAD move has indirect implications for UK businesses trading with Canada or the US",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK timber importers",
+      "UK oil and gas companies with Canadian exposure"
+    ],
+    "why_now": "BoC rate decision may influence USD/CAD, and by extension, affect UK businesses with North American trade",
+    "confidence_level": "medium",
+    "confidence_reason": "Currency move is real but not directly impactful on most UK businesses, and the event is a precursor to a central bank decision",
+    "discovery_recommendation": "Context only — indirect UK B2B FX implications, not a strong reason to call today",
+    "what_happened": "Canadian Dollar edges higher ahead of BoC rate decision",
+    "what_changed_financially": "USD/CAD rate moved, potentially affecting UK businesses with CAD or USD exposure",
+    "who_pays_more": "UK importers with USD or CAD exposure, if any",
+    "who_receives_less": "UK exporters with USD or CAD revenue, if any",
+    "affected_payment_flow": "None directly, but potential indirect impact on UK-Canada or UK-US trade",
+    "fx_payment_logic": "UK businesses with Canadian or US trade may face FX exposure due to the USD/CAD move, but this is not a primary concern for most",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "business_impact_summary": "UK businesses with North American trade may see minor implications from the USD/CAD move, but this is not a significant event for most",
+    "sales_angle": "If you trade with Canada or the US, keep an eye on the USD/CAD rate as it may influence your upcoming payments or receipts.",
+    "overall_sales_angle": "Monitor USD/CAD for potential indirect implications on UK-Canada or UK-US trade",
+    "summary": "USD/CAD moved ahead of the BoC rate decision. While not directly impactful, UK businesses with CAD or USD exposure may see some effect.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "The USD/CAD pair loses traction to near 1.4050 during the early European trading hours on Wednesday. Traders expect the US Federal Reserve (Fed) to skip the July rate hike as inflation cools, weighing on the US Dollar (USD) against the Canadian Dollar (CAD).",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "exposure_types": [
+      "Indirect USD/CAD exposure via trade with Canada or the US"
+    ],
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "3c450761480cd3a5": {
+    "id": "3c450761480cd3a5",
+    "headline": "investingLive Americas market news wrap: Oil climbs as Trump reimposes sanctions on Iran",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-market-news-wrap-oil-climbs-as-trump-reimposes-sanctions-on-iran-20260707/",
+    "detected_at": "2026-07-07T22:52:47.384Z",
+    "status": "context_only",
+    "event_type": "Commodity price move",
+    "event_breadth": "commodity",
+    "currency_pairs": [],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Oil price increase due to Iran sanctions may impact UK businesses importing oil or related products, but the direct FX hook is indirect",
+    "trigger_strength": "weak",
+    "trigger_score": 22,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK oil importers",
+      "UK businesses with oil-related costs"
+    ],
+    "why_now": "The increase in oil price may lead to higher costs for UK businesses, but the urgency is low due to the indirect nature of the impact",
+    "confidence_level": "medium",
+    "confidence_reason": "The event (oil price increase) has a potential indirect impact on UK businesses through increased costs, but it's not a direct FX or payment-flow event",
+    "discovery_recommendation": "Context only — the event has an indirect impact on UK businesses, and the FX hook is not direct",
+    "what_happened": "Oil price increased due to US reimposing sanctions on Iran",
+    "what_changed_financially": "Oil price moved, potentially affecting costs for UK businesses importing oil or related products",
+    "who_pays_more": "UK businesses importing oil or related products",
+    "who_receives_less": "None directly",
+    "affected_payment_flow": "GBP revenue vs USD-priced oil imports",
+    "fx_payment_logic": "UK businesses importing oil or related products may face higher costs due to the increased oil price, but this is not a direct FX or payment-flow event",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
+    "business_impact_summary": "UK businesses with oil-related costs may face higher expenses due to the increased oil price. However, the impact is indirect and not immediate.",
+    "sales_angle": "If you're importing oil or related products, the recent price increase may impact your costs.",
+    "overall_sales_angle": "The oil price increase may impact UK businesses with oil-related costs, but the direct FX hook is indirect",
+    "summary": "Oil price increased due to US sanctions on Iran, potentially affecting UK businesses with oil-related costs. However, the direct FX impact is indirect and not immediate.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "US Treasury revokes June 21 Iran oil sanctions waiver One-year inflation expectations hit the highest since 2023 in New York Fed survey Trump on Ukraine war: I think we're going to be settling Fed's Williams sees steady trend-like growth for the US economy US International Trade balance -$77.6B vs -$78.5B estimate Canada May trade balance $4.24 billion vs $2.85 billion expected Markets: WTI crude oil up $3.45 to $72.00 Gold down $49 to $4114 US 10-year yields up 7 bps to 4.55% S&amp;P 500 down 0.4% CHF leads, NZD lags Oil bulls finally caught a break today but it was slow-in-coming. The latest",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\boil price|\\bcrude oil|\\bwti|; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
+    "exposure_types": [
+      "Commodity price exposure"
+    ],
+    "ai_model": "llama-3.3-70b-versatile"
+  },
+  "3c65e0f054857595": {
+    "id": "3c65e0f054857595",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-fx-news-wrap-1-sept-it-s-a-wrap-but-not-for-the-iran-war-fighting-resumes/",
+    "headline": "investingLive Americas FX news wrap 1 Sept: It's a wrap but not for the Iran War.  Fighting resumes.",
+    "raw_summary": "Oil: Private survey of inventory shows a headline crude oil draw greater than expected Nasdaq indices close sharply lower as Iran war heats up All aboard!. The Bond Bears take the 10 year yield above 4.75% and up to 4.80% Here we go again. Trump says \"Iran will be totally wiped out as a country\". Crude oil trades at $90.50 Trump confirms US striking Iran. Crude oil moves higher. Stocks move lower as reports of an American attack on Iran More Bessent: He emphasized the importance of sound formulation and communication of monetary policy US Treas. Sec Bessent: I think Japan is taking right steps",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-09-01T23:42:01.423Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "Oil: Private survey of inventory shows a headline crude oil draw greater than expected Nasdaq indices close sharply lower as Iran war heats up All aboard!. The Bond Bears take the 10 year yield above 4.75% and up to 4.80% Here we go again. Trump says \"Iran will be totally wiped out as a country\". Crude oil trades at $90.50 Trump confirms US striking Iran. Crude oil moves higher. Stocks move lower as reports of an American attack on Iran More Bessent: He emphasized the importance of sound formulation and communication of monetary policy US Treas. Sec Bessent: I think Japan is taking right steps",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 7,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "medium",
+    "trigger_score": 55,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
     "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
-    "what_happened": "Euro area inflation climbs above 3% in August on higher energy prices",
+    "what_happened": "investingLive Americas FX news wrap 1 Sept: It's a wrap but not for the Iran War.  Fighting resumes.",
     "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
@@ -17491,109 +18132,7 @@
       "\"industrial chemical\" wholesale UK"
     ],
     "web_discovery_done": true,
-    "web_discovery_at": "2026-09-01T09:12:30.326Z"
-  },
-  "3c4335af3fa7e572": {
-    "id": "3c4335af3fa7e572",
-    "headline": "Canadian Dollar edges higher ahead of BoC rate decision",
-    "source": "FXStreet",
-    "source_url": "https://www.fxstreet.com/news/canadian-dollar-edges-higher-ahead-of-boc-rate-decision-202607150614",
-    "detected_at": "2026-07-15T07:13:22.269Z",
-    "status": "context_only",
-    "event_type": "Currency move",
-    "event_breadth": "broad_currency",
-    "currency_pairs": [
-      "USD/CAD"
-    ],
-    "urgency_score": 2,
-    "commercial_relevance": 2,
-    "commercial_relevance_reason": "USD/CAD move has indirect implications for UK businesses trading with Canada or the US",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [
-      "UK timber importers",
-      "UK oil and gas companies with Canadian exposure"
-    ],
-    "why_now": "BoC rate decision may influence USD/CAD, and by extension, affect UK businesses with North American trade",
-    "confidence_level": "medium",
-    "confidence_reason": "Currency move is real but not directly impactful on most UK businesses, and the event is a precursor to a central bank decision",
-    "discovery_recommendation": "Context only — indirect UK B2B FX implications, not a strong reason to call today",
-    "what_happened": "Canadian Dollar edges higher ahead of BoC rate decision",
-    "what_changed_financially": "USD/CAD rate moved, potentially affecting UK businesses with CAD or USD exposure",
-    "who_pays_more": "UK importers with USD or CAD exposure, if any",
-    "who_receives_less": "UK exporters with USD or CAD revenue, if any",
-    "affected_payment_flow": "None directly, but potential indirect impact on UK-Canada or UK-US trade",
-    "fx_payment_logic": "UK businesses with Canadian or US trade may face FX exposure due to the USD/CAD move, but this is not a primary concern for most",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
-    "business_impact_summary": "UK businesses with North American trade may see minor implications from the USD/CAD move, but this is not a significant event for most",
-    "sales_angle": "If you trade with Canada or the US, keep an eye on the USD/CAD rate as it may influence your upcoming payments or receipts.",
-    "overall_sales_angle": "Monitor USD/CAD for potential indirect implications on UK-Canada or UK-US trade",
-    "summary": "USD/CAD moved ahead of the BoC rate decision. While not directly impactful, UK businesses with CAD or USD exposure may see some effect.",
-    "ai_provider": "groq",
-    "fallback_mode": false,
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "raw_summary": "The USD/CAD pair loses traction to near 1.4050 during the early European trading hours on Wednesday. Traders expect the US Federal Reserve (Fed) to skip the July rate hike as inflation cools, weighing on the US Dollar (USD) against the Canadian Dollar (CAD).",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
-    "exposure_types": [
-      "Indirect USD/CAD exposure via trade with Canada or the US"
-    ],
-    "ai_model": "llama-3.3-70b-versatile"
-  },
-  "3c450761480cd3a5": {
-    "id": "3c450761480cd3a5",
-    "headline": "investingLive Americas market news wrap: Oil climbs as Trump reimposes sanctions on Iran",
-    "source": "ForexLive",
-    "source_url": "https://investinglive.com/news/investinglive-americas-market-news-wrap-oil-climbs-as-trump-reimposes-sanctions-on-iran-20260707/",
-    "detected_at": "2026-07-07T22:52:47.384Z",
-    "status": "context_only",
-    "event_type": "Commodity price move",
-    "event_breadth": "commodity",
-    "currency_pairs": [],
-    "urgency_score": 2,
-    "commercial_relevance": 3,
-    "commercial_relevance_reason": "Oil price increase due to Iran sanctions may impact UK businesses importing oil or related products, but the direct FX hook is indirect",
-    "trigger_strength": "weak",
-    "trigger_score": 22,
-    "discovery_mode": "context_only",
-    "recommended_query_budget": 0,
-    "likely_affected_businesses": [
-      "UK oil importers",
-      "UK businesses with oil-related costs"
-    ],
-    "why_now": "The increase in oil price may lead to higher costs for UK businesses, but the urgency is low due to the indirect nature of the impact",
-    "confidence_level": "medium",
-    "confidence_reason": "The event (oil price increase) has a potential indirect impact on UK businesses through increased costs, but it's not a direct FX or payment-flow event",
-    "discovery_recommendation": "Context only — the event has an indirect impact on UK businesses, and the FX hook is not direct",
-    "what_happened": "Oil price increased due to US reimposing sanctions on Iran",
-    "what_changed_financially": "Oil price moved, potentially affecting costs for UK businesses importing oil or related products",
-    "who_pays_more": "UK businesses importing oil or related products",
-    "who_receives_less": "None directly",
-    "affected_payment_flow": "GBP revenue vs USD-priced oil imports",
-    "fx_payment_logic": "UK businesses importing oil or related products may face higher costs due to the increased oil price, but this is not a direct FX or payment-flow event",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Low",
-    "business_impact_summary": "UK businesses with oil-related costs may face higher expenses due to the increased oil price. However, the impact is indirect and not immediate.",
-    "sales_angle": "If you're importing oil or related products, the recent price increase may impact your costs.",
-    "overall_sales_angle": "The oil price increase may impact UK businesses with oil-related costs, but the direct FX hook is indirect",
-    "summary": "Oil price increased due to US sanctions on Iran, potentially affecting UK businesses with oil-related costs. However, the direct FX impact is indirect and not immediate.",
-    "ai_provider": "groq",
-    "fallback_mode": false,
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "raw_summary": "US Treasury revokes June 21 Iran oil sanctions waiver One-year inflation expectations hit the highest since 2023 in New York Fed survey Trump on Ukraine war: I think we're going to be settling Fed's Williams sees steady trend-like growth for the US economy US International Trade balance -$77.6B vs -$78.5B estimate Canada May trade balance $4.24 billion vs $2.85 billion expected Markets: WTI crude oil up $3.45 to $72.00 Gold down $49 to $4114 US 10-year yields up 7 bps to 4.55% S&amp;P 500 down 0.4% CHF leads, NZD lags Oil bulls finally caught a break today but it was slow-in-coming. The latest",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\boil price|\\bcrude oil|\\bwti|; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
-    "exposure_types": [
-      "Commodity price exposure"
-    ],
-    "ai_model": "llama-3.3-70b-versatile"
+    "web_discovery_at": "2026-09-01T23:42:09.569Z"
   },
   "3ce4069f5ba6d401": {
     "id": "3ce4069f5ba6d401",
@@ -29318,6 +29857,150 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-19T22:16:51.111Z"
+  },
+  "6195731d40d4c515": {
+    "id": "6195731d40d4c515",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/economic-and-event-calendar-in-asia-wednesday-september-2-2026-rbzn-rate-hike-expected/",
+    "headline": "Economic and event calendar in Asia Wednesday, September 2, 2026 - RBZN rate hike expected",
+    "raw_summary": "Australian GDP data is due, for the months of April, May and June.&nbsp; But, the focus today is on the RBNZ decision. A rate hike is expected, but that is not unanimous.&nbsp; Earlier: Preview: Westpac sees RBNZ hiking OCR to 2.75% tomorrow, data dependent from there Preview - Path of least resistance: ASB expects consensus RBNZ hike this week Reserve Bank of New Zealand Shadow Board split, most back 25bp rate hike this week Preview: Inflation and growth strength point to further RBNZ tightening, BNZ says 90% of economists expect RBNZ hike on September 2, poll shows As mentioned, Australia's ",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-09-01T23:42:01.554Z",
+    "event_type": "Rate decision",
+    "event_breadth": "broad_macro",
+    "summary": "Australian GDP data is due, for the months of April, May and June.&nbsp; But, the focus today is on the RBNZ decision. A rate hike is expected, but that is not unanimous.&nbsp; Earlier: Preview: Westpac sees RBNZ hiking OCR to 2.75% tomorrow, data dependent from there Preview - Path of least resistance: ASB expects consensus RBNZ hike this week Reserve Bank of New Zealand Shadow Board split, most back 25bp rate hike this week Preview: Inflation and growth strength point to further RBNZ tightening, BNZ says 90% of economists expect RBNZ hike on September 2, poll shows As mentioned, Australia's ",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "weak",
+    "trigger_score": 30,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers with upcoming supplier payments",
+      "UK exporters receiving overseas revenue"
+    ],
+    "why_now": "Recent rate decision may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "what_happened": "Economic and event calendar in Asia Wednesday, September 2, 2026 - RBZN rate hike expected",
+    "what_changed_financially": "Market rate decision with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
+    "fx_payment_logic": "Interest rate decisions shift currency values. UK businesses with overseas supplier payments or overseas customer revenue face changed FX costs/receipts.",
+    "business_impact_summary": "Rate decisions move exchange rates — importers face changed costs, exporters face changed GBP revenue.",
+    "sales_angle": "Recent rate decision may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent rate decision creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Rate decision exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor or wholesaler with regular EUR or USD supplier invoices due for payment",
+        "exposure_level": "High",
+        "exposure_type": "Interest-rate / currency-move exposure",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Rate decision moves GBP → pending supplier invoice now costs more/less GBP → margin impact on goods already ordered",
+        "margin_risk": "High for businesses with near-term invoices due",
+        "payment_timing_risk": "High — invoices due in 30-60 days are immediately exposed",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"food importer\" UK",
+          "\"wine importer\" UK",
+          "\"wholesale importer\" UK"
+        ],
+        "sales_angle": "Rate-driven currency moves mean upcoming overseas supplier invoices now cost more in GBP than when orders were placed.",
+        "exposure_thesis_template": "This company appears to import goods invoiced in EUR/USD — rate-driven currency moves affect the GBP cost of upcoming payments.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "food international",
+          "wines wholesale",
+          "seafood wholesale"
+        ],
+        "segment_name": "UK importers with upcoming supplier payments",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK business exporting goods/services, receiving payment in EUR or USD",
+        "exposure_level": "High",
+        "exposure_type": "Export revenue FX exposure",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Overseas customer pays EUR/USD → UK exporter converts to GBP → rate move changes GBP value of that receipt",
+        "margin_risk": "Medium — revenue in GBP terms changes without cost-structure change",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"uk exporter\" international customers",
+          "\"manufacturer\" UK export"
+        ],
+        "sales_angle": "Currency moves from rate decisions affect the GBP value of any outstanding overseas customer invoices.",
+        "exposure_thesis_template": "This company appears to export with revenue in EUR/USD — rate-driven moves affect how much GBP they receive.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "exports international",
+          "trading international",
+          "manufacturing exports"
+        ],
+        "segment_name": "UK exporters receiving overseas revenue",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "food international",
+      "wines wholesale",
+      "seafood wholesale",
+      "exports international",
+      "trading international",
+      "manufacturing exports"
+    ],
+    "all_search_queries": [
+      "\"food importer\" UK",
+      "\"wine importer\" UK",
+      "\"wholesale importer\" UK",
+      "\"uk exporter\" international customers",
+      "\"manufacturer\" UK export"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T23:42:24.474Z"
   },
   "61bd9c7e24ec09a3": {
     "id": "61bd9c7e24ec09a3",
@@ -50561,6 +51244,104 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "a8bd5f435e647399": {
+    "id": "a8bd5f435e647399",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/canada-pm-carney-we-never-thought-we-had-a-trade-deal-with-us-during-talks/",
+    "headline": "Canada PM Carney: We never thought we had a trade deal with US during talks",
+    "raw_summary": "Canada's Carney is standing his ground. Says: Asked about US officials insulting Canada, says \"It's beneath their office\" We can start having trade discussions with the US when Americans stop doing memes, stop throwing shade, stop trying to be tough and start being serious. US terms in trade talks meant Canadian industries either would become US subsidiaries or would be wound down. We never thought we had a full trade deal with US during the talks that Canada walked away from. Of course Pres. Trump in response to the trade deal breaking down, renamed Lake Ontario to Lake America. Treasury Secr",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-09-01T23:42:01.553Z",
+    "event_type": "Macro data",
+    "event_breadth": "broad_macro",
+    "summary": "Canada's Carney is standing his ground. Says: Asked about US officials insulting Canada, says \"It's beneath their office\" We can start having trade discussions with the US when Americans stop doing memes, stop throwing shade, stop trying to be tough and start being serious. US terms in trade talks meant Canadian industries either would become US subsidiaries or would be wound down. We never thought we had a full trade deal with US during the talks that Canada walked away from. Of course Pres. Trump in response to the trade deal breaking down, renamed Lake Ontario to Lake America. Treasury Secr",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "medium",
+    "trigger_score": 55,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK businesses with regular overseas payments"
+    ],
+    "why_now": "Recent macro data may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "what_happened": "Canada PM Carney: We never thought we had a trade deal with US during talks",
+    "what_changed_financially": "Market macro data with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
+    "fx_payment_logic": "Macro events can shift currency values and affect UK businesses with overseas payment obligations or overseas revenue.",
+    "business_impact_summary": "Macro data may move GBP — UK businesses with overseas supplier payments or overseas customer revenue could be affected.",
+    "sales_angle": "Recent macro data may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent macro data creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Macro data exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK importer or exporter with recurring FX payments or receipts",
+        "exposure_level": "High",
+        "exposure_type": "Currency exposure — GBP vs overseas currencies",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Macro data shifts GBP expectations → currency moves → GBP cost of overseas payments or GBP value of overseas receipts changes",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"importer\" UK",
+          "\"exporter\" UK international"
+        ],
+        "sales_angle": "Macro uncertainty affecting GBP is a good time to review FX exposure on upcoming international payments.",
+        "exposure_thesis_template": "This company appears to have overseas payment obligations or international revenue — macro-driven GBP moves affect those FX transactions.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "food international",
+          "import trading",
+          "international trading"
+        ],
+        "segment_name": "UK businesses with regular overseas payments",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "food international",
+      "import trading",
+      "international trading"
+    ],
+    "all_search_queries": [
+      "\"importer\" UK",
+      "\"exporter\" UK international"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T23:42:16.432Z"
+  },
   "a8cb84bf77fa3a00": {
     "id": "a8cb84bf77fa3a00",
     "headline": "Interest rates may need to rise this year, says Bank of England economist",
@@ -58316,6 +59097,147 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-18T22:14:08.690Z"
   },
+  "c26dc06a32654137": {
+    "id": "c26dc06a32654137",
+    "source": "BBC Business",
+    "source_url": "https://www.bbc.co.uk/news/articles/c980y8r98y2o?at_medium=RSS&at_campaign=rss",
+    "headline": "US borrowing costs hit fresh highs over inflation fears",
+    "raw_summary": "The effective interest rate on 10 years rose to 4.79%, its highest level since January 2025, as oil prices surged.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-09-01T23:42:01.554Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "The effective interest rate on 10 years rose to 4.79%, its highest level since January 2025, as oil prices surged.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "weak",
+    "trigger_score": 30,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "what_happened": "US borrowing costs hit fresh highs over inflation fears",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "segment_name": "UK petroleum and fuel importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "segment_name": "UK chemical and industrial-input importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T23:42:17.730Z"
+  },
   "c2a067811e314958": {
     "id": "c2a067811e314958",
     "headline": "British Pound: BoE hikes and politics cap Pound – BBH",
@@ -64180,6 +65102,147 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "dc00e53d40729ea1": {
+    "id": "dc00e53d40729ea1",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-european-news-wrap-risk-off-returns-as-oil-and-yields-extend-gains/",
+    "headline": "investingLive European news wrap: Risk-off returns as oil and yields extend gains",
+    "raw_summary": "S&amp;P 500 analysis (with video) shows bears are back but where is the next bounce? Bitcoin at crossroads after hawkish Warsh: traders waiting for 77K-80K range break Euro area inflation climbs above 3% in August on higher energy prices UK mortgage borrowing slows in July, though consumer borrowing continues to hold up Euro area factory growth continues to expand in August, driven by Germany - PMI data USD/JPY continues to test the waters at the 160 mark France manufacturing confirmed to pick up a little in August - PMI data Stock Movers to Watch Today: PCG and EIX Plunge as RBLX, CRWD, TSLA ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-09-01T23:42:01.554Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "S&amp;P 500 analysis (with video) shows bears are back but where is the next bounce? Bitcoin at crossroads after hawkish Warsh: traders waiting for 77K-80K range break Euro area inflation climbs above 3% in August on higher energy prices UK mortgage borrowing slows in July, though consumer borrowing continues to hold up Euro area factory growth continues to expand in August, driven by Germany - PMI data USD/JPY continues to test the waters at the 160 mark France manufacturing confirmed to pick up a little in August - PMI data Stock Movers to Watch Today: PCG and EIX Plunge as RBLX, CRWD, TSLA ",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n",
+    "trigger_strength": "medium",
+    "trigger_score": 55,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "what_happened": "investingLive European news wrap: Risk-off returns as oil and yields extend gains",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "segment_name": "UK petroleum and fuel importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "segment_name": "UK chemical and industrial-input importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-09-01T23:42:17.230Z"
+  },
   "dc68896ebe548c0c": {
     "id": "dc68896ebe548c0c",
     "headline": "Pakistani Army Chief Munir is carrying an offer to Iran to halt blockade and lift sanctions under MoU",
@@ -66690,16 +67753,13 @@
   },
   "e5b426a146612b75": {
     "id": "e5b426a146612b75",
+    "headline": "Euro area factory growth continues to expand in August, driven by Germany - PMI data",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/euro-area-factory-growth-continues-to-expand-in-august-driven-by-germany-pmi-data/",
-    "headline": "Euro area factory growth continues to expand in August, driven by Germany - PMI data",
-    "raw_summary": "Eurozone August final manufacturing PMI 52.7 vs 52.8 prelim Prior 51.9 The final estimate reaffirms a solid showing in euro area industrial activity in August, with both factory output and new orders rising&nbsp;at their quickest rates since early-2022. The added good news is that inflation pressures also continued to ease, although rates of increase in both input costs and output prices were still above those seen immediately prior to the US-Iran conflict. The biggest positive swing to the overall report comes from Germany,&nbsp;which recorded its best month of manufacturing sector growth in ",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-09-01T09:12:22.226Z",
+    "status": "ready",
     "event_type": "Rate decision",
     "event_breadth": "broad_macro",
-    "summary": "Eurozone August final manufacturing PMI 52.7 vs 52.8 prelim Prior 51.9 The final estimate reaffirms a solid showing in euro area industrial activity in August, with both factory output and new orders rising&nbsp;at their quickest rates since early-2022. The added good news is that inflation pressures also continued to ease, although rates of increase in both input costs and output prices were still above those seen immediately prior to the US-Iran conflict. The biggest positive swing to the overall report comes from Germany,&nbsp;which recorded its best month of manufacturing sector growth in ",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -66716,27 +67776,26 @@
       "UK exporters receiving overseas revenue"
     ],
     "why_now": "Recent rate decision may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — ai-error: Groq 404: {\"error\":{\"message\":\"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.\",\"type\":\"invalid_request_error\",\"code\":\"model_not_found\"}}\n. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "what_happened": "Euro area factory growth continues to expand in August, driven by Germany - PMI data",
     "what_changed_financially": "Market rate decision with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
     "fx_payment_logic": "Interest rate decisions shift currency values. UK businesses with overseas supplier payments or overseas customer revenue face changed FX costs/receipts.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "Rate decisions move exchange rates — importers face changed costs, exporters face changed GBP revenue.",
     "sales_angle": "Recent rate decision may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent rate decision creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Rate decision exposure"
-    ],
-    "status": "ready",
+    "summary": "Eurozone August final manufacturing PMI 52.7 vs 52.8 prelim Prior 51.9 The final estimate reaffirms a solid showing in euro area industrial activity in August, with both factory output and new orders rising&nbsp;at their quickest rates since early-2022. The added good news is that inflation pressures also continued to ease, although rates of increase in both input costs and output prices were still above those seen immediately prior to the US-Iran conflict. The biggest positive swing to the overall report comes from Germany,&nbsp;which recorded its best month of manufacturing sector growth in ",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK importers with upcoming supplier payments",
         "business_model": "UK distributor or wholesaler with regular EUR or USD supplier invoices due for payment",
         "exposure_level": "High",
         "exposure_type": "Interest-rate / currency-move exposure",
@@ -66744,38 +67803,42 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Rate decision moves GBP → pending supplier invoice now costs more/less GBP → margin impact on goods already ordered",
         "margin_risk": "High for businesses with near-term invoices due",
         "payment_timing_risk": "High — invoices due in 30-60 days are immediately exposed",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"food importer\" UK",
+          "\"wine importer\" UK",
+          "\"wholesale importer\" UK"
+        ],
+        "companies_house_terms": [
+          "food international",
+          "wines wholesale",
+          "seafood wholesale"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"food importer\" UK",
-          "\"wine importer\" UK",
-          "\"wholesale importer\" UK"
-        ],
-        "sales_angle": "Rate-driven currency moves mean upcoming overseas supplier invoices now cost more in GBP than when orders were placed.",
-        "exposure_thesis_template": "This company appears to import goods invoiced in EUR/USD — rate-driven currency moves affect the GBP cost of upcoming payments.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "food international",
-          "wines wholesale",
-          "seafood wholesale"
-        ],
-        "segment_name": "UK importers with upcoming supplier payments",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Rate-driven currency moves mean upcoming overseas supplier invoices now cost more in GBP than when orders were placed.",
+        "exposure_thesis_template": "This company appears to import goods invoiced in EUR/USD — rate-driven currency moves affect the GBP cost of upcoming payments."
       },
       {
+        "segment_name": "UK exporters receiving overseas revenue",
         "business_model": "UK business exporting goods/services, receiving payment in EUR or USD",
         "exposure_level": "High",
         "exposure_type": "Export revenue FX exposure",
@@ -66783,35 +67846,38 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Overseas customer pays EUR/USD → UK exporter converts to GBP → rate move changes GBP value of that receipt",
         "margin_risk": "Medium — revenue in GBP terms changes without cost-structure change",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"uk exporter\" international customers",
+          "\"manufacturer\" UK export"
+        ],
+        "companies_house_terms": [
+          "exports international",
+          "trading international",
+          "manufacturing exports"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"uk exporter\" international customers",
-          "\"manufacturer\" UK export"
-        ],
-        "sales_angle": "Currency moves from rate decisions affect the GBP value of any outstanding overseas customer invoices.",
-        "exposure_thesis_template": "This company appears to export with revenue in EUR/USD — rate-driven moves affect how much GBP they receive.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "exports international",
-          "trading international",
-          "manufacturing exports"
-        ],
-        "segment_name": "UK exporters receiving overseas revenue",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Currency moves from rate decisions affect the GBP value of any outstanding overseas customer invoices.",
+        "exposure_thesis_template": "This company appears to export with revenue in EUR/USD — rate-driven moves affect how much GBP they receive."
       }
     ],
     "companies_house_terms": [
@@ -66828,6 +67894,12 @@
       "\"wholesale importer\" UK",
       "\"uk exporter\" international customers",
       "\"manufacturer\" UK export"
+    ],
+    "raw_summary": "Eurozone August final manufacturing PMI 52.7 vs 52.8 prelim Prior 51.9 The final estimate reaffirms a solid showing in euro area industrial activity in August, with both factory output and new orders rising&nbsp;at their quickest rates since early-2022. The added good news is that inflation pressures also continued to ease, although rates of increase in both input costs and output prices were still above those seen immediately prior to the US-Iran conflict. The biggest positive swing to the overall report comes from Germany,&nbsp;which recorded its best month of manufacturing sector growth in ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "Rate decision exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-01T09:12:45.567Z"
