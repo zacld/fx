@@ -31,7 +31,7 @@ try:
 except ImportError:  # degrade gracefully — PDF reports just get skipped
     HAVE_PDFPLUMBER = False
 
-USER_AGENT = "Mozilla/5.0 (compatible; HayvinLeadSourcer/1.0; +https://hayvin.example/bot)"
+USER_AGENT = "Mozilla/5.0 (compatible; LeadSourcer/1.0; +https://github.com/zacld/fx)"
 
 # Two capitalised words (+ optional middle initial/hyphen), e.g. "Jane Doe",
 # "Jane A. Doe", "Anne-Marie O'Brien". Deliberately conservative — false

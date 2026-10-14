@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-main.py — Hayvin lead sourcer.
+main.py — B2B lead sourcer.
 
 Finds B2B leads (company, contact name, role/title, email) for Hayvin, a
 vape/battery recycling collection service pitching UK retailers.
@@ -59,7 +59,7 @@ CSV_FIELDS = [
     "phone",
 ]
 
-DEFAULT_OUTPUT = "hayvin_leads.csv"
+DEFAULT_OUTPUT = "leads.csv"
 DEFAULT_TIER1_CONFIG = "config/tier1_targets.yaml"
 DEFAULT_SIC_CONFIG = "config/sic_codes.yaml"
 
@@ -291,7 +291,7 @@ def run_tier23(config: dict, max_per_sic_override: Optional[int]) -> list[dict]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Find B2B leads (company, contact, role, email) for Hayvin.",
+        description="Find B2B leads (company, contact, role, email) for Hayvin, a vape/battery recycling collection service.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
@@ -320,7 +320,7 @@ def run_pipeline(
     if tier1_only and tier2_only:
         raise ValueError("tier1_only and tier2_only are mutually exclusive")
 
-    print("Hayvin Lead Sourcer")
+    print("Lead Sourcer")
     print(f"  Companies House key: {'set' if companies_house.get_api_key() else 'MISSING — Tier 2/3 will be skipped'}")
     print(f"  Hunter.io key:       {'set' if hunter.get_api_key() else 'not set — emails will be unverified guesses'}")
 

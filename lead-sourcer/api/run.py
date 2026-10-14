@@ -82,7 +82,7 @@ class handler(BaseHTTPRequestHandler):
         csv_bytes = _rows_to_csv_bytes(rows)
         self.send_response(200)
         self.send_header("Content-Type", "text/csv")
-        self.send_header("Content-Disposition", 'attachment; filename="hayvin_leads.csv"')
+        self.send_header("Content-Disposition", 'attachment; filename="leads.csv"')
         self.send_header("Content-Length", str(len(csv_bytes)))
         self.end_headers()
         self.wfile.write(csv_bytes)

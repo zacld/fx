@@ -1,4 +1,4 @@
-# Fly.io config for the hayvin_lead_sourcer HTTP wrapper (server.py).
+# Fly.io config for the lead-sourcer HTTP wrapper (server.py).
 # Deploy from this directory: flyctl deploy
 # This hosts the *trigger/status/CSV-download* API, not a scheduled job —
 # nothing here runs the pipeline automatically. POST /run to kick off a run,
@@ -10,7 +10,7 @@
 #   flyctl secrets set HUNTER_API_KEY=...
 #   flyctl secrets set TRIGGER_TOKEN=...   # recommended — guards POST /run
 
-app            = "hayvin-lead-sourcer"
+app            = "fx-lead-sourcer"
 primary_region = "lhr"
 
 [build]

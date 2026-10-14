@@ -38,8 +38,8 @@ from typing import Optional
 
 import main as pipeline
 
-OUTPUT_DIR = os.environ.get("HAYVIN_OUTPUT_DIR", "output")
-OUTPUT_PATH = os.path.join(OUTPUT_DIR, "hayvin_leads.csv")
+OUTPUT_DIR = os.environ.get("LEAD_SOURCER_OUTPUT_DIR", "output")
+OUTPUT_PATH = os.path.join(OUTPUT_DIR, "leads.csv")
 
 _lock = threading.Lock()
 _state: dict = {
@@ -75,7 +75,7 @@ def _run_in_background(tier1_only: bool, tier2_only: bool, max_per_sic: Optional
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "HayvinLeadSourcer/1.0"
+    server_version = "LeadSourcer/1.0"
 
     def _json(self, code: int, payload: dict) -> None:
         body = json.dumps(payload).encode()
@@ -106,7 +106,7 @@ class Handler(BaseHTTPRequestHandler):
                 body = f.read()
             self.send_response(200)
             self.send_header("Content-Type", "text/csv")
-            self.send_header("Content-Disposition", 'attachment; filename="hayvin_leads.csv"')
+            self.send_header("Content-Disposition", 'attachment; filename="leads.csv"')
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
@@ -160,7 +160,7 @@ class Handler(BaseHTTPRequestHandler):
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
     server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
-    print(f"hayvin_lead_sourcer server listening on :{port}")
+    print(f"lead-sourcer server listening on :{port}")
     print(f"  TRIGGER_TOKEN protection: {'ON' if os.environ.get('TRIGGER_TOKEN', '').strip() else 'OFF (POST /run is open)'}")
     server.serve_forever()
 

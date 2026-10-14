@@ -1,4 +1,4 @@
-# hayvin_lead_sourcer
+# lead-sourcer
 
 B2B lead sourcing for Hayvin (vape/battery recycling collection, pitching UK
 retailers). Finds **company, contact name, role/title, email** — never phone
@@ -54,7 +54,7 @@ crashing the run.
 ## Usage
 
 ```bash
-python3 main.py                                # both tiers -> hayvin_leads.csv
+python3 main.py                                # both tiers -> leads.csv
 python3 main.py --tier1-only
 python3 main.py --tier2-only --max-per-sic 50
 python3 main.py --output leads.csv
@@ -62,7 +62,7 @@ python3 main.py --output leads.csv
 
 ## Output
 
-A single CSV (`hayvin_leads.csv` by default), same shape/spirit as the
+A single CSV (`leads.csv` by default), same shape/spirit as the
 existing Cognism CSV pipeline so it can slot into the same downstream
 workflow:
 
@@ -108,7 +108,7 @@ is open to anyone who can reach the URL.
 
 Deploy:
 ```bash
-cd hayvin-lead-sourcer
+cd lead-sourcer
 flyctl launch --no-deploy
 flyctl secrets set COMPANIES_HOUSE_API_KEY=... HUNTER_API_KEY=... TRIGGER_TOKEN=...
 flyctl deploy
@@ -145,13 +145,13 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"tier1_only": true}' \
   https://your-project.vercel.app/api/run \
-  -o hayvin_leads.csv
+  -o leads.csv
 ```
 
 Deploy:
 ```bash
 npm install -g vercel
-cd hayvin-lead-sourcer
+cd lead-sourcer
 vercel login
 vercel link
 vercel env add COMPANIES_HOUSE_API_KEY

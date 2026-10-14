@@ -1,4 +1,4 @@
-# hayvin_lead_sourcer — small Python HTTP wrapper around main.py's pipeline.
+# lead-sourcer — small Python HTTP wrapper around main.py's pipeline.
 FROM python:3.12-slim
 WORKDIR /app
 
