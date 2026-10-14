@@ -23,6 +23,10 @@ export interface SearchStats {
   kept: number;
   skippedDomain: number;
   skippedTitle: number;
+  /** Short diagnostic for a "blocked" result — e.g. "HTTP 429" or "HTTP 401"
+   *  — so a caller can log *why* instead of just that it failed. Undefined
+   *  for "ok"/"empty" (nothing to explain). */
+  detail?: string;
 }
 
 function unwrapDdgHref(href: string): string | null {
@@ -113,7 +117,7 @@ export async function braveSearch(
   apiKey: string,
 ): Promise<{ results: SearchResult[]; stats: SearchStats }> {
   const empty: SearchStats = { status: "empty", raw: 0, kept: 0, skippedDomain: 0, skippedTitle: 0 };
-  if (!apiKey) return { results: [], stats: { ...empty, status: "blocked" } };
+  if (!apiKey) return { results: [], stats: { ...empty, status: "blocked", detail: "no API key" } };
   try {
     const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=${Math.min(20, Math.max(5, n))}&country=GB&search_lang=en&result_filter=web`;
     const res = await fetch(url, {
@@ -125,8 +129,13 @@ export async function braveSearch(
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) {
-      // 429 = rate limit, 401 = bad key
-      return { results: [], stats: { ...empty, status: res.status === 429 ? "blocked" : "empty" } };
+      // Any non-2xx is a hard failure (429 = quota/rate limit, 401/403 = bad
+      // key, 5xx = Brave-side issue) — all "blocked", never silently
+      // downgraded to "empty" (which means "searched fine, found nothing").
+      // Conflating the two previously made a dead key indistinguishable
+      // from a query that legitimately had no results.
+      const body = await res.text().catch(() => "");
+      return { results: [], stats: { ...empty, status: "blocked", detail: `HTTP ${res.status}${body ? `: ${body.slice(0, 120)}` : ""}` } };
     }
     const json = await res.json() as {
       web?: { results?: Array<{ url: string; title: string; description?: string }> };
@@ -147,7 +156,7 @@ export async function braveSearch(
     empty.kept = results.length;
     empty.status = results.length > 0 ? "ok" : raw.length > 0 ? "empty" : "empty";
     return { results, stats: empty };
-  } catch {
-    return { results: [], stats: { ...empty, status: "blocked" } };
+  } catch (e) {
+    return { results: [], stats: { ...empty, status: "blocked", detail: e instanceof Error ? e.message.slice(0, 120) : String(e) } };
   }
 }

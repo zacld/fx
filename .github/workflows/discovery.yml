@@ -12,6 +12,17 @@ name: FX Discovery
 #   COMPANIES_HOUSE_API_KEY   (CH validation in discover; optional — discovery still
 #                              works from website evidence without it)
 # Optional: GROQ_MODEL, GEMINI_API_KEY, GEMINI_MODEL (only if AI_PROVIDER=gemini).
+# If GROQ_MODEL (or the hardcoded default) gets retired by Groq — it happened
+# Oct 2026 to llama-3.3-70b-versatile — ai.ts now tries a short built-in
+# fallback list before giving up, so a stale model name degrades instead of
+# silently killing all real AI reasoning for the whole run. Update GROQ_MODEL
+# once you've picked a current one; see ai.ts's GROQ_MODEL_FALLBACKS comment.
+#
+# BRAVE_API_KEY (optional) has its own run-level circuit breaker + budget in
+# discover.ts — a hard failure (bad key, 429 quota, 5xx) disables Brave for
+# the rest of that run instead of re-failing it query after query, and
+# BRAVE_MAX_QUERIES_PER_RUN (default 60) caps how much of the free tier's
+# 2000/month one run can burn through on its own.
 
 on:
   schedule:
@@ -91,7 +102,12 @@ jobs:
           GOOGLE_SHEET_ID:              ${{ secrets.GOOGLE_SHEET_ID }}
           GOOGLE_SERVICE_ACCOUNT_KEY:   ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
           GOOGLE_SHEET_TAB:             ${{ vars.GOOGLE_SHEET_TAB }}
-          NODE_OPTIONS:                 "--max-old-space-size=4096"
+          # 6144 (was 4096) — ubuntu-latest runners have 7GB RAM; this was
+          # getting hit exactly at 4096 by enrich-decision-makers once the
+          # lead pool grew past ~1200 (see ENRICH_BATCH_SIZE in that stage
+          # for the real fix — batched + checkpointed persistence — this is
+          # just extra headroom on top of that).
+          NODE_OPTIONS:                 "--max-old-space-size=6144"
           # Industry preset — blank on scheduled runs (default FX behaviour).
           # Set via workflow_dispatch input for one-off industry-targeted runs.
           INDUSTRY_PRESET:              ${{ inputs.industry_preset || '' }}

@@ -10,7 +10,10 @@
  * for tests; with no API key it throws.
  *
  * Credentials live in env / .env (gitignored) or CI secrets — never in code:
- *   GROQ_API_KEY  (+ optional GROQ_MODEL, default llama-3.3-70b-versatile)
+ *   GROQ_API_KEY  (+ optional GROQ_MODEL, default llama-3.3-70b-versatile —
+ *                  if that (or whatever GROQ_MODEL names) 404s as
+ *                  model_not_found, falls through GROQ_MODEL_FALLBACKS below
+ *                  before giving up — see its comment for why)
  *   GEMINI_API_KEY (+ optional GEMINI_MODEL, default gemini-2.0-flash)
  *   AI_PROVIDER = groq | gemini   (default groq)
  */
@@ -396,40 +399,117 @@ export function extractJson<T = Record<string, unknown>>(text: string): T {
 
 export class RateLimitError extends Error {}
 
+/**
+ * Backup Groq models, tried in order, if the configured one 404s as
+ * model_not_found. Groq periodically retires models — that's exactly what
+ * happened to the old hardcoded default (llama-3.3-70b-versatile) in
+ * Oct 2026: with no fallback chain, every single run silently fell straight
+ * to the static-playbook fallback (the sticky-failure path below still
+ * caught it so nothing crashed, but Brain 1/2 stopped actually reasoning —
+ * see analyse.ts's sticky-fallback comment) until a human happened to
+ * notice. This list is deliberately short — it only exists to survive a
+ * retired model name, not to shop around for the "best" one.
+ *
+ * Only a model_not_found-shaped 404 advances to the next candidate. Any
+ * other failure (rate limit, other 4xx/5xx, timeout) still throws
+ * immediately on the first candidate tried, exactly as before — so Priority
+ * 1's "one AI call per event" holds on every path except the specific
+ * "your configured model no longer exists" case, and even then only until
+ * one candidate succeeds, at which point it's memoized (see
+ * resolvedGroqModel below) and every later event in the run goes back to
+ * exactly one call, straight to the model that's known to work.
+ */
+const GROQ_MODEL_FALLBACKS = [
+  "llama-3.1-8b-instant",
+  "meta-llama/llama-4-scout-17b-16e-instruct",
+  "openai/gpt-oss-120b",
+];
+
+function isModelNotFoundError(status: number, body: string): boolean {
+  return status === 404 && /model_not_found|does not exist/i.test(body);
+}
+
+// Memoised within the process (i.e. for the lifetime of one pipeline run) —
+// once a candidate model is confirmed working, every subsequent call in this
+// run skips straight to it instead of re-trying (and re-failing) the
+// configured one first. Resets naturally every run since each CI job is a
+// fresh process.
+let resolvedGroqModel: string | null = null;
+
+/** The Groq model that actually answered the last successful call this
+ *  process, if any — may differ from resolveProviderModel()'s "configured"
+ *  value when a fallback candidate had to be used. null before any call, or
+ *  if the configured provider isn't groq. */
+export function getResolvedGroqModel(): string | null {
+  return resolvedGroqModel;
+}
+
+export function _resetGroqModelMemoForTests(): void { resolvedGroqModel = null; }
+
 export type AiProvider = "groq" | "gemini";
 export interface AiOptions { provider?: AiProvider; apiKey?: string; model?: string; fetchImpl?: typeof fetch; timeoutMs?: number; }
 export type AnalyseFn = (headline: string, summary: string) => Promise<Record<string, unknown>>;
 
 const _isRateLimited = (status: number, body: string) => status === 429 || /quota|rate.?limit|resource_exhausted|too many requests/i.test(body);
 
-/** Groq — OpenAI-compatible chat/completions with JSON mode. Default provider. */
-export async function analyseViaGroq(headline: string, summary: string, opts: AiOptions = {}): Promise<Record<string, unknown>> {
-  // `||` (not `??`) so an empty-string env var (e.g. `GROQ_MODEL: ${{ secrets.GROQ_MODEL }}`
-  // when the secret is unset) falls back to the default instead of becoming model="".
-  const apiKey = opts.apiKey || process.env.GROQ_API_KEY || "";
-  const model = opts.model || process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-  if (!apiKey) throw new Error("no GROQ_API_KEY");
-  const fetchImpl = opts.fetchImpl ?? fetch;
+async function groqChatCompletion(
+  model: string, apiKey: string, headline: string, summary: string,
+  fetchImpl: typeof fetch, timeoutMs: number,
+): Promise<{ ok: true; text: string } | { ok: false; status: number; body: string }> {
   let res: Response;
   try {
     res = await fetchImpl("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({ model, temperature: 0.5, response_format: { type: "json_object" }, messages: [{ role: "user", content: formatPrompt(headline, summary) }] }),
-      signal: AbortSignal.timeout(opts.timeoutMs ?? 60_000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (e) {
     throw new Error(`Groq request failed: ${e instanceof Error ? e.message : String(e)}`);
   }
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    if (_isRateLimited(res.status, body)) throw new RateLimitError(`Groq ${res.status}: ${body.slice(0, 200)}`);
-    throw new Error(`Groq ${res.status}: ${body.slice(0, 200)}`);
-  }
+  if (!res.ok) return { ok: false, status: res.status, body: await res.text().catch(() => "") };
   const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const text = json.choices?.[0]?.message?.content ?? "";
-  if (!text) throw new Error("Groq returned no content");
-  return extractJson(text);
+  return { ok: true, text: json.choices?.[0]?.message?.content ?? "" };
+}
+
+/** Groq — OpenAI-compatible chat/completions with JSON mode. Default provider. */
+export async function analyseViaGroq(headline: string, summary: string, opts: AiOptions = {}): Promise<Record<string, unknown>> {
+  // `||` (not `??`) so an empty-string env var (e.g. `GROQ_MODEL: ${{ secrets.GROQ_MODEL }}`
+  // when the secret is unset) falls back to the default instead of becoming model="".
+  const apiKey = opts.apiKey || process.env.GROQ_API_KEY || "";
+  const configuredModel = opts.model || process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  if (!apiKey) throw new Error("no GROQ_API_KEY");
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const timeoutMs = opts.timeoutMs ?? 60_000;
+
+  // If a previous call this run already found a working model, go straight
+  // to it — only re-fan-out across candidates when we don't yet know one
+  // works, so the normal (healthy) path is still exactly one request.
+  const candidates = resolvedGroqModel
+    ? [resolvedGroqModel]
+    : [configuredModel, ...GROQ_MODEL_FALLBACKS.filter((m) => m !== configuredModel)];
+
+  const attempts: string[] = [];
+  for (const [i, model] of candidates.entries()) {
+    attempts.push(model);
+    const result = await groqChatCompletion(model, apiKey, headline, summary, fetchImpl, timeoutMs);
+    if (result.ok) {
+      if (!result.text) throw new Error("Groq returned no content");
+      resolvedGroqModel = model;
+      if (model !== configuredModel) {
+        console.warn(`analyseViaGroq: configured model "${configuredModel}" unavailable — using fallback "${model}". Update GROQ_MODEL once you've picked a current one.`);
+      }
+      return extractJson(result.text);
+    }
+    if (_isRateLimited(result.status, result.body)) throw new RateLimitError(`Groq ${result.status}: ${result.body.slice(0, 200)}`);
+    if (!isModelNotFoundError(result.status, result.body)) throw new Error(`Groq ${result.status}: ${result.body.slice(0, 200)}`);
+    // model_not_found — fall through to the next candidate, if any.
+    if (i === candidates.length - 1) {
+      throw new Error(`Groq: no working model found (tried ${attempts.join(", ")}) — last response ${result.status}: ${result.body.slice(0, 200)}`);
+    }
+  }
+  // Unreachable — candidates is always non-empty — but keeps TS satisfied.
+  throw new Error("Groq: no candidate models configured");
 }
 
 /** Gemini — generativelanguage.googleapis.com generateContent. Alternative provider. */
@@ -467,9 +547,12 @@ export async function analyseEvent(headline: string, summary: string, opts: AiOp
   return provider === "gemini" ? analyseViaGemini(headline, summary, opts) : analyseViaGroq(headline, summary, opts);
 }
 
-/** The model name actually used for a given provider, applying the same fallback
- *  rules as analyseViaGroq/Gemini. For logging/audit so we can see in CI exactly
- *  what was sent. */
+/** The *configured* model name for a given provider (same env/opts fallback
+ *  rules as analyseViaGroq/Gemini use to pick what to try first) — pure, no
+ *  network. For groq this is only what gets tried FIRST: if it 404s as
+ *  model_not_found, analyseViaGroq falls through GROQ_MODEL_FALLBACKS, and
+ *  the model that actually answered may differ — see getResolvedGroqModel()
+ *  for that. */
 export function resolveProviderModel(provider: AiProvider, opts: AiOptions = {}): string {
   if (provider === "gemini") return opts.model || process.env.GEMINI_MODEL || "gemini-2.0-flash";
   return opts.model || process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
