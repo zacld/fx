@@ -54,6 +54,16 @@ import { buildNoWebsiteHints, linkedinSearchForTown } from "../sources/no-websit
 // ── Config ────────────────────────────────────────────────────────────────────
 const MAX_OFFICERS = 8;
 const MAX_PAGES = 6;            // homepage + 5 team/about/contact pages
+// Leads are enriched in batches, persisting after each one, rather than in one
+// giant Promise.all over the whole candidate pool. Two reasons: (1) peak
+// memory stays bounded to one batch's worth of concurrently-held page HTML/
+// cheerio trees instead of the entire run's, which is what was blowing the
+// 4GB heap once the lead pool grew past ~1200; (2) a crash mid-run (OOM,
+// runner timeout, a bad page) now only loses the in-flight batch instead of
+// every lead this run touched — every prior batch already has dm_enriched_at
+// set and persisted, so the next run picks up where this one left off rather
+// than redoing the whole backlog from scratch.
+const ENRICH_BATCH_SIZE = 50;
 const TEAM_SLUGS = [
   "team", "our-team", "meet-the-team", "people", "our-people",
   "management", "leadership", "directors", "staff", "key-people",
@@ -66,7 +76,13 @@ export interface EnrichDmOptions {
   dbPath?: string; outPath?: string; runsDir?: string;
   pageCachePath?: string; chCachePath?: string; smtpCachePath?: string;
   concurrency?: number;
-  /** Hard cap on leads to enrich per run (default 1000). */
+  /**
+   * Hard cap on leads to enrich per run (default 300 — was 1000; see
+   * ENRICH_BATCH_SIZE above for why that was too high once checkpointed
+   * persistence wasn't yet in place). With checkpointing, the main risk of a
+   * high `max` is just run time, not lost work — raise it if the backlog
+   * needs to clear faster and CI job time allows.
+   */
   max?: number;
   force?: boolean;
   /** Disable SMTP verification entirely (default: env FX_SMTP_DISABLE / CI). */
@@ -484,7 +500,7 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
   const outPath = opts.outPath ?? resolve(root, "data/leads.json");
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const concurrency = opts.concurrency ?? 4;
-  const max = opts.max ?? 1000;
+  const max = opts.max ?? 300;
   const force = !!opts.force;
   const disableTech = !!opts.disableTech;
   const persist = opts.persist ?? true;
@@ -520,22 +536,8 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
     };
     const candidates = Object.values(leads).filter(needsEnrichment).slice(0, max);
 
-    const grades: Record<RouteGrade, number> = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
-    let multiDm = 0, verifiedAny = 0;
-    const limit = pLimit(concurrency);
-    await Promise.all(candidates.map((l) => limit(async () => {
-      try { await enrichLead(l, ch, fetcher, smtp, disableTech); }
-      catch (e) { rec.warn(`enrich-dm failed for ${l.id}: ${String(e)}`); }
-    })));
-
-    for (const l of Object.values(leads)) {
-      const g = (l.route_grade as RouteGrade | undefined) ?? "F";
-      grades[g] = (grades[g] ?? 0) + 1;
-      if ((l.decision_makers?.length ?? 0) > 1) multiDm++;
-      if (l.decision_makers?.some((d) => d.email_verified && d.email)) verifiedAny++;
-    }
-
-    if (persist) {
+    const persistAll = (): void => {
+      if (!persist) return;
       const upd = sqlite.prepare(`UPDATE leads SET data=@data WHERE id=@id`);
       const tx = sqlite.transaction(() => { for (const l of Object.values(leads)) upd.run({ id: l.id, data: JSON.stringify(l) }); });
       tx();
@@ -544,7 +546,30 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
       smtp.flush();
       mkdirSync(dirname(outPath), { recursive: true });
       writeFileSync(outPath, JSON.stringify(leads, null, 2));
+    };
+
+    const limit = pLimit(concurrency);
+    for (let i = 0; i < candidates.length; i += ENRICH_BATCH_SIZE) {
+      const batch = candidates.slice(i, i + ENRICH_BATCH_SIZE);
+      await Promise.all(batch.map((l) => limit(async () => {
+        try { await enrichLead(l, ch, fetcher, smtp, disableTech); }
+        catch (e) { rec.warn(`enrich-dm failed for ${l.id}: ${String(e)}`); }
+      })));
+      // Checkpoint after every batch — see ENRICH_BATCH_SIZE's comment above
+      // for why this (not just the final write) is the point of batching.
+      persistAll();
+      console.log(`enrich-dm: checkpointed ${Math.min(i + ENRICH_BATCH_SIZE, candidates.length)}/${candidates.length}`);
     }
+
+    const grades: Record<RouteGrade, number> = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
+    let multiDm = 0, verifiedAny = 0;
+    for (const l of Object.values(leads)) {
+      const g = (l.route_grade as RouteGrade | undefined) ?? "F";
+      grades[g] = (grades[g] ?? 0) + 1;
+      if ((l.decision_makers?.length ?? 0) > 1) multiDm++;
+      if (l.decision_makers?.some((d) => d.email_verified && d.email)) verifiedAny++;
+    }
+
     rec.section("contact_coverage", {
       total_leads: Object.keys(leads).length, to_process: candidates.length,
       multi_dm_leads: multiDm, verified_any: verifiedAny,

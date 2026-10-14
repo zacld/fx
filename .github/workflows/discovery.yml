@@ -91,7 +91,12 @@ jobs:
           GOOGLE_SHEET_ID:              ${{ secrets.GOOGLE_SHEET_ID }}
           GOOGLE_SERVICE_ACCOUNT_KEY:   ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
           GOOGLE_SHEET_TAB:             ${{ vars.GOOGLE_SHEET_TAB }}
-          NODE_OPTIONS:                 "--max-old-space-size=4096"
+          # 6144 (was 4096) — ubuntu-latest runners have 7GB RAM; this was
+          # getting hit exactly at 4096 by enrich-decision-makers once the
+          # lead pool grew past ~1200 (see ENRICH_BATCH_SIZE in that stage
+          # for the real fix — batched + checkpointed persistence — this is
+          # just extra headroom on top of that).
+          NODE_OPTIONS:                 "--max-old-space-size=6144"
           # Industry preset — blank on scheduled runs (default FX behaviour).
           # Set via workflow_dispatch input for one-off industry-targeted runs.
           INDUSTRY_PRESET:              ${{ inputs.industry_preset || '' }}
