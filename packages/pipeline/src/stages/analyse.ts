@@ -17,7 +17,7 @@ import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 import { fetchHtml as defaultFetchHtml, type HtmlFetcher } from "../sources/fetch.js";
 import { RSS_FEEDS, type RssFeed, parseFeed, scoreCommercialRelevance, ENTRY_KEYWORDS, dedupeId } from "../sources/rss.js";
-import { analyseEvent, RateLimitError, resolveProviderModel, type AiProvider, type AnalyseFn } from "../sources/ai.js";
+import { analyseEvent, RateLimitError, resolveProviderModel, getResolvedGroqModel, type AiProvider, type AnalyseFn } from "../sources/ai.js";
 
 const nowIso = () => new Date().toISOString();
 
@@ -364,6 +364,11 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
     const provider: AiProvider = (process.env.AI_PROVIDER as AiProvider) || "groq";
     const model = resolveProviderModel(provider);
     if (newItems.length) console.log(`analyse: AI provider=${provider} model=${model} new_items=${newItems.length}`);
+    // If a call actually succeeds via one of ai.ts's Groq fallback candidates
+    // (the configured model having 404'd as model_not_found), record which
+    // model really answered rather than the one that failed — see
+    // getResolvedGroqModel()'s doc comment.
+    const effectiveModel = () => (provider === "groq" ? (getResolvedGroqModel() ?? model) : model);
 
     let stickyFallback = false;          // once tripped, all remaining events use fallback (saves repeat-calls on deterministic errors)
     let stickyReason = "";               // reason persisted into the fallback's confidence_reason
@@ -388,7 +393,7 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
             urgency_score: urgency, commercial_relevance: rel,
             commercial_relevance_reason: String(a.commercial_relevance_reason ?? ""),
             confidence_level: String(a.confidence_level ?? "low"), confidence_reason: String(a.confidence_reason ?? ""),
-            ai_provider: provider, ai_model: model,
+            ai_provider: provider, ai_model: effectiveModel(),
           });
           continue;
         }
@@ -414,7 +419,7 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
           sales_angle: a.sales_angle ?? "", business_impact_summary: a.business_impact_summary ?? "",
           exposure_types: a.exposure_types ?? [], overall_sales_angle: a.overall_sales_angle ?? "",
           target_segments: segments, companies_house_terms: chTerms, all_search_queries: queries,
-          status: decision.status, ai_provider: provider, ai_model: model,
+          status: decision.status, ai_provider: provider, ai_model: effectiveModel(),
         });
         st.aiOk++; st.saved++;
       } catch (e) {
