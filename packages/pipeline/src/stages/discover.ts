@@ -58,7 +58,7 @@ export interface DiscoverOptions {
 
 export interface DiscoverResult {
   events: number; queriesRun: number;
-  braveOk: number; ddgOk: number; ddgEmpty: number; bingOk: number; bingEmpty: number; chFallbackUsed: number;
+  braveOk: number; braveBlocked: number; braveSkippedBudget: number; ddgOk: number; ddgEmpty: number; bingOk: number; bingEmpty: number; chFallbackUsed: number;
   sourcePagesMined: number; sourcePageLinks: number;
   candidates: number; rejectedIncoherent: number; rejectedValidation: number; rejectedNoSignals: number; rejectedNegatives: number; rejectedDuplicate: number;
   leadsAdded: number; byPriority: Record<string, number>; runId: string;
@@ -141,13 +141,31 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
   const { db, sqlite, close } = getDb(dbPath);
   const rec = new RunRecorder("discover", { dbPath, maxEvents, maxSegments, sourcePageMining });
   const st: DiscoverResult = {
-    events: 0, queriesRun: 0, braveOk: 0, ddgOk: 0, ddgEmpty: 0, bingOk: 0, bingEmpty: 0, chFallbackUsed: 0,
+    events: 0, queriesRun: 0, braveOk: 0, braveBlocked: 0, braveSkippedBudget: 0, ddgOk: 0, ddgEmpty: 0, bingOk: 0, bingEmpty: 0, chFallbackUsed: 0,
     sourcePagesMined: 0, sourcePageLinks: 0, candidates: 0, rejectedIncoherent: 0, rejectedValidation: 0,
     rejectedNoSignals: 0, rejectedNegatives: 0, rejectedDuplicate: 0, leadsAdded: 0,
     byPriority: { HOT: 0, WARM: 0, QUEUE: 0, SKIP: 0 }, runId: rec.run.run_id,
   };
 
   if (!enabled) { console.warn("Web discovery disabled (WEB_DISCOVERY_ENABLED=false) — skipping."); if (persist) rec.finish(sqlite, runsDir); close(); return st; }
+
+  // ── Brave Search run-level circuit breaker + budget ─────────────────────
+  // Brave's free tier is 2000 requests/month — with no cap, one event-heavy
+  // run can burn a big share of a month's quota in minutes, and once it's
+  // gone every later run silently gets zero Brave results (indistinguishable
+  // in the summary line from "Brave just isn't finding anything" without
+  // digging into per-query logs). Two mitigations:
+  //   1. A sticky circuit breaker — the first "blocked" response (bad key,
+  //      429 quota, 5xx) this run disables Brave for every remaining query
+  //      in the run instead of re-attempting (and re-failing) it query after
+  //      query, and logs once with the actual reason.
+  //   2. A per-run budget (BRAVE_MAX_QUERIES_PER_RUN, default 60) so a single
+  //      run can't exhaust the whole month's quota on its own, leaving some
+  //      budget for the rest of the month's runs.
+  const braveKey = process.env.BRAVE_API_KEY ?? "";
+  const braveMaxPerRun = Number(process.env.BRAVE_MAX_QUERIES_PER_RUN ?? 60) || 60;
+  let braveQueriesThisRun = 0;
+  let braveBlockedDetail: string | null = null;
 
   const upsertLead = sqlite.prepare(`INSERT OR REPLACE INTO leads
     (id, event_id, company_number, company_name, company_status, website, website_domain, website_source, website_confidence,
@@ -274,12 +292,28 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
           // blocklist correctly rejects. CH keyword is the guaranteed last resort.
           let results: Array<{ url: string; title: string }> = [];
           let path: "brave" | "ddg" | "bing" | "ch_keyword" = "ch_keyword";
-          const braveKey = process.env.BRAVE_API_KEY ?? "";
 
-          // 1. Brave (if key set)
+          // 1. Brave (if key set, circuit closed, and under this run's budget)
           if (braveKey && !results.length) {
-            const brave = await braveSearch(q, effMaxResults, braveKey);
-            if (brave.results.length) { results = brave.results; path = "brave"; st.braveOk++; }
+            if (braveBlockedDetail || braveQueriesThisRun >= braveMaxPerRun) {
+              st.braveSkippedBudget++;
+            } else {
+              braveQueriesThisRun++;
+              const brave = await braveSearch(q, effMaxResults, braveKey);
+              if (brave.results.length) {
+                results = brave.results; path = "brave"; st.braveOk++;
+              } else if (brave.stats.status === "blocked") {
+                // Hard failure (bad key, 429 quota, 5xx) — not "this query had
+                // no results". Trip the circuit so the rest of this run's
+                // queries skip straight past Brave instead of re-failing it
+                // one query at a time, and log once with the real reason.
+                st.braveBlocked++;
+                braveBlockedDetail = brave.stats.detail ?? "blocked";
+                console.warn(`discover: Brave Search failed (${braveBlockedDetail}) — disabling Brave for the rest of this run, falling back to DDG/Bing/Companies House.`);
+              }
+              // else status "empty" — a real search that found nothing for
+              // this specific query; not a failure, nothing to do here.
+            }
           }
           // 2. DDG (always try — works locally; usually blocked in CI)
           if (!results.length) {
@@ -394,7 +428,7 @@ function parseArgs(argv: string[]): DiscoverOptions {
 const isMain = (() => { try { return !!process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url); } catch { return false; } })();
 if (isMain) {
   runDiscoverStage(parseArgs(process.argv.slice(2))).then((r) => {
-    console.log(`discover: ${r.events} events | ${r.queriesRun} queries (brave ok ${r.braveOk}, ddg ok ${r.ddgOk}, bing ok ${r.bingOk}, ch-fallback ${r.chFallbackUsed}) | source pages mined ${r.sourcePagesMined} (+${r.sourcePageLinks} links) | candidates ${r.candidates} | leads added ${r.leadsAdded} ${JSON.stringify(r.byPriority)}`);
+    console.log(`discover: ${r.events} events | ${r.queriesRun} queries (brave ok ${r.braveOk}, blocked ${r.braveBlocked}, budget-skipped ${r.braveSkippedBudget} | ddg ok ${r.ddgOk}, bing ok ${r.bingOk}, ch-fallback ${r.chFallbackUsed}) | source pages mined ${r.sourcePagesMined} (+${r.sourcePageLinks} links) | candidates ${r.candidates} | leads added ${r.leadsAdded} ${JSON.stringify(r.byPriority)}`);
     console.log(`  rejected — incoherent ${r.rejectedIncoherent}, validation ${r.rejectedValidation}, no-signals ${r.rejectedNoSignals}, negatives ${r.rejectedNegatives}, duplicate ${r.rejectedDuplicate}`);
     console.log(`  run_id ${r.runId}`);
   }).catch((e) => { console.error("discover failed:", e); process.exitCode = 1; });

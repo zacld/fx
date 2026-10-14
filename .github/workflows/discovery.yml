@@ -12,6 +12,17 @@ name: FX Discovery
 #   COMPANIES_HOUSE_API_KEY   (CH validation in discover; optional — discovery still
 #                              works from website evidence without it)
 # Optional: GROQ_MODEL, GEMINI_API_KEY, GEMINI_MODEL (only if AI_PROVIDER=gemini).
+# If GROQ_MODEL (or the hardcoded default) gets retired by Groq — it happened
+# Oct 2026 to llama-3.3-70b-versatile — ai.ts now tries a short built-in
+# fallback list before giving up, so a stale model name degrades instead of
+# silently killing all real AI reasoning for the whole run. Update GROQ_MODEL
+# once you've picked a current one; see ai.ts's GROQ_MODEL_FALLBACKS comment.
+#
+# BRAVE_API_KEY (optional) has its own run-level circuit breaker + budget in
+# discover.ts — a hard failure (bad key, 429 quota, 5xx) disables Brave for
+# the rest of that run instead of re-failing it query after query, and
+# BRAVE_MAX_QUERIES_PER_RUN (default 60) caps how much of the free tier's
+# 2000/month one run can burn through on its own.
 
 on:
   schedule:

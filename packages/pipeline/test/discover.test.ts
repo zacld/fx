@@ -115,3 +115,98 @@ describe("discover stage (orchestrator, mocked fetch, CH disabled)", () => {
     expect(r2.leadsAdded).toBe(0);
   });
 });
+
+describe("discover stage — Brave circuit breaker", () => {
+  function seedTwoQueryEvent(dir: string): { dbPath: string } {
+    const dbPath = join(dir, "fx.db");
+    const { sqlite, close } = getDb(dbPath);
+    const eventData = {
+      id: "evt1", headline: "GBP/EUR slides after dovish BoE", status: "ready", event_type: "Currency move",
+      event_breadth: "broad_currency", urgency_score: 8, commercial_relevance: 8,
+      business_impact_summary: "UK wine importers face higher GBP cost on EUR supplier invoices.",
+      target_segments: [{
+        segment_name: "European wine and spirits importers", business_model: "UK importer buying from European producers.",
+        exposure_level: "Very High", exposure_type: "Import cost exposure",
+        likely_currency_pairs: ["GBP/EUR"],
+        why_affected: "GBP weakening increases the GBP cost of EUR supplier invoices.",
+        why_financially_exposed: "Recurring EUR payments, GBP-only revenue.",
+        website_validation_signals: ["imported from", "direct from the producer"],
+        exposure_thesis_template: "Imports wine from Europe; GBP/EUR move raises stock payment costs.",
+        micro_categories: [{
+          name: "European wine importers", why: "core",
+          search_queries: ['"wine importer" UK wholesale', '"wine distributor" UK wholesale'],
+          companies_house_terms: ["wine merchant"],
+        }],
+      }],
+    };
+    sqlite.prepare(`INSERT INTO events (id, headline, status, event_type, event_breadth, urgency_score, commercial_relevance, data)
+                    VALUES (?,?,?,?,?,?,?,?)`).run(
+      "evt1", eventData.headline, "ready", "Currency move", "broad_currency", 8, 8, JSON.stringify(eventData),
+    );
+    close();
+    return { dbPath };
+  }
+
+  it("a hard Brave failure (401) on the first query trips the circuit — the second query skips Brave entirely and still succeeds via DDG", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fxdiscover-brave-"));
+    const { dbPath } = seedTwoQueryEvent(dir);
+    const ch = new ChClient({ apiKey: "", cachePath: join(dir, "ch.json") });
+
+    const origEnv = process.env.BRAVE_API_KEY;
+    const origFetch = globalThis.fetch;
+    process.env.BRAVE_API_KEY = "bad-key";
+    let braveCalls = 0;
+    globalThis.fetch = (async (url: string) => {
+      if (String(url).startsWith("https://api.search.brave.com/")) { braveCalls++; return new Response("unauthorized", { status: 401 }); }
+      throw new Error(`unexpected global fetch to ${url}`);
+    }) as typeof fetch;
+
+    try {
+      const r = await runDiscoverStage({
+        dbPath, runsDir: join(dir, "runs"), fetchHtml, chClient: ch,
+        concurrency: 1, sourcePageMining: false, maxEvents: 5, maxResultsPerQuery: 5,
+      });
+      expect(r.queriesRun).toBe(2);
+      expect(braveCalls).toBe(1);          // tripped after the first — never retried on the second query
+      expect(r.braveOk).toBe(0);
+      expect(r.braveBlocked).toBe(1);
+      expect(r.ddgOk).toBe(2);             // both queries still resolved, via DDG
+    } finally {
+      globalThis.fetch = origFetch;
+      if (origEnv === undefined) delete process.env.BRAVE_API_KEY; else process.env.BRAVE_API_KEY = origEnv;
+    }
+  });
+
+  it("BRAVE_MAX_QUERIES_PER_RUN caps Brave usage even when every call succeeds", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fxdiscover-brave-budget-"));
+    const { dbPath } = seedTwoQueryEvent(dir);
+    const ch = new ChClient({ apiKey: "", cachePath: join(dir, "ch.json") });
+
+    const origEnv = process.env.BRAVE_API_KEY;
+    const origBudget = process.env.BRAVE_MAX_QUERIES_PER_RUN;
+    const origFetch = globalThis.fetch;
+    process.env.BRAVE_API_KEY = "good-key";
+    process.env.BRAVE_MAX_QUERIES_PER_RUN = "1";
+    let braveCalls = 0;
+    globalThis.fetch = (async () => {
+      braveCalls++;
+      return new Response(JSON.stringify({ web: { results: [{ url: "https://acmewine.co.uk/", title: "Acme Wine Importers Ltd", description: "import wine direct from Italy" }] } }), { status: 200 });
+    }) as typeof fetch;
+
+    try {
+      const r = await runDiscoverStage({
+        dbPath, runsDir: join(dir, "runs"), fetchHtml, chClient: ch,
+        concurrency: 1, sourcePageMining: false, maxEvents: 5, maxResultsPerQuery: 5,
+      });
+      expect(r.queriesRun).toBe(2);
+      expect(braveCalls).toBe(1);           // budget of 1 — second query never calls Brave
+      expect(r.braveOk).toBe(1);
+      expect(r.braveSkippedBudget).toBe(1);
+      expect(r.ddgOk).toBe(1);              // the budget-skipped query still resolved via DDG
+    } finally {
+      globalThis.fetch = origFetch;
+      if (origEnv === undefined) delete process.env.BRAVE_API_KEY; else process.env.BRAVE_API_KEY = origEnv;
+      if (origBudget === undefined) delete process.env.BRAVE_MAX_QUERIES_PER_RUN; else process.env.BRAVE_MAX_QUERIES_PER_RUN = origBudget;
+    }
+  });
+});

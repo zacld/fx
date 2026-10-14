@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   shouldSkipUrl, shouldSkipTitle, domainCoherentWithName, domainFromUrl, nameTokens,
 } from "../src/sources/blocklists.js";
-import { parseDdgResults, parseBingResults } from "../src/sources/search.js";
+import { parseDdgResults, parseBingResults, braveSearch } from "../src/sources/search.js";
 import { isSourcePage, mineSourcePage } from "../src/sources/source-page-miner.js";
 import { validateWebsite } from "../src/sources/website.js";
 
@@ -66,6 +66,71 @@ describe("search result parsing", () => {
     </ol></body></html>`;
     const { results } = parseBingResults(html, 10);
     expect(results.map((r) => r.url)).toEqual(["https://bravofoods.co.uk/"]);
+  });
+});
+
+describe("braveSearch", () => {
+  const withFetch = async (impl: typeof fetch, run: () => Promise<void>) => {
+    const orig = globalThis.fetch;
+    globalThis.fetch = impl;
+    try { await run(); } finally { globalThis.fetch = orig; }
+  };
+
+  it("no API key → blocked, no request made", async () => {
+    let called = false;
+    await withFetch((async () => { called = true; return new Response(); }) as typeof fetch, async () => {
+      const { results, stats } = await braveSearch("q", 10, "");
+      expect(results).toEqual([]);
+      expect(stats.status).toBe("blocked");
+      expect(stats.detail).toBe("no API key");
+      expect(called).toBe(false);
+    });
+  });
+
+  it("200 with real results → ok, kept + blocklist filtering applied", async () => {
+    await withFetch((async () => new Response(JSON.stringify({
+      web: { results: [
+        { url: "https://acmewine.co.uk/", title: "Acme Wine Importers Ltd", description: "We import wine direct from Italy." },
+        { url: "https://www.linkedin.com/company/x", title: "Acme on LinkedIn" },
+      ] },
+    }), { status: 200 })) as typeof fetch, async () => {
+      const { results, stats } = await braveSearch("wine importer UK", 10, "key123");
+      expect(results.map((r) => r.url)).toEqual(["https://acmewine.co.uk/"]);
+      expect(stats.status).toBe("ok");
+      expect(stats.skippedDomain).toBe(1);
+    });
+  });
+
+  it("200 with zero results → empty (a real search that found nothing, not a failure)", async () => {
+    await withFetch((async () => new Response(JSON.stringify({ web: { results: [] } }), { status: 200 })) as typeof fetch, async () => {
+      const { stats } = await braveSearch("q", 10, "key123");
+      expect(stats.status).toBe("empty");
+      expect(stats.detail).toBeUndefined();
+    });
+  });
+
+  it("401 (bad/revoked key) → blocked with detail, NOT empty — a caller must be able to tell this apart from a query that just found nothing", async () => {
+    await withFetch((async () => new Response("unauthorized", { status: 401 })) as typeof fetch, async () => {
+      const { stats } = await braveSearch("q", 10, "bad-key");
+      expect(stats.status).toBe("blocked");
+      expect(stats.detail).toContain("401");
+    });
+  });
+
+  it("429 (quota/rate limit) → blocked with detail", async () => {
+    await withFetch((async () => new Response("rate limited", { status: 429 })) as typeof fetch, async () => {
+      const { stats } = await braveSearch("q", 10, "key123");
+      expect(stats.status).toBe("blocked");
+      expect(stats.detail).toContain("429");
+    });
+  });
+
+  it("network error → blocked with the error message as detail", async () => {
+    await withFetch((async () => { throw new Error("getaddrinfo ENOTFOUND"); }) as unknown as typeof fetch, async () => {
+      const { stats } = await braveSearch("q", 10, "key123");
+      expect(stats.status).toBe("blocked");
+      expect(stats.detail).toContain("ENOTFOUND");
+    });
   });
 });
 
