@@ -2410,6 +2410,60 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-08T23:47:08.328Z"
   },
+  "04b4357d6a188302": {
+    "id": "04b4357d6a188302",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/new-zealand-manufacturing-pmi-jumps-to-56-5-15th-straight-month-of-expansion/",
+    "headline": "New Zealand manufacturing PMI jumps to 56.5, 15th straight month of expansion",
+    "raw_summary": "The stronger reading is mildly supportive for the New Zealand dollar, adding to evidence that the goods side of the economy is gathering pace into year-end. Firm new orders and production point to near-term resilience, while the return to growth in employment is the detail policymakers are likely to watch most closely. Fuel prices remain the main cost pressure cited by firms, so any further rise in oil prices would squeeze margins and could dent sentiment that is already more negative than the headline suggests. Election uncertainty adds a domestic risk premium to investment decisions. Newswir",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-10-15T23:59:43.232Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "The NZ manufacturing PMI jumped, giving the NZD a slight lift. UK businesses that pay NZD‑priced suppliers may see a small increase in GBP cost on upcoming invoices, but the effect is modest and not urgent.",
+    "currency_pairs": [
+      "NZD/GBP",
+      "NZD/USD"
+    ],
+    "urgency_score": 3,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Modest NZD strength affects a niche set of UK importers of NZ‑origin goods",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK dairy ingredient importers",
+      "UK meat processors importing NZ beef/lamb",
+      "UK wine importers of New Zealand varieties",
+      "UK specialty food distributors sourcing NZ products"
+    ],
+    "why_now": "Upcoming NZD‑denominated supplier invoices will now cost more GBP than when the orders were placed",
+    "discovery_recommendation": "Context only — the NZD move is modest and the UK exposure is limited, so no active lead generation",
+    "confidence_level": "medium",
+    "confidence_reason": "PMI move is real but impact on NZD is mild and indirect for UK firms",
+    "what_happened": "New Zealand manufacturing PMI rose to 56.5, its 15th consecutive month of expansion, giving modest support to the NZD",
+    "what_changed_financially": "The NZD edged higher against the GBP and USD following the stronger PMI reading",
+    "who_pays_more": "UK companies that import NZ‑priced dairy, meat, wine or other specialty products and settle invoices in NZD",
+    "who_receives_less": "None directly; UK exporters receiving NZD would actually benefit slightly",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP → NZD supplier payments for imported NZ goods",
+    "fx_payment_logic": "UK importers receive an invoice in NZD from a New Zealand supplier, convert GBP to NZD to pay, and because the NZD has strengthened, they need more GBP per NZD, slightly raising their cost.",
+    "sales_angle": "If you have NZD‑priced supplier invoices due soon, the recent NZD strength means a higher GBP cost than when you placed the order.",
+    "business_impact_summary": "UK importers of New Zealand dairy, meat, wine or specialty foods face a modest increase in the GBP amount needed to settle NZD invoices, but the impact is limited and not time‑critical.",
+    "exposure_types": [
+      "NZD supplier payment exposure"
+    ],
+    "overall_sales_angle": "The NZD has edged stronger after the PMI rise, so any NZD‑denominated invoices you’re about to pay will now cost a bit more in GBP.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "04c8b4ccd164178e": {
     "id": "04c8b4ccd164178e",
     "headline": "Canada Tariffs Deepen North America’s Steel and Aluminum Squeeze",
@@ -51846,6 +51900,57 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-09T07:10:07.291Z"
   },
+  "63eba350458d652f": {
+    "id": "63eba350458d652f",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-retails-sales-for-september-0-8-mom-vs-1-1-last-month-0/",
+    "headline": "US retails sales for September 0.8% MoM vs 0.3% estimate. Prior month 1.3%",
+    "raw_summary": "Prior 1.3% Details Retail sales MoM: +0.8% vs +0.3% expected. Prior revised to +1.2% from +1.1%. Retail sales excluding autos MoM: +0.9% vs +0.5% expected. Prior revised to +1.4% from +1.3%. Retail sales excluding gasoline and autos MoM: +0.2%. Prior revised to +1.2% from +1.1%. Retail control group MoM: +0.1% vs +0.3% expected. Prior revised to +1.4% from +1.2%. US retail sales were stronger than expected in September, rising 0.8% compared with the 0.3% estimate. Sales excluding autos also comfortably beat expectations, while upward revisions added to the strength of the prior month. However,",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-10-15T23:59:21.794Z",
+    "event_type": "Economic data",
+    "event_breadth": "broad_macro",
+    "summary": "US retail sales beat expectations, indicating stronger US consumer demand and potential upward pressure on the dollar. UK businesses that pay or receive USD may see a modest shift in costs or revenues, but the effect is indirect and low urgency. Use this as background when discussing FX strategy.",
+    "currency_pairs": [],
+    "urgency_score": 4,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Macro US data may nudge USD higher, modest impact on UK firms with USD‑denominated invoices or receipts",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of US consumer electronics",
+      "UK manufacturers buying US‑sourced components",
+      "UK SaaS providers with US customers"
+    ],
+    "why_now": "If you have upcoming USD invoices, the recent data could push the dollar higher, increasing the GBP cost of those payments today",
+    "discovery_recommendation": "Context only – macro data, no immediate lead‑generation opportunity",
+    "confidence_level": "medium",
+    "confidence_reason": "Data release is factual, but FX impact is indirect and modest",
+    "what_happened": "US retail sales for September rose 0.8% month‑on‑month, beating the 0.3% forecast",
+    "what_changed_financially": "Stronger‑than‑expected US consumer spending supports a firmer USD",
+    "who_pays_more": "UK importers of US‑priced goods (e.g., consumer electronics, raw materials) may face higher GBP costs if the dollar strengthens",
+    "who_receives_less": "UK exporters receiving USD revenue see only a modest benefit from a stronger dollar",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "USD payments for imports or USD receipts for exports",
+    "fx_payment_logic": "When a UK company owes a US supplier in USD, a stronger dollar means more GBP are needed to settle the invoice; conversely, a UK exporter receiving USD will convert a stronger dollar into more GBP. The recent US retail data could nudge the dollar higher, affecting these transactions.",
+    "sales_angle": "Stronger US retail numbers could lift the dollar, so any USD‑denominated invoices you have now may cost more in GBP than a week ago.",
+    "business_impact_summary": "UK importers of US‑priced goods could see slightly higher purchase costs, while exporters earning in USD may enjoy a small upside on conversion. The impact is modest and not time‑critical.",
+    "exposure_types": [
+      "USD import payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "US retail strength may push the dollar higher – check how that affects your upcoming USD invoices or receipts.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "645e22786dae193b": {
     "id": "645e22786dae193b",
     "headline": "The Pound tests an August low on the Fed's hike odds",
@@ -64716,6 +64821,139 @@
     "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "7e9b1dad4a472ab2": {
+    "id": "7e9b1dad4a472ab2",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-september-ppi-6-3-vs-5-3-expected/",
+    "headline": "US September PPI 6.3% vs 5.3% expected",
+    "raw_summary": "Prior was 5.4% PPI final demand m/m vs +0.5% expected Prior m/m +0.4% Ex-food and energy y/y vs+4.4%&nbsp;expected Prior ex-food and energy 4.6% y/y Ex-food and energy m/m vs +0.3% expected Prior ex-food and energy +0.2% m/m Ex-food, energy and trade y/y vs +4.7% prior Ex-food, energy and trade m/m vs +0.3% prior The Producer Price Index (PPI), published monthly by the US Bureau of Labor Statistics, measures the average change in the selling prices that domestic producers receive for their output. Where the CPI tracks inflation from the consumer’s side of the register, the PPI looks at it from",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-10-15T23:59:30.038Z",
+    "event_type": "Economic data",
+    "event_breadth": "broad_macro",
+    "summary": "US producer‑price inflation came in sharply above expectations, likely nudging the USD higher. UK businesses that pay US suppliers in USD will need more pounds to settle upcoming invoices, while firms receiving USD revenue may see a modest conversion benefit. The timing aligns with many invoice cycles, making it a timely outreach opportunity.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "US PPI surprise could lift the USD, affecting UK firms that pay US suppliers or receive USD revenue.",
+    "trigger_strength": "medium",
+    "trigger_score": 68,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK electronics component importers",
+      "UK chemical raw‑material importers from the US",
+      "UK SaaS firms with US customers",
+      "UK consulting firms billing US clients"
+    ],
+    "why_now": "The PPI surprise may push the USD higher in the next few days, so any USD‑denominated invoices due soon could cost more in GBP.",
+    "discovery_recommendation": "Limited run — two distinct payment‑flow niches worth targeting.",
+    "confidence_level": "medium",
+    "confidence_reason": "The data point is a clear surprise, but FX impact is indirect and depends on market reaction.",
+    "what_happened": "US September Producer Price Index rose 6.3% year‑over‑year, ahead of the 5.3% forecast.",
+    "what_changed_financially": "Producer‑price inflation accelerated, raising expectations of tighter US monetary policy and a stronger USD.",
+    "who_pays_more": "UK importers that settle invoices with US suppliers in USD (e.g., electronics, chemicals).",
+    "who_receives_less": "UK exporters receiving USD payments see a modest upside, but may face pricing pressure on future quotes.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP → USD supplier payments and USD → GBP revenue conversions.",
+    "fx_payment_logic": "UK importers order goods priced in USD, receive an invoice in USD, and convert GBP to USD to pay. If the USD strengthens after the PPI surprise, each GBP buys fewer USD, raising the GBP cost of the invoice. Conversely, UK exporters that receive USD from US customers convert those receipts back to GBP; a stronger USD gives them a slightly higher GBP amount, but also means future pricing may need adjustment.",
+    "sales_angle": "If you have USD invoices coming due this week, the recent US inflation surprise could mean you’ll pay more in pounds than you expected.",
+    "business_impact_summary": "Electronics and chemical importers face higher landed‑costs on recent US orders, squeezing margins unless they hedge. SaaS and consulting firms with US clients may see a small upside on conversion but should lock in rates to protect future pricing.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion exposure"
+    ],
+    "overall_sales_angle": "The US PPI surprise may lift the dollar, so any GBP‑to‑USD payments due soon could cost more – a perfect moment to discuss hedging.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US electronics components",
+        "category_priority_score": 80,
+        "business_model": "UK wholesaler/distributor buying semiconductors, telecom gear, and other electronic parts from US manufacturers, selling to UK OEMs in GBP.",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure – USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Supplier issues invoice in USD → UK buyer converts GBP to USD → a stronger USD after the PPI data means more GBP per USD, raising cost.",
+        "margin_risk": "Medium — a 2% USD rise on a £1 m annual spend ≈ £20k extra cost if unhedged",
+        "payment_timing_risk": "Medium — typical 30‑60 day payment terms create an open FX window",
+        "affected_payment_flow": "USD payments to US electronics manufacturers, usually £50k‑£500k per shipment, quarterly",
+        "website_validation_signals": [
+          "imported from the United States",
+          "US‑based supplier",
+          "electronics components",
+          "wholesale distributor"
+        ],
+        "avoid_segments": [
+          "retail electronics shops without import operations",
+          "pure UK‑made component makers"
+        ],
+        "sales_angle": "Your upcoming USD invoices for US‑made chips could cost more in GBP after the latest US inflation data.",
+        "exposure_thesis_template": "This company imports electronic components from US manufacturers. A stronger USD after the PPI surprise raises the GBP cost of those invoices.",
+        "micro_categories": [
+          {
+            "name": "US semiconductor importers UK",
+            "why": "Pay USD for chips and wafers; margin directly hit by USD strength.",
+            "search_queries": [
+              "\"US semiconductor importer\" UK",
+              "\"US chip distributor\" UK",
+              "\"semiconductor imports\" United States UK"
+            ],
+            "companies_house_terms": [
+              "semiconductor",
+              "chip importer",
+              "US electronics"
+            ]
+          },
+          {
+            "name": "US telecom equipment importers UK",
+            "why": "USD‑priced telecom gear from US suppliers creates direct FX exposure.",
+            "search_queries": [
+              "\"US telecom equipment\" importer UK",
+              "\"US network gear\" distributor UK",
+              "\"telecom imports\" United States UK"
+            ],
+            "companies_house_terms": [
+              "telecom equipment",
+              "network gear",
+              "US imports"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from the United States",
+          "US‑based supplier",
+          "electronics components",
+          "wholesale distributor"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "semiconductor",
+      "chip importer",
+      "US electronics",
+      "telecom equipment",
+      "network gear",
+      "US imports"
+    ],
+    "all_search_queries": [
+      "\"US semiconductor importer\" UK",
+      "\"US chip distributor\" UK",
+      "\"semiconductor imports\" United States UK",
+      "\"US telecom equipment\" importer UK",
+      "\"US network gear\" distributor UK",
+      "\"telecom imports\" United States UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-15T23:59:52.428Z"
+  },
   "7ec66f3984422bf5": {
     "id": "7ec66f3984422bf5",
     "headline": "Pentagon adds Alibaba, Baidu and BYD to China military-linked firms list",
@@ -70132,6 +70370,57 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-26T00:44:09.281Z"
+  },
+  "88aa6642600a428f": {
+    "id": "88aa6642600a428f",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/2026/oct/15/trump-economy-midterm-elections",
+    "headline": "Bad news for Trump ahead of the midterms: it’s still the economy, stupid",
+    "raw_summary": "Voters’ opposition to the state of Trump’s economy is well established – despite his desperate attempts to deflect Tell us: what is your personal ‘recession indicator’? It’s indisputable that the political polarization of our time has reduced (and confused) the influence of economic conditions on US elections. In September of 2024, in the waning weeks of the Joe Biden presidency, 65% of Republicans believed the US economy was getting worse. About six months later, as Donald Trump launched a trade war on the rest of the world with his “liberation day” tariffs, the share of Republican pessimists",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d",
+    "detected_at": "2026-10-15T23:59:47.849Z",
+    "event_type": "Tariff announcement",
+    "event_breadth": "tariff",
+    "summary": "Trump's new \"liberation day\" tariffs target imports from several countries, raising the cost of US‑priced goods and creating uncertainty for UK firms that trade with the US. While the impact on UK FX exposure is indirect, companies with USD invoices or receipts should monitor potential price adjustments.",
+    "currency_pairs": [],
+    "urgency_score": 3,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "US tariff announcement may affect UK firms that import US‑priced goods or export to the US, but the link is indirect and requires several steps.",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of US agricultural commodities",
+      "UK manufacturers sourcing US electronic components",
+      "UK exporters selling services or goods to US customers"
+    ],
+    "why_now": "The tariffs were announced this week, so any pending USD‑denominated contracts may be renegotiated or re‑priced immediately.",
+    "discovery_recommendation": "Context only — the event offers macro background but lacks a clear, immediate UK B2B FX hook for targeted outreach.",
+    "confidence_level": "medium",
+    "confidence_reason": "The news clearly states new US tariffs, but it does not specify any direct UK trade impact, making the FX relevance plausible but not certain.",
+    "what_happened": "US President Trump announced a series of \"liberation day\" tariffs on imports from several non‑US countries.",
+    "what_changed_financially": "The tariffs raise the landed cost of US‑priced imports and could trigger retaliatory measures, potentially altering USD‑GBP payment flows for UK businesses.",
+    "who_pays_more": "UK importers that source goods priced in USD (e.g., US agricultural products, tech components) may face higher invoice amounts.",
+    "who_receives_less": "UK exporters to the US could see reduced demand or future tariffs on UK goods, lowering USD revenue.",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP→USD for US imports and USD→GBP for US export receipts",
+    "fx_payment_logic": "UK firms that pay US suppliers in USD must convert GBP to USD; higher US tariffs can push suppliers to raise prices, meaning more GBP is needed per USD invoice. Conversely, UK exporters receiving USD payments may benefit from a weaker GBP but could face future US tariffs on UK exports.",
+    "sales_angle": "If you have upcoming USD‑priced invoices from US suppliers, the new tariffs could increase your GBP cost before you settle.",
+    "business_impact_summary": "UK importers of US goods may see higher landed costs, while exporters to the US could face demand pressure if retaliatory measures arise. The timing is immediate because the tariffs were just announced.",
+    "exposure_types": [
+      "USD import cost exposure",
+      "USD export revenue risk"
+    ],
+    "overall_sales_angle": "New US tariffs could raise the GBP cost of your USD invoices today – worth a quick check.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
   },
   "88f27740026c01b7": {
     "id": "88f27740026c01b7",
@@ -85767,6 +86056,28 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-16T09:06:28.953Z"
   },
+  "a6231ef5da33b0af": {
+    "id": "a6231ef5da33b0af",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/new-zealand-card-spending-falls-for-second-month-as-food-prices-hold-flat-in-september/",
+    "headline": "New Zealand card spending falls for second month as food prices hold flat in September",
+    "raw_summary": "The data adds to a mixed picture for the New Zealand dollar, with weak household spending offsetting the stronger manufacturing survey released earlier in the day. A second monthly fall in card spending points to soft domestic demand, which tends to argue against tighter policy, while flat food prices remove one source of upward pressure on inflation for the month. Fuel costs, which manufacturers flagged as a key concern, remain the bigger swing factor for household budgets, leaving oil prices important for the consumer outlook. --- Yesterday: RBNZ’s Conway says October rate decision completel",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-10-15T23:59:11.826Z",
+    "status": "low_relevance",
+    "trigger_strength": "reject",
+    "trigger_score": 5,
+    "discovery_mode": "reject",
+    "recommended_query_budget": 0,
+    "urgency_score": 1,
+    "commercial_relevance": 1,
+    "commercial_relevance_reason": "The event concerns New Zealand domestic consumer spending and inflation, with no clear UK B2B payment‑flow or currency exposure.",
+    "confidence_level": "high",
+    "confidence_reason": "The news is about NZ household data and RBNZ policy; there is no UK business or FX link.",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "a6c19f19aa232267": {
     "id": "a6c19f19aa232267",
     "headline": "Euro: Energy risks cap recovery against US Dollar – ING",
@@ -93431,16 +93742,13 @@
   },
   "b3b54f1ae5df982f": {
     "id": "b3b54f1ae5df982f",
+    "headline": "Chancellor John Healey pledges to protect ‘resilience’ of UK economy after growth beats forecasts in August – business live",
     "source": "The Guardian Biz",
     "source_url": "https://www.theguardian.com/business/live/2026/oct/15/tech-stock-sell-off-markets-uk-gdp-economy-august-imf-latest-news-updates",
-    "headline": "Chancellor John Healey pledges to protect ‘resilience’ of UK economy after growth beats forecasts in August – business live",
-    "raw_summary": "John Healey is speaking to UK journalists at the IMF annual meeting in Bangkok now Today’s better-than-forecast UK growth report is good news for chancellor John Healey as he hobnobs with other finance ministers at the IMF meeting in Bangkok. But it may encourage the Bank of England to raise interest rates as soon as its next meeting in November…. “While August’s unexpected uptick all but confirms that the OBR will raise its growth forecast for this year from 1.1% to 1.4%, the Chancellor still faces a major Budget headache, as elevated borrowing costs eat into fiscal headroom and increase pres",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
     "detected_at": "2026-10-15T09:36:21.238Z",
+    "status": "context_only",
     "event_type": "Macro economic news",
     "event_breadth": "broad_macro",
-    "summary": "UK growth outperformed expectations, raising the likelihood of a BoE rate hike in November. A higher UK rate could modestly strengthen GBP and lift borrowing costs for firms with variable‑rate debt, making financing more expensive in the short term.",
     "currency_pairs": [],
     "urgency_score": 4,
     "commercial_relevance": 4,
@@ -93455,29 +93763,33 @@
       "Property developers using interest‑only loans"
     ],
     "why_now": "If the BoE hikes rates in November, firms with upcoming loan repayments could see higher interest expenses within weeks.",
-    "discovery_recommendation": "Context only – useful for messaging about rate‑risk, but not a fresh lead generation trigger.",
     "confidence_level": "medium",
     "confidence_reason": "The event is a macro‑economic forecast, not an actual rate decision; impact on FX is indirect and speculative.",
+    "discovery_recommendation": "Context only – useful for messaging about rate‑risk, but not a fresh lead generation trigger.",
     "what_happened": "UK August GDP growth beat forecasts, leading the Chancellor to warn that the Bank of England may raise interest rates at its November meeting.",
     "what_changed_financially": "Stronger growth expectations could push UK rates higher, which may cause GBP to appreciate modestly and increase borrowing costs for UK businesses.",
     "who_pays_more": "UK SMEs and corporates with variable‑rate GBP loans, property developers, and other firms reliant on short‑term financing.",
     "who_receives_less": "none",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP borrowing costs – variable‑rate loan repayments in GBP.",
     "fx_payment_logic": "Higher UK rates tend to support GBP, which can reduce the cost of importing goods priced in foreign currencies but simultaneously increase the cost of servicing GBP‑denominated variable‑rate debt, affecting firms that rely on such financing.",
-    "sales_angle": "If you have variable‑rate GBP loans coming due soon, a potential November rate hike could raise your interest bill – let’s review how to protect your margins.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK firms that depend on variable‑rate financing may face higher interest expenses if the BoE raises rates, while a modest GBP strength could slightly lower the cost of foreign‑currency imports. The timing is immediate because loan repayment schedules often align with quarterly or monthly cycles.",
+    "sales_angle": "If you have variable‑rate GBP loans coming due soon, a potential November rate hike could raise your interest bill – let’s review how to protect your margins.",
+    "overall_sales_angle": "Upcoming BoE rate hike risk – protect your financing costs now.",
+    "summary": "UK growth outperformed expectations, raising the likelihood of a BoE rate hike in November. A higher UK rate could modestly strengthen GBP and lift borrowing costs for firms with variable‑rate debt, making financing more expensive in the short term.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "John Healey is speaking to UK journalists at the IMF annual meeting in Bangkok now Today’s better-than-forecast UK growth report is good news for chancellor John Healey as he hobnobs with other finance ministers at the IMF meeting in Bangkok. But it may encourage the Bank of England to raise interest rates as soon as its next meeting in November…. “While August’s unexpected uptick all but confirms that the OBR will raise its growth forecast for this year from 1.1% to 1.4%, the Chancellor still faces a major Budget headache, as elevated borrowing costs eat into fiscal headroom and increase pres",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
     "exposure_types": [
       "Interest‑rate exposure",
       "Borrowing‑cost exposure"
     ],
-    "overall_sales_angle": "Upcoming BoE rate hike risk – protect your financing costs now.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "b3c19384c3d1cdf1": {
@@ -99416,6 +99728,55 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "bf5914a137a3e5cc": {
+    "id": "bf5914a137a3e5cc",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/canada-august-manufacturing-sales-1-5-vs-1-1-expected/",
+    "headline": "Canada August manufacturing sales +1.5% vs +1.1% expected",
+    "raw_summary": "Prior was -0.4% (revised to -0.3%) Wholesale trade -1.6% vs -1.5% expected Prior trade +0.3% (revised to +0.4%) Statistics Canada publishes two monthly reports that track activity in the goods-producing side of the economy: the Monthly Survey of Manufacturing and the Monthly Wholesale Trade Survey. Both arrive first as advance “flash” estimates, roughly three weeks after the reference month ends. Full releases follow a few weeks later with detailed industry and provincial breakdowns. Manufacturing sales measure the value of goods shipped by Canadian factories. Key industries include petroleum ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-10-15T23:59:18.388Z",
+    "event_type": "Manufacturing data",
+    "event_breadth": "broad_macro",
+    "summary": "Canadian manufacturing sales beat expectations, hinting at a stronger CAD. UK businesses with CAD‑denominated supplier invoices may see higher costs, but the impact is modest and indirect.",
+    "currency_pairs": [],
+    "urgency_score": 3,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Canadian manufacturing data may nudge CAD rates, modestly affecting UK firms that pay CAD‑denominated invoices",
+    "trigger_strength": "weak",
+    "trigger_score": 30,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK construction firms importing Canadian timber",
+      "UK energy firms importing Canadian petroleum"
+    ],
+    "why_now": "If the CAD strengthens after the data release, upcoming CAD‑priced invoices become more expensive in GBP",
+    "discovery_recommendation": "Context only – monitor CAD movements, no immediate discovery needed",
+    "confidence_level": "medium",
+    "confidence_reason": "The data is factual but its FX impact is indirect and uncertain",
+    "what_happened": "Canada's August manufacturing sales rose 1.5% month‑on‑month, beating the 1.1% consensus estimate",
+    "what_changed_financially": "Manufacturing sales growth accelerated, indicating stronger Canadian production activity",
+    "who_pays_more": "UK importers of Canadian goods that invoice in CAD could face higher GBP costs if CAD appreciates",
+    "who_receives_less": "none",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP payments to Canadian suppliers on CAD‑denominated invoices",
+    "fx_payment_logic": "UK companies that buy Canadian products priced in CAD must convert GBP to CAD to settle invoices; a stronger CAD after the data means more GBP is needed per CAD, raising costs.",
+    "sales_angle": "If you have upcoming CAD‑priced invoices from Canadian suppliers, the recent manufacturing data could push the CAD higher and increase your costs.",
+    "business_impact_summary": "UK importers of Canadian timber or petroleum may face slightly higher GBP outlays on CAD invoices if the CAD appreciates, though the effect is limited at this stage.",
+    "exposure_types": [
+      "CAD supplier payment exposure"
+    ],
+    "overall_sales_angle": "Recent Canadian manufacturing strength could lift the CAD, making any pending CAD‑denominated invoices more costly for UK importers today.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "bfa8ada806b310d0": {
     "id": "bfa8ada806b310d0",
     "headline": "Carney: Canada to allow immediate expensing for most new capital investment",
@@ -101906,6 +102267,58 @@
     "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "c3c8502d5e97fc55": {
+    "id": "c3c8502d5e97fc55",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-august-business-inventories-0-4-vs-0-4-expected/",
+    "headline": "US August business inventories +0.4% vs +0.4% expected",
+    "raw_summary": "Prior was +0.8% Retail inventories ex-autos vs +0.8% prior For background, the US business inventories report, formally the Manufacturing and Trade Inventories and Sales release, is published monthly by the Census Bureau about six weeks after the reference month ends. It combines inventory and sales data from three sectors: manufacturers, wholesalers and retailers. Together they cover the bulk of goods held in the US economy. By the time the report is released, much of it is already known. Manufacturing inventories come out earlier in the factory orders report. Advance estimates for wholesale ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-10-15T23:59:14.964Z",
+    "event_type": "Economic data",
+    "event_breadth": "broad_macro",
+    "summary": "US business inventories rose as expected, offering little new information to markets. The modest data may keep the USD stable or slightly stronger, meaning UK firms with USD exposure see limited impact. It is a background point rather than a fresh reason to call today.",
+    "currency_pairs": [
+      "USD/GBP"
+    ],
+    "urgency_score": 2,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "US inventory data may modestly affect USD, giving limited impact on UK importers of US‑priced goods",
+    "trigger_strength": "weak",
+    "trigger_score": 28,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK manufacturers importing US components",
+      "UK retailers sourcing US goods"
+    ],
+    "why_now": "Upcoming USD‑denominated invoices could be settled at a slightly weaker GBP if the dollar gains on the data",
+    "discovery_recommendation": "Context only — the event provides macro background but no immediate call trigger",
+    "confidence_level": "medium",
+    "confidence_reason": "Data is factual but its FX impact is indirect and expected",
+    "what_happened": "US August business inventories rose 0.4% month‑on‑month, matching expectations",
+    "what_changed_financially": "US business inventory levels increased modestly, providing no surprise to markets",
+    "who_pays_more": "UK importers of US‑priced goods could face slightly higher USD costs if the dollar strengthens",
+    "who_receives_less": "UK exporters receiving USD revenue may see a marginal benefit on conversion",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "USD payments to US suppliers or USD receipts from US customers",
+    "fx_payment_logic": "UK companies that pay US suppliers in USD must convert GBP to USD; if the dollar strengthens after the inventory report, they will need more GBP per USD, slightly raising costs. Conversely, UK exporters receiving USD will convert to GBP at a marginally better rate.",
+    "sales_angle": "If you have upcoming USD invoices, the current rate is roughly unchanged from last week, so there’s no urgent need to hedge now.",
+    "business_impact_summary": "UK importers of US‑sourced components see little cost change, while exporters earning in USD get a tiny upside on conversion. The inventory data doesn’t create a pressing timing risk, so any FX action can be routine rather than urgent.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "The inventory report leaves USD rates steady, so there’s no immediate FX pressure for UK businesses today.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
   },
   "c4656cbea98000b0": {
     "id": "c4656cbea98000b0",
@@ -122246,6 +122659,141 @@
       "AUD revenue conversion"
     ],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "f45ab4f87d74c729": {
+    "id": "f45ab4f87d74c729",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-european-news-wrap-markets-consolidate-after-the-us-cpi-shock/",
+    "headline": "investingLive European news wrap: Markets consolidate after the US CPI shock",
+    "raw_summary": "Headlines: Ethereum extends losses after the US CPI as risk sentiment deteriorates further. What's next? Why do altcoins crash so much harder than Bitcoin? Oil remains supported amid persistent Middle East tensions as US weighs using \"Mother of All Bombs\" Bitcoin sinks after the US CPI as markets get increasingly worried about the growth outlook US inflation worries aren't over yet as PPI and retail sales pose fresh risks for markets Gold whipsaws after US CPI as data falls short of bringing an October rate hike back into play European stock market open: Equities under pressure as Wall Street ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-10-15T23:59:38.105Z",
+    "event_type": "Macro data release",
+    "event_breadth": "broad_currency",
+    "summary": "US CPI came in hotter than expected, pushing the dollar higher. UK firms that pay US suppliers now face higher GBP costs, while exporters converting USD receipts see a modest gain. The move is fresh, so any invoices or conversions due this week are directly impacted.",
+    "currency_pairs": [
+      "GBP/USD",
+      "USD/EUR"
+    ],
+    "urgency_score": 7,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "US CPI shock lifts the USD, raising costs for UK importers paying USD invoices and altering conversion rates for UK exporters receiving USD revenue",
+    "trigger_strength": "medium",
+    "trigger_score": 66,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK importers of US technology components",
+      "UK aerospace parts importers from the US",
+      "UK SaaS firms with US customers"
+    ],
+    "why_now": "Upcoming USD invoices or revenue conversions will be settled at the newly stronger USD rate, affecting margins today",
+    "discovery_recommendation": "Limited run – two distinct payment‑flow niches (US‑supplier importers and US‑customer exporters) worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "The CPI release is a concrete event that moved markets, but the exact GBP/USD move is not quantified in the source",
+    "what_happened": "US consumer price index rose above expectations, triggering a sharp appreciation of the US dollar against major currencies",
+    "what_changed_financially": "USD strengthened versus GBP and EUR, making GBP‑denominated payments for USD‑priced goods more expensive and increasing the GBP value of USD receipts",
+    "who_pays_more": "UK businesses that import US‑priced components, raw materials or services and must convert GBP to USD",
+    "who_receives_less": "None – UK exporters receiving USD revenue actually benefit from a stronger USD",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP→USD supplier payments and USD→GBP revenue conversions",
+    "fx_payment_logic": "UK importers receive an invoice from a US supplier in USD, convert GBP to USD at the spot rate and pay the invoice; a stronger USD means they need more GBP per USD, squeezing margins. Conversely, UK exporters invoicing US customers receive USD, which they later convert to GBP; a stronger USD gives them more GBP per USD received.",
+    "sales_angle": "If you have USD‑denominated invoices coming due this week, the recent CPI‑driven dollar rally means they’ll cost more in GBP than they did last month.",
+    "business_impact_summary": "UK importers of US‑priced goods such as semiconductors or aerospace parts will see higher landed costs on recent orders, compressing margins. UK SaaS and other service firms billing US customers will receive more GBP per USD, but the volatility creates pricing uncertainty.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "The CPI‑driven USD rally means any GBP‑to‑USD payments you’re about to make are now more expensive – let’s review how to protect your margin.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US technology components",
+        "category_priority_score": 78,
+        "business_model": "UK distributor buying semiconductors, microchips and other electronic components from US manufacturers, paying invoices in USD and selling to UK OEMs in GBP",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure — USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Importer receives a USD invoice from a US chip maker, converts GBP to USD at the spot rate and pays; a stronger USD now requires more GBP per invoice, eroding margin.",
+        "margin_risk": "Medium — a 2% USD/GBP move on £1 m annual spend ≈ £20 k extra cost if unhedged",
+        "payment_timing_risk": "High — typical 30‑60 day payment terms create a wide FX window",
+        "affected_payment_flow": "USD payments to US semiconductor manufacturers, usually £100k‑£500k per order, quarterly",
+        "website_validation_signals": [
+          "imported from the United States",
+          "US supplier",
+          "semiconductor",
+          "electronics components",
+          "US‑based manufacturer"
+        ],
+        "avoid_segments": [
+          "pure UK‑made electronics firms",
+          "retail electronics stores"
+        ],
+        "sales_angle": "Your upcoming US component invoices will cost more in GBP after the recent CPI‑driven USD rally.",
+        "exposure_thesis_template": "This company imports US‑made technology components. The stronger USD increases the GBP cost of upcoming USD‑denominated supplier invoices.",
+        "micro_categories": [
+          {
+            "name": "US chip manufacturers UK importers",
+            "why": "Pay USD to US silicon fabs; margin directly hit by USD strength",
+            "search_queries": [
+              "\"US chip importer\" UK",
+              "\"semiconductor importer\" United States UK",
+              "\"US silicon supplier\" UK"
+            ],
+            "companies_house_terms": [
+              "chip importer",
+              "semiconductor UK",
+              "us silicon"
+            ]
+          },
+          {
+            "name": "US aerospace parts importers UK",
+            "why": "USD‑priced aerospace components from US suppliers increase GBP cost when USD strengthens",
+            "search_queries": [
+              "\"US aerospace parts\" importer UK",
+              "\"american aerospace supplier\" UK",
+              "\"US aircraft components\" UK importer"
+            ],
+            "companies_house_terms": [
+              "aerospace imports",
+              "us aerospace",
+              "aircraft parts"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from the United States",
+          "US supplier",
+          "semiconductor",
+          "electronics components",
+          "US‑based manufacturer"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "chip importer",
+      "semiconductor UK",
+      "us silicon",
+      "aerospace imports",
+      "us aerospace",
+      "aircraft parts"
+    ],
+    "all_search_queries": [
+      "\"US chip importer\" UK",
+      "\"semiconductor importer\" United States UK",
+      "\"US silicon supplier\" UK",
+      "\"US aerospace parts\" importer UK",
+      "\"american aerospace supplier\" UK",
+      "\"US aircraft components\" UK importer"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-15T23:59:54.326Z"
   },
   "f46e417e8a9e87c6": {
     "id": "f46e417e8a9e87c6",
