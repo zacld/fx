@@ -10501,6 +10501,216 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-01T20:51:58.613Z"
   },
+  "155e40341f740f70": {
+    "id": "155e40341f740f70",
+    "source": "OilPrice.com",
+    "source_url": "https://oilprice.com/Latest-Energy-News/World-News/Global-Fuel-Oil-Shortage-Deepens-as-Middle-East-and-Russia-Supplies-Collapse.html",
+    "headline": "Global Fuel Oil Shortage Deepens as Middle East and Russia Supplies Collapse",
+    "raw_summary": "Global fuel oil supply is shrinking while demand for the fuel from the shipping industry remains robust, suggesting further supply pain down the road. Exports of high-sulfur fuel oil from the Middle East are running at a rate that is at least 800,000 tons a month lower than it was before the war, the head of Asian operations at Vitol said at an industry event. “Producers are paying higher freight rates and more risk premiums to shuttle cargoes out of Hormuz, recognising the importance of oil revenues to their national budgets,” Kieran…",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu",
+    "detected_at": "2026-10-16T08:46:54.664Z",
+    "event_type": "Commodity shock",
+    "event_breadth": "commodity",
+    "summary": "A major supply drop in Middle‑East and Russian fuel oil has driven USD fuel prices sharply higher. UK shipping, freight and import‑dependent businesses now face higher bunker and freight costs, compressing margins on upcoming payments.",
+    "currency_pairs": [
+      "USD/GBP"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Sharp rise in USD‑priced fuel oil lifts bunker costs for UK shipping and logistics firms, creating immediate margin pressure",
+    "trigger_strength": "strong",
+    "trigger_score": 82,
+    "discovery_mode": "full",
+    "recommended_query_budget": 30,
+    "likely_affected_businesses": [
+      "UK container ship owners",
+      "UK bulk carrier operators",
+      "UK bunker fuel wholesalers",
+      "UK sea‑freight forwarders",
+      "UK automotive parts importers"
+    ],
+    "why_now": "Many firms have upcoming bunker‑fuel contracts and freight bookings that will be settled at today’s elevated USD rates",
+    "discovery_recommendation": "Full run — clear USD payment flow, multiple identifiable shipping and logistics niches, public websites typically disclose fuel‑procurement language",
+    "confidence_level": "high",
+    "confidence_reason": "Event cites concrete supply cuts and quantifiable shortfall, indicating a real price shock to a USD‑denominated commodity",
+    "what_happened": "Supply of high‑sulphur fuel oil from the Middle East and Russia has collapsed, leaving a shortfall of at least 800,000 t/month",
+    "what_changed_financially": "Fuel oil spot prices have jumped, raising the USD cost of bunker fuel for ship owners and freight operators",
+    "who_pays_more": "UK ship owners, charterers and freight forwarders that purchase bunker fuel or pay freight in USD",
+    "who_receives_less": "UK importers and manufacturers whose margins are squeezed by higher sea‑freight costs",
+    "margin_risk": "High",
+    "payment_timing_risk": "High",
+    "affected_payment_flow": "GBP revenue versus USD bunker‑fuel or freight payments",
+    "fx_payment_logic": "UK ship owners and freight firms invoice customers in GBP but must buy bunker fuel and pay freight charges in USD; a rise in USD‑priced fuel oil means they need more GBP per USD, eroding margins unless hedged.",
+    "sales_angle": "If you have bunker‑fuel or freight contracts coming up, the current USD price spike means you’ll pay noticeably more in GBP than a week ago.",
+    "business_impact_summary": "UK container and bulk carriers, bunker fuel traders, and sea‑freight forwarders will see higher operating costs on upcoming voyages. Importers of high‑value goods will feel the squeeze through increased freight rates, making today the right time to discuss hedging solutions.",
+    "exposure_types": [
+      "USD bunker‑fuel cost exposure",
+      "USD freight cost exposure"
+    ],
+    "overall_sales_angle": "The sudden USD fuel‑oil price jump is inflating your sea‑transport costs right now – let’s lock in a better rate before the next invoice.",
+    "target_segments": [
+      {
+        "segment_name": "UK container ship owners and operators",
+        "category_priority_score": 88,
+        "business_model": "UK companies own or charter container vessels, earn GBP freight revenue, and purchase bunker fuel in USD for voyages",
+        "exposure_level": "Very High",
+        "exposure_type": "Bunker‑fuel cost exposure – USD payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "USD/GBP"
+        ],
+        "fx_payment_logic": "When a vessel sails, the operator buys fuel in USD; a weaker GBP means more GBP needed per USD, directly cutting margin on each voyage.",
+        "margin_risk": "High — a 5% rise in USD fuel price on a £10 m annual fuel budget ≈ £500k extra cost if unhedged",
+        "payment_timing_risk": "High — fuel is bought weekly to monthly, creating a rolling exposure window",
+        "affected_payment_flow": "USD payments to fuel suppliers, typically £200k‑£2 m per month",
+        "website_validation_signals": [
+          "bunker fuel",
+          "marine fuel",
+          "container vessel",
+          "fleet",
+          "operates routes"
+        ],
+        "avoid_segments": [
+          "pure logistics consultants",
+          "charter brokers without own vessels"
+        ],
+        "sales_angle": "Your upcoming bunker‑fuel purchases will cost more in GBP after today’s price jump.",
+        "exposure_thesis_template": "This company runs container ships; USD‑priced fuel price surge raises GBP cost of bunker fuel.",
+        "micro_categories": [
+          {
+            "name": "UK Asia‑Europe container lines",
+            "why": "These routes rely on heavy bunker consumption priced in USD, so fuel‑price spikes hit margins directly",
+            "search_queries": [
+              "\"container shipping\" UK Asia Europe",
+              "\"UK container line\" Europe",
+              "\"UK liner shipping\""
+            ],
+            "companies_house_terms": [
+              "container shipping",
+              "liner",
+              "asia europe"
+            ]
+          },
+          {
+            "name": "UK feeder vessel operators",
+            "why": "Feeder ships buy fuel in USD for short‑haul trips, exposing them to the same price shock",
+            "search_queries": [
+              "\"feeder vessel\" UK",
+              "\"UK feeder operator\" shipping",
+              "\"feeder ship\" UK"
+            ],
+            "companies_house_terms": [
+              "feeder vessel",
+              "short sea",
+              "feeder operator"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "bunker fuel",
+          "marine fuel",
+          "container vessel",
+          "fleet",
+          "operates routes"
+        ]
+      },
+      {
+        "segment_name": "UK dry‑bulk carrier owners",
+        "category_priority_score": 84,
+        "business_model": "UK firms own or charter dry‑bulk vessels, earn GBP freight revenue, and purchase bunker fuel in USD for voyages carrying iron ore, coal, grain, etc.",
+        "exposure_level": "Very High",
+        "exposure_type": "Bunker‑fuel cost exposure – USD payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "USD/GBP"
+        ],
+        "fx_payment_logic": "Bulk carriers buy large volumes of fuel in USD; a rise in USD price forces more GBP per voyage, eroding freight margin.",
+        "margin_risk": "High — 4% USD fuel price rise on a £8 m annual fuel spend ≈ £320k extra cost",
+        "payment_timing_risk": "High — fuel bought per voyage (weekly‑monthly), exposure persists until next hedge",
+        "affected_payment_flow": "USD payments to fuel suppliers, often £500k‑£5 m per voyage",
+        "website_validation_signals": [
+          "dry bulk",
+          "bulk carrier",
+          "fuel consumption",
+          "marine fuel",
+          "fleet of bulk vessels"
+        ],
+        "avoid_segments": [
+          "UK offshore wind service firms",
+          "tug operators"
+        ],
+        "sales_angle": "Your bulk‑carrier fuel bills will be hit hard by today’s USD price surge.",
+        "exposure_thesis_template": "This bulk carrier buys USD‑priced fuel; the price jump raises GBP fuel costs.",
+        "micro_categories": [
+          {
+            "name": "UK iron‑ore bulk carriers",
+            "why": "Heavy fuel consumption on long hauls makes them very sensitive to USD fuel price moves",
+            "search_queries": [
+              "\"iron ore carrier\" UK",
+              "\"UK bulk carrier\" iron ore",
+              "\"dry bulk\" UK"
+            ],
+            "companies_house_terms": [
+              "iron ore",
+              "bulk carrier",
+              "dry bulk"
+            ]
+          },
+          {
+            "name": "UK grain import bulk carriers",
+            "why": "Frequent voyages and fuel‑intensive routes expose them to USD fuel price spikes",
+            "search_queries": [
+              "\"grain carrier\" UK",
+              "\"UK bulk carrier\" grain",
+              "\"dry bulk\" grain UK"
+            ],
+            "companies_house_terms": [
+              "grain",
+              "bulk carrier",
+              "dry bulk"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "dry bulk",
+          "bulk carrier",
+          "fuel consumption",
+          "marine fuel",
+          "fleet of bulk vessels"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "container shipping",
+      "liner",
+      "asia europe",
+      "feeder vessel",
+      "short sea",
+      "feeder operator",
+      "iron ore",
+      "bulk carrier",
+      "dry bulk",
+      "grain"
+    ],
+    "all_search_queries": [
+      "\"container shipping\" UK Asia Europe",
+      "\"UK container line\" Europe",
+      "\"UK liner shipping\"",
+      "\"feeder vessel\" UK",
+      "\"UK feeder operator\" shipping",
+      "\"feeder ship\" UK",
+      "\"iron ore carrier\" UK",
+      "\"UK bulk carrier\" iron ore",
+      "\"dry bulk\" UK",
+      "\"grain carrier\" UK",
+      "\"UK bulk carrier\" grain",
+      "\"dry bulk\" grain UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-16T08:47:00.706Z"
+  },
   "155e6790eed437bd": {
     "id": "155e6790eed437bd",
     "headline": "Canada's LeBlanc says trade talks with US unfrozen, more meetings ahead",
@@ -23698,144 +23908,212 @@
     "raw_summary": "Warsh won’t prejudge rest of 2026, names October and December as decision points Tesla unveils thruster-powered Roadster with $50,000 deposit, production slated for 2028 Bailey says UK second-round inflation effects subdued so far, too early to judge Ethereum whale’s $13.45M loss reflects a year-long exit, not a fresh ETH dump Google’s 40-fold quantum leap: big for Willow, smaller for Alphabet’s share price PBOC sets USD/ CNY reference rate for today at 6.7220 (vs. estimate at 6.6947) FX option expiries for 16 October 10am New York cut Goldman: Warsh’s quieter Fed: why less guidance could mean",
     "pre_relevance_score": 8,
     "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-10-16T06:49:43.431Z",
+    "detected_at": "2026-10-16T08:46:47.703Z",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "The PBOC set the USD/CNY rate at 6.7220, a modest surprise versus forecasts. This makes GBP‑denominated payments to Chinese suppliers slightly more expensive and reduces the GBP value of CNY receipts. UK importers and exporters with USD or CNY exposure should review their rates today.",
+    "summary": "The PBOC’s higher‑than‑expected USD/CNY reference rate weakens the yuan, meaning UK firms paying Chinese suppliers now need more GBP per USD/CNY invoice and exporters receiving yuan see reduced GBP proceeds. Companies with invoices due this month face immediate cost pressure.",
     "currency_pairs": [
-      "USD/CNY"
+      "USD/CNY",
+      "GBP/USD",
+      "GBP/CNY"
     ],
     "urgency_score": 6,
-    "commercial_relevance": 6,
-    "commercial_relevance_reason": "PBOC's USD/CNY reference rate moved versus expectations, affecting UK firms that pay Chinese suppliers in USD or CNY and those that receive CNY revenue.",
+    "commercial_relevance": 7,
+    "commercial_relevance_reason": "PBOC reference rate shift weakens CNY, raising GBP cost for UK firms paying Chinese suppliers and reducing GBP value of CNY receipts.",
     "trigger_strength": "medium",
     "trigger_score": 62,
     "discovery_mode": "limited",
     "recommended_query_budget": 12,
     "likely_affected_businesses": [
-      "UK electronics component importers from China",
-      "UK consumer‑goods importers sourcing from China",
-      "UK fashion brands selling to Chinese e‑commerce platforms"
+      "UK electronics importers sourcing from China",
+      "UK apparel and textile importers buying Chinese fabrics",
+      "UK manufacturers using Chinese raw‑material components",
+      "UK fashion brands selling to Chinese consumers"
     ],
-    "why_now": "Many UK firms have pending invoices for shipments arriving this week, so the new reference rate impacts their cash‑flow and margin immediately.",
-    "discovery_recommendation": "Limited run — two distinct payment‑flow niches (USD‑paying importers and CNY‑paying importers/exporters) worth targeting.",
-    "confidence_level": "medium",
-    "confidence_reason": "The rate announcement is factual and the affected payment flows (GBP→USD/CNY and CNY→GBP) are clear, but the move is modest.",
-    "what_happened": "The People's Bank of China set the daily USD/CNY reference rate at 6.7220, slightly stronger than the market estimate of 6.6947.",
-    "what_changed_financially": "The CNY appreciated against the USD by roughly 0.4%, raising the GBP cost of USD‑denominated payments to Chinese suppliers and reducing the GBP value of CNY‑denominated receipts.",
-    "who_pays_more": "UK businesses that settle invoices with Chinese suppliers in USD or CNY will need more GBP to meet those payments.",
-    "who_receives_less": "UK exporters receiving payments in CNY will convert fewer GBP per CNY, lowering GBP‑denominated revenue.",
-    "margin_risk": "Medium",
+    "why_now": "Many EUR‑denominated invoices were booked before the rate shift; they will be settled in the next 30‑60 days at the weaker CNY rate.",
+    "discovery_recommendation": "Limited run – two distinct payment‑flow niches (importers and exporters) merit targeted outreach.",
+    "confidence_level": "high",
+    "confidence_reason": "The rate is an official daily reference, the deviation from forecasts is clear, and the GBP‑CNY payment flow is concrete.",
+    "what_happened": "The People’s Bank of China set the USD/CNY reference rate at 6.7220, above the market estimate of 6.6947.",
+    "what_changed_financially": "CNY weakened roughly 0.4% against the USD, implying a higher GBP cost for USD‑priced Chinese imports and a lower GBP value for CNY‑priced Chinese export receipts.",
+    "who_pays_more": "UK importers of Chinese goods invoiced in USD or CNY (electronics, apparel, machinery).",
+    "who_receives_less": "UK exporters receiving payments in CNY from Chinese customers (fashion, tech services).",
+    "margin_risk": "Medium‑High",
     "payment_timing_risk": "Medium",
-    "affected_payment_flow": "GBP→USD or GBP→CNY payments to Chinese suppliers; CNY→GBP receipts from Chinese customers.",
-    "fx_payment_logic": "UK companies that buy goods from Chinese suppliers receive invoices in USD or CNY; they must convert GBP into the invoiced currency to pay. Because the CNY has strengthened against the USD, more GBP is required for the same USD amount and each CNY now yields fewer GBP on conversion, squeezing margins on upcoming payments and receipts.",
-    "sales_angle": "If you have EUR‑denominated (actually USD/CNY‑denominated) invoices from China due this week, the current rate means you'll pay more GBP than you expected.",
-    "business_impact_summary": "UK importers of electronics, consumer goods and other products from China will see higher landed‑costs on USD‑priced invoices and slightly lower costs on CNY‑priced invoices, while exporters receiving CNY revenue will see a modest reduction in GBP proceeds. The timing aligns with imminent payment windows, making a rate‑review call timely.",
+    "affected_payment_flow": "GBP → USD/CNY to settle Chinese supplier invoices; CNY → GBP for inbound Chinese payments.",
+    "fx_payment_logic": "A UK importer receives a supplier invoice in USD or CNY, converts GBP to the foreign currency to pay, and because the yuan has weakened, more GBP is required for the same amount, compressing margins. Conversely, a UK exporter receiving CNY must convert it back to GBP and gets fewer pounds per yuan, eroding revenue.",
+    "sales_angle": "If you have Chinese supplier invoices due soon, the latest CNY weakness means you’ll pay more GBP than you expected.",
+    "business_impact_summary": "UK importers of Chinese electronics, textiles and components will see higher landed‑costs on upcoming invoices, while exporters earning in yuan will see a modest drop in GBP‑converted revenue. Both groups face tighter margins today.",
     "exposure_types": [
-      "USD payment exposure to Chinese suppliers",
-      "CNY payment exposure to Chinese suppliers",
+      "CNY supplier payment exposure",
       "CNY revenue conversion exposure"
     ],
-    "overall_sales_angle": "The PBOC's rate move means your upcoming Chinese supplier payments now cost more in GBP – a quick review could protect your margin.",
+    "overall_sales_angle": "The unexpected CNY weakening raises the GBP cost of your Chinese supplier invoices and reduces the GBP value of any yuan receipts – a timely reason to review hedging now.",
     "target_segments": [
       {
-        "segment_name": "UK electronics component importers (USD invoices) from China",
-        "category_priority_score": 80,
-        "business_model": "UK wholesaler/distributor buying semiconductors, PCBs and other electronic parts from Chinese manufacturers, paying invoices in USD, selling to UK OEMs in GBP.",
+        "segment_name": "UK importers of Chinese manufactured goods",
+        "category_priority_score": 82,
+        "business_model": "UK wholesaler/distributor buying electronics, textiles or machinery parts from Chinese factories, paying invoices in USD or CNY, selling finished goods in GBP to UK customers.",
         "exposure_level": "High",
-        "exposure_type": "Import cost exposure – USD supplier payments vs GBP revenue",
+        "exposure_type": "Import cost exposure – USD/CNY move raises GBP cost of Chinese supplier invoices",
         "likely_currency_pairs": [
-          "USD/CNY"
+          "USD/CNY",
+          "GBP/USD",
+          "GBP/CNY"
         ],
-        "fx_payment_logic": "Supplier issues USD invoice → UK importer converts GBP to USD → stronger CNY means USD is relatively more expensive → more GBP needed per USD → margin compressed.",
-        "margin_risk": "High — a 0.4% CNY appreciation on a £2 m annual USD spend ≈ £8 k extra cost if unhedged.",
-        "payment_timing_risk": "Medium — typical 30‑60 day payment terms create an open FX window.",
-        "affected_payment_flow": "GBP → USD payments to Chinese electronics manufacturers, usually £100k‑£1 m per shipment, quarterly.",
+        "fx_payment_logic": "Invoice arrives in USD or CNY → UK importer converts GBP to the foreign currency → weaker CNY/stronger USD means more GBP needed → margin compressed.",
+        "margin_risk": "Medium‑High — a 0.4% CNY move on £2 m annual Chinese spend ≈ £8 k extra cost if unhedged.",
+        "payment_timing_risk": "Medium — typical 30‑60 day payment terms create an open FX window.",
+        "affected_payment_flow": "GBP → USD/CNY payments to Chinese suppliers, usually £50k‑£500k per shipment, quarterly.",
         "website_validation_signals": [
-          "electronics components imported from China",
-          "USD invoicing",
-          "PCBs",
-          "semiconductor supplier",
-          "sourced from Shenzhen"
+          "imported from China",
+          "sourced from Chinese factory",
+          "manufactured in China",
+          "CNY invoiced",
+          "USD priced"
         ],
         "avoid_segments": [
-          "pure UK‑based electronics manufacturers with domestic supply",
-          "retail electronics shops without import operations"
+          "retail shops that do not import directly",
+          "pure UK‑made product companies"
         ],
-        "sales_angle": "Your upcoming USD invoices from Chinese component makers will cost more GBP after today's CNY move.",
-        "exposure_thesis_template": "This company imports electronic components from China with USD invoices – the USD/CNY shift raises the GBP cost of those payments.",
+        "sales_angle": "Your upcoming Chinese supplier invoices will cost more GBP after the recent CNY weakening.",
+        "exposure_thesis_template": "This company imports electronics/textiles from China. The CNY move increases GBP cost of USD/CNY‑denominated supplier invoices.",
         "micro_categories": [
           {
-            "name": "UK smartphone component importers",
-            "why": "Pay USD for chips and modules from Chinese factories; margin directly hit by the CNY‑USD move.",
+            "name": "UK electronics importers sourcing from Shenzhen",
+            "why": "Electronics components are priced in USD; a weaker CNY pushes USD higher, raising GBP cost of each invoice.",
             "search_queries": [
-              "\"smartphone component importer\" UK",
-              "\"mobile phone parts\" China supplier UK",
-              "\\\"UK distributor\\\" \\\"Chinese chip\\",
-              "\n          ]",
-              "companies_house_terms",
-              ":",
-              [
-                "smartphone components",
-                "mobile parts",
-                "electronics imports"
-              ]
+              "\"electronics importer\" UK China",
+              "\"Chinese component supplier\" UK",
+              "\"import electronics from Shenzhen\""
+            ],
+            "companies_house_terms": [
+              "electronics import",
+              "Chinese components",
+              "shenzhen supplier"
             ]
           },
           {
-            "name": "UK computer hardware parts importers",
-            "why": "Buy motherboards, SSDs and other hardware in USD from Chinese OEMs, exposing them to the rate change.",
+            "name": "UK apparel importers of Chinese fabrics",
+            "why": "Fabric invoices often quoted in CNY; the yuan weakening means more GBP per CNY when paying.",
             "search_queries": [
-              "\"computer hardware importer\" UK",
-              "\"SSD importer\" China UK",
-              "\\\"UK distributor\\\" \\\"Chinese motherboard\\",
-              "\n          ]",
-              "companies_house_terms",
-              ":",
-              [
-                "computer hardware",
-                "hardware imports",
-                "SSD importer"
-              ]
+              "\"fabric importer\" UK China",
+              "\"Chinese textile supplier\" UK",
+              "\"import cotton fabric\" UK"
+            ],
+            "companies_house_terms": [
+              "fabric import",
+              "textile China",
+              "Chinese fabrics"
             ]
           }
         ],
         "segment_signals": [
-          "electronics components imported from China",
-          "USD invoicing",
-          "PCBs",
-          "semiconductor supplier",
-          "sourced from Shenzhen"
+          "imported from China",
+          "sourced from Chinese factory",
+          "manufactured in China",
+          "CNY invoiced",
+          "USD priced"
+        ]
+      },
+      {
+        "segment_name": "UK exporters receiving CNY revenue",
+        "category_priority_score": 71,
+        "business_model": "UK fashion brand, SaaS provider or consultancy selling to Chinese customers, invoicing in CNY and converting receipts back to GBP.",
+        "exposure_level": "Medium",
+        "exposure_type": "Revenue conversion exposure – weaker CNY reduces GBP value of Chinese payments",
+        "likely_currency_pairs": [
+          "GBP/CNY"
+        ],
+        "fx_payment_logic": "Chinese customer pays in CNY → UK exporter holds CNY then converts to GBP → weaker CNY yields fewer pounds per yuan, lowering revenue.",
+        "margin_risk": "Medium — a 0.4% CNY move on £500k annual CNY receipts ≈ £2 k reduced GBP revenue if unhedged.",
+        "payment_timing_risk": "Medium — receipts may sit for 15‑45 days before conversion.",
+        "affected_payment_flow": "CNY receipts from Chinese customers, typically £30k‑£200k per month, converted to GBP.",
+        "website_validation_signals": [
+          "sell to China",
+          "Chinese market",
+          "CNY invoiced",
+          "priced in yuan",
+          "export to China"
+        ],
+        "avoid_segments": [
+          "companies with no Chinese customer base",
+          "pure UK domestic sellers"
+        ],
+        "sales_angle": "Your CNY‑denominated sales to China will fetch fewer pounds after the recent yuan weakening.",
+        "exposure_thesis_template": "This company sells to Chinese buyers in CNY. The CNY move reduces the GBP value of incoming payments.",
+        "micro_categories": [
+          {
+            "name": "UK luxury fashion brands with Chinese retail partners",
+            "why": "Sales are invoiced in CNY; a weaker yuan cuts the GBP value of each sale.",
+            "search_queries": [
+              "\"UK fashion brand\" China sales",
+              "\"luxury apparel\" China market UK",
+              "\"Chinese retailer\" UK supplier"
+            ],
+            "companies_house_terms": [
+              "fashion export",
+              "china market",
+              "luxury apparel"
+            ]
+          },
+          {
+            "name": "UK SaaS providers charging Chinese enterprises in CNY",
+            "why": "Subscription fees are billed in yuan; conversion to GBP now yields fewer pounds.",
+            "search_queries": [
+              "\"SaaS\" China client UK",
+              "\"software subscription\" China UK",
+              "\"cloud services\" China UK"
+            ],
+            "companies_house_terms": [
+              "software export",
+              "cloud services",
+              "china client"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "sell to China",
+          "Chinese market",
+          "CNY invoiced",
+          "priced in yuan",
+          "export to China"
         ]
       }
     ],
-    "companies_house_terms": [],
+    "companies_house_terms": [
+      "electronics import",
+      "Chinese components",
+      "shenzhen supplier",
+      "fabric import",
+      "textile China",
+      "Chinese fabrics",
+      "fashion export",
+      "china market",
+      "luxury apparel",
+      "software export",
+      "cloud services",
+      "china client"
+    ],
     "all_search_queries": [
-      "\"smartphone component importer\" UK",
-      "\"mobile phone parts\" China supplier UK",
-      "\\\"UK distributor\\\" \\\"Chinese chip\\",
-      "\n          ]",
-      "companies_house_terms",
-      ":",
-      [
-        "smartphone components",
-        "mobile parts",
-        "electronics imports"
-      ],
-      "\"computer hardware importer\" UK",
-      "\"SSD importer\" China UK",
-      "\\\"UK distributor\\\" \\\"Chinese motherboard\\",
-      [
-        "computer hardware",
-        "hardware imports",
-        "SSD importer"
-      ]
+      "\"electronics importer\" UK China",
+      "\"Chinese component supplier\" UK",
+      "\"import electronics from Shenzhen\"",
+      "\"fabric importer\" UK China",
+      "\"Chinese textile supplier\" UK",
+      "\"import cotton fabric\" UK",
+      "\"UK fashion brand\" China sales",
+      "\"luxury apparel\" China market UK",
+      "\"Chinese retailer\" UK supplier",
+      "\"SaaS\" China client UK",
+      "\"software subscription\" China UK",
+      "\"cloud services\" China UK"
     ],
     "status": "ready",
     "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b",
     "web_discovery_done": true,
-    "web_discovery_at": "2026-10-16T06:49:46.889Z"
+    "web_discovery_at": "2026-10-16T08:46:59.772Z"
   },
   "30a559cedd75df25": {
     "id": "30a559cedd75df25",
