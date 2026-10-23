@@ -54,6 +54,12 @@ on:
         required: false
         default: ""
 
+
+# One run at a time reads and writes the leads store; a second run waits for the first.
+concurrency:
+  group: fx-leads-store
+  cancel-in-progress: false
+
 jobs:
   discover:
     runs-on: ubuntu-latest
@@ -106,6 +112,10 @@ jobs:
           fi
 
       - name: Run the v2 pipeline (import → analyse → discover → enrich-contacts → enrich-decision-makers → enrich-website-intel → score → dedup → generate-drafts → export)
+        # Capped below the job's limit and allowed to fail, so the leads are still saved to the store after a
+        # slow or stuck run (the store would otherwise lose everything since the last save).
+        timeout-minutes: 60
+        continue-on-error: true
         env:
           AI_PROVIDER:                  groq
           GROQ_API_KEY:                 ${{ secrets.GROQ_API_KEY }}
