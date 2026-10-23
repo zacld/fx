@@ -55,7 +55,9 @@ jobs:
             if [ -z "$ARCHIVE_READ_TOKEN" ]; then
               echo "store empty and no ARCHIVE_READ_TOKEN secret: can't copy the old leads, stopping"; exit 1
             fi
-            git fetch -q --depth 1 "https://x-access-token:$ARCHIVE_READ_TOKEN@github.com/zacld/fx-archive.git" d505a2f3b274e72d4b076e266550a718efb0325a
+            # checkout leaves this repo's own token as an extra header on every github.com request, which
+            # would override the archive token: clear it for this one fetch
+            git -c http.https://github.com/.extraheader= fetch -q --depth 1 "https://x-access-token:$ARCHIVE_READ_TOKEN@github.com/zacld/fx-archive.git" d505a2f3b274e72d4b076e266550a718efb0325a
             git show FETCH_HEAD:data/leads.json > data/leads.json
             echo "store empty: starting from the last leads committed to fx-archive"
           elif [ "$code" -ne 0 ]; then
