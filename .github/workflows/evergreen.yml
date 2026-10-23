@@ -55,10 +55,19 @@ jobs:
             if [ -z "$ARCHIVE_READ_TOKEN" ]; then
               echo "store empty and no ARCHIVE_READ_TOKEN secret: can't copy the old leads, stopping"; exit 1
             fi
-            # checkout leaves this repo's own token as an extra header on every github.com request, which
-            # would override the archive token: clear it for this one fetch
-            git -c http.https://github.com/.extraheader= fetch -q --depth 1 "https://x-access-token:$ARCHIVE_READ_TOKEN@github.com/zacld/fx-archive.git" d505a2f3b274e72d4b076e266550a718efb0325a
-            git show FETCH_HEAD:data/leads.json > data/leads.json
+            # GitHub's file API (not git, which checkout's own credentials interfere with), so a token problem
+            # comes back as a clear status code
+            api=https://api.github.com/repos/zacld/fx-archive
+            auth=(-H "Authorization: Bearer $ARCHIVE_READ_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28")
+            repo=$(curl -s -o /dev/null -w '%{http_code}' "${auth[@]}" "$api")
+            if [ "$repo" != 200 ]; then
+              echo "ARCHIVE_READ_TOKEN can't see zacld/fx-archive (HTTP $repo): add it under the token's Repository access"; exit 1
+            fi
+            file=$(curl -s -L -o data/leads.json -w '%{http_code}' "${auth[@]}" -H "Accept: application/vnd.github.raw" \
+              "$api/contents/data/leads.json?ref=d505a2f3b274e72d4b076e266550a718efb0325a")
+            if [ "$file" != 200 ]; then
+              echo "ARCHIVE_READ_TOKEN sees fx-archive but can't read its files (HTTP $file): set Contents to Read-only"; exit 1
+            fi
             echo "store empty: starting from the last leads committed to fx-archive"
           elif [ "$code" -ne 0 ]; then
             exit "$code"
