@@ -74,13 +74,18 @@ jobs:
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          ARCHIVE_READ_TOKEN: ${{ secrets.ARCHIVE_READ_TOKEN }}   # first run only; delete the secret afterwards
         run: |
           set +e; node apps/web/scripts/leads-store.mjs get data/leads.json; code=$?; set -e
           if [ "$code" -eq 3 ]; then
-            # store still empty (first run after the move): start from the last leads.json committed to git
-            git fetch -q --depth 1 origin d505a2f3b274e72d4b076e266550a718efb0325a
-            git show d505a2f3b274e72d4b076e266550a718efb0325a:data/leads.json > data/leads.json
-            echo "store empty: starting from the last committed leads"
+            # Store still empty (first run after the move to this public repo): start from the last leads.json
+            # committed to the old private repo, read with a read-only token (secret ARCHIVE_READ_TOKEN).
+            if [ -z "$ARCHIVE_READ_TOKEN" ]; then
+              echo "store empty and no ARCHIVE_READ_TOKEN secret: can't copy the old leads, stopping"; exit 1
+            fi
+            git fetch -q --depth 1 "https://x-access-token:$ARCHIVE_READ_TOKEN@github.com/zacld/fx-archive.git" d505a2f3b274e72d4b076e266550a718efb0325a
+            git show FETCH_HEAD:data/leads.json > data/leads.json
+            echo "store empty: starting from the last leads committed to fx-archive"
           elif [ "$code" -ne 0 ]; then
             exit "$code"
           fi
