@@ -32,6 +32,10 @@ on:
     # Two runs a weekday (was five): the GitHub Actions allowance is 2,000 minutes a month across every workflow.
     - cron: '0 22 * * 1-5'   # 10pm UTC — overnight run
     - cron: '0 5 * * 1-5'    # 5am UTC  — final push, list ready by 6am BST
+  push:   # a change to this workflow runs it straight away (free on the public repo), so changes are tested at once
+    branches: [main]
+    paths:
+      - '.github/workflows/discovery.yml'
   workflow_dispatch:
     # Optional one-off overrides for trigger-quality audits. Blank → use the
     # scheduled defaults below. Useful when you want Brain 1 to see a wider /
