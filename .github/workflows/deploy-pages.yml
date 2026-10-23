@@ -35,6 +35,7 @@ jobs:
       # --filter: netlify-cli sees the npm workspaces (@fx/core, @fx/pipeline,
       # @fx/web) and refuses to deploy until told which one is the site.
       # Major version pinned so a new release can't silently break this again.
-      # --functions: /api/accounts, the password check in front of the Accounts page's list.
+      # --functions: /api/accounts and /api/leads (the account list and the event leads, both behind the
+      # Accounts password) and /api/market (the public market moves).
       - name: Deploy to Netlify
         run: npx netlify-cli@27 deploy --prod --filter @fx/web --dir="$(pwd)/apps/web/dist" --functions="$(pwd)/apps/web/netlify/functions" --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }}
