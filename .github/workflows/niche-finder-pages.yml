@@ -1,5 +1,8 @@
 name: Deploy to GitHub Pages
 
+# Public repo: anyone can read this workflow's logs, so print counts and company names only, never people's
+# names, emails or phones, and attach no files that hold them. Keys stay in secrets.
+
 # Serves two dashboards from one Pages deployment:
 #   /            → niche-finder dashboard (existing)
 #   /niche-generator/ → niche-generator-standalone dashboard (new)

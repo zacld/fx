@@ -1,5 +1,8 @@
 name: Deploy dashboard to Netlify
 
+# Public repo: anyone can read this workflow's logs, so print counts and company names only, never people's
+# names, emails or phones, and attach no files that hold them. Keys stay in secrets.
+
 on:
   push:
     branches: [main]
