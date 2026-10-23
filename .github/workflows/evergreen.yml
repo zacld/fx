@@ -23,6 +23,12 @@ on:
         required: false
         default: "false"
 
+
+# One run at a time reads and writes the leads store; a second run waits for the first.
+concurrency:
+  group: fx-leads-store
+  cancel-in-progress: false
+
 jobs:
   evergreen:
     runs-on: ubuntu-latest
@@ -74,6 +80,10 @@ jobs:
           fi
 
       - name: Run evergreen pipeline (insert playbook events → discover → enrich → score → export)
+        # Capped below the job's limit and allowed to fail, so the leads are still saved to the store after a
+        # slow or stuck run (the store would otherwise lose everything since the last save).
+        timeout-minutes: 60
+        continue-on-error: true
         env:
           BRAVE_API_KEY:                 ${{ secrets.BRAVE_API_KEY }}
           COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
