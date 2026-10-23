@@ -1,5 +1,8 @@
 name: Deploy Dashboard to Fly.io
 
+# Public repo: anyone can read this workflow's logs, so print counts and company names only, never people's
+# names, emails or phones, and attach no files that hold them. Keys stay in secrets.
+
 # Mirrors the GitHub Pages workflow: redeploy the Fly-hosted dashboard whenever
 # code changes (push to main) or the discovery pipeline commits new data.
 #

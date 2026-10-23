@@ -1,5 +1,8 @@
 name: FX Evergreen Discovery
 
+# Public repo: anyone can read this workflow's logs, so print counts and company names only, never people's
+# names, emails or phones, and attach no files that hold them. Keys stay in secrets.
+
 # Weekly job that discovers high-fit UK importers/distributors independently of
 # daily news flow. Runs the evergreen playbook (wine/spirits, food, machinery,
 # chemicals, packaging, furniture, textiles, automotive, electronics, logistics)

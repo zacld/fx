@@ -1,5 +1,8 @@
 name: FX company finder
 
+# Public repo: anyone can read this workflow's logs, so print counts and company names only, never people's
+# names, emails or phones, and attach no files that hold them. Keys stay in secrets.
+
 # Finds UK companies with foreign-currency flows for a bank FX desk — core
 # band £25m–£250m turnover — using lead-sourcer/:
 #   1. Loads 12 months of HMRC customs records (who imports/exports what),

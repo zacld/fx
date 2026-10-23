@@ -1,5 +1,8 @@
 name: FX Discovery
 
+# Public repo: anyone can read this workflow's logs, so print counts and company names only, never people's
+# names, emails or phones, and attach no files that hold them. Keys stay in secrets.
+
 # Daily v2 pipeline (TypeScript monorepo). Imports the committed data/*.json into
 # a throwaway SQLite DB, runs every stage, exports the DB back out to data/*.json,
 # refreshes the dashboard snapshot, and commits the result. The deploy workflows
