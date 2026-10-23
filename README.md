@@ -6,6 +6,11 @@ Market event → commercial relevance filter → business impact translation →
 
 **Total API cost: ~£0/day (free tiers — one LLM call per market event, no per-company AI)**
 
+> **This repository is public; the data is not.** Leads, the account list and API keys never live here:
+> leads and accounts sit in the dashboard's private Netlify Blobs store behind the Accounts password
+> (`/api/leads`, `/api/accounts`), keys in GitHub secrets. Workflow runs attach no files and log counts
+> and company names only. Never commit `data/leads.json`, an accounts export or a `.env` file.
+
 ---
 
 ## What it does
