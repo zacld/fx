@@ -37,7 +37,7 @@ on:
         required: false
         default: ""
       max_enrich:
-        description: "How many companies to check for turnover + directors (the rest of the list ships unchecked)"
+        description: "How many companies to check (under 200 = a test run: the Accounts page is left as it is)"
         required: false
         default: "1000"
       own_bank:
@@ -167,16 +167,20 @@ jobs:
           node-version: 22
           cache: npm
 
-      # A run started by a change to this file checks only 300 companies: it must not replace the full list.
+      # A small test run (Run workflow with "companies to check" under 200) must not replace the full list.
       - name: Upload to the Accounts page
         if: steps.accounts.outcome == 'success' && github.event_name != 'push'
         continue-on-error: true
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          MAX_ENRICH: ${{ inputs.max_enrich }}
         run: |
           if [ -z "$NETLIFY_SITE_ID" ] || [ -z "$NETLIFY_AUTH_TOKEN" ]; then
             echo "No Netlify secrets: Accounts page not updated"; exit 0
+          fi
+          if [ -n "$MAX_ENRICH" ] && [ "$MAX_ENRICH" -lt 200 ]; then
+            echo "Test run ($MAX_ENRICH companies): Accounts page not updated"; exit 0
           fi
           npm ci --workspace apps/web --no-audit --no-fund
           node apps/web/scripts/upload-accounts.mjs lead-sourcer/accounts.json
