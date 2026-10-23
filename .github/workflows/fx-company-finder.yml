@@ -1,0 +1,179 @@
+name: FX company finder
+
+# Finds UK companies with foreign-currency flows for a bank FX desk — core
+# band £25m–£250m turnover — using lead-sourcer/:
+#   1. Loads 12 months of HMRC customs records (who imports/exports what),
+#      HMRC trade statistics (where the UK trades each good, in £) and the
+#      free monthly Companies House bulk file, and matches them.
+#   2. Candidates: FX-niche companies with medium/large/group accounts, plus
+#      every company customs records show trading.
+#   3. Reads turnover, cost of sales, FX gains/losses, hedging and the
+#      "Bankers" line from filed accounts (tagged iXBRL, else the PDF via
+#      pdftotext, or OCR for scanned filings); looks up directors, owners and
+#      charges. Works out likely currencies, an FX wallet range, who the
+#      company banks with, recent triggers (new owner, refinancing, new
+#      director), when to call, and group roll-ups; splits into Core /
+#      Above / Below the band.
+# Then a web search per checked company confirms who runs the finance: search APIs
+# with keys (secrets SEARCH1API_KEY, TAVILY_API_KEY, EXA_API_KEY, SERPER_API_KEY), each
+# within its monthly allowance; at most SEARCH_MAX_PER_RUN searches a run (default 150).
+# Runs every weekday morning; searched companies are cached for 30 days, so each morning's
+# searches go to companies not yet checked.
+# Output: the dashboard's password-protected Accounts page (no run attachments: the repo is public).
+# Nothing is committed and nobody is contacted. Logs print aggregate counts only.
+#
+# Required secret: COMPANIES_HOUSE_API_KEY (the one discovery.yml uses).
+# Own bank: Investec by default (its existing clients are flagged as
+# cross-sell); override with the run input or a repository variable OWN_BANK.
+
+on:
+  workflow_dispatch:
+    inputs:
+      niches:
+        description: "Niche ids, comma-separated (blank = every niche; ids are in lead-sourcer/config/fx_niches.json)"
+        required: false
+        default: ""
+      max_enrich:
+        description: "How many companies to check for turnover + directors (the rest of the list ships unchecked)"
+        required: false
+        default: "1000"
+      own_bank:
+        description: "Your bank's name — its existing clients get flagged (blank = repository variable OWN_BANK, else Investec)"
+        required: false
+        default: ""
+  schedule:
+    - cron: '17 5 * * 1-5'   # weekdays 05:17 UTC (06:17 UK in summer): the list is ready before 7am
+
+concurrency:
+  group: fx-company-finder
+  cancel-in-progress: true
+
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PDF tools (pdftotext, OCR)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils tesseract-ocr > /dev/null
+
+      - name: Unit tests
+        working-directory: lead-sourcer
+        run: python -m unittest discover -s tests
+
+      - name: Month
+        id: month
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      # ~470MB; downloaded once a month, then reused by every run that month.
+      - name: Cache the Companies House bulk file
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer
+          key: ch-bulk-${{ steps.month.outputs.month }}
+          restore-keys: ch-bulk-
+
+      - name: Cache the HMRC trader files and trade statistics
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/hmrc
+          key: hmrc-v2-${{ steps.month.outputs.month }}
+          restore-keys: |
+            hmrc-v2-
+            hmrc-traders-
+
+      # Each company's accounts read, officers, owners and charges, kept 7 days (sooner if newer accounts are
+      # filed): a morning run looks up only the companies not seen this week, saving most of its Actions minutes.
+      - name: Cache Companies House lookups
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/register
+          key: register-${{ github.run_id }}
+          restore-keys: register-
+
+      - name: Find companies
+        working-directory: lead-sourcer
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          CH_RATE_LIMIT_SECONDS: "0.8"   # leaves headroom on the key the discovery pipeline also uses
+          PYTHONUNBUFFERED: "1"
+          REGISTER_CACHE_DAYS: "7"
+          NICHES: ${{ inputs.niches }}
+          MAX_ENRICH: ${{ inputs.max_enrich }}
+          OWN_BANK: ${{ inputs.own_bank || vars.OWN_BANK || 'Investec' }}
+          WARM_AUDITORS: ${{ vars.WARM_AUDITORS }}   # introducer audit firms, comma-separated (optional)
+          # Each company checked costs 5 Companies House calls (~4s). Pushes: 300 (~25 min);
+          # schedule/manual: 1,000 (~75 min). Customs-proven traders are checked first.
+          DEFAULT_ENRICH: ${{ github.event_name == 'push' && '300' || '1000' }}
+        run: python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv
+
+      # Search results are kept for 30 days, so a company re-checked within that costs no credits.
+      - name: Cache Google search results
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/search
+          key: search-${{ github.run_id }}
+          restore-keys: search-
+
+      # Who really runs the finance: a Google search (Search1API) per checked company, best first,
+      # re-grading the finance contact. Skipped (list still written) without the SEARCH1API_KEY secret.
+      - name: Confirm finance contacts
+        id: confirm
+        continue-on-error: true
+        working-directory: lead-sourcer
+        env:
+          # Search APIs used in this order, each within its monthly allowance (free tiers first).
+          SEARCH1API_KEY: ${{ secrets.SEARCH1API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          SEARCH1API_MONTHLY: ${{ vars.SEARCH1API_MONTHLY || '200' }}
+          TAVILY_MONTHLY: ${{ vars.TAVILY_MONTHLY || '1000' }}
+          EXA_MONTHLY: ${{ vars.EXA_MONTHLY || '500' }}
+          SERPER_MONTHLY: ${{ vars.SERPER_MONTHLY || '2500' }}   # Serper's 2,500 free sign-up searches (one-off)
+          SEARCH_MAX_PER_RUN: ${{ vars.SEARCH_MAX_PER_RUN || '150' }}   # clears the backlog; back to ~75 once Serper's credits are spent
+          PYTHONUNBUFFERED: "1"
+        run: python tools/confirm_contacts.py fx_companies.csv --output fx_companies.xlsx --csv-out fx_companies_confirmed.csv
+
+      # No run attachments: on a public repo anyone with a GitHub account could download them, and the list
+      # names finance directors. The list goes only to the password-protected Accounts page below (CSV export there).
+
+      # The dashboard's Accounts page (/accounts): the checked companies go to the
+      # site's private Netlify Blobs store, readable only through the page's
+      # password check — never committed, never in the public build. Uses the
+      # dashboard deploy's secrets (NETLIFY_SITE_ID, NETLIFY_AUTH_TOKEN); skipped
+      # without them. The log shows counts only.
+      - name: Accounts page data
+        id: accounts
+        continue-on-error: true
+        working-directory: lead-sourcer
+        run: |
+          list=fx_companies.csv
+          [ -f fx_companies_confirmed.csv ] && list=fx_companies_confirmed.csv
+          python tools/to_accounts_json.py "$list" --output accounts.json
+
+      - uses: actions/setup-node@v4
+        if: steps.accounts.outcome == 'success' && github.event_name != 'push'
+        with:
+          node-version: 22
+          cache: npm
+
+      # A run started by a change to this file checks only 300 companies: it must not replace the full list.
+      - name: Upload to the Accounts page
+        if: steps.accounts.outcome == 'success' && github.event_name != 'push'
+        continue-on-error: true
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          if [ -z "$NETLIFY_SITE_ID" ] || [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "No Netlify secrets: Accounts page not updated"; exit 0
+          fi
+          npm ci --workspace apps/web --no-audit --no-fund
+          node apps/web/scripts/upload-accounts.mjs lead-sourcer/accounts.json

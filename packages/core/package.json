@@ -1,0 +1,37 @@
+{
+  "name": "@fx/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared domain core for the FX Discovery pipeline & dashboard: schema, signals, scoring.",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./signals": "./src/signals.ts",
+    "./scoring": "./src/scoring.ts",
+    "./contacts": "./src/contacts.ts",
+    "./cache": "./src/cache.ts",
+    "./db": "./src/db/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:import": "tsx src/db/import-json.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "cheerio": "^1.2.0",
+    "drizzle-orm": "^0.33.0",
+    "libphonenumber-js": "^1.13.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.19.19",
+    "tsx": "^4.21.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.1"
+  }
+}

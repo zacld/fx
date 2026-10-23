@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm ci --workspace=@fx/web --no-audit --no-fund",
+  "buildCommand": "npm run build",
+  "outputDirectory": "apps/web/dist",
+  "redirects": [
+    {
+      "source": "/accounts",
+      "destination": "https://teal-rugelach-d2ff6d.netlify.app/accounts",
+      "permanent": false
+    },
+    {
+      "source": "/accounts.html",
+      "destination": "https://teal-rugelach-d2ff6d.netlify.app/accounts",
+      "permanent": false
+    },
+    {
+      "source": "/moves",
+      "destination": "https://teal-rugelach-d2ff6d.netlify.app/moves",
+      "permanent": false
+    },
+    {
+      "source": "/moves.html",
+      "destination": "https://teal-rugelach-d2ff6d.netlify.app/moves",
+      "permanent": false
+    }
+  ]
+}

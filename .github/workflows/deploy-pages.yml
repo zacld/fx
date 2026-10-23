@@ -1,0 +1,37 @@
+name: Deploy dashboard to Netlify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'apps/web/public/data/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22   # netlify-cli 27 requires Node >= 22.13
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dashboard
+        working-directory: apps/web
+        run: npm run build
+        env:
+          VITE_COMPANIES_HOUSE_API_KEY: ${{ secrets.VITE_COMPANIES_HOUSE_API_KEY }}
+
+      # --filter: netlify-cli sees the npm workspaces (@fx/core, @fx/pipeline,
+      # @fx/web) and refuses to deploy until told which one is the site.
+      # Major version pinned so a new release can't silently break this again.
+      # --functions: /api/accounts, the password check in front of the Accounts page's list.
+      - name: Deploy to Netlify
+        run: npx netlify-cli@27 deploy --prod --filter @fx/web --dir="$(pwd)/apps/web/dist" --functions="$(pwd)/apps/web/netlify/functions" --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }}

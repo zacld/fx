@@ -1,0 +1,34 @@
+{
+  "name": "@fx/pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "FX Discovery v2 pipeline — discrete idempotent CLI stages over the SQLite DB.",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "analyse": "tsx src/stages/analyse.ts",
+    "discover": "tsx src/stages/discover.ts",
+    "score": "tsx src/stages/score.ts",
+    "dedup": "tsx src/stages/dedup.ts",
+    "rescore": "tsx src/stages/score.ts && tsx src/stages/dedup.ts",
+    "enrich-contacts": "tsx src/stages/enrich-contacts.ts",
+    "compare-scores": "tsx src/dev/compare-scores.ts",
+    "all": "tsx src/stages/analyse.ts && tsx src/stages/discover.ts && tsx src/stages/enrich-contacts.ts && tsx src/stages/score.ts && tsx src/stages/dedup.ts"
+  },
+  "dependencies": {
+    "@fx/core": "file:../core",
+    "cheerio": "^1.2.0",
+    "p-limit": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.19.19",
+    "better-sqlite3": "^11.10.0",
+    "drizzle-orm": "^0.33.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.1",
+    "zod": "^3.23.8"
+  }
+}

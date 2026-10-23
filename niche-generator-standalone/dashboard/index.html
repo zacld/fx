@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Niche Generator — FX Sector Results</title>
+  <style>
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #222533;
+      --border:    #2e3347;
+      --text:      #e2e6f0;
+      --muted:     #8892a4;
+      --accent:    #4f8ef7;
+      --green:     #34d399;
+      --green-dim: #0d3d2a;
+      --orange:    #f97316;
+      --orange-dim:#3d2000;
+      --blue:      #60a5fa;
+      --blue-dim:  #0d2a4a;
+      --purple:    #a78bfa;
+      --purple-dim:#2d1a5a;
+      --yellow:    #fbbf24;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    header .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .funnel {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    .funnel-stat {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .funnel-stat span { color: var(--accent); font-weight: 600; }
+    .funnel-arrow { color: var(--muted); font-size: 12px; }
+
+    /* ── Controls ── */
+    .controls {
+      padding: 12px 24px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 400px;
+    }
+    .search-wrap input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px 7px 32px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 4px;
+    }
+    .filter-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover { color: var(--text); border-color: var(--accent); }
+    .filter-btn.active { color: var(--text); border-color: var(--accent); background: var(--accent-dim, #1a3060); }
+
+    .count-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-left: auto;
+    }
+    .count-label strong { color: var(--text); }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 12px;
+      padding: 16px 24px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: #44507a; }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .direction-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .direction-dot.pays     { background: var(--orange); }
+    .direction-dot.receives { background: var(--green); }
+    .direction-dot.both     { background: var(--blue); }
+
+    .sector-name {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text);
+    }
+    .sic-code {
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 12px;
+    }
+
+    .mechanism-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      width: fit-content;
+    }
+    .mechanism-badge.pays {
+      background: var(--orange-dim);
+      color: var(--orange);
+      border: 1px solid #6b3000;
+    }
+    .mechanism-badge.receives {
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid #0f6040;
+    }
+    .mechanism-badge.both {
+      background: var(--blue-dim);
+      color: var(--blue);
+      border: 1px solid #1a4070;
+    }
+
+    .filter-reason {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .source-chip {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: monospace;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Empty state ── */
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty strong { display: block; font-size: 16px; margin-bottom: 6px; color: var(--text); }
+
+    /* ── Meta bar ── */
+    .meta-bar {
+      text-align: center;
+      padding: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <h1>Niche Generator — FX Sector Results</h1>
+      <div class="subtitle">UK business sectors with structural foreign currency exposure</div>
+    </div>
+    <div class="funnel" id="funnel">
+      <div class="funnel-stat">Sources: <span id="count-raw">—</span></div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-stat">First filter: <span id="count-first">—</span></div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-stat">Final: <span id="count-final">—</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search" placeholder="Search sector or mechanism…" />
+  </div>
+
+  <div class="filter-group" id="dir-filters">
+    <button class="filter-btn active" data-dir="all">All</button>
+    <button class="filter-btn" data-dir="pays" style="color:var(--orange)">Pays foreign</button>
+    <button class="filter-btn" data-dir="receives" style="color:var(--green)">Receives foreign</button>
+    <button class="filter-btn" data-dir="both" style="color:var(--blue)">Both directions</button>
+  </div>
+
+  <div class="filter-group" id="src-filters">
+    <button class="filter-btn active" data-src="all">All sources</button>
+    <button class="filter-btn" data-src="ons_sic">SIC</button>
+    <button class="filter-btn" data-src="taf">TAF</button>
+    <button class="filter-btn" data-src="wikipedia">Wikipedia</button>
+  </div>
+
+  <div class="count-label">Showing <strong id="visible-count">—</strong></div>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="meta-bar" id="meta-bar"></div>
+
+<script>
+let ALL_NICHES = [];
+let dirFilter = 'all';
+let srcFilter = 'all';
+
+function parseSectorName(raw) {
+  const m = raw.match(/^(.*?)\s*\(SIC (\d+)\)\s*$/);
+  if (m) return { name: m[1].trim(), sic: m[2] };
+  return { name: raw, sic: null };
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const grid = document.getElementById('grid');
+
+  const visible = ALL_NICHES.filter(n => {
+    if (dirFilter !== 'all' && n.fx_direction !== dirFilter) return false;
+    if (srcFilter !== 'all' && n.source !== srcFilter) return false;
+    if (q && !n.sector_name.toLowerCase().includes(q) && !n.mechanism.toLowerCase().includes(q) && !n.filter_reason.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('visible-count').textContent = visible.length;
+
+  if (visible.length === 0) {
+    grid.innerHTML = '<div class="empty"><strong>No results</strong>Try a different search or filter</div>';
+    return;
+  }
+
+  grid.innerHTML = visible.map(n => {
+    const { name, sic } = parseSectorName(n.sector_name);
+    const sicSpan = sic ? ` <span class="sic-code">(SIC ${sic})</span>` : '';
+    const dir = n.fx_direction || 'pays';
+    const srcLabel = { ons_sic: 'ONS SIC', taf: 'TAF', wikipedia: 'Wikipedia' }[n.source] || n.source;
+    const mechanismText = n.mechanism || '';
+    const reasonText = n.filter_reason ? n.filter_reason.replace(/,?\s*$/, '.') : '';
+
+    return `
+      <div class="card">
+        <div class="card-top">
+          <div class="direction-dot ${dir}"></div>
+          <div class="sector-name">${escHtml(name)}${sicSpan}</div>
+        </div>
+        <div class="mechanism-badge ${dir}">${escHtml(mechanismText)}</div>
+        <div class="filter-reason">${escHtml(reasonText)}</div>
+        <div class="card-footer">
+          ${n.source ? `<span class="source-chip">${escHtml(srcLabel)}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// Search
+document.getElementById('search').addEventListener('input', render);
+
+// Direction filter buttons
+document.getElementById('dir-filters').addEventListener('click', e => {
+  const btn = e.target.closest('[data-dir]');
+  if (!btn) return;
+  dirFilter = btn.dataset.dir;
+  document.querySelectorAll('[data-dir]').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
+
+// Source filter buttons
+document.getElementById('src-filters').addEventListener('click', e => {
+  const btn = e.target.closest('[data-src]');
+  if (!btn) return;
+  srcFilter = btn.dataset.src;
+  document.querySelectorAll('[data-src]').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
+
+// Load data
+fetch('data/niches.json')
+  .then(r => r.json())
+  .then(data => {
+    ALL_NICHES = data.niches || [];
+    const meta = data.meta || {};
+
+    document.getElementById('count-raw').textContent   = (meta.sectors_raw   || 0).toLocaleString();
+    document.getElementById('count-first').textContent = (meta.first_filter  || 0).toLocaleString();
+    document.getElementById('count-final').textContent = (meta.final         || 0).toLocaleString();
+
+    const ts = meta.generated_at ? new Date(meta.generated_at).toLocaleString() : '';
+    document.getElementById('meta-bar').textContent = ts ? `Generated ${ts} UTC` : '';
+
+    render();
+  })
+  .catch(err => {
+    document.getElementById('grid').innerHTML =
+      `<div class="empty"><strong>Could not load data</strong>${err.message}<br><br>Serve this directory over HTTP, or run the pipeline first to generate dashboard/data/niches.json</div>`;
+  });
+</script>
+</body>
+</html>

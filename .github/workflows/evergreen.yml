@@ -1,0 +1,109 @@
+name: FX Evergreen Discovery
+
+# Weekly job that discovers high-fit UK importers/distributors independently of
+# daily news flow. Runs the evergreen playbook (wine/spirits, food, machinery,
+# chemicals, packaging, furniture, textiles, automotive, electronics, logistics)
+# through the same website-validation and scoring pipeline as the daily run.
+#
+# Adds a rolling pool of ~50-200 validated evergreen_saving leads per week.
+# These feed into the daily READY ranking and gain freshness bonus when first found.
+#
+# Required secrets: same as discovery.yml (GROQ not needed — no AI calls here).
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'   # 2am Sunday UTC — before the working week, plenty of time
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Re-run evergreen even if this week's events already exist"
+        required: false
+        default: "false"
+
+jobs:
+  evergreen:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install workspace deps
+        run: npm ci
+
+      # The leads (director names, phones, emails) live in the site's private store behind the Accounts
+      # password, not in git. A run without them would overwrite the store with only today's finds, so it stops.
+      - name: Fetch the leads from the private store
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set +e; node apps/web/scripts/leads-store.mjs get data/leads.json; code=$?; set -e
+          if [ "$code" -eq 3 ]; then
+            # store still empty (first run after the move): start from the last leads.json committed to git
+            git fetch -q --depth 1 origin d505a2f3b274e72d4b076e266550a718efb0325a
+            git show d505a2f3b274e72d4b076e266550a718efb0325a:data/leads.json > data/leads.json
+            echo "store empty: starting from the last committed leads"
+          elif [ "$code" -ne 0 ]; then
+            exit "$code"
+          fi
+
+      - name: Run evergreen pipeline (insert playbook events → discover → enrich → score → export)
+        env:
+          BRAVE_API_KEY:                 ${{ secrets.BRAVE_API_KEY }}
+          COMPANIES_HOUSE_API_KEY:      ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          FX_SMTP_DISABLE:              "1"
+          FX_HOST_MIN_INTERVAL_MS:      "800"
+          FX_EMAIL_VERIFIER_URL:        ${{ secrets.FX_EMAIL_VERIFIER_URL }}
+          FX_EMAIL_VERIFIER_TOKEN:      ${{ secrets.FX_EMAIL_VERIFIER_TOKEN }}
+          GOOGLE_SHEET_ID:              ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_KEY:   ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          GOOGLE_SHEET_TAB:             ${{ vars.GOOGLE_SHEET_TAB }}
+          EVERGREEN_FORCE:              ${{ inputs.force }}
+        run: npm run pipeline:evergreen
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: pip install requests dnspython --quiet
+
+      - name: Enrich CH accounts
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+        run: python3 scripts/enrich_ch_accounts.py
+        continue-on-error: true
+
+      - name: Enrich directories
+        run: python3 scripts/enrich_directories.py
+        continue-on-error: true
+
+      - name: Compute call readiness
+        run: python3 scripts/compute_call_readiness.py
+        continue-on-error: true
+
+      - name: Refresh dashboard snapshot
+        run: npm run sync-web-data
+
+      - name: Save the leads to the private store
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: node apps/web/scripts/leads-store.mjs put data/leads.json
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "FX Discovery Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/events.json apps/web/public/data/events.json   # leads: private store only
+          git diff --staged --quiet || git commit -m "data: evergreen update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git checkout -- .
+          git pull --rebase origin main
+          git push

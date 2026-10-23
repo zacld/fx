@@ -1,0 +1,3 @@
+# Standard library only: HTTP via urllib, CSV, zip and HTML parsing are all
+# built in, so there's nothing to install. Kept so Dockerfile/Vercel builds
+# (which run pip install -r requirements.txt) work unchanged.

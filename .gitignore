@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.env
+*.env.local
+*.env.*.local
+*.pyc
+__pycache__/
+.DS_Store
+.vercel/
+# v2: SQLite (regenerable from data/leads.json|events.json via @fx/core db:import)
+*.db
+*.db-shm
+*.db-wal
+# v2: per-run logs + HTTP/CH caches — local/CI artifacts, not committed
+data/runs/
+data/cache/
+# Event-engine leads (names, phones, emails): kept in the site's private store (/api/leads), not in git
+data/leads.json
+apps/web/public/data/leads.json
+public/data/leads.json

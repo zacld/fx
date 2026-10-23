@@ -1,0 +1,28 @@
+# Fly.io config for the lead-sourcer HTTP wrapper (server.py).
+# Deploy from this directory: flyctl deploy
+# This hosts the *trigger/status/CSV-download* API, not a scheduled job —
+# nothing here runs the pipeline automatically. POST /run to kick off a run,
+# poll GET /status, then GET /leads.csv once it's done.
+#
+# Secrets:
+#   flyctl secrets set COMPANIES_HOUSE_API_KEY=...
+#   flyctl secrets set TRIGGER_TOKEN=...   # recommended — guards POST /run
+# Without CH_BULK_FILE (the ~470MB Companies House bulk zip on a volume)
+# runs use the search API, which samples each SIC code rather than covering
+# every company.
+
+app            = "fx-lead-sourcer"
+primary_region = "lhr"
+
+[build]
+
+[http_service]
+  internal_port        = 8080
+  force_https          = true
+  auto_stop_machines   = true
+  auto_start_machines  = true
+  min_machines_running = 0
+
+[[vm]]
+  size   = "shared-cpu-1x"
+  memory = "512mb"

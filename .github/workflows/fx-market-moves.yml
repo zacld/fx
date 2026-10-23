@@ -1,0 +1,59 @@
+name: FX market moves
+
+# The day-to-day market moves for the dashboard's /moves page: official ECB
+# reference rates -> the pound's moves against each currency (1d/1w/1m/3m),
+# material moves flagged (market-moves/moves.py, MOVE_RULES), uploaded to the
+# site's private Netlify Blobs store and served by /api/market. Separate from
+# the company finder: nothing here touches it.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7 6 * * 1-5'    # weekdays 06:07 UTC: yesterday's close, before the working day
+    - cron: '37 15 * * 1-5'  # weekdays 15:37 UTC: after the ECB's ~15:00 CET fix
+  push:
+    paths:
+      - '.github/workflows/fx-market-moves.yml'
+      - 'market-moves/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fx-market-moves
+  cancel-in-progress: true
+
+jobs:
+  moves:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tests
+        working-directory: market-moves
+        run: python -m unittest discover -s tests
+      - name: Build the market moves
+        working-directory: market-moves
+        run: python moves.py --output market.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Upload to the /moves page
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          if [ -z "$NETLIFY_SITE_ID" ] || [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "No Netlify secrets: /moves not updated"; exit 0
+          fi
+          npm ci --workspace apps/web --no-audit --no-fund
+          node apps/web/scripts/upload-market.mjs market-moves/market.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fx-market-moves
+          path: market-moves/market.json
+          retention-days: 14
