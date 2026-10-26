@@ -44,22 +44,44 @@ function pathOf(url: string): string {
   try { return new URL(url).pathname.toLowerCase(); } catch { return ""; }
 }
 
+// A sitemap index can list hundreds of child sitemaps (one per product range,
+// month of posts, image set…). Following them all, one host-gated fetch after
+// another, once kept a single lead busy for most of an hour and stalled the
+// decision-maker stage. So: at most MAX_SITEMAP_FETCHES sitemap reads per
+// site, child sitemaps likely to hold company pages first, product / post /
+// tag / image sitemaps last.
+const MAX_SITEMAP_FETCHES = 6;
+const LIKELY_PAGES = /page|main|static|site|general|company/i;
+const UNLIKELY_PAGES = /product|categor|tag|post|author|image|video|attachment|archive|news|blog|brand|shop|portfolio/i;
+
+/** Child sitemaps worth reading, best first. */
+export function rankChildSitemaps(locs: ReadonlyArray<string>): string[] {
+  const rank = (u: string): number => {
+    const name = (u.split("/").pop() ?? u).replace(/sitemap/gi, "");
+    return LIKELY_PAGES.test(name) ? 0 : UNLIKELY_PAGES.test(name) ? 2 : 1;
+  };
+  return locs.map((u, i) => ({ u, r: rank(u), i })).sort((a, b) => a.r - b.r || a.i - b.i).map((x) => x.u);
+}
+
 /** Parse a sitemap.xml body for <loc>...</loc> URLs. Sitemap-index files are followed one level deep. */
-async function readSitemap(url: string, fetcher: HtmlFetcher, depth = 0): Promise<string[]> {
-  if (depth > 1) return [];
+async function readSitemap(url: string, fetcher: HtmlFetcher, budget: { fetches: number }, depth = 0): Promise<string[]> {
+  if (depth > 1 || budget.fetches <= 0) return [];
+  budget.fetches--;
   const got = await fetcher(url, 8000);
   if (!got) return [];
   const xml = got.html.slice(0, SITEMAP_LIMIT_BYTES);
   const locs = Array.from(xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)).map((m) => m[1]!.trim());
   // Sitemap-index? Children that end with .xml are themselves sitemaps.
   const out: string[] = [];
+  const children: string[] = [];
   for (const loc of locs) {
-    if (/\.xml(\?|$)/i.test(loc)) {
-      for (const u of await readSitemap(loc, fetcher, depth + 1)) out.push(u);
-    } else {
-      out.push(loc);
-    }
+    if (/\.xml(\?|$)/i.test(loc)) children.push(loc);
+    else out.push(loc);
     if (out.length > 5000) break;       // safety
+  }
+  for (const child of rankChildSitemaps(children)) {
+    if (budget.fetches <= 0 || out.length > 5000) break;
+    for (const u of await readSitemap(child, fetcher, budget, depth + 1)) out.push(u);
   }
   return out;
 }
@@ -102,9 +124,10 @@ export async function discoverPages(opts: DiscoverPagesOptions): Promise<string[
   // to collect enough that the prioritise step has the URLs it needs to pick
   // from. Hard ceiling of 200 still avoids pathological 10k-URL sitemaps.
   const COLLECT_CAP = Math.max(50, max * 8, 200);
+  const budget = { fetches: MAX_SITEMAP_FETCHES };
   for (const sm of sitemapUrls) {
-    if (seen.size >= COLLECT_CAP) break;
-    for (const u of await readSitemap(sm, fetcher)) {
+    if (seen.size >= COLLECT_CAP || budget.fetches <= 0) break;
+    for (const u of await readSitemap(sm, fetcher, budget)) {
       keep(u);
       if (seen.size >= COLLECT_CAP) break;
     }

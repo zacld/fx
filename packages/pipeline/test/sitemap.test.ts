@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { discoverPages } from "../src/sources/sitemap.js";
+import { discoverPages, rankChildSitemaps } from "../src/sources/sitemap.js";
 import type { HtmlFetcher } from "../src/sources/fetch.js";
 
 function fixedFetcher(pages: Record<string, string>): HtmlFetcher {
@@ -48,6 +48,27 @@ describe("discoverPages", () => {
       headOk: async () => false,
     });
     expect(got).toContain("https://acmewine.co.uk/products/wine");
+  });
+
+  it("reads only a few child sitemaps of a huge index, page sitemaps first", async () => {
+    const children = Array.from({ length: 300 }, (_, i) => `https://shop.co.uk/product-sitemap${i + 1}.xml`);
+    children.splice(150, 0, "https://shop.co.uk/page-sitemap.xml");
+    const fetched: string[] = [];
+    const fetcher: HtmlFetcher = async (url) => {
+      fetched.push(url);
+      if (url.endsWith("/sitemap.xml")) return { html: `<sitemapindex>${children.map((c) => `<sitemap><loc>${c}</loc></sitemap>`).join("")}</sitemapindex>`, finalUrl: url };
+      if (url.endsWith("/page-sitemap.xml")) return { html: "<urlset><url><loc>https://shop.co.uk/about-us</loc></url></urlset>", finalUrl: url };
+      if (url.includes("product-sitemap")) return { html: "<urlset><url><loc>https://shop.co.uk/p/1</loc></url></urlset>", finalUrl: url };
+      return null;
+    };
+    const got = await discoverPages({ homeUrl: "https://shop.co.uk", relevant: () => true, fetcher, headOk: async () => false });
+    expect(got).toContain("https://shop.co.uk/about-us");
+    expect(fetched.filter((u) => u.endsWith(".xml")).length).toBeLessThanOrEqual(6);
+  });
+
+  it("ranks page sitemaps before product / post ones", () => {
+    expect(rankChildSitemaps(["a/product-sitemap.xml", "a/post-sitemap.xml", "a/sitemap-2.xml", "a/page-sitemap.xml"]))
+      .toEqual(["a/page-sitemap.xml", "a/sitemap-2.xml", "a/product-sitemap.xml", "a/post-sitemap.xml"]);
   });
 
   it("falls back to HEAD-probing slugs when there's no sitemap", async () => {
