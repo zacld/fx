@@ -58,6 +58,9 @@ CASES = [
      (-78_704, -204_649), ""),
     ("12467589", "OCR p25", "stated after charging/(crediting):\n£ £\nForeign exchange differences (105,529) 66,700",
      (105_529, -66_700), ""),
+    ("01207120", "pdftotext -layout columns, £'000", "Operating profit is stated after charging:\n"
+     "                                         2025          2024\n                                        £'000         £'000\n"
+     "Net foreign exchange losses                 56            58", (-56_000, -58_000), ""),
     # Not the P&L line
     ("12467589", "translation reserve", "Foreign currency translation reserve 100,190 116,065", None, ""),
     ("09914960", "hedging and cash-pooling lines", "£'000 £'000\nFair value gains on exchange rate futures fair value "
@@ -125,7 +128,17 @@ class TestFxTagsInAccounts(unittest.TestCase):
 <tr><td>Stocks recognised as expenses</td>
  <td><ix:nonFraction name="{FX}" contextRef="C" unitRef="u1" scale="0" sign="-">113,049,604</ix:nonFraction></td>
  <td><ix:nonFraction name="{FX}" contextRef="P" unitRef="u1" scale="0" sign="-">100,459,883</ix:nonFraction></td></tr>
-<tr><td>Exchange differences</td><td>150,529</td><td>41,380</td></tr>""")
+<tr>
+      <td class="label">
+        Exchange differences
+      </td>
+      <td class="figure">
+        150,529
+      </td>
+      <td class="figure">
+        41,380
+      </td>
+    </tr>""")
         f = accounts.extract_facts(doc)
         self.assertEqual((f["fx_gain_loss"], f["fx_gain_loss_prior"], f["fx_gain_loss_check"]), (-150_529, -41_380, ""))
         self.assertEqual(f["fx_gain_loss_evidence"], 'accounts text: "Exchange differences 150,529 41,380"')
@@ -164,6 +177,14 @@ class TestFxInPdfText(unittest.TestCase):
         f = accounts.extract_facts_from_text(text, "2025-12-31", "scanned pdf")
         self.assertEqual((f["fx_gain_loss"], f["fx_gain_loss_prior"]), (62_022, 99_844))
         self.assertEqual(f["fx_gain_loss_evidence"], 'scanned accounts p3: "Exchange differences (62,022) (99,844)"')
+
+    def test_ocr_dollar_sign_is_usually_a_pound(self):
+        # 12467589 p25: OCR turned the "£" heading into "$"
+        page = "stated after charging/(crediting):\n$ $\nForeign exchange differences (105,529) 66,700"
+        self.assertIn("$", fx_text.read(page)["check"])
+        self.assertEqual(fx_text.read(page, ocr=True)["value"], 105_529)
+        dollars = "All figures in US dollars\nafter charging:\n$'000 $'000\nExchange differences 1,262 (1,123)"
+        self.assertIn("$", fx_text.read(dollars, ocr=True)["check"])
 
     def test_pages_tried_for_the_fx_note(self):
         # 30 pages, 6 already read: 18-27 first (60-90%), then 7, 8 (12 pages at most)

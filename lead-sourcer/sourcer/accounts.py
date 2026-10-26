@@ -388,9 +388,9 @@ def _screen_fx_tags(scanner: "_IxbrlScanner") -> str:
     return why
 
 
-def _fx_from_text(facts: dict, text: str, how: str, scale_text: Optional[str] = None) -> bool:
+def _fx_from_text(facts: dict, text: str, how: str, ocr: bool = False) -> bool:
     """Fill the FX fields from an FX line in accounts text; True when a line was found (a figure or a check)."""
-    found = fx_text.read(text, scale_text)
+    found = fx_text.read(text, ocr=ocr)
     if not found:
         return False
     if found["check"]:
@@ -572,7 +572,7 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
     if how == "scanned pdf" and facts["fx_gain_loss"] is None and not facts["fx_gain_loss_check"]:
         # the FX line is in the notes, past the pages OCR'd for the company information
         page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None)
-        if page and _fx_from_text(facts, page, f"scanned accounts p{number}"):
+        if page and _fx_from_text(facts, page, f"scanned accounts p{number}", ocr=True):
             check_fx(facts)
     return facts
 
@@ -726,7 +726,8 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
         "fx_gain_loss_evidence": "",
     }
     for number, page in enumerate(pages, 1):
-        if _fx_from_text(facts, page, f"{'scanned ' if how == 'scanned pdf' else ''}accounts p{number}"):
+        if _fx_from_text(facts, page, f"{'scanned ' if how == 'scanned pdf' else ''}accounts p{number}",
+                         ocr=how == "scanned pdf"):
             break
     return check_fx(facts)
 

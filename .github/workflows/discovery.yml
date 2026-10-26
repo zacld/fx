@@ -144,6 +144,9 @@ jobs:
           # carries on) and give up on one slow site after 2 minutes, so score / dedup / export always run.
           FX_DM_BUDGET_MIN:             "35"
           FX_DM_LEAD_TIMEOUT_S:         "120"
+          # Website intel likewise: 15 minutes, 90 seconds a site; a site read is left 14 days.
+          FX_INTEL_BUDGET_MIN:          "15"
+          FX_INTEL_LEAD_TIMEOUT_S:      "90"
           # Optional: set FX_EMAIL_VERIFIER_URL (+ FX_EMAIL_VERIFIER_TOKEN) as
           # GitHub secrets to route verification through Hunter / Snov /
           # NeverBounce / a custom worker. When set, takes precedence over the
