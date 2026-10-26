@@ -1,0 +1,54 @@
+name: FX case study
+
+# How real filings show their foreign-exchange gain/loss, for the case-study
+# library in lead-sourcer/tests/fx_cases/ (lead-sourcer/tools/fx_case_study.py).
+# Runs when this file or the tool changes (free on the public repo), or by hand
+# with other company numbers. Public repo: the log holds accounts figures and
+# table rows only (public records, no personal names) and there are no attachments.
+
+on:
+  workflow_dispatch:
+    inputs:
+      numbers:
+        description: 'Company numbers, space-separated'
+        required: false
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fx-case-study.yml
+      - lead-sourcer/tools/fx_case_study.py
+
+permissions:
+  contents: read
+
+jobs:
+  case-study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # iXBRL with an FX figure (Wanis first: the £113m "loss"), iXBRL without one, scanned PDFs.
+      DEFAULT_NUMBERS: >-
+        00795535 SC302951 03010238 01072524 04955681 15457728 07292813 07243661 02213734 09506166
+        05324059 04667077 11539600 05748278 12608794
+        SC204765 00929005 02430421 NI057478 00782674 06848372 07992951 03005254 03028250 01620340 02512025
+        07461227 03441802 01408420 01207120 09914960 01003962 04902094 10875762 02035315 10260062
+        01263890 NI016607 01246241 02738190 04307559 00822749 01008589 04934963 12467589 04527390
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PDF tools (pdftotext, OCR)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils tesseract-ocr > /dev/null
+
+      - name: Install Python packages
+        run: pip install -q -r lead-sourcer/requirements.txt
+
+      - name: Case studies
+        working-directory: lead-sourcer
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          NUMBERS: ${{ inputs.numbers }}
+        run: python3 tools/fx_case_study.py ${NUMBERS:-$DEFAULT_NUMBERS}
