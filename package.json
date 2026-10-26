@@ -30,9 +30,12 @@
     "export-it-leads": "tsx packages/pipeline/src/stages/export-it-leads.ts",
     "export-fx-leads": "tsx packages/pipeline/src/stages/export-fx-leads.ts",
     "enrich-accounts": "tsx packages/pipeline/src/stages/enrich-accounts.ts",
+    "enrich-ch-accounts": "tsx packages/pipeline/src/stages/enrich-ch-accounts.ts",
+    "call-readiness": "tsx packages/pipeline/src/stages/call-readiness.ts",
+    "audit": "tsx packages/pipeline/src/stages/audit.ts",
     "enrich-fx-confidence": "tsx packages/pipeline/src/stages/enrich-fx-confidence.ts",
-    "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run generate-drafts && npm run db:export && npm run export-sheets",
-    "pipeline:evergreen": "npm run db:import && npm run evergreen && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run score && npm run dedup && npm run generate-drafts && npm run db:export && npm run export-sheets",
+    "pipeline": "npm run db:import && npm run analyse && npm run discover && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run enrich-ch-accounts && npm run score && npm run dedup && npm run call-readiness && npm run generate-drafts && npm run db:export && npm run export-sheets && npm run audit",
+    "pipeline:evergreen": "npm run db:import && npm run evergreen && npm run enrich-contacts && npm run enrich-decision-makers && npm run enrich-website-intel && npm run enrich-ch-accounts && npm run score && npm run dedup && npm run call-readiness && npm run generate-drafts && npm run db:export && npm run export-sheets && npm run audit",
     "sync-web-data": "mkdir -p apps/web/public/data && cp data/events.json data/leads.json apps/web/public/data/"
   },
   "devDependencies": {

@@ -84,23 +84,6 @@ jobs:
           export FX_PIPELINE_DEADLINE=$(( $(date +%s) + 55 * 60 ))
           npm run pipeline:evergreen
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python deps
-        run: pip install requests dnspython --quiet
-
-      - name: Enrich CH accounts
-        env:
-          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
-        run: python3 scripts/enrich_ch_accounts.py
-        continue-on-error: true
-
-      - name: Compute call readiness
-        run: python3 scripts/compute_call_readiness.py
-        continue-on-error: true
-
       - name: Refresh dashboard snapshot
         run: npm run sync-web-data
 

@@ -529,10 +529,11 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
   const force = !!opts.force;
   const disableTech = !!opts.disableTech;
   const persist = opts.persist ?? true;
-  // Leaves time before the pipeline's end (FX_PIPELINE_DEADLINE) for website intel, the lead it may still be
-  // finishing, and score / dedup / export.
+  // Leaves time before the pipeline's end (FX_PIPELINE_DEADLINE) for website intel, CH accounts, the lead it
+  // may still be finishing, and score / dedup / export.
   const intelBudgetMin = Number(process.env.FX_INTEL_BUDGET_MIN ?? "15");
-  const deadline = stageDeadline(opts.budgetMinutes ?? DEFAULT_BUDGET_MIN, intelBudgetMin + 6);
+  const accountsBudgetMin = Number(process.env.FX_ACCOUNTS_BUDGET_MIN ?? "4");
+  const deadline = stageDeadline(opts.budgetMinutes ?? DEFAULT_BUDGET_MIN, intelBudgetMin + accountsBudgetMin + 6);
   const leadTimeoutMs = (opts.leadTimeoutSeconds ?? DEFAULT_LEAD_TIMEOUT_S) * 1000;
 
   const { db, sqlite, close } = getDb(dbPath);
