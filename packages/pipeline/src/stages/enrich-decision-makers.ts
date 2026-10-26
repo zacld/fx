@@ -1,5 +1,5 @@
 /**
- * stages/enrich-decision-makers.ts — TS port of scripts/legacy/enrich_decision_makers.py.
+ * stages/enrich-decision-makers.ts — TS port of the original Python enrich_decision_makers.py (removed).
  *
  * For every lead with a Companies-House number or a director name, this stage:
  *

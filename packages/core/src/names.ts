@@ -11,7 +11,7 @@
  *   * levenshtein + nameSimilarity — fuzzy comparison for cross-page dedup.
  *     Replaces the old "any token overlap" check that merged every "John".
  *
- * Pure functions, no I/O. Ported from scripts/legacy/enrich_decision_makers.py
+ * Pure functions, no I/O. Ported from the original Python enrich_decision_makers.py (removed)
  * with extra care around the well-documented dedup false-positives.
  */
 
