@@ -42,7 +42,9 @@ API_URL = "https://api.search1api.com/search"
 TIMEOUT_SECONDS = 30
 PAUSE_SECONDS = 1.0
 CACHE_DIR = os.path.join(os.path.expanduser("~"), ".cache", "fx-lead-sourcer", "search")
-CACHE_DAYS = 30
+# A finance director rarely changes within two months; at 60 days the whole list's re-checks (~650
+# searches a month) fit inside Tavily's free 1,000 a month, so one-off credits (Serper) last.
+CACHE_DAYS = float(os.environ.get("SEARCH_CACHE_DAYS", "60"))
 MAX_SEARCHES = int(os.environ.get("SEARCH_MAX_PER_RUN", "200"))
 MAX_FAILED = 5              # consecutive searches no provider could answer before giving up for the run
 RETRIES = 2                 # extra tries on a temporary failure (timeout, 429, 5xx), with a growing pause

@@ -72,7 +72,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   used within their free/paid allowances in turn — Search1API, Tavily, Exa,
   Serper (secrets `*_API_KEY`, monthly caps `*_MONTHLY`, ≤
   `SEARCH_MAX_PER_RUN` searches a run — 150 on weekday mornings while Serper's
-  2,500 sign-up searches last — results cached 30 days; accounts qualified Out
+  2,500 sign-up searches last — results cached 60 days (`SEARCH_CACHE_DAYS`), so steady-state re-checks fit Tavily's free 1,000 a month; accounts qualified Out
   are not searched) — reads result titles and snippets only — LinkedIn profile
   titles, company board pages, news, org charts — to confirm or replace the
   pick (when no finance director turns up, one more search under the
