@@ -57,6 +57,15 @@ const INTEL_SLUGS = [
   "case-studies", "case-study", "customers", "clients",
 ];
 
+// Time limits, as in enrich-decision-makers: stop starting new leads after
+// FX_INTEL_BUDGET_MIN minutes (the rest wait for the next run) and give up on
+// one site after FX_INTEL_LEAD_TIMEOUT_S, so score / dedup / export always run
+// inside the workflow's cap. A lead whose site was read is left for
+// RECHECK_DAYS even when it scored 0 (it used to be re-crawled every run).
+const DEFAULT_BUDGET_MIN = Number(process.env.FX_INTEL_BUDGET_MIN ?? "15");
+const DEFAULT_LEAD_TIMEOUT_S = Number(process.env.FX_INTEL_LEAD_TIMEOUT_S ?? "90");
+const RECHECK_DAYS = 14;
+
 export interface EnrichIntelOptions {
   dbPath?: string; outPath?: string; runsDir?: string;
   pageCachePath?: string;
@@ -64,10 +73,13 @@ export interface EnrichIntelOptions {
   max?: number;
   force?: boolean;
   persist?: boolean;
+  budgetMinutes?: number;
+  leadTimeoutSeconds?: number;
 }
 
 export interface EnrichIntelResult {
   totalLeads: number; toProcess: number; enriched: number;
+  timedOut: number; leftForNextRun: number;
   withSnippets: number; withCountries: number;
   fxLikelihoodBuckets: { ge80: number; b60_79: number; b40_59: number; b20_39: number; lt20: number };
   runId: string;
@@ -82,6 +94,8 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
   const max = opts.max ?? 1000;
   const force = !!opts.force;
   const persist = opts.persist ?? true;
+  const deadline = Date.now() + (opts.budgetMinutes ?? DEFAULT_BUDGET_MIN) * 60_000;
+  const leadTimeoutMs = (opts.leadTimeoutSeconds ?? DEFAULT_LEAD_TIMEOUT_S) * 1000;
 
   const { db, sqlite, close } = getDb(dbPath);
   const rec = new RunRecorder("enrich-website-intel", { dbPath, outPath, concurrency, max, force });
@@ -98,13 +112,29 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
       if (!l.website) return false;
       if (shouldSkipUrl(l.website).skip) return false;
       if (force) return true;
-      return !l.fx_likelihood_score;
+      if (l.fx_likelihood_score) return false;
+      const checkedAt = (l as Record<string, unknown>).intel_checked_at as string | undefined;
+      return !checkedAt || (Date.now() - new Date(checkedAt).getTime()) / 86_400_000 >= RECHECK_DAYS;
     };
     const candidates = Object.values(leads).filter(needs).slice(0, max);
 
-    let withSnippets = 0, withCountries = 0;
+    let withSnippets = 0, withCountries = 0, enriched = 0, timedOut = 0, leftForNextRun = 0;
     const limit = pLimit(concurrency);
     await Promise.all(candidates.map((l) => limit(async () => {
+      if (Date.now() >= deadline) { leftForNextRun++; return; }
+      (l as Record<string, unknown>).intel_checked_at = new Date().toISOString();
+      let timer: NodeJS.Timeout | undefined;
+      const timeout = new Promise<"timeout">((res) => { timer = setTimeout(() => res("timeout"), leadTimeoutMs); });
+      const outcome = await Promise.race([readSite(l), timeout]);
+      clearTimeout(timer);
+      if (outcome === "timeout") {
+        timedOut++;
+        console.warn(`enrich-website-intel: gave up on ${l.company_name ?? l.id} after ${leadTimeoutMs / 1000}s`);
+      } else enriched++;
+    })));
+    if (leftForNextRun) console.log(`enrich-website-intel: time budget used — ${leftForNextRun} leads left for the next run`);
+
+    async function readSite(l: Lead): Promise<void> {
       try {
         const pages = await discoverPages({
           homeUrl: l.website!,
@@ -185,7 +215,7 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
       } catch (e) {
         rec.warn(`intel failed for ${l.id}: ${String(e)}`);
       }
-    })));
+    }
 
     // Also generate a confidence reason for leads that don't get crawled (no
     // website / bad domain), so the dashboard renders something.
@@ -215,6 +245,7 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
     }
     rec.section("contact_coverage", {
       total_leads: Object.keys(leads).length, to_process: candidates.length,
+      enriched, timed_out: timedOut, left_for_next_run: leftForNextRun,
       with_snippets: withSnippets, with_countries: withCountries,
       fx_likelihood_ge_80: buckets.ge80,
       fetcher_stats: fetcher.stats(),
@@ -223,7 +254,7 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
 
     return {
       totalLeads: Object.keys(leads).length, toProcess: candidates.length,
-      enriched: candidates.length, withSnippets, withCountries,
+      enriched, timedOut, leftForNextRun, withSnippets, withCountries,
       fxLikelihoodBuckets: buckets, runId: rec.run.run_id,
     };
   } finally {
@@ -241,6 +272,7 @@ function parseArgs(argv: string[]): EnrichIntelOptions {
     else if (a === "--runs") o.runsDir = argv[++i];
     else if (a === "--page-cache") o.pageCachePath = argv[++i];
     else if (a === "--limit") o.concurrency = Number(argv[++i]);
+    else if (a === "--budget-min") o.budgetMinutes = Number(argv[++i]);
     else if (a === "--max") o.max = Number(argv[++i]);
     else if (a === "--force") o.force = true;
   }
@@ -249,8 +281,9 @@ function parseArgs(argv: string[]): EnrichIntelOptions {
 const isMain = (() => { try { return !!process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url); } catch { return false; } })();
 if (isMain) {
   runEnrichWebsiteIntelStage(parseArgs(process.argv.slice(2))).then((r) => {
-    console.log(`enrich-website-intel: ${r.totalLeads} leads | processed ${r.toProcess} | snippets ${r.withSnippets} | countries ${r.withCountries}`);
+    console.log(`enrich-website-intel: ${r.totalLeads} leads | due ${r.toProcess} | read ${r.enriched} | gave up ${r.timedOut} | left for next run ${r.leftForNextRun} | snippets ${r.withSnippets} | countries ${r.withCountries}`);
     console.log(`  fx_likelihood: 80+ ${r.fxLikelihoodBuckets.ge80} | 60-79 ${r.fxLikelihoodBuckets.b60_79} | 40-59 ${r.fxLikelihoodBuckets.b40_59} | 20-39 ${r.fxLikelihoodBuckets.b20_39} | <20 ${r.fxLikelihoodBuckets.lt20}`);
     console.log(`  run_id ${r.runId}`);
-  }).catch((e) => { console.error("enrich-website-intel failed:", e); process.exitCode = 1; });
+    process.exit(0);   // saved; a site we gave up on can't hold the step open
+  }).catch((e) => { console.error("enrich-website-intel failed:", e); process.exit(1); });
 }
