@@ -22,7 +22,7 @@ import urllib.request
 from html.parser import HTMLParser
 from typing import Optional
 
-from sourcer import banks, companies_house, hooks, incumbent, pdf, people, profiles, website
+from sourcer import banks, companies_house, fx_text, hooks, incumbent, pdf, people, profiles, website
 
 CH_FILING_HISTORY = f"{companies_house.CH_BASE}/company/{{number}}/filing-history"
 DOCUMENT_CONTENT = "https://document-api.company-information.service.gov.uk/document/{id}/content"
@@ -144,6 +144,7 @@ class _IxbrlScanner(HTMLParser):
         self._fact_depth = 0                 # tags opened inside the current fact
         self._capture: Optional[str] = None  # what _text is collecting: "end" | "measure" | "fact"
         self._text: Optional[list[str]] = None
+        self._recent = ""                    # the last few hundred characters of text: a fact's table row
 
     def handle_starttag(self, tag, attrs):
         if self._fact is not None:
@@ -181,6 +182,7 @@ class _IxbrlScanner(HTMLParser):
             "scale": attrs.get("scale", "0"),
             "sign": attrs.get("sign", ""),
             "format": attrs.get("format", ""),
+            "before": self._recent,          # its row label, to check an FX tag is on an FX line
         }
         self._fact_depth = 0
         self._capture, self._text = "fact", []
@@ -214,6 +216,8 @@ class _IxbrlScanner(HTMLParser):
     def handle_data(self, data):
         if self._text is not None:
             self._text.append(data)
+        if data.strip():
+            self._recent = (self._recent + " " + " ".join(data.split()))[-400:]
 
 
 def _fact_value(fact: dict) -> Optional[float]:
@@ -346,6 +350,78 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
     return sorted(({"region": k, "value": v} for k, v in found.items()), key=lambda r: -r["value"])
 
 
+# An FX gain/loss bigger than this share of turnover is almost certainly a
+# different figure tagged or read as FX (Wanis: purchases in foreign currency,
+# £113m on £156m turnover). It goes to fx_gain_loss_check, never into a fact.
+FX_MAX_SHARE_OF_TURNOVER = 0.20
+
+
+def _gbp_short(value: float) -> str:
+    a = abs(value)
+    text = f"£{a / 1e6:.1f}m" if a >= 1e6 else f"£{a / 1e3:.0f}k" if a >= 1e3 else f"£{a:.0f}"
+    return ("-" if value < 0 else "") + text
+
+
+def _screen_fx_tags(scanner: "_IxbrlScanner") -> str:
+    """
+    Drop FX gain/loss tags that aren't on an FX line (Wanis: "Stocks
+    recognised as expenses" tagged as FX) or sit under a $ / € table heading
+    (Weston Importers: tagged GBP, headed $'000). Returns why, for the check
+    column when the accounts text has no FX line either; "" when all are fine.
+    """
+    kept, why = [], ""
+    for fact in scanner.facts:
+        if fact["concept"] in FX_GAIN_LOSS_CONCEPTS:
+            before = fact.get("before", "")
+            value = _fact_value(fact)
+            shown = _gbp_short(value) if value is not None else fact.get("text", "")
+            row = fx_text.row_label(before)[-80:]
+            if not fx_text.label_is_fx(before):
+                why = why or f'the figure tagged as FX ({shown}) is on the line "{row}"; check the accounts'
+                continue
+            currency = fx_text.foreign_heading(before)
+            if currency:
+                why = why or f"the FX figure ({shown}) is in a table headed {currency}, not pounds; check the accounts"
+                continue
+        kept.append(fact)
+    scanner.facts = kept
+    return why
+
+
+def _fx_from_text(facts: dict, text: str, how: str, scale_text: Optional[str] = None) -> bool:
+    """Fill the FX fields from an FX line in accounts text; True when a line was found (a figure or a check)."""
+    found = fx_text.read(text, scale_text)
+    if not found:
+        return False
+    if found["check"]:
+        facts["fx_gain_loss_check"] = found["check"]
+        return True
+    facts.update(fx_gain_loss=found["value"], fx_gain_loss_prior=found["prior"],
+                 fx_gain_loss_evidence=f'{how}: "{found["line"]}"')
+    return True
+
+
+def check_fx(facts: dict) -> dict:
+    """
+    Sanity checks on the FX gain/loss just read. A figure that fails moves to
+    fx_gain_loss_check (a sentence saying why) and fx_gain_loss / _prior are
+    cleared, so no hook, signal or opener states it as a fact.
+    """
+    facts.setdefault("fx_gain_loss_check", "")
+    facts.setdefault("fx_gain_loss_evidence", "")
+    fx, prior, turnover = facts.get("fx_gain_loss"), facts.get("fx_gain_loss_prior"), facts.get("turnover")
+    reason = ""
+    if fx is not None and turnover and abs(fx) > FX_MAX_SHARE_OF_TURNOVER * turnover:
+        reason = (f"FX figure {_gbp_short(fx)} is {abs(fx) / turnover:.0%} of turnover: too big for an exchange "
+                  f"gain/loss, likely another figure tagged as FX; check the accounts")
+    elif prior is not None and turnover and abs(prior) > FX_MAX_SHARE_OF_TURNOVER * turnover:
+        reason = (f"last year's FX figure {_gbp_short(prior)} is {abs(prior) / turnover:.0%} of turnover: "
+                  f"likely another figure tagged as FX; check the accounts")
+    if reason:
+        facts.update(fx_gain_loss=None, fx_gain_loss_prior=None, fx_gain_loss_evidence="", fx_gain_loss_check=reason)
+    return facts
+
+
 def extract_facts(document: bytes) -> dict:
     """
     What an iXBRL accounts document says about size and currency exposure:
@@ -372,6 +448,7 @@ def extract_facts(document: bytes) -> dict:
     except Exception:  # noqa: BLE001 — a malformed tail shouldn't lose facts already read
         pass
     turnover = _latest(scanner, TURNOVER_CONCEPTS, allow_negative=False)
+    fx_tag_problem = _screen_fx_tags(scanner)
     fx = _latest(scanner, FX_GAIN_LOSS_CONCEPTS, allow_negative=True)
     cost = _latest(scanner, COST_OF_SALES_CONCEPTS, allow_negative=True)  # some filings tag it as a negative
     plain = html.unescape(re.sub(r"<[^>]*>", " ", text))
@@ -382,7 +459,7 @@ def extract_facts(document: bytes) -> dict:
     auditor = auditor_from_text(plain)
     tagged_signatory = next((" ".join(f["text"].split()) for f in scanner.facts
                              if f["concept"] in people.SIGNATORY_CONCEPTS and f.get("text", "").strip()), "")
-    return {
+    facts = {
         "turnover": turnover[0] if turnover else None,
         "period_end": end,
         "fx_gain_loss": fx[0] if fx else None,
@@ -408,7 +485,12 @@ def extract_facts(document: bytes) -> dict:
         "trading_names": profiles.trading_names(plain),
         **hooks.text_evidence(plain),
         **incumbent.text_evidence(plain),
+        "fx_gain_loss_evidence": "tagged in the accounts" if fx else "",
+        "fx_gain_loss_check": "",
     }
+    if not fx and not _fx_from_text(facts, plain, "accounts text") and fx_tag_problem:
+        facts["fx_gain_loss_check"] = fx_tag_problem
+    return check_fx(facts)
 
 
 # Audit firms by tier — the tier hints at how sophisticated the finance function
@@ -482,10 +564,17 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
         return facts
     if not pdf.available():
         return None
-    text, how = pdf.to_text(fetch_pdf(document_id, api_key) or b"")
+    data = fetch_pdf(document_id, api_key) or b""
+    text, how = pdf.to_text(data)
     if not text:
         return None
-    return dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on)
+    facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on)
+    if how == "scanned pdf" and facts["fx_gain_loss"] is None and not facts["fx_gain_loss_check"]:
+        # the FX line is in the notes, past the pages OCR'd for the company information
+        page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None)
+        if page and _fx_from_text(facts, page, f"scanned accounts p{number}"):
+            check_fx(facts)
+    return facts
 
 
 # --- Accounts as plain text (PDF / OCR) --------------------------------------
@@ -593,8 +682,9 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
     The extract_facts() fields that can be read from accounts text: turnover
     and last year's (first "Turnover"/"Revenue" table row), cost of sales,
     cash, net assets, bankers, auditor, finance people, signatory, hedging
-    and FX-risk wording. Tagged-only fields (FX gain/loss, regional splits)
-    are None/False. A turnover under £100k is treated as a misread.
+    and FX-risk wording. Tagged-only fields (regional splits) are None/False;
+    the FX gain/loss comes from its line in the notes (sourcer/fx_text.py).
+    A turnover under £100k is treated as a misread.
     """
     pages = text.split("\f")
     turnover = _line_amounts(pages, r"(?:Turnover|Revenue)")
@@ -605,7 +695,7 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
     net = _line_amounts(pages, r"Net\s+assets")
     plain = " ".join(text.split())
     auditor = auditor_from_text(plain)
-    return {
+    facts = {
         "turnover": abs(turnover[0]) if turnover else None,
         "period_end": made_up_date or _period_end(plain),
         "fx_gain_loss": None,
@@ -632,7 +722,13 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
         **hooks.text_evidence(plain),
         **incumbent.text_evidence(plain),
         "format": how,
+        "fx_gain_loss_check": "",
+        "fx_gain_loss_evidence": "",
     }
+    for number, page in enumerate(pages, 1):
+        if _fx_from_text(facts, page, f"{'scanned ' if how == 'scanned pdf' else ''}accounts p{number}"):
+            break
+    return check_fx(facts)
 
 
 def turnover_from_latest_accounts(company_number: str, api_key: str) -> Optional[dict]:

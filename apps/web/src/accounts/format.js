@@ -50,20 +50,43 @@ export function filterRows(rows, { section = "", query = "", confidence = "", fd
       .some((v) => (v || "").toLowerCase().includes(q))));
 }
 
+// FX gain/loss as a share of turnover ("0.8% of turnover"); "" without both figures.
+export function fxShare(r) {
+  const fx = Number(r.fx_gain_loss_gbp), t = Number(r.turnover_gbp);
+  if (!r.fx_gain_loss_gbp || !Number.isFinite(fx) || !(t > 0)) return "";
+  const pct = (Math.abs(fx) / t) * 100;
+  return `${pct < 0.1 ? "<0.1" : pct.toFixed(1)}% of turnover`;
+}
+
+export const fxLine = (r) => r.fx_gain_loss_gbp
+  ? `${money(r.fx_gain_loss_gbp)} ${Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}` +
+    ` (${[fxShare(r), `prior year ${money(r.fx_gain_loss_prior_gbp) || "n/a"}`].filter(Boolean).join("; ")})`
+  : "";
+
+// Biggest FX loss first, then gains (biggest first), then no figure.
+const fxLossKey = (r) => {
+  const fx = Number(r.fx_gain_loss_gbp);
+  if (!r.fx_gain_loss_gbp || !Number.isFinite(fx)) return 4e15;
+  return fx < 0 ? fx : 2e15 - fx;
+};
+
 export const SORTS = {
   rank: { label: "List order", key: (r) => r.rank },
   turnover: { label: "Turnover", key: (r) => -(Number(r.turnover_gbp) || 0) },
   wallet: { label: "FX wallet", key: (r) => -(Number(r.fx_wallet_high_gbp) || 0) },
+  fxLoss: { label: "Largest FX loss", key: fxLossKey },
   confidence: { label: "Contact confidence", key: (r) => (r.finance_contact ? CONFIDENCE.indexOf(r.finance_contact_confidence) : 9) * 10000 + r.rank },
 };
 
-export const sortRows = (rows, by = "rank") => [...rows].sort((a, b) => SORTS[by].key(a) - SORTS[by].key(b));
+export const sortRows = (rows, by = "rank") =>
+  [...rows].sort((a, b) => SORTS[by].key(a) - SORTS[by].key(b) || a.rank - b.rank);
 
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "finance_contact", "finance_contact_role",
   "finance_contact_confidence", "finance_contact_linkedin", "search_check", "lead_director", "turnover_gbp",
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",
+  "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_check",
   "main_bank", "bank_type", "fact_1", "fact_2", "main_currency", "currency_direction",
   "currency_evidence", "currency_confidence", "opener", "fx_estimate", "incumbent_bank", "facility_ends",
   "facility_ends_evidence", "fx_today", "fx_today_evidence", "lenders", "triggers", "when_to_call", "fx_niche", "call_angle",
