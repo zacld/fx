@@ -132,6 +132,7 @@ CSV_FIELDS = [
     "hmrc_match",
     "fx_gain_loss_gbp",
     "fx_gain_loss_prior_gbp",
+    "fx_gain_loss_check",
     "turnover_growth",
     "overseas_turnover_share",
     "cost_of_sales_gbp",
@@ -524,6 +525,7 @@ def company_row(
         planning_window_now="yes" if planning_now else "",
         pe_backed=triggers.investor_owner(owners),
         fx_gain_loss_prior_gbp=_money(f.get("fx_gain_loss_prior")),
+        fx_gain_loss_check=f.get("fx_gain_loss_check", ""),
         turnover_growth=f"{growth * 100:+.0f}%" if growth is not None else "",
         overseas_turnover_share=f"{f['overseas_share'] * 100:.0f}%" if f.get("overseas_share") is not None else "",
         cash_gbp=_money(f.get("cash")),
@@ -748,6 +750,8 @@ def run_pipeline(
         cached = register_cache.load(number, made_up) if checked and turnover_check else None
         facts = cached["facts"] if cached else (
             accounts.facts_from_latest_accounts(number, api_key) if checked and turnover_check else None)
+        if facts:
+            accounts.check_fx(facts)   # cached facts too, read before a check existed
         turnover = ({"turnover": facts["turnover"], "period_end": facts["period_end"]}
                     if facts and facts["turnover"] is not None else None)
         if turnover is not None and turnover["turnover"] < min_turnover:

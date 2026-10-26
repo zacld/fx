@@ -346,6 +346,38 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
     return sorted(({"region": k, "value": v} for k, v in found.items()), key=lambda r: -r["value"])
 
 
+# An FX gain/loss bigger than this share of turnover is almost certainly a
+# different figure tagged or read as FX (Wanis: purchases in foreign currency,
+# £113m on £156m turnover). It goes to fx_gain_loss_check, never into a fact.
+FX_MAX_SHARE_OF_TURNOVER = 0.20
+
+
+def _gbp_short(value: float) -> str:
+    a = abs(value)
+    text = f"£{a / 1e6:.1f}m" if a >= 1e6 else f"£{a / 1e3:.0f}k" if a >= 1e3 else f"£{a:.0f}"
+    return ("-" if value < 0 else "") + text
+
+
+def check_fx(facts: dict) -> dict:
+    """
+    Sanity checks on the FX gain/loss just read. A figure that fails moves to
+    fx_gain_loss_check (a sentence saying why) and fx_gain_loss / _prior are
+    cleared, so no hook, signal or opener states it as a fact.
+    """
+    facts.setdefault("fx_gain_loss_check", "")
+    fx, prior, turnover = facts.get("fx_gain_loss"), facts.get("fx_gain_loss_prior"), facts.get("turnover")
+    reason = ""
+    if fx is not None and turnover and abs(fx) > FX_MAX_SHARE_OF_TURNOVER * turnover:
+        reason = (f"FX figure {_gbp_short(fx)} is {abs(fx) / turnover:.0%} of turnover: too big for an exchange "
+                  f"gain/loss, likely another figure tagged as FX; check the accounts")
+    elif prior is not None and turnover and abs(prior) > FX_MAX_SHARE_OF_TURNOVER * turnover:
+        reason = (f"last year's FX figure {_gbp_short(prior)} is {abs(prior) / turnover:.0%} of turnover: "
+                  f"likely another figure tagged as FX; check the accounts")
+    if reason:
+        facts.update(fx_gain_loss=None, fx_gain_loss_prior=None, fx_gain_loss_check=reason)
+    return facts
+
+
 def extract_facts(document: bytes) -> dict:
     """
     What an iXBRL accounts document says about size and currency exposure:
@@ -382,7 +414,7 @@ def extract_facts(document: bytes) -> dict:
     auditor = auditor_from_text(plain)
     tagged_signatory = next((" ".join(f["text"].split()) for f in scanner.facts
                              if f["concept"] in people.SIGNATORY_CONCEPTS and f.get("text", "").strip()), "")
-    return {
+    return check_fx({
         "turnover": turnover[0] if turnover else None,
         "period_end": end,
         "fx_gain_loss": fx[0] if fx else None,
@@ -408,7 +440,7 @@ def extract_facts(document: bytes) -> dict:
         "trading_names": profiles.trading_names(plain),
         **hooks.text_evidence(plain),
         **incumbent.text_evidence(plain),
-    }
+    })
 
 
 # Audit firms by tier — the tier hints at how sophisticated the finance function
@@ -632,6 +664,7 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
         **hooks.text_evidence(plain),
         **incumbent.text_evidence(plain),
         "format": how,
+        "fx_gain_loss_check": "",
     }
 
 

@@ -1038,6 +1038,27 @@ class TestPeople(unittest.TestCase):
                          ([{"name": "Jane Doe", "title": "Finance Director"}], "Jane Doe"))
 
 
+class TestFxSanity(unittest.TestCase):
+    def test_wanis_shaped_figure_is_a_check_not_a_fact(self):
+        # Wanis Ltd (00795535), y/e 2025-06-30: "FX loss" £113.0m on £156.4m turnover, £100.5m the year before.
+        doc = ixbrl(current="156,366", prior="139,600").replace(b">420<", b">113,050<").replace(b">90<", b">100,460<")
+        f = accounts.extract_facts(doc)
+        self.assertIsNone(f["fx_gain_loss"])
+        self.assertIsNone(f["fx_gain_loss_prior"])
+        self.assertIn("72% of turnover", f["fx_gain_loss_check"])
+        self.assertIn("-£113.0m", f["fx_gain_loss_check"])
+        self.assertNotIn("fx", [h["kind"] for h in hooks.find_hooks(f, [], [], [], today=date(2026, 10, 26))])
+
+    def test_ordinary_figure_passes(self):
+        f = accounts.extract_facts(ixbrl())   # £420k loss on £23.4m: 1.8%
+        self.assertEqual((f["fx_gain_loss"], f["fx_gain_loss_check"]), (-420_000, ""))
+
+    def test_cached_facts_are_checked_too(self):
+        f = accounts.check_fx({"turnover": 10_000_000, "fx_gain_loss": 2_500_000, "fx_gain_loss_prior": None})
+        self.assertIsNone(f["fx_gain_loss"])
+        self.assertIn("25% of turnover", f["fx_gain_loss_check"])
+
+
 class TestPdfAccounts(unittest.TestCase):
     def test_facts_from_layout_text(self):
         f = accounts.extract_facts_from_text(PDF_TEXT_05 + """
