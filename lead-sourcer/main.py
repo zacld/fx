@@ -54,6 +54,8 @@ import itertools
 import json
 import os
 import sys
+import threading
+import time
 from collections import Counter
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -61,8 +63,8 @@ from datetime import date, datetime, timezone
 from typing import Optional, Union
 
 from sourcer import (
-    accounts, banks, bulk, companies_house, currency, excel, hmrc, hooks, incumbent, matching, news, people, profiles,
-    qualify, register_cache, registries, roles, signals, timing, triggers, website)
+    accounts, banks, bulk, companies_house, currency, excel, hmrc, hooks, incumbent, matching, news, pdf, people,
+    profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
 
 CSV_FIELDS = [
     "section",
@@ -170,6 +172,10 @@ SMALL_COMPANY_MAX_TURNOVER = 15_000_000    # small-company accounts limit (from 
 DEFAULT_HMRC_MONTHS = 12
 DEFAULT_MIN_TRADE_MONTHS = 3               # small-accounts companies need this many months of customs records
 DEFAULT_MAX_PER_SIC = 25  # search API source only
+# Stop starting new companies after this many minutes, so the workflow's later steps (and its
+# cache save) always run; the list is then marked partial (PARTIAL_FILE) and not uploaded.
+FINDER_BUDGET_MIN = float(os.environ.get("FINDER_BUDGET_MIN", "0"))
+PARTIAL_FILE = "finder_partial.txt"
 CH_WORKERS = int(os.environ.get("CH_WORKERS", "4"))  # companies checked at once (API calls still rate-limited)
 
 # Last-accounts categories that put a company in the frame. Medium, large
@@ -742,38 +748,61 @@ def run_pipeline(
     stats: Counter = Counter()
     pending: list[dict] = []   # company_row arguments, finished once websites are in
     parents: dict[str, tuple[str, str]] = {}
+    started = time.monotonic()
+    deadline = started + FINDER_BUDGET_MIN * 60 if FINDER_BUDGET_MIN > 0 else None
+    spent: Counter = Counter()   # seconds and counts, for the progress line
+    spent_lock = threading.Lock()
+
     def gather(item: tuple) -> tuple:
         """Accounts + register lookups for one company: (skip reason or "", details)."""
         position, (niche, company, trade) = item
         checked = position < budget
+        if checked and deadline and time.monotonic() > deadline:
+            return "time_budget", None
         number = company["company_number"]
         made_up = company.get("accounts_made_up_to", "")
         # read on an earlier run within REGISTER_CACHE_DAYS (and no newer accounts since): no Companies House calls
         cached = register_cache.load(number, made_up) if checked and turnover_check else None
-        facts = cached["facts"] if cached else (
+        if cached and cached.get("facts_version") != accounts.FACTS_VERSION:
+            cached = None   # read with older rules: read the accounts again
+        # the accounts themselves (OCR included) are kept longer: only the register goes stale weekly
+        older = (register_cache.load(number, made_up, days=register_cache.FACTS_DAYS)
+                 if checked and turnover_check and not cached else None)
+        # (a filing with nothing readable stays that way: its None is kept too)
+        reuse = bool(older and older.get("facts_version") == accounts.FACTS_VERSION)
+        t0 = time.monotonic()
+        facts = cached["facts"] if cached else older["facts"] if reuse else (
             accounts.facts_from_latest_accounts(number, api_key) if checked and turnover_check else None)
+        with spent_lock:
+            spent["accounts"] += time.monotonic() - t0
+            spent["accounts_read" if not (cached or reuse) and checked else "accounts_cached"] += 1
         if facts:
             accounts.check_fx(facts)   # cached facts too, read before a check existed
         turnover = ({"turnover": facts["turnover"], "period_end": facts["period_end"]}
                     if facts and facts["turnover"] is not None else None)
+        version = {"facts_version": accounts.FACTS_VERSION}
         if turnover is not None and turnover["turnover"] < min_turnover:
             if not cached:
-                register_cache.store(number, made_up, {"facts": facts})
+                register_cache.store(number, made_up, {"facts": facts, **version})
             return "under_min", None
         if turnover is None and company["accounts_category"] not in LIKELY_CATEGORIES and not trade:
             if not cached and checked and turnover_check:
-                register_cache.store(number, made_up, {"facts": facts})
+                register_cache.store(number, made_up, {"facts": facts, **version})
             return "unconfirmed", None  # audit-exempt subsidiary with no filed turnover or customs record
         if cached and "officers" in cached:
             register = {k: cached[k] for k in ("officers", "owners", "charges")}
         else:
+            t0 = time.monotonic()
             register = {
                 "officers": companies_house.get_active_officers(number, api_key) if checked else [],
                 "owners": companies_house.get_owners(number, api_key, with_ceased=True) if checked else [],
                 "charges": companies_house.get_charges(number, api_key) if checked else [],
             }
+            with spent_lock:
+                spent["register"] += time.monotonic() - t0
+                spent["register_read"] += 1
             if checked and turnover_check:
-                register_cache.store(number, made_up, {"facts": facts, **register})
+                register_cache.store(number, made_up, {"facts": facts, **register, **version})
         return "", {"niche": niche, "company": company, "trade": trade, "checked": checked, "facts": facts,
                     "turnover": turnover, **register}
 
@@ -785,8 +814,20 @@ def run_pipeline(
         gathered = []
         for done, result in enumerate(results, 1):
             if done < budget and done % 50 == 0:
-                print(f"  …checked {done:,} of {min(budget, len(queue)):,}", flush=True)
+                read, regs = spent["accounts_read"], spent["register_read"]
+                print(f"  …checked {done:,} of {min(budget, len(queue)):,} in {(time.monotonic() - started) / 60:.0f} min"
+                      f" | accounts read {read} ({spent['accounts'] / max(read, 1):.0f}s each), cached"
+                      f" {spent['accounts_cached']} | OCR {pdf.stats['pages']} pages ({pdf.stats['fx_pages']} for FX),"
+                      f" {pdf.stats['seconds'] / max(pdf.stats['pages'], 1):.1f}s a page | register read {regs}"
+                      f" ({spent['register'] / max(regs, 1):.0f}s each)", flush=True)
             gathered.append(result)
+    if os.path.exists(PARTIAL_FILE):
+        os.remove(PARTIAL_FILE)
+    if stats_left := sum(1 for skip, _ in gathered if skip == "time_budget"):
+        with open(PARTIAL_FILE, "w") as f:
+            f.write(f"{stats_left}\n")
+        print(f"  Time budget ({FINDER_BUDGET_MIN:.0f} min) used: {stats_left:,} companies left for the next run"
+              f" (their lookups so far are cached); this list is partial", flush=True)
     for skip, g in gathered:
         if skip:
             stats[skip] += 1

@@ -22,6 +22,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 
 OCR_MAX_PAGES = int(os.environ.get("OCR_MAX_PAGES", "6"))
@@ -37,9 +38,24 @@ def ocr_available() -> bool:
     return bool(shutil.which("tesseract") and shutil.which("pdftoppm"))
 
 
+# Tesseract uses every core for each page; with several companies OCR'd at once
+# (main.CH_WORKERS) they fight over the CPU, so each process gets one thread.
+_ENV = {**os.environ, "OMP_THREAD_LIMIT": "1"}
+# OCR time and pages this run, for the finder's progress line (thread-safe).
+stats = {"seconds": 0.0, "pages": 0, "fx_pages": 0}
+_stats_lock = threading.Lock()
+
+
+def _count(seconds: float, pages: int = 0, fx_pages: int = 0) -> None:
+    with _stats_lock:
+        stats["seconds"] += seconds
+        stats["pages"] += pages
+        stats["fx_pages"] += fx_pages
+
+
 def _run(args: list[str]) -> str:
     try:
-        done = subprocess.run(args, capture_output=True, timeout=TIMEOUT_SECONDS, check=False)
+        done = subprocess.run(args, capture_output=True, timeout=TIMEOUT_SECONDS, check=False, env=_ENV)
     except (OSError, subprocess.TimeoutExpired):
         return ""
     return done.stdout.decode("utf-8", "replace") if done.returncode == 0 else ""
@@ -62,10 +78,12 @@ def to_text(data: bytes) -> tuple[str, str]:
             return text, "pdf"
         if not ocr_available():
             return "", ""
+        started = time.monotonic()
         _run(["pdftoppm", "-r", "200", "-gray", "-f", "1", "-l", str(OCR_MAX_PAGES), "-png", path,
               os.path.join(tmp, "page")])
         pages = [_run(["tesseract", image, "stdout", "--psm", "6"])
                  for image in sorted(glob.glob(os.path.join(tmp, "page*.png")))]
+        _count(time.monotonic() - started, pages=len(pages))
         text = "\f".join(pages)
         return (text, "scanned pdf") if len(re.sub(r"\s", "", text)) >= MIN_TEXT_CHARS else ("", "")
 
@@ -114,7 +132,9 @@ def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES) -> tuple[str, in
             _run(["pdftoppm", "-r", "200", "-gray", "-f", str(number), "-l", str(number), "-png", path, stem])
             images = sorted(glob.glob(stem + "*.png"))
             text = _run(["tesseract", images[0], "stdout", "--psm", "6"]) if images else ""
-            _fx_search_spent += time.monotonic() - started
+            elapsed = time.monotonic() - started
+            _fx_search_spent += elapsed
+            _count(elapsed, pages=1, fx_pages=1)
             if text and wanted(text):
                 return text, number
     return "", 0

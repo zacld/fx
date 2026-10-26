@@ -93,8 +93,10 @@ jobs:
 
       # Each company's accounts read, officers, owners and charges, kept 7 days (sooner if newer accounts are
       # filed): a morning run looks up only the companies not seen this week, saving most of its Actions minutes.
-      - name: Cache Companies House lookups
-        uses: actions/cache@v4
+      # Restored here and saved straight after "Find companies" even when it stops early or fails,
+      # so a cut-short run's lookups aren't lost (a combined cache step saves only when the job succeeds).
+      - name: Restore Companies House lookups
+        uses: actions/cache/restore@v4
         with:
           path: ~/.cache/fx-lead-sourcer/register
           key: register-${{ github.run_id }}
@@ -102,7 +104,11 @@ jobs:
 
       - name: Find companies
         working-directory: lead-sourcer
+        timeout-minutes: 200
         env:
+          # Stops starting new companies after this (the rest wait for the next run, their lookups cached),
+          # leaving time for the contact search, the cache save and the upload inside the job's 240 minutes.
+          FINDER_BUDGET_MIN: "170"
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           CH_RATE_LIMIT_SECONDS: "0.8"   # leaves headroom on the key the discovery pipeline also uses
           PYTHONUNBUFFERED: "1"
@@ -111,10 +117,18 @@ jobs:
           MAX_ENRICH: ${{ inputs.max_enrich }}
           OWN_BANK: ${{ inputs.own_bank || vars.OWN_BANK || 'Investec' }}
           WARM_AUDITORS: ${{ vars.WARM_AUDITORS }}   # introducer audit firms, comma-separated (optional)
-          # Each company checked costs 5 Companies House calls (~4s). Pushes: 300 (~25 min);
-          # schedule/manual: 1,000 (~75 min). Customs-proven traders are checked first.
+          # Each company checked costs 5 Companies House calls (~4s) plus reading its accounts (OCR for
+          # scanned filings); a filing once read is cached 90 days. Customs-proven traders are checked first.
           DEFAULT_ENRICH: ${{ github.event_name == 'push' && '300' || '1000' }}
         run: python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv
+
+      - name: Save Companies House lookups
+        if: always()
+        continue-on-error: true   # nothing to save (e.g. no API key) mustn't fail the run
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/register
+          key: register-${{ github.run_id }}
 
       # Search results are kept for 30 days, so a company re-checked within that costs no credits.
       - name: Cache Google search results
@@ -181,6 +195,9 @@ jobs:
           fi
           if [ -n "$MAX_ENRICH" ] && [ "$MAX_ENRICH" -lt 200 ]; then
             echo "Test run ($MAX_ENRICH companies): Accounts page not updated"; exit 0
+          fi
+          if [ -f lead-sourcer/finder_partial.txt ]; then
+            echo "Time budget used before every company was checked: Accounts page not updated (the next run carries on from the cache)"; exit 0
           fi
           npm ci --workspace apps/web --no-audit --no-fund
           node apps/web/scripts/upload-accounts.mjs lead-sourcer/accounts.json

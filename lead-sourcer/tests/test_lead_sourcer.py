@@ -445,6 +445,29 @@ class TestIxbrlTurnover(unittest.TestCase):
             self.assertIsNone(accounts.fetch_ixbrl("doc1", "key"))
 
 
+class TestFinderTimeBudget(PipelineTestCase):
+    def test_budget_used_marks_the_list_partial(self):
+        os.chdir(self.tmp.name)
+        self.addCleanup(os.chdir, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        with mock.patch.object(main, "FINDER_BUDGET_MIN", 1e-9):
+            rows = self.run_bulk(news_check=False)
+        self.assertEqual(rows, [])
+        with open(main.PARTIAL_FILE) as f:
+            self.assertGreater(int(f.read()), 0)
+        self.run_bulk(news_check=False)            # no budget: a full list, marker gone
+        self.assertFalse(os.path.exists(main.PARTIAL_FILE))
+
+    def test_accounts_kept_longer_than_the_register(self):
+        with mock.patch.object(register_cache, "CACHE_DIR", os.path.join(self.tmp.name, "register")), \
+                mock.patch.object(register_cache, "CACHE_DAYS", 7):
+            self.run_bulk(news_check=False)
+            reads = sum(1 for c in self.fake.calls if "filing-history" in c)
+            with mock.patch.object(register_cache, "CACHE_DAYS", 1e-9):   # register stale, accounts still fresh
+                with mock.patch.object(register_cache, "FACTS_DAYS", 90):
+                    self.run_bulk(news_check=False)
+            self.assertEqual(sum(1 for c in self.fake.calls if "filing-history" in c), reads)
+
+
 class TestPipeline(PipelineTestCase):
     def test_keeps_in_frame_companies_and_names_directors(self):
         rows = {r["company_number"]: r for r in self.run_bulk()}
