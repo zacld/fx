@@ -22,6 +22,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 
 OCR_MAX_PAGES = int(os.environ.get("OCR_MAX_PAGES", "6"))
 MIN_TEXT_CHARS = 300   # less than this from pdftotext means a scanned document
@@ -67,3 +68,53 @@ def to_text(data: bytes) -> tuple[str, str]:
                  for image in sorted(glob.glob(os.path.join(tmp, "page*.png")))]
         text = "\f".join(pages)
         return (text, "scanned pdf") if len(re.sub(r"\s", "", text)) >= MIN_TEXT_CHARS else ("", "")
+
+
+# --- The FX line in a scanned filing -----------------------------------------
+# The operating-profit note with the exchange gain/loss line sits 60-90% of the
+# way through scanned accounts (pages 20-27 of 24-37 in the case study), well
+# past the first OCR_MAX_PAGES. Those pages are read one at a time, stopping at
+# the first that has the line; a per-run time budget keeps the finder within
+# its minutes (each page is ~2s of OCR).
+FX_SEARCH_MAX_PAGES = int(os.environ.get("OCR_FX_MAX_PAGES", "12"))
+FX_SEARCH_BUDGET_SECONDS = float(os.environ.get("OCR_FX_BUDGET_SECONDS", "1800"))
+_fx_search_spent = 0.0
+
+
+def _page_count(path: str) -> int:
+    m = re.search(r"^Pages:\s+(\d+)", _run(["pdfinfo", path]), re.M)
+    return int(m.group(1)) if m else 0
+
+
+def fx_pages_order(pages: int, already: int) -> list[int]:
+    """Pages to try for the FX note, best first: 60-90% of the way through, then the rest after `already`."""
+    likely = list(range(max(already + 1, round(pages * 0.6)), min(pages, round(pages * 0.9)) + 1))
+    rest = [p for p in range(already + 1, pages + 1) if p not in likely]
+    return (likely + rest)[:FX_SEARCH_MAX_PAGES]
+
+
+def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES) -> tuple[str, int]:
+    """
+    (page text, page number) of the first page after the first `already`
+    that `wanted(text)` accepts, OCR'd one page at a time in fx_pages_order;
+    ("", 0) when none does, OCR isn't installed or the run's budget is spent.
+    """
+    global _fx_search_spent
+    if not data or not ocr_available() or _fx_search_spent >= FX_SEARCH_BUDGET_SECONDS:
+        return "", 0
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "accounts.pdf")
+        with open(path, "wb") as f:
+            f.write(data)
+        for number in fx_pages_order(_page_count(path), already):
+            if _fx_search_spent >= FX_SEARCH_BUDGET_SECONDS:
+                break
+            started = time.monotonic()
+            stem = os.path.join(tmp, f"fx{number}")
+            _run(["pdftoppm", "-r", "200", "-gray", "-f", str(number), "-l", str(number), "-png", path, stem])
+            images = sorted(glob.glob(stem + "*.png"))
+            text = _run(["tesseract", images[0], "stdout", "--psm", "6"]) if images else ""
+            _fx_search_spent += time.monotonic() - started
+            if text and wanted(text):
+                return text, number
+    return "", 0

@@ -115,6 +115,13 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      gain/loss, currency or region breakdowns, hedging, bankers), else the
      PDF's text (pdftotext, or Tesseract OCR of the first pages for scanned
      filings — system tools installed in the workflow, not Python packages).
+     The FX gain/loss: a tag counts only when its row is an exchange/currency
+     line in pounds (Wanis tagged "Stocks recognised as expenses"); otherwise
+     the "Exchange differences / losses/(gains)" line in the notes text
+     (`sourcer/fx_text.py`; scanned filings: OCR of the pages 60–90% through,
+     `OCR_FX_BUDGET_SECONDS` a run). Over 20% of turnover, no gain/loss
+     direction, or not in pounds → `fx_gain_loss_check`, never a fact.
+     Real cases: `tests/test_fx_cases.py` (`tools/fx_case_study.py`).
   3. Companies House owners, charges and directors.
   4. The FX niches (`lead-sourcer/config/fx_niches.json`).
 - **Scores:** every score and estimate lists its evidence or basis. Weights

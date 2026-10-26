@@ -98,6 +98,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("numbers", nargs="+")
     ap.add_argument("--ocr-pages", type=int, default=40)
+    ap.add_argument("--dump", action="store_true", help="also every FX tag / OCR line (slow for scanned PDFs)")
     args = ap.parse_args()
     key = os.environ.get("COMPANIES_HOUSE_API_KEY", "")
     if not key:
@@ -112,9 +113,15 @@ def main() -> int:
         doc_id = ((filing.get("links") or {}).get("document_metadata") or "").rstrip("/").rsplit("/", 1)[-1]
         made_up = (filing.get("description_values") or {}).get("made_up_date") or ""
         print(f"\n== {number} | made up to {made_up} | {filing.get('description', '')}")
+        t0 = time.time()
+        facts = accounts.facts_from_latest_accounts(number, key) or {}
+        print(f"  FINDER {facts.get('format', 'unread')} ({time.time() - t0:.0f}s): fx {facts.get('fx_gain_loss')}"
+              f" prior {facts.get('fx_gain_loss_prior')} turnover {facts.get('turnover')}"
+              f" | evidence {facts.get('fx_gain_loss_evidence', '')!r} | check {facts.get('fx_gain_loss_check', '')!r}")
+        if not args.dump:
+            continue
         document = None if filing.get("paper_filed") else accounts.fetch_ixbrl(doc_id, key)
         if document:
-            facts = accounts.extract_facts(document)
             print(f"  finder reads: fx {facts.get('fx_gain_loss')} prior {facts.get('fx_gain_loss_prior')}"
                   f" turnover {facts.get('turnover')} cost of sales {facts.get('cost_of_sales')}")
             ixbrl_case(document)
