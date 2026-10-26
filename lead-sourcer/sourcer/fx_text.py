@@ -97,7 +97,7 @@ def _scale(before: str) -> tuple[float, str]:
     return (1_000.0 if unit in ("000", "k") else 1_000_000.0 if unit == "m" else 1.0), symbol
 
 
-def read(text: str, scale_text: Optional[str] = None) -> Optional[dict]:
+def read(text: str, scale_text: Optional[str] = None, ocr: bool = False) -> Optional[dict]:
     """
     The first FX gain/loss line in `text`: {"value", "prior", "label",
     "line", "check"}. value/prior in £, + gain / - loss; None for prior when
@@ -106,6 +106,8 @@ def read(text: str, scale_text: Optional[str] = None) -> Optional[dict]:
     there is no such line. `scale_text` is the text whose headings set the
     scale (a PDF page); by default the 2,000 characters before the line.
     """
+    # Table cells come with indentation and line breaks between them (iXBRL markup, pdftotext -layout columns).
+    text = re.sub(r"[^\S\n]+", " ", re.sub(r"\s*\n\s*", "\n", text))
     for m in _ROW.finditer(text):
         label, first, second = " ".join(m.group(1).split()), m.group(2), m.group(3)
         before = text[max(0, m.start() - 2_000):m.start()]
@@ -116,6 +118,8 @@ def read(text: str, scale_text: Optional[str] = None) -> Optional[dict]:
         if current is None:
             continue
         multiplier, currency = _scale(scale_text if scale_text is not None else before)
+        if ocr and currency == "$" and ("£" in text or not re.search(r"US\$|USD|dollar", text, re.I)):
+            currency = "£"   # OCR often reads "£" as "$": only a page that says dollars and never £ is in dollars
         context = (scale_text if scale_text is not None else before)[-1_500:]
         direction = _direction(label, context)
         line = " ".join(text[m.start():m.end()].split())
