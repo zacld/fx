@@ -47,6 +47,7 @@ import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
 import { ChClient, type ChOfficer, type ChPsc } from "../sources/companies-house.js";
 import { createCachedFetcher, headOk as defaultHeadOk, type CachedFetcher } from "../sources/fetch.js";
+import { stageDeadline, stoppable, type StopFlag } from "../sources/deadline.js";
 import { discoverPages } from "../sources/sitemap.js";
 import { createSmtpVerifier, type SmtpVerifier } from "../sources/smtp-verify.js";
 import { buildNoWebsiteHints, linkedinSearchForTown } from "../sources/no-website-fallback.js";
@@ -193,6 +194,7 @@ interface LeadCtx {
   coShort: string;
   fetcher: CachedFetcher;
   smtp: SmtpVerifier | null;
+  stop: StopFlag;
 }
 
 async function fetchPages(ctx: LeadCtx): Promise<string[]> {
@@ -208,7 +210,8 @@ async function fetchPages(ctx: LeadCtx): Promise<string[]> {
     fallbackSlugs: TEAM_SLUGS,
     prioritise: ["team", "leadership", "people", "about", "contact"],
     maxPages: MAX_PAGES,
-    fetcher: ctx.fetcher.fetch,
+    fetcher: stoppable(ctx.fetcher.fetch, ctx.stop),
+    headOk: async (url, timeoutMs) => !ctx.stop.stopped && defaultHeadOk(url, timeoutMs),
   });
   return pages;
 }
@@ -406,6 +409,7 @@ async function enrichLead(
   fetcher: CachedFetcher,
   smtp: SmtpVerifier | null,
   disableTech: boolean,
+  stop: StopFlag = { stopped: false },
 ): Promise<void> {
   const ctx: LeadCtx = {
     lead,
@@ -414,6 +418,7 @@ async function enrichLead(
     coShort: linkedinCompanyName(lead.company_name),
     fetcher,
     smtp,
+    stop,
   };
 
   // Drop a legacy junk director_name (e.g. "Mobile Portrait", "Address Line",
@@ -435,7 +440,8 @@ async function enrichLead(
   } else if (lead.director_name) {
     officers = [{ name: lead.director_name, officer_role: lead.director_role || "director" }];
   }
-  const pscs = lead.company_number ? await ch.psc(lead.company_number) : [];
+  const pscs = lead.company_number && !stop.stopped ? await ch.psc(lead.company_number) : [];
+  if (stop.stopped) return;   // given up on (timed out): leave the lead as it was
 
   // 1.5) No-website fallback. If we have no website but a clean company name +
   //      address, try to find a real domain by HEAD-probing common patterns,
@@ -444,6 +450,7 @@ async function enrichLead(
   if (!lead.website && ctx.coClean) {
     noWebsite = buildNoWebsiteHints({ companyNameClean: ctx.coClean, address: lead.address ?? "" });
     for (const url of noWebsite.candidate_domains) {
+      if (stop.stopped) return;
       if (await defaultHeadOk(url)) { (lead as Record<string, unknown>).website = url; ctx.domain = bareDomain(url); break; }
     }
   }
@@ -455,6 +462,7 @@ async function enrichLead(
   let homepageHtml = "";
 
   for (const url of pages) {
+    if (stop.stopped) return;
     const got = await fetcher.fetch(url);
     if (!got) continue;
     if (!homepageHtml && url === lead.website) homepageHtml = got.html;
@@ -468,11 +476,13 @@ async function enrichLead(
     }
   }
 
+  if (stop.stopped) return;
   // 3) Build DMs
   const dms = buildDecisionMakers(officers, pscs, websitePeople, ctx);
 
   // 4) Attach emails (guess → rank → SMTP)
   await attachEmails(dms, websitePeople, ctx);
+  if (stop.stopped) return;
 
   // 5) Tech-stack signals from homepage HTML (cheap; only over what we already fetched).
   if (!disableTech && homepageHtml) {
@@ -519,7 +529,10 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
   const force = !!opts.force;
   const disableTech = !!opts.disableTech;
   const persist = opts.persist ?? true;
-  const deadline = Date.now() + (opts.budgetMinutes ?? DEFAULT_BUDGET_MIN) * 60_000;
+  // Leaves time before the pipeline's end (FX_PIPELINE_DEADLINE) for website intel, the lead it may still be
+  // finishing, and score / dedup / export.
+  const intelBudgetMin = Number(process.env.FX_INTEL_BUDGET_MIN ?? "15");
+  const deadline = stageDeadline(opts.budgetMinutes ?? DEFAULT_BUDGET_MIN, intelBudgetMin + 6);
   const leadTimeoutMs = (opts.leadTimeoutSeconds ?? DEFAULT_LEAD_TIMEOUT_S) * 1000;
 
   const { db, sqlite, close } = getDb(dbPath);
@@ -574,8 +587,10 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
         let timer: NodeJS.Timeout | undefined;
         const timeout = new Promise<"timeout">((res) => { timer = setTimeout(() => res("timeout"), leadTimeoutMs); });
         try {
-          const outcome = await Promise.race([enrichLead(l, ch, fetcher, smtp, disableTech), timeout]);
+          const stop: StopFlag = { stopped: false };
+          const outcome = await Promise.race([enrichLead(l, ch, fetcher, smtp, disableTech, stop), timeout]);
           if (outcome === "timeout") {
+            stop.stopped = true;   // its unfinished work stops at the next step instead of running on
             timedOut++;
             (l as Record<string, unknown>).dm_enriched_at = new Date().toISOString();
             console.warn(`enrich-dm: gave up on ${l.company_name ?? l.id} after ${leadTimeoutMs / 1000}s (${bareDomain(l.website) || "no website"})`);

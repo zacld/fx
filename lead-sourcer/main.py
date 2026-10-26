@@ -766,10 +766,13 @@ def run_pipeline(
         if cached and cached.get("facts_version") != accounts.FACTS_VERSION:
             cached = None   # read with older rules: read the accounts again
         # the accounts themselves (OCR included) are kept longer: only the register goes stale weekly
-        older = (register_cache.load(number, made_up, days=register_cache.FACTS_DAYS)
+        # (a filing with nothing readable stays that way: its None is kept too). The age is from when the
+        # accounts were read (facts_read_at), not the file's date, which every register refresh resets.
+        older = (register_cache.load(number, made_up, days=float("inf"))
                  if checked and turnover_check and not cached else None)
-        # (a filing with nothing readable stays that way: its None is kept too)
-        reuse = bool(older and older.get("facts_version") == accounts.FACTS_VERSION)
+        now = time.time()
+        reuse = bool(older and older.get("facts_version") == accounts.FACTS_VERSION
+                     and now - older.get("facts_read_at", 0) < register_cache.FACTS_DAYS * 86400)
         t0 = time.monotonic()
         facts = cached["facts"] if cached else older["facts"] if reuse else (
             accounts.facts_from_latest_accounts(number, api_key) if checked and turnover_check else None)
@@ -780,7 +783,8 @@ def run_pipeline(
             accounts.check_fx(facts)   # cached facts too, read before a check existed
         turnover = ({"turnover": facts["turnover"], "period_end": facts["period_end"]}
                     if facts and facts["turnover"] is not None else None)
-        version = {"facts_version": accounts.FACTS_VERSION}
+        read_at = (cached or {}).get("facts_read_at") if cached else older["facts_read_at"] if reuse else now
+        version = {"facts_version": accounts.FACTS_VERSION, "facts_read_at": read_at or now}
         if turnover is not None and turnover["turnover"] < min_turnover:
             if not cached:
                 register_cache.store(number, made_up, {"facts": facts, **version})

@@ -351,7 +351,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-10-26"
+FACTS_VERSION = "2026-10-26b"   # b: FX reader review fixes (bare figures, minus signs, £000s headings)
 
 # An FX gain/loss bigger than this share of turnover is almost certainly a
 # different figure tagged or read as FX (Wanis: purchases in foreign currency,

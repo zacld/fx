@@ -93,6 +93,15 @@ jobs:
           path: ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip
           key: ch-bulk-v2-${{ steps.month.outputs.month }}
 
+      # gov.uk gender pay gap and modern slavery registries (finance-contact names), refreshed monthly.
+      - name: Restore the gov.uk registry files
+        id: registries
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/registries
+          key: registries-${{ steps.month.outputs.month }}
+          restore-keys: registries-
+
       - name: Restore the HMRC trader files and trade statistics
         id: hmrc
         uses: actions/cache/restore@v4
@@ -149,6 +158,14 @@ jobs:
         with:
           path: ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip
           key: ch-bulk-v2-${{ steps.month.outputs.month }}
+
+      - name: Save the gov.uk registry files
+        if: always() && steps.registries.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/registries
+          key: registries-${{ steps.month.outputs.month }}
 
       - name: Save the HMRC trader files and trade statistics
         if: always() && steps.hmrc.outputs.cache-hit != 'true'

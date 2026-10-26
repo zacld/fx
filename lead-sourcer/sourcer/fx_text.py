@@ -28,33 +28,45 @@ _LABEL = re.compile(
     re.I)
 # OCR and layout debris allowed between the label and the figures: ", ", " : ", " ° ", "_".
 _GAP = r"[\s:;,.°'\"_~|]{0,8}"
-_NUMBER = r"\(\s?-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s?\)|-?\d{1,3}(?:,\d{3})*(?:\.\d+)?"
+# A figure: "52,195", "52195", "(25,479)", "-12,345", "1.2" (£m tables), "52.195" (OCR's comma as a full stop).
+_DIGITS = r"(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?"
+_NUMBER = rf"\(\s?-?{_DIGITS}\s?\)|-?{_DIGITS}"
 _ROW = re.compile(_LABEL.pattern + rf"{_GAP}({_NUMBER})(?:{_GAP}({_NUMBER}|-|–|—))?(?![\d,])", re.I)
 # Lines that look like the label but are something else.
 _NOT_PL = re.compile(r"translation|reserve|comprehensive|consolidation|futures|contracts|cash.?pool|hedg", re.I)
-_YEAR = re.compile(r"^(?:19|20)\d\d$")
+_YEAR = re.compile(r"^(?:19|20)\d\d$")          # a bare column year, "2025"; "2,019" is a figure
+_OCR_THOUSANDS = re.compile(r"^\d{1,3}(?:\.\d{3})+$")   # "52.195": a comma OCR read as a full stop
 _CHARGING = re.compile(r"after\s+charging|charging\s*/\s*\(?crediting|\(crediting\)", re.I)
 _CREDITING = re.compile(r"after\s+crediting", re.I)
 # Table headings that set the scale or say the figures aren't in pounds.
-# "£", "£'000", "£000", "£m", "$'000", "€'000" standing alone, not "£45m" in a sentence.
-_HEADING = re.compile(r"(US\$|£|\$|€)\s*['’`]?\s*(000|m|k)?(?![\w,.])", re.I)
+# "£'000", "£000", "£'000s", "£m", "£ million", "$'000", "€'000" standing alone (not "£45m" in a sentence),
+# or a bare symbol repeated for the columns ("£ £", "$ $"). A single "US$" or "£" in prose isn't a heading.
+_HEADING = re.compile(
+    r"(US\$|£|\$|€)(?:\s*['’`]?\s*(000s?|thousands?|millions?|m|k)(?![\w,.])|(?=\s+(?:US\$|£|\$|€)(?![\w,.'’`])))",
+    re.I)
 
 
-def _value(token: str) -> Optional[float]:
+def _value(token: str, millions: bool = False) -> Optional[float]:
+    """The size of a figure (no sign); None for a column year or junk."""
     token = token.strip()
     if token in ("-", "–", "—"):
         return 0.0
-    digits = re.sub(r"[^\d.]", "", token)
-    if not digits or _YEAR.match(digits):
+    bare = re.sub(r"[()\s-]", "", token)
+    if _YEAR.match(bare):
         return None
+    if _OCR_THOUSANDS.match(bare) and not millions:
+        bare = bare.replace(".", "")   # "52.195" in a £ or £'000 table is 52,195
+    digits = re.sub(r"[^\d.]", "", bare)
     try:
-        return float(digits)
+        return float(digits) if digits else None
     except ValueError:
         return None
 
 
-def _bracketed(token: str) -> bool:
-    return token.strip().startswith("(")
+def _negative(token: str) -> bool:
+    """Shown in brackets or with a minus: the other way from the column's plain figures."""
+    token = token.strip()
+    return token.startswith("(") or (token.startswith("-") and token not in ("-", "–", "—"))
 
 
 def _direction(label: str, context: str) -> Optional[str]:
@@ -94,7 +106,9 @@ def _scale(before: str) -> tuple[float, str]:
         return 1.0, "£"
     symbol = last.group(1).upper().replace("US$", "$")
     unit = (last.group(2) or "").lower()
-    return (1_000.0 if unit in ("000", "k") else 1_000_000.0 if unit == "m" else 1.0), symbol
+    if unit.startswith(("000", "k", "thousand")):
+        return 1_000.0, symbol
+    return (1_000_000.0 if unit.startswith("m") else 1.0), symbol
 
 
 def read(text: str, scale_text: Optional[str] = None, ocr: bool = False) -> Optional[dict]:
@@ -114,10 +128,10 @@ def read(text: str, scale_text: Optional[str] = None, ocr: bool = False) -> Opti
         # "Currency translation differences", "Fair value gains on exchange rate futures": not the P&L line.
         if _NOT_PL.search(label) or _NOT_PL.search(before[-40:].split("\n")[-1]):
             continue
-        current = _value(first)
+        multiplier, currency = _scale(scale_text if scale_text is not None else before)
+        current = _value(first, millions=multiplier == 1_000_000)
         if current is None:
             continue
-        multiplier, currency = _scale(scale_text if scale_text is not None else before)
         if ocr and currency == "$" and ("£" in text or not re.search(r"US\$|USD|dollar", text, re.I)):
             currency = "£"   # OCR often reads "£" as "$": only a page that says dollars and never £ is in dollars
         context = (scale_text if scale_text is not None else before)[-1_500:]
@@ -125,13 +139,15 @@ def read(text: str, scale_text: Optional[str] = None, ocr: bool = False) -> Opti
         line = " ".join(text[m.start():m.end()].split())
 
         def signed(token: str, amount: float) -> float:
+            if amount == 0:
+                return 0.0
             if direction.endswith(" only"):
                 loss = direction == "loss only"
             else:
-                loss = (direction == "loss") != _bracketed(token)
+                loss = (direction == "loss") != _negative(token)
             return -amount * multiplier if loss else amount * multiplier
 
-        prior_amount = _value(second) if second else None
+        prior_amount = _value(second, millions=multiplier == 1_000_000) if second else None
         check = ""
         if currency != "£":
             check = f'FX line "{line}" is in {currency}, not pounds; check the accounts'

@@ -466,6 +466,10 @@ class TestFinderTimeBudget(PipelineTestCase):
                 with mock.patch.object(register_cache, "FACTS_DAYS", 90):
                     self.run_bulk(news_check=False)
             self.assertEqual(sum(1 for c in self.fake.calls if "filing-history" in c), reads)
+            # past FACTS_DAYS from when they were read (not from the file's date, which each refresh resets): read again
+            with mock.patch.object(register_cache, "CACHE_DAYS", 1e-9), mock.patch.object(register_cache, "FACTS_DAYS", 1e-9):
+                self.run_bulk(news_check=False)
+            self.assertGreater(sum(1 for c in self.fake.calls if "filing-history" in c), reads)
 
 
 class TestPipeline(PipelineTestCase):

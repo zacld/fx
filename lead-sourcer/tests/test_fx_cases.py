@@ -91,6 +91,26 @@ class TestFxCases(unittest.TestCase):
                     self.assertEqual(got["check"], "")
                     self.assertEqual((got["value"], got["prior"]), expected)
 
+    def test_review_findings(self):
+        # figures without thousands commas, and OCR's full stop for a comma
+        self.assertEqual(fx_text.read(CHARGING + "Exchange losses 52195 25479")["value"], -52_195)
+        self.assertEqual(fx_text.read(CHARGING + "Exchange losses 52195 25479")["prior"], -25_479)
+        self.assertEqual(fx_text.read(CHARGING + "Exchange losses 52.195 25.479")["value"], -52_195)
+        # ... but a £m table keeps its decimals
+        self.assertEqual(fx_text.read("after charging: £m £m Exchange losses 1.2 0.8")["value"], -1_200_000)
+        # a minus in a losses/(gains) column is a gain, like brackets
+        self.assertEqual(fx_text.read(CHARGING + "Foreign exchange losses/(gains) -12,345 6,000")["value"], 12_345)
+        # "2,019" is a figure, not a year
+        self.assertEqual(fx_text.read("after charging: £'000 £'000 Exchange losses 2,019 5,000")["value"], -2_019_000)
+        # "£'000s" / "£ million" headings scale
+        self.assertEqual(fx_text.read("after charging: £'000s £'000s Exchange losses 1,234 567")["value"], -1_234_000)
+        self.assertEqual(fx_text.read("after charging: £ million Exchange losses 1.5 2.0")["value"], -1_500_000)
+        # "US$" in prose isn't a dollar table
+        self.assertIsNone(fx_text.foreign_heading("The group has US$ and euro borrowings. Foreign exchange loss "))
+        got = fx_text.read("The group has US$ borrowings. Operating profit is stated after charging: £ £ "
+                           "Exchange losses 12,000 9,000")
+        self.assertEqual((got["value"], got["check"]), (-12_000, ""))
+
     def test_tag_on_the_wrong_line(self):
         # Wanis: the FX tag's row is "Stocks recognised as expenses"
         self.assertFalse(fx_text.label_is_fx("Amortisation in intangible fixed assets 16,046 23,949 Stocks recognised "
