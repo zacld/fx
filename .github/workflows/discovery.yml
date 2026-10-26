@@ -87,7 +87,7 @@ jobs:
         # Fails (exit 3) when the store is empty: stop rather than start the leads again from nothing.
         run: node apps/web/scripts/leads-store.mjs get data/leads.json
 
-      - name: Run the v2 pipeline (import → analyse → discover → enrich-contacts → enrich-decision-makers → enrich-website-intel → score → dedup → generate-drafts → export)
+      - name: Run the v2 pipeline (import → analyse → discover → enrich-contacts → enrich-decision-makers → enrich-website-intel → CH accounts → score → dedup → call readiness → drafts → export → audit)
         # Capped below the job's limit and allowed to fail, so the leads are still saved to the store after a
         # slow or stuck run (the store would otherwise lose everything since the last save).
         timeout-minutes: 60
@@ -149,32 +149,9 @@ jobs:
           export FX_PIPELINE_DEADLINE=$(( $(date +%s) + 55 * 60 ))
           npm run pipeline
 
-      # ── Python supplementary scripts ──────────────────────────────────────
-      # The two big enrichments (decision makers, website intelligence) are now
-      # done in TypeScript inside `npm run pipeline` above. These remaining
-      # Python scripts fill in what the TS stages don't: CH accounts (size band,
-      # employees, accounts type), call readiness (READY / REVIEW / HOLD), QA audit.
-      # Phones come from the companies' own websites (enrich-contacts); the old
-      # directory/Bing phone scrape was removed (4 min a run for ~5 phones).
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python deps
-        run: pip install requests dnspython --quiet
-
-      - name: Enrich CH accounts (size band, employee count, turnover, accounts type)
-        env:
-          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
-        run: python3 scripts/enrich_ch_accounts.py
-        continue-on-error: true
-
-      - name: Compute call readiness (READY / REVIEW / HOLD per lead)
-        run: python3 scripts/compute_call_readiness.py
-        continue-on-error: true
-
-      - name: QA audit (summary printed to Actions log — non-blocking)
-        run: python3 scripts/audit_leads.py || true
+      # CH accounts (size band, employees, accounts type), call readiness (READY / REVIEW / HOLD) and the
+      # QA audit now run inside `npm run pipeline` (TypeScript stages enrich-ch-accounts, call-readiness,
+      # audit), within the same deadline; phones come from the companies' own websites (enrich-contacts).
 
       - name: Refresh the dashboard data snapshot
         run: npm run sync-web-data

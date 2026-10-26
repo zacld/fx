@@ -38,6 +38,7 @@ Throughout this document, references to `ingest.py`, `discover_web.py`, `discove
 | `signals.py` | `@fx/core` `signals.ts` |
 | `linkedin_assist.py`, `outreach.py` | LinkedIn search URLs are now generated per-director inside `enrich-decision-makers.ts` (Google `site:linkedin.com/in` queries — Priority 12 compliant). `outreach.py` not yet ported (lower priority — generated on demand, see P13/P15). |
 | `run_pipeline.py` | `npm run pipeline` / `discovery.yml` |
+| `enrich_ch_accounts.py`, `compute_call_readiness.py`, `audit_leads.py` | `stages/enrich-ch-accounts.ts`, `call-readiness.ts`, `audit.ts` (inside `npm run pipeline`; call readiness now recomputed every run) |
 | AI provider: Gemini | **Groq** (`llama-3.3-70b-versatile`) by default; `AI_PROVIDER=gemini` still works. The "Gemini" mentions below mean "the one event-level LLM call". |
 
 Everything below this section — the three-brain architecture, the gates, the

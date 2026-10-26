@@ -1,0 +1,54 @@
+name: Checks
+
+# Type check and every test suite on each pull request and push to main, so a
+# type error or a failing test shows up on the PR instead of in a nightly run.
+# Free on the public repo; no secrets needed.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths-ignore:
+      - data/**
+      - apps/web/public/data/**
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Type check (core, pipeline)
+        run: npm run typecheck
+      - name: Tests (core, pipeline)
+        run: npm test
+      - name: Tests (dashboard)
+        run: npm test -w @fx/web
+
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q -r lead-sourcer/requirements.txt
+      - name: Tests (company finder)
+        working-directory: lead-sourcer
+        run: python -m unittest discover -s tests
+      - name: Tests (market moves)
+        working-directory: market-moves
+        run: python -m unittest discover -s tests

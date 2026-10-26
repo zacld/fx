@@ -164,7 +164,7 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
       // mid-market industry companies surface rather than being filtered out.
       // Excluded: micro-entities (< £632k turnover), large orgs, no website.
       if (industryPreset && lead.priority === "SKIP" && (lead.segment_signals ?? []).length >= 1) {
-        const isMicro = (lead.accounts_type ?? "").toLowerCase().includes("micro");
+        const isMicro = String(lead.accounts_type ?? "").toLowerCase().includes("micro");
         const hasWebsite = !!(lead.website || lead.website_domain);
         if (hasWebsite && !lead.is_large_org && !isMicro) {
           const lifted = Math.max(lead.score ?? 0, lead.fx_exposure_score ?? 0);
@@ -187,7 +187,7 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
       // Once they have a website, the next score pass will re-score properly.
       // Excluded: micro-entities, large orgs.
       if (lead.priority === "SKIP" && (lead.source as string) === "ch_sic_search") {
-        const isMicro = (lead.accounts_type ?? "").toLowerCase().includes("micro");
+        const isMicro = String(lead.accounts_type ?? "").toLowerCase().includes("micro");
         if (!lead.is_large_org && !isMicro) {
           lead.score = 42;
           lead.priority = "QUEUE";

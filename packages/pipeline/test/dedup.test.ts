@@ -7,7 +7,7 @@ import { getDb, schema } from "@fx/core/db";
 import type { Lead } from "@fx/core";
 import { dedupLeads, runDedupStage } from "../src/stages/dedup.js";
 
-function L(p: Partial<Lead> & { id: string }): Lead {
+function L(p: Partial<Lead>): Lead {   // every call passes an id
   return {
     event_id: "", company_name: "X Ltd", priority: "QUEUE", score: 0, company_number: null,
     website: null, website_domain: "", linked_event_ids: [], scoring_reasons: [], ...p,

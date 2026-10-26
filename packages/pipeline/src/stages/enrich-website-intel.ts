@@ -95,8 +95,10 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
   const max = opts.max ?? 1000;
   const force = !!opts.force;
   const persist = opts.persist ?? true;
-  // ...or earlier, to leave score / dedup / export (and a site still finishing) time before the pipeline's end.
-  const deadline = stageDeadline(opts.budgetMinutes ?? DEFAULT_BUDGET_MIN, 5);
+  // ...or earlier, to leave CH accounts (FX_ACCOUNTS_BUDGET_MIN), score / dedup / export and a site still
+  // finishing time before the pipeline's end.
+  const deadline = stageDeadline(opts.budgetMinutes ?? DEFAULT_BUDGET_MIN,
+    Number(process.env.FX_ACCOUNTS_BUDGET_MIN ?? "4") + 5);
   const leadTimeoutMs = (opts.leadTimeoutSeconds ?? DEFAULT_LEAD_TIMEOUT_S) * 1000;
 
   const { db, sqlite, close } = getDb(dbPath);
