@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CONFIDENCE, SORTS, filterRows, googleFd, hasConfirmedFd, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONFIDENCE, SORTS, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -177,7 +177,7 @@ function Account({ r }) {
     ["Directors", r.all_directors], ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by],
     ["Owners", r.owners], ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
     ["Banking", r.banking_relationships],
-    ["FX gain/loss", r.fx_gain_loss_gbp && `${money(r.fx_gain_loss_gbp)} (prior year ${money(r.fx_gain_loss_prior_gbp) || "n/a"})`],
+    ["FX gain/loss", fxLine(r)], ["FX figure to check", r.fx_gain_loss_check],
     ["Growth", r.turnover_growth], ["Overseas sales", r.overseas_turnover_share],
     ["Cash / borrowings", [money(r.cash_gbp), money(r.bank_borrowings_gbp)].filter(Boolean).join(" / ")],
     ["Auditor", [r.auditor, r.auditor_tier].filter(Boolean).join(" — ")], ["Accounts", r.size_basis],
@@ -196,6 +196,7 @@ function Account({ r }) {
         <div className="figures">
           {r.turnover_gbp && <span><b>{money(r.turnover_gbp)}</b> turnover</span>}
           {wallet(r) && <span><b>{wallet(r)}</b> FX a year</span>}
+          {r.fx_gain_loss_gbp && <span><b>{money(r.fx_gain_loss_gbp)}</b> FX {Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}{fxShare(r) && ` (${fxShare(r).replace(" of turnover", "")})`}</span>}
         </div>
       </div>
 

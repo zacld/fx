@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterRows, googleFd, hasConfirmedFd, isFinanceDirector, money, sortRows, toCsv, wallet } from "./format.js";
+import { filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -39,6 +39,22 @@ describe("accounts helpers", () => {
     expect(filterRows(withOut, { showOut: true }).map((r) => r.rank)).toEqual([1, 2, 3, 4]);
     expect(sortRows(rows, "turnover").map((r) => r.rank)).toEqual([2, 1, 3]);
     expect(sortRows(rows, "confidence").map((r) => r.rank)).toEqual([1, 2, 3]);
+  });
+
+  it("sorts by largest FX loss, then gains, then no figure", () => {
+    const rows = [
+      { rank: 1, fx_gain_loss_gbp: "-50000", turnover_gbp: "40000000" },
+      { rank: 2, fx_gain_loss_gbp: "" },
+      { rank: 3, fx_gain_loss_gbp: "120000" },
+      { rank: 4, fx_gain_loss_gbp: "-900000", turnover_gbp: "60000000" },
+      { rank: 5, fx_gain_loss_gbp: "30000" },
+    ];
+    expect(sortRows(rows, "fxLoss").map((r) => r.rank)).toEqual([4, 1, 3, 5, 2]);
+    expect(fxShare(rows[3])).toBe("1.5% of turnover");
+    expect(fxShare(rows[0])).toBe("0.1% of turnover");
+    expect(fxShare({ fx_gain_loss_gbp: "-1000", turnover_gbp: "50000000" })).toBe("<0.1% of turnover");
+    expect(fxShare(rows[2])).toBe("");
+    expect(fxLine({ ...rows[3], fx_gain_loss_prior_gbp: "-400000" })).toBe("−£900k loss (1.5% of turnover; prior year −£400k)");
   });
 
   it("searches Google for the company's finance director", () => {
