@@ -1,5 +1,5 @@
 /**
- * stages/enrich-website-intel.ts — TS port of scripts/legacy/enrich_website_intelligence.py.
+ * stages/enrich-website-intel.ts — TS port of the original Python enrich_website_intelligence.py (removed).
  *
  * For every lead with a website, crawls the product/supplier/about pages
  * (sitemap-aware) and extracts the FX evidence the dashboard surfaces as

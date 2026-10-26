@@ -149,7 +149,7 @@ export const ContactFieldsSchema = z.object({
 });
 export type ContactFields = z.infer<typeof ContactFieldsSchema>;
 
-// ── Decision-maker enrichment (= scripts/legacy/enrich_decision_makers.py) ───
+// ── Decision-maker enrichment (= the original Python enrich_decision_makers.py (removed)) ───
 // Tier 1 = primary FX conversation targets (FD/CFO/MD/CEO/Owner).
 // Tier 2 = secondary (Commercial/Ops/Procurement/Sales/Accounts Manager).
 // Tier 3 = generic Director / Company Secretary / Non-Executive fallback.
@@ -200,7 +200,7 @@ export type DecisionMaker = z.infer<typeof DecisionMakerSchema>;
 export const RouteGrade = z.enum(["A", "B", "C", "D", "E", "F"]);
 export type RouteGrade = z.infer<typeof RouteGrade>;
 
-// ── Website intelligence (= scripts/legacy/enrich_website_intelligence.py) ───
+// ── Website intelligence (= the original Python enrich_website_intelligence.py (removed)) ───
 export const WebsiteIntelSchema = z.object({
   fx_evidence_snippets: z.array(z.string()).default([]),
   country_evidence: z.array(z.string()).default([]),

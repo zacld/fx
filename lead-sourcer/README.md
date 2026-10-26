@@ -319,7 +319,7 @@ used in turn: Search1API (`SEARCH1API_KEY`, 200 free), Tavily
 (`SERPER_API_KEY`, ~$1 per 1,000). Set the keys as secrets and, if needed,
 the allowances as variables (`SEARCH1API_MONTHLY`, `TAVILY_MONTHLY`,
 `EXA_MONTHLY`, `SERPER_MONTHLY`; 0 = no cap). At most `SEARCH_MAX_PER_RUN`
-searches a run (default 150 while Serper's 2,500 sign-up searches last, run every weekday morning; accounts qualified Out are skipped); results are cached for 30 days, so a company
+searches a run (default 150 while Serper's 2,500 sign-up searches last, run every weekday morning; accounts qualified Out are skipped); results are cached for 60 days (`SEARCH_CACHE_DAYS`), so a company
 is never paid for twice in a month. It reads only the search results' titles and snippets —
 LinkedIn profile titles ("Alan Metcalfe - Finance Director at LJ Fairburn &
 Son"), company board pages, news and org charts:
