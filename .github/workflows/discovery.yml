@@ -143,7 +143,11 @@ jobs:
           # Industry preset — blank on scheduled runs (default FX behaviour).
           # Set via workflow_dispatch input for one-off industry-targeted runs.
           INDUSTRY_PRESET:              ${{ inputs.industry_preset || '' }}
-        run: npm run pipeline
+        run: |
+          # One deadline for the whole step (its limit is 60 min): the slow stages stop early enough
+          # that score / dedup / export always finish inside it.
+          export FX_PIPELINE_DEADLINE=$(( $(date +%s) + 55 * 60 ))
+          npm run pipeline
 
       # ── Python supplementary scripts ──────────────────────────────────────
       # The two big enrichments (decision makers, website intelligence) are now

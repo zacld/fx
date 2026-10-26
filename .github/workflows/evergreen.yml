@@ -78,7 +78,11 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_KEY:   ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
           GOOGLE_SHEET_TAB:             ${{ vars.GOOGLE_SHEET_TAB }}
           EVERGREEN_FORCE:              ${{ inputs.force }}
-        run: npm run pipeline:evergreen
+        run: |
+          # One deadline for the whole step (its limit is 60 min): the slow stages stop early enough
+          # that score / dedup / export always finish inside it.
+          export FX_PIPELINE_DEADLINE=$(( $(date +%s) + 55 * 60 ))
+          npm run pipeline:evergreen
 
       - uses: actions/setup-python@v5
         with:

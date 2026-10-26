@@ -351,7 +351,22 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-10-26"
+FACTS_VERSION = "2026-10-26b"   # b: FX reader review fixes (bare figures, minus signs, £000s headings)
+
+
+def facts_reusable(entry: dict) -> bool:
+    """
+    Whether cached facts were read with rules still current. Facts from
+    "2026-10-26" differ only where the FX line came from the accounts text
+    or a $/€ check was raised, so only those are read again (not every
+    company's accounts).
+    """
+    version = entry.get("facts_version")
+    if version == FACTS_VERSION:
+        return True
+    facts = entry.get("facts") or {}
+    return version == "2026-10-26" and not (facts.get("fx_gain_loss_evidence", "").startswith(("accounts", "scanned"))
+                                           or re.search(r"[$€]", facts.get("fx_gain_loss_check", "")))
 
 # An FX gain/loss bigger than this share of turnover is almost certainly a
 # different figure tagged or read as FX (Wanis: purchases in foreign currency,

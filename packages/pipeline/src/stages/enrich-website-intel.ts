@@ -33,7 +33,8 @@ import {
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
 import { RunRecorder } from "../run.js";
-import { createCachedFetcher } from "../sources/fetch.js";
+import { createCachedFetcher, headOk } from "../sources/fetch.js";
+import { stageDeadline, stoppable, type StopFlag } from "../sources/deadline.js";
 import { discoverPages } from "../sources/sitemap.js";
 import { shouldSkipUrl } from "../sources/blocklists.js";
 
@@ -94,7 +95,8 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
   const max = opts.max ?? 1000;
   const force = !!opts.force;
   const persist = opts.persist ?? true;
-  const deadline = Date.now() + (opts.budgetMinutes ?? DEFAULT_BUDGET_MIN) * 60_000;
+  // ...or earlier, to leave score / dedup / export (and a site still finishing) time before the pipeline's end.
+  const deadline = stageDeadline(opts.budgetMinutes ?? DEFAULT_BUDGET_MIN, 5);
   const leadTimeoutMs = (opts.leadTimeoutSeconds ?? DEFAULT_LEAD_TIMEOUT_S) * 1000;
 
   const { db, sqlite, close } = getDb(dbPath);
@@ -125,16 +127,18 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
       (l as Record<string, unknown>).intel_checked_at = new Date().toISOString();
       let timer: NodeJS.Timeout | undefined;
       const timeout = new Promise<"timeout">((res) => { timer = setTimeout(() => res("timeout"), leadTimeoutMs); });
-      const outcome = await Promise.race([readSite(l), timeout]);
+      const stop: StopFlag = { stopped: false };
+      const outcome = await Promise.race([readSite(l, stop), timeout]);
       clearTimeout(timer);
       if (outcome === "timeout") {
+        stop.stopped = true;   // its unfinished work stops at the next step instead of running on
         timedOut++;
         console.warn(`enrich-website-intel: gave up on ${l.company_name ?? l.id} after ${leadTimeoutMs / 1000}s`);
       } else enriched++;
     })));
     if (leftForNextRun) console.log(`enrich-website-intel: time budget used — ${leftForNextRun} leads left for the next run`);
 
-    async function readSite(l: Lead): Promise<void> {
+    async function readSite(l: Lead, stop: StopFlag): Promise<void> {
       try {
         const pages = await discoverPages({
           homeUrl: l.website!,
@@ -145,12 +149,14 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
           fallbackSlugs: INTEL_SLUGS,
           prioritise: ["suppliers", "products", "about"],
           maxPages: MAX_PAGES,
-          fetcher: fetcher.fetch,
+          fetcher: stoppable(fetcher.fetch, stop),
+          headOk: async (url, timeoutMs) => !stop.stopped && headOk(url, timeoutMs),
         });
 
         let combinedText = "";
         let homepageHtml = "";
         for (const url of pages) {
+          if (stop.stopped) return;
           const got = await fetcher.fetch(url);
           if (!got) continue;
           if (url === l.website && !homepageHtml) homepageHtml = got.html;
@@ -158,6 +164,7 @@ export async function runEnrichWebsiteIntelStage(opts: EnrichIntelOptions = {}):
         }
         combinedText = combinedText.replace(/\s+/g, " ").trim();
 
+        if (stop.stopped) return;   // given up on (timed out): leave the lead as it was
         const evidence = extractWebsiteIntel(combinedText);
         const techSigs = homepageHtml ? detectTechStack(homepageHtml) : [];
         const techScore = techStackFxScore(techSigs);

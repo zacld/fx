@@ -42,7 +42,7 @@ def ocr_available() -> bool:
 # (main.CH_WORKERS) they fight over the CPU, so each process gets one thread.
 _ENV = {**os.environ, "OMP_THREAD_LIMIT": "1"}
 # OCR time and pages this run, for the finder's progress line (thread-safe).
-stats = {"seconds": 0.0, "pages": 0, "fx_pages": 0}
+stats = {"seconds": 0.0, "pages": 0, "fx_pages": 0, "fx_seconds": 0.0}
 _stats_lock = threading.Lock()
 
 
@@ -51,6 +51,8 @@ def _count(seconds: float, pages: int = 0, fx_pages: int = 0) -> None:
         stats["seconds"] += seconds
         stats["pages"] += pages
         stats["fx_pages"] += fx_pages
+        if fx_pages:
+            stats["fx_seconds"] += seconds
 
 
 def _run(args: list[str]) -> str:
@@ -96,7 +98,12 @@ def to_text(data: bytes) -> tuple[str, str]:
 # its minutes (each page is ~2s of OCR).
 FX_SEARCH_MAX_PAGES = int(os.environ.get("OCR_FX_MAX_PAGES", "12"))
 FX_SEARCH_BUDGET_SECONDS = float(os.environ.get("OCR_FX_BUDGET_SECONDS", "1800"))
-_fx_search_spent = 0.0
+
+
+def _fx_budget_left() -> bool:
+    """Whether this run's FX-page OCR is under OCR_FX_BUDGET_SECONDS (all worker threads together)."""
+    with _stats_lock:
+        return stats["fx_seconds"] < FX_SEARCH_BUDGET_SECONDS
 
 
 def _page_count(path: str) -> int:
@@ -117,24 +124,21 @@ def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES) -> tuple[str, in
     that `wanted(text)` accepts, OCR'd one page at a time in fx_pages_order;
     ("", 0) when none does, OCR isn't installed or the run's budget is spent.
     """
-    global _fx_search_spent
-    if not data or not ocr_available() or _fx_search_spent >= FX_SEARCH_BUDGET_SECONDS:
+    if not data or not ocr_available() or not _fx_budget_left():
         return "", 0
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "accounts.pdf")
         with open(path, "wb") as f:
             f.write(data)
         for number in fx_pages_order(_page_count(path), already):
-            if _fx_search_spent >= FX_SEARCH_BUDGET_SECONDS:
+            if not _fx_budget_left():
                 break
             started = time.monotonic()
             stem = os.path.join(tmp, f"fx{number}")
             _run(["pdftoppm", "-r", "200", "-gray", "-f", str(number), "-l", str(number), "-png", path, stem])
             images = sorted(glob.glob(stem + "*.png"))
             text = _run(["tesseract", images[0], "stdout", "--psm", "6"]) if images else ""
-            elapsed = time.monotonic() - started
-            _fx_search_spent += elapsed
-            _count(elapsed, pages=1, fx_pages=1)
+            _count(time.monotonic() - started, pages=1, fx_pages=1)
             if text and wanted(text):
                 return text, number
     return "", 0
