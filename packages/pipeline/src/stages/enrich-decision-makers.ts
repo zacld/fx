@@ -64,6 +64,15 @@ const MAX_PAGES = 6;            // homepage + 5 team/about/contact pages
 // set and persisted, so the next run picks up where this one left off rather
 // than redoing the whole backlog from scratch.
 const ENRICH_BATCH_SIZE = 50;
+// Time limits, so the stages after this one (website intel, score, dedup,
+// drafts, export) always get to run inside the workflow's 60-minute cap.
+// The stage stops starting new leads after FX_DM_BUDGET_MIN minutes, saves,
+// and the next run carries on from where it stopped (unenriched leads are
+// still candidates). A lead taking longer than FX_DM_LEAD_TIMEOUT_S is left
+// for 7 days, like any other enriched lead, so one slow site can't hold up
+// its whole batch again.
+const DEFAULT_BUDGET_MIN = Number(process.env.FX_DM_BUDGET_MIN ?? "35");
+const DEFAULT_LEAD_TIMEOUT_S = Number(process.env.FX_DM_LEAD_TIMEOUT_S ?? "120");
 const TEAM_SLUGS = [
   "team", "our-team", "meet-the-team", "people", "our-people",
   "management", "leadership", "directors", "staff", "key-people",
@@ -90,10 +99,16 @@ export interface EnrichDmOptions {
   /** Disable tech-stack detection (rarely useful — kept for tests). */
   disableTech?: boolean;
   persist?: boolean;
+  /** Stop starting new leads after this many minutes (default env FX_DM_BUDGET_MIN or 35). */
+  budgetMinutes?: number;
+  /** Give up on one lead after this many seconds (default env FX_DM_LEAD_TIMEOUT_S or 120). */
+  leadTimeoutSeconds?: number;
 }
 
 export interface EnrichDmResult {
   totalLeads: number; toProcess: number; enriched: number;
+  /** Leads left for the next run because the time budget ran out. */
+  leftForNextRun: number; timedOut: number;
   multiDmLeads: number; verifiedAny: number;
   routeGrades: Record<RouteGrade, number>;
   runId: string;
@@ -504,6 +519,8 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
   const force = !!opts.force;
   const disableTech = !!opts.disableTech;
   const persist = opts.persist ?? true;
+  const deadline = Date.now() + (opts.budgetMinutes ?? DEFAULT_BUDGET_MIN) * 60_000;
+  const leadTimeoutMs = (opts.leadTimeoutSeconds ?? DEFAULT_LEAD_TIMEOUT_S) * 1000;
 
   const { db, sqlite, close } = getDb(dbPath);
   const rec = new RunRecorder("enrich-decision-makers", { dbPath, outPath, concurrency, max, force });
@@ -549,16 +566,33 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
     };
 
     const limit = pLimit(concurrency);
+    let enriched = 0, timedOut = 0, leftForNextRun = 0;
     for (let i = 0; i < candidates.length; i += ENRICH_BATCH_SIZE) {
       const batch = candidates.slice(i, i + ENRICH_BATCH_SIZE);
       await Promise.all(batch.map((l) => limit(async () => {
-        try { await enrichLead(l, ch, fetcher, smtp, disableTech); }
+        if (Date.now() >= deadline) { leftForNextRun++; return; }
+        let timer: NodeJS.Timeout | undefined;
+        const timeout = new Promise<"timeout">((res) => { timer = setTimeout(() => res("timeout"), leadTimeoutMs); });
+        try {
+          const outcome = await Promise.race([enrichLead(l, ch, fetcher, smtp, disableTech), timeout]);
+          if (outcome === "timeout") {
+            timedOut++;
+            (l as Record<string, unknown>).dm_enriched_at = new Date().toISOString();
+            console.warn(`enrich-dm: gave up on ${l.company_name ?? l.id} after ${leadTimeoutMs / 1000}s (${bareDomain(l.website) || "no website"})`);
+          } else enriched++;
+        }
         catch (e) { rec.warn(`enrich-dm failed for ${l.id}: ${String(e)}`); }
+        finally { clearTimeout(timer); }
       })));
       // Checkpoint after every batch — see ENRICH_BATCH_SIZE's comment above
       // for why this (not just the final write) is the point of batching.
       persistAll();
       console.log(`enrich-dm: checkpointed ${Math.min(i + ENRICH_BATCH_SIZE, candidates.length)}/${candidates.length}`);
+      if (Date.now() >= deadline) {
+        leftForNextRun += candidates.length - Math.min(i + ENRICH_BATCH_SIZE, candidates.length);
+        console.log(`enrich-dm: time budget used — ${leftForNextRun} leads left for the next run`);
+        break;
+      }
     }
 
     const grades: Record<RouteGrade, number> = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
@@ -572,6 +606,7 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
 
     rec.section("contact_coverage", {
       total_leads: Object.keys(leads).length, to_process: candidates.length,
+      enriched, timed_out: timedOut, left_for_next_run: leftForNextRun,
       multi_dm_leads: multiDm, verified_any: verifiedAny,
       grade_a: grades.A, grade_b: grades.B, grade_c: grades.C,
       grade_d: grades.D, grade_e: grades.E, grade_f: grades.F,
@@ -582,7 +617,7 @@ export async function runEnrichDecisionMakersStage(opts: EnrichDmOptions = {}): 
 
     return {
       totalLeads: Object.keys(leads).length, toProcess: candidates.length,
-      enriched: candidates.length, multiDmLeads: multiDm, verifiedAny,
+      enriched, leftForNextRun, timedOut, multiDmLeads: multiDm, verifiedAny,
       routeGrades: grades, runId: rec.run.run_id,
     };
   } finally {
@@ -603,6 +638,7 @@ function parseArgs(argv: string[]): EnrichDmOptions {
     else if (a === "--smtp-cache") o.smtpCachePath = argv[++i];
     else if (a === "--limit") o.concurrency = Number(argv[++i]);
     else if (a === "--max") o.max = Number(argv[++i]);
+    else if (a === "--budget-min") o.budgetMinutes = Number(argv[++i]);
     else if (a === "--force") o.force = true;
     else if (a === "--no-smtp") o.disableSmtp = true;
     else if (a === "--no-tech") o.disableTech = true;
@@ -612,8 +648,11 @@ function parseArgs(argv: string[]): EnrichDmOptions {
 const isMain = (() => { try { return !!process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url); } catch { return false; } })();
 if (isMain) {
   runEnrichDecisionMakersStage(parseArgs(process.argv.slice(2))).then((r) => {
-    console.log(`enrich-decision-makers: ${r.totalLeads} leads | processed ${r.toProcess} | multi-DM ${r.multiDmLeads} | verified-email ${r.verifiedAny}`);
+    console.log(`enrich-decision-makers: ${r.totalLeads} leads | due ${r.toProcess} | enriched ${r.enriched} | gave up ${r.timedOut} | left for next run ${r.leftForNextRun} | multi-DM ${r.multiDmLeads} | verified-email ${r.verifiedAny}`);
     console.log(`  grades: A=${r.routeGrades.A} B=${r.routeGrades.B} C=${r.routeGrades.C} D=${r.routeGrades.D} E=${r.routeGrades.E} F=${r.routeGrades.F}`);
     console.log(`  run_id ${r.runId}`);
-  }).catch((e) => { console.error("enrich-decision-makers failed:", e); process.exitCode = 1; });
+    // Everything is saved by now; exit even if a lead we gave up on still has a
+    // request open, so it can't hold the pipeline step past its cap.
+    process.exit(0);
+  }).catch((e) => { console.error("enrich-decision-makers failed:", e); process.exit(1); });
 }

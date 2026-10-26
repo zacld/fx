@@ -140,6 +140,10 @@ jobs:
           # Per-host fetch politeness — 6 concurrent leads × multiple stages
           # would otherwise hammer the same domain.
           FX_HOST_MIN_INTERVAL_MS:      "800"
+          # Decision-maker lookups stop starting new leads after 35 minutes (saved; the next run
+          # carries on) and give up on one slow site after 2 minutes, so score / dedup / export always run.
+          FX_DM_BUDGET_MIN:             "35"
+          FX_DM_LEAD_TIMEOUT_S:         "120"
           # Optional: set FX_EMAIL_VERIFIER_URL (+ FX_EMAIL_VERIFIER_TOKEN) as
           # GitHub secrets to route verification through Hunter / Snov /
           # NeverBounce / a custom worker. When set, takes precedence over the
