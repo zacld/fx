@@ -17,18 +17,23 @@ from typing import Optional
 
 CACHE_DIR = os.path.join(os.path.expanduser("~"), ".cache", "fx-lead-sourcer", "register")
 CACHE_DAYS = float(os.environ.get("REGISTER_CACHE_DAYS", "0"))
+# What was read from a filing (incl. OCR) doesn't change until newer accounts are filed: kept longer.
+FACTS_DAYS = float(os.environ.get("REGISTER_FACTS_DAYS", "90"))
 
 
 def _path(number: str) -> str:
     return os.path.join(CACHE_DIR, f"{number}.json")
 
 
-def load(number: str, made_up_to: str = "") -> Optional[dict]:
-    """The stored lookups for this company, or None when missing, too old or the accounts have moved on."""
+def load(number: str, made_up_to: str = "", days: Optional[float] = None) -> Optional[dict]:
+    """
+    The stored lookups for this company, or None when missing, older than
+    `days` (default CACHE_DAYS) or the accounts have moved on.
+    """
     if CACHE_DAYS <= 0 or not number:
         return None
     try:
-        if time.time() - os.path.getmtime(_path(number)) > CACHE_DAYS * 86400:
+        if time.time() - os.path.getmtime(_path(number)) > (CACHE_DAYS if days is None else days) * 86400:
             return None
         with open(_path(number), encoding="utf-8") as f:
             entry = json.load(f)
