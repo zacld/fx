@@ -63177,6 +63177,147 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-10T08:41:16.283Z"
   },
+  "753e6290dcf86f59": {
+    "id": "753e6290dcf86f59",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/australia-cpi-preview-banks-see-1-0-core-rise-above-the-rba-s-0-8-forecast/",
+    "headline": "Australia CPI preview: banks see 1.0% core rise, above the RBA’s 0.8% forecast",
+    "raw_summary": "The Australian dollar and front-end yields are set up for a binary reaction. With implied hike odds already above half, a trimmed mean at or above 1.0% would push November pricing closer to fully priced and support the currency. A 0.9% or lower print could see that pricing unwind quickly. Oil is central to the headline story: the fuel spike reflects the global energy shock tied to the Iran conflict, so further gains in crude would keep headline inflation elevated into year-end. The services component matters most for the RBA, since broadening price pressure would undercut the argument that thi",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-10-27T01:19:49.080Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "The Australian dollar and front-end yields are set up for a binary reaction. With implied hike odds already above half, a trimmed mean at or above 1.0% would push November pricing closer to fully priced and support the currency. A 0.9% or lower print could see that pricing unwind quickly. Oil is central to the headline story: the fuel spike reflects the global energy shock tied to the Iran conflict, so further gains in crude would keep headline inflation elevated into year-end. The services component matters most for the RBA, since broadening price pressure would undercut the argument that thi",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "Fallback event — ai-error: no GROQ_API_KEY",
+    "trigger_strength": "weak",
+    "trigger_score": 30,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: no GROQ_API_KEY. Rule-based segments inferred from headline keywords.",
+    "what_happened": "Australia CPI preview: banks see 1.0% core rise, above the RBA’s 0.8% forecast",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "segment_name": "UK petroleum and fuel importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "segment_name": "UK chemical and industrial-input importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-27T01:20:06.875Z"
+  },
   "756736c7054978cb": {
     "id": "756736c7054978cb",
     "headline": "Euro ticks higher against British Pound following UK CPI data",
@@ -97073,6 +97214,150 @@
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "accfa62615001b9f": {
+    "id": "accfa62615001b9f",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-and-canada-working-on-deal-to-ease-tariffs-on-canadian-steel-and-auto-imports/",
+    "headline": "US and Canada working on deal to ease tariffs on Canadian steel and auto imports",
+    "raw_summary": "False reports of 'a&nbsp;Canada-USA trade deal' aren't far off from the number of reports about 'peace in Hormuz' so I would take this one with a grain of salt. There has been some noise over the weekend about new trade negotiations led by Lutnick. This report from Reuters cites two Canadian and four American sources that say the sides are talking about reduced tariffs on autos and steel. They're underway with broad discontent in US border states about tariffs and Michigan Republican Senate candidate Mike Rogers now running against tariffs. The report says a deal is possible before the Novembe",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-10-27T01:19:49.079Z",
+    "event_type": "Tariff",
+    "event_breadth": "tariff",
+    "summary": "False reports of 'a&nbsp;Canada-USA trade deal' aren't far off from the number of reports about 'peace in Hormuz' so I would take this one with a grain of salt. There has been some noise over the weekend about new trade negotiations led by Lutnick. This report from Reuters cites two Canadian and four American sources that say the sides are talking about reduced tariffs on autos and steel. They're underway with broad discontent in US border states about tariffs and Michigan Republican Senate candidate Mike Rogers now running against tariffs. The report says a deal is possible before the Novembe",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Fallback event — ai-error: no GROQ_API_KEY",
+    "trigger_strength": "medium",
+    "trigger_score": 55,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK importers of US/EU goods",
+      "UK manufacturers importing raw materials"
+    ],
+    "why_now": "Recent tariff may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: no GROQ_API_KEY. Rule-based segments inferred from headline keywords.",
+    "what_happened": "US and Canada working on deal to ease tariffs on Canadian steel and auto imports",
+    "what_changed_financially": "Market tariff with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
+    "fx_payment_logic": "New or increased tariffs raise the cost of imported goods. UK businesses buying stock from overseas suppliers face higher landed costs and margin pressure immediately.",
+    "business_impact_summary": "UK importers with US or EU suppliers now face higher input costs. Businesses that priced stock before the tariff announcement will see margin compression on committed orders.",
+    "sales_angle": "Recent tariff may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent tariff creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Tariff exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor or retailer sourcing stock from US or European suppliers, selling domestically in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "Tariff cost exposure",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Tariff added to import invoice → higher total cost in foreign currency → more GBP needed to pay → margin compressed",
+        "margin_risk": "High — tariff applies directly to cost of goods",
+        "payment_timing_risk": "High — goods already ordered now cost more",
+        "affected_payment_flow": "USD/EUR payments to overseas suppliers, monthly or per-shipment",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"food importer\" UK",
+          "\"product distributor\" UK wholesale",
+          "\"import trading\" UK"
+        ],
+        "sales_angle": "With tariffs increasing import costs, businesses may want to review upcoming USD/EUR supplier payments.",
+        "exposure_thesis_template": "This company appears to import goods from overseas and sell in GBP — tariffs increase the GBP cost of upcoming orders.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "import trading",
+          "distribution international",
+          "foods wholesale"
+        ],
+        "segment_name": "UK importers of US/EU goods",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK manufacturer sourcing raw materials or components from US/EU, selling finished goods in GBP",
+        "exposure_level": "High",
+        "exposure_type": "Input cost exposure",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Tariff on imported components/materials → higher cost per unit → margin compressed on GBP-priced finished goods",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"manufacturer\" UK international supply",
+          "\"components distributor\" UK"
+        ],
+        "sales_angle": "Tariffs on imported components are increasing production costs for UK manufacturers with overseas supply chains.",
+        "exposure_thesis_template": "This company appears to manufacture using imported materials/components — tariffs raise hard-to-pass-on input costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "manufacturing international",
+          "components wholesale",
+          "industrial trading"
+        ],
+        "segment_name": "UK manufacturers importing raw materials",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "import trading",
+      "distribution international",
+      "foods wholesale",
+      "manufacturing international",
+      "components wholesale",
+      "industrial trading"
+    ],
+    "all_search_queries": [
+      "\"food importer\" UK",
+      "\"product distributor\" UK wholesale",
+      "\"import trading\" UK",
+      "\"manufacturer\" UK international supply",
+      "\"components distributor\" UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-27T01:20:06.513Z"
+  },
   "acfc3728bd5aa8f7": {
     "id": "acfc3728bd5aa8f7",
     "headline": "French services activity continues downturn in June but at a slower pace",
@@ -103396,6 +103681,147 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-19T03:28:05.464Z"
+  },
+  "b892bbccda334eae": {
+    "id": "b892bbccda334eae",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/japan-september-services-ppi-holds-at-3-7-y-y-in-line-with-forecast-before-boj/",
+    "headline": "Japan September services PPI holds at 3.7% y/y, in line with forecast, before BoJ",
+    "raw_summary": "An in-line print is unlikely to move the yen much on its own, but it removes one possible dovish surprise before Friday’s decision and keeps the backdrop supportive of December hike pricing. Steady services inflation strengthens the case for the Outlook Report to effectively declare underlying inflation has reached 2%, which would support the yen and short-end JGB yields. The bigger moves are still likely to come from the BoJ’s vote split, Ueda’s press conference and Wednesday’s Fed decision. Oil-driven cost pressure tied to the Iran conflict keeps the wider inflation backdrop firm. --- Earlie",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-10-27T01:19:49.079Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "An in-line print is unlikely to move the yen much on its own, but it removes one possible dovish surprise before Friday’s decision and keeps the backdrop supportive of December hike pricing. Steady services inflation strengthens the case for the Outlook Report to effectively declare underlying inflation has reached 2%, which would support the yen and short-end JGB yields. The bigger moves are still likely to come from the BoJ’s vote split, Ueda’s press conference and Wednesday’s Fed decision. Oil-driven cost pressure tied to the Iran conflict keeps the wider inflation backdrop firm. --- Earlie",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Fallback event — ai-error: no GROQ_API_KEY",
+    "trigger_strength": "medium",
+    "trigger_score": 55,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: no GROQ_API_KEY. Rule-based segments inferred from headline keywords.",
+    "what_happened": "Japan September services PPI holds at 3.7% y/y, in line with forecast, before BoJ",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "segment_name": "UK petroleum and fuel importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "segment_name": "UK chemical and industrial-input importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-27T01:20:04.692Z"
   },
   "b8ad7bceae93cf68": {
     "id": "b8ad7bceae93cf68",
@@ -111200,6 +111626,150 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-10-15T00:12:40.236Z"
+  },
+  "c7d6babb8b3777de": {
+    "id": "c7d6babb8b3777de",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-fx-news-wrap-26-oct-anthropic-ipo-puts-ai-back-in-focus-as-stocks-rebound/",
+    "headline": "investingLive Americas FX news wrap 26 Oct: Anthropic IPO puts AI back in focus as stocks rebound",
+    "raw_summary": "At the close: US stock markets climb Monday as Anthropic files for IPO US and Canada working on deal to ease tariffs on Canadian steel and auto imports The once Magnificent 7 are not so magnificent, but they still are large cap technology movers Saudi Arabia offers cash to Houthis to stop attacks - report The cost of intelligence is collapsing US Treasury sells $69 billion of 2-year notes at a high yield of 4.708% Saudi, Pakistani, Iranian and Turkish security chiefs sit down in Tehran, agree to continue talks US October Dallas Fed manufacturing index 13.4 vs 9.8 prior Anthropic files for IPO ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-10-27T01:19:49.079Z",
+    "event_type": "Tariff",
+    "event_breadth": "tariff",
+    "summary": "At the close: US stock markets climb Monday as Anthropic files for IPO US and Canada working on deal to ease tariffs on Canadian steel and auto imports The once Magnificent 7 are not so magnificent, but they still are large cap technology movers Saudi Arabia offers cash to Houthis to stop attacks - report The cost of intelligence is collapsing US Treasury sells $69 billion of 2-year notes at a high yield of 4.708% Saudi, Pakistani, Iranian and Turkish security chiefs sit down in Tehran, agree to continue talks US October Dallas Fed manufacturing index 13.4 vs 9.8 prior Anthropic files for IPO ",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Fallback event — ai-error: no GROQ_API_KEY",
+    "trigger_strength": "medium",
+    "trigger_score": 55,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK importers of US/EU goods",
+      "UK manufacturers importing raw materials"
+    ],
+    "why_now": "Recent tariff may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: no GROQ_API_KEY. Rule-based segments inferred from headline keywords.",
+    "what_happened": "investingLive Americas FX news wrap 26 Oct: Anthropic IPO puts AI back in focus as stocks rebound",
+    "what_changed_financially": "Market tariff with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
+    "fx_payment_logic": "New or increased tariffs raise the cost of imported goods. UK businesses buying stock from overseas suppliers face higher landed costs and margin pressure immediately.",
+    "business_impact_summary": "UK importers with US or EU suppliers now face higher input costs. Businesses that priced stock before the tariff announcement will see margin compression on committed orders.",
+    "sales_angle": "Recent tariff may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent tariff creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Tariff exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor or retailer sourcing stock from US or European suppliers, selling domestically in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "Tariff cost exposure",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Tariff added to import invoice → higher total cost in foreign currency → more GBP needed to pay → margin compressed",
+        "margin_risk": "High — tariff applies directly to cost of goods",
+        "payment_timing_risk": "High — goods already ordered now cost more",
+        "affected_payment_flow": "USD/EUR payments to overseas suppliers, monthly or per-shipment",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"food importer\" UK",
+          "\"product distributor\" UK wholesale",
+          "\"import trading\" UK"
+        ],
+        "sales_angle": "With tariffs increasing import costs, businesses may want to review upcoming USD/EUR supplier payments.",
+        "exposure_thesis_template": "This company appears to import goods from overseas and sell in GBP — tariffs increase the GBP cost of upcoming orders.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "import trading",
+          "distribution international",
+          "foods wholesale"
+        ],
+        "segment_name": "UK importers of US/EU goods",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK manufacturer sourcing raw materials or components from US/EU, selling finished goods in GBP",
+        "exposure_level": "High",
+        "exposure_type": "Input cost exposure",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Tariff on imported components/materials → higher cost per unit → margin compressed on GBP-priced finished goods",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"manufacturer\" UK international supply",
+          "\"components distributor\" UK"
+        ],
+        "sales_angle": "Tariffs on imported components are increasing production costs for UK manufacturers with overseas supply chains.",
+        "exposure_thesis_template": "This company appears to manufacture using imported materials/components — tariffs raise hard-to-pass-on input costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "manufacturing international",
+          "components wholesale",
+          "industrial trading"
+        ],
+        "segment_name": "UK manufacturers importing raw materials",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "import trading",
+      "distribution international",
+      "foods wholesale",
+      "manufacturing international",
+      "components wholesale",
+      "industrial trading"
+    ],
+    "all_search_queries": [
+      "\"food importer\" UK",
+      "\"product distributor\" UK wholesale",
+      "\"import trading\" UK",
+      "\"manufacturer\" UK international supply",
+      "\"components distributor\" UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-27T01:20:05.626Z"
   },
   "c7e348440910521c": {
     "id": "c7e348440910521c",
@@ -120009,6 +120579,150 @@
       "USD transaction exposure"
     ],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "da868244cf362423": {
+    "id": "da868244cf362423",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/carney-says-canada-has-not-budged-as-us-trade-deal-looks-less-imminent-than-claimed/",
+    "headline": "Carney says Canada has not budged as US trade deal looks less imminent than claimed",
+    "raw_summary": "The Canadian dollar had some deal optimism built in after the weekend remarks from Washington, so Carney’s comments and the Semafor report remove part of that support and leave USD/CAD sensitive to further trade headlines. A deal that eases retaliatory tariffs would still be a positive for Canadian exporters and cross-border supply chains, so any concrete breakthrough could still bring a sharp move. For oil, Canada is a major supplier of crude to the US, which keeps energy flows in focus whenever tariff talks shift. With the two governments framing progress so differently, traders are likely t",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-10-27T01:19:48.928Z",
+    "event_type": "Tariff",
+    "event_breadth": "tariff",
+    "summary": "The Canadian dollar had some deal optimism built in after the weekend remarks from Washington, so Carney’s comments and the Semafor report remove part of that support and leave USD/CAD sensitive to further trade headlines. A deal that eases retaliatory tariffs would still be a positive for Canadian exporters and cross-border supply chains, so any concrete breakthrough could still bring a sharp move. For oil, Canada is a major supplier of crude to the US, which keeps energy flows in focus whenever tariff talks shift. With the two governments framing progress so differently, traders are likely t",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "Fallback event — ai-error: no GROQ_API_KEY",
+    "trigger_strength": "medium",
+    "trigger_score": 55,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK importers of US/EU goods",
+      "UK manufacturers importing raw materials"
+    ],
+    "why_now": "Recent tariff may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: no GROQ_API_KEY. Rule-based segments inferred from headline keywords.",
+    "what_happened": "Carney says Canada has not budged as US trade deal looks less imminent than claimed",
+    "what_changed_financially": "Market tariff with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
+    "fx_payment_logic": "New or increased tariffs raise the cost of imported goods. UK businesses buying stock from overseas suppliers face higher landed costs and margin pressure immediately.",
+    "business_impact_summary": "UK importers with US or EU suppliers now face higher input costs. Businesses that priced stock before the tariff announcement will see margin compression on committed orders.",
+    "sales_angle": "Recent tariff may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent tariff creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Tariff exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor or retailer sourcing stock from US or European suppliers, selling domestically in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "Tariff cost exposure",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Tariff added to import invoice → higher total cost in foreign currency → more GBP needed to pay → margin compressed",
+        "margin_risk": "High — tariff applies directly to cost of goods",
+        "payment_timing_risk": "High — goods already ordered now cost more",
+        "affected_payment_flow": "USD/EUR payments to overseas suppliers, monthly or per-shipment",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"food importer\" UK",
+          "\"product distributor\" UK wholesale",
+          "\"import trading\" UK"
+        ],
+        "sales_angle": "With tariffs increasing import costs, businesses may want to review upcoming USD/EUR supplier payments.",
+        "exposure_thesis_template": "This company appears to import goods from overseas and sell in GBP — tariffs increase the GBP cost of upcoming orders.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "import trading",
+          "distribution international",
+          "foods wholesale"
+        ],
+        "segment_name": "UK importers of US/EU goods",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK manufacturer sourcing raw materials or components from US/EU, selling finished goods in GBP",
+        "exposure_level": "High",
+        "exposure_type": "Input cost exposure",
+        "likely_currency_pairs": [
+          "GBP/USD",
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Tariff on imported components/materials → higher cost per unit → margin compressed on GBP-priced finished goods",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"manufacturer\" UK international supply",
+          "\"components distributor\" UK"
+        ],
+        "sales_angle": "Tariffs on imported components are increasing production costs for UK manufacturers with overseas supply chains.",
+        "exposure_thesis_template": "This company appears to manufacture using imported materials/components — tariffs raise hard-to-pass-on input costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "manufacturing international",
+          "components wholesale",
+          "industrial trading"
+        ],
+        "segment_name": "UK manufacturers importing raw materials",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "import trading",
+      "distribution international",
+      "foods wholesale",
+      "manufacturing international",
+      "components wholesale",
+      "industrial trading"
+    ],
+    "all_search_queries": [
+      "\"food importer\" UK",
+      "\"product distributor\" UK wholesale",
+      "\"import trading\" UK",
+      "\"manufacturer\" UK international supply",
+      "\"components distributor\" UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-27T01:20:02.466Z"
   },
   "daaa1222a8290889": {
     "id": "daaa1222a8290889",
