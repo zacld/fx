@@ -94,7 +94,7 @@ jobs:
         continue-on-error: true
         env:
           AI_PROVIDER:                  groq
-          GROQ_API_KEY:                 ${{ secrets.GROQ_API_KEY }}
+          GROQ_API_KEY:                 ${{ secrets.GROQ_API_KEY || secrets.GROQ_API }}   # either secret name works
           GROQ_MODEL:                   ${{ secrets.GROQ_MODEL }}
           GEMINI_API_KEY:               ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL:                 ${{ secrets.GEMINI_MODEL }}
