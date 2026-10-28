@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import { CONTACT_GROUPS, SORTS, bankUrl, contactGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isNew, isOut, money, parts, sortContacted, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, roleGroup, bankUrl, contactGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isNew, isOut, money, parts, sortContacted, sortRows, toCsv, wallet } from "./format.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -87,7 +87,7 @@ function Gate({ password, setPassword, onSubmit, error, loading }) {
 
 function Accounts({ data, password }) {
   const rows = data.rows || [];
-  const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", fdOnly: false, pair: "",
+  const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false });
   const [sort, setSort] = useState("hot");
   const [shown, setShown] = useState(PAGE);
@@ -139,6 +139,10 @@ function Accounts({ data, password }) {
     const base = filterRows(rows, { ...ctx, contact: "" });
     return Object.fromEntries(["", ...CONTACT_GROUPS].map((g) => [g, g ? base.filter((r) => contactGroup(r) === g).length : base.length]));
   }, [rows, filters, contacted, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const roleCounts = useMemo(() => {
+    const base = filterRows(rows, { ...ctx, role: "" });
+    return Object.fromEntries(ROLE_GROUPS.map((g) => [g, base.filter((r) => roleGroup(r) === g).length]));
+  }, [rows, filters, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const contactedCount = rows.length - open.length;
   const stats = [
     { n: open.length, l: "Accounts", s: "Not yet contacted", c: "#6366F1" },
@@ -148,7 +152,9 @@ function Accounts({ data, password }) {
     { n: contactedCount, l: "Contacted", s: "Moved off the list", c: "#A5B4FC" },
     { n: open.filter((r) => r.triggers).length, l: "With triggers", s: "New owner, charges, directors", c: "#F59E0B" },
   ];
-  const grouped = filters.view !== "contacted" && sort === "hot" && !filters.contact;
+  // Headings between groups: contact groups in the hottest order, job roles in the role order.
+  const groupOf = filters.view === "contacted" ? null
+    : sort === "hot" && !filters.contact ? contactGroup : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
     const blob = new Blob([toCsv(visible.map((r) => ({ ...r, notes: notes[r.company_number]?.text || "" })))], { type: "text/csv;charset=utf-8" });
@@ -200,6 +206,10 @@ function Accounts({ data, password }) {
             <option value="">Any currency</option>
             {pairs.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
+          <select className="input" value={filters.role} onChange={(e) => set({ role: e.target.value })} aria-label="Job role">
+            <option value="">Any job role</option>
+            {ROLE_GROUPS.map((g) => <option key={g} value={g} disabled={!roleCounts[g]}>{g} ({roleCounts[g]})</option>)}
+          </select>
           <select className="input" value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort" disabled={filters.view === "contacted"}>
             {Object.entries(SORTS).map(([k, { label }]) => <option key={k} value={k}>Sort: {label}</option>)}
           </select>
@@ -215,11 +225,13 @@ function Accounts({ data, password }) {
       <div className="list">
         {saveError && <div className="save-error" role="alert">{saveError}</div>}
         {visible.slice(0, shown).map((r, i, list) => {
-          const group = contactGroup(r);
-          const heading = grouped && (i === 0 || contactGroup(list[i - 1]) !== group);
+          const group = groupOf ? groupOf(r) : "";
+          const heading = groupOf && (i === 0 || groupOf(list[i - 1]) !== group);
           return (
             <Fragment key={r.company_number || r.rank}>
-              {heading && <h2 className="group-h">{group} <span>{groupCounts[group]} · {GROUP_NOTE[group]}</span></h2>}
+              {heading && (groupOf === contactGroup
+                ? <h2 className="group-h">{group} <span>{groupCounts[group]} · {GROUP_NOTE[group]}</span></h2>
+                : <h2 className="group-h">{group} <span>{roleCounts[group]}</span></h2>)}
               <Account r={r} isNew={isNew(r, data.made_at)} contactedAt={contacted[r.company_number]?.at} onMark={mark}
                        note={notes[r.company_number]} onSaveNote={(text) => saveNote(r.company_number, text)} />
             </Fragment>

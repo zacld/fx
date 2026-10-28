@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bankUrl, contactGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortContacted, sortRows, toCsv, wallet } from "./format.js";
+import { bankUrl, contactGroup, roleGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortContacted, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -53,6 +53,23 @@ describe("accounts helpers", () => {
     expect(sortRows(list).map((r) => r.rank)).toEqual([3, 5, 1, 4, 2]);
     expect(sortRows(list, "rank").map((r) => r.rank)).toEqual([1, 2, 3, 4, 5]);
     expect(filterRows(list, { contact: "Confirmed" }).map((r) => r.rank)).toEqual([3, 5]);
+  });
+
+  it("sorts and filters by the finance contact's job role, most senior first", () => {
+    const person = (rank, role, conf = "Confirmed") => ({ rank, finance_contact: `P${rank}`, finance_contact_role: role, finance_contact_confidence: conf });
+    const list = [
+      person(1, "Finance Manager"), person(2, "Director"), person(3, "Group Finance Director", "Guess"),
+      person(4, "Financial Controller"), { rank: 5 }, person(6, "Chief Financial Officer"),
+      person(7, "Management Accountant"), person(8, "Head of Finance"), person(9, "Assistant Financial Controller"),
+      person(10, "Commercial Finance Manager"), person(11, "Head of Logistics"),
+    ];
+    expect(list.map(roleGroup)).toEqual([
+      "Finance Manager", "Other director", "CFO / Finance Director", "Financial Controller", "No one named",
+      "CFO / Finance Director", "Accountant", "Head of Finance / Treasurer", "Financial Controller", "Finance Manager", "Other role",
+    ]);
+    // CFO/FD first (confirmed before a guess), then head of finance, controllers, managers, accountants, other directors…
+    expect(sortRows(list, "role").map((r) => r.rank)).toEqual([6, 3, 8, 4, 9, 1, 10, 7, 2, 11, 5]);
+    expect(filterRows(list, { role: "Finance Manager" }).map((r) => r.rank)).toEqual([1, 10]);
   });
 
   it("labels the latest scan's additions new and filters recent FX losses", () => {

@@ -116,7 +116,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `RECENT_FX_LOSS` in `main.py`) lifts it 15.
 - **Accounts page order:** "Hottest" by default — finance contact Confirmed
   (Verified/Confirmed) first, then Guess (Likely/Guess), then No one named,
-  each in the finder's rank; buttons filter by those groups. Companies added
+  each in the finder's rank; buttons filter by those groups. "Job role" sort
+  and filter: CFO/FD → Head of Finance/Treasurer → Financial Controller →
+  Finance Manager → Accountant → Other director → other / no one
+  (`ROLES` in `apps/web/src/accounts/format.js`). Companies added
   by the latest upload are labelled New (`first_seen`, carried over by
   `upload-accounts.mjs`). The Contacted button moves a company to the
   Contacted tab (marks kept in the Blobs store under `contacted`, via POST

@@ -36,6 +36,22 @@ export const CONTACT_GROUPS = ["Confirmed", "Guess", "No one named"];
 export const contactGroup = (r) =>
   !r.finance_contact ? "No one named" : ["Verified", "Confirmed"].includes(r.finance_contact_confidence) ? "Confirmed" : "Guess";
 
+// The finance contact's job role, most senior first. A finance title beats a general one ("Finance Director"
+// is FD, not "Other director"); "Assistant Financial Controller" counts as a controller.
+export const ROLES = [
+  ["CFO / Finance Director", /chief financ|\bcfo\b|financ(e|ial) director|finance (&|and) \w+ director|director of finance|\bfd\b|finance partner/i],
+  ["Head of Finance / Treasurer", /head of (finance|treasury)|treasurer|vp,? finance|vice president,? finance|finance lead|treasury manager/i],
+  ["Financial Controller", /controller|comptroller/i],
+  ["Finance Manager", /financ(e|ial) manager|accounts manager|head of accounts|finance business partner/i],
+  ["Accountant", /accountant|accounts|bookkeep|finance (officer|assistant|analyst)/i],
+  ["Other director", /director|\bceo\b|chief executive|\bmd\b|chair|owner|founder|partner|secretary/i],
+];
+export const ROLE_GROUPS = [...ROLES.map(([label]) => label), "Other role", "No one named"];
+export function roleGroup(r) {
+  if (!r.finance_contact) return "No one named";
+  return ROLES.find(([, re]) => re.test(r.finance_contact_role || ""))?.[0] || "Other role";
+}
+
 // Added by the latest scan: the finder's upload keeps when each company first appeared (first_seen).
 export const isNew = (r, madeAt) => Boolean(madeAt) && r.first_seen === madeAt;
 
@@ -48,12 +64,13 @@ export const googleFd = (r) =>
 // view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
 export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
                                    showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
-                                   contacted = {}, notes = {} } = {}) {
+                                   contacted = {}, notes = {}, role = "" } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
     (view === "contacted") === Boolean(contacted[r.company_number]) &&
     (!section || r.section === section) &&
     (!contact || contactGroup(r) === contact) &&
+    (!role || roleGroup(r) === role) &&
     (!newOnly || isNew(r, madeAt)) &&
     (!fxLossOnly || Boolean(r.recent_fx_loss)) &&
     (!fdOnly || hasConfirmedFd(r)) &&
@@ -104,6 +121,8 @@ const fxLossKey = (r) => {
 export const SORTS = {
   hot: { label: "Hottest (confirmed first)", key: (r) => CONTACT_GROUPS.indexOf(contactGroup(r)) * 1e6 + r.rank },
   rank: { label: "Our score", key: (r) => r.rank },
+  // Most senior finance role first (CFO/FD, head of finance, controller, manager…); within a role, hottest first.
+  role: { label: "Job role (CFO/FD first)", key: (r) => ROLE_GROUPS.indexOf(roleGroup(r)) * 1e7 + SORTS.hot.key(r) },
   turnover: { label: "Turnover", key: (r) => -(Number(r.turnover_gbp) || 0) },
   wallet: { label: "FX wallet", key: (r) => -(Number(r.fx_wallet_high_gbp) || 0) },
   fxLoss: { label: "Largest FX loss", key: fxLossKey },
