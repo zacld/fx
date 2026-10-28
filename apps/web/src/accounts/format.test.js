@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bankUrl, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, money, sortRows, toCsv, wallet } from "./format.js";
+import { bankUrl, contactGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortContacted, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -30,7 +30,7 @@ describe("accounts helpers", () => {
   it("filters and sorts", () => {
     expect(filterRows(rows, { fdOnly: true }).map((r) => r.rank)).toEqual([1]);
     expect(filterRows(rows, { pair: "GBP/USD" }).map((r) => r.rank)).toEqual([1, 2]);
-    expect(filterRows(rows, { confidence: "none" }).map((r) => r.rank)).toEqual([3]);
+    expect(filterRows(rows, { contact: "No one named" }).map((r) => r.rank)).toEqual([3]);
     expect(filterRows(rows, { query: "natco" }).map((r) => r.rank)).toEqual([2]);
     expect(filterRows(rows, { section: "Above" }).map((r) => r.rank)).toEqual([3]);
     expect(filterRows(rows, { triggersOnly: true }).map((r) => r.rank)).toEqual([1]);
@@ -39,6 +39,41 @@ describe("accounts helpers", () => {
     expect(filterRows(withOut, { showOut: true }).map((r) => r.rank)).toEqual([1, 2, 3, 4]);
     expect(sortRows(rows, "turnover").map((r) => r.rank)).toEqual([2, 1, 3]);
     expect(sortRows(rows, "confidence").map((r) => r.rank)).toEqual([1, 2, 3]);
+  });
+
+  it("groups by who is named, hottest confirmed first, then our score", () => {
+    const list = [
+      { rank: 1, finance_contact: "A", finance_contact_confidence: "Likely" },
+      { rank: 2 },
+      { rank: 3, finance_contact: "C", finance_contact_confidence: "Verified" },
+      { rank: 4, finance_contact: "D", finance_contact_confidence: "Guess" },
+      { rank: 5, finance_contact: "E", finance_contact_confidence: "Confirmed" },
+    ];
+    expect(list.map(contactGroup)).toEqual(["Guess", "No one named", "Confirmed", "Guess", "Confirmed"]);
+    expect(sortRows(list).map((r) => r.rank)).toEqual([3, 5, 1, 4, 2]);
+    expect(sortRows(list, "rank").map((r) => r.rank)).toEqual([1, 2, 3, 4, 5]);
+    expect(filterRows(list, { contact: "Confirmed" }).map((r) => r.rank)).toEqual([3, 5]);
+  });
+
+  it("labels the latest scan's additions new and filters recent FX losses", () => {
+    const list = [
+      { rank: 1, first_seen: "2026-10-28T06:00:00+00:00", recent_fx_loss: "£150,512 FX loss, accounts filed 2026-09-12" },
+      { rank: 2, first_seen: "2026-10-20T06:00:00+00:00" },
+      { rank: 3 },
+    ];
+    const madeAt = "2026-10-28T06:00:00+00:00";
+    expect(list.map((r) => isNew(r, madeAt))).toEqual([true, false, false]);
+    expect(isNew(list[0], "")).toBe(false);
+    expect(filterRows(list, { newOnly: true, madeAt }).map((r) => r.rank)).toEqual([1]);
+    expect(filterRows(list, { fxLossOnly: true }).map((r) => r.rank)).toEqual([1]);
+  });
+
+  it("moves contacted companies off the list into the contacted view, latest first", () => {
+    const list = [{ rank: 1, company_number: "01" }, { rank: 2, company_number: "02" }, { rank: 3, company_number: "03" }];
+    const contacted = { "01": { at: "2026-10-27T09:00:00Z" }, "03": { at: "2026-10-28T09:00:00Z" } };
+    expect(filterRows(list, { contacted }).map((r) => r.rank)).toEqual([2]);
+    const done = filterRows(list, { contacted, view: "contacted" });
+    expect(sortContacted(done, contacted).map((r) => r.rank)).toEqual([3, 1]);
   });
 
   it("sorts by largest FX loss, then gains, then no figure", () => {

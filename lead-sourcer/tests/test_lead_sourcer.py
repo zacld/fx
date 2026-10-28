@@ -469,6 +469,18 @@ class TestSourceLinks(PipelineTestCase):
             self.assertIn("/company/01/charges", wine["incumbent_bank_url"])
 
 
+class TestRecentFxLoss(unittest.TestCase):
+    def test_loss_in_accounts_filed_lately(self):
+        today = date(2026, 10, 28)
+        self.assertEqual(main.recent_fx_loss(-150_512, "2026-09-12", today),
+                         "£150,512 FX loss, accounts filed 2026-09-12")
+        self.assertEqual(main.recent_fx_loss(-150_512, "2025-12-01", today), "")   # filed too long ago
+        self.assertEqual(main.recent_fx_loss(150_512, "2026-09-12", today), "")    # a gain
+        self.assertEqual(main.recent_fx_loss(-20_000, "2026-09-12", today), "")    # under the hook threshold
+        self.assertEqual(main.recent_fx_loss(None, "2026-09-12", today), "")
+        self.assertEqual(main.recent_fx_loss(-150_512, "", today), "")
+
+
 class TestFinderTimeBudget(PipelineTestCase):
     def test_budget_used_marks_the_list_partial(self):
         os.chdir(self.tmp.name)

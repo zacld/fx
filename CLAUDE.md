@@ -111,7 +111,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   estimate; `qualified` Yes/Check/Out (`QUALIFY_RULES`; a filter, not a score)
   and `warm_route` (own-bank relationship, PE sponsor, `WARM_AUDITORS`).
 - **When to call** (year-end planning window, customs season) is shown but
-  never scored. Triggers lift ranking a little (10 each, max 20).
+  never scored. Triggers lift ranking a little (10 each, max 20); an FX loss
+  of £50k+ in accounts filed in the last 183 days (`recent_fx_loss`,
+  `RECENT_FX_LOSS` in `main.py`) lifts it 15.
+- **Accounts page order:** "Hottest" by default — finance contact Confirmed
+  (Verified/Confirmed) first, then Guess (Likely/Guess), then No one named,
+  each in the finder's rank; buttons filter by those groups. Companies added
+  by the latest upload are labelled New (`first_seen`, carried over by
+  `upload-accounts.mjs`). The Contacted button moves a company to the
+  Contacted tab (marks kept in the Blobs store under `contacted`, via POST
+  `/api/accounts`; the finder never touches them).
 - **Evidence comes from raw records, in this order:**
   1. HMRC monthly importer/exporter lists, matched to Companies House.
   2. Filed accounts: tagged iXBRL figures (turnover, cost of sales, FX

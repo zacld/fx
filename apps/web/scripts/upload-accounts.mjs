@@ -4,7 +4,7 @@
 //   NETLIFY_SITE_ID=... NETLIFY_AUTH_TOKEN=... node scripts/upload-accounts.mjs accounts.json
 import { readFile } from "node:fs/promises";
 import { getStore } from "@netlify/blobs";
-import { KEY, STORE } from "../netlify/functions/accounts.mjs";
+import { KEY, STORE, markFirstSeen } from "../netlify/functions/accounts.mjs";
 
 const [path] = process.argv.slice(2);
 const siteID = process.env.NETLIFY_SITE_ID;
@@ -13,6 +13,9 @@ if (!path || !siteID || !token) {
   console.error("usage: NETLIFY_SITE_ID=... NETLIFY_AUTH_TOKEN=... node scripts/upload-accounts.mjs accounts.json");
   process.exit(2);
 }
-const data = JSON.parse(await readFile(path, "utf8"));
-await getStore({ name: STORE, siteID, token }).setJSON(KEY, data);
-console.log(`uploaded ${data.count ?? data.rows?.length ?? 0} accounts (made ${data.made_at})`);   // counts only: logs are readable
+const store = getStore({ name: STORE, siteID, token });
+// Carries each company's first_seen over from the list being replaced, so the page can label new ones.
+const data = markFirstSeen(await store.get(KEY, { type: "json" }), JSON.parse(await readFile(path, "utf8")));
+await store.setJSON(KEY, data);
+const added = data.rows.filter((r) => r.first_seen === data.made_at).length;
+console.log(`uploaded ${data.count ?? data.rows.length} accounts, ${added} new (made ${data.made_at})`);   // counts only: logs are readable
