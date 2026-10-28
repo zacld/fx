@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { CONFIDENCE, SORTS, bankUrl, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { CONTACT_GROUPS, SORTS, bankUrl, contactGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isNew, isOut, money, parts, sortContacted, sortRows, toCsv, wallet } from "./format.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -17,6 +17,9 @@ const ago = (iso) => {
 };
 
 const CONF_COLOUR = { Verified: "#10B981", Confirmed: "#38BDF8", Likely: "#F59E0B", Guess: "rgba(255,255,255,.4)" };
+const GROUP_NOTE = { Confirmed: "finance contact verified or confirmed", Guess: "likely or best guess — check before calling",
+                     "No one named": "no finance person found yet" };
+const day = (iso) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "");
 
 export default function AccountsApp() {
   const [password, setPassword] = useState(remembered);
@@ -59,7 +62,7 @@ export default function AccountsApp() {
           {data && <button className="btn-sm" onClick={lock}>Lock</button>}
         </div>
       </div>
-      {data ? <Accounts data={data} /> : (
+      {data ? <Accounts data={data} password={password} /> : (
         <Gate password={password} setPassword={setPassword} onSubmit={() => load(password)} error={error} loading={loading} />
       )}
     </>
@@ -82,23 +85,56 @@ function Gate({ password, setPassword, onSubmit, error, loading }) {
   );
 }
 
-function Accounts({ data }) {
+function Accounts({ data, password }) {
   const rows = data.rows || [];
-  const [filters, setFilters] = useState({ section: "", query: "", confidence: "", fdOnly: false, pair: "", triggersOnly: false,
-                                            showOut: false });
-  const [sort, setSort] = useState("rank");
+  const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", fdOnly: false, pair: "",
+                                            triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false });
+  const [sort, setSort] = useState("hot");
   const [shown, setShown] = useState(PAGE);
+  const [contacted, setContacted] = useState(data.contacted || {});
+  const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
 
+  // Marks a company contacted (off the list, into Contacted) or back; shown at once, undone if the save fails.
+  const mark = useCallback(async (number, on) => {
+    const before = contacted;
+    const next = { ...contacted };
+    if (on) next[number] = { at: new Date().toISOString() }; else delete next[number];
+    setContacted(next);
+    setSaveError("");
+    try {
+      const res = await fetch(API, { method: "POST", headers: { authorization: `Bearer ${password}`, "content-type": "application/json" },
+                                     body: JSON.stringify({ company_number: number, contacted: on }) });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+      setContacted(body.contacted || next);
+    } catch (e) {
+      setContacted(before);
+      setSaveError(`Couldn't save that (${e.message}) — try again.`);
+    }
+  }, [contacted, password]);
+
+  const ctx = { ...filters, madeAt: data.made_at, contacted };
   const pairs = useMemo(() => [...new Set(rows.flatMap((r) => parts(r.currency_pairs)))].sort(), [rows]);
-  const visible = useMemo(() => sortRows(filterRows(rows, filters), sort), [rows, filters, sort]);
+  const visible = useMemo(() => {
+    const matched = filterRows(rows, ctx);
+    return filters.view === "contacted" ? sortContacted(matched, contacted) : sortRows(matched, sort);
+  }, [rows, filters, sort, contacted, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const open = rows.filter((r) => !contacted[r.company_number]);
+  const groupCounts = useMemo(() => {
+    const base = filterRows(rows, { ...ctx, contact: "" });
+    return Object.fromEntries(["", ...CONTACT_GROUPS].map((g) => [g, g ? base.filter((r) => contactGroup(r) === g).length : base.length]));
+  }, [rows, filters, contacted, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const contactedCount = rows.length - open.length;
   const stats = [
-    { n: rows.length, l: "Accounts", s: "Checked in full", c: "#6366F1" },
-    { n: rows.filter(hasConfirmedFd).length, l: "FD named", s: "Verified or confirmed", c: "#10B981" },
-    { n: rows.filter((r) => r.finance_contact_confidence === "Verified").length, l: "Verified", s: "2+ independent sources", c: "#10B981" },
-    { n: rows.filter((r) => r.triggers).length, l: "With triggers", s: "New owner, charges, directors", c: "#F59E0B" },
-    { n: rows.filter((r) => r.planning_window_now === "yes").length, l: "Planning now", s: "Year-end planning window", c: "#38BDF8" },
+    { n: open.length, l: "Accounts", s: "Not yet contacted", c: "#6366F1" },
+    { n: open.filter((r) => contactGroup(r) === "Confirmed").length, l: "Confirmed contact", s: "Verified or confirmed", c: "#10B981" },
+    { n: open.filter((r) => r.recent_fx_loss).length, l: "Recent FX loss", s: "Accounts filed in the last 6 months", c: "#F87171" },
+    { n: open.filter((r) => isNew(r, data.made_at)).length, l: "New", s: "Added by the latest scan", c: "#38BDF8" },
+    { n: contactedCount, l: "Contacted", s: "Moved off the list", c: "#A5B4FC" },
+    { n: open.filter((r) => r.triggers).length, l: "With triggers", s: "New owner, charges, directors", c: "#F59E0B" },
   ];
+  const grouped = filters.view !== "contacted" && sort === "hot" && !filters.contact;
 
   const exportCsv = () => {
     const blob = new Blob([toCsv(visible)], { type: "text/csv;charset=utf-8" });
@@ -120,28 +156,41 @@ function Accounts({ data }) {
 
       <div className="controls">
         <div className="tabs" role="tablist">
-          {["", ...(data.sections || [])].map((s) => (
-            <button key={s || "all"} role="tab" aria-selected={filters.section === s}
-                    className={`tab${filters.section === s ? " on" : ""}`} onClick={() => set({ section: s })}>
-              {s || "All"} <span className="tab-n">{s ? rows.filter((r) => r.section === s).length : rows.length}</span>
+          {["", ...(data.sections || [])].map((s) => {
+            const on = !filters.view && filters.section === s;
+            return (
+              <button key={s || "all"} role="tab" aria-selected={on} className={`tab${on ? " on" : ""}`}
+                      onClick={() => set({ section: s, view: "" })}>
+                {s || "All"} <span className="tab-n">{s ? open.filter((r) => r.section === s).length : open.length}</span>
+              </button>
+            );
+          })}
+          <button role="tab" aria-selected={filters.view === "contacted"} className={`tab contacted-tab${filters.view === "contacted" ? " on" : ""}`}
+                  onClick={() => set({ section: "", view: "contacted" })}>
+            Contacted <span className="tab-n">{contactedCount}</span>
+          </button>
+        </div>
+        <div className="groups" role="group" aria-label="Finance contact">
+          <span className="groups-l">Finance contact</span>
+          {["", ...CONTACT_GROUPS].map((g) => (
+            <button key={g || "any"} aria-pressed={filters.contact === g} className={`grp${filters.contact === g ? " on" : ""}`}
+                    title={GROUP_NOTE[g] || "Everyone"} onClick={() => set({ contact: g })}>
+              {g || "All"} <span className="tab-n">{groupCounts[g]}</span>
             </button>
           ))}
         </div>
         <div className="filters">
           <input className="input search" placeholder="Search company, person, niche, bank…" value={filters.query}
                  onChange={(e) => set({ query: e.target.value })} aria-label="Search" />
-          <select className="input" value={filters.confidence} onChange={(e) => set({ confidence: e.target.value })} aria-label="Contact confidence">
-            <option value="">Any confidence</option>
-            {CONFIDENCE.map((c) => <option key={c} value={c}>{c}</option>)}
-            <option value="none">No contact</option>
-          </select>
           <select className="input" value={filters.pair} onChange={(e) => set({ pair: e.target.value })} aria-label="Currency pair">
             <option value="">Any currency</option>
             {pairs.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
-          <select className="input" value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort">
+          <select className="input" value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort" disabled={filters.view === "contacted"}>
             {Object.entries(SORTS).map(([k, { label }]) => <option key={k} value={k}>Sort: {label}</option>)}
           </select>
+          <label className="check"><input type="checkbox" checked={filters.newOnly} onChange={(e) => set({ newOnly: e.target.checked })} /> New</label>
+          <label className="check"><input type="checkbox" checked={filters.fxLossOnly} onChange={(e) => set({ fxLossOnly: e.target.checked })} /> Recent FX loss</label>
           <label className="check"><input type="checkbox" checked={filters.fdOnly} onChange={(e) => set({ fdOnly: e.target.checked })} /> FD named</label>
           <label className="check"><input type="checkbox" checked={filters.triggersOnly} onChange={(e) => set({ triggersOnly: e.target.checked })} /> Triggers</label>
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>
@@ -150,8 +199,18 @@ function Accounts({ data }) {
       </div>
 
       <div className="list">
-        {visible.slice(0, shown).map((r) => <Account key={r.company_number || r.rank} r={r} />)}
-        {!visible.length && <div className="empty">No accounts match these filters.</div>}
+        {saveError && <div className="save-error" role="alert">{saveError}</div>}
+        {visible.slice(0, shown).map((r, i, list) => {
+          const group = contactGroup(r);
+          const heading = grouped && (i === 0 || contactGroup(list[i - 1]) !== group);
+          return (
+            <Fragment key={r.company_number || r.rank}>
+              {heading && <h2 className="group-h">{group} <span>{groupCounts[group]} · {GROUP_NOTE[group]}</span></h2>}
+              <Account r={r} isNew={isNew(r, data.made_at)} contactedAt={contacted[r.company_number]?.at} onMark={mark} />
+            </Fragment>
+          );
+        })}
+        {!visible.length && <div className="empty">{filters.view === "contacted" ? "Nobody marked contacted yet — use the Contacted button on a company." : "No accounts match these filters."}</div>}
         {visible.length > shown && (
           <button className="btn-sm more" onClick={() => setShown((n) => n + PAGE)}>Show more ({visible.length - shown} left)</button>
         )}
@@ -167,7 +226,7 @@ function Src({ href, children, className, title }) {
     : <span className={className} title={title}>{children}</span>;
 }
 
-function Account({ r }) {
+function Account({ r, isNew: fresh, contactedAt, onMark }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const conf = r.finance_contact_confidence;
@@ -197,14 +256,20 @@ function Account({ r }) {
       <div className="card-top">
         <div className="card-name">
           <span className="rank">#{r.rank}</span>
+          {fresh && <span className="new">New</span>}
           <a href={r.companies_house_url} target="_blank" rel="noreferrer" className="co">{r.company_name}</a>
           {r.trading_as && <span className="site">t/a {r.trading_as}</span>}
           {r.website && <a className="site" href={r.website.startsWith("http") ? r.website : `https://${r.website}`} target="_blank" rel="noreferrer">{r.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}</a>}
         </div>
+        <div className="card-r">
         <div className="figures">
           {r.turnover_gbp && <span><b>{money(r.turnover_gbp)}</b> turnover</span>}
           {wallet(r) && <span><b>{wallet(r)}</b> FX a year</span>}
           {r.fx_gain_loss_gbp && <Src href={r.fx_gain_loss_url} title="Open the accounts at the FX line"><b>{money(r.fx_gain_loss_gbp)}</b> FX {Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}{fxShare(r) && ` (${fxShare(r).replace(" of turnover", "")})`}</Src>}
+        </div>
+        {contactedAt
+          ? <span className="done">Contacted {day(contactedAt)} <button className="btn-sm" onClick={() => onMark(r.company_number, false)}>Undo</button></span>
+          : r.company_number && <button className="btn-sm contacted" onClick={() => onMark(r.company_number, true)} title="Move this company to Contacted">Contacted</button>}
         </div>
       </div>
 
@@ -225,6 +290,7 @@ function Account({ r }) {
       </div>
 
       <div className="chips">
+        {r.recent_fx_loss && <Src className="chip loss" href={r.fx_gain_loss_url} title={r.recent_fx_loss}>Recent FX loss</Src>}
         {parts(r.currency_pairs).map((p) => <span key={p} className="chip fx">{p}</span>)}
         {r.qualified && r.qualified !== "Yes" && <span className={`chip ${r.qualified === "Out" ? "out" : "warn"}`} title={r.qualify_reason}>{r.qualified}: {r.qualify_reason}</span>}
         {r.warm_route && <span className="chip own">Warm: {r.warm_route}</span>}
@@ -326,6 +392,21 @@ select.input option{background:#0F141F}
 .chip.own{background:rgba(16,185,129,.12);color:#34D399}
 .chip.warn{background:rgba(244,114,182,.1);color:#F9A8D4}
 .chip.out{background:rgba(248,113,113,.12);color:#FCA5A5}
+.chip.loss{background:rgba(248,113,113,.14);color:#FCA5A5;font-weight:600}
+.new{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:10px;background:rgba(56,189,248,.15);color:#7DD3FC}
+.card-r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn-sm.contacted{border-color:rgba(16,185,129,.35);color:#34D399}
+.btn-sm.contacted:hover{background:rgba(16,185,129,.12)}
+.done{display:flex;align-items:center;gap:8px;font-size:12px;color:#A5B4FC}
+.groups{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.groups-l{font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
+.grp{padding:5px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:none;color:rgba(255,255,255,.55);font:600 12px 'Inter',sans-serif;cursor:pointer}
+.grp.on{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.35);color:#7DD3FC}
+.contacted-tab{margin-left:8px}
+.group-h{margin-top:10px;font-size:13px;font-weight:800;color:#F8FAFC;letter-spacing:.02em}
+.group-h:first-of-type{margin-top:0}
+.group-h span{font-size:11px;font-weight:500;color:rgba(255,255,255,.35);margin-left:6px}
+.save-error{padding:10px 12px;border-radius:8px;background:rgba(248,113,113,.1);color:#FCA5A5;font-size:13px}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}
 .angle{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);font-size:13px;color:rgba(255,255,255,.75);display:flex;gap:12px;align-items:flex-start;justify-content:space-between}

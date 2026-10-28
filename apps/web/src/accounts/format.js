@@ -30,18 +30,32 @@ export const hasConfirmedFd = (r) =>
 // Older lists have no `qualified` column: every row counts as in.
 export const isOut = (r) => r.qualified === "Out";
 
+// Who to ask for: a finance contact a search or registry stands behind (Verified/Confirmed), one worked out from
+// weaker clues (Likely/Guess), or nobody named yet.
+export const CONTACT_GROUPS = ["Confirmed", "Guess", "No one named"];
+export const contactGroup = (r) =>
+  !r.finance_contact ? "No one named" : ["Verified", "Confirmed"].includes(r.finance_contact_confidence) ? "Confirmed" : "Guess";
+
+// Added by the latest scan: the finder's upload keeps when each company first appeared (first_seen).
+export const isNew = (r, madeAt) => Boolean(madeAt) && r.first_seen === madeAt;
+
 // "Check on Google": plain "<company> finance director", which shows who holds the job now.
 export const shortCompany = (name = "") =>
   name.replace(/[\s,.]*\b(?:public limited company|limited|ltd|plc|llp)\.?\s*$/i, "").trim();
 export const googleFd = (r) =>
   "https://www.google.com/search?" + new URLSearchParams({ q: `${shortCompany(r.company_name)} finance director` });
 
-export function filterRows(rows, { section = "", query = "", confidence = "", fdOnly = false, pair = "", triggersOnly = false,
-                                   showOut = false } = {}) {
+// view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
+export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
+                                   showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
+                                   contacted = {} } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
+    (view === "contacted") === Boolean(contacted[r.company_number]) &&
     (!section || r.section === section) &&
-    (!confidence || (confidence === "none" ? !r.finance_contact : r.finance_contact_confidence === confidence)) &&
+    (!contact || contactGroup(r) === contact) &&
+    (!newOnly || isNew(r, madeAt)) &&
+    (!fxLossOnly || Boolean(r.recent_fx_loss)) &&
     (!fdOnly || hasConfirmedFd(r)) &&
     (!pair || parts(r.currency_pairs).includes(pair)) &&
     (!triggersOnly || Boolean(r.triggers)) &&
@@ -85,23 +99,30 @@ const fxLossKey = (r) => {
   return fx < 0 ? fx : 2e15 - fx;
 };
 
+// "Hottest": confirmed contacts first, then guesses, then no one named; within each, the finder's ranking
+// (FX evidence + untapped + triggers + a recent FX loss).
 export const SORTS = {
-  rank: { label: "List order", key: (r) => r.rank },
+  hot: { label: "Hottest (confirmed first)", key: (r) => CONTACT_GROUPS.indexOf(contactGroup(r)) * 1e6 + r.rank },
+  rank: { label: "Our score", key: (r) => r.rank },
   turnover: { label: "Turnover", key: (r) => -(Number(r.turnover_gbp) || 0) },
   wallet: { label: "FX wallet", key: (r) => -(Number(r.fx_wallet_high_gbp) || 0) },
   fxLoss: { label: "Largest FX loss", key: fxLossKey },
   confidence: { label: "Contact confidence", key: (r) => (r.finance_contact ? CONFIDENCE.indexOf(r.finance_contact_confidence) : 9) * 10000 + r.rank },
 };
 
-export const sortRows = (rows, by = "rank") =>
+export const sortRows = (rows, by = "hot") =>
   [...rows].sort((a, b) => SORTS[by].key(a) - SORTS[by].key(b) || a.rank - b.rank);
+
+// The contacted list: most recently contacted first.
+export const sortContacted = (rows, contacted = {}) =>
+  [...rows].sort((a, b) => (contacted[b.company_number]?.at || "").localeCompare(contacted[a.company_number]?.at || "") || a.rank - b.rank);
 
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "finance_contact", "finance_contact_role",
   "finance_contact_confidence", "finance_contact_linkedin", "search_check", "lead_director", "turnover_gbp",
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",
-  "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_check",
+  "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_check", "recent_fx_loss", "accounts_filed_on", "first_seen",
   "main_bank", "bank_type", "fact_1", "fact_2", "main_currency", "currency_direction",
   "currency_evidence", "currency_confidence", "opener", "fx_estimate", "incumbent_bank", "facility_ends",
   "facility_ends_evidence", "fx_today", "fx_today_evidence", "lenders", "triggers", "when_to_call", "fx_niche", "call_angle",

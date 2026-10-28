@@ -136,6 +136,8 @@ CSV_FIELDS = [
     "fx_gain_loss_prior_gbp",
     "fx_gain_loss_check",
     "fx_gain_loss_evidence",
+    "recent_fx_loss",
+    "accounts_filed_on",
     "turnover_growth",
     "overseas_turnover_share",
     "cost_of_sales_gbp",
@@ -385,6 +387,24 @@ def _money(value: Optional[float]) -> str:
     return str(round(value)) if value is not None else ""
 
 
+# A loss on currency in accounts filed lately lifts a company in the list (logged for recalibration, like triggers).
+RECENT_FX_LOSS = {"days": 183, "min_gbp": hooks.HOOK_RULES["fx_gain_loss_min_gbp"], "lift": 15}
+
+
+def recent_fx_loss(fx_gain_loss: Optional[float], filed_on: str, today: date, rules: dict = RECENT_FX_LOSS) -> str:
+    """"£150,512 FX loss, accounts filed 2026-09-12" when the latest accounts, filed in the last ~6 months, show
+    an FX loss of at least the hook threshold; "" otherwise (a figure sent to check never counts)."""
+    if fx_gain_loss is None or fx_gain_loss > -rules["min_gbp"] or not filed_on:
+        return ""
+    try:
+        filed = date.fromisoformat(filed_on[:10])
+    except ValueError:
+        return ""
+    if not 0 <= (today - filed).days <= rules["days"]:
+        return ""
+    return f"£{-fx_gain_loss:,.0f} FX loss, accounts filed {filed.isoformat()}"
+
+
 def group_parent(owners: list[dict]) -> tuple[str, str]:
     """(key, label) for the company's UK parent from its corporate owners, or ("", "")."""
     for o in owners:
@@ -582,6 +602,8 @@ def company_row(
         turnover_gbp=str(round(turnover["turnover"])) if turnover else "",
         turnover_period_end=turnover["period_end"] if turnover else "",
         fx_gain_loss_gbp=_money(f.get("fx_gain_loss")),
+        recent_fx_loss=recent_fx_loss(f.get("fx_gain_loss"), f.get("filed_on") or "", today) if checked else "",
+        accounts_filed_on=(f.get("filed_on") or "")[:10],
         cost_of_sales_gbp=_money(cost_of_sales),
         size_basis=describe_size(company["accounts_category"], turnover, turnover_checked),
         accounts_category=company["accounts_category"],
@@ -923,6 +945,7 @@ def run_pipeline(
         stats["currency"] += bool(row["import_currencies"] or row["export_currencies"])
         stats["bank"] += bool(row["main_bank"])
         stats["triggered"] += bool(row["triggers"])
+        stats["recent_fx_loss"] += bool(row["recent_fx_loss"])
         stats["pe_backed"] += bool(row["pe_backed"])
         stats["planning_now"] += bool(row["planning_window_now"])
         stats["own_bank"] += bool(row["own_bank_client"])
@@ -930,11 +953,13 @@ def run_pipeline(
 
     stats["groups"] = add_group_rollup(rows, parents)
     section_order = {label: i for i, label in enumerate(sections(*band))}
-    # Triggers lift a company a little (10 each, up to 20); when-to-call never does.
+    # Triggers lift a company a little (10 each, up to 20), a recent FX loss by RECENT_FX_LOSS["lift"];
+    # when-to-call never does.
     rows.sort(key=lambda r: (
         section_order[r["section"]],
         -(int(r["fx_evidence_score"]) + (int(r["untapped_score"]) if r["untapped_score"] != "" else 0)
-          + 10 * min(len(r["triggers"].split(" | ")) if r["triggers"] else 0, 2)),
+          + 10 * min(len(r["triggers"].split(" | ")) if r["triggers"] else 0, 2)
+          + (RECENT_FX_LOSS["lift"] if r.get("recent_fx_loss") else 0)),
         -float(r["fx_wallet_high_gbp"] or 0),
         r["company_name"].lower(),
     ))
@@ -953,7 +978,9 @@ def print_summary(rows: list[dict], stats: Counter, min_turnover: int,
           + (f" | already banks with {own_bank}: {stats['own_bank']:,}" if own_bank else ""))
     print(f"  With a trigger (new owner, refinancing, new director): {stats['triggered']:,} | "
           f"investor-backed: {stats['pe_backed']:,} | in year-end planning window now: {stats['planning_now']:,} | "
-          f"groups with 2+ companies listed: {stats['groups']:,}")
+          f"groups with 2+ companies listed: {stats['groups']:,} | "
+          f"FX loss in accounts filed in the last {RECENT_FX_LOSS['days']} days: {stats['recent_fx_loss']:,} "
+          f"(+{RECENT_FX_LOSS['lift']} to rank)")
     print(f"  FX evidence High: {sum(r['fx_evidence_level'] == 'High' for r in rows):,} | "
           f"Medium: {sum(r['fx_evidence_level'] == 'Medium' for r in rows):,}")
     print(f"  Untapped High: {sum(r['untapped_level'] == 'High' for r in rows):,} | family-run: {stats['family']:,}")
