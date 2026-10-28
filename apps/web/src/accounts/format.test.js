@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bankUrl, contactGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortContacted, sortRows, toCsv, wallet } from "./format.js";
+import { bankUrl, companyPath, contactGroup, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortContacted, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -55,6 +55,23 @@ describe("accounts helpers", () => {
     expect(filterRows(list, { contact: "Confirmed" }).map((r) => r.rank)).toEqual([3, 5]);
   });
 
+  it("sorts and filters by the finance contact's job role, most senior first", () => {
+    const person = (rank, role, conf = "Confirmed") => ({ rank, finance_contact: `P${rank}`, finance_contact_role: role, finance_contact_confidence: conf });
+    const list = [
+      person(1, "Finance Manager"), person(2, "Director"), person(3, "Group Finance Director", "Guess"),
+      person(4, "Financial Controller"), { rank: 5 }, person(6, "Chief Financial Officer"),
+      person(7, "Management Accountant"), person(8, "Head of Finance"), person(9, "Assistant Financial Controller"),
+      person(10, "Commercial Finance Manager"), person(11, "Head of Logistics"),
+    ];
+    expect(list.map(roleGroup)).toEqual([
+      "Finance Manager", "Other director", "CFO / Finance Director", "Financial Controller", "No one named",
+      "CFO / Finance Director", "Accountant", "Head of Finance / Treasurer", "Financial Controller", "Finance Manager", "Other role",
+    ]);
+    // CFO/FD first (confirmed before a guess), then head of finance, controllers, managers, accountants, other directors…
+    expect(sortRows(list, "role").map((r) => r.rank)).toEqual([6, 3, 8, 4, 9, 1, 10, 7, 2, 11, 5]);
+    expect(filterRows(list, { role: "Finance Manager" }).map((r) => r.rank)).toEqual([1, 10]);
+  });
+
   it("labels the latest scan's additions new and filters recent FX losses", () => {
     const list = [
       { rank: 1, first_seen: "2026-10-28T06:00:00+00:00", recent_fx_loss: "£150,512 FX loss, accounts filed 2026-09-12" },
@@ -105,6 +122,27 @@ describe("accounts helpers", () => {
     expect(factUrl(r, "Turnover grew 24% last year")).toBe("https://ch/acc");
     expect(factUrl(r, "New finance director appointed")).toBe("");
     expect(factUrl({}, "FX loss of £420k")).toBe("");                              // older lists: no link
+  });
+
+  it("gives each company its own page with every detail and the documents behind it", () => {
+    expect(companyPath("SC123456")).toBe("/accounts/SC123456");
+    expect(numberFromPath("/accounts/sc123456")).toBe("SC123456");
+    expect(numberFromPath("/accounts")).toBe("");
+    expect(numberFromPath("/accounts/../x")).toBe("");
+    const r = {
+      main_bank: "HSBC", incumbent_bank: "HSBC: all-assets debenture", incumbent_bank_url: "https://ch/charge",
+      accounts_url: "https://ch/acc", fx_gain_loss_url: "https://ch/acc#page=22", fx_gain_loss_gbp: "-150512",
+      turnover_gbp: "120000000", finance_contact_evidence: "CH occupation", companies_house_url: "https://ch/company/01",
+    };
+    const sections = Object.fromEntries(detailSections(r));
+    expect(Object.keys(sections)).toEqual(["Banking", "FX exposure", "People"]);       // empty sections left out
+    expect(sections.Banking[0]).toEqual(["Main bank", "HSBC", "https://ch/charge"]);
+    expect(sections["FX exposure"][0]).toEqual(["FX gain/loss", "−£151k loss (0.1% of turnover; prior year n/a)", "https://ch/acc#page=22"]);
+    expect(sourceDocuments(r).map(([label]) => label)).toEqual([
+      "Latest filed accounts", "Accounts at the FX line", "Charge: HSBC", "Companies House record", "Filing history",
+      "Charges register", "Officers", "Owners (PSCs)",
+    ]);
+    expect(sourceDocuments({ ...r, fx_gain_loss_url: "https://ch/acc" }).map(([l]) => l)).not.toContain("Accounts at the FX line");
   });
 
   it("searches Google for the company's finance director", () => {

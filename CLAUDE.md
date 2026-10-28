@@ -116,13 +116,22 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `RECENT_FX_LOSS` in `main.py`) lifts it 15.
 - **Accounts page order:** "Hottest" by default — finance contact Confirmed
   (Verified/Confirmed) first, then Guess (Likely/Guess), then No one named,
-  each in the finder's rank; buttons filter by those groups. Companies added
+  each in the finder's rank; buttons filter by those groups. "Job role" sort
+  and filter: CFO/FD → Head of Finance/Treasurer → Financial Controller →
+  Finance Manager → Accountant → Other director → other / no one
+  (`ROLES` in `apps/web/src/accounts/format.js`). Companies added
   by the latest upload are labelled New (`first_seen`, carried over by
   `upload-accounts.mjs`). The Contacted button moves a company to the
   Contacted tab (marks kept in the Blobs store under `contacted`, via POST
   `/api/accounts`; the finder never touches them). Each card has a Notes box
   (Blobs key `notes`, same POST with `{company_number, notes}`; "" deletes;
-  searched by the search box and included in the CSV export).
+  searched by the search box and included in the CSV export). Clicking a
+  company's name opens its own page, `/accounts/<company number>`
+  (`_redirects` serves accounts.html; same password): key figures, finance
+  contact, notes, Contacted, why call, every detail grouped Banking / FX
+  exposure / People / Company with each fact linked to its filing or charge,
+  and a Source documents list (`detailSections`, `sourceDocuments` in
+  `format.js`).
 - **Evidence comes from raw records, in this order:**
   1. HMRC monthly importer/exporter lists, matched to Companies House.
   2. Filed accounts: tagged iXBRL figures (turnover, cost of sales, FX

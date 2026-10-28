@@ -36,6 +36,22 @@ export const CONTACT_GROUPS = ["Confirmed", "Guess", "No one named"];
 export const contactGroup = (r) =>
   !r.finance_contact ? "No one named" : ["Verified", "Confirmed"].includes(r.finance_contact_confidence) ? "Confirmed" : "Guess";
 
+// The finance contact's job role, most senior first. A finance title beats a general one ("Finance Director"
+// is FD, not "Other director"); "Assistant Financial Controller" counts as a controller.
+export const ROLES = [
+  ["CFO / Finance Director", /chief financ|\bcfo\b|financ(e|ial) director|finance (&|and) \w+ director|director of finance|\bfd\b|finance partner/i],
+  ["Head of Finance / Treasurer", /head of (finance|treasury)|treasurer|vp,? finance|vice president,? finance|finance lead|treasury manager/i],
+  ["Financial Controller", /controller|comptroller/i],
+  ["Finance Manager", /financ(e|ial) manager|accounts manager|head of accounts|finance business partner/i],
+  ["Accountant", /accountant|accounts|bookkeep|finance (officer|assistant|analyst)/i],
+  ["Other director", /director|\bceo\b|chief executive|\bmd\b|chair|owner|founder|partner|secretary/i],
+];
+export const ROLE_GROUPS = [...ROLES.map(([label]) => label), "Other role", "No one named"];
+export function roleGroup(r) {
+  if (!r.finance_contact) return "No one named";
+  return ROLES.find(([, re]) => re.test(r.finance_contact_role || ""))?.[0] || "Other role";
+}
+
 // Added by the latest scan: the finder's upload keeps when each company first appeared (first_seen).
 export const isNew = (r, madeAt) => Boolean(madeAt) && r.first_seen === madeAt;
 
@@ -48,12 +64,13 @@ export const googleFd = (r) =>
 // view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
 export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
                                    showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
-                                   contacted = {}, notes = {} } = {}) {
+                                   contacted = {}, notes = {}, role = "" } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
     (view === "contacted") === Boolean(contacted[r.company_number]) &&
     (!section || r.section === section) &&
     (!contact || contactGroup(r) === contact) &&
+    (!role || roleGroup(r) === role) &&
     (!newOnly || isNew(r, madeAt)) &&
     (!fxLossOnly || Boolean(r.recent_fx_loss)) &&
     (!fdOnly || hasConfirmedFd(r)) &&
@@ -92,6 +109,59 @@ export function factUrl(r, fact = "") {
   return "";
 }
 
+// A company's own page: /accounts/<company number> (Netlify serves accounts.html for it).
+export const companyPath = (number) => `/accounts/${number}`;
+export const numberFromPath = (path = "") => (path.match(/^\/accounts\/([A-Z0-9]{8})\/?$/i) || [])[1]?.toUpperCase() || "";
+
+// Everything known about a company, in sections of [label, value, source link]; empty values left out.
+export function detailSections(r) {
+  const join = (...xs) => xs.filter(Boolean).join(" — ");
+  return [
+    ["Banking", [
+      ["Main bank", join(r.main_bank, r.bank_type), bankUrl(r)], ["Incumbent bank", r.incumbent_bank, r.incumbent_bank_url],
+      ["Facility ends", r.facility_ends_evidence || r.facility_ends, r.accounts_url], ["FX today", r.fx_today_evidence, r.fx_today_url],
+      ["Lenders", r.lenders], ["Banking", r.banking_relationships], ["Existing client", r.own_bank_client],
+    ]],
+    ["FX exposure", [
+      ["FX gain/loss", fxLine(r), r.fx_gain_loss_url], ["Recent FX loss", r.recent_fx_loss, r.fx_gain_loss_url],
+      ["FX figure to check", r.fx_gain_loss_check, r.fx_gain_loss_url], ["FX line in the accounts", r.fx_gain_loss_evidence, r.fx_gain_loss_url],
+      ["FX size", r.fx_estimate], ["Wallet basis", r.fx_wallet_basis],
+      ["Main currency", [r.main_currency, r.currency_direction, r.currency_confidence && `${r.currency_confidence} confidence`].filter(Boolean).join(" · ")],
+      ["Currency evidence", r.currency_evidence], ["Imports in", r.import_currencies], ["Exports in", r.export_currencies],
+      ["Trade", r.trade_countries], ["Customs goods", r.hmrc_goods], ["Why FX", r.fx_evidence], ["Niche", r.fx_niche],
+      ["Exposure", r.fx_exposure], ["Why untapped", r.untapped_reasons],
+    ]],
+    ["People", [
+      ["Contact source", r.finance_contact_source], ["Contact evidence", r.finance_contact_evidence], ["Search check", r.search_check],
+      ["Lead director", join(r.lead_director, r.lead_director_occupation)], ["Directors", r.all_directors],
+      ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by], ["Owners", r.owners],
+      ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
+    ]],
+    ["Company", [
+      ["Accounts", r.size_basis, r.accounts_url], ["Accounts filed", r.accounts_filed_on, r.accounts_url],
+      ["Growth", r.turnover_growth, r.accounts_url], ["Overseas sales", r.overseas_turnover_share, r.accounts_url],
+      ["Cash / borrowings", [money(r.cash_gbp), money(r.bank_borrowings_gbp)].filter(Boolean).join(" / "), r.accounts_url],
+      ["Net assets", money(r.net_assets_gbp), r.accounts_url], ["Auditor", join(r.auditor, r.auditor_tier)],
+      ["Qualified", join(r.qualified, r.qualify_reason)], ["Warm route", r.warm_route], ["Triggers", r.triggers],
+      ["When to call", r.when_to_call], ["Generic emails", r.generic_emails], ["Address", r.registered_address],
+      ["SIC codes", r.sic_codes], ["Incorporated", r.incorporated_on],
+    ]],
+  ].map(([title, rows]) => [title, rows.filter(([, v]) => v)]).filter(([, rows]) => rows.length);
+}
+
+// The public records behind the facts, each once: the accounts (and its FX page), the charges, the register.
+export function sourceDocuments(r) {
+  const ch = r.companies_house_url || "";
+  const docs = [
+    ["Latest filed accounts", r.accounts_url], ["Accounts at the FX line", r.fx_gain_loss_url],
+    [`Charge: ${r.main_bank || "bank"}`, r.incumbent_bank_url], ["FX provider's charge", r.fx_today_url],
+    ["Companies House record", ch], ["Filing history", ch && `${ch}/filing-history`], ["Charges register", ch && `${ch}/charges`],
+    ["Officers", ch && `${ch}/officers`], ["Owners (PSCs)", ch && `${ch}/persons-with-significant-control`],
+  ];
+  const seen = new Set();
+  return docs.filter(([, url]) => url && !seen.has(url) && seen.add(url));
+}
+
 // Biggest FX loss first, then gains (biggest first), then no figure.
 const fxLossKey = (r) => {
   const fx = Number(r.fx_gain_loss_gbp);
@@ -104,6 +174,8 @@ const fxLossKey = (r) => {
 export const SORTS = {
   hot: { label: "Hottest (confirmed first)", key: (r) => CONTACT_GROUPS.indexOf(contactGroup(r)) * 1e6 + r.rank },
   rank: { label: "Our score", key: (r) => r.rank },
+  // Most senior finance role first (CFO/FD, head of finance, controller, manager…); within a role, hottest first.
+  role: { label: "Job role (CFO/FD first)", key: (r) => ROLE_GROUPS.indexOf(roleGroup(r)) * 1e7 + SORTS.hot.key(r) },
   turnover: { label: "Turnover", key: (r) => -(Number(r.turnover_gbp) || 0) },
   wallet: { label: "FX wallet", key: (r) => -(Number(r.fx_wallet_high_gbp) || 0) },
   fxLoss: { label: "Largest FX loss", key: fxLossKey },

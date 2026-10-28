@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import { CONTACT_GROUPS, SORTS, bankUrl, contactGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isNew, isOut, money, parts, sortContacted, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, companyPath, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortContacted, sortRows, toCsv, wallet } from "./format.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -87,7 +87,7 @@ function Gate({ password, setPassword, onSubmit, error, loading }) {
 
 function Accounts({ data, password }) {
   const rows = data.rows || [];
-  const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", fdOnly: false, pair: "",
+  const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false });
   const [sort, setSort] = useState("hot");
   const [shown, setShown] = useState(PAGE);
@@ -95,6 +95,25 @@ function Accounts({ data, password }) {
   const [notes, setNotes] = useState(data.notes || {});
   const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
+
+  // A company's own page at /accounts/<number>; the browser's back button returns to the list where it was.
+  const [pageNo, setPageNo] = useState(() => numberFromPath(window.location.pathname));
+  const [listScroll, setListScroll] = useState(0);
+  useEffect(() => {
+    const onPop = () => setPageNo(numberFromPath(window.location.pathname));
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  useEffect(() => { window.scrollTo(0, pageNo ? 0 : listScroll); }, [pageNo]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const openCompany = useCallback((number) => {
+    setListScroll(window.scrollY);
+    window.history.pushState({ fromList: true }, "", companyPath(number));
+    setPageNo(number);
+  }, []);
+  const backToList = useCallback(() => {
+    if (window.history.state?.fromList) window.history.back();
+    else { window.history.pushState(null, "", "/accounts"); setPageNo(""); }
+  }, []);
 
   // Saves a change for one company ({contacted} or {notes}) to the site's store; the server's copy comes back.
   const save = useCallback(async (number, change) => {
@@ -139,6 +158,10 @@ function Accounts({ data, password }) {
     const base = filterRows(rows, { ...ctx, contact: "" });
     return Object.fromEntries(["", ...CONTACT_GROUPS].map((g) => [g, g ? base.filter((r) => contactGroup(r) === g).length : base.length]));
   }, [rows, filters, contacted, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const roleCounts = useMemo(() => {
+    const base = filterRows(rows, { ...ctx, role: "" });
+    return Object.fromEntries(ROLE_GROUPS.map((g) => [g, base.filter((r) => roleGroup(r) === g).length]));
+  }, [rows, filters, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const contactedCount = rows.length - open.length;
   const stats = [
     { n: open.length, l: "Accounts", s: "Not yet contacted", c: "#6366F1" },
@@ -148,7 +171,9 @@ function Accounts({ data, password }) {
     { n: contactedCount, l: "Contacted", s: "Moved off the list", c: "#A5B4FC" },
     { n: open.filter((r) => r.triggers).length, l: "With triggers", s: "New owner, charges, directors", c: "#F59E0B" },
   ];
-  const grouped = filters.view !== "contacted" && sort === "hot" && !filters.contact;
+  // Headings between groups: contact groups in the hottest order, job roles in the role order.
+  const groupOf = filters.view === "contacted" ? null
+    : sort === "hot" && !filters.contact ? contactGroup : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
     const blob = new Blob([toCsv(visible.map((r) => ({ ...r, notes: notes[r.company_number]?.text || "" })))], { type: "text/csv;charset=utf-8" });
@@ -156,6 +181,14 @@ function Accounts({ data, password }) {
     a.click();
     URL.revokeObjectURL(a.href);
   };
+
+  if (pageNo) {
+    const r = rows.find((x) => x.company_number === pageNo);
+    return (
+      <CompanyPage r={r} number={pageNo} madeAt={data.made_at} contactedAt={contacted[pageNo]?.at} onMark={mark}
+                   note={notes[pageNo]} onSaveNote={(text) => saveNote(pageNo, text)} onBack={backToList} saveError={saveError} />
+    );
+  }
 
   return (
     <main>
@@ -200,6 +233,10 @@ function Accounts({ data, password }) {
             <option value="">Any currency</option>
             {pairs.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
+          <select className="input" value={filters.role} onChange={(e) => set({ role: e.target.value })} aria-label="Job role">
+            <option value="">Any job role</option>
+            {ROLE_GROUPS.map((g) => <option key={g} value={g} disabled={!roleCounts[g]}>{g} ({roleCounts[g]})</option>)}
+          </select>
           <select className="input" value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort" disabled={filters.view === "contacted"}>
             {Object.entries(SORTS).map(([k, { label }]) => <option key={k} value={k}>Sort: {label}</option>)}
           </select>
@@ -215,13 +252,15 @@ function Accounts({ data, password }) {
       <div className="list">
         {saveError && <div className="save-error" role="alert">{saveError}</div>}
         {visible.slice(0, shown).map((r, i, list) => {
-          const group = contactGroup(r);
-          const heading = grouped && (i === 0 || contactGroup(list[i - 1]) !== group);
+          const group = groupOf ? groupOf(r) : "";
+          const heading = groupOf && (i === 0 || groupOf(list[i - 1]) !== group);
           return (
             <Fragment key={r.company_number || r.rank}>
-              {heading && <h2 className="group-h">{group} <span>{groupCounts[group]} · {GROUP_NOTE[group]}</span></h2>}
+              {heading && (groupOf === contactGroup
+                ? <h2 className="group-h">{group} <span>{groupCounts[group]} · {GROUP_NOTE[group]}</span></h2>
+                : <h2 className="group-h">{group} <span>{roleCounts[group]}</span></h2>)}
               <Account r={r} isNew={isNew(r, data.made_at)} contactedAt={contacted[r.company_number]?.at} onMark={mark}
-                       note={notes[r.company_number]} onSaveNote={(text) => saveNote(r.company_number, text)} />
+                       note={notes[r.company_number]} onSaveNote={(text) => saveNote(r.company_number, text)} onOpen={openCompany} />
             </Fragment>
           );
         })}
@@ -274,106 +313,225 @@ function Notes({ note, onSave }) {
   ) : <button className="more-btn add-note" onClick={() => setEditing(true)}>+ Add note</button>;
 }
 
-function Account({ r, isNew: fresh, contactedAt, onMark, note, onSaveNote }) {
-  const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+// Opens the company's page on a plain click; a middle/ctrl-click opens it in a new tab like any link.
+function CompanyLink({ r, onOpen, className = "co" }) {
+  if (!r.company_number) return <span className={className}>{r.company_name}</span>;
+  return (
+    <a href={companyPath(r.company_number)} className={className} title="Open this company's page"
+       onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey) { e.preventDefault(); onOpen(r.company_number); } }}>
+      {r.company_name}
+    </a>
+  );
+}
+
+const siteUrl = (w) => (w.startsWith("http") ? w : `https://${w}`);
+const siteLabel = (w) => w.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+
+function ContactedButton({ number, contactedAt, onMark }) {
+  if (!number) return null;
+  return contactedAt
+    ? <span className="done">Contacted {day(contactedAt)} <button className="btn-sm" onClick={() => onMark(number, false)}>Undo</button></span>
+    : <button className="btn-sm contacted" onClick={() => onMark(number, true)} title="Move this company to Contacted">Contacted</button>;
+}
+
+function FxFigure({ r }) {
+  return r.fx_gain_loss_gbp
+    ? <Src href={r.fx_gain_loss_url} title="Open the accounts at the FX line"><b>{money(r.fx_gain_loss_gbp)}</b> FX {Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}{fxShare(r) && ` (${fxShare(r).replace(" of turnover", "")})`}</Src>
+    : null;
+}
+
+function ContactLine({ r }) {
   const conf = r.finance_contact_confidence;
+  return (
+    <div className="contact">
+      {r.finance_contact ? (
+        <>
+          <span className="person">{r.finance_contact}</span>
+          <span className="role">{r.finance_contact_role}</span>
+          {conf && <span className="badge" style={{ color: CONF_COLOUR[conf], borderColor: CONF_COLOUR[conf] }}>{conf}</span>}
+        </>
+      ) : <span className="role">No finance contact found yet</span>}
+      <span className="links">
+        {r.finance_contact_linkedin
+          ? <a href={r.finance_contact_linkedin} target="_blank" rel="noreferrer">LinkedIn profile</a>
+          : r.linkedin_search_url && <a href={r.linkedin_search_url} target="_blank" rel="noreferrer">LinkedIn search</a>}
+        {r.company_name && <a href={googleFd(r)} target="_blank" rel="noreferrer">Check on Google</a>}
+      </span>
+    </div>
+  );
+}
+
+function Chips({ r }) {
+  return (
+    <div className="chips">
+      {r.recent_fx_loss && <Src className="chip loss" href={r.fx_gain_loss_url} title={r.recent_fx_loss}>Recent FX loss</Src>}
+      {parts(r.currency_pairs).map((p) => <span key={p} className="chip fx">{p}</span>)}
+      {r.qualified && r.qualified !== "Yes" && <span className={`chip ${r.qualified === "Out" ? "out" : "warn"}`} title={r.qualify_reason}>{r.qualified}: {r.qualify_reason}</span>}
+      {r.warm_route && <span className="chip own">Warm: {r.warm_route}</span>}
+      {r.main_bank && <Src className="chip" href={bankUrl(r)} title="Open where this bank is named">{r.main_bank}{r.bank_type ? ` · ${r.bank_type}` : ""}</Src>}
+      {r.facility_ends && <Src className="chip trig" href={r.accounts_url} title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</Src>}
+      {r.fx_today && <Src className="chip fx" href={r.fx_today_url} title={r.fx_today_evidence}>{r.fx_today}</Src>}
+      {r.own_bank_client && <span className="chip own">Existing client</span>}
+      {r.pe_backed && <span className="chip warn">PE-backed</span>}
+      {r.family_run && <span className="chip">Family-run</span>}
+      {parts(r.triggers).map((t) => <span key={t} className="chip trig">{t}</span>)}
+    </div>
+  );
+}
+
+// When to call, the two strongest facts (each linked to its record), the currency line and the opener.
+function CallPrep({ r }) {
+  const [copied, setCopied] = useState(false);
   const copy = async () => {
     try { await navigator.clipboard.writeText(r.opener || r.call_angle || ""); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
   };
-  const details = [
-    ["Incumbent bank", r.incumbent_bank, r.incumbent_bank_url], ["Facility ends", r.facility_ends_evidence, r.accounts_url],
-    ["FX today", r.fx_today_evidence, r.fx_today_url],
-    ["Lenders", r.lenders], ["FX size", r.fx_estimate], ["Currency evidence", r.currency_evidence], ["Why FX", r.fx_evidence], ["Niche", r.fx_niche], ["Exposure", r.fx_exposure],
-    ["Imports in", r.import_currencies], ["Exports in", r.export_currencies], ["Trade", r.trade_countries],
-    ["Wallet basis", r.fx_wallet_basis], ["Why untapped", r.untapped_reasons],
-    ["Contact evidence", r.finance_contact_evidence], ["Search check", r.search_check],
-    ["Lead director", [r.lead_director, r.lead_director_occupation].filter(Boolean).join(" — ")],
-    ["Directors", r.all_directors], ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by],
-    ["Owners", r.owners], ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
-    ["Banking", r.banking_relationships],
-    ["FX gain/loss", fxLine(r), r.fx_gain_loss_url], ["FX figure to check", r.fx_gain_loss_check, r.fx_gain_loss_url],
-    ["Growth", r.turnover_growth], ["Overseas sales", r.overseas_turnover_share],
-    ["Cash / borrowings", [money(r.cash_gbp), money(r.bank_borrowings_gbp)].filter(Boolean).join(" / ")],
-    ["Auditor", [r.auditor, r.auditor_tier].filter(Boolean).join(" — ")], ["Accounts", r.size_basis],
-    ["Generic emails", r.generic_emails], ["Address", r.registered_address],
-  ].filter(([, v]) => v);
-
   return (
-    <article className="card">
-      <div className="card-top">
-        <div className="card-name">
-          <span className="rank">#{r.rank}</span>
-          {fresh && <span className="new">New</span>}
-          <a href={r.companies_house_url} target="_blank" rel="noreferrer" className="co">{r.company_name}</a>
-          {r.trading_as && <span className="site">t/a {r.trading_as}</span>}
-          {r.website && <a className="site" href={r.website.startsWith("http") ? r.website : `https://${r.website}`} target="_blank" rel="noreferrer">{r.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}</a>}
-        </div>
-        <div className="card-r">
-        <div className="figures">
-          {r.turnover_gbp && <span><b>{money(r.turnover_gbp)}</b> turnover</span>}
-          {wallet(r) && <span><b>{wallet(r)}</b> FX a year</span>}
-          {r.fx_gain_loss_gbp && <Src href={r.fx_gain_loss_url} title="Open the accounts at the FX line"><b>{money(r.fx_gain_loss_gbp)}</b> FX {Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}{fxShare(r) && ` (${fxShare(r).replace(" of turnover", "")})`}</Src>}
-        </div>
-        {contactedAt
-          ? <span className="done">Contacted {day(contactedAt)} <button className="btn-sm" onClick={() => onMark(r.company_number, false)}>Undo</button></span>
-          : r.company_number && <button className="btn-sm contacted" onClick={() => onMark(r.company_number, true)} title="Move this company to Contacted">Contacted</button>}
-        </div>
-      </div>
-
-      <div className="contact">
-        {r.finance_contact ? (
-          <>
-            <span className="person">{r.finance_contact}</span>
-            <span className="role">{r.finance_contact_role}</span>
-            {conf && <span className="badge" style={{ color: CONF_COLOUR[conf], borderColor: CONF_COLOUR[conf] }}>{conf}</span>}
-          </>
-        ) : <span className="role">No finance contact found yet</span>}
-        <span className="links">
-          {r.finance_contact_linkedin
-            ? <a href={r.finance_contact_linkedin} target="_blank" rel="noreferrer">LinkedIn profile</a>
-            : r.linkedin_search_url && <a href={r.linkedin_search_url} target="_blank" rel="noreferrer">LinkedIn search</a>}
-          {r.company_name && <a href={googleFd(r)} target="_blank" rel="noreferrer">Check on Google</a>}
-        </span>
-      </div>
-
-      <div className="chips">
-        {r.recent_fx_loss && <Src className="chip loss" href={r.fx_gain_loss_url} title={r.recent_fx_loss}>Recent FX loss</Src>}
-        {parts(r.currency_pairs).map((p) => <span key={p} className="chip fx">{p}</span>)}
-        {r.qualified && r.qualified !== "Yes" && <span className={`chip ${r.qualified === "Out" ? "out" : "warn"}`} title={r.qualify_reason}>{r.qualified}: {r.qualify_reason}</span>}
-        {r.warm_route && <span className="chip own">Warm: {r.warm_route}</span>}
-        {r.main_bank && <Src className="chip" href={bankUrl(r)} title="Open where this bank is named">{r.main_bank}{r.bank_type ? ` · ${r.bank_type}` : ""}</Src>}
-        {r.facility_ends && <Src className="chip trig" href={r.accounts_url} title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</Src>}
-        {r.fx_today && <Src className="chip fx" href={r.fx_today_url} title={r.fx_today_evidence}>{r.fx_today}</Src>}
-        {r.own_bank_client && <span className="chip own">Existing client</span>}
-        {r.pe_backed && <span className="chip warn">PE-backed</span>}
-        {r.family_run && <span className="chip">Family-run</span>}
-        {parts(r.triggers).map((t) => <span key={t} className="chip trig">{t}</span>)}
-      </div>
+    <>
       {r.when_to_call && <div className="when">When to call: {r.when_to_call}{r.planning_window_now === "yes" ? " · planning window now" : ""}</div>}
-
       {[r.fact_1, r.fact_2].filter(Boolean).map((fact) => (
         <div key={fact} className="fact"><Src href={factUrl(r, fact)}>{fact}</Src></div>
       ))}
       {r.main_currency && (
         <div className="when">Currency: {r.main_currency} · {r.currency_direction} · {r.currency_confidence} confidence</div>
       )}
-
       {(r.opener || r.call_angle) && (
         <div className="angle">
           <span>{r.opener || r.call_angle}</span>
           <button className="btn-sm" onClick={copy}>{copied ? "Copied" : "Copy"}</button>
         </div>
       )}
+    </>
+  );
+}
 
+const Details = ({ rows }) => (
+  <dl className="details">
+    {rows.map(([k, v, href]) => <div key={k}><dt>{k}</dt><dd><Src href={href}>{v}</Src></dd></div>)}
+  </dl>
+);
+
+function Account({ r, isNew: fresh, contactedAt, onMark, note, onSaveNote, onOpen }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <article className="card">
+      <div className="card-top">
+        <div className="card-name">
+          <span className="rank">#{r.rank}</span>
+          {fresh && <span className="new">New</span>}
+          <CompanyLink r={r} onOpen={onOpen} />
+          {r.trading_as && <span className="site">t/a {r.trading_as}</span>}
+          {r.website && <a className="site" href={siteUrl(r.website)} target="_blank" rel="noreferrer">{siteLabel(r.website)}</a>}
+        </div>
+        <div className="card-r">
+          <div className="figures">
+            {r.turnover_gbp && <span><b>{money(r.turnover_gbp)}</b> turnover</span>}
+            {wallet(r) && <span><b>{wallet(r)}</b> FX a year</span>}
+            <FxFigure r={r} />
+          </div>
+          <ContactedButton number={r.company_number} contactedAt={contactedAt} onMark={onMark} />
+        </div>
+      </div>
+      <ContactLine r={r} />
+      <Chips r={r} />
+      <CallPrep r={r} />
       <Notes note={note} onSave={onSaveNote} />
-      <button className="more-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Less" : "More detail"}</button>
-      {open && (
-        <dl className="details">
-          {details.map(([k, v, href]) => <div key={k}><dt>{k}</dt><dd><Src href={href}>{v}</Src></dd></div>)}
-        </dl>
-      )}
+      <div className="card-foot">
+        <button className="more-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Less" : "More detail"}</button>
+        {r.company_number && <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>Open company page →</a>}
+      </div>
+      {open && <Details rows={detailSections(r).flatMap(([, rows]) => rows)} />}
     </article>
+  );
+}
+
+// One company: everything the finder knows, each fact linked to the filing or charge it came from, with notes and
+// the Contacted button.
+function CompanyPage({ r, number, madeAt, contactedAt, onMark, note, onSaveNote, onBack, saveError }) {
+  useEffect(() => { document.title = r ? `${r.company_name} · Accounts` : "Accounts"; return () => { document.title = "Accounts"; }; }, [r]);
+  if (!r) {
+    return (
+      <main className="page">
+        <button className="btn-sm" onClick={onBack}>← All accounts</button>
+        <div className="empty">Company {number} isn't in the current account list.</div>
+      </main>
+    );
+  }
+  const figures = [
+    ["Turnover", money(r.turnover_gbp), r.accounts_url, r.turnover_period_end && `accounts to ${r.turnover_period_end}`],
+    ["FX a year (estimate)", wallet(r), "", r.fx_wallet_basis],
+    ["FX gain/loss", r.fx_gain_loss_gbp ? `${money(r.fx_gain_loss_gbp)} ${Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}` : "", r.fx_gain_loss_url,
+     [fxShare(r), r.fx_gain_loss_prior_gbp && `prior year ${money(r.fx_gain_loss_prior_gbp)}`].filter(Boolean).join(" · ")],
+    ["Growth", r.turnover_growth, r.accounts_url, ""],
+    ["Overseas sales", r.overseas_turnover_share, r.accounts_url, ""],
+    ["Cash / borrowings", [money(r.cash_gbp), money(r.bank_borrowings_gbp)].filter(Boolean).join(" / "), r.accounts_url, ""],
+  ].filter(([, v]) => v);
+  return (
+    <main className="page">
+      <button className="btn-sm" onClick={onBack}>← All accounts</button>
+      {saveError && <div className="save-error" role="alert">{saveError}</div>}
+      <header className="pg-head">
+        <div>
+          <div className="card-name">
+            <span className="rank">#{r.rank}</span>
+            {isNew(r, madeAt) && <span className="new">New</span>}
+            {r.section && <span className="chip">{r.section}</span>}
+          </div>
+          <h1 className="pg-title">{r.company_name}</h1>
+          <div className="pg-sub">
+            {r.trading_as && <span>t/a {r.trading_as}</span>}
+            {r.company_number && <a href={r.companies_house_url} target="_blank" rel="noreferrer">Companies House {r.company_number}</a>}
+            {r.website && <a href={siteUrl(r.website)} target="_blank" rel="noreferrer">{siteLabel(r.website)}</a>}
+            {r.fx_niche && <span>{r.fx_niche}</span>}
+          </div>
+        </div>
+        <ContactedButton number={r.company_number} contactedAt={contactedAt} onMark={onMark} />
+      </header>
+
+      {figures.length > 0 && (
+        <div className="pg-figs">
+          {figures.map(([label, value, href, sub]) => (
+            <div className="fig" key={label}>
+              <div className="fig-l">{label}</div>
+              <div className="fig-v"><Src href={href}>{value}</Src></div>
+              {sub && <div className="fig-s">{sub}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="pg-grid">
+        <section className="panel">
+          <h2 className="panel-h">Finance contact</h2>
+          <ContactLine r={r} />
+          {r.finance_contact_evidence && <p className="panel-p">{r.finance_contact_evidence}</p>}
+          {r.lead_director && <p className="panel-p">Lead director: {[r.lead_director, r.lead_director_occupation].filter(Boolean).join(" — ")}</p>}
+        </section>
+        <section className="panel">
+          <h2 className="panel-h">Notes</h2>
+          <Notes note={note} onSave={onSaveNote} />
+        </section>
+      </div>
+
+      <section className="panel">
+        <h2 className="panel-h">Why call</h2>
+        <Chips r={r} />
+        <CallPrep r={r} />
+      </section>
+
+      {detailSections(r).map(([title, rows]) => (
+        <section className="panel" key={title}>
+          <h2 className="panel-h">{title}</h2>
+          <Details rows={rows} />
+        </section>
+      ))}
+
+      <section className="panel">
+        <h2 className="panel-h">Source documents</h2>
+        <ul className="docs">
+          {sourceDocuments(r).map(([label, url]) => <li key={url}><a href={url} target="_blank" rel="noreferrer">{label} ↗</a></li>)}
+        </ul>
+      </section>
+    </main>
   );
 }
 
@@ -463,6 +621,26 @@ select.input option{background:#0F141F}
 .notes-in{width:100%;resize:vertical;min-height:70px;line-height:1.45}
 .notes-btns{display:flex;gap:8px}
 .add-note{display:block}
+.card-foot{display:flex;gap:16px;align-items:center}
+a.more-btn{text-decoration:none;margin-top:10px}
+a.co:hover{color:#34D399}
+.page{max-width:1100px;margin:0 auto;padding:20px 40px 80px;display:flex;flex-direction:column;gap:14px;align-items:stretch}
+.page>.btn-sm:first-child{align-self:flex-start}
+.pg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.pg-title{font-size:24px;font-weight:800;color:#F8FAFC;margin-top:6px;overflow-wrap:anywhere}
+.pg-sub{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:rgba(255,255,255,.45);margin-top:4px}
+.pg-figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.fig{padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+.fig-l{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.fig-v{font-size:18px;font-weight:800;color:#F8FAFC;margin-top:2px}
+.fig-s{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.pg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.panel{padding:16px 18px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);min-width:0}
+.panel-h{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.panel .contact{margin-top:8px}
+.panel-p{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.6);overflow-wrap:anywhere}
+.panel .details{margin-top:8px}
+.docs{list-style:none;margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 20px;font-size:13px}
 .save-error{padding:10px 12px;border-radius:8px;background:rgba(248,113,113,.1);color:#FCA5A5;font-size:13px}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}
@@ -478,5 +656,5 @@ a.chip.src:hover{filter:brightness(1.25)}
 .details dd{font-size:12.5px;color:rgba(255,255,255,.7);overflow-wrap:anywhere}
 .empty{padding:40px;text-align:center;color:rgba(255,255,255,.35)}
 .more{align-self:center}
-@media(max-width:700px){.tb,.stats,.controls,.list{padding-left:16px;padding-right:16px}.tb-tag,.tb-time{display:none}.links{margin-left:0}.export{margin-left:0}}
+@media(max-width:700px){.tb,.stats,.controls,.list,.page{padding-left:16px;padding-right:16px}.tb-logo{font-size:0;gap:0}.tb-mark{font-size:12px}.tb-r{gap:6px}.tb .btn-sm{padding:6px 9px}.tb-tag,.tb-time{display:none}.links{margin-left:0}.export{margin-left:0}}
 `;
