@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bankUrl, contactGroup, roleGroup, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortContacted, sortRows, toCsv, wallet } from "./format.js";
+import { bankUrl, companyPath, contactGroup, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortContacted, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -122,6 +122,27 @@ describe("accounts helpers", () => {
     expect(factUrl(r, "Turnover grew 24% last year")).toBe("https://ch/acc");
     expect(factUrl(r, "New finance director appointed")).toBe("");
     expect(factUrl({}, "FX loss of £420k")).toBe("");                              // older lists: no link
+  });
+
+  it("gives each company its own page with every detail and the documents behind it", () => {
+    expect(companyPath("SC123456")).toBe("/accounts/SC123456");
+    expect(numberFromPath("/accounts/sc123456")).toBe("SC123456");
+    expect(numberFromPath("/accounts")).toBe("");
+    expect(numberFromPath("/accounts/../x")).toBe("");
+    const r = {
+      main_bank: "HSBC", incumbent_bank: "HSBC: all-assets debenture", incumbent_bank_url: "https://ch/charge",
+      accounts_url: "https://ch/acc", fx_gain_loss_url: "https://ch/acc#page=22", fx_gain_loss_gbp: "-150512",
+      turnover_gbp: "120000000", finance_contact_evidence: "CH occupation", companies_house_url: "https://ch/company/01",
+    };
+    const sections = Object.fromEntries(detailSections(r));
+    expect(Object.keys(sections)).toEqual(["Banking", "FX exposure", "People"]);       // empty sections left out
+    expect(sections.Banking[0]).toEqual(["Main bank", "HSBC", "https://ch/charge"]);
+    expect(sections["FX exposure"][0]).toEqual(["FX gain/loss", "−£151k loss (0.1% of turnover; prior year n/a)", "https://ch/acc#page=22"]);
+    expect(sourceDocuments(r).map(([label]) => label)).toEqual([
+      "Latest filed accounts", "Accounts at the FX line", "Charge: HSBC", "Companies House record", "Filing history",
+      "Charges register", "Officers", "Owners (PSCs)",
+    ]);
+    expect(sourceDocuments({ ...r, fx_gain_loss_url: "https://ch/acc" }).map(([l]) => l)).not.toContain("Accounts at the FX line");
   });
 
   it("searches Google for the company's finance director", () => {

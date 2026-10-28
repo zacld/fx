@@ -109,6 +109,59 @@ export function factUrl(r, fact = "") {
   return "";
 }
 
+// A company's own page: /accounts/<company number> (Netlify serves accounts.html for it).
+export const companyPath = (number) => `/accounts/${number}`;
+export const numberFromPath = (path = "") => (path.match(/^\/accounts\/([A-Z0-9]{8})\/?$/i) || [])[1]?.toUpperCase() || "";
+
+// Everything known about a company, in sections of [label, value, source link]; empty values left out.
+export function detailSections(r) {
+  const join = (...xs) => xs.filter(Boolean).join(" — ");
+  return [
+    ["Banking", [
+      ["Main bank", join(r.main_bank, r.bank_type), bankUrl(r)], ["Incumbent bank", r.incumbent_bank, r.incumbent_bank_url],
+      ["Facility ends", r.facility_ends_evidence || r.facility_ends, r.accounts_url], ["FX today", r.fx_today_evidence, r.fx_today_url],
+      ["Lenders", r.lenders], ["Banking", r.banking_relationships], ["Existing client", r.own_bank_client],
+    ]],
+    ["FX exposure", [
+      ["FX gain/loss", fxLine(r), r.fx_gain_loss_url], ["Recent FX loss", r.recent_fx_loss, r.fx_gain_loss_url],
+      ["FX figure to check", r.fx_gain_loss_check, r.fx_gain_loss_url], ["FX line in the accounts", r.fx_gain_loss_evidence, r.fx_gain_loss_url],
+      ["FX size", r.fx_estimate], ["Wallet basis", r.fx_wallet_basis],
+      ["Main currency", [r.main_currency, r.currency_direction, r.currency_confidence && `${r.currency_confidence} confidence`].filter(Boolean).join(" · ")],
+      ["Currency evidence", r.currency_evidence], ["Imports in", r.import_currencies], ["Exports in", r.export_currencies],
+      ["Trade", r.trade_countries], ["Customs goods", r.hmrc_goods], ["Why FX", r.fx_evidence], ["Niche", r.fx_niche],
+      ["Exposure", r.fx_exposure], ["Why untapped", r.untapped_reasons],
+    ]],
+    ["People", [
+      ["Contact source", r.finance_contact_source], ["Contact evidence", r.finance_contact_evidence], ["Search check", r.search_check],
+      ["Lead director", join(r.lead_director, r.lead_director_occupation)], ["Directors", r.all_directors],
+      ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by], ["Owners", r.owners],
+      ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
+    ]],
+    ["Company", [
+      ["Accounts", r.size_basis, r.accounts_url], ["Accounts filed", r.accounts_filed_on, r.accounts_url],
+      ["Growth", r.turnover_growth, r.accounts_url], ["Overseas sales", r.overseas_turnover_share, r.accounts_url],
+      ["Cash / borrowings", [money(r.cash_gbp), money(r.bank_borrowings_gbp)].filter(Boolean).join(" / "), r.accounts_url],
+      ["Net assets", money(r.net_assets_gbp), r.accounts_url], ["Auditor", join(r.auditor, r.auditor_tier)],
+      ["Qualified", join(r.qualified, r.qualify_reason)], ["Warm route", r.warm_route], ["Triggers", r.triggers],
+      ["When to call", r.when_to_call], ["Generic emails", r.generic_emails], ["Address", r.registered_address],
+      ["SIC codes", r.sic_codes], ["Incorporated", r.incorporated_on],
+    ]],
+  ].map(([title, rows]) => [title, rows.filter(([, v]) => v)]).filter(([, rows]) => rows.length);
+}
+
+// The public records behind the facts, each once: the accounts (and its FX page), the charges, the register.
+export function sourceDocuments(r) {
+  const ch = r.companies_house_url || "";
+  const docs = [
+    ["Latest filed accounts", r.accounts_url], ["Accounts at the FX line", r.fx_gain_loss_url],
+    [`Charge: ${r.main_bank || "bank"}`, r.incumbent_bank_url], ["FX provider's charge", r.fx_today_url],
+    ["Companies House record", ch], ["Filing history", ch && `${ch}/filing-history`], ["Charges register", ch && `${ch}/charges`],
+    ["Officers", ch && `${ch}/officers`], ["Owners (PSCs)", ch && `${ch}/persons-with-significant-control`],
+  ];
+  const seen = new Set();
+  return docs.filter(([, url]) => url && !seen.has(url) && seen.add(url));
+}
+
 // Biggest FX loss first, then gains (biggest first), then no figure.
 const fxLossKey = (r) => {
   const fx = Number(r.fx_gain_loss_gbp);

@@ -1,2 +1,3 @@
 /accounts  /accounts.html  200
+/accounts/*  /accounts.html  200
 /moves  /moves.html  200
