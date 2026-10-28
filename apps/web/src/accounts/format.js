@@ -185,10 +185,6 @@ export const SORTS = {
 export const sortRows = (rows, by = "hot") =>
   [...rows].sort((a, b) => SORTS[by].key(a) - SORTS[by].key(b) || a.rank - b.rank);
 
-// The contacted list: most recently contacted first.
-export const sortContacted = (rows, contacted = {}) =>
-  [...rows].sort((a, b) => (contacted[b.company_number]?.at || "").localeCompare(contacted[a.company_number]?.at || "") || a.rank - b.rank);
-
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "finance_contact", "finance_contact_role",

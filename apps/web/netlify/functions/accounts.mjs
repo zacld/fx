@@ -1,18 +1,21 @@
 // GET /api/accounts — the finder's latest account list (FD names included),
 // with the companies marked contacted and Zac's notes; POST /api/accounts
-// {company_number, contacted: true|false} marks or unmarks one, and
-// {company_number, notes: "..."} saves its notes ("" deletes them). Only for
-// a request carrying the Accounts password:
+// {company_number, contacted: true, channel} logs a touch (the first marks it
+// contacted), {contacted: false} takes it off the list, {response} /
+// {follow_up_at} record a reply or a chosen next date (src/accounts/
+// followups.js), and {notes: "..."} saves its notes ("" deletes them). Only
+// for a request carrying the Accounts password:
 //   Authorization: Bearer <password>
 // The password is the ACCOUNTS_PASSWORD environment variable on Netlify
 // (Site configuration → Environment variables). The list itself lives in
 // the site's private Blobs store ("fx-accounts", key "latest"), put there by
 // the finder workflow — never in the repo or the public build.
 import { getStore } from "@netlify/blobs";
+import { applyContact, invalidChange } from "../../src/accounts/followups.js";
 
 export const STORE = "fx-accounts";
 export const KEY = "latest";
-export const CONTACTED_KEY = "contacted";   // {company_number: {at}} — Zac's marks, never touched by the finder
+export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const NOTES_MAX = 4000;
 const COMPANY_NUMBER = /^[A-Z0-9]{8}$/i;
@@ -60,17 +63,22 @@ export async function handle(req, { password = expectedPassword(), store = () =>
   }
   const blobs = store();
   if (req.method === "POST") {
-    const { company_number: number, contacted, notes } = await req.json().catch(() => ({}));
-    if (!COMPANY_NUMBER.test(number || "") || (typeof contacted !== "boolean" && typeof notes !== "string")) {
-      return reply({ error: "send {company_number, contacted: true|false} or {company_number, notes}" }, 400);
+    const body = await req.json().catch(() => ({}));
+    const { company_number: number, notes } = body;
+    const change = Object.fromEntries(["contacted", "channel", "response", "follow_up_at"]
+      .filter((k) => body[k] !== undefined).map((k) => [k, body[k]]));
+    const touchesContact = "contacted" in change || "response" in change || "follow_up_at" in change;
+    if (!COMPANY_NUMBER.test(number || "") || (!touchesContact && typeof notes !== "string")) {
+      return reply({ error: "send {company_number} with contacted / channel / response / follow_up_at, or notes" }, 400);
     }
+    const invalid = invalidChange(change);
+    if (invalid) return reply({ error: invalid }, 400);
     if (typeof notes === "string" && notes.length > NOTES_MAX) return reply({ error: `notes are limited to ${NOTES_MAX} characters` }, 400);
-    const [marks, noted] = await Promise.all([CONTACTED_KEY, NOTES_KEY].map(async (k) => (await blobs.get(k, { type: "json" })) || {}));
+    const [stored, noted] = await Promise.all([CONTACTED_KEY, NOTES_KEY].map(async (k) => (await blobs.get(k, { type: "json" })) || {}));
     const at = new Date().toISOString();
-    if (contacted === true) marks[number] = { at };
-    if (contacted === false) delete marks[number];
+    const marks = touchesContact ? applyContact(stored, number, change, at) : stored;
     if (typeof notes === "string") { if (notes.trim()) noted[number] = { text: notes.trim(), at }; else delete noted[number]; }
-    if (typeof contacted === "boolean") await blobs.setJSON(CONTACTED_KEY, marks);
+    if (touchesContact) await blobs.setJSON(CONTACTED_KEY, marks);
     if (typeof notes === "string") await blobs.setJSON(NOTES_KEY, noted);
     return reply({ contacted: marks, notes: noted }, 200);
   }

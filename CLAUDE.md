@@ -129,7 +129,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   by the latest upload are labelled New (`first_seen`, carried over by
   `upload-accounts.mjs`). The Contacted button moves a company to the
   Contacted tab (marks kept in the Blobs store under `contacted`, via POST
-  `/api/accounts`; the finder never touches them). Each card has a Notes box
+  `/api/accounts`; the finder never touches them). Follow-ups
+  (`apps/web/src/accounts/followups.js`, shared by the page and the API):
+  "Contacted" asks the channel (phone / email / LinkedIn / in person) and
+  logs a touch; the next follow-up is due 2, 4, then 7 days after each touch,
+  then nurture (90 days); a reply / meeting / not interested stops it; Zac
+  can move the date. The Contacted tab groups Overdue / Due today / Replied
+  / Upcoming / Nurture / Meeting booked / Not interested, with the suggested
+  next action and a copy-ready line (event reminder → new angle → soft bump
+  → break-up, from the company's own facts; no AI, nothing sent). Each card has a Notes box
   (Blobs key `notes`, same POST with `{company_number, notes}`; "" deletes;
   searched by the search box and included in the CSV export). Clicking a
   company's name opens its own page, `/accounts/<company number>`
