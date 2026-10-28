@@ -25,7 +25,8 @@ from sourcer import roles
 _FINANCE_TITLE_RE = re.compile(
     r"\b(?:Group\s+|Interim\s+|Deputy\s+|UK\s+)?(?:Chief\s+Financial\s+Officer|Chief\s+Finance\s+Officer|CFO|"
     r"Finance\s+(?:(?:&|and)\s+(?:Administration|Operations|Commercial|IT|Business)\s+)?Director|Financial\s+Director|Director\s+of\s+Finance|Financial\s+Controller|Finance\s+Controller|"
-    r"Head\s+of\s+Finance|Finance\s+Manager|Treasurer|Head\s+of\s+Treasury|Treasury\s+Manager)\b",
+    r"Head\s+of\s+Finance|Finance\s+Manager|Treasurer|Head\s+of\s+Treasury|Treasury\s+Manager|"
+    r"V\.?P\.?,?\s+(?:of\s+)?Finance|Vice\s+President,?\s+(?:of\s+)?Finance|Director\s*[,–—-]\s*Finance|Chief\s+Accountant)\b",
     re.I)
 _TOKEN = r"[A-ZÀ-ÖØ-Þ](?:[^\W\d_]|['’-])*\.?"   # letters with accents too ("Bauló")
 _NAME_AT_END = re.compile(rf"((?:{_TOKEN}\s+){{1,4}}{_TOKEN})$")
@@ -131,7 +132,8 @@ def finance_people(text: str, not_names: str = "") -> list[dict]:
             continue
         if name and name.upper() not in found:
             found[name.upper()] = {"name": name, "title": title}
-    return list(found.values())
+    # most senior first (a page often lists the finance manager before the FD); page order among equals
+    return sorted(found.values(), key=lambda p: finance_rank(p["title"]))
 
 
 def qualified_people(text: str) -> list[dict]:
@@ -172,17 +174,19 @@ def same_person(a: str, b: str) -> bool:
 VERIFIED, CONFIRMED, LIKELY, GUESS = "Verified", "Confirmed", "Likely", "Guess"
 
 
-# Most senior first: who to call about FX. The first FINANCE_DIRECTOR_LEVEL run the finance function.
+# Most senior first: who to call about FX. Those before "financial controller" run the finance function.
 _FINANCE_RANK = ("chief financial", "chief finance", "cfo", "finance director", "financial director",
-                 "director of finance", "head of finance", "treasurer", "head of treasury", "financial controller",
-                 "finance controller", "treasury manager", "finance manager")
-FINANCE_DIRECTOR_LEVEL = 9
+                 "director of finance", "director finance", "vp finance", "vp of finance", "vice president finance",
+                 "vice president of finance", "head of finance", "treasurer", "head of treasury",
+                 "financial controller", "finance controller", "chief accountant", "treasury manager", "finance manager")
+FINANCE_DIRECTOR_LEVEL = _FINANCE_RANK.index("financial controller")
 
 
 def finance_rank(title: str) -> int:
     """Position in _FINANCE_RANK (lower = more senior; len() when not a finance title)."""
-    t = re.sub(r"finance (?:&|and) \w+ director", "finance director", (title or "").lower())
-    t = re.sub(r"\bfd\b", "finance director", t)
+    t = re.sub(r"[\s,.–—-]+", " ", (title or "").lower())          # "Director – Finance", "V.P., Finance"
+    t = re.sub(r"finance (?:&|and) \w+ director", "finance director", t)
+    t = re.sub(r"\bfd\b", "finance director", t).replace("v p ", "vp ")
     return next((i for i, s in enumerate(_FINANCE_RANK) if s in t), len(_FINANCE_RANK))
 
 
@@ -223,21 +227,28 @@ def choose_finance_contact(officers: list[dict], accounts_people: list[dict], we
 
     directors = [o for o in officers if o["role"] != "Company Secretary"]
     fd = roles.pick_finance_director(directors)
-    if fd:
+    if fd and is_finance_director(fd["occupation"]):
         return {"name": fd["name"], "role": fd["occupation"], "source": "Companies House occupation",
                 "confidence": CONFIRMED, "officer": fd}
+    # The most senior finance title any source gives, not the first source with someone: a board director filed as
+    # "Accountant" or "Finance Manager" doesn't stop us finding the FD the website or a filing names. Among equals the
+    # source order below decides; a board director with a finance occupation counts as controller level and wins ties.
     registry_finance = [p for p in registry_people if is_finance_title(p.get("title", ""))]
-    for found, where in ((accounts_people, "filed accounts"), (website_people, "company website"),
-                         (registry_finance, ""), (news_people, "news")):
-        if found:
-            p = found[0]
-            where = where or p["source"]
-            officer = officer_for(p["name"])
-            also = " (also a director)" if officer and officer["role"] != "Company Secretary" else ""
-            note = f" — {p['note']}" if p.get("note") else ""
-            return {"name": officer["name"] if officer else p["name"], "role": p["title"],
-                    "source": f"{where}: listed as {p['title']}{also}{note}",
-                    "confidence": p.get("confidence", CONFIRMED), "officer": officer}
+    named = [(p, where) for found, where in ((accounts_people, "filed accounts"), (website_people, "company website"),
+                                             (registry_finance, ""), (news_people, "news")) for p in found]
+    best = min(named, key=lambda pw: finance_rank(pw[0]["title"]), default=None)
+    if fd and (best is None or min(finance_rank(fd["occupation"]), FINANCE_DIRECTOR_LEVEL) <= finance_rank(best[0]["title"])):
+        return {"name": fd["name"], "role": fd["occupation"], "source": "Companies House occupation",
+                "confidence": CONFIRMED, "officer": fd}
+    if best:
+        p, where = best
+        where = where or p["source"]
+        officer = officer_for(p["name"])
+        also = " (also a director)" if officer and officer["role"] != "Company Secretary" else ""
+        note = f" — {p['note']}" if p.get("note") else ""
+        return {"name": officer["name"] if officer else p["name"], "role": p["title"],
+                "source": f"{where}: listed as {p['title']}{also}{note}",
+                "confidence": p.get("confidence", CONFIRMED), "officer": officer}
 
     secretary = next((o for o in officers if o["role"] == "Company Secretary"), None)
     accountants = [o for o in officers if letters_for(o["name"])]

@@ -132,7 +132,7 @@ export function detailSections(r) {
       ["Exposure", r.fx_exposure], ["Why untapped", r.untapped_reasons],
     ]],
     ["People", [
-      ["Contact source", r.finance_contact_source], ["Contact evidence", r.finance_contact_evidence], ["Search check", r.search_check],
+      ["Contact source", r.finance_contact_source], ["Probably no FD", r.no_fd_likely], ["Contact evidence", r.finance_contact_evidence], ["Search check", r.search_check],
       ["Lead director", join(r.lead_director, r.lead_director_occupation)], ["Directors", r.all_directors],
       ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by], ["Owners", r.owners],
       ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
@@ -192,7 +192,7 @@ export const sortContacted = (rows, contacted = {}) =>
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "finance_contact", "finance_contact_role",
-  "finance_contact_confidence", "finance_contact_linkedin", "search_check", "lead_director", "turnover_gbp",
+  "finance_contact_confidence", "finance_contact_linkedin", "search_check", "no_fd_likely", "lead_director", "turnover_gbp",
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",
   "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_check", "recent_fx_loss", "accounts_filed_on", "first_seen",
   "main_bank", "bank_type", "fact_1", "fact_2", "main_currency", "currency_direction",

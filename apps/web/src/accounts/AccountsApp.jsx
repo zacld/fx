@@ -357,6 +357,12 @@ function ContactLine({ r }) {
           : r.linkedin_search_url && <a href={r.linkedin_search_url} target="_blank" rel="noreferrer">LinkedIn search</a>}
         {r.company_name && <a href={googleFd(r)} target="_blank" rel="noreferrer">Check on Google</a>}
       </span>
+      {r.no_fd_likely && (
+        <div className="no-fd" title={r.no_fd_likely}>
+          <b>Probably no FD</b> — {r.no_fd_likely}.
+          {r.lead_director && <> Decision-maker: <b>{r.lead_director}</b>{r.lead_director_occupation ? ` (${r.lead_director_occupation})` : ""}.</>}
+        </div>
+      )}
     </div>
   );
 }
@@ -641,6 +647,8 @@ a.co:hover{color:#34D399}
 .panel-p{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.6);overflow-wrap:anywhere}
 .panel .details{margin-top:8px}
 .docs{list-style:none;margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 20px;font-size:13px}
+.no-fd{flex-basis:100%;font-size:12.5px;color:rgba(255,255,255,.65);padding:6px 10px;border-radius:7px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18)}
+.no-fd b{color:#FBBF24;font-weight:700}
 .save-error{padding:10px 12px;border-radius:8px;background:rgba(248,113,113,.1);color:#FCA5A5;font-size:13px}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}

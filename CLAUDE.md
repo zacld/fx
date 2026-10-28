@@ -78,7 +78,13 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   titles, company board pages, news, org charts — to confirm or replace the
   pick (when no finance director turns up, one more search under the
   company's trading name, from "trading as" in its accounts or the results) (2+ separate sites naming them = Verified; a pick shown as MD etc. is
-  replaced). linkedin.com is never fetched; no emails or phones are kept; no
+  replaced; a current FD named by the search also replaces a controller /
+  manager pick, whatever its grade; for a subsidiary with no FD found, one
+  more search under its parent's name for the group FD). The picker takes the
+  most senior finance title any source gives (a board "Finance Manager" no
+  longer stops it finding the website's FD). `no_fd_likely`: no FD-level
+  person anywhere after the search, under £50m, no parent — the MD is shown
+  as decision-maker. linkedin.com is never fetched; no emails or phones are kept; no
   browser automation or bot-detection workarounds. Generated Google/LinkedIn
   search links remain for checking by hand.
 - **Target:** UK companies with proven foreign-currency flows, sized for a
