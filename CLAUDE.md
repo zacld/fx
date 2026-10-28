@@ -52,10 +52,17 @@ A separate, rule-based Python tool for the standing account list (not
 event-driven). It is still bound by Priorities 1 and 12: no AI calls, no
 LinkedIn/social scraping, no phone lookups, no outreach.
 - **Company websites:** only the company's own site, only when the register
-  and accounts name no finance person; the site must show the company's
+  and accounts name no finance director (a controller or manager there may
+  report to one the team page names); the site must show the company's
   registration number or registered name; at most 4 pages (home + team /
-  leadership / about / contact); robots.txt respected; keeps names with
+  leadership / about / contact — when the homepage links no team page, the
+  sitemap robots.txt names, or /sitemap.xml, is read to find one: XML only,
+  at most two files); robots.txt respected; keeps names with
   finance titles and generic company emails only.
+- **Former finance directors:** from the same Companies House officers call
+  (no extra calls), directors who resigned with a finance occupation
+  (`former_finance_director`); one who left within `FORMER_FD_TRIGGER_DAYS`
+  (365) is a trigger, and any stops `no_fd_likely`.
 - **Finance contact order:** CH occupation → finance title in the accounts
   → company website → gov.uk registry filing with a finance title (gender
   pay gap "responsible person", modern slavery statement approver; ≤3
@@ -72,7 +79,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   finder workflow): a web search per checked company through search APIs
   used within their free/paid allowances in turn — Search1API, Tavily, Exa,
   Serper (secrets `*_API_KEY`, monthly caps `*_MONTHLY`, ≤
-  `SEARCH_MAX_PER_RUN` searches a run — 150 on weekday mornings while Serper's
+  `SEARCH_MAX_PER_RUN` searches a run, neediest first (nobody / Guess →
+  Likely → a Confirmed controller or manager); a finance director already
+  Confirmed by a finance title isn't searched — 150 on weekday mornings while Serper's
   2,500 sign-up searches last — results cached 60 days (`SEARCH_CACHE_DAYS`), so steady-state re-checks fit Tavily's free 1,000 a month; accounts qualified Out
   are not searched) — reads result titles and snippets only — LinkedIn profile
   titles, company board pages, news, org charts — to confirm or replace the

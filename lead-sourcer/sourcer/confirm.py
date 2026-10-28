@@ -123,13 +123,15 @@ def no_fd_reason(row: dict) -> str:
     """
     Why this company probably has no finance director (so call the MD as the decision-maker), or "".
     Only after a search: nobody at finance-director level in the register, accounts, website, filings or search,
-    turnover under NO_FD_MAX_TURNOVER, and no parent company (whose group FD would run its finance).
+    turnover under NO_FD_MAX_TURNOVER, no parent company (whose group FD would run its finance) and no former FD on
+    the board.
     """
     try:
         turnover = float(row.get("turnover_gbp") or 0)
     except ValueError:
         turnover = 0
     if (people.is_finance_director(row.get("finance_contact_role", "")) or row.get("group_parent")
+            or row.get("former_finance_director")   # an FD sat on the board: the role exists
             or not 0 < turnover < NO_FD_MAX_TURNOVER):
         return ""
     who = f"{row['finance_contact']} ({row.get('finance_contact_role') or 'finance'})" if row.get("finance_contact") else ""
@@ -148,19 +150,29 @@ def parent_name(group_parent: str) -> str:
 def confirm_rows(rows: list[dict], fetcher: Optional[profiles.Fetcher] = None, pause: Optional[float] = None,
                  key: Optional[str] = None, max_searches: Optional[int] = None) -> tuple[list[dict], Counter]:
     """
-    Every checked row that isn't already Verified or qualified Out, in list order (best first),
-    searched and re-graded until the search budget runs out; the others
-    unchanged. Returns (rows, counts of outcomes — no names).
+    Every checked row that still needs a search, neediest first (nobody or a guess, then a likely pick, then a
+    confirmed controller / manager who may report to an FD; list order within each), searched and re-graded until
+    the search budget runs out; the others unchanged. Not searched: Verified contacts, a finance director already
+    Confirmed by a finance title in the register, accounts, website or a filing (a search would only re-grade
+    them), and companies qualified Out. Returns (rows, counts of outcomes — no names).
     """
-    wanted = [r for r in rows if r.get("untapped_reasons") != NOT_CHECKED
-              and r.get("finance_contact_confidence") != people.VERIFIED
-              and r.get("qualified") != "Out"]   # qualified out: not worth a search
+    def need(r: dict) -> int:
+        confidence = r.get("finance_contact_confidence") or ""
+        return 0 if confidence in ("", people.GUESS) else 1 if confidence == people.LIKELY else 2
+
+    candidates = [r for r in rows if r.get("untapped_reasons") != NOT_CHECKED and r.get("qualified") != "Out"]
+    wanted = sorted((r for r in candidates if r.get("finance_contact_confidence") != people.VERIFIED and not (
+        r.get("finance_contact_confidence") == people.CONFIRMED and people.is_finance_director(r.get("finance_contact_role", "")))),
+        key=need)
     found, status = profiles.finance_team_many([(r["company_number"], r["company_name"],
                                                  [n for n in (r.get("trading_as") or "").split("; ") if n],
                                                  parent_name(r.get("group_parent", "")))
                                                 for r in wanted],
                                                fetcher=fetcher, pause=pause, key=key, max_searches=max_searches)
-    stats: Counter = Counter({"to check": len(wanted), "checked": len(found), f"search {status}": 1})
+    stats: Counter = Counter({"to check": len(wanted), "checked": len(found), f"search {status}": 1,
+                              "not searched: FD already confirmed": sum(
+                                  r.get("finance_contact_confidence") == people.CONFIRMED
+                                  and people.is_finance_director(r.get("finance_contact_role", "")) for r in candidates)})
     searched = {id(r) for r in wanted if r["company_number"] in found}
     out = []
     for row in rows:

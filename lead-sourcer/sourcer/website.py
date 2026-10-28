@@ -116,20 +116,46 @@ def confirms_company(text: str, company_number: str, company_name: str) -> str:
     return "medium" if name and name in flat.replace("&", "AND") else ""
 
 
-def team_links(html: str, base_url: str, limit: int = MAX_PAGES - 1) -> list[str]:
-    """Same-site links most likely to name the finance team, best first."""
-    host = urllib.parse.urlparse(base_url).netloc.lower()
+def _ranked(candidates: Iterable[tuple[str, str]], base_url: str, limit: int) -> list[str]:
+    """Same-site URLs (with their link text) most likely to name the finance team, best first."""
+    host = urllib.parse.urlparse(base_url).netloc.lower().removeprefix("www.")
     scored: dict[str, int] = {}
-    for href, text in re.findall(r'(?is)<a\b[^>]*href=["\']([^"\'#]+)["\'][^>]*>(.*?)</a>', html):
+    for href, text in candidates:
         url = urllib.parse.urljoin(base_url, href.strip())
         parsed = urllib.parse.urlparse(url)
-        if parsed.scheme not in ("http", "https") or parsed.netloc.lower() != host or url.rstrip("/") == base_url.rstrip("/"):
+        if (parsed.scheme not in ("http", "https") or parsed.netloc.lower().removeprefix("www.") != host
+                or url.rstrip("/") == base_url.rstrip("/")):
             continue
         hay = (parsed.path + " " + re.sub(r"<[^>]+>", " ", text)).lower()
         score = max((w for k, w in _PAGE_WORDS if k in hay), default=0)
         if score:
             scored[url] = max(scored.get(url, 0), score)
     return [u for u, _ in sorted(scored.items(), key=lambda kv: (-kv[1], len(kv[0])))][:limit]
+
+
+def team_links(html: str, base_url: str, limit: int = MAX_PAGES - 1) -> list[str]:
+    """Same-site links most likely to name the finance team, best first."""
+    return _ranked(re.findall(r'(?is)<a\b[^>]*href=["\']([^"\'#]+)["\'][^>]*>(.*?)</a>', html), base_url, limit)
+
+
+_LOC = re.compile(r"<loc>\s*([^<\s]+)\s*</loc>", re.I)
+
+
+def sitemap_links(base_url: str, fetcher: Fetcher, robots: urllib.robotparser.RobotFileParser,
+                  limit: int = MAX_PAGES - 1) -> list[str]:
+    """
+    Team / leadership pages listed in the site's sitemap, best first: for sites whose homepage doesn't link to
+    them (menus built by scripts, pages only in the footer). The sitemap robots.txt names, else /sitemap.xml;
+    for a sitemap index, the one child sitemap for pages. At most two small XML files; no pages fetched here.
+    """
+    got = fetcher(next(iter(robots.site_maps() or []), "") or urllib.parse.urljoin(base_url, "/sitemap.xml"))
+    xml = got[1] if got else ""
+    if re.search(r"<sitemapindex", xml, re.I):
+        children = _LOC.findall(xml)
+        child = next((c for c in children if re.search(r"page", c, re.I)), children[0] if children else "")
+        got = fetcher(child) if child else None
+        xml = got[1] if got else ""
+    return _ranked(((u, "") for u in _LOC.findall(xml)), base_url, limit)
 
 
 def generic_emails(text: str, site_host: str) -> list[str]:
@@ -171,8 +197,11 @@ def look_up(company_number: str, company_name: str, fetcher: Optional[Fetcher] =
             continue
         texts = [page_text(html)]
         confidence = confirms_company(texts[0], company_number, company_name)
-        links = team_links(html, url)
         robots = _robots(url, fetcher)
+        links = team_links(html, url)
+        if not any(re.search(r"team|leadership|management|board|directors", link, re.I) for link in links):
+            # no team page linked from the homepage: the sitemap may list one
+            links = list(dict.fromkeys(sitemap_links(url, fetcher, robots) + links))[:MAX_PAGES - 1]
         for link in links:
             if not robots.can_fetch(USER_AGENT, link):
                 continue

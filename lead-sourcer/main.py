@@ -59,7 +59,7 @@ import time
 from collections import Counter
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional, Union
 
 from sourcer import (
@@ -102,6 +102,7 @@ CSV_FIELDS = [
     "fx_today_evidence",
     "turnover_gbp",
     "turnover_period_end",
+    "former_finance_director",
     "fx_wallet_low_gbp",
     "fx_wallet_high_gbp",
     "fx_wallet_basis",
@@ -387,6 +388,8 @@ def _money(value: Optional[float]) -> str:
     return str(round(value)) if value is not None else ""
 
 
+FORMER_FD_TRIGGER_DAYS = 365   # a finance director who left the board within this is a trigger
+
 # A loss on currency in accounts filed lately lifts a company in the list (logged for recalibration, like triggers).
 RECENT_FX_LOSS = {"days": 183, "min_gbp": hooks.HOOK_RULES["fx_gain_loss_min_gbp"], "lift": 15}
 
@@ -487,6 +490,7 @@ def company_row(
     registry_people: Optional[list[dict]] = None,
     appointments: Optional[dict] = None,
     own_bank_name: str = "",
+    former_fd: Optional[list[dict]] = None,
 ) -> dict:
     """
     One CSV row. `directors` may include company secretaries (they count as
@@ -527,6 +531,11 @@ def company_row(
     events = triggers.find(history, charges or [], directors, today) if checked else []
     events += [f"new finance lead {p['name']} ({p['date'][:7]}, news) — new people review providers"
                for p in (news_people or [])[:1] if news.is_recent(p["date"], today)]
+    # A finance director who left the board lately: the role changed hands (or moved off the board).
+    since = ((today or date.today()) - timedelta(days=FORMER_FD_TRIGGER_DAYS)).isoformat()
+    left = [f for f in (former_fd or []) if f["resigned_on"] >= since]
+    events += [f"finance director {f['name']} left the board {f['resigned_on'][:7]} — a new finance lead reviews providers"
+               for f in left[:1]] if checked else []
     verify_url, linkedin_url = news.verify_links(company["company_name"], contact["name"] if contact else "")
     when, planning_now = timing.when_to_call(trade, (turnover or {}).get("period_end") or f.get("period_end")
                                              or company.get("accounts_made_up_to", ""), today)
@@ -601,6 +610,8 @@ def company_row(
         hmrc_match=trade["confidence"] if trade else "",
         turnover_gbp=str(round(turnover["turnover"])) if turnover else "",
         turnover_period_end=turnover["period_end"] if turnover else "",
+        former_finance_director="; ".join(f"{f['name']} ({f['occupation']}), left the board {f['resigned_on']}"
+                                          for f in (former_fd or [])[:2]),
         fx_gain_loss_gbp=_money(f.get("fx_gain_loss")),
         recent_fx_loss=recent_fx_loss(f.get("fx_gain_loss"), f.get("filed_on") or "", today) if checked else "",
         accounts_filed_on=(f.get("filed_on") or "")[:10],
@@ -831,10 +842,12 @@ def run_pipeline(
             return "unconfirmed", None  # audit-exempt subsidiary with no filed turnover or customs record
         if cached and "officers" in cached:
             register = {k: cached[k] for k in ("officers", "owners", "charges")}
+            register["former_fd"] = cached.get("former_fd", [])   # saved before former FDs were kept: none
         else:
             t0 = time.monotonic()
+            officers, former_fd = companies_house.get_officers_and_former(number, api_key) if checked else ([], [])
             register = {
-                "officers": companies_house.get_active_officers(number, api_key) if checked else [],
+                "officers": officers, "former_fd": former_fd,
                 "owners": companies_house.get_owners(number, api_key, with_ceased=True) if checked else [],
                 "charges": companies_house.get_charges(number, api_key) if checked else [],
             }
@@ -879,12 +892,15 @@ def run_pipeline(
                 if checked else None)
         need_site = False
         if checked and websites:
-            # The company's own site only when the register and accounts name no finance person.
+            # The company's own site unless the register or accounts already name the finance director (a
+            # controller or manager there may report to an FD the team page names).
             known = people.choose_finance_contact(officers, (facts or {}).get("finance_people", []), [],
                                                   (facts or {}).get("signatory", ""))
-            need_site = not known or not known["source"].startswith(("Companies House", "filed accounts"))
+            need_site = not (known and known["source"].startswith(("Companies House", "filed accounts"))
+                             and people.is_finance_director(known["role"]))
         pending.append({"args": (niche, company, turnover, officers, checked and turnover_check),
                         "kwargs": dict(trade=trade, months_loaded=months_loaded, facts=facts, owners=owners, bank=bank,
+                                       former_fd=g.get("former_fd", []),
                                        checked=checked, trade_model=trade_model, band=band, charges=charges,
                                        today=today, own_bank_name=own_bank),
                         "need_site": need_site})
@@ -896,7 +912,7 @@ def run_pipeline(
     wanted = [(p["args"][1]["company_number"], p["args"][1]["company_name"],
                (p["kwargs"]["facts"] or {}).get("web_addresses", [])) for p in pending if p["need_site"]]
     if wanted:
-        print(f"  Reading {len(wanted):,} company websites (no finance person named in the register or accounts)…",
+        print(f"  Reading {len(wanted):,} company websites (no finance director named in the register or accounts)…",
               flush=True)
     sites = website.look_up_many(wanted) if wanted else {}
     stats["site_tried"], stats["site_found"] = len(wanted), sum(bool(s["website"]) for s in sites.values())
