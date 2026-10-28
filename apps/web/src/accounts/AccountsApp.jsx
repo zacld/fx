@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CONFIDENCE, SORTS, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONFIDENCE, SORTS, bankUrl, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -160,6 +160,13 @@ function Accounts({ data }) {
   );
 }
 
+// Text that opens its source document when there is one.
+function Src({ href, children, className, title }) {
+  return href
+    ? <a className={`src ${className || ""}`} href={href} target="_blank" rel="noreferrer" title={title || "Open the source document"}>{children}</a>
+    : <span className={className} title={title}>{children}</span>;
+}
+
 function Account({ r }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -168,7 +175,8 @@ function Account({ r }) {
     try { await navigator.clipboard.writeText(r.opener || r.call_angle || ""); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
   };
   const details = [
-    ["Incumbent bank", r.incumbent_bank], ["Facility ends", r.facility_ends_evidence], ["FX today", r.fx_today_evidence],
+    ["Incumbent bank", r.incumbent_bank, r.incumbent_bank_url], ["Facility ends", r.facility_ends_evidence, r.accounts_url],
+    ["FX today", r.fx_today_evidence, r.fx_today_url],
     ["Lenders", r.lenders], ["FX size", r.fx_estimate], ["Currency evidence", r.currency_evidence], ["Why FX", r.fx_evidence], ["Niche", r.fx_niche], ["Exposure", r.fx_exposure],
     ["Imports in", r.import_currencies], ["Exports in", r.export_currencies], ["Trade", r.trade_countries],
     ["Wallet basis", r.fx_wallet_basis], ["Why untapped", r.untapped_reasons],
@@ -177,7 +185,7 @@ function Account({ r }) {
     ["Directors", r.all_directors], ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by],
     ["Owners", r.owners], ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
     ["Banking", r.banking_relationships],
-    ["FX gain/loss", fxLine(r)], ["FX figure to check", r.fx_gain_loss_check],
+    ["FX gain/loss", fxLine(r), r.fx_gain_loss_url], ["FX figure to check", r.fx_gain_loss_check, r.fx_gain_loss_url],
     ["Growth", r.turnover_growth], ["Overseas sales", r.overseas_turnover_share],
     ["Cash / borrowings", [money(r.cash_gbp), money(r.bank_borrowings_gbp)].filter(Boolean).join(" / ")],
     ["Auditor", [r.auditor, r.auditor_tier].filter(Boolean).join(" — ")], ["Accounts", r.size_basis],
@@ -196,7 +204,7 @@ function Account({ r }) {
         <div className="figures">
           {r.turnover_gbp && <span><b>{money(r.turnover_gbp)}</b> turnover</span>}
           {wallet(r) && <span><b>{wallet(r)}</b> FX a year</span>}
-          {r.fx_gain_loss_gbp && <span><b>{money(r.fx_gain_loss_gbp)}</b> FX {Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}{fxShare(r) && ` (${fxShare(r).replace(" of turnover", "")})`}</span>}
+          {r.fx_gain_loss_gbp && <Src href={r.fx_gain_loss_url} title="Open the accounts at the FX line"><b>{money(r.fx_gain_loss_gbp)}</b> FX {Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}{fxShare(r) && ` (${fxShare(r).replace(" of turnover", "")})`}</Src>}
         </div>
       </div>
 
@@ -220,9 +228,9 @@ function Account({ r }) {
         {parts(r.currency_pairs).map((p) => <span key={p} className="chip fx">{p}</span>)}
         {r.qualified && r.qualified !== "Yes" && <span className={`chip ${r.qualified === "Out" ? "out" : "warn"}`} title={r.qualify_reason}>{r.qualified}: {r.qualify_reason}</span>}
         {r.warm_route && <span className="chip own">Warm: {r.warm_route}</span>}
-        {r.main_bank && <span className="chip">{r.main_bank}{r.bank_type ? ` · ${r.bank_type}` : ""}</span>}
-        {r.facility_ends && <span className="chip trig" title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</span>}
-        {r.fx_today && <span className="chip fx" title={r.fx_today_evidence}>{r.fx_today}</span>}
+        {r.main_bank && <Src className="chip" href={bankUrl(r)} title="Open where this bank is named">{r.main_bank}{r.bank_type ? ` · ${r.bank_type}` : ""}</Src>}
+        {r.facility_ends && <Src className="chip trig" href={r.accounts_url} title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</Src>}
+        {r.fx_today && <Src className="chip fx" href={r.fx_today_url} title={r.fx_today_evidence}>{r.fx_today}</Src>}
         {r.own_bank_client && <span className="chip own">Existing client</span>}
         {r.pe_backed && <span className="chip warn">PE-backed</span>}
         {r.family_run && <span className="chip">Family-run</span>}
@@ -230,7 +238,9 @@ function Account({ r }) {
       </div>
       {r.when_to_call && <div className="when">When to call: {r.when_to_call}{r.planning_window_now === "yes" ? " · planning window now" : ""}</div>}
 
-      {[r.fact_1, r.fact_2].filter(Boolean).map((fact) => <div key={fact} className="fact">{fact}</div>)}
+      {[r.fact_1, r.fact_2].filter(Boolean).map((fact) => (
+        <div key={fact} className="fact"><Src href={factUrl(r, fact)}>{fact}</Src></div>
+      ))}
       {r.main_currency && (
         <div className="when">Currency: {r.main_currency} · {r.currency_direction} · {r.currency_confidence} confidence</div>
       )}
@@ -245,7 +255,7 @@ function Account({ r }) {
       <button className="more-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Less" : "More detail"}</button>
       {open && (
         <dl className="details">
-          {details.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
+          {details.map(([k, v, href]) => <div key={k}><dt>{k}</dt><dd><Src href={href}>{v}</Src></dd></div>)}
         </dl>
       )}
     </article>
@@ -321,6 +331,10 @@ select.input option{background:#0F141F}
 .angle{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);font-size:13px;color:rgba(255,255,255,.75);display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
 .more-btn{margin-top:10px;background:none;border:none;color:rgba(255,255,255,.4);font:600 12px 'Inter',sans-serif;cursor:pointer;padding:0}
 .more-btn:hover{color:#fff}
+a.src{color:inherit;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+a.src:hover{text-decoration-style:solid}
+a.chip.src{text-decoration:none}
+a.chip.src:hover{filter:brightness(1.25)}
 .details{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px 20px}
 .details dt{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.3)}
 .details dd{font-size:12.5px;color:rgba(255,255,255,.7);overflow-wrap:anywhere}

@@ -249,6 +249,9 @@ def columns(facts: Optional[dict], charges: list[dict], today: Optional[date] = 
         "facility_ends_evidence": f"\"{end['sentence']}\" ({source})" if end else "",
         "fx_today": fx_today,
         "fx_today_evidence": fx_evidence,
+        # links to the records behind them: the charge on the public register (accounts links: main.py)
+        "incumbent_bank_url": (bank.get("url") or "") if bank else "",
+        "fx_today_url": (provider_charge.get("url") or "") if provider_charge else "",
     }
 
 

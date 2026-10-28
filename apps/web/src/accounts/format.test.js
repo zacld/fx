@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, money, sortRows, toCsv, wallet } from "./format.js";
+import { bankUrl, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -55,6 +55,20 @@ describe("accounts helpers", () => {
     expect(fxShare({ fx_gain_loss_gbp: "-1000", turnover_gbp: "50000000" })).toBe("<0.1% of turnover");
     expect(fxShare(rows[2])).toBe("");
     expect(fxLine({ ...rows[3], fx_gain_loss_prior_gbp: "-400000" })).toBe("−£900k loss (1.5% of turnover; prior year −£400k)");
+  });
+
+  it("links each fact to the record it came from", () => {
+    const r = {
+      accounts_url: "https://ch/acc", fx_gain_loss_url: "https://ch/acc#page=22", incumbent_bank_url: "https://ch/charge",
+      main_bank: "HSBC", incumbent_bank: "HSBC: all-assets debenture since 1 Jan 2020 (Companies House charges register)",
+    };
+    expect(bankUrl(r)).toBe("https://ch/charge");                                 // the bank holding the debenture
+    expect(bankUrl({ ...r, main_bank: "Barclays" })).toBe("https://ch/acc");      // named in the accounts' Bankers line
+    expect(factUrl(r, "FX loss of £420k on the latest accounts")).toBe("https://ch/acc#page=22");
+    expect(factUrl(r, "New charge to Lloyds registered 3 months ago")).toBe("https://ch/charge");
+    expect(factUrl(r, "Turnover grew 24% last year")).toBe("https://ch/acc");
+    expect(factUrl(r, "New finance director appointed")).toBe("");
+    expect(factUrl({}, "FX loss of £420k")).toBe("");                              // older lists: no link
   });
 
   it("searches Google for the company's finance director", () => {

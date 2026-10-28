@@ -99,7 +99,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   confidence (geography note → currency named in accounts → overseas group →
   HMRC customs mix → niche default), and a one-sentence opener built only from the detail
   columns. Every detail names its fetched source; blank beats a guess; no
-  extra API calls and no AI.
+  extra API calls and no AI. On the Accounts page each fact links to that source on the public
+  Companies House site: the accounts document (`accounts_url`; the FX line's page, `fx_gain_loss_url`,
+  for PDF/OCR figures) and the charge (`incumbent_bank_url`).
 - **Incumbent + qualify** (`sourcer/incumbent.py`, `sourcer/qualify.py`): incumbent
   bank (all-assets debenture holder) and every charge's type from the charges
   register already fetched; facility end dates and "how they do FX today"
