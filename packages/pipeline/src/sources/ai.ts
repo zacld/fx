@@ -397,7 +397,22 @@ export function extractJson<T = Record<string, unknown>>(text: string): T {
   return JSON.parse(t.slice(s, e + 1)) as T;
 }
 
-export class RateLimitError extends Error {}
+export class RateLimitError extends Error {
+  /** Seconds the provider asks us to wait when it's a per-minute limit (tokens or requests per minute);
+   *  null for a daily quota, where waiting won't help this run. */
+  constructor(message: string, readonly retryAfterS: number | null = null) { super(message); }
+}
+
+/** How long a 429 asks us to wait, when it's a per-minute limit: the retry-after header, else Groq's
+ *  "Please try again in 1m2.5s" (60s when it names a per-minute limit without a time). null for daily quotas. */
+export function perMinuteRetryAfter(body: string, header: string | null = null): number | null {
+  if (/per day|\((?:TPD|RPD)\)|daily/i.test(body)) return null;
+  const h = Number(header);
+  if (header && Number.isFinite(h) && h >= 0) return h;
+  const m = body.match(/try again in (?:(\d+)m)?(\d+(?:\.\d+)?)s/i);
+  if (m) return Number(m[1] ?? 0) * 60 + Number(m[2]);
+  return /per minute|\((?:TPM|RPM)\)/i.test(body) ? 60 : null;
+}
 
 /**
  * Backup Groq models, tried in order, if the configured one 404s as
@@ -455,7 +470,7 @@ const _isRateLimited = (status: number, body: string) => status === 429 || /quot
 async function groqChatCompletion(
   model: string, apiKey: string, headline: string, summary: string,
   fetchImpl: typeof fetch, timeoutMs: number,
-): Promise<{ ok: true; text: string } | { ok: false; status: number; body: string }> {
+): Promise<{ ok: true; text: string } | { ok: false; status: number; body: string; retryAfter: string | null }> {
   let res: Response;
   try {
     res = await fetchImpl("https://api.groq.com/openai/v1/chat/completions", {
@@ -467,7 +482,7 @@ async function groqChatCompletion(
   } catch (e) {
     throw new Error(`Groq request failed: ${e instanceof Error ? e.message : String(e)}`);
   }
-  if (!res.ok) return { ok: false, status: res.status, body: await res.text().catch(() => "") };
+  if (!res.ok) return { ok: false, status: res.status, body: await res.text().catch(() => ""), retryAfter: res.headers?.get?.("retry-after") ?? null };
   const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
   return { ok: true, text: json.choices?.[0]?.message?.content ?? "" };
 }
@@ -501,7 +516,9 @@ export async function analyseViaGroq(headline: string, summary: string, opts: Ai
       }
       return extractJson(result.text);
     }
-    if (_isRateLimited(result.status, result.body)) throw new RateLimitError(`Groq ${result.status}: ${result.body.slice(0, 200)}`);
+    if (_isRateLimited(result.status, result.body)) {
+      throw new RateLimitError(`Groq ${result.status}: ${result.body.slice(0, 200)}`, perMinuteRetryAfter(result.body, result.retryAfter));
+    }
     if (!isModelNotFoundError(result.status, result.body)) throw new Error(`Groq ${result.status}: ${result.body.slice(0, 200)}`);
     // model_not_found — fall through to the next candidate, if any.
     if (i === candidates.length - 1) {

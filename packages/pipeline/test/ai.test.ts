@@ -71,3 +71,16 @@ describe("analyseViaGroq — model fallback chain", () => {
     expect(calls).toEqual(["llama-3.3-70b-versatile"]);
   });
 });
+
+describe("perMinuteRetryAfter", () => {
+  it("reads Groq's wait for per-minute limits, none for daily quotas", async () => {
+    const { perMinuteRetryAfter } = await import("../src/sources/ai.js");
+    const tpm = 'Rate limit reached for model `openai/gpt-oss-120b` ... on tokens per minute (TPM): Limit 8000, Used 6100, Requested 4200. Please try again in 17.25s.';
+    expect(perMinuteRetryAfter(tpm)).toBe(17.25);
+    expect(perMinuteRetryAfter("on requests per minute (RPM): Please try again in 1m2.5s")).toBe(62.5);
+    expect(perMinuteRetryAfter(tpm, "12")).toBe(12);
+    expect(perMinuteRetryAfter("tokens per minute (TPM): Limit 8000")).toBe(60);
+    expect(perMinuteRetryAfter("on tokens per day (TPD): Limit 200000. Please try again in 7m12s")).toBe(null);
+    expect(perMinuteRetryAfter("rate limit")).toBe(null);
+  });
+});

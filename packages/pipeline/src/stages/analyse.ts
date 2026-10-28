@@ -279,6 +279,8 @@ export function buildFallbackEvent(item: RawItem, failureReason?: string): Recor
 export interface AnalyseOptions {
   dbPath?: string; runsDir?: string; maxEvents?: number; minRelevance?: number;
   feeds?: ReadonlyArray<RssFeed>; fetchHtml?: HtmlFetcher; analyse?: AnalyseFn; persist?: boolean;
+  /** Seconds this run may spend waiting out per-minute AI rate limits (FX_AI_WAIT_BUDGET_S, default 600). */
+  aiWaitBudgetS?: number; sleep?: (ms: number) => Promise<void>;
 }
 export interface AnalyseResult {
   feedsFetched: number; itemsPreFiltered: number; newItems: number;
@@ -372,7 +374,14 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
 
     let stickyFallback = false;          // once tripped, all remaining events use fallback (saves repeat-calls on deterministic errors)
     let stickyReason = "";               // reason persisted into the fallback's confidence_reason
-    for (const item of newItems) {
+    // A per-minute limit (Groq's free tier allows ~8k tokens a minute: about one event) is waited out and the same
+    // event asked again — a refused request isn't an answered call, so it's still one AI call per event. Daily
+    // quotas and other errors still go sticky. The waiting is capped per run.
+    const waitBudgetS = opts.aiWaitBudgetS ?? n(process.env.FX_AI_WAIT_BUDGET_S, 600);
+    const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+    let waitedS = 0;
+    for (let i = 0; i < newItems.length; i++) {
+      const item = newItems[i]!;
       if (stickyFallback) {
         putEvent(buildFallbackEvent(item, stickyReason));
         st.fallbackUsed++; st.saved++;
@@ -429,6 +438,14 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
         // call entirely because the same config error will keep firing.
         const msg = e instanceof Error ? e.message : String(e);
         const kind = e instanceof RateLimitError ? "rate-limit" : "ai-error";
+        const wait = e instanceof RateLimitError && e.retryAfterS !== null ? Math.ceil(e.retryAfterS) + 1 : null;
+        if (wait !== null && wait <= 90 && waitedS + wait <= waitBudgetS) {
+          console.log(`analyse: per-minute AI limit — waiting ${wait}s, then asking again about "${item.headline.slice(0, 60)}"`);
+          await sleep(wait * 1000);
+          waitedS += wait;
+          i--;                               // same event again
+          continue;
+        }
         stickyFallback = true;
         stickyReason = `${kind}: ${msg.slice(0, 200)}`;
         st.fallbackUsed++; st.saved++;
