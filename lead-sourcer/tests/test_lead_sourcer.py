@@ -1237,6 +1237,36 @@ COMPANY_PAGE = ("https://uk.linkedin.com/company/l-j-fairburn", "L J Fairburn & 
                 "Vicki Taylor. Head of Finance, L J Fairburn & So Ltd ; Alan Metcalfe. Finance Director at LJ Fairburn & Son…")
 
 
+class TestMostSeniorFinanceContact(unittest.TestCase):
+    def test_titles_and_order(self):
+        for title in ("VP, Finance", "V.P. Finance", "Director – Finance", "Group FD", "Finance & Operations Director"):
+            self.assertTrue(people.is_finance_director(title), title)
+        for title in ("Financial Controller", "Chief Accountant", "Finance Manager", "Director", "Accountant"):
+            self.assertFalse(people.is_finance_director(title), title)
+        self.assertTrue(people.is_finance_title("Chief Accountant"))
+        page = "Our team: Jane Smith, Finance Manager. John Brown, Finance Director. Amy Lee, Financial Controller."
+        self.assertEqual([p["name"] for p in people.finance_people(page)], ["John Brown", "Amy Lee", "Jane Smith"])
+
+    def test_most_senior_across_sources_not_the_first_source(self):
+        officers = [{"name": "Pat Jones", "role": "Director", "occupation": "Finance Manager", "appointed_on": "2015-01-01"},
+                    {"name": "Sam Roe", "role": "Director", "occupation": "Managing Director", "appointed_on": "2001-01-01"}]
+        website = [{"name": "John Brown", "title": "Finance Director"}]
+        accounts = [{"name": "Amy Lee", "title": "Financial Controller"}]
+        # the board "Finance Manager" no longer stops the search: the website's FD wins
+        pick = people.choose_finance_contact(officers, accounts, website)
+        self.assertEqual((pick["name"], pick["role"], pick["source"]), ("John Brown", "Finance Director", "company website: listed as Finance Director"))
+        # a controller elsewhere ties with a board director filed with a finance occupation: the board director stays
+        pick = people.choose_finance_contact(officers, accounts, [])
+        self.assertEqual((pick["name"], pick["source"]), ("Pat Jones", "Companies House occupation"))
+        # a board FD is taken straight away
+        fd = [{**officers[0], "occupation": "Finance Director"}, officers[1]]
+        self.assertEqual(people.choose_finance_contact(fd, accounts, website)["name"], "Pat Jones")
+        # with no finance director on the board, the most senior title any source gives
+        plain = [{**officers[0], "occupation": "Director"}, officers[1]]
+        self.assertEqual(people.choose_finance_contact(plain, accounts, [{"name": "Jo Bell", "title": "Finance Manager"}])["name"],
+                         "Amy Lee")
+
+
 class TestConfirmation(unittest.TestCase):
     ROW = {"company_number": "01182857", "company_name": FAIRBURN, "untapped_reasons": "x",
            "finance_contact": "Daniel James Fairburn", "finance_contact_role": "Director",
@@ -1487,6 +1517,51 @@ class TestConfirmation(unittest.TestCase):
         self.assertEqual((row["finance_contact"], outcome), ("Alan Metcalfe", "replaced the guess"))  # FD beats Head of Finance
         row, outcome = confirm.confirm_row(dict(self.ROW), [])
         self.assertEqual((row["search_check"], outcome), ("no finance person found", "nobody found"))
+        # A Confirmed controller / manager we picked gives way when the search names a current FD; kept in the evidence.
+        for role in ("Financial Controller", "Finance Manager"):
+            row, outcome = confirm.confirm_row({**self.ROW, "finance_contact": "Pat Jones", "finance_contact_role": role,
+                                                "finance_contact_confidence": "Confirmed"}, team)
+            self.assertEqual((row["finance_contact"], outcome), ("Alan Metcalfe", "replaced a controller / manager with the FD"))
+            self.assertIn(f"earlier pick: Pat Jones ({role})", row["finance_contact_evidence"])
+        row, outcome = confirm.confirm_row({**self.ROW, "finance_contact": "Pat Jones", "finance_contact_role": "CFO",
+                                            "finance_contact_confidence": "Confirmed"}, team)
+        self.assertEqual((row["finance_contact"], outcome), ("Pat Jones", "kept our pick, search names another"))  # an FD stays
+
+    def test_group_fd_found_under_the_parent(self):
+        controller = ("https://uk.linkedin.com/in/kim", "Kim Hart - Financial Controller at Brindle Foods", "")
+        group_fd = ("https://uk.linkedin.com/in/lee", "Lee Park - Group Finance Director at Halden Holdings", "")
+        asked = []
+
+        def fetcher(query, key):
+            asked.append(query)
+            return search_answer(group_fd) if "Halden" in query else search_answer(controller)
+        row = {**self.ROW, "company_name": "BRINDLE FOODS LIMITED", "finance_contact": "", "finance_contact_role": "",
+               "finance_contact_confidence": "", "group_parent": "HALDEN HOLDINGS LIMITED (01234567)"}
+        out, stats = confirm.confirm_rows([row], fetcher=fetcher, pause=0, key="k")
+        self.assertEqual(len(asked), 3)                              # two wordings, then one under the parent
+        self.assertIn("Halden Holdings finance director", asked[-1])
+        self.assertEqual((out[0]["finance_contact"], out[0]["finance_contact_role"]), ("Lee Park", "Group Finance Director"))
+        self.assertIn("at the parent company HALDEN HOLDINGS LIMITED", out[0]["search_check"])
+        self.assertEqual(confirm.parent_name("HALDEN HOLDINGS LIMITED (01234567)"), "HALDEN HOLDINGS LIMITED")
+        # an FD at the company itself: no parent search
+        asked.clear()
+        fd_here = ("https://uk.linkedin.com/in/ann", "Ann Cole - Finance Director at Tarrant Foods", "")
+        profiles_fetch = lambda query, key: asked.append(query) or search_answer(fd_here)
+        out, _ = confirm.confirm_rows([{**row, "company_number": "99", "company_name": "TARRANT FOODS LIMITED"}],
+                                      fetcher=profiles_fetch, pause=0, key="k")
+        self.assertEqual((len(asked), out[0]["finance_contact"]), (1, "Ann Cole"))
+
+    def test_probably_no_fd(self):
+        row = {"finance_contact": "Jo Bell", "finance_contact_role": "Finance Manager", "turnover_gbp": "32000000",
+               "family_run": "same surname on the board"}
+        self.assertEqual(confirm.no_fd_reason(row),
+                         "no finance director in the register, accounts, website or search; £32m turnover, no parent company; "
+                         "family-run; the MD likely decides on FX — Jo Bell (Finance Manager) likely makes the payments")
+        self.assertEqual(confirm.no_fd_reason({**row, "finance_contact_role": "Finance Director"}), "")   # an FD
+        self.assertEqual(confirm.no_fd_reason({**row, "turnover_gbp": "80000000"}), "")                  # too big
+        self.assertEqual(confirm.no_fd_reason({**row, "group_parent": "HALDEN HOLDINGS LIMITED"}), "")    # group FD
+        self.assertEqual(confirm.no_fd_reason({**row, "turnover_gbp": ""}), "")                           # size unknown
+        self.assertTrue(confirm.no_fd_reason({"turnover_gbp": "30000000"}).endswith("the MD likely decides on FX"))
 
     def test_confirm_rows_budget_cache_and_skips(self):
         rows = [dict(self.ROW), {**self.ROW, "company_number": "2", "untapped_reasons": "not checked"},
@@ -1507,7 +1582,7 @@ class TestConfirmation(unittest.TestCase):
         self.assertEqual(stats["search budget of 0 searches reached"], 1)
         self.assertEqual(profiles.finance_team_many([("1", FAIRBURN)], key="")[1], "no search API key")
         self.assertEqual(confirm.fields_with_confirmation(["a", "finance_contact_evidence", "b"]),
-                         ["a", "finance_contact_evidence", "search_check", "finance_contact_linkedin", "b"])
+                         ["a", "finance_contact_evidence", "search_check", "finance_contact_linkedin", "no_fd_likely", "b"])
 
 
 class TestCsvAndConfig(unittest.TestCase):

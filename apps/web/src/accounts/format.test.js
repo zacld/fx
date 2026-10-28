@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bankUrl, companyPath, contactGroup, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortContacted, sortRows, toCsv, wallet } from "./format.js";
+import { bankUrl, companyPath, contactGroup, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -85,13 +85,12 @@ describe("accounts helpers", () => {
     expect(filterRows(list, { fxLossOnly: true }).map((r) => r.rank)).toEqual([1]);
   });
 
-  it("moves contacted companies off the list into the contacted view, latest first", () => {
+  it("moves contacted companies off the list into the contacted view", () => {
     const list = [{ rank: 1, company_number: "01" }, { rank: 2, company_number: "02" }, { rank: 3, company_number: "03" }];
     const contacted = { "01": { at: "2026-10-27T09:00:00Z" }, "03": { at: "2026-10-28T09:00:00Z" } };
     expect(filterRows(list, { contacted }).map((r) => r.rank)).toEqual([2]);
     expect(filterRows(list, { query: "call back", notes: { "02": { text: "Call back in January" } } }).map((r) => r.rank)).toEqual([2]);
-    const done = filterRows(list, { contacted, view: "contacted" });
-    expect(sortContacted(done, contacted).map((r) => r.rank)).toEqual([3, 1]);
+    expect(filterRows(list, { contacted, view: "contacted" }).map((r) => r.rank)).toEqual([1, 3]);
   });
 
   it("sorts by largest FX loss, then gains, then no figure", () => {

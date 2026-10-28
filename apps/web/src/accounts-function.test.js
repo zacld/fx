@@ -59,6 +59,20 @@ describe("/api/accounts", () => {
     expect((await handle(post({ company_number: "01234567", notes: "x".repeat(4001) }), opts)).status).toBe(400);
   });
 
+  it("logs touches by channel, a reply and a chosen follow-up date", async () => {
+    const s = memory();
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    await handle(post({ company_number: "01234567", contacted: true, channel: "phone" }), opts);
+    await handle(post({ company_number: "01234567", contacted: true, channel: "email" }), opts);
+    await handle(post({ company_number: "01234567", follow_up_at: "2026-11-05" }), opts);
+    const res = await handle(post({ company_number: "01234567", response: "replied" }), opts);
+    const mark = (await res.json()).contacted["01234567"];
+    expect(mark.touches.map((t) => t.channel)).toEqual(["phone", "email"]);
+    expect([mark.follow_up_at, mark.response]).toEqual(["2026-11-05", "replied"]);
+    expect((await handle(post({ company_number: "01234567", channel: "fax", contacted: true }), opts)).status).toBe(400);
+    expect((await handle(post({ company_number: "01234567", response: "maybe" }), opts)).status).toBe(400);
+  });
+
   it("refuses a bad contacted mark, and any mark without the password", async () => {
     const s = memory();
     for (const body of [{ company_number: "../x", contacted: true }, { company_number: "01234567" }, {}]) {

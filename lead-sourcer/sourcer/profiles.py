@@ -531,9 +531,13 @@ def finance_team_many(companies: list[tuple], fetcher: Optional[Fetcher] = None,
                       pause: Optional[float] = None, key: Optional[str] = None,
                       max_searches: Optional[int] = None) -> tuple[dict[str, list[dict]], str]:
     """
-    ({company_number: people_in_results(...)}, status) for (number, name)
-    pairs, in order. The second wording is tried only when the first finds no
-    current finance director (a controller or manager alone isn't enough). status: "ok", "no search API key", "budget of N
+    ({company_number: people_in_results(...)}, status) for (number, name,
+    [trading names], parent name) tuples, in order (the last two optional).
+    The second wording is tried only when the first finds no current finance
+    director (a controller or manager alone isn't enough); then, for a
+    subsidiary, one search under its parent's name, keeping only a finance
+    director there (the group FD usually runs the subsidiary's finance), marked
+    with "parent". status: "ok", "no search API key", "budget of N
     searches reached", or "stopped after N failed searches".
     """
     key = api_key() if key is None else key
@@ -596,6 +600,13 @@ def finance_team_many(companies: list[tuple], fetcher: Optional[Fetcher] = None,
                 if results:
                     hits = dedupe(hits + results)
                     team = merge(people_in_results(hits, name), [p for p in team if p.get("trading_as")])
+            parent = rest[1] if len(rest) > 1 else ""
+            if not has_fd(team) and parent and plain_name(parent).lower() != plain_name(name).lower():
+                results = search(queries_for(parent)[0])
+                if results:
+                    group = [{**p, "parent": parent} for p in people_in_results(results, parent)
+                             if p["current"] and people.is_finance_director(p["title"])]
+                    team = merge(team, group)
             found[number] = team
     except Stop as stop:
         return found, str(stop)

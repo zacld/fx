@@ -78,7 +78,13 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   titles, company board pages, news, org charts — to confirm or replace the
   pick (when no finance director turns up, one more search under the
   company's trading name, from "trading as" in its accounts or the results) (2+ separate sites naming them = Verified; a pick shown as MD etc. is
-  replaced). linkedin.com is never fetched; no emails or phones are kept; no
+  replaced; a current FD named by the search also replaces a controller /
+  manager pick, whatever its grade; for a subsidiary with no FD found, one
+  more search under its parent's name for the group FD). The picker takes the
+  most senior finance title any source gives (a board "Finance Manager" no
+  longer stops it finding the website's FD). `no_fd_likely`: no FD-level
+  person anywhere after the search, under £50m, no parent — the MD is shown
+  as decision-maker. linkedin.com is never fetched; no emails or phones are kept; no
   browser automation or bot-detection workarounds. Generated Google/LinkedIn
   search links remain for checking by hand.
 - **Target:** UK companies with proven foreign-currency flows, sized for a
@@ -123,7 +129,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   by the latest upload are labelled New (`first_seen`, carried over by
   `upload-accounts.mjs`). The Contacted button moves a company to the
   Contacted tab (marks kept in the Blobs store under `contacted`, via POST
-  `/api/accounts`; the finder never touches them). Each card has a Notes box
+  `/api/accounts`; the finder never touches them). Follow-ups
+  (`apps/web/src/accounts/followups.js`, shared by the page and the API):
+  "Contacted" asks the channel (phone / email / LinkedIn / in person) and
+  logs a touch; the next follow-up is due 2, 4, then 7 days after each touch,
+  then nurture (90 days); a reply / meeting / not interested stops it; Zac
+  can move the date. The Contacted tab groups Overdue / Due today / Replied
+  / Upcoming / Nurture / Meeting booked / Not interested, with the suggested
+  next action and a copy-ready line (event reminder → new angle → soft bump
+  → break-up, from the company's own facts; no AI, nothing sent). Each card has a Notes box
   (Blobs key `notes`, same POST with `{company_number, notes}`; "" deletes;
   searched by the search box and included in the CSV export). Clicking a
   company's name opens its own page, `/accounts/<company number>`

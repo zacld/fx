@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, companyPath, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortContacted, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, companyPath, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -125,14 +126,13 @@ function Accounts({ data, password }) {
     if (body.notes) setNotes(body.notes);
   }, [password]);
 
-  // Marks a company contacted (off the list, into Contacted) or back; shown at once, undone if the save fails.
-  const mark = useCallback(async (number, on) => {
+  // A follow-up change for one company ({contacted, channel} logs a touch, {contacted: false} takes it off the
+  // contacted list, {response}, {follow_up_at}): shown at once, undone if the save fails.
+  const contact = useCallback(async (number, change) => {
     const before = contacted;
-    const next = { ...contacted };
-    if (on) next[number] = { at: new Date().toISOString() }; else delete next[number];
-    setContacted(next);
+    setContacted(applyContact(contacted, number, change));
     setSaveError("");
-    try { await save(number, { contacted: on }); } catch (e) {
+    try { await save(number, change); } catch (e) {
       setContacted(before);
       setSaveError(`Couldn't save that (${e.message}) — try again.`);
     }
@@ -151,7 +151,7 @@ function Accounts({ data, password }) {
   const pairs = useMemo(() => [...new Set(rows.flatMap((r) => parts(r.currency_pairs)))].sort(), [rows]);
   const visible = useMemo(() => {
     const matched = filterRows(rows, ctx);
-    return filters.view === "contacted" ? sortContacted(matched, contacted) : sortRows(matched, sort);
+    return filters.view === "contacted" ? sortFollowUps(matched, contacted) : sortRows(matched, sort);
   }, [rows, filters, sort, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const open = rows.filter((r) => !contacted[r.company_number]);
   const groupCounts = useMemo(() => {
@@ -163,16 +163,19 @@ function Accounts({ data, password }) {
     return Object.fromEntries(ROLE_GROUPS.map((g) => [g, base.filter((r) => roleGroup(r) === g).length]));
   }, [rows, filters, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const contactedCount = rows.length - open.length;
+  const followUpsDue = rows.filter((r) => ["overdue", "due", "replied"].includes(followUp(contacted[r.company_number], r)?.state)).length;
   const stats = [
     { n: open.length, l: "Accounts", s: "Not yet contacted", c: "#6366F1" },
     { n: open.filter((r) => contactGroup(r) === "Confirmed").length, l: "Confirmed contact", s: "Verified or confirmed", c: "#10B981" },
     { n: open.filter((r) => r.recent_fx_loss).length, l: "Recent FX loss", s: "Accounts filed in the last 6 months", c: "#F87171" },
     { n: open.filter((r) => isNew(r, data.made_at)).length, l: "New", s: "Added by the latest scan", c: "#38BDF8" },
-    { n: contactedCount, l: "Contacted", s: "Moved off the list", c: "#A5B4FC" },
+    { n: followUpsDue, l: "Follow-ups due", s: `Today or overdue · ${contactedCount} contacted`, c: followUpsDue ? "#F87171" : "#A5B4FC" },
     { n: open.filter((r) => r.triggers).length, l: "With triggers", s: "New owner, charges, directors", c: "#F59E0B" },
   ];
-  // Headings between groups: contact groups in the hottest order, job roles in the role order.
-  const groupOf = filters.view === "contacted" ? null
+  // Headings between groups: follow-up state on the Contacted tab, contact groups in the hottest order, job roles
+  // in the role order.
+  const stateOf = (r) => STATES[followUp(contacted[r.company_number], r)?.state] || "";
+  const groupOf = filters.view === "contacted" ? stateOf
     : sort === "hot" && !filters.contact ? contactGroup : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
@@ -185,7 +188,7 @@ function Accounts({ data, password }) {
   if (pageNo) {
     const r = rows.find((x) => x.company_number === pageNo);
     return (
-      <CompanyPage r={r} number={pageNo} madeAt={data.made_at} contactedAt={contacted[pageNo]?.at} onMark={mark}
+      <CompanyPage r={r} number={pageNo} madeAt={data.made_at} mark={contacted[pageNo]} onContact={contact}
                    note={notes[pageNo]} onSaveNote={(text) => saveNote(pageNo, text)} onBack={backToList} saveError={saveError} />
     );
   }
@@ -215,6 +218,7 @@ function Accounts({ data, password }) {
           <button role="tab" aria-selected={filters.view === "contacted"} className={`tab contacted-tab${filters.view === "contacted" ? " on" : ""}`}
                   onClick={() => set({ section: "", view: "contacted" })}>
             Contacted <span className="tab-n">{contactedCount}</span>
+            {followUpsDue > 0 && <span className="due-n" title="Follow-ups due today or overdue">{followUpsDue} due</span>}
           </button>
         </div>
         <div className="groups" role="group" aria-label="Finance contact">
@@ -258,8 +262,9 @@ function Accounts({ data, password }) {
             <Fragment key={r.company_number || r.rank}>
               {heading && (groupOf === contactGroup
                 ? <h2 className="group-h">{group} <span>{groupCounts[group]} · {GROUP_NOTE[group]}</span></h2>
-                : <h2 className="group-h">{group} <span>{roleCounts[group]}</span></h2>)}
-              <Account r={r} isNew={isNew(r, data.made_at)} contactedAt={contacted[r.company_number]?.at} onMark={mark}
+                : groupOf === roleGroup ? <h2 className="group-h">{group} <span>{roleCounts[group]}</span></h2>
+                : <h2 className="group-h">{group} <span>{list.filter((x) => groupOf(x) === group).length}</span></h2>)}
+              <Account r={r} isNew={isNew(r, data.made_at)} mark={contacted[r.company_number]} onContact={contact}
                        note={notes[r.company_number]} onSaveNote={(text) => saveNote(r.company_number, text)} onOpen={openCompany} />
             </Fragment>
           );
@@ -327,11 +332,74 @@ function CompanyLink({ r, onOpen, className = "co" }) {
 const siteUrl = (w) => (w.startsWith("http") ? w : `https://${w}`);
 const siteLabel = (w) => w.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
-function ContactedButton({ number, contactedAt, onMark }) {
+// "Contacted" asks how (phone, email, LinkedIn, in person), then moves the company to the Contacted tab.
+function ContactedButton({ number, mark, onContact }) {
+  const [choosing, setChoosing] = useState(false);
   if (!number) return null;
-  return contactedAt
-    ? <span className="done">Contacted {day(contactedAt)} <button className="btn-sm" onClick={() => onMark(number, false)}>Undo</button></span>
-    : <button className="btn-sm contacted" onClick={() => onMark(number, true)} title="Move this company to Contacted">Contacted</button>;
+  if (mark) {
+    const f = followUp(mark);
+    return <span className={`state st-${f.state}`}>{STATES[f.state]}</span>;
+  }
+  if (!choosing) {
+    return <button className="btn-sm contacted" onClick={() => setChoosing(true)} title="Log how you contacted them and move them to Contacted">Contacted</button>;
+  }
+  return (
+    <span className="channels" role="group" aria-label="How did you contact them?">
+      <span className="channels-l">How?</span>
+      {Object.entries(CHANNELS).map(([k, label]) => (
+        <button key={k} className="btn-sm contacted" onClick={() => { setChoosing(false); onContact(number, { contacted: true, channel: k }); }}>{label}</button>
+      ))}
+      <button className="btn-sm" onClick={() => setChoosing(false)} aria-label="Cancel">×</button>
+    </span>
+  );
+}
+
+const dayLabel = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : "");
+const whenLabel = (f) => f.inDays === null ? "" : f.inDays < 0 ? `${-f.inDays} day${f.inDays === -1 ? "" : "s"} overdue`
+  : f.inDays === 0 ? "today" : f.inDays === 1 ? "tomorrow" : `in ${f.inDays} days`;
+
+// Where a contacted company stands: touches so far, the suggested next step and when, a copy-ready line, and buttons
+// to log the next touch, record a reply or meeting, or move the date. Reminders only — nothing is sent.
+function FollowUpPanel({ r, mark, onContact }) {
+  const [copied, setCopied] = useState(false);
+  const f = followUp(mark, r);
+  if (!f) return null;
+  const number = r.company_number;
+  const copy = async () => { try { await navigator.clipboard.writeText(f.line); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ } };
+  return (
+    <div className={`follow st-${f.state}`}>
+      <div className="follow-h">
+        <span className={`state st-${f.state}`}>{STATES[f.state]}</span>
+        <span className="follow-next"><b>{f.action}</b>{f.nextDay && ` — ${dayLabel(f.nextDay)}${whenLabel(f) ? ` (${whenLabel(f)})` : ""}`}</span>
+      </div>
+      <div className="follow-touches">
+        {f.touches} touch{f.touches === 1 ? "" : "es"}: {touchesOf(mark).map((t) => `${CHANNELS[t.channel] || "Contacted"} ${day(t.at)}`).join(" · ")}
+      </div>
+      {f.line && (
+        <div className="angle">
+          <span>{f.line}</span>
+          <button className="btn-sm" onClick={copy}>{copied ? "Copied" : "Copy"}</button>
+        </div>
+      )}
+      <div className="follow-btns">
+        <span className="channels-l">Log a touch</span>
+        {Object.entries(CHANNELS).map(([k, label]) => (
+          <button key={k} className="btn-sm" onClick={() => onContact(number, { contacted: true, channel: k })}>{label}</button>
+        ))}
+      </div>
+      <div className="follow-btns">
+        <span className="channels-l">Outcome</span>
+        {Object.entries(RESPONSES).map(([k, label]) => (
+          <button key={k} className={`btn-sm${mark.response === k ? " on" : ""}`} aria-pressed={mark.response === k}
+                  onClick={() => onContact(number, { response: mark.response === k ? "" : k })}>{label}</button>
+        ))}
+        <label className="follow-date">Next follow-up
+          <input className="input" type="date" value={f.nextDay || ""} onChange={(e) => onContact(number, { follow_up_at: e.target.value })} />
+        </label>
+        <button className="more-btn undo" onClick={() => onContact(number, { contacted: false })} title="Take it off the contacted list">Remove from contacted</button>
+      </div>
+    </div>
+  );
 }
 
 function FxFigure({ r }) {
@@ -357,6 +425,12 @@ function ContactLine({ r }) {
           : r.linkedin_search_url && <a href={r.linkedin_search_url} target="_blank" rel="noreferrer">LinkedIn search</a>}
         {r.company_name && <a href={googleFd(r)} target="_blank" rel="noreferrer">Check on Google</a>}
       </span>
+      {r.no_fd_likely && (
+        <div className="no-fd" title={r.no_fd_likely}>
+          <b>Probably no FD</b> — {r.no_fd_likely}.
+          {r.lead_director && <> Decision-maker: <b>{r.lead_director}</b>{r.lead_director_occupation ? ` (${r.lead_director_occupation})` : ""}.</>}
+        </div>
+      )}
     </div>
   );
 }
@@ -410,7 +484,7 @@ const Details = ({ rows }) => (
   </dl>
 );
 
-function Account({ r, isNew: fresh, contactedAt, onMark, note, onSaveNote, onOpen }) {
+function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen }) {
   const [open, setOpen] = useState(false);
   return (
     <article className="card">
@@ -428,10 +502,11 @@ function Account({ r, isNew: fresh, contactedAt, onMark, note, onSaveNote, onOpe
             {wallet(r) && <span><b>{wallet(r)}</b> FX a year</span>}
             <FxFigure r={r} />
           </div>
-          <ContactedButton number={r.company_number} contactedAt={contactedAt} onMark={onMark} />
+          <ContactedButton number={r.company_number} mark={mark} onContact={onContact} />
         </div>
       </div>
       <ContactLine r={r} />
+      {mark && <FollowUpPanel r={r} mark={mark} onContact={onContact} />}
       <Chips r={r} />
       <CallPrep r={r} />
       <Notes note={note} onSave={onSaveNote} />
@@ -446,7 +521,7 @@ function Account({ r, isNew: fresh, contactedAt, onMark, note, onSaveNote, onOpe
 
 // One company: everything the finder knows, each fact linked to the filing or charge it came from, with notes and
 // the Contacted button.
-function CompanyPage({ r, number, madeAt, contactedAt, onMark, note, onSaveNote, onBack, saveError }) {
+function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onBack, saveError }) {
   useEffect(() => { document.title = r ? `${r.company_name} · Accounts` : "Accounts"; return () => { document.title = "Accounts"; }; }, [r]);
   if (!r) {
     return (
@@ -484,8 +559,14 @@ function CompanyPage({ r, number, madeAt, contactedAt, onMark, note, onSaveNote,
             {r.fx_niche && <span>{r.fx_niche}</span>}
           </div>
         </div>
-        <ContactedButton number={r.company_number} contactedAt={contactedAt} onMark={onMark} />
+        <ContactedButton number={r.company_number} mark={mark} onContact={onContact} />
       </header>
+      {mark && (
+        <section className="panel">
+          <h2 className="panel-h">Follow-up</h2>
+          <FollowUpPanel r={r} mark={mark} onContact={onContact} />
+        </section>
+      )}
 
       {figures.length > 0 && (
         <div className="pg-figs">
@@ -604,7 +685,6 @@ select.input option{background:#0F141F}
 .card-r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .btn-sm.contacted{border-color:rgba(16,185,129,.35);color:#34D399}
 .btn-sm.contacted:hover{background:rgba(16,185,129,.12)}
-.done{display:flex;align-items:center;gap:8px;font-size:12px;color:#A5B4FC}
 .groups{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .groups-l{font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
 .grp{padding:5px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:none;color:rgba(255,255,255,.55);font:600 12px 'Inter',sans-serif;cursor:pointer}
@@ -641,6 +721,29 @@ a.co:hover{color:#34D399}
 .panel-p{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.6);overflow-wrap:anywhere}
 .panel .details{margin-top:8px}
 .docs{list-style:none;margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 20px;font-size:13px}
+.no-fd{flex-basis:100%;font-size:12.5px;color:rgba(255,255,255,.65);padding:6px 10px;border-radius:7px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18)}
+.no-fd b{color:#FBBF24;font-weight:700}
+.due-n{margin-left:6px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:9px;background:rgba(248,113,113,.18);color:#FCA5A5}
+.channels{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.channels-l{font-size:11px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.05em}
+.state{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:10px;white-space:nowrap;background:rgba(165,180,252,.12);color:#A5B4FC}
+.state.st-overdue{background:rgba(248,113,113,.16);color:#FCA5A5}
+.state.st-due,.state.st-replied{background:rgba(245,158,11,.16);color:#FBBF24}
+.state.st-booked{background:rgba(16,185,129,.16);color:#34D399}
+.state.st-closed,.state.st-nurture{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)}
+.follow{margin-top:10px;padding:10px 12px;border-radius:9px;background:rgba(165,180,252,.04);border:1px solid rgba(165,180,252,.14);display:flex;flex-direction:column;gap:8px}
+.follow.st-overdue{border-color:rgba(248,113,113,.3)}
+.follow.st-due,.follow.st-replied{border-color:rgba(245,158,11,.3)}
+.panel .follow{margin-top:8px}
+.follow-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:rgba(255,255,255,.75)}
+.follow-next b{color:#F8FAFC}
+.follow-touches{font-size:12px;color:rgba(255,255,255,.45)}
+.follow .angle{margin-top:0}
+.follow-btns{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.btn-sm.on{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#34D399}
+.follow-date{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.5);margin-left:6px}
+.follow-date .input{padding:4px 8px;font-size:12px;color-scheme:dark}
+.more-btn.undo{margin:0 0 0 auto}
 .save-error{padding:10px 12px;border-radius:8px;background:rgba(248,113,113,.1);color:#FCA5A5;font-size:13px}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}
