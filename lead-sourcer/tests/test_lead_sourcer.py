@@ -445,6 +445,30 @@ class TestIxbrlTurnover(unittest.TestCase):
             self.assertIsNone(accounts.fetch_ixbrl("doc1", "key"))
 
 
+class TestSourceLinks(PipelineTestCase):
+    def test_accounts_document_and_fx_page(self):
+        filing = {"links": {"self": "/company/01234567/filing-history/MzQ1Njc4"}}
+        url = accounts.filing_document_url("01234567", filing)
+        self.assertEqual(url, "https://find-and-update.company-information.service.gov.uk/company/01234567/"
+                              "filing-history/MzQ1Njc4/document?format=pdf&download=0")
+        links = accounts.accounts_links("01234567", {"accounts_url": url, "fx_gain_loss": 11_677,
+                                                     "fx_gain_loss_evidence": 'scanned accounts p22: "Exchange differences (11,677)"'})
+        self.assertEqual(links["fx_gain_loss_url"], url + "#page=22")
+        # tagged figure: the document itself; no FX figure: no FX link
+        self.assertEqual(accounts.accounts_links("01234567", {"accounts_url": url, "fx_gain_loss": -5}, )["fx_gain_loss_url"], url)
+        self.assertEqual(accounts.accounts_links("01234567", {"accounts_url": url})["fx_gain_loss_url"], "")
+        # read before links were kept: the company's accounts filings
+        self.assertEqual(accounts.accounts_links("01234567", {"fx_gain_loss": -5})["accounts_url"],
+                         "https://find-and-update.company-information.service.gov.uk/company/01234567/filing-history?category=accounts")
+
+    def test_rows_link_their_sources(self):
+        wine = {r["company_number"]: r for r in self.run_bulk(news_check=False)}["01"]
+        self.assertTrue(wine["accounts_url"].startswith("https://find-and-update.company-information.service.gov.uk/company/01"))
+        self.assertTrue(wine["fx_gain_loss_url"])          # it has an FX figure
+        if wine["incumbent_bank"]:
+            self.assertIn("/company/01/charges", wine["incumbent_bank_url"])
+
+
 class TestFinderTimeBudget(PipelineTestCase):
     def test_budget_used_marks_the_list_partial(self):
         os.chdir(self.tmp.name)

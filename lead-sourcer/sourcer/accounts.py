@@ -63,6 +63,32 @@ def latest_accounts_filing(company_number: str, api_key: str) -> Optional[dict]:
     return None
 
 
+def filing_document_url(company_number: str, filing: dict) -> str:
+    """The filed accounts as a PDF on the public Companies House site (every filing has one), or ""."""
+    path = (filing.get("links") or {}).get("self") or ""
+    if not path and filing.get("transaction_id"):
+        path = f"/company/{company_number}/filing-history/{filing['transaction_id']}"
+    page = companies_house.public_url(path)
+    return f"{page}/document?format=pdf&download=0" if page else ""
+
+
+def accounts_links(company_number: str, facts: Optional[dict]) -> dict:
+    """
+    {"accounts_url", "fx_gain_loss_url"}: the accounts document the facts
+    came from (accounts read before links were kept: the company's accounts
+    filings on Companies House), and the FX line's page in it when the
+    figure came from a PDF page ("scanned accounts p22").
+    """
+    f = facts or {}
+    url = f.get("accounts_url") or (
+        f"{companies_house.FIND_URL}/company/{company_number}/filing-history?category=accounts" if company_number else "")
+    fx_url = ""
+    if f.get("fx_gain_loss") is not None or f.get("fx_gain_loss_check"):
+        page = re.match(r"(?:scanned )?accounts p(\d+):", f.get("fx_gain_loss_evidence") or "")
+        fx_url = f"{url}#page={page.group(1)}" if page and f.get("accounts_url") else url
+    return {"accounts_url": url, "fx_gain_loss_url": fx_url}
+
+
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None  # surface the 302 so its target is fetched without our credentials
@@ -574,10 +600,11 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
     if not document_id:
         return None
     filed_on = filing.get("date") or ""   # for the "accounts just filed" hook
+    url = filing_document_url(company_number, filing)
     made_up = (filing.get("description_values") or {}).get("made_up_date") or ""
     document = None if filing.get("paper_filed") else fetch_ixbrl(document_id, api_key)
     if document:
-        facts = dict(extract_facts(document), format="ixbrl", filed_on=filed_on)
+        facts = dict(extract_facts(document), format="ixbrl", filed_on=filed_on, accounts_url=url)
         facts["period_end"] = facts["period_end"] or made_up   # no tagged turnover or FX: the filing's made-up date
         return facts
     if not pdf.available():
@@ -586,7 +613,7 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
     text, how = pdf.to_text(data)
     if not text:
         return None
-    facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on)
+    facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on, accounts_url=url)
     if how == "scanned pdf" and facts["fx_gain_loss"] is None and not facts["fx_gain_loss_check"]:
         # the FX line is in the notes, past the pages OCR'd for the company information
         page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None)

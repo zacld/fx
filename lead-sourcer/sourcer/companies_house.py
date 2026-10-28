@@ -269,11 +269,21 @@ def holder_name(name: str) -> str:
     return _INITIALISM_RE.sub(lambda m: _INITIALISMS[m.group(1)], " ".join(name.split()))
 
 
+# The public Companies House site, for links a person can open (no API key needed).
+FIND_URL = "https://find-and-update.company-information.service.gov.uk"
+
+
+def public_url(path: str) -> str:
+    """A Companies House API path ("/company/01/charges/abc") as a page on the public site, or ""."""
+    return f"{FIND_URL}{path}" if path and path.startswith("/company/") else ""
+
+
 def get_charges(company_number: str, api_key: str) -> list[dict]:
     """
     Every charge on the register, one entry per holder per charge, as
     [{"name", "created_on", "status", "satisfied_on", "classification",
-    "particulars", "floating_all", "floating"}]. status is "outstanding",
+    "particulars", "floating_all", "floating", "url"}] (url: the charge's
+    page on the public register). status is "outstanding",
     "part-satisfied", "fully-satisfied" (or similar); the last four say what
     the charge covers (e.g. a debenture over all assets, a property).
     """
@@ -291,7 +301,8 @@ def get_charges(company_number: str, api_key: str) -> list[dict]:
                                 "classification": ((item.get("classification") or {}).get("description") or "").strip(),
                                 "particulars": " ".join(((item.get("particulars") or {}).get("description") or "").split())[:300],
                                 "floating_all": bool((item.get("particulars") or {}).get("floating_charge_covers_all")),
-                                "floating": bool((item.get("particulars") or {}).get("contains_floating_charge"))})
+                                "floating": bool((item.get("particulars") or {}).get("contains_floating_charge")),
+                                "url": public_url((item.get("links") or {}).get("self") or "")})
     return charges
 
 

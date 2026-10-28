@@ -158,6 +158,10 @@ CSV_FIELDS = [
     "postcode",
     "registered_address",
     "companies_house_url",
+    "accounts_url",
+    "fx_gain_loss_url",
+    "incumbent_bank_url",
+    "fx_today_url",
 ]
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -518,6 +522,15 @@ def company_row(
     # The incumbent (who holds the security, when the facility is up), how they do FX today, and qualify-out.
     if checked:
         talking.update(incumbent.columns(f, charges or [], today))
+        # Each fact links to the record it came from: the accounts document (the FX line's page when known),
+        # the charge on the register (the company's charges page for charges read before links were kept).
+        links = accounts.accounts_links(number, f)
+        talking.update(links)
+        charges_page = f"{companies_house.FIND_URL}/company/{number}/charges"
+        if talking["incumbent_bank"] and not talking["incumbent_bank_url"]:
+            talking["incumbent_bank_url"] = charges_page
+        if talking["fx_today"] and not talking["fx_today_url"]:
+            talking["fx_today_url"] = charges_page if "charges register" in talking["fx_today_evidence"] else links["accounts_url"]
         talking.update(qualify.assess(owners, f, {"confidence": talking["currency_confidence"]}, talking["fx_today"],
                                       customs["import_months"] + customs["export_months"], bool(bank.get("own_bank")),
                                       own_bank_name or os.environ.get("OWN_BANK", "").strip(), triggers.investor_owner(owners)))

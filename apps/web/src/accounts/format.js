@@ -63,6 +63,21 @@ export const fxLine = (r) => r.fx_gain_loss_gbp
     ` (${[fxShare(r), `prior year ${money(r.fx_gain_loss_prior_gbp) || "n/a"}`].filter(Boolean).join("; ")})`
   : "";
 
+// Where each fact came from, as a public Companies House page: the filed accounts (at the FX line's page when
+// known) or the charge on the register. Lists made before the links existed have none: no link is shown.
+export const bankUrl = (r) =>
+  r.incumbent_bank && r.main_bank && r.incumbent_bank.toLowerCase().startsWith(r.main_bank.toLowerCase())
+    ? r.incumbent_bank_url || r.accounts_url : r.accounts_url;
+
+// A headline fact links to the record it is about: FX figures to the accounts' FX line, charges and debentures to
+// the register, anything else from the accounts to the accounts.
+export function factUrl(r, fact = "") {
+  if (/\bFX\b|exchange|currency/i.test(fact) && r.fx_gain_loss_url) return r.fx_gain_loss_url;
+  if (/debenture|charge|lender|refinanc|security/i.test(fact) && r.incumbent_bank_url) return r.incumbent_bank_url;
+  if (/accounts|facility|turnover|grew|growth|filed/i.test(fact)) return r.accounts_url || "";
+  return "";
+}
+
 // Biggest FX loss first, then gains (biggest first), then no figure.
 const fxLossKey = (r) => {
   const fx = Number(r.fx_gain_loss_gbp);
@@ -90,7 +105,7 @@ export const EXPORT_FIELDS = [
   "main_bank", "bank_type", "fact_1", "fact_2", "main_currency", "currency_direction",
   "currency_evidence", "currency_confidence", "opener", "fx_estimate", "incumbent_bank", "facility_ends",
   "facility_ends_evidence", "fx_today", "fx_today_evidence", "lenders", "triggers", "when_to_call", "fx_niche", "call_angle",
-  "website", "generic_emails",
+  "website", "generic_emails", "accounts_url", "fx_gain_loss_url", "incumbent_bank_url",
   "companies_house_url",
 ];
 
