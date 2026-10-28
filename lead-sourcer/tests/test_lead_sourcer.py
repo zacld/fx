@@ -1185,6 +1185,48 @@ class TestWebsite(unittest.TestCase):
         self.assertEqual((found["website"], found["confidence"], found["people"]), ("https://www.acmewine.co.uk/", "high", []))
 
 
+class TestWebsiteSitemap(unittest.TestCase):
+    def test_team_page_found_through_the_sitemap(self):
+        home = "https://www.acmewine.co.uk/"
+        index = ('<sitemapindex><sitemap><loc>https://www.acmewine.co.uk/post-sitemap.xml</loc></sitemap>'
+                 '<sitemap><loc>https://www.acmewine.co.uk/page-sitemap.xml</loc></sitemap></sitemapindex>')
+        pages = ('<urlset><url><loc>https://www.acmewine.co.uk/shop</loc></url>'
+                 '<url><loc>https://acmewine.co.uk/about-us/our-leadership-team/</loc></url></urlset>')
+        sites = {home: (home, "Acme Wine Limited, company 1234567. <a href='/shop'>Shop</a>"),
+                 home + "robots.txt": (home + "robots.txt", "User-agent: *\nSitemap: https://www.acmewine.co.uk/sitemap_index.xml"),
+                 home + "sitemap_index.xml": ("", index), home + "page-sitemap.xml": ("", pages),
+                 "https://acmewine.co.uk/about-us/our-leadership-team/": ("", "Jo Bloggs, Finance Director")}
+        asked = []
+        fetcher = lambda url: asked.append(url) or sites.get(url)
+        found = website.look_up("01234567", "ACME WINE LIMITED", fetcher, pause=0)
+        self.assertEqual(found["people"], [{"name": "Jo Bloggs", "title": "Finance Director"}])
+        self.assertNotIn(home + "post-sitemap.xml", asked)        # only the pages sitemap of the index
+        # a team page linked from the homepage: no sitemap read
+        sites[home] = (home, "Acme Wine Limited, company 1234567. <a href='/our-team'>Our team</a>")
+        asked.clear()
+        website.look_up("01234567", "ACME WINE LIMITED", fetcher, pause=0)
+        self.assertFalse(any("sitemap" in u for u in asked))
+
+
+class TestFormerFinanceDirector(unittest.TestCase):
+    def test_kept_from_the_same_officers_call(self):
+        items = {"items": [
+            {"name": "ROE, Sam", "officer_role": "director", "occupation": "Managing Director", "appointed_on": "2001-01-01"},
+            {"name": "LEE, Amy", "officer_role": "director", "occupation": "Finance Director", "appointed_on": "2015-01-01",
+             "resigned_on": "2026-03-31"},
+            {"name": "OLD, Bob", "officer_role": "director", "occupation": "Sales Director", "resigned_on": "2025-01-01"},
+            {"name": "SEC, Pat", "officer_role": "secretary", "occupation": "Chief Financial Officer", "resigned_on": "2024-01-01"},
+        ]}
+        with mock.patch.object(companies_house, "_get", return_value=items), mock.patch.object(companies_house, "_throttle"):
+            active, former = companies_house.get_officers_and_former("01234567", "k")
+        self.assertEqual([o["name"] for o in active], ["Sam Roe"])
+        self.assertEqual(former, [{"name": "Amy Lee", "occupation": "Finance Director", "resigned_on": "2026-03-31"}])
+        # the no-FD flag stands down when the company had an FD on the board
+        row = {"finance_contact_role": "Finance Manager", "turnover_gbp": "30000000"}
+        self.assertTrue(confirm.no_fd_reason(row))
+        self.assertEqual(confirm.no_fd_reason({**row, "former_finance_director": "Amy Lee (Finance Director), left the board 2026-03-31"}), "")
+
+
 class TestRoles(unittest.TestCase):
     PEOPLE = [
         {"name": "A", "occupation": "Company Director", "appointed_on": "2001-01-01"},
@@ -1562,6 +1604,20 @@ class TestConfirmation(unittest.TestCase):
         self.assertEqual(confirm.no_fd_reason({**row, "group_parent": "HALDEN HOLDINGS LIMITED"}), "")    # group FD
         self.assertEqual(confirm.no_fd_reason({**row, "turnover_gbp": ""}), "")                           # size unknown
         self.assertTrue(confirm.no_fd_reason({"turnover_gbp": "30000000"}).endswith("the MD likely decides on FX"))
+
+    def test_neediest_first_and_confirmed_fds_skipped(self):
+        rows = [{**self.ROW, "company_number": "1", "company_name": "TARRANT FOODS LIMITED",   # its own search (not cached)
+                 "finance_contact": "Pat Jones", "finance_contact_role": "Finance Manager",
+                 "finance_contact_confidence": "Confirmed"},
+                {**self.ROW, "company_number": "2"},                                          # a Guess
+                {**self.ROW, "company_number": "3", "finance_contact": "Kim Fox", "finance_contact_role": "Finance Director",
+                 "finance_contact_confidence": "Confirmed"}]
+        asked = []
+        fetcher = lambda query, key: asked.append(query) or search_answer(ALAN)
+        out, stats = confirm.confirm_rows(rows, fetcher=fetcher, pause=0, key="k", max_searches=1)
+        self.assertEqual(len(asked), 1)
+        self.assertEqual([r["finance_contact"] for r in out], ["Pat Jones", "Alan Metcalfe", "Kim Fox"])   # the guess went first
+        self.assertEqual((stats["to check"], stats["not searched: FD already confirmed"]), (2, 1))
 
     def test_confirm_rows_budget_cache_and_skips(self):
         rows = [dict(self.ROW), {**self.ROW, "company_number": "2", "untapped_reasons": "not checked"},
@@ -1977,6 +2033,20 @@ class TestReviewFixesIncumbent(unittest.TestCase):
         self.assertEqual(hooks.find_hooks({}, [], [old], [], today=self.TODAY), [])
         recent = {**old, "created_on": "2022-06-01"}
         self.assertEqual([h["kind"] for h in hooks.find_hooks({}, [], [recent], [], today=self.TODAY)], ["bank_since"])
+
+    def test_a_finance_director_leaving_the_board_is_a_trigger(self):
+        company = {"company_name": "ACME LIMITED", "company_number": "01234567", "accounts_category": "full",
+                   "sic_codes": ["46900"]}
+        left = [{"name": "Amy Lee", "occupation": "Finance Director", "resigned_on": "2026-03-31"}]
+        row = main.company_row({"id": "x", "name": "N", "currency_pairs": []}, company, None, [], True,
+                               facts={}, owners=[], charges=[], today=date(2026, 10, 28), former_fd=left)
+        self.assertIn("finance director Amy Lee left the board 2026-03", row["triggers"])
+        self.assertEqual(row["former_finance_director"], "Amy Lee (Finance Director), left the board 2026-03-31")
+        long_ago = [{**left[0], "resigned_on": "2024-01-31"}]
+        row = main.company_row({"id": "x", "name": "N", "currency_pairs": []}, company, None, [], True,
+                               facts={}, owners=[], charges=[], today=date(2026, 10, 28), former_fd=long_ago)
+        self.assertNotIn("left the board", row["triggers"])
+        self.assertTrue(row["former_finance_director"])
 
     def test_warm_route_names_the_runs_own_bank(self):
         company = {"company_name": "ACME LIMITED", "company_number": "01234567", "accounts_category": "full",

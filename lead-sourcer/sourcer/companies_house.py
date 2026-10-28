@@ -152,7 +152,16 @@ def get_last_accounts(company_number: str, api_key: str) -> dict:
     return {"accounts_category": last.get("type") or "", "accounts_made_up_to": last.get("made_up_to") or ""}
 
 
+# A filed occupation that runs the finance function (people.is_finance_director, without importing people here).
+_FINANCE_OCCUPATION = re.compile(r"chief financ|\bcfo\b|financ(?:e|ial) director|director of finance|\bf\.?d\b|"
+                                 r"head of finance|finance (?:&|and) \w+ director", re.I)
+
+
 def get_active_officers(company_number: str, api_key: str) -> list[dict]:
+    return get_officers_and_former(company_number, api_key)[0]
+
+
+def get_officers_and_former(company_number: str, api_key: str) -> tuple[list[dict], list[dict]]:
     """
     Active officers who are people — directors, LLP members and company
     secretaries — as [{"name", "role", "occupation", "appointed_on",
@@ -160,16 +169,23 @@ def get_active_officers(company_number: str, api_key: str) -> list[dict]:
     first. CH officer names come back "SURNAME, Forename" — normalised to
     "Forename Surname". In a mid-market private company the company
     secretary is often the finance director.
+
+    Also, from the same call: former directors whose filed occupation was a
+    finance role, [{"name", "occupation", "resigned_on"}], latest first — the
+    company has an FD role even when today's FD isn't on the board.
     """
     url = CH_OFFICERS.format(number=company_number)
     _throttle()
     data = _get(url, {"items_per_page": 100}, api_key)
     if not data:
-        return []
+        return [], []
 
-    officers = []
+    officers, former = [], []
     for item in data.get("items", []):
         if item.get("resigned_on"):
+            if (item.get("officer_role") or "").lower() in PERSON_ROLES and _FINANCE_OCCUPATION.search(item.get("occupation") or ""):
+                former.append({"name": _normalise_ch_name(item.get("name", "")),
+                               "occupation": (item.get("occupation") or "").strip(), "resigned_on": item["resigned_on"]})
             continue
         role = (item.get("officer_role") or "").lower()
         if role not in PERSON_ROLES and role != "secretary":
@@ -187,7 +203,8 @@ def get_active_officers(company_number: str, api_key: str) -> list[dict]:
         })
 
     officers.sort(key=lambda d: d["appointed_on"], reverse=True)
-    return officers
+    former.sort(key=lambda d: d["resigned_on"], reverse=True)
+    return officers, former
 
 
 _GENERIC_NAME_WORDS = {"LIMITED", "LTD", "PLC", "LLP", "UK", "GB", "GROUP", "HOLDINGS", "HOLDING", "INTERNATIONAL",
