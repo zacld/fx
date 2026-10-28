@@ -120,7 +120,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   by the latest upload are labelled New (`first_seen`, carried over by
   `upload-accounts.mjs`). The Contacted button moves a company to the
   Contacted tab (marks kept in the Blobs store under `contacted`, via POST
-  `/api/accounts`; the finder never touches them).
+  `/api/accounts`; the finder never touches them). Each card has a Notes box
+  (Blobs key `notes`, same POST with `{company_number, notes}`; "" deletes;
+  searched by the search box and included in the CSV export).
 - **Evidence comes from raw records, in this order:**
   1. HMRC monthly importer/exporter lists, matched to Companies House.
   2. Filed accounts: tagged iXBRL figures (turnover, cost of sales, FX

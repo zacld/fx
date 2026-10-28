@@ -48,7 +48,7 @@ export const googleFd = (r) =>
 // view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
 export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
                                    showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
-                                   contacted = {} } = {}) {
+                                   contacted = {}, notes = {} } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
     (view === "contacted") === Boolean(contacted[r.company_number]) &&
@@ -60,7 +60,7 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!pair || parts(r.currency_pairs).includes(pair)) &&
     (!triggersOnly || Boolean(r.triggers)) &&
     (showOut || !isOut(r)) &&
-    (!q || [r.company_name, r.finance_contact, r.fx_niche, r.main_bank, r.postcode, r.company_number]
+    (!q || [r.company_name, r.finance_contact, r.fx_niche, r.main_bank, r.postcode, r.company_number, notes[r.company_number]?.text]
       .some((v) => (v || "").toLowerCase().includes(q))));
 }
 
@@ -126,7 +126,7 @@ export const EXPORT_FIELDS = [
   "main_bank", "bank_type", "fact_1", "fact_2", "main_currency", "currency_direction",
   "currency_evidence", "currency_confidence", "opener", "fx_estimate", "incumbent_bank", "facility_ends",
   "facility_ends_evidence", "fx_today", "fx_today_evidence", "lenders", "triggers", "when_to_call", "fx_niche", "call_angle",
-  "website", "generic_emails", "accounts_url", "fx_gain_loss_url", "incumbent_bank_url",
+  "website", "generic_emails", "notes", "accounts_url", "fx_gain_loss_url", "incumbent_bank_url",
   "companies_house_url",
 ];
 

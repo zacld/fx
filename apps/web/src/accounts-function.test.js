@@ -4,7 +4,7 @@ import { handle, markFirstSeen } from "../netlify/functions/accounts.mjs";
 const list = { made_at: "2026-10-21T06:00:00+00:00", count: 1, rows: [{ company_name: "A LTD", rank: 1 }] };
 // An in-memory Blobs store: the list under "latest", Zac's contacted marks under "contacted".
 const memory = (data = list, marks = null) => {
-  const blobs = { latest: data, contacted: marks };
+  const blobs = { latest: data, contacted: marks, notes: null };
   return Object.assign(() => ({ get: async (k) => blobs[k] ?? null, setJSON: async (k, v) => { blobs[k] = v; } }), { blobs });
 };
 const store = (data = list) => memory(data);
@@ -45,6 +45,18 @@ describe("/api/accounts", () => {
     await handle(post({ company_number: "01234567", contacted: false }), opts);
     expect(s.blobs.contacted).toEqual({});
     expect(s.blobs.latest).toBe(list);                        // the finder's list is never rewritten
+  });
+
+  it("saves, returns and deletes a company's notes", async () => {
+    const s = memory();
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const res = await handle(post({ company_number: "01234567", notes: "  Spoke to FD, call back Jan  " }), opts);
+    expect((await res.json()).notes["01234567"].text).toBe("Spoke to FD, call back Jan");
+    expect(s.blobs.contacted).toBe(null);                      // a note doesn't touch the contacted marks
+    expect((await (await handle(get("Bearer s3cret"), opts)).json()).notes["01234567"].text).toBe("Spoke to FD, call back Jan");
+    await handle(post({ company_number: "01234567", notes: "" }), opts);
+    expect(s.blobs.notes).toEqual({});
+    expect((await handle(post({ company_number: "01234567", notes: "x".repeat(4001) }), opts)).status).toBe(400);
   });
 
   it("refuses a bad contacted mark, and any mark without the password", async () => {
