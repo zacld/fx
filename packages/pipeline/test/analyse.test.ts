@@ -270,6 +270,37 @@ describe("analyse stage (mocked feeds + AI)", () => {
     } finally { close(); }
   });
 
+  it("waits out a per-minute limit and asks about the same event again; a daily quota still falls back", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fxanalyse4-"));
+    let calls = 0;
+    const slept: number[] = [];
+    const r = await runAnalyseStage({
+      dbPath: join(dir, "fx.db"), runsDir: join(dir, "runs"), feeds: [{ source: "Test", url: "https://test.feed/rss" }],
+      fetchHtml: feedFetch, maxEvents: 5, sleep: async (ms) => { slept.push(ms); },
+      analyse: async () => { if (++calls % 2 === 1) throw new RateLimitError("Groq 429: TPM", 7.2); return cannedAnalysis; },
+    });
+    expect(r.aiOk).toBe(2);
+    expect(r.fallbackUsed).toBe(0);
+    expect(slept).toEqual([9000, 9000]);                       // 7.2s rounded up + 1s, once per event
+    expect(calls).toBe(4);
+
+    const dir2 = mkdtempSync(join(tmpdir(), "fxanalyse5-"));
+    const daily = await runAnalyseStage({
+      dbPath: join(dir2, "fx.db"), runsDir: join(dir2, "runs"), feeds: [{ source: "Test", url: "https://test.feed/rss" }],
+      fetchHtml: feedFetch, maxEvents: 5, sleep: async () => { throw new Error("must not wait"); },
+      analyse: async () => { throw new RateLimitError("Groq 429: TPD", null); },
+    });
+    expect(daily.fallbackUsed).toBe(2);
+
+    const dir3 = mkdtempSync(join(tmpdir(), "fxanalyse6-"));
+    const capped = await runAnalyseStage({                     // the run's waiting budget is spent: fall back
+      dbPath: join(dir3, "fx.db"), runsDir: join(dir3, "runs"), feeds: [{ source: "Test", url: "https://test.feed/rss" }],
+      fetchHtml: feedFetch, maxEvents: 5, aiWaitBudgetS: 5, sleep: async () => {},
+      analyse: async () => { throw new RateLimitError("Groq 429: TPM", 30); },
+    });
+    expect(capped.fallbackUsed).toBe(2);
+  });
+
   it("on a non-rate-limit AI error (e.g. 404 model-not-found) it falls back instead of dropping the event", async () => {
     const dir = mkdtempSync(join(tmpdir(), "fxanalyse3-"));
     const dbPath = join(dir, "fx.db");

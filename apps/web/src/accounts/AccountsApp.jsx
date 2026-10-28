@@ -92,8 +92,19 @@ function Accounts({ data, password }) {
   const [sort, setSort] = useState("hot");
   const [shown, setShown] = useState(PAGE);
   const [contacted, setContacted] = useState(data.contacted || {});
+  const [notes, setNotes] = useState(data.notes || {});
   const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
+
+  // Saves a change for one company ({contacted} or {notes}) to the site's store; the server's copy comes back.
+  const save = useCallback(async (number, change) => {
+    const res = await fetch(API, { method: "POST", headers: { authorization: `Bearer ${password}`, "content-type": "application/json" },
+                                   body: JSON.stringify({ company_number: number, ...change }) });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+    if (body.contacted) setContacted(body.contacted);
+    if (body.notes) setNotes(body.notes);
+  }, [password]);
 
   // Marks a company contacted (off the list, into Contacted) or back; shown at once, undone if the save fails.
   const mark = useCallback(async (number, on) => {
@@ -102,24 +113,27 @@ function Accounts({ data, password }) {
     if (on) next[number] = { at: new Date().toISOString() }; else delete next[number];
     setContacted(next);
     setSaveError("");
-    try {
-      const res = await fetch(API, { method: "POST", headers: { authorization: `Bearer ${password}`, "content-type": "application/json" },
-                                     body: JSON.stringify({ company_number: number, contacted: on }) });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
-      setContacted(body.contacted || next);
-    } catch (e) {
+    try { await save(number, { contacted: on }); } catch (e) {
       setContacted(before);
       setSaveError(`Couldn't save that (${e.message}) — try again.`);
     }
-  }, [contacted, password]);
+  }, [contacted, save]);
 
-  const ctx = { ...filters, madeAt: data.made_at, contacted };
+  // Saves a company's notes; true when saved (the editor then closes), false with the reason shown when not.
+  const saveNote = useCallback(async (number, text) => {
+    setSaveError("");
+    try { await save(number, { notes: text }); return true; } catch (e) {
+      setSaveError(`Couldn't save the note (${e.message}) — your text is still in the box.`);
+      return false;
+    }
+  }, [save]);
+
+  const ctx = { ...filters, madeAt: data.made_at, contacted, notes };
   const pairs = useMemo(() => [...new Set(rows.flatMap((r) => parts(r.currency_pairs)))].sort(), [rows]);
   const visible = useMemo(() => {
     const matched = filterRows(rows, ctx);
     return filters.view === "contacted" ? sortContacted(matched, contacted) : sortRows(matched, sort);
-  }, [rows, filters, sort, contacted, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rows, filters, sort, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const open = rows.filter((r) => !contacted[r.company_number]);
   const groupCounts = useMemo(() => {
     const base = filterRows(rows, { ...ctx, contact: "" });
@@ -137,7 +151,7 @@ function Accounts({ data, password }) {
   const grouped = filters.view !== "contacted" && sort === "hot" && !filters.contact;
 
   const exportCsv = () => {
-    const blob = new Blob([toCsv(visible)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([toCsv(visible.map((r) => ({ ...r, notes: notes[r.company_number]?.text || "" })))], { type: "text/csv;charset=utf-8" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `fx-accounts-${new Date().toISOString().slice(0, 10)}.csv` });
     a.click();
     URL.revokeObjectURL(a.href);
@@ -206,7 +220,8 @@ function Accounts({ data, password }) {
           return (
             <Fragment key={r.company_number || r.rank}>
               {heading && <h2 className="group-h">{group} <span>{groupCounts[group]} · {GROUP_NOTE[group]}</span></h2>}
-              <Account r={r} isNew={isNew(r, data.made_at)} contactedAt={contacted[r.company_number]?.at} onMark={mark} />
+              <Account r={r} isNew={isNew(r, data.made_at)} contactedAt={contacted[r.company_number]?.at} onMark={mark}
+                       note={notes[r.company_number]} onSaveNote={(text) => saveNote(r.company_number, text)} />
             </Fragment>
           );
         })}
@@ -226,7 +241,40 @@ function Src({ href, children, className, title }) {
     : <span className={className} title={title}>{children}</span>;
 }
 
-function Account({ r, isNew: fresh, contactedAt, onMark }) {
+// Zac's notes on a company: shown on the card, edited in place, kept on the site (any device).
+function Notes({ note, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState(note?.text || "");
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { if (!editing) setText(note?.text || ""); }, [note, editing]);
+  const save = async () => {
+    setSaving(true);
+    const ok = await onSave(text.trim());
+    setSaving(false);
+    if (ok) setEditing(false);
+  };
+  if (editing) {
+    return (
+      <div className="notes">
+        <textarea className="input notes-in" rows={3} maxLength={4000} autoFocus value={text} aria-label="Notes"
+                  placeholder="Who you spoke to, what they said, next step…" onChange={(e) => setText(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) save(); if (e.key === "Escape") setEditing(false); }} />
+        <div className="notes-btns">
+          <button className="btn-sm contacted" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save note"}</button>
+          <button className="btn-sm" onClick={() => setEditing(false)} disabled={saving}>Cancel</button>
+        </div>
+      </div>
+    );
+  }
+  return note?.text ? (
+    <div className="notes has">
+      <div className="notes-h"><span>Notes · {day(note.at)}</span><button className="more-btn" onClick={() => setEditing(true)}>Edit</button></div>
+      <p>{note.text}</p>
+    </div>
+  ) : <button className="more-btn add-note" onClick={() => setEditing(true)}>+ Add note</button>;
+}
+
+function Account({ r, isNew: fresh, contactedAt, onMark, note, onSaveNote }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const conf = r.finance_contact_confidence;
@@ -318,6 +366,7 @@ function Account({ r, isNew: fresh, contactedAt, onMark }) {
         </div>
       )}
 
+      <Notes note={note} onSave={onSaveNote} />
       <button className="more-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Less" : "More detail"}</button>
       {open && (
         <dl className="details">
@@ -406,6 +455,14 @@ select.input option{background:#0F141F}
 .group-h{margin-top:10px;font-size:13px;font-weight:800;color:#F8FAFC;letter-spacing:.02em}
 .group-h:first-of-type{margin-top:0}
 .group-h span{font-size:11px;font-weight:500;color:rgba(255,255,255,.35);margin-left:6px}
+.notes{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.notes.has{padding:10px 12px;border-radius:8px;background:rgba(165,180,252,.06);border:1px solid rgba(165,180,252,.15);gap:4px}
+.notes-h{display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(165,180,252,.7)}
+.notes-h .more-btn{margin-top:0;text-transform:none;letter-spacing:0}
+.notes p{font-size:13px;color:rgba(255,255,255,.8);white-space:pre-wrap;overflow-wrap:anywhere}
+.notes-in{width:100%;resize:vertical;min-height:70px;line-height:1.45}
+.notes-btns{display:flex;gap:8px}
+.add-note{display:block}
 .save-error{padding:10px 12px;border-radius:8px;background:rgba(248,113,113,.1);color:#FCA5A5;font-size:13px}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}

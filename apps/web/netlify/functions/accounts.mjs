@@ -1,7 +1,8 @@
 // GET /api/accounts — the finder's latest account list (FD names included),
-// with the companies marked contacted; POST /api/accounts {company_number,
-// contacted: true|false} marks or unmarks one. Only for a request carrying
-// the Accounts password:
+// with the companies marked contacted and Zac's notes; POST /api/accounts
+// {company_number, contacted: true|false} marks or unmarks one, and
+// {company_number, notes: "..."} saves its notes ("" deletes them). Only for
+// a request carrying the Accounts password:
 //   Authorization: Bearer <password>
 // The password is the ACCOUNTS_PASSWORD environment variable on Netlify
 // (Site configuration → Environment variables). The list itself lives in
@@ -12,6 +13,8 @@ import { getStore } from "@netlify/blobs";
 export const STORE = "fx-accounts";
 export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at}} — Zac's marks, never touched by the finder
+export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
+export const NOTES_MAX = 4000;
 const COMPANY_NUMBER = /^[A-Z0-9]{8}$/i;
 const WRONG_PASSWORD_DELAY_MS = 1000;   // slows down guessing
 
@@ -57,19 +60,23 @@ export async function handle(req, { password = expectedPassword(), store = () =>
   }
   const blobs = store();
   if (req.method === "POST") {
-    const { company_number: number, contacted } = await req.json().catch(() => ({}));
-    if (!COMPANY_NUMBER.test(number || "") || typeof contacted !== "boolean") {
-      return reply({ error: "send {company_number, contacted: true|false}" }, 400);
+    const { company_number: number, contacted, notes } = await req.json().catch(() => ({}));
+    if (!COMPANY_NUMBER.test(number || "") || (typeof contacted !== "boolean" && typeof notes !== "string")) {
+      return reply({ error: "send {company_number, contacted: true|false} or {company_number, notes}" }, 400);
     }
-    const marks = (await blobs.get(CONTACTED_KEY, { type: "json" })) || {};
-    if (contacted) marks[number] = { at: new Date().toISOString() };
-    else delete marks[number];
-    await blobs.setJSON(CONTACTED_KEY, marks);
-    return reply({ contacted: marks }, 200);
+    if (typeof notes === "string" && notes.length > NOTES_MAX) return reply({ error: `notes are limited to ${NOTES_MAX} characters` }, 400);
+    const [marks, noted] = await Promise.all([CONTACTED_KEY, NOTES_KEY].map(async (k) => (await blobs.get(k, { type: "json" })) || {}));
+    const at = new Date().toISOString();
+    if (contacted === true) marks[number] = { at };
+    if (contacted === false) delete marks[number];
+    if (typeof notes === "string") { if (notes.trim()) noted[number] = { text: notes.trim(), at }; else delete noted[number]; }
+    if (typeof contacted === "boolean") await blobs.setJSON(CONTACTED_KEY, marks);
+    if (typeof notes === "string") await blobs.setJSON(NOTES_KEY, noted);
+    return reply({ contacted: marks, notes: noted }, 200);
   }
-  const [data, marks] = await Promise.all([blobs.get(KEY, { type: "json" }), blobs.get(CONTACTED_KEY, { type: "json" })]);
+  const [data, marks, noted] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY].map((k) => blobs.get(k, { type: "json" })));
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);
-  return reply({ ...data, contacted: marks || {} }, 200);
+  return reply({ ...data, contacted: marks || {}, notes: noted || {} }, 200);
 }
 
 export default (req) => handle(req);

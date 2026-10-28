@@ -72,6 +72,7 @@ describe("accounts helpers", () => {
     const list = [{ rank: 1, company_number: "01" }, { rank: 2, company_number: "02" }, { rank: 3, company_number: "03" }];
     const contacted = { "01": { at: "2026-10-27T09:00:00Z" }, "03": { at: "2026-10-28T09:00:00Z" } };
     expect(filterRows(list, { contacted }).map((r) => r.rank)).toEqual([2]);
+    expect(filterRows(list, { query: "call back", notes: { "02": { text: "Call back in January" } } }).map((r) => r.rank)).toEqual([2]);
     const done = filterRows(list, { contacted, view: "contacted" });
     expect(sortContacted(done, contacted).map((r) => r.rank)).toEqual([3, 1]);
   });
