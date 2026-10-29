@@ -3583,6 +3583,147 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-04T23:35:59.221Z"
   },
+  "05ea365fe1c0ae39": {
+    "id": "05ea365fe1c0ae39",
+    "source": "OilPrice.com",
+    "source_url": "https://oilprice.com/Energy/Energy-General/UBS-Data-Shows-Russian-Oil-Exports-Only-10-Below-Pre-War-Levels.html",
+    "headline": "UBS Data Shows Russian Oil Exports Only 10% Below Pre-War Levels",
+    "raw_summary": "President Trump's US-Russia deal to export diesel and crude cargoes has drawn considerable scrutiny from Western elites as the first shipments could soon reach US shores. Ukrainian drone strikes on Russian refineries, combined with disruptions in the Strait of Hormuz, have intensified pressure on the global energy market and refining capacity ahead of the US midterms. UBS chief economist Arend Kapteyn published new data tracking Russian oil exports. Before reading the note, the assumption would have been that Western sanctions and Ukraine's efforts…",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bsanction|\\btrade ban|\\btrade; +3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-10-29T01:41:50.640Z",
+    "event_type": "Commodity",
+    "event_breadth": "commodity",
+    "summary": "President Trump's US-Russia deal to export diesel and crude cargoes has drawn considerable scrutiny from Western elites as the first shipments could soon reach US shores. Ukrainian drone strikes on Russian refineries, combined with disruptions in the Strait of Hormuz, have intensified pressure on the global energy market and refining capacity ahead of the US midterms. UBS chief economist Arend Kapteyn published new data tracking Russian oil exports. Before reading the note, the assumption would have been that Western sanctions and Ukraine's efforts…",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "Fallback event — ai-error: Groq 400: {\"error\":{\"message\":\"Failed to generate JSON. Please adjust your prompt. See 'failed_generation' for more details.\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_gener",
+    "trigger_strength": "weak",
+    "trigger_score": 30,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK petroleum and fuel importers",
+      "UK chemical and industrial-input importers"
+    ],
+    "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
+    "confidence_level": "low",
+    "confidence_reason": "AI fallback used — ai-error: Groq 400: {\"error\":{\"message\":\"Failed to generate JSON. Please adjust your prompt. See 'failed_generation' for more details.\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_gener. Rule-based segments inferred from headline keywords.",
+    "what_happened": "UBS Data Shows Russian Oil Exports Only 10% Below Pre-War Levels",
+    "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
+    "who_pays_more": "UK importers with overseas supplier invoices",
+    "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
+    "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
+    "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
+    "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
+    "exposure_types": [
+      "Commodity exposure"
+    ],
+    "status": "ready",
+    "fallback_mode": true,
+    "target_segments": [
+      {
+        "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "USD commodity pricing exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
+        "segment_name": "UK petroleum and fuel importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      },
+      {
+        "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
+        "exposure_level": "High",
+        "exposure_type": "USD commodity input exposure",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
+        "margin_risk": "Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "",
+        "website_validation_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
+        "micro_categories": [],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
+        "segment_name": "UK chemical and industrial-input importers",
+        "segment_signals": [
+          "we import",
+          "imported from",
+          "overseas supplier",
+          "international supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "petroleum wholesale",
+      "fuel trading",
+      "chemical supplies",
+      "chemicals wholesale",
+      "industrial supplies",
+      "plastics wholesale"
+    ],
+    "all_search_queries": [
+      "\"fuel importer\" UK",
+      "\"petroleum distributor\" UK",
+      "\"chemical wholesaler\" UK",
+      "\"chemical distributor\" UK",
+      "\"industrial chemical\" wholesale UK"
+    ],
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-29T01:41:54.404Z"
+  },
   "05f340dde01044ea": {
     "id": "05f340dde01044ea",
     "headline": "Japanese Yen gains ground as traders await Fed rate decision",
@@ -45508,42 +45649,41 @@
     "raw_summary": "UK chancellor Healey has a rather unenviable task at hand today.&nbsp;He is expected to deliver a budget that keeps households happy, businesses afloat, and bond investors calm. All while trying to convince everyone that the government isn't running short of money. Well, good luck with that. It is definitely quite the juggling act for his first autumn budget.&nbsp;And with borrowing costs still elevated and fiscal headroom shrinking, there's not exactly much room for him to get creative. So,&nbsp;what goodies can Healey realistically pull out of the bag today? And perhaps more importantly for ",
     "pre_relevance_score": 6,
     "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
-    "detected_at": "2026-10-28T15:58:03.340Z",
-    "event_type": "Fiscal policy / budget",
+    "detected_at": "2026-10-29T01:40:06.665Z",
+    "event_type": "Fiscal policy",
     "event_breadth": "macro_fiscal",
-    "summary": "The autumn budget was presented as the UK grapples with high borrowing costs and limited fiscal space. While the measures themselves are not a direct FX event, the fiscal stance could move gilt yields and, in turn, the GBP. Businesses with large debt or foreign‑currency exposure should monitor any resulting rate moves.",
+    "summary": "The UK autumn budget was presented today, highlighting fiscal deficits and borrowing needs. While this could influence gilt yields and GBP sentiment, there is no direct foreign‑currency transaction impact for most UK businesses. Any FX relevance is limited to potential changes in borrowing costs tied to bond yields.",
     "currency_pairs": [],
-    "urgency_score": 3,
-    "commercial_relevance": 3,
-    "commercial_relevance_reason": "Budget may influence GBP yields and borrowing costs, but no direct payment‑flow identified",
+    "urgency_score": 4,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "Budget may move GBP via gilt yields but no direct FX payment flow for most UK firms",
     "trigger_strength": "weak",
     "trigger_score": 32,
     "discovery_mode": "context_only",
     "recommended_query_budget": 0,
     "likely_affected_businesses": [
-      "UK corporates with large debt portfolios",
-      "UK exporters to the EU/US",
-      "UK importers sensitive to GBP fluctuations"
+      "UK companies with corporate bond issues",
+      "UK SMEs with bank loans tied to gilt yields"
     ],
-    "why_now": "The budget signals fiscal direction that could shift gilt yields soon, impacting financing costs and GBP rates for businesses with upcoming debt or currency exposure.",
-    "discovery_recommendation": "Context only — no clear payment‑flow hook to justify discovery",
-    "confidence_level": "medium",
-    "confidence_reason": "Event is factual but FX impact is indirect and lacks a concrete payment‑flow hook",
-    "what_happened": "Chancellor Jeremy Healey delivered the UK autumn budget, outlining fiscal measures amid high borrowing costs and shrinking fiscal headroom.",
-    "what_changed_financially": "The budget set out government spending and borrowing plans, which could move gilt yields and indirectly affect the GBP exchange rate.",
-    "who_pays_more": "UK companies with sizable GBP‑denominated debt may see higher interest costs if gilt yields rise.",
-    "who_receives_less": "UK exporters could face a weaker GBP, reducing the GBP value of foreign‑currency revenue.",
+    "why_now": "The budget was released today, so markets may adjust GBP expectations immediately",
+    "discovery_recommendation": "Context only — no clear FX payment‑flow hook to generate new leads",
+    "confidence_level": "high",
+    "confidence_reason": "Event is factual and its macro impact is clear, but FX link is indirect",
+    "what_happened": "UK chancellor Jeremy Healey delivered the autumn budget outlining new spending, tax measures and borrowing plans",
+    "what_changed_financially": "Projected fiscal deficit and government borrowing levels were updated, raising questions about future gilt yields and GBP expectations",
+    "who_pays_more": "UK corporates with GBP‑denominated debt or bond issuances may face higher borrowing costs if gilt yields rise",
+    "who_receives_less": "None directly, as the event does not affect inbound foreign revenue",
     "margin_risk": "Low",
     "payment_timing_risk": "Low",
-    "affected_payment_flow": "GBP borrowing costs and GBP valuation versus foreign currencies",
-    "fx_payment_logic": "The budget may push gilt yields higher, which typically pressures the GBP lower. A weaker GBP raises the GBP cost of any EUR‑denominated invoices for importers and can increase the interest expense on GBP‑denominated debt for heavily leveraged firms.",
-    "sales_angle": "If you have upcoming debt repayments or EUR invoices, the budget‑driven fiscal outlook could affect the rates you’ll pay today.",
-    "business_impact_summary": "Highly leveraged UK firms could see higher borrowing costs, while exporters and importers may experience modest currency shifts. The timing is immediate as markets react to the budget’s fiscal signals.",
+    "affected_payment_flow": "GBP borrowing costs for corporate bonds and loans linked to gilt yields",
+    "fx_payment_logic": "Businesses that finance with GBP‑denominated debt may see cost changes if the budget moves gilt yields and thus the GBP, but there is no immediate currency conversion involved.",
+    "sales_angle": "The budget could shift GBP rates and affect your debt costs, so it’s worth reviewing your financing strategy now.",
+    "business_impact_summary": "Corporates with GBP debt may see higher or lower borrowing costs depending on how the market prices the budget’s fiscal outlook; exporters and importers face no direct FX impact today.",
     "exposure_types": [
-      "bond yield exposure",
-      "GBP financing cost exposure"
+      "GBP borrowing cost exposure",
+      "gilt yield sensitivity"
     ],
-    "overall_sales_angle": "The budget’s fiscal stance could move gilt yields and the GBP, so any upcoming debt or cross‑border payments deserve a quick rate check.",
+    "overall_sales_angle": "The budget’s fiscal stance could move GBP and affect your debt costs – a timely reason to discuss hedging or financing options.",
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
@@ -52489,16 +52629,13 @@
   },
   "5e3bc429595fefd2": {
     "id": "5e3bc429595fefd2",
+    "headline": "Budget 2026: key points at a glance",
     "source": "The Guardian Biz",
     "source_url": "https://www.theguardian.com/uk-news/2026/oct/28/budget-2026-key-points-john-healey",
-    "headline": "Budget 2026: key points at a glance",
-    "raw_summary": "John Healey has announced his first budget – here are the main points, with political analysis Healey offers £100 payment to households to help navigate ‘global economic storms’ UK growth forecast for 2027 slashed despite Healey’s budget measures Budget 2026 live – latest updates John Healey starts by saying that his budget is “delivered at a time when global uncertainties and pressures are swirling worldwide and hitting people here at home”. Healey says he will meet the fiscal rule that day-to-day spending must be covered by tax receipts, and the investment rule that government debt, defined ",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-10-28T15:58:03.428Z",
+    "status": "ready",
     "event_type": "Macro data",
     "event_breadth": "broad_macro",
-    "summary": "John Healey has announced his first budget – here are the main points, with political analysis Healey offers £100 payment to households to help navigate ‘global economic storms’ UK growth forecast for 2027 slashed despite Healey’s budget measures Budget 2026 live – latest updates John Healey starts by saying that his budget is “delivered at a time when global uncertainties and pressures are swirling worldwide and hitting people here at home”. Healey says he will meet the fiscal rule that day-to-day spending must be covered by tax receipts, and the investment rule that government debt, defined ",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -52514,27 +52651,26 @@
       "UK businesses with regular overseas payments"
     ],
     "why_now": "Recent macro data may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — rate-limit: Groq 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kn1qw9dvebs88x9zaf5pw5yf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "what_happened": "Budget 2026: key points at a glance",
     "what_changed_financially": "Market macro data with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
     "fx_payment_logic": "Macro events can shift currency values and affect UK businesses with overseas payment obligations or overseas revenue.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "Macro data may move GBP — UK businesses with overseas supplier payments or overseas customer revenue could be affected.",
     "sales_angle": "Recent macro data may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent macro data creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Macro data exposure"
-    ],
-    "status": "ready",
+    "summary": "John Healey has announced his first budget – here are the main points, with political analysis Healey offers £100 payment to households to help navigate ‘global economic storms’ UK growth forecast for 2027 slashed despite Healey’s budget measures Budget 2026 live – latest updates John Healey starts by saying that his budget is “delivered at a time when global uncertainties and pressures are swirling worldwide and hitting people here at home”. Healey says he will meet the fiscal rule that day-to-day spending must be covered by tax receipts, and the investment rule that government debt, defined ",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK businesses with regular overseas payments",
         "business_model": "UK importer or exporter with recurring FX payments or receipts",
         "exposure_level": "High",
         "exposure_type": "Currency exposure — GBP vs overseas currencies",
@@ -52542,35 +52678,38 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Macro data shifts GBP expectations → currency moves → GBP cost of overseas payments or GBP value of overseas receipts changes",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"importer\" UK",
+          "\"exporter\" UK international"
+        ],
+        "companies_house_terms": [
+          "food international",
+          "import trading",
+          "international trading"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"importer\" UK",
-          "\"exporter\" UK international"
-        ],
-        "sales_angle": "Macro uncertainty affecting GBP is a good time to review FX exposure on upcoming international payments.",
-        "exposure_thesis_template": "This company appears to have overseas payment obligations or international revenue — macro-driven GBP moves affect those FX transactions.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "food international",
-          "import trading",
-          "international trading"
-        ],
-        "segment_name": "UK businesses with regular overseas payments",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Macro uncertainty affecting GBP is a good time to review FX exposure on upcoming international payments.",
+        "exposure_thesis_template": "This company appears to have overseas payment obligations or international revenue — macro-driven GBP moves affect those FX transactions."
       }
     ],
     "companies_house_terms": [
@@ -52581,6 +52720,12 @@
     "all_search_queries": [
       "\"importer\" UK",
       "\"exporter\" UK international"
+    ],
+    "raw_summary": "John Healey has announced his first budget – here are the main points, with political analysis Healey offers £100 payment to households to help navigate ‘global economic storms’ UK growth forecast for 2027 slashed despite Healey’s budget measures Budget 2026 live – latest updates John Healey starts by saying that his budget is “delivered at a time when global uncertainties and pressures are swirling worldwide and hitting people here at home”. Healey says he will meet the fiscal rule that day-to-day spending must be covered by tax receipts, and the investment rule that government debt, defined ",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [
+      "Macro data exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-10-28T15:58:13.589Z"
@@ -57172,16 +57317,13 @@
   },
   "6645517db3ccb2ea": {
     "id": "6645517db3ccb2ea",
+    "headline": "China’s Refiners Turn to Africa and Brazil Crude as Freight Rates Ease",
     "source": "OilPrice.com",
     "source_url": "https://oilprice.com/Latest-Energy-News/World-News/Chinas-Refiners-Turn-to-Africa-and-Brazil-Crude-as-Freight-Rates-Ease.html",
-    "headline": "China’s Refiners Turn to Africa and Brazil Crude as Freight Rates Ease",
-    "raw_summary": "China’s refiners are buying crude oil from West Africa and Brazil after freight rates eased in the past two weeks, while competition for Russian supply is stronger and Iranian barrels have disappeared. Following a decline in shipping rates from all-time highs, some Chinese refiners have bought West African and Brazilian crude grades at premiums of up to $20 per barrel above ICE Brent for delivery in December, trading sources told Bloomberg on Wednesday. In early October, the freight rates of crude cargoes from the Atlantic Basin to Asia soared…",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bshipping cost|\\bfreight|\\bsu; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-10-28T15:58:03.429Z",
+    "status": "ready",
     "event_type": "Commodity",
     "event_breadth": "commodity",
-    "summary": "China’s refiners are buying crude oil from West Africa and Brazil after freight rates eased in the past two weeks, while competition for Russian supply is stronger and Iranian barrels have disappeared. Following a decline in shipping rates from all-time highs, some Chinese refiners have bought West African and Brazilian crude grades at premiums of up to $20 per barrel above ICE Brent for delivery in December, trading sources told Bloomberg on Wednesday. In early October, the freight rates of crude cargoes from the Atlantic Basin to Asia soared…",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -57197,100 +57339,106 @@
       "UK chemical and industrial-input importers"
     ],
     "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — rate-limit: Groq 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kn1qw9dvebs88x9zaf5pw5yf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "what_happened": "China’s Refiners Turn to Africa and Brazil Crude as Freight Rates Ease",
     "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
     "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
     "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Commodity exposure"
-    ],
-    "status": "ready",
+    "summary": "China’s refiners are buying crude oil from West Africa and Brazil after freight rates eased in the past two weeks, while competition for Russian supply is stronger and Iranian barrels have disappeared. Following a decline in shipping rates from all-time highs, some Chinese refiners have bought West African and Brazilian crude grades at premiums of up to $20 per barrel above ICE Brent for delivery in December, trading sources told Bloomberg on Wednesday. In early October, the freight rates of crude cargoes from the Atlantic Basin to Asia soared…",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK petroleum and fuel importers",
         "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
         "exposure_level": "Very High",
         "exposure_type": "USD commodity pricing exposure",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"fuel importer\" UK",
-          "\"petroleum distributor\" UK",
-          "\"chemical wholesaler\" UK"
-        ],
-        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
-        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "petroleum wholesale",
-          "fuel trading",
-          "chemical supplies"
-        ],
-        "segment_name": "UK petroleum and fuel importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs."
       },
       {
+        "segment_name": "UK chemical and industrial-input importers",
         "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
         "exposure_level": "High",
         "exposure_type": "USD commodity input exposure",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"chemical distributor\" UK",
-          "\"industrial chemical\" wholesale UK"
-        ],
-        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
-        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "chemicals wholesale",
-          "industrial supplies",
-          "plastics wholesale"
-        ],
-        "segment_name": "UK chemical and industrial-input importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs."
       }
     ],
     "companies_house_terms": [
@@ -57307,6 +57455,12 @@
       "\"chemical wholesaler\" UK",
       "\"chemical distributor\" UK",
       "\"industrial chemical\" wholesale UK"
+    ],
+    "raw_summary": "China’s refiners are buying crude oil from West Africa and Brazil after freight rates eased in the past two weeks, while competition for Russian supply is stronger and Iranian barrels have disappeared. Following a decline in shipping rates from all-time highs, some Chinese refiners have bought West African and Brazilian crude grades at premiums of up to $20 per barrel above ICE Brent for delivery in December, trading sources told Bloomberg on Wednesday. In early October, the freight rates of crude cargoes from the Atlantic Basin to Asia soared…",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bshipping cost|\\bfreight|\\bsu; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "Commodity exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-10-28T15:58:14.068Z"
@@ -57843,16 +57997,13 @@
   },
   "66e456ba68c453f7": {
     "id": "66e456ba68c453f7",
+    "headline": "investingLive European session wrap: Stocks tread cautiously as Fed decision and big tech earnings loom",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/investinglive-european-fx-news-wrap-28-oct/",
-    "headline": "investingLive European session wrap: Stocks tread cautiously as Fed decision and big tech earnings loom",
-    "raw_summary": "Headlines: Crude oil remains under pressure amid US-Iran deal hopes; setbacks could push prices to new highs Qatari mediators presented Iran with new draft deal; Iran's response expected by the end of the week Gold rebounds on renewed hopes for US-Iran deal as focus shifts to FOMC decision Wall Street faces a double test as Fed decision and Microsoft, Alphabet earnings loom Heads up: UK autumn budget puts Healey to the test as gilt markets await fiscal reassurance Germany consumer sentiment remains weak ahead of November as inflation fears cloud recovery outlook Germany's trade struggles with ",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\boil price|\\bcrude oil|\\bwti|; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
     "detected_at": "2026-10-28T15:58:03.427Z",
+    "status": "ready",
     "event_type": "Commodity",
     "event_breadth": "commodity",
-    "summary": "Headlines: Crude oil remains under pressure amid US-Iran deal hopes; setbacks could push prices to new highs Qatari mediators presented Iran with new draft deal; Iran's response expected by the end of the week Gold rebounds on renewed hopes for US-Iran deal as focus shifts to FOMC decision Wall Street faces a double test as Fed decision and Microsoft, Alphabet earnings loom Heads up: UK autumn budget puts Healey to the test as gilt markets await fiscal reassurance Germany consumer sentiment remains weak ahead of November as inflation fears cloud recovery outlook Germany's trade struggles with ",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -57868,100 +58019,106 @@
       "UK chemical and industrial-input importers"
     ],
     "why_now": "Recent commodity may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — rate-limit: Groq 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kn1qw9dvebs88x9zaf5pw5yf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Limited run — AI fallback, using rule-based segment hypothesis",
     "what_happened": "investingLive European session wrap: Stocks tread cautiously as Fed decision and big tech earnings loom",
     "what_changed_financially": "Market commodity with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD supplier costs",
     "fx_payment_logic": "Energy and commodity prices are denominated in USD. UK businesses buying commodities or fuel face higher GBP costs when prices rise or GBP weakens against USD.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers of petroleum, chemicals, and commodity-dependent manufacturers face higher input costs.",
     "sales_angle": "Recent commodity may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent commodity creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Commodity exposure"
-    ],
-    "status": "ready",
+    "summary": "Headlines: Crude oil remains under pressure amid US-Iran deal hopes; setbacks could push prices to new highs Qatari mediators presented Iran with new draft deal; Iran's response expected by the end of the week Gold rebounds on renewed hopes for US-Iran deal as focus shifts to FOMC decision Wall Street faces a double test as Fed decision and Microsoft, Alphabet earnings loom Heads up: UK autumn budget puts Healey to the test as gilt markets await fiscal reassurance Germany consumer sentiment remains weak ahead of November as inflation fears cloud recovery outlook Germany's trade struggles with ",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK petroleum and fuel importers",
         "business_model": "UK distributor buying petroleum products priced in USD, selling to UK trade in GBP",
         "exposure_level": "Very High",
         "exposure_type": "USD commodity pricing exposure",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Crude/fuel priced in USD → UK importer pays USD → GBP/USD move changes GBP cost of every delivery",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"fuel importer\" UK",
+          "\"petroleum distributor\" UK",
+          "\"chemical wholesaler\" UK"
+        ],
+        "companies_house_terms": [
+          "petroleum wholesale",
+          "fuel trading",
+          "chemical supplies"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"fuel importer\" UK",
-          "\"petroleum distributor\" UK",
-          "\"chemical wholesaler\" UK"
-        ],
-        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
-        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "petroleum wholesale",
-          "fuel trading",
-          "chemical supplies"
-        ],
-        "segment_name": "UK petroleum and fuel importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "With oil prices moving in USD, any UK business buying petroleum or chemicals faces GBP cost uncertainty.",
+        "exposure_thesis_template": "This company appears to import petroleum/chemicals priced in USD — USD price moves directly affect GBP costs."
       },
       {
+        "segment_name": "UK chemical and industrial-input importers",
         "business_model": "UK importer/distributor of industrial chemicals, plastics or raw materials priced in USD",
         "exposure_level": "High",
         "exposure_type": "USD commodity input exposure",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Commodity inputs priced in USD → USD payment to overseas supplier → GBP cost moves with USD rate",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"chemical distributor\" UK",
+          "\"industrial chemical\" wholesale UK"
+        ],
+        "companies_house_terms": [
+          "chemicals wholesale",
+          "industrial supplies",
+          "plastics wholesale"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"chemical distributor\" UK",
-          "\"industrial chemical\" wholesale UK"
-        ],
-        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
-        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "chemicals wholesale",
-          "industrial supplies",
-          "plastics wholesale"
-        ],
-        "segment_name": "UK chemical and industrial-input importers",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Oil price moves affect the USD cost of chemical inputs — worth reviewing overseas supplier FX exposure.",
+        "exposure_thesis_template": "This company appears to import chemicals/industrial inputs priced in USD — oil moves affect those costs."
       }
     ],
     "companies_house_terms": [
@@ -57978,6 +58135,12 @@
       "\"chemical wholesaler\" UK",
       "\"chemical distributor\" UK",
       "\"industrial chemical\" wholesale UK"
+    ],
+    "raw_summary": "Headlines: Crude oil remains under pressure amid US-Iran deal hopes; setbacks could push prices to new highs Qatari mediators presented Iran with new draft deal; Iran's response expected by the end of the week Gold rebounds on renewed hopes for US-Iran deal as focus shifts to FOMC decision Wall Street faces a double test as Fed decision and Microsoft, Alphabet earnings loom Heads up: UK autumn budget puts Healey to the test as gilt markets await fiscal reassurance Germany consumer sentiment remains weak ahead of November as inflation fears cloud recovery outlook Germany's trade struggles with ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\boil price|\\bcrude oil|\\bwti|; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
+    "exposure_types": [
+      "Commodity exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-10-28T15:58:10.213Z"
@@ -74943,6 +75106,119 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-08T23:47:09.006Z"
   },
+  "85965cdce888e93b": {
+    "id": "85965cdce888e93b",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/2026/oct/28/fed-interest-rates-midterms",
+    "headline": "Fed holds interest rates steady in last decision before midterms",
+    "raw_summary": "Fed chair Kevin Warsh said politics played no role in pause of interest rate hikes, despite inflation remaining above 3% The US Federal Reserve left interest rates unchanged on Wednesday during its last board meeting before the midterm elections, keeping rates at one of the highest pre-election levels seen in over 20 years. Two out of 12 board members voted against the pause, preferring to raise rates by a quarter point this meeting, the Fed board said in a statement. Continue reading...",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-10-29T01:40:39.527Z",
+    "event_type": "Central bank decision",
+    "event_breadth": "broad_currency",
+    "summary": "The Fed held rates steady, a move that can shift GBP/USD. UK firms with USD‑denominated costs or revenues will see their conversion rates affected immediately, making today a key moment to review hedging. Importers may face higher GBP costs on pending invoices, while exporters could see a modest gain on USD receipts.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "Fed rate hold influences GBP/USD, affecting UK importers paying USD suppliers and exporters receiving USD revenue",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK electronics component importers",
+      "UK aerospace parts importers from US",
+      "UK software firms paying US cloud services",
+      "UK manufacturers exporting to US"
+    ],
+    "why_now": "Upcoming USD invoices or revenue conversions will be settled at current rates, which may be less favourable after the Fed decision",
+    "discovery_recommendation": "Limited run — two distinct payment‑flow niches (USD importers and USD exporters) worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "Decision is factual, but market reaction uncertain; still clear USD exposure",
+    "what_happened": "The US Federal Reserve kept its policy rate unchanged at its latest meeting, holding rates steady.",
+    "what_changed_financially": "No change to US rates; market expectations of a hike were tempered, leading to potential GBP/USD movement.",
+    "who_pays_more": "UK businesses that pay USD‑denominated invoices (e.g., electronics importers, raw‑material buyers)",
+    "who_receives_less": "UK exporters that receive USD revenue may see a modest benefit but could face pricing pressure",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP → USD supplier payments and USD → GBP revenue conversions",
+    "fx_payment_logic": "UK importers receive invoices in USD from US suppliers and must convert GBP to USD to pay; a weaker GBP means more GBP per USD, raising costs. Conversely, UK exporters earn USD from US customers and convert back to GBP; a weaker GBP can increase the GBP amount received, but also creates pricing pressure for future contracts.",
+    "sales_angle": "If you have upcoming USD supplier payments or USD revenue, the current GBP/USD rate after the Fed hold could impact your margins today.",
+    "business_impact_summary": "UK importers of US‑priced electronics, aerospace parts and other goods will see higher GBP costs on pending invoices, while UK software and manufacturing firms earning in USD may see a modest upside but need to manage future pricing. The Fed’s decision makes the FX environment volatile, so reviewing hedging now is timely.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion exposure"
+    ],
+    "overall_sales_angle": "The Fed’s rate hold may move GBP/USD, so any UK business with USD invoices or receipts should check today’s rates before settling.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US‑priced electronics and components",
+        "category_priority_score": 80,
+        "business_model": "UK wholesaler/distributor buying electronic parts from US manufacturers, paying USD invoices, selling finished goods in GBP to UK customers",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure — USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Importer receives USD invoice from US chip maker → converts GBP to USD → if GBP has weakened since order, more GBP needed → margin compressed",
+        "margin_risk": "High — 2% GBP/USD move on £1,000,000 annual spend ≈ £20,000 extra cost if unhedged",
+        "payment_timing_risk": "High — typical 30‑60 day payment terms create open FX window",
+        "affected_payment_flow": "USD payments to US suppliers, typically £100k‑£1m per shipment, monthly/quarterly",
+        "website_validation_signals": [
+          "imported from the United States",
+          "US supplier",
+          "electronics components",
+          "exclusive distributor"
+        ],
+        "avoid_segments": [
+          "retail electronics shops without import operations",
+          "pure UK manufacturers"
+        ],
+        "sales_angle": "Your upcoming USD component invoices will cost more in GBP after the Fed’s rate hold.",
+        "exposure_thesis_template": "This company imports electronic components from US suppliers. GBP/USD move increases GBP cost of upcoming USD invoices.",
+        "micro_categories": [
+          {
+            "name": "UK smartphone component importers",
+            "why": "Pay USD to US chip manufacturers, margin hit by GBP weakening",
+            "search_queries": [
+              "\"smartphone component importer\" UK",
+              "\"US chip supplier\" UK",
+              "\"electronics components import\" UK"
+            ],
+            "companies_house_terms": [
+              "electronics import",
+              "chip",
+              "components"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from the United States",
+          "US supplier",
+          "electronics components",
+          "exclusive distributor"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "electronics import",
+      "chip",
+      "components"
+    ],
+    "all_search_queries": [
+      "\"smartphone component importer\" UK",
+      "\"US chip supplier\" UK",
+      "\"electronics components import\" UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-29T01:41:53.516Z"
+  },
   "85aa9f8951e08bc7": {
     "id": "85aa9f8951e08bc7",
     "headline": "Interest rates expected to be held again by Bank of England",
@@ -77264,16 +77540,13 @@
   },
   "89b24768bc33760e": {
     "id": "89b24768bc33760e",
+    "headline": "British exporters to be given greater access to finance as UKEF strengthens support for Ukraine",
     "source": "GOV.UK Trade",
     "source_url": "https://www.gov.uk/government/news/british-exporters-to-be-given-greater-access-to-finance-as-ukef-strengthens-support-for-ukraine",
-    "headline": "British exporters to be given greater access to finance as UKEF strengthens support for Ukraine",
-    "raw_summary": "UK exporters set to benefit from wider eligibility and faster access to government-backed finance of up to £15 million through UK Export Finance’s General Export Facility",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\buk business|\\buk compan|\\buk",
     "detected_at": "2026-10-28T15:58:03.428Z",
+    "status": "ready",
     "event_type": "Macro data",
     "event_breadth": "broad_macro",
-    "summary": "UK exporters set to benefit from wider eligibility and faster access to government-backed finance of up to £15 million through UK Export Finance’s General Export Facility",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -77289,27 +77562,26 @@
       "UK businesses with regular overseas payments"
     ],
     "why_now": "Recent macro data may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — rate-limit: Groq 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kn1qw9dvebs88x9zaf5pw5yf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "what_happened": "British exporters to be given greater access to finance as UKEF strengthens support for Ukraine",
     "what_changed_financially": "Market macro data with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
     "fx_payment_logic": "Macro events can shift currency values and affect UK businesses with overseas payment obligations or overseas revenue.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "Macro data may move GBP — UK businesses with overseas supplier payments or overseas customer revenue could be affected.",
     "sales_angle": "Recent macro data may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent macro data creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Macro data exposure"
-    ],
-    "status": "ready",
+    "summary": "UK exporters set to benefit from wider eligibility and faster access to government-backed finance of up to £15 million through UK Export Finance’s General Export Facility",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK businesses with regular overseas payments",
         "business_model": "UK importer or exporter with recurring FX payments or receipts",
         "exposure_level": "High",
         "exposure_type": "Currency exposure — GBP vs overseas currencies",
@@ -77317,35 +77589,38 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Macro data shifts GBP expectations → currency moves → GBP cost of overseas payments or GBP value of overseas receipts changes",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"importer\" UK",
+          "\"exporter\" UK international"
+        ],
+        "companies_house_terms": [
+          "food international",
+          "import trading",
+          "international trading"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"importer\" UK",
-          "\"exporter\" UK international"
-        ],
-        "sales_angle": "Macro uncertainty affecting GBP is a good time to review FX exposure on upcoming international payments.",
-        "exposure_thesis_template": "This company appears to have overseas payment obligations or international revenue — macro-driven GBP moves affect those FX transactions.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "food international",
-          "import trading",
-          "international trading"
-        ],
-        "segment_name": "UK businesses with regular overseas payments",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Macro uncertainty affecting GBP is a good time to review FX exposure on upcoming international payments.",
+        "exposure_thesis_template": "This company appears to have overseas payment obligations or international revenue — macro-driven GBP moves affect those FX transactions."
       }
     ],
     "companies_house_terms": [
@@ -77356,6 +77631,12 @@
     "all_search_queries": [
       "\"importer\" UK",
       "\"exporter\" UK international"
+    ],
+    "raw_summary": "UK exporters set to benefit from wider eligibility and faster access to government-backed finance of up to £15 million through UK Export Finance’s General Export Facility",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\buk business|\\buk compan|\\buk",
+    "exposure_types": [
+      "Macro data exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-10-28T15:58:12.652Z"
@@ -84498,16 +84779,13 @@
   },
   "9507d95c792540a5": {
     "id": "9507d95c792540a5",
+    "headline": "British exporters to be given greater access to finance as UKEF strengthens support for Ukraine",
     "source": "GOV.UK Export",
     "source_url": "https://www.gov.uk/government/news/british-exporters-to-be-given-greater-access-to-finance-as-ukef-strengthens-support-for-ukraine",
-    "headline": "British exporters to be given greater access to finance as UKEF strengthens support for Ukraine",
-    "raw_summary": "UK exporters set to benefit from wider eligibility and faster access to government-backed finance of up to £15 million through UK Export Finance’s General Export Facility",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\buk business|\\buk compan|\\buk",
     "detected_at": "2026-10-28T15:58:03.428Z",
+    "status": "ready",
     "event_type": "Macro data",
     "event_breadth": "broad_macro",
-    "summary": "UK exporters set to benefit from wider eligibility and faster access to government-backed finance of up to £15 million through UK Export Finance’s General Export Facility",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -84523,27 +84801,26 @@
       "UK businesses with regular overseas payments"
     ],
     "why_now": "Recent macro data may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — rate-limit: Groq 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kn1qw9dvebs88x9zaf5pw5yf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "what_happened": "British exporters to be given greater access to finance as UKEF strengthens support for Ukraine",
     "what_changed_financially": "Market macro data with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
     "fx_payment_logic": "Macro events can shift currency values and affect UK businesses with overseas payment obligations or overseas revenue.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "Macro data may move GBP — UK businesses with overseas supplier payments or overseas customer revenue could be affected.",
     "sales_angle": "Recent macro data may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent macro data creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Macro data exposure"
-    ],
-    "status": "ready",
+    "summary": "UK exporters set to benefit from wider eligibility and faster access to government-backed finance of up to £15 million through UK Export Finance’s General Export Facility",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK businesses with regular overseas payments",
         "business_model": "UK importer or exporter with recurring FX payments or receipts",
         "exposure_level": "High",
         "exposure_type": "Currency exposure — GBP vs overseas currencies",
@@ -84551,35 +84828,38 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Macro data shifts GBP expectations → currency moves → GBP cost of overseas payments or GBP value of overseas receipts changes",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"importer\" UK",
+          "\"exporter\" UK international"
+        ],
+        "companies_house_terms": [
+          "food international",
+          "import trading",
+          "international trading"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"importer\" UK",
-          "\"exporter\" UK international"
-        ],
-        "sales_angle": "Macro uncertainty affecting GBP is a good time to review FX exposure on upcoming international payments.",
-        "exposure_thesis_template": "This company appears to have overseas payment obligations or international revenue — macro-driven GBP moves affect those FX transactions.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "food international",
-          "import trading",
-          "international trading"
-        ],
-        "segment_name": "UK businesses with regular overseas payments",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Macro uncertainty affecting GBP is a good time to review FX exposure on upcoming international payments.",
+        "exposure_thesis_template": "This company appears to have overseas payment obligations or international revenue — macro-driven GBP moves affect those FX transactions."
       }
     ],
     "companies_house_terms": [
@@ -84591,21 +84871,24 @@
       "\"importer\" UK",
       "\"exporter\" UK international"
     ],
+    "raw_summary": "UK exporters set to benefit from wider eligibility and faster access to government-backed finance of up to £15 million through UK Export Finance’s General Export Facility",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\buk business|\\buk compan|\\buk",
+    "exposure_types": [
+      "Macro data exposure"
+    ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-10-28T15:58:13.099Z"
   },
   "95967696d113a555": {
     "id": "95967696d113a555",
+    "headline": "US September advance goods trade balance -134.9 billion vs -130.2 billion expected",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/us-september-advance-goods-trade-balance-vs-130-2-billion-expected/",
-    "headline": "US September advance goods trade balance -134.9 billion vs -130.2 billion expected",
-    "raw_summary": "Prior was -132.6 These are the two worst back-to-back months since just before Liberation Day, when goods were flooding into the US to try to front-run Trump's tariffs. Excluding Jan-Mar 2025, it's the worst two-month period ever. Needless to say, tariffs aren't working. For background, the advance goods trade balance is part of the Census Bureau’s Advance Economic Indicators report, released at 8:30 am ET roughly four weeks after the reference month ends. The same release includes advance estimates for wholesale and retail inventories, making it one of the more useful early inputs for trackin",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
     "detected_at": "2026-10-28T15:58:03.428Z",
+    "status": "ready",
     "event_type": "Tariff",
     "event_breadth": "tariff",
-    "summary": "Prior was -132.6 These are the two worst back-to-back months since just before Liberation Day, when goods were flooding into the US to try to front-run Trump's tariffs. Excluding Jan-Mar 2025, it's the worst two-month period ever. Needless to say, tariffs aren't working. For background, the advance goods trade balance is part of the Census Bureau’s Advance Economic Indicators report, released at 8:30 am ET roughly four weeks after the reference month ends. The same release includes advance estimates for wholesale and retail inventories, making it one of the more useful early inputs for trackin",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -84622,27 +84905,26 @@
       "UK manufacturers importing raw materials"
     ],
     "why_now": "Recent tariff may affect upcoming overseas payments for UK businesses",
-    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "confidence_level": "low",
     "confidence_reason": "AI fallback used — rate-limit: Groq 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kn1qw9dvebs88x9zaf5pw5yf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used. Rule-based segments inferred from headline keywords.",
+    "discovery_recommendation": "Context only — pre-relevance was weak and AI was unavailable",
     "what_happened": "US September advance goods trade balance -134.9 billion vs -130.2 billion expected",
     "what_changed_financially": "Market tariff with direct FX implications for UK businesses",
     "who_pays_more": "UK importers with overseas supplier invoices",
     "who_receives_less": "UK exporters with overseas customer revenue (if GBP strengthened)",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue vs GBP/USD/GBP/EUR supplier costs",
     "fx_payment_logic": "New or increased tariffs raise the cost of imported goods. UK businesses buying stock from overseas suppliers face higher landed costs and margin pressure immediately.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers with US or EU suppliers now face higher input costs. Businesses that priced stock before the tariff announcement will see margin compression on committed orders.",
     "sales_angle": "Recent tariff may affect UK businesses with overseas payments. Worth reviewing FX exposure.",
     "overall_sales_angle": "Recent tariff creates FX exposure for UK businesses with international payment flows.",
-    "exposure_types": [
-      "Tariff exposure"
-    ],
-    "status": "ready",
+    "summary": "Prior was -132.6 These are the two worst back-to-back months since just before Liberation Day, when goods were flooding into the US to try to front-run Trump's tariffs. Excluding Jan-Mar 2025, it's the worst two-month period ever. Needless to say, tariffs aren't working. For background, the advance goods trade balance is part of the Census Bureau’s Advance Economic Indicators report, released at 8:30 am ET roughly four weeks after the reference month ends. The same release includes advance estimates for wholesale and retail inventories, making it one of the more useful early inputs for trackin",
+    "ai_provider": "",
     "fallback_mode": true,
     "target_segments": [
       {
+        "segment_name": "UK importers of US/EU goods",
         "business_model": "UK distributor or retailer sourcing stock from US or European suppliers, selling domestically in GBP",
         "exposure_level": "Very High",
         "exposure_type": "Tariff cost exposure",
@@ -84650,38 +84932,42 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Tariff added to import invoice → higher total cost in foreign currency → more GBP needed to pay → margin compressed",
         "margin_risk": "High — tariff applies directly to cost of goods",
         "payment_timing_risk": "High — goods already ordered now cost more",
         "affected_payment_flow": "USD/EUR payments to overseas suppliers, monthly or per-shipment",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"food importer\" UK",
+          "\"product distributor\" UK wholesale",
+          "\"import trading\" UK"
+        ],
+        "companies_house_terms": [
+          "import trading",
+          "distribution international",
+          "foods wholesale"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"food importer\" UK",
-          "\"product distributor\" UK wholesale",
-          "\"import trading\" UK"
-        ],
-        "sales_angle": "With tariffs increasing import costs, businesses may want to review upcoming USD/EUR supplier payments.",
-        "exposure_thesis_template": "This company appears to import goods from overseas and sell in GBP — tariffs increase the GBP cost of upcoming orders.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "import trading",
-          "distribution international",
-          "foods wholesale"
-        ],
-        "segment_name": "UK importers of US/EU goods",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "With tariffs increasing import costs, businesses may want to review upcoming USD/EUR supplier payments.",
+        "exposure_thesis_template": "This company appears to import goods from overseas and sell in GBP — tariffs increase the GBP cost of upcoming orders."
       },
       {
+        "segment_name": "UK manufacturers importing raw materials",
         "business_model": "UK manufacturer sourcing raw materials or components from US/EU, selling finished goods in GBP",
         "exposure_level": "High",
         "exposure_type": "Input cost exposure",
@@ -84689,35 +84975,38 @@
           "GBP/USD",
           "GBP/EUR"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Tariff on imported components/materials → higher cost per unit → margin compressed on GBP-priced finished goods",
         "margin_risk": "Medium",
         "payment_timing_risk": "Medium",
         "affected_payment_flow": "",
+        "ideal_company_profile": "",
+        "micro_categories": [],
+        "high_intent_search_queries": [
+          "\"manufacturer\" UK international supply",
+          "\"components distributor\" UK"
+        ],
+        "companies_house_terms": [
+          "manufacturing international",
+          "components wholesale",
+          "industrial trading"
+        ],
         "website_validation_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
         ],
-        "high_intent_search_queries": [
-          "\"manufacturer\" UK international supply",
-          "\"components distributor\" UK"
-        ],
-        "sales_angle": "Tariffs on imported components are increasing production costs for UK manufacturers with overseas supply chains.",
-        "exposure_thesis_template": "This company appears to manufacture using imported materials/components — tariffs raise hard-to-pass-on input costs.",
-        "micro_categories": [],
-        "companies_house_terms": [
-          "manufacturing international",
-          "components wholesale",
-          "industrial trading"
-        ],
-        "segment_name": "UK manufacturers importing raw materials",
         "segment_signals": [
           "we import",
           "imported from",
           "overseas supplier",
           "international supplier"
-        ]
+        ],
+        "avoid_segments": [],
+        "sales_angle": "Tariffs on imported components are increasing production costs for UK manufacturers with overseas supply chains.",
+        "exposure_thesis_template": "This company appears to manufacture using imported materials/components — tariffs raise hard-to-pass-on input costs."
       }
     ],
     "companies_house_terms": [
@@ -84734,6 +85023,12 @@
       "\"import trading\" UK",
       "\"manufacturer\" UK international supply",
       "\"components distributor\" UK"
+    ],
+    "raw_summary": "Prior was -132.6 These are the two worst back-to-back months since just before Liberation Day, when goods were flooding into the US to try to front-run Trump's tariffs. Excluding Jan-Mar 2025, it's the worst two-month period ever. Needless to say, tariffs aren't working. For background, the advance goods trade balance is part of the Census Bureau’s Advance Economic Indicators report, released at 8:30 am ET roughly four weeks after the reference month ends. The same release includes advance estimates for wholesale and retail inventories, making it one of the more useful early inputs for trackin",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
+    "exposure_types": [
+      "Tariff exposure"
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-10-28T15:58:11.699Z"
