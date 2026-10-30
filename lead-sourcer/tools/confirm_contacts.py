@@ -68,17 +68,18 @@ def main() -> None:
     if args.match:
         rows = [r for r in rows if args.match.lower() in r["company_name"].lower()]
     if args.debug:
-        real_fetch = profiles.fetch
+        # the searches go through fetch_any (Search1API, Tavily, Exa, Serper in turn): show what each returned
+        real_fetch = profiles.fetch_any
 
-        def fetch_and_show(query: str, key: str):
+        def fetch_and_show(query: str, key: str = ""):
             answer = real_fetch(query, key)
             results = profiles.parse(answer) if answer else None
-            print(f"\n  [Google via Search1API] {query}\n    -> "
+            print(f"\n  [search] {query}\n    -> "
                   f"{'FAILED (no answer)' if answer is None else 'not a results answer' if results is None else f'{len(results)} results'}")
             for link, title, _ in (results or [])[:6]:
                 print(f"    - {urllib.parse.urlparse(link).netloc:28} {title[:90]}")
             return answer
-        profiles.fetch = fetch_and_show
+        profiles.fetch_any = fetch_and_show
     if args.top:
         keep = {id(r) for r in [r for r in rows if r.get("untapped_reasons") != confirm.NOT_CHECKED][:args.top]}
         rows = [r for r in rows if id(r) in keep]

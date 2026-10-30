@@ -28,6 +28,13 @@ DIRECTOR_WINDOW_DAYS = 365
 RENEWAL_YEARS = (3, 5)         # typical term of a bank facility
 
 
+def in_renewal_window(created_on: str, today: date, years: tuple[int, int] = RENEWAL_YEARS) -> bool:
+    """A facility (its charge's creation date) in its renewal window: low to high years old, plus a year's grace
+    for a renewal running late. One rule for the trigger and the bank_since hook."""
+    low, high = years
+    return _ago(today, (high + 1) * 365) <= (created_on or "")[:10] <= _ago(today, low * 365) if created_on else False
+
+
 def _ago(today: date, days: int) -> str:
     return (today - timedelta(days=days)).isoformat()
 
@@ -79,7 +86,7 @@ def find(owners: list[dict], charges: list[dict], directors: list[dict], today: 
     if bank_charges:
         newest = max(bank_charges, key=lambda c: c["created_on"])
         lo, hi = RENEWAL_YEARS
-        if _ago(today, 365 * hi + 1) <= newest["created_on"] <= _ago(today, 365 * lo):
+        if in_renewal_window(newest["created_on"], today):
             group = banks.classify(newest["name"])[0]
             lines.append(f"{group} facility from {newest['created_on'][:7]} — on a {lo}–{hi} year term, renewal is near")
 

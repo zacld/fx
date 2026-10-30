@@ -164,7 +164,7 @@ def country_currency(place: str) -> Optional[str]:
 
 
 def is_uk(place: str) -> bool:
-    return " ".join((place or "").upper().replace(".", "").split()) in _UK_PLACES | {""}
+    return " ".join((place or "").upper().replace(".", "").split()) in _UK_PLACES | {""} or signals.is_uk(place)
 
 
 def region_currency(region: str) -> Optional[str]:
@@ -359,8 +359,7 @@ def find_hooks(facts: Optional[dict], officers: list[dict], charges: list[dict],
     bank = incumbent.incumbent_bank(charges)
     if bank and not any(h["kind"] == "charge" and bank["name"] in h["detail"] for h in hooks):
         since = _d(bank["created_on"])
-        low, high = rules["bank_since_years"]
-        if since and low * 365 <= (today - since).days <= (high + 1) * 365:
+        if since and triggers.in_renewal_window(bank["created_on"], today, rules["bank_since_years"]):
             years = (today - since).days // 365
             hooks.append({"kind": "bank_since", "label": "Main bank facility in place for years",
                           "detail": f"{bank['name']} has held an all-assets debenture since {day(bank['created_on'])}, "

@@ -12,6 +12,7 @@ step instead of crashing.
 from __future__ import annotations
 
 import base64
+import http.client
 import json
 import os
 import re
@@ -81,9 +82,11 @@ def _get(url: str, params: dict, api_key: str, retries: int = 3) -> Optional[dic
                 return None
             else:
                 time.sleep(1)
-        except urllib.error.URLError as e:
+        except (urllib.error.URLError, OSError, http.client.HTTPException, ValueError) as e:
+            # URLError: the request didn't go; OSError / HTTPException: a timeout or dropped connection while
+            # reading the answer (urllib doesn't wrap those); ValueError: a body that isn't JSON.
             if attempt == retries:
-                print(f"WARNING: Companies House request failed: {e}", file=sys.stderr)
+                print(f"WARNING: Companies House request failed: {type(e).__name__}: {e}", file=sys.stderr)
                 return None
             time.sleep(1)
     return None

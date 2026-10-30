@@ -388,6 +388,7 @@ def _money(value: Optional[float]) -> str:
     return str(round(value)) if value is not None else ""
 
 
+NO_FACTS_RETRY_DAYS = 3   # accounts that gave nothing are read again after this (FACTS_DAYS for readable ones)
 FORMER_FD_TRIGGER_DAYS = 365   # a finance director who left the board within this is a trigger
 
 # A loss on currency in accounts filed lately lifts a company in the list (logged for recalibration, like triggers).
@@ -811,14 +812,20 @@ def run_pipeline(
         cached = register_cache.load(number, made_up) if checked and turnover_check else None
         if cached and not accounts.facts_reusable(cached):
             cached = None   # read with older rules: read the accounts again
+        if cached and cached.get("facts") is None and time.time() - cached.get("facts_read_at", 0) > NO_FACTS_RETRY_DAYS * 86400:
+            cached = None   # accounts that gave nothing: try again (see NO_FACTS_RETRY_DAYS)
         # the accounts themselves (OCR included) are kept longer: only the register goes stale weekly
         # (a filing with nothing readable stays that way: its None is kept too). The age is from when the
         # accounts were read (facts_read_at), not the file's date, which every register refresh resets.
         older = (register_cache.load(number, made_up, days=float("inf"))
                  if checked and turnover_check and not cached else None)
         now = time.time()
+        # Accounts that gave nothing (None: a Document API error or timeout, or a filing with nothing readable)
+        # are tried again after NO_FACTS_RETRY_DAYS, not kept for FACTS_DAYS: a passing 503 mustn't hide a
+        # company's figures for three months.
+        keep_days = register_cache.FACTS_DAYS if (older or {}).get("facts") else NO_FACTS_RETRY_DAYS
         reuse = bool(older and accounts.facts_reusable(older)
-                     and now - older.get("facts_read_at", now) < register_cache.FACTS_DAYS * 86400)
+                     and now - older.get("facts_read_at", now) < keep_days * 86400)
         # (entries saved before facts_read_at existed count from now)
         t0 = time.monotonic()
         facts = cached["facts"] if cached else older["facts"] if reuse else (

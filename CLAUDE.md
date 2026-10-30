@@ -67,7 +67,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   → company website → gov.uk registry filing with a finance title (gender
   pay gap "responsible person", modern slavery statement approver; ≤3
   years) → finance appointment in the news (Google News RSS, headline must
-  name the company, ≤4 years) → qualified accountant (ACA/FCA/ACCA/…) on
+  name the company, ≤4 years) → qualified accountant (ACA/FCA/ACCA/…, or a
+  director filed only as "Accountant": Likely) on
   the board → company secretary → director who signed the accounts.
   `finance_contact_source` records which, `finance_contact_evidence` lists
   every source naming that person, and `finance_contact_confidence` grades

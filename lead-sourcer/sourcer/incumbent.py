@@ -28,8 +28,11 @@ FX_PROVIDERS = ["Ebury", "Corpay", "Cambridge Global Payments", "Moneycorp", "We
                 "AFEX", "Argentex", "Equals Money", "Currencies Direct", "Wise Business", "OFX", "Alpha FX",
                 "Smart Currency Exchange", "Bibby Foreign Exchange", "Kantox", "Convera", "GPS Capital Markets",
                 "Clear Currency", "Centtrip", "Payoneer", "Airwallex", "iBanFirst", "Currenxie"]
-# Case-sensitive: these are proper names. Names that are also everyday words ("global reach") are left out.
+# Case-sensitive in the accounts' prose: these are proper names ("clear currency" in a sentence isn't Clear Currency).
+# Names that are also everyday words ("global reach") are left out. Charge holders are filed in capitals
+# ("EBURY PARTNERS UK LIMITED"), so the charges register is matched ignoring case.
 _PROVIDER_RE = re.compile(r"\b(" + "|".join(re.escape(p) for p in FX_PROVIDERS) + r")\b")
+_PROVIDER_HOLDER_RE = re.compile(_PROVIDER_RE.pattern, re.I)
 
 _FORWARDS_RE = re.compile(r"forward\s+(?:foreign\s+)?(?:exchange|currency|fx)\s+contracts?|forward\s+contracts?|"
                           r"(?:currency|fx|foreign\s+exchange)\s+forwards?|forward\s+(?:purchases?|cover)", re.I)
@@ -227,11 +230,12 @@ def columns(facts: Optional[dict], charges: list[dict], today: Optional[date] = 
     lenders = [f"{c['name']}: {charge_kind(c)}, registered {hooks.day(c['created_on'])}" for c in _outstanding(charges)[:4]]
     bank = incumbent_bank(charges)
     end = next_facility_end(f, today)
-    provider_charge = next((c for c in _outstanding(charges) if _PROVIDER_RE.search(c["name"])), None)
+    provider_charge = next((c for c in _outstanding(charges) if _PROVIDER_HOLDER_RE.search(c["name"])), None)
     named = next(iter(f.get("fx_providers") or []), None)
     policy = f.get("fx_policy") or {}
     if provider_charge:
-        fx_today = f"Uses an FX provider: {_PROVIDER_RE.search(provider_charge['name']).group(1)}"
+        found = _PROVIDER_HOLDER_RE.search(provider_charge["name"]).group(1).lower()
+        fx_today = f"Uses an FX provider: {next(p for p in FX_PROVIDERS if p.lower() == found)}"   # "Ebury", not "EBURY"
         fx_evidence = (f"{provider_charge['name']} holds a charge registered {hooks.day(provider_charge['created_on'])} "
                        f"(Companies House charges register)")
     elif named:
