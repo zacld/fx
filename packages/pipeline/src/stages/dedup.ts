@@ -36,7 +36,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   LeadSchema, clearContactFields, bestContactRoute, repoRoot,
-  companyNameKey, isDedupableNameKey,
+  companyNameKey, isDedupableNameKey, multiEventBoost,
   type Lead, type LeadEvidence,
 } from "@fx/core";
 import { getDb, schema } from "@fx/core/db";
@@ -132,13 +132,20 @@ function mergeInto(best: Lead, dropped: Lead[]): void {
   }
 }
 
-/** Apply the multi-event scoring boost — only the CN pass uses this. */
-function applyMultiEventBoost(best: Lead, groupSize: number): void {
+/**
+ * The multi-event boost (CLAUDE.md Priority 11), by DISTINCT events — a CH-fallback lead and a web lead from the same
+ * event are one event. scoreLead adds the same boost from linked_event_ids on every later run; here only the part
+ * this merge newly earns is added (scoreLead may already have counted the events the best record knew of).
+ */
+function applyMultiEventBoost(best: Lead, eventsBefore: number): void {
+  const events = (best.linked_event_ids ?? []).length;
+  if (events < 2) return;
   best.multi_event_trigger = true;
-  best.multi_event_count = groupSize;
-  const boost = Math.min(8, (groupSize - 1) * 4);
+  best.multi_event_count = events;
+  const boost = multiEventBoost(events) - multiEventBoost(eventsBefore);
+  if (boost <= 0) return;
   best.score = Math.min(100, (best.score ?? 0) + boost);
-  best.scoring_reasons = [...(best.scoring_reasons ?? []), `Multi-event trigger: ${groupSize} separate events flag this company (+${boost})`];
+  best.scoring_reasons = [...(best.scoring_reasons ?? []), `Multi-event trigger: ${events} separate events flag this company (+${boost})`];
   best.priority = priorityFor(best.score);
 }
 
@@ -170,8 +177,9 @@ export function dedupLeads(leads: Record<string, Lead>): Omit<DedupResult, "runI
     group.sort((a, b) => leadCompare(leads[a]!, leads[b]!));
     const best = leads[group[0]!]!;
     const dropped = group.slice(1).map((i) => leads[i]!);
+    const eventsBefore = (best.linked_event_ids?.length ? best.linked_event_ids : [best.event_id]).filter(Boolean).length;
     mergeInto(best, dropped);
-    applyMultiEventBoost(best, group.length);
+    applyMultiEventBoost(best, eventsBefore);
     for (const i of group.slice(1)) { delete leads[i]; cnLeadsRemoved++; }
   }
 

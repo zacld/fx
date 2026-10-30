@@ -451,7 +451,12 @@ async function enrichLead(
     noWebsite = buildNoWebsiteHints({ companyNameClean: ctx.coClean, address: lead.address ?? "" });
     for (const url of noWebsite.candidate_domains) {
       if (stop.stopped) return;
-      if (await defaultHeadOk(url)) { (lead as Record<string, unknown>).website = url; ctx.domain = bareDomain(url); break; }
+      if (await defaultHeadOk(url)) {
+        // a domain that answers isn't proof it's this company's: marked guessed, so scoring caps it below WARM
+        Object.assign(lead as Record<string, unknown>, { website: url, website_confidence: "guessed", website_source: "domain_guess" });
+        ctx.domain = bareDomain(url);
+        break;
+      }
     }
   }
 

@@ -472,6 +472,7 @@ Gate rules (enforced in `rescore.py`):
 - No FX signals → cap at 39 (SKIP)
 - Known bad domain → cap at 49 (QUEUE)
 - HOT requires: score ≥ 80 AND verified website AND at least 1 FX signal
+- Website confidence low or guessed (a name-guessed domain) → cap at 59 (QUEUE)
 
 Known bad domains are maintained in `KNOWN_BAD_DOMAINS` in `rescore.py`. Add directories, news sites, aggregators, and marketplaces to this list as they appear.
 

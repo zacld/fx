@@ -15,9 +15,11 @@ import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { EventSchema, LeadSchema } from "../schema.js";
+import { EventSchema, LeadSchema, type FxEvent, type Lead } from "../schema.js";
 import { repoRoot } from "../paths.js";
 import { getDb, schema } from "./index.js";
+
+const int = (v: unknown) => Math.round(Number(v) || 0);   // a column value from a row the schema rejected
 
 export interface ImportResult {
   eventsOk: number;
@@ -63,16 +65,18 @@ export function importJson(opts: ImportOptions = {}): ImportResult {
           const parsed = EventSchema.safeParse(obj);
           if (!parsed.success) {
             if (opts.strict) throw new Error(`bad event ${id}: ${parsed.error.message}`);
-            res.eventsBad++; res.eventsBadIds.push(id); continue;
+            res.eventsBad++; res.eventsBadIds.push(id);
           }
-          const e = parsed.data;
+          // An event the schema rejects is still kept, as it was: dropping it here would delete it from the export
+          // (and the next RSS pass would pay for a second AI call). The count above reports it.
+          const e = (parsed.success ? parsed.data : obj) as FxEvent;
           db.insert(schema.events).values({
-            id: e.id, headline: e.headline, status: e.status, event_type: e.event_type,
-            event_breadth: e.event_breadth || "sector_specific",
-            urgency_score: e.urgency_score, commercial_relevance: e.commercial_relevance,
+            id: e.id, headline: String(e.headline ?? ""), status: String(e.status ?? "ready"),
+            event_type: String(e.event_type ?? ""), event_breadth: String(e.event_breadth || "sector_specific"),
+            urgency_score: int(e.urgency_score), commercial_relevance: int(e.commercial_relevance),
             detected_at: e.detected_at ?? null, data: e,
           }).run();
-          res.eventsOk++;
+          if (parsed.success) res.eventsOk++;
         }
       });
       tx();
@@ -88,22 +92,24 @@ export function importJson(opts: ImportOptions = {}): ImportResult {
           const parsed = LeadSchema.safeParse(obj);
           if (!parsed.success) {
             if (opts.strict) throw new Error(`bad lead ${id}: ${parsed.error.message}`);
-            res.leadsBad++; res.leadsBadIds.push(id); continue;
+            res.leadsBad++; res.leadsBadIds.push(id);
           }
-          const l = parsed.data;
+          // A lead the schema rejects is still kept, as it was: the export (and the private store after it) would
+          // otherwise lose it and its enrichment for good. Stages read rows with safeParse and fall back the same way.
+          const l = (parsed.success ? parsed.data : obj) as Lead;
           db.insert(schema.leads).values({
-            id: l.id, event_id: l.event_id,
-            company_number: l.company_number ?? null, company_name: l.company_name,
+            id: l.id, event_id: String(l.event_id ?? ""),
+            company_number: l.company_number ?? null, company_name: String(l.company_name ?? "Unknown"),
             company_status: l.company_status ?? null,
-            website: l.website ?? null, website_domain: l.website_domain,
+            website: l.website ?? null, website_domain: String(l.website_domain ?? ""),
             website_source: (l.website_source as string | null) ?? null,
             website_confidence: (l.website_confidence as string | null) ?? null,
-            priority: l.priority, score: l.score,
-            exposure_level: l.exposure_level || "", exposure_confidence: l.exposure_confidence,
-            lead_type: l.lead_type, segment_name: l.segment_name,
+            priority: String(l.priority ?? "QUEUE"), score: int(l.score),
+            exposure_level: String(l.exposure_level || ""), exposure_confidence: String(l.exposure_confidence ?? "none"),
+            lead_type: String(l.lead_type ?? "unknown"), segment_name: String(l.segment_name ?? ""),
             is_large_org: !!l.is_large_org, rescored_at: l.rescored_at ?? null, data: l,
           }).run();
-          res.leadsOk++;
+          if (parsed.success) res.leadsOk++;
         }
       });
       tx();
@@ -136,7 +142,7 @@ if (isMain) {
   const opts = parseArgs(process.argv.slice(2));
   const r = importJson(opts);
   console.log(
-    `imported: ${r.eventsOk} events (${r.eventsBad} skipped), ${r.leadsOk} leads (${r.leadsBad} skipped)`,
+    `imported: ${r.eventsOk} events (+${r.eventsBad} kept as-is, failing the schema), ${r.leadsOk} leads (+${r.leadsBad} kept as-is)`,
   );
   if (r.eventsBad) console.log(`  bad event ids: ${r.eventsBadIds.slice(0, 10).join(", ")}${r.eventsBadIds.length > 10 ? " …" : ""}`);
   if (r.leadsBad) console.log(`  bad lead ids: ${r.leadsBadIds.slice(0, 10).join(", ")}${r.leadsBadIds.length > 10 ? " …" : ""}`);

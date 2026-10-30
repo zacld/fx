@@ -167,10 +167,12 @@ export function runScoreStage(opts: ScoreStageOptions = {}): ScoreStageResult {
         const isMicro = String(lead.accounts_type ?? "").toLowerCase().includes("micro");
         const hasWebsite = !!(lead.website || lead.website_domain);
         if (hasWebsite && !lead.is_large_org && !isMicro) {
-          const lifted = Math.max(lead.score ?? 0, lead.fx_exposure_score ?? 0);
+          // at most QUEUE (research needed): the lead failed the FX gates, so it can't be WARM / HOT without the
+          // evidence they ask for (CLAUDE.md Priority 7) — the lift only keeps it visible
+          const lifted = Math.min(59, Math.max(lead.score ?? 0, lead.fx_exposure_score ?? 0));
           if (lifted >= 40) {
             lead.score = lifted;
-            lead.priority = lifted >= 80 ? "HOT" : lifted >= 60 ? "WARM" : "QUEUE";
+            lead.priority = "QUEUE";
             lead.scoring_reasons = [...(lead.scoring_reasons ?? []),
               `↑ Industry preset lift: fx_exposure_score=${lead.fx_exposure_score} (${industryPreset.id})`];
             after[lead.priority] = (after[lead.priority] ?? 0) + 1;

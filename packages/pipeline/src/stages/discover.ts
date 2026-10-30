@@ -14,7 +14,7 @@
  * stages re-score the new leads and export data/leads.json afterwards.
  *
  * Live HTTP — not a broad crawl by default: capped via WEB_MAX_EVENTS /
- * WEB_MAX_SEGMENTS_PER_EVENT / WEB_MAX_MICRO_CATEGORIES_PER_SEGMENT /
+ * WEB_MAX_CATEGORIES_TO_SCRAPE (niches per event, highest score first) / WEB_MAX_MICRO_CATEGORIES_PER_SEGMENT /
  * WEB_MAX_QUERIES_PER_MICRO_CATEGORY / WEB_MAX_RESULTS_PER_QUERY and the CH call
  * budget. WEB_DISCOVERY_ENABLED=false skips it entirely.
  *
@@ -119,7 +119,9 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
   const runsDir = opts.runsDir ?? resolve(root, "data/runs");
   const enabled = opts.enabled ?? flag(process.env.WEB_DISCOVERY_ENABLED, true);
   const maxEvents = opts.maxEvents ?? n(process.env.WEB_MAX_EVENTS, 5);
-  const maxSegments = opts.maxSegments ?? n(process.env.WEB_MAX_SEGMENTS_PER_EVENT, 10);
+  // CLAUDE.md Priority 3: WEB_MAX_CATEGORIES_TO_SCRAPE (the workflow sets it); WEB_MAX_SEGMENTS_PER_EVENT is the old name
+  const maxSegments = opts.maxSegments
+    ?? n(process.env.WEB_MAX_CATEGORIES_TO_SCRAPE, n(process.env.WEB_MAX_SEGMENTS_PER_EVENT, 6));
   const maxMicroCats = opts.maxMicroCats ?? n(process.env.WEB_MAX_MICRO_CATEGORIES_PER_SEGMENT, 3);
   const maxQPerMc = opts.maxQueriesPerMicroCat ?? n(process.env.WEB_MAX_QUERIES_PER_MICRO_CATEGORY, 2);
   const maxQPerSeg = opts.maxQueriesPerSegment ?? n(process.env.WEB_MAX_QUERIES_PER_SEGMENT, 5);
@@ -225,14 +227,19 @@ export async function runDiscoverStage(opts: DiscoverOptions = {}): Promise<Disc
       const triggerStrength = (event as { trigger_strength?: string }).trigger_strength ?? "medium";
       const isStrong = mode === "full" && triggerStrength === "strong";
       const scale = mode === "context_only" ? 0.25 : mode === "limited" ? 0.5 : isStrong ? 1.5 : 1;
-      const effMaxSegments = mode === "context_only" ? 1 : Math.min(20, Math.max(1, Math.round(maxSegments * scale)));
+      // a strong event searches each niche harder, never more niches than the cap
+      const effMaxSegments = mode === "context_only" ? 1 : Math.min(maxSegments, Math.max(1, Math.round(maxSegments * scale)));
       const effMaxQPerMc   = mode === "context_only" ? 1 : Math.min(5, Math.max(1, Math.round(maxQPerMc * scale)));
       const effMaxQPerSeg  = mode === "context_only" ? 2 : Math.min(8, Math.max(1, Math.round(maxQPerSeg * scale)));
       const effMaxResults  = mode === "context_only" ? 4 : Math.min(15, Math.max(2, Math.round(maxResults * (mode === "limited" ? 0.6 : isStrong ? 1.5 : 1))));
       const budgetCap = Number((event as { recommended_query_budget?: number }).recommended_query_budget ?? 0);
 
+      // Brain 2's ranking decides (Priority 3): the highest category_priority_score first, unscored ones after
       const segments: Segment[] = (event.target_segments ?? [])
         .filter((s) => (s.category_priority_score == null) || (s.category_priority_score >= minScore))
+        .map((s, i) => ({ s, i }))
+        .sort((a, b) => (b.s.category_priority_score ?? -1) - (a.s.category_priority_score ?? -1) || a.i - b.i)
+        .map(({ s }) => s)
         .slice(0, effMaxSegments);
 
       // ── Industry preset injection ──────────────────────────────────────────
