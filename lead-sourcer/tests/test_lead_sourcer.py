@@ -1227,6 +1227,25 @@ class TestWebsiteNeverStopsTheRun(unittest.TestCase):
         out = website.look_up_many([("01234567", "ACME WINE LIMITED")], broken)
         self.assertEqual(out["01234567"]["website"], "")             # that company skipped, the run carries on
 
+    def test_malformed_links_relative_child_sitemaps_and_robots(self):
+        home = "https://www.acmewine.co.uk/"
+        # a link urllib can't parse is skipped, not fatal for the company
+        self.assertEqual(website.team_links("<a href='http://[oops'>Team</a><a href='/team'>Team</a>", home),
+                         [home + "team"])
+        sites = {home: (home, "Acme Wine Limited, company 1234567"),
+                 home + "robots.txt": (home + "robots.txt", "User-agent: *\nSitemap: /maps/index.xml"),
+                 home + "maps/index.xml": (home + "maps/index.xml",
+                                           "<sitemapindex><sitemap><loc>pages.xml</loc></sitemap></sitemapindex>"),
+                 home + "maps/pages.xml": ("", "<urlset><url><loc>/about/our-team?a=1&amp;b=2</loc></url></urlset>"),
+                 home + "about/our-team?a=1&b=2": ("", "Jo Bloggs, Finance Director")}
+        found = website.look_up("01234567", "ACME WINE LIMITED", sites.get, pause=0)
+        self.assertEqual(found["people"], [{"name": "Jo Bloggs", "title": "Finance Director"}])
+        # /sitemap.xml (not named by robots.txt) is not read when robots.txt disallows it
+        sites[home + "robots.txt"] = (home + "robots.txt", "User-agent: *\nDisallow: /sitemap.xml")
+        asked = []
+        website.look_up("01234567", "ACME WINE LIMITED", lambda u: asked.append(u) or sites.get(u), pause=0)
+        self.assertNotIn(home + "sitemap.xml", asked)
+
 
 class TestFormerFinanceDirector(unittest.TestCase):
     def test_kept_from_the_same_officers_call(self):
