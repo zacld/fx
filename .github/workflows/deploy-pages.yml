@@ -10,6 +10,12 @@ on:
       - 'apps/web/**'
       - 'apps/web/public/data/**'
       - '.github/workflows/deploy-pages.yml'
+  # The discovery runs commit fresh events.json with GITHUB_TOKEN, which never starts other workflows: redeploy
+  # when they finish so the dashboard and /moves "why it moved" don't go stale.
+  workflow_run:
+    workflows: ["FX Discovery", "FX Evergreen Discovery"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 jobs:

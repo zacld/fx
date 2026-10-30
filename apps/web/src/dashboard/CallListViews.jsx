@@ -128,7 +128,9 @@ export function DailyCallListView({ callListLeads, remainingHot, allLeads, event
   // Apply revenue filter to call list bands — confirmed passes only, unverified collected separately
   const revPasses   = minRevenue > 0 ? callListLeads.filter(l => sizeFit(l, minRevenue) === "passes") : callListLeads;
   const revUnverCL  = minRevenue > 0 ? callListLeads.filter(l => sizeFit(l, minRevenue) === "unverified") : [];
-  const remPasses   = minRevenue > 0 ? (remainingHot||[]).filter(l => sizeFit(l, minRevenue) === "passes") : (remainingHot||[]);
+  // eligible leads ranked below the top 25 join the remaining HOT list (they were shown nowhere before)
+  const remPasses   = [...revPasses.slice(25),
+                       ...(minRevenue > 0 ? (remainingHot||[]).filter(l => sizeFit(l, minRevenue) === "passes") : (remainingHot||[]))];
   const remUnver    = minRevenue > 0 ? (remainingHot||[]).filter(l => sizeFit(l, minRevenue) === "unverified") : [];
   const allUnver    = [...revUnverCL, ...remUnver];
 

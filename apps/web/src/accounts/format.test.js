@@ -149,6 +149,12 @@ describe("accounts helpers", () => {
     expect(googleFd({ company_name: "Babystyle Ltd." })).toBe("https://www.google.com/search?q=Babystyle+finance+director");
   });
 
+  it("exports CSV that spreadsheets open as text, not formulas", () => {
+    const csv = toCsv([{ notes: '=HYPERLINK("http://x","click")', fx_gain_loss_gbp: "-150512", opener: "-2+3", x: "@SUM(A1)" }],
+                      ["notes", "fx_gain_loss_gbp", "opener", "x"]);
+    expect(csv.split("\n")[1]).toBe(`"'=HYPERLINK(""http://x"",""click"")",-150512,'-2+3,'@SUM(A1)`);
+  });
+
   it("exports CSV with quoting", () => {
     const csv = toCsv([rows[2]], ["company_name", "call_angle"]);
     expect(csv).toBe('company_name,call_angle\nQUATRA UK LTD,"Say ""hi"", then"');

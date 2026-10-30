@@ -76,7 +76,7 @@ export default function App() {
 
   const hot       = leads.filter(l=>l.priority==="HOT").length;
   const warm      = leads.filter(l=>l.priority==="WARM").length;
-  const contacted = useMemo(()=>leads.filter(l=>["contacted","follow_up","meeting_booked","passed_to_closer"].includes(getCrmStatus(l))).length,[leads,getCrmStatus]);
+  const contacted = useMemo(()=>leads.filter(l=>["contacted","follow_up","replied","meeting_booked","passed_to_closer"].includes(getCrmStatus(l))).length,[leads,getCrmStatus]);
   const saved     = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="saved").length,[leads,getCrmStatus]);
   const meetings  = useMemo(()=>leads.filter(l=>getCrmStatus(l)==="meeting_booked").length,[leads,getCrmStatus]);
   const hasSite   = leads.filter(l=>l.website).length;

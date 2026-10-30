@@ -21,7 +21,8 @@ const daysBetween = (fromDay, toDay) => Math.round((Date.parse(toDay) - Date.par
 export const touchesOf = (mark) => (!mark ? [] : mark.touches?.length ? mark.touches : [{ at: mark.at, channel: "" }]);
 
 /** Why a change can't be saved, or "" when it can. */
-export function invalidChange({ contacted, channel, response, follow_up_at: followUpAt } = {}) {
+export function invalidChange({ contacted, channel, response, follow_up_at: followUpAt, company_name: name } = {}) {
+  if (name !== undefined && (typeof name !== "string" || name.length > 200)) return "company_name must be text (200 characters at most)";
   if (contacted !== undefined && typeof contacted !== "boolean") return "contacted must be true or false";
   if (channel !== undefined && channel !== "" && !(channel in CHANNELS)) return `channel must be one of ${Object.keys(CHANNELS).join(", ")}`;
   if (response !== undefined && response !== "" && !(response in RESPONSES)) return `response must be one of ${Object.keys(RESPONSES).join(", ")}`;
@@ -46,6 +47,7 @@ export function applyContact(marks, number, change, now = new Date().toISOString
   let mark = next[number] ? { ...next[number], touches: touchesOf(next[number]) } : null;
   if (change.contacted === true) {
     mark = mark || { at: now, touches: [] };
+    if (change.company_name) mark.name = change.company_name;   // kept so the company stays listed if a scan drops it
     mark.touches = [...mark.touches, { at: now, channel: change.channel || "" }].slice(-MAX_TOUCHES);
     delete mark.follow_up_at;
   }
@@ -102,7 +104,11 @@ export function followUp(mark, r = {}, now = new Date()) {
 
 const lcFirst = (s = "") => (/^[A-Z]{2}/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1));   // "FX loss" stays
 
-/** The copy-ready follow-up after `n` touches: event reminder, new angle, soft bump, then break-up (no AI). */
+/**
+ * The copy-ready follow-up after `n` touches, matching the suggested action: event reminder (after the 1st), soft bump
+ * — who handles overseas payments? (2nd), break-up — the last try (3rd); in nurture, a new angle to reopen with
+ * later. No AI.
+ */
 export function followUpLine(r = {}, n = 1) {
   const cur = r.main_currency || (r.currency_pairs || "").split("|")[0]?.replace("GBP/", "") || "";
   const payments = cur ? `${cur} supplier payments` : "overseas supplier payments";
@@ -111,12 +117,12 @@ export function followUpLine(r = {}, n = 1) {
     return `Just following up — with sterling still moving, upcoming ${payments} could be worth a quick review${why}. Would a 10-minute call this week work?`;
   }
   if (n === 2) {
-    return `A lot of businesses paying overseas suppliers just use their bank and don't always see the rate and spread difference — happy to run a quick comparison on a recent ${cur ? `${cur} ` : ""}payment, no commitment.`;
-  }
-  if (n === 3) {
     return `Not sure if you're the right person for this — would ${payments} normally sit with finance or with ${r.lead_director || "the MD"}?`;
   }
-  return `No worries if it's not relevant — I just thought it could be useful given the recent moves. I'll leave it there for now, but do get in touch if ${payments} come up.`;
+  if (n === 3) {
+    return `No worries if it's not relevant — I just thought it could be useful given the recent moves. I'll leave it there for now, but do get in touch if ${payments} come up.`;
+  }
+  return `A lot of businesses paying overseas suppliers just use their bank and don't always see the rate and spread difference — happy to run a quick comparison on a recent ${cur ? `${cur} ` : ""}payment, no commitment.`;
 }
 
 /** Contacted companies in follow-up order: overdue, due, replied, upcoming (soonest first), nurture, booked, closed. */

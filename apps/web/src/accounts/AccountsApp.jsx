@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, companyPath, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
@@ -87,12 +87,22 @@ function Gate({ password, setPassword, onSubmit, error, loading }) {
 }
 
 function Accounts({ data, password }) {
-  const rows = data.rows || [];
+  const [contacted, setContacted] = useState(data.contacted || {});
+  // Companies contacted but no longer in the latest scan stay on the Contacted tab (their follow-ups still matter),
+  // shown with what the marks remember.
+  const rows = useMemo(() => {
+    const listed = data.rows || [];
+    const known = new Set(listed.map((r) => r.company_number));
+    const dropped = Object.entries(contacted).filter(([n]) => !known.has(n)).map(([n, mark]) => ({
+      company_number: n, company_name: mark.name || `Company ${n}`, rank: 99999, dropped: true,
+      companies_house_url: `https://find-and-update.company-information.service.gov.uk/company/${n}`,
+    }));
+    return [...listed, ...dropped];
+  }, [data.rows, contacted]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false });
   const [sort, setSort] = useState("hot");
   const [shown, setShown] = useState(PAGE);
-  const [contacted, setContacted] = useState(data.contacted || {});
   const [notes, setNotes] = useState(data.notes || {});
   const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
@@ -117,13 +127,19 @@ function Accounts({ data, password }) {
   }, []);
 
   // Saves a change for one company ({contacted} or {notes}) to the site's store; the server's copy comes back.
-  const save = useCallback(async (number, change) => {
-    const res = await fetch(API, { method: "POST", headers: { authorization: `Bearer ${password}`, "content-type": "application/json" },
-                                   body: JSON.stringify({ company_number: number, ...change }) });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
-    if (body.contacted) setContacted(body.contacted);
-    if (body.notes) setNotes(body.notes);
+  // One save at a time, in click order: two quick clicks would otherwise race on the server's read-modify-write.
+  const queue = useRef(Promise.resolve());
+  const save = useCallback((number, change) => {
+    const run = queue.current.catch(() => {}).then(async () => {
+      const res = await fetch(API, { method: "POST", headers: { authorization: `Bearer ${password}`, "content-type": "application/json" },
+                                     body: JSON.stringify({ company_number: number, ...change }) });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+      if (body.contacted) setContacted(body.contacted);
+      if (body.notes) setNotes(body.notes);
+    });
+    queue.current = run;
+    return run;
   }, [password]);
 
   // A follow-up change for one company ({contacted, channel} logs a touch, {contacted: false} takes it off the
@@ -333,7 +349,7 @@ const siteUrl = (w) => (w.startsWith("http") ? w : `https://${w}`);
 const siteLabel = (w) => w.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 // "Contacted" asks how (phone, email, LinkedIn, in person), then moves the company to the Contacted tab.
-function ContactedButton({ number, mark, onContact }) {
+function ContactedButton({ number, name, mark, onContact }) {
   const [choosing, setChoosing] = useState(false);
   if (!number) return null;
   if (mark) {
@@ -347,7 +363,7 @@ function ContactedButton({ number, mark, onContact }) {
     <span className="channels" role="group" aria-label="How did you contact them?">
       <span className="channels-l">How?</span>
       {Object.entries(CHANNELS).map(([k, label]) => (
-        <button key={k} className="btn-sm contacted" onClick={() => { setChoosing(false); onContact(number, { contacted: true, channel: k }); }}>{label}</button>
+        <button key={k} className="btn-sm contacted" onClick={() => { setChoosing(false); onContact(number, { contacted: true, channel: k, company_name: name }); }}>{label}</button>
       ))}
       <button className="btn-sm" onClick={() => setChoosing(false)} aria-label="Cancel">×</button>
     </span>
@@ -384,7 +400,7 @@ function FollowUpPanel({ r, mark, onContact }) {
       <div className="follow-btns">
         <span className="channels-l">Log a touch</span>
         {Object.entries(CHANNELS).map(([k, label]) => (
-          <button key={k} className="btn-sm" onClick={() => onContact(number, { contacted: true, channel: k })}>{label}</button>
+          <button key={k} className="btn-sm" onClick={() => onContact(number, { contacted: true, channel: k, company_name: r.company_name })}>{label}</button>
         ))}
       </div>
       <div className="follow-btns">
@@ -438,6 +454,7 @@ function ContactLine({ r }) {
 function Chips({ r }) {
   return (
     <div className="chips">
+      {r.dropped && <span className="chip warn" title="Contacted earlier; the latest scan didn't list it (its follow-ups are kept)">Not in the latest scan</span>}
       {r.recent_fx_loss && <Src className="chip loss" href={r.fx_gain_loss_url} title={r.recent_fx_loss}>Recent FX loss</Src>}
       {parts(r.currency_pairs).map((p) => <span key={p} className="chip fx">{p}</span>)}
       {r.qualified && r.qualified !== "Yes" && <span className={`chip ${r.qualified === "Out" ? "out" : "warn"}`} title={r.qualify_reason}>{r.qualified}: {r.qualify_reason}</span>}
@@ -502,7 +519,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen })
             {wallet(r) && <span><b>{wallet(r)}</b> FX a year</span>}
             <FxFigure r={r} />
           </div>
-          <ContactedButton number={r.company_number} mark={mark} onContact={onContact} />
+          <ContactedButton number={r.company_number} name={r.company_name} mark={mark} onContact={onContact} />
         </div>
       </div>
       <ContactLine r={r} />
@@ -559,7 +576,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
             {r.fx_niche && <span>{r.fx_niche}</span>}
           </div>
         </div>
-        <ContactedButton number={r.company_number} mark={mark} onContact={onContact} />
+        <ContactedButton number={r.company_number} name={r.company_name} mark={mark} onContact={onContact} />
       </header>
       {mark && (
         <section className="panel">

@@ -4,13 +4,14 @@ import { useState, useCallback } from "react";
 
 // ─── CRM ───────────────────────────────────────────────────────────
 export const CRM_KEY      = "fx_crm_state";
-export const CRM_STATUSES = ["new","reviewed","saved","contacted","follow_up","meeting_booked","passed_to_closer","not_relevant"];
+export const CRM_STATUSES = ["new","reviewed","saved","contacted","follow_up","replied","meeting_booked","passed_to_closer","not_relevant"];
 export const CRM_LABELS   = {
   new:             "New",
   reviewed:        "Reviewed",
   saved:           "Saved",
   contacted:       "Contacted",
   follow_up:       "Follow up",
+  replied:         "Replied",
   meeting_booked:  "Meeting booked",
   passed_to_closer:"Passed to closer",
   not_relevant:    "Not relevant",
@@ -21,6 +22,7 @@ export const CRM_COLORS   = {
   saved:           "#10B981",
   contacted:       "#38BDF8",
   follow_up:       "#F97316",
+  replied:         "#FBBF24",
   meeting_booked:  "#10B981",
   passed_to_closer:"#A855F7",
   not_relevant:    "#475569",
@@ -88,15 +90,17 @@ export function useCrmState() {
     const id = lead.id;
     setState(prev => {
       const cur = prev[id] || {};
-      const touch = (cur.touch_count||0) + (action === "follow_later"?0:1);
+      // a reply is their move, not a touch of ours: the touch count and last-contacted date stay as they were
+      const ours = action !== "follow_later" && action !== "replied";
+      const touch = (cur.touch_count||0) + (ours ? 1 : 0);
       const last_channel = action === "called" ? "phone" : action === "email_sent" ? "email" : action === "linkedin_sent" ? "linkedin" : action === "replied" ? "reply" : action === "meeting_booked" ? "meeting" : cur.last_channel || null;
-      const status = action === "not_relevant" ? "not_relevant" : action === "replied" ? "reviewed" : action === "meeting_booked" ? "meeting_booked" : "contacted";
+      const status = action === "not_relevant" ? "not_relevant" : action === "replied" ? "replied" : action === "meeting_booked" ? "meeting_booked" : "contacted";
       const next_follow_up_at = scheduleNextFollowUp(touch, action);
       const next = {
         ...prev,
         [id]: {
           ...cur,
-          last_contacted_at: action === "follow_later" ? cur.last_contacted_at || null : new Date().toISOString(),
+          last_contacted_at: ours ? new Date().toISOString() : cur.last_contacted_at || null,
           last_channel,
           touch_count: touch,
           status,
