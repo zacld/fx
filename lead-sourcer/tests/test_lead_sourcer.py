@@ -1208,6 +1208,26 @@ class TestWebsiteSitemap(unittest.TestCase):
         self.assertFalse(any("sitemap" in u for u in asked))
 
 
+class TestWebsiteNeverStopsTheRun(unittest.TestCase):
+    def test_relative_sitemap_address_and_bad_sites(self):
+        # The 29 and 30 Oct finder runs died on "Sitemap: /sitemap.xml" in a robots.txt ("unknown url type").
+        self.assertIsNone(website.fetch("/sitemap.xml"))
+        home = "https://www.acmewine.co.uk/"
+        sites = {home: (home, "Acme Wine Limited, company 1234567"),
+                 home + "robots.txt": (home + "robots.txt", "User-agent: *\nSitemap: /sitemap.xml"),
+                 home + "sitemap.xml": ("", "<urlset><url><loc>/about/our-team</loc></url></urlset>"),
+                 home + "about/our-team": ("", "Jo Bloggs, Finance Director")}
+        asked = []
+        found = website.look_up("01234567", "ACME WINE LIMITED", lambda u: asked.append(u) or sites.get(u), pause=0)
+        self.assertIn(home + "sitemap.xml", asked)
+        self.assertEqual(found["people"], [{"name": "Jo Bloggs", "title": "Finance Director"}])
+
+        def broken(url):
+            raise ValueError(f"unknown url type: {url!r}")
+        out = website.look_up_many([("01234567", "ACME WINE LIMITED")], broken)
+        self.assertEqual(out["01234567"]["website"], "")             # that company skipped, the run carries on
+
+
 class TestFormerFinanceDirector(unittest.TestCase):
     def test_kept_from_the_same_officers_call(self):
         items = {"items": [
