@@ -18,11 +18,23 @@ if (!["get", "put"].includes(command) || !path || !siteID || !token) {
 const store = getStore({ name: STORE, siteID, token });
 const count = (text) => Object.keys(JSON.parse(text)).length;   // counts only: logs are readable
 
+// A run must never shrink the store by much: a schema change or a bug that drops leads would otherwise delete them
+// (and their enrichment) for good. Dedup removes a few each run; more than MAX_SHRINK of them is refused.
+const MAX_SHRINK = 0.1;
+const tooSmall = (before, after) => before > 0 && after < before * (1 - MAX_SHRINK);
+
 if (command === "put") {
   const text = await readFile(path, "utf8");
   const n = count(text);   // refuses to store a broken file
+  const stored = await store.get(KEY, { type: "arrayBuffer" });
+  const before = stored ? count(gunzipSync(Buffer.from(stored)).toString("utf8")) : 0;
+  if (tooSmall(before, n) && process.env.LEADS_ALLOW_SHRINK !== "1") {
+    console.error(`refusing to store ${n} leads over ${before} (more than ${MAX_SHRINK * 100}% fewer); ` +
+                  "set LEADS_ALLOW_SHRINK=1 for one run if that's intended");
+    process.exit(4);
+  }
   await store.set(KEY, gzipSync(Buffer.from(text, "utf8"), { level: 9 }));
-  console.log(`stored ${n} leads`);
+  console.log(`stored ${n} leads (was ${before})`);
 } else {
   const data = await store.get(KEY, { type: "arrayBuffer" });
   if (!data) {

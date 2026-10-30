@@ -169,5 +169,5 @@ jobs:
           git add data/events.json apps/web/public/data/events.json   # leads: private store only
           git diff --staged --quiet || git commit -m "data: auto-update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git checkout -- .
-          git pull --rebase -X ours origin main
+          git pull --rebase -X theirs origin main   # in a rebase "theirs" is this run's commit: its new events win
           git push

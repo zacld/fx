@@ -53,7 +53,10 @@ export function markFirstSeen(previous, next) {
   return { ...next, rows: (next.rows || []).map((r) => ({ ...r, first_seen: before.get(r.company_number) || next.made_at })) };
 }
 
-export async function handle(req, { password = expectedPassword(), store = () => getStore(STORE), delay = WRONG_PASSWORD_DELAY_MS } = {}) {
+// Strong consistency: a save reads the marks the previous save just wrote (the default is eventually consistent, so two
+// quick clicks could each read the old map and the second would drop the first's change).
+export async function handle(req, { password = expectedPassword(), store = () => getStore({ name: STORE, consistency: "strong" }),
+                                    delay = WRONG_PASSWORD_DELAY_MS } = {}) {
   if (req.method !== "GET" && req.method !== "POST") return reply({ error: "method not allowed" }, 405);
   if (!password) return reply({ error: "ACCOUNTS_PASSWORD is not set on Netlify yet" }, 503);
   const given = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
@@ -65,7 +68,7 @@ export async function handle(req, { password = expectedPassword(), store = () =>
   if (req.method === "POST") {
     const body = await req.json().catch(() => ({}));
     const { company_number: number, notes } = body;
-    const change = Object.fromEntries(["contacted", "channel", "response", "follow_up_at"]
+    const change = Object.fromEntries(["contacted", "channel", "response", "follow_up_at", "company_name"]
       .filter((k) => body[k] !== undefined).map((k) => [k, body[k]]));
     const touchesContact = "contacted" in change || "response" in change || "follow_up_at" in change;
     if (!COMPANY_NUMBER.test(number || "") || (!touchesContact && typeof notes !== "string")) {

@@ -65,7 +65,7 @@ describe("db — schema + round-trip", () => {
     }
   });
 
-  it("importJson loads JSON-keyed events/leads files into the DB (bad rows skipped)", () => {
+  it("importJson loads JSON-keyed events/leads files into the DB (rows failing the schema kept as-is, counted)", () => {
     const dir = mkdtempSync(join(tmpdir(), "fxdb-"));
     mkdirSync(join(dir, "data"), { recursive: true });
     const eventsPath = join(dir, "events.json");
@@ -78,7 +78,7 @@ describe("db — schema + round-trip", () => {
     }));
     writeFileSync(leadsPath, JSON.stringify({
       lead1: { id: "lead1", event_id: "evt1", company_name: "Acme Ltd", priority: "WARM", score: 70 },
-      leadbad: { event_id: "evt1", priority: "NOPE" },   // bad priority enum → skipped (and missing id, but key supplies it; priority enum fails)
+      leadbad: { event_id: "evt1", priority: "NOPE" },   // bad priority enum → counted as bad but kept (never deleted on import)
       lead2: { id: "lead2", event_id: "evt1", company_name: "Bravo Ltd", priority: "QUEUE", score: 45 },
     }));
 
@@ -89,8 +89,10 @@ describe("db — schema + round-trip", () => {
 
     const { db, close } = getDb(dbPath);
     try {
-      expect(db.select().from(schema.leads).all().length).toBe(2);
-      expect(db.select().from(schema.events).all().length).toBe(r.eventsOk);
+      expect(db.select().from(schema.leads).all().length).toBe(3);                    // the bad one kept, as it was
+      expect(db.select().from(schema.events).all().length).toBe(r.eventsOk + r.eventsBad);
+      const bad = db.select().from(schema.leads).where(eq(schema.leads.id, "leadbad")).all()[0]!;
+      expect((bad.data as { priority?: string }).priority).toBe("NOPE");
       const warm = db.select().from(schema.leads).where(eq(schema.leads.priority, "WARM")).all();
       expect(warm[0]!.company_name).toBe("Acme Ltd");
     } finally {
@@ -101,7 +103,7 @@ describe("db — schema + round-trip", () => {
     importJson({ dbPath, eventsPath, leadsPath });
     const { db: db2, close: close2 } = getDb(dbPath);
     try {
-      expect(db2.select().from(schema.leads).all().length).toBe(2);
+      expect(db2.select().from(schema.leads).all().length).toBe(3);
     } finally {
       close2();
     }

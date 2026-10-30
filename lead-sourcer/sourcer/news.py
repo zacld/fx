@@ -75,8 +75,9 @@ def appointments(company_name: str, fetcher: Optional[Fetcher] = None, today: Op
     found: dict[str, dict] = {}
     for item in root.iter("item"):
         headline = _plain(item.findtext("title") or "")
-        text = f"{headline}\n{_plain(item.findtext('description') or '')}"
-        if wanted not in text.upper():
+        # The headline must name the company: Google News descriptions list related stories' headlines too, so
+        # "Other Co appoints Jane Smith as CFO" next to an Acme story would otherwise become Acme's FD.
+        if wanted not in headline.upper():
             continue  # about someone else
         try:
             when = parsedate_to_datetime(item.findtext("pubDate") or "").date()
@@ -87,7 +88,7 @@ def appointments(company_name: str, fetcher: Optional[Fetcher] = None, today: Op
             continue
         source = _plain(item.findtext("source") or "") or "news"
         not_names = f"{company_name} {source}"
-        for p in people.finance_people(headline, not_names) or people.finance_people(text, not_names):
+        for p in people.finance_people(headline, not_names):
             key = p["name"].upper()
             if key in found and found[key]["date"] >= when.isoformat():
                 continue

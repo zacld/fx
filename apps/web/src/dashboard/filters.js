@@ -206,10 +206,10 @@ export function applyFilters(leads, filters, getCrmStatus) {
     const cutoff = Date.now() - 24*60*60*1000;
     r = sortByReadyScore(r.filter(l => l.created_at && new Date(l.created_at).getTime() > cutoff));
   } else if (filters.view === "research") {
-    const callListIds = new Set(
-      r.filter(isCallListEligible).map(l => l.website_domain || l.company_number)
-    );
-    r = r.filter(l => !callListIds.has(l.website_domain || l.company_number));
+    // by lead id: a domain / company-number key was undefined for leads with neither, which then hid every other
+    // such lead from Research
+    const callListIds = new Set(r.filter(isCallListEligible).map(l => l.id));
+    r = r.filter(l => !callListIds.has(l.id));
   }
 
   // Additional filters

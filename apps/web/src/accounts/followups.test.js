@@ -27,6 +27,8 @@ describe("follow-ups", () => {
     expect(invalidChange({ response: "maybe" })).toMatch(/response/);
     expect(invalidChange({ follow_up_at: "next week" })).toMatch(/YYYY-MM-DD/);
     expect(invalidChange({ contacted: "yes" })).toMatch(/contacted/);
+    expect(invalidChange({ company_name: "x".repeat(201) })).toMatch(/company_name/);
+    expect(applyContact({}, "01", { contacted: true, channel: "phone", company_name: "ACME LTD" })["01"].name).toBe("ACME LTD");
   });
 
   it("suggests the next touch 2, 4 then 7 days on, then nurture; replies and meetings stop it", () => {
@@ -51,10 +53,11 @@ describe("follow-ups", () => {
     const r = { main_currency: "USD", fact_1: "FX loss of £151k on the latest accounts.", lead_director: "Sam Roe" };
     expect(followUpLine(r, 1)).toBe("Just following up — with sterling still moving, upcoming USD supplier payments could be worth a quick review (FX loss of £151k on the latest accounts). Would a 10-minute call this week work?");
     expect(followUpLine({ fact_1: "New charge to HSBC" }, 1)).toMatch(/\(new charge to HSBC\)/);
-    expect(followUpLine(r, 2)).toMatch(/quick comparison on a recent USD payment/);
-    expect(followUpLine(r, 3)).toBe("Not sure if you're the right person for this — would USD supplier payments normally sit with finance or with Sam Roe?");
-    expect(followUpLine({}, 4)).toMatch(/overseas supplier payments come up/);
-    expect(followUpLine({ currency_pairs: "GBP/EUR|GBP/USD" }, 3)).toMatch(/EUR supplier payments/);
+    // each line matches the suggested action: after the 2nd touch "ask who handles payments", after the 3rd "last try"
+    expect(followUpLine(r, 2)).toBe("Not sure if you're the right person for this — would USD supplier payments normally sit with finance or with Sam Roe?");
+    expect(followUpLine({}, 3)).toMatch(/I'll leave it there for now.*overseas supplier payments come up/);
+    expect(followUpLine(r, 4)).toMatch(/quick comparison on a recent USD payment/);                    // nurture: a new angle
+    expect(followUpLine({ currency_pairs: "GBP/EUR|GBP/USD" }, 2)).toMatch(/EUR supplier payments/);
   });
 
   it("lists overdue first, then due, replied, upcoming (soonest first), nurture, booked, closed", () => {

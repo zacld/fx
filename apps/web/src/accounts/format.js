@@ -199,10 +199,14 @@ export const EXPORT_FIELDS = [
   "companies_house_url",
 ];
 
+// A cell a spreadsheet would run as a formula ("=HYPERLINK(...)", "+1", "@x", "-2+3") is prefixed with ' so it opens as
+// text. Plain negative numbers ("-150512", an FX loss) stay numbers.
+export const safeCell = (s) => (/^[=+@\t\r]/.test(s) || /^-(?!\d+(\.\d+)?$)/.test(s) ? `'${s}` : s);
+
 export function toCsv(rows, fields = EXPORT_FIELDS) {
   const cell = (v) => {
-    const s = v === undefined || v === null ? "" : String(v);
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    const s = safeCell(v === undefined || v === null ? "" : String(v));
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return [fields.join(","), ...rows.map((r) => fields.map((f) => cell(r[f])).join(","))].join("\n");
 }

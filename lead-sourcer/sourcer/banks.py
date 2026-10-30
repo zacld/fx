@@ -85,9 +85,10 @@ _SPECIALIST_WORDS = ("FINANCE", "LEASING", "ASSET", "INVOICE", "FACTORS", "FACTO
 def classify(name: str) -> Optional[tuple[str, str]]:
     """(banking group, type) for a lender/banker name, or None if it isn't recognisably a lender."""
     upper = name.upper()
-    for keyword, group, kind in _GROUPS:
-        if keyword in upper:
-            return group, kind
+    # the longest match: "ROYAL BANK OF SCOTLAND" (NatWest) also contains "BANK OF SCOTLAND" (Lloyds)
+    found = max((g for g in _GROUPS if g[0] in upper), key=lambda g: len(g[0]), default=None)
+    if found:
+        return found[1], found[2]
     if "BANK" in upper:
         return name.strip(), "other bank"
     if any(w in upper for w in _SPECIALIST_WORDS):

@@ -32,7 +32,7 @@ sys.path.insert(0, ROOT)
 
 import main  # noqa: E402
 import server  # noqa: E402
-from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, hmrc, hooks, incumbent, matching, people, profiles, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
+from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
 
 # api/ is a Vercel functions folder, not a package — load run.py by path.
 _spec = importlib.util.spec_from_file_location("api_run", os.path.join(ROOT, "api", "run.py"))
@@ -1227,6 +1227,81 @@ class TestWebsiteNeverStopsTheRun(unittest.TestCase):
         out = website.look_up_many([("01234567", "ACME WINE LIMITED")], broken)
         self.assertEqual(out["01234567"]["website"], "")             # that company skipped, the run carries on
 
+    def test_malformed_links_relative_child_sitemaps_and_robots(self):
+        home = "https://www.acmewine.co.uk/"
+        # a link urllib can't parse is skipped, not fatal for the company
+        self.assertEqual(website.team_links("<a href='http://[oops'>Team</a><a href='/team'>Team</a>", home),
+                         [home + "team"])
+        sites = {home: (home, "Acme Wine Limited, company 1234567"),
+                 home + "robots.txt": (home + "robots.txt", "User-agent: *\nSitemap: /maps/index.xml"),
+                 home + "maps/index.xml": (home + "maps/index.xml",
+                                           "<sitemapindex><sitemap><loc>pages.xml</loc></sitemap></sitemapindex>"),
+                 home + "maps/pages.xml": ("", "<urlset><url><loc>/about/our-team?a=1&amp;b=2</loc></url></urlset>"),
+                 home + "about/our-team?a=1&b=2": ("", "Jo Bloggs, Finance Director")}
+        found = website.look_up("01234567", "ACME WINE LIMITED", sites.get, pause=0)
+        self.assertEqual(found["people"], [{"name": "Jo Bloggs", "title": "Finance Director"}])
+        # /sitemap.xml (not named by robots.txt) is not read when robots.txt disallows it
+        sites[home + "robots.txt"] = (home + "robots.txt", "User-agent: *\nDisallow: /sitemap.xml")
+        asked = []
+        website.look_up("01234567", "ACME WINE LIMITED", lambda u: asked.append(u) or sites.get(u), pause=0)
+        self.assertNotIn(home + "sitemap.xml", asked)
+
+
+class TestReviewFixes(unittest.TestCase):
+    def test_royal_bank_of_scotland_is_natwest(self):
+        self.assertEqual(banks.classify("THE ROYAL BANK OF SCOTLAND PLC"), ("NatWest", "high-street"))
+        self.assertEqual(banks.classify("BANK OF SCOTLAND PLC"), ("Lloyds", "high-street"))
+
+    def test_uk_parent_registered_at_companies_house_is_not_abroad(self):
+        for country in ("Companies House", "Register Of Companies For England And Wales",
+                        "United Kingdom (England And Wales)", "England, United Kingdom"):
+            parent = [{"kind": "corporate", "name": "ACME HOLDINGS LIMITED", "country": country}]
+            got = qualify.assess(parent, {}, {"confidence": "High"}, "", 6, False, "", "")
+            self.assertNotEqual(got["qualified"], "Out", country)
+        abroad = [{"kind": "corporate", "name": "ACME GMBH", "country": "Germany"}]
+        self.assertEqual(qualify.assess(abroad, {}, {"confidence": "High"}, "", 6, False, "", "")["qualified"], "Out")
+        self.assertFalse(signals.is_uk("New South Wales, Australia"))
+
+    def test_fx_provider_charge_in_capitals(self):
+        charge = {"name": "EBURY PARTNERS UK LIMITED", "created_on": "2025-01-01", "status": "outstanding",
+                  "classification": "", "particulars": "", "floating_all": False, "floating": False}
+        self.assertEqual(incumbent.columns({}, [charge], date(2026, 10, 30))["fx_today"], "Uses an FX provider: Ebury")
+        self.assertIsNone(incumbent._PROVIDER_RE.search("we keep a clear currency policy"))   # prose: proper names only
+
+    def test_companies_house_timeouts_never_escape(self):
+        with mock.patch.object(companies_house.urllib.request, "urlopen", side_effect=TimeoutError("read timed out")), \
+                mock.patch.object(companies_house.time, "sleep"):
+            self.assertIsNone(companies_house._get("https://api.example/x", {}, "k"))
+
+    def test_news_headline_must_name_the_company(self):
+        feed = """<rss><channel><item><title>Rival Ltd appoints Jane Smith as CFO</title>
+<description>Rival Ltd appoints Jane Smith as CFO - Acme Wine results out</description>
+<pubDate>Mon, 02 Mar 2026 09:00:00 GMT</pubDate></item></channel></rss>"""
+        self.assertEqual(news.appointments("ACME WINE LIMITED", lambda url: feed, today=date(2026, 10, 20)), [])
+
+    def test_accountant_on_the_board_is_likely_and_after_named_titles(self):
+        accountant = [{"name": "Pat Jones", "role": "Director", "occupation": "Chartered Accountant", "appointed_on": "2015"}]
+        alone = people.choose_finance_contact(accountant, [], [])
+        self.assertEqual((alone["name"], alone["confidence"]), ("Pat Jones", "Likely"))
+        self.assertEqual(people.choose_finance_contact(accountant, [], [{"name": "Jo Bell", "title": "Finance Manager"}])["name"],
+                         "Jo Bell")
+
+
+class TestRenewalWindowOneRule(unittest.TestCase):
+    def test_hook_and_trigger_agree(self):
+        today = date(2026, 10, 30)
+        self.assertFalse(triggers.in_renewal_window("2024-10-01", today))   # 2 years: too new
+        self.assertTrue(triggers.in_renewal_window("2023-06-01", today))    # 3.4 years
+        self.assertTrue(triggers.in_renewal_window("2021-05-01", today))    # 5.5 years: overdue, still in
+        self.assertFalse(triggers.in_renewal_window("2019-01-01", today))   # 7.8 years: long since renewed
+        self.assertFalse(triggers.in_renewal_window("", today))
+        hsbc = {"name": "HSBC UK BANK PLC", "created_on": "2021-05-01", "status": "outstanding", "classification": "",
+                "particulars": "", "floating_all": True, "floating": True}
+        events = triggers.find([], [hsbc], [], today)
+        hooks_found = [h["kind"] for h in hooks.find_hooks({}, [], [hsbc], [], today=today)]
+        self.assertTrue(any("renewal is near" in e for e in events))
+        self.assertIn("bank_since", hooks_found)
+
 
 class TestFormerFinanceDirector(unittest.TestCase):
     def test_kept_from_the_same_officers_call(self):
@@ -1638,6 +1713,15 @@ class TestConfirmation(unittest.TestCase):
         self.assertEqual(len(asked), 1)
         self.assertEqual([r["finance_contact"] for r in out], ["Pat Jones", "Alan Metcalfe", "Kim Fox"])   # the guess went first
         self.assertEqual((stats["to check"], stats["not searched: FD already confirmed"]), (2, 1))
+
+    def test_cached_companies_still_checked_when_the_budget_runs_out(self):
+        fetcher = lambda query, key: search_answer(ALAN)
+        confirm.confirm_rows([dict(self.ROW)], fetcher=fetcher, pause=0, key="k")          # yesterday: searched, cached
+        rows = [{**self.ROW, "company_number": "9", "company_name": "TARRANT FOODS LIMITED"},   # new: needs a search
+                dict(self.ROW)]
+        out, stats = confirm.confirm_rows(rows, fetcher=fetcher, pause=0, key="k", max_searches=0)
+        self.assertEqual([r["finance_contact"] for r in out], ["Daniel James Fairburn", "Alan Metcalfe"])
+        self.assertEqual((stats["checked"], stats["search budget of 0 searches reached"]), (1, 1))
 
     def test_confirm_rows_budget_cache_and_skips(self):
         rows = [dict(self.ROW), {**self.ROW, "company_number": "2", "untapped_reasons": "not checked"},

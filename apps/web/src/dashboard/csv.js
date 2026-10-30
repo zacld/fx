@@ -1,6 +1,8 @@
 // CSV export of the visible leads.
 // (Split out of App.jsx; no behaviour change.)
 // ─── CSV / Sheets export ──────────────────────────────────────────────────────
+import { safeCell } from "../accounts/format.js";
+
 export function leadsToCSV(leads, crmState = {}) {
   const headers = [
     "Rank","Company","Website","Segment","Director","Role","Phone","Email",
@@ -9,8 +11,8 @@ export function leadsToCSV(leads, crmState = {}) {
     "CRM Status","Touches","Last Contacted","Next Follow-up","Notes","Rescored At"
   ];
   const esc = v => {
-    const s = (v ?? "").toString().replace(/"/g,'""');
-    return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s}"` : s;
+    const s = safeCell((v ?? "").toString()).replace(/"/g,'""');
+    return /[",\n\r]/.test(s) ? `"${s}"` : s;
   };
   const rows = leads.map((l, i) => {
     const dms = l.decision_makers || [];

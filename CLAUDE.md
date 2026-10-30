@@ -67,7 +67,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   → company website → gov.uk registry filing with a finance title (gender
   pay gap "responsible person", modern slavery statement approver; ≤3
   years) → finance appointment in the news (Google News RSS, headline must
-  name the company, ≤4 years) → qualified accountant (ACA/FCA/ACCA/…) on
+  name the company, ≤4 years) → qualified accountant (ACA/FCA/ACCA/…, or a
+  director filed only as "Accountant": Likely) on
   the board → company secretary → director who signed the accounts.
   `finance_contact_source` records which, `finance_contact_evidence` lists
   every source naming that person, and `finance_contact_confidence` grades
@@ -471,6 +472,7 @@ Gate rules (enforced in `rescore.py`):
 - No FX signals → cap at 39 (SKIP)
 - Known bad domain → cap at 49 (QUEUE)
 - HOT requires: score ≥ 80 AND verified website AND at least 1 FX signal
+- Website confidence low or guessed (a name-guessed domain) → cap at 59 (QUEUE)
 
 Known bad domains are maintained in `KNOWN_BAD_DOMAINS` in `rescore.py`. Add directories, news sites, aggregators, and marketplaces to this list as they appear.
 

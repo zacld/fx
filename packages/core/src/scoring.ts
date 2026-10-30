@@ -309,12 +309,15 @@ type ScoreInput = Pick<
   | "is_large_org"
   // Gate J — actionable contact route required for HOT
   | "contact_phone" | "contact_email" | "contact_page"
->;
+ | "linked_event_ids">;
 
 /**
  * Score a lead. `urgency` is the trigger event's urgency (0–10) — the caller
  * resolves it (rescore.py reads it from urgency_map). Faithful to rescore.py.
  */
+/** The multi-event bonus for a company flagged by `events` distinct events: +4 each beyond the first, max +8. */
+export const multiEventBoost = (events: number): number => Math.min(8, Math.max(0, events - 1) * 4);
+
 export function scoreLead(lead: Partial<ScoreInput>, urgency = 0): ScoreResult {
   let score = 0;
   const reasons: string[] = [];
@@ -369,12 +372,16 @@ export function scoreLead(lead: Partial<ScoreInput>, urgency = 0): ScoreResult {
     if (conf === "high") { score += 25; reasons.push(`Website verified — strong name match (${src})`); }
     else if (conf === "medium" || conf === "confirmed") { score += 15; reasons.push(`Website verified (${src})`); }
     else if (conf === "low") { score += 8; reasons.push(`Website found — low confidence (${src})`); }
+    else if (conf === "guessed") { reasons.push(`Website guessed from the name — not verified (${src})`); }
     else { score += 15; reasons.push("Website confirmed"); }
   } else {
     score -= 20;
     reasons.push("No website found (−20)");
   }
-  // 10. Active status (+5)
+  // 10. Multi-event trigger (+4 per extra distinct event, max +8) — CLAUDE.md Priority 11; dedup links the events
+  const events = new Set((lead.linked_event_ids ?? []).filter(Boolean)).size;
+  if (events >= 2) { score += multiEventBoost(events); reasons.push(`Multi-event trigger: ${events} separate events flag this company (+${multiEventBoost(events)})`); }
+  // 11. Active status (+5)
   if ((lead.company_status ?? "").toLowerCase() === "active") { score += 5; reasons.push("Active on Companies House"); }
 
   score = Math.min(score, 100);
@@ -502,6 +509,13 @@ export function scoreLead(lead: Partial<ScoreInput>, urgency = 0): ScoreResult {
     }
   }
 
+  // Gate K: HOT and WARM need a verified website (CLAUDE.md Priority 10, Final benchmark gate 3): a low-confidence
+  // or name-guessed site caps at QUEUE. (No confidence recorded = an older lead whose site was confirmed: unchanged.)
+  if (lead.website && ["low", "guessed"].includes(wc) && score >= 60) {
+    score = 59;
+    reasons.push(`⚠ Website not verified (${wc} confidence) — capped at QUEUE`);
+  }
+
   const priority: Priority = score >= 80 ? "HOT" : score >= 60 ? "WARM" : score >= 40 ? "QUEUE" : "SKIP";
   return { score, priority, reasons };
 }
@@ -569,8 +583,9 @@ export function computeReadyScore(lead: Partial<Lead>): number {
   const hasPhone = !!(lead.contact_phone);
   const hasEmail = !!(lead.contact_email ||
     dms.find((d) => d["email"] || d["email_candidate"]));
-  const hasVerifiedEmail = !!(lead.contact_email ||
-    dms.find((d) => d["email_verified"] || d["email_candidate"]));
+  // verified: the company's own published email, or a director's address that passed verification — a pattern
+  // guess (email_candidate) is only "an email"
+  const hasVerifiedEmail = !!(lead.contact_email || dms.find((d) => d["email_verified"] === true));
   if (hasPhone && hasVerifiedEmail) s += 8;
   else if (hasPhone && hasEmail) s += 5;
   else if (hasPhone) s += 2;

@@ -52,10 +52,11 @@ Fetcher = Callable[[str], Optional[tuple[str, str]]]
 def fetch(url: str) -> Optional[tuple[str, str]]:
     """(final URL, text) for an HTML or text page, or None on any failure."""
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,text/plain"})
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT,
+                                                   "Accept": "text/html,text/plain,application/xml,text/xml"})
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
             ctype = resp.headers.get("Content-Type", "")
-            if "html" not in ctype and "text/plain" not in ctype:
+            if "html" not in ctype and "text/plain" not in ctype and "xml" not in ctype:  # xml: sitemaps
                 return None
             charset = resp.headers.get_content_charset() or "utf-8"
             return resp.geturl(), resp.read(MAX_BYTES).decode(charset, "replace")
@@ -116,12 +117,22 @@ def confirms_company(text: str, company_number: str, company_name: str) -> str:
     return "medium" if name and name in flat.replace("&", "AND") else ""
 
 
+def _join(base_url: str, href: str) -> str:
+    """href resolved against base_url; "" for an address urllib can't parse ("http://[oops", ...)."""
+    try:
+        return urllib.parse.urljoin(base_url, htmllib.unescape(href.strip()))
+    except ValueError:
+        return ""
+
+
 def _ranked(candidates: Iterable[tuple[str, str]], base_url: str, limit: int) -> list[str]:
     """Same-site URLs (with their link text) most likely to name the finance team, best first."""
     host = urllib.parse.urlparse(base_url).netloc.lower().removeprefix("www.")
     scored: dict[str, int] = {}
     for href, text in candidates:
-        url = urllib.parse.urljoin(base_url, href.strip())
+        url = _join(base_url, href)
+        if not url:
+            continue
         parsed = urllib.parse.urlparse(url)
         if (parsed.scheme not in ("http", "https") or parsed.netloc.lower().removeprefix("www.") != host
                 or url.rstrip("/") == base_url.rstrip("/")):
@@ -149,12 +160,17 @@ def sitemap_links(base_url: str, fetcher: Fetcher, robots: urllib.robotparser.Ro
     for a sitemap index, the one child sitemap for pages. At most two small XML files; no pages fetched here.
     """
     # robots.txt and sitemaps sometimes give "/sitemap.xml" rather than a full address: resolve against the site
-    got = fetcher(urllib.parse.urljoin(base_url, next(iter(robots.site_maps() or []), "") or "/sitemap.xml"))
+    named = next(iter(robots.site_maps() or []), "")
+    address = _join(base_url, named or "/sitemap.xml")
+    allowed = bool(address) and (bool(named) or robots.can_fetch(USER_AGENT, address))  # robots.txt respected
+    got = fetcher(address) if allowed else None
     xml = got[1] if got else ""
     if re.search(r"<sitemapindex", xml, re.I):
         children = _LOC.findall(xml)
-        child = next((c for c in children if re.search(r"page", c, re.I)), children[0] if children else "")
-        got = fetcher(urllib.parse.urljoin(base_url, child)) if child else None
+        child = next((c for c in children if re.search(r"page", urllib.parse.urlparse(c).path, re.I)),
+                     children[0] if children else "")
+        child = _join(got[0] or address, child) if child else ""   # a relative child is relative to the index
+        got = fetcher(child) if child and robots.can_fetch(USER_AGENT, child) else None
         xml = got[1] if got else ""
     return _ranked(((u, "") for u in _LOC.findall(xml)), base_url, limit)
 
@@ -178,6 +194,11 @@ def _robots(base_url: str, fetcher: Fetcher) -> urllib.robotparser.RobotFilePars
     return parser
 
 
+def no_site() -> dict:
+    """What look_up gives when no site could be confirmed as the company's."""
+    return {"website": "", "confidence": "", "people": [], "emails": [], "qualified": []}
+
+
 def look_up(company_number: str, company_name: str, fetcher: Optional[Fetcher] = None, pause: Optional[float] = None,
             hints: Iterable[str] = ()) -> dict:
     """
@@ -188,7 +209,7 @@ def look_up(company_number: str, company_name: str, fetcher: Optional[Fetcher] =
     """
     fetcher = fetcher or fetch
     pause = PAUSE_SECONDS if pause is None else pause
-    result = {"website": "", "confidence": "", "people": [], "emails": [], "qualified": []}
+    result = no_site()
     for guess in dict.fromkeys([*hints, *candidate_domains(company_name)]):
         got = fetcher(guess)
         if not got:
@@ -236,7 +257,7 @@ def look_up_many(companies: Iterable[tuple], fetcher: Optional[Fetcher] = None,
             return look_up(c[0], c[1], fetcher, hints=c[2] if len(c) > 2 else ())
         except Exception as e:  # noqa: BLE001 — one odd website must never stop the run
             print(f"  website lookup failed for {c[1]}: {type(e).__name__}", flush=True)
-            return {"website": "", "confidence": "", "people": [], "emails": [], "qualified": []}
+            return no_site()
 
     with ThreadPoolExecutor(max_workers=max(1, min(workers or WORKERS, len(companies) or 1))) as pool:
         return {c[0]: result for c, result in zip(companies, pool.map(one, companies))}

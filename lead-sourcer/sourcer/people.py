@@ -237,7 +237,8 @@ def choose_finance_contact(officers: list[dict], accounts_people: list[dict], we
     named = [(p, where) for found, where in ((accounts_people, "filed accounts"), (website_people, "company website"),
                                              (registry_finance, ""), (news_people, "news")) for p in found]
     best = min(named, key=lambda pw: finance_rank(pw[0]["title"]), default=None)
-    if fd and (best is None or min(finance_rank(fd["occupation"]), FINANCE_DIRECTOR_LEVEL) <= finance_rank(best[0]["title"])):
+    titled = bool(fd) and is_finance_title(fd["occupation"])   # "Finance Manager", not just "Accountant"
+    if titled and (best is None or min(finance_rank(fd["occupation"]), FINANCE_DIRECTOR_LEVEL) <= finance_rank(best[0]["title"])):
         return {"name": fd["name"], "role": fd["occupation"], "source": "Companies House occupation",
                 "confidence": CONFIRMED, "officer": fd}
     if best:
@@ -249,6 +250,12 @@ def choose_finance_contact(officers: list[dict], accounts_people: list[dict], we
         return {"name": officer["name"] if officer else p["name"], "role": p["title"],
                 "source": f"{where}: listed as {p['title']}{also}{note}",
                 "confidence": p.get("confidence", CONFIRMED), "officer": officer}
+    if fd:
+        # a director whose filed occupation is only "Accountant" / "Chartered Accountant": likely the finance lead,
+        # but no finance title says so (CLAUDE.md: a qualified accountant on the board comes after the named titles)
+        return {"name": fd["name"], "role": fd["occupation"],
+                "source": f"Companies House occupation: {fd['occupation']} on the board — likely the finance lead",
+                "confidence": LIKELY, "officer": fd}
 
     secretary = next((o for o in officers if o["role"] == "Company Secretary"), None)
     accountants = [o for o in officers if letters_for(o["name"])]

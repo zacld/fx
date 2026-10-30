@@ -12,6 +12,7 @@ on:
     - cron: '7 6 * * 1-5'    # weekdays 06:07 UTC: yesterday's close, before the working day
     - cron: '37 15 * * 1-5'  # weekdays 15:37 UTC: after the ECB's ~15:00 CET fix
   push:
+    branches: [main]   # a branch's code must never overwrite the live /api/market data
     paths:
       - '.github/workflows/fx-market-moves.yml'
       - 'market-moves/**'

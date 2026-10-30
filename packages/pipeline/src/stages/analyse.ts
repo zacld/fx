@@ -26,11 +26,39 @@ interface RawItem { id: string; source: string; source_url: string; headline: st
 // ── helpers ──────────────────────────────────────────────────────────────────
 type Seg = Record<string, unknown> & { segment_name?: string; website_validation_signals?: string[]; segment_signals?: string[]; micro_categories?: Array<Record<string, unknown> & { search_queries?: string[]; companies_house_terms?: string[] }>; companies_house_terms?: string[]; high_intent_search_queries?: string[] };
 
+// The AI's numbers and labels made to fit EventSchema before saving: an event that fails the schema on the next
+// import used to be dropped (and paid for again). 7.5 → 8, "Medium-High" → "High", "sector-specific" → "sector_specific".
+export const intIn = (v: unknown, lo: number, hi: number, dflt = lo): number => {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(hi, Math.max(lo, Math.round(n))) : dflt;
+};
+const EXPOSURE = ["Very High", "High", "Medium", "Low"];
+export function exposureLevel(v: unknown): string {
+  const t = String(v ?? "").toLowerCase();
+  if (!t) return "";
+  if (/very\s*high/.test(t)) return "Very High";
+  return EXPOSURE.find((e) => t.startsWith(e.toLowerCase()) || t.endsWith(e.toLowerCase())) ?? "";
+}
+const BREADTHS = ["broad_currency", "broad_macro", "commodity", "tariff", "sector_specific"];
+export function eventBreadth(v: unknown, eventType: unknown): string {
+  const t = String(v ?? "").toLowerCase().replace(/[\s-]+/g, "_");
+  return BREADTHS.includes(t) ? t : TYPE_TO_BREADTH[String(eventType ?? "")] ?? "sector_specific";
+}
+export const confidence3 = (v: unknown): string => {
+  const t = String(v ?? "").toLowerCase();
+  return ["high", "medium", "low", "none"].includes(t) ? t : "low";
+};
+
 function normaliseSegments(segments: Seg[]): Seg[] {
   for (const s of segments ?? []) {
     const sigs = s.website_validation_signals ?? s.segment_signals ?? [];
     s.website_validation_signals = sigs;
     s.segment_signals = sigs;
+    const seg = s as Record<string, unknown>;
+    if (seg.exposure_level !== undefined) seg.exposure_level = exposureLevel(seg.exposure_level);
+    if (seg.category_priority_score !== undefined && seg.category_priority_score !== null) {
+      seg.category_priority_score = intIn(seg.category_priority_score, 0, 100);
+    }
   }
   return segments ?? [];
 }
@@ -391,17 +419,17 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
       try {
         const a = await analyseFn(item.headline, item.raw_summary);
         const decision = deriveTriggerDecision(a);
-        const urgency = Number(a.urgency_score ?? 0), rel = Number(a.commercial_relevance ?? 0);
+        const urgency = intIn(a.urgency_score, 0, 10), rel = intIn(a.commercial_relevance, 0, 10);
 
         if (decision.mode === "reject") {
           st.lowRelevance++;
           putEvent({
             ...item, detected_at: nowIso(), status: "low_relevance",
-            trigger_strength: decision.strength, trigger_score: Number(a.trigger_score ?? 0),
+            trigger_strength: decision.strength, trigger_score: intIn(a.trigger_score, 0, 100),
             discovery_mode: decision.mode, recommended_query_budget: 0,
             urgency_score: urgency, commercial_relevance: rel,
             commercial_relevance_reason: String(a.commercial_relevance_reason ?? ""),
-            confidence_level: String(a.confidence_level ?? "low"), confidence_reason: String(a.confidence_reason ?? ""),
+            confidence_level: confidence3(a.confidence_level), confidence_reason: String(a.confidence_reason ?? ""),
             ai_provider: provider, ai_model: effectiveModel(),
           });
           continue;
@@ -413,14 +441,14 @@ export async function runAnalyseStage(opts: AnalyseOptions = {}): Promise<Analys
         const { chTerms, queries } = extractChTerms(segments);
         putEvent({
           ...item, detected_at: nowIso(),
-          event_type: a.event_type, event_breadth: a.event_breadth ?? "sector_specific",
+          event_type: a.event_type, event_breadth: eventBreadth(a.event_breadth, a.event_type),
           summary: a.summary ?? item.raw_summary, currency_pairs: a.currency_pairs ?? [],
           urgency_score: urgency, commercial_relevance: rel, commercial_relevance_reason: a.commercial_relevance_reason ?? "",
-          trigger_strength: decision.strength, trigger_score: Number(a.trigger_score ?? 0),
+          trigger_strength: decision.strength, trigger_score: intIn(a.trigger_score, 0, 100),
           discovery_mode: decision.mode, recommended_query_budget: decision.budget,
           likely_affected_businesses: Array.isArray(a.likely_affected_businesses) ? a.likely_affected_businesses : [],
           why_now: a.why_now ?? "", discovery_recommendation: a.discovery_recommendation ?? "",
-          confidence_level: a.confidence_level ?? "low", confidence_reason: a.confidence_reason ?? "",
+          confidence_level: confidence3(a.confidence_level), confidence_reason: a.confidence_reason ?? "",
           what_happened: a.what_happened ?? "", what_changed_financially: a.what_changed_financially ?? "",
           who_pays_more: a.who_pays_more ?? "", who_receives_less: a.who_receives_less ?? "",
           margin_risk: a.margin_risk ?? "", payment_timing_risk: a.payment_timing_risk ?? "",

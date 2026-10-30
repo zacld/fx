@@ -10,6 +10,7 @@ deliberately simple; they get recalibrated once real call outcomes exist.
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from datetime import date
 from typing import Optional
@@ -29,8 +30,20 @@ def _gbp(value: float) -> str:
     return f"£{v / 1e6:,.1f}m" if v >= 1e6 else f"£{v / 1e3:,.0f}k"
 
 
-def _is_uk(place: str) -> bool:
-    return place.strip().upper() in UK_NAMES
+_UK_PART = re.compile(r"\b(?:UNITED KINGDOM|GREAT BRITAIN|BRITAIN|ENGLAND|WALES|SCOTLAND|NORTHERN IRELAND|UK|GB|"
+                      r"COMPANIES HOUSE|REGISTRAR? OF COMPANIES|JERSEY|GUERNSEY|ISLE OF MAN|CHANNEL ISLANDS)\b")
+
+
+def is_uk(place: str) -> bool:
+    """A UK place, as Companies House and accounts write it: "England", "United Kingdom (England And Wales)",
+    "Companies House", "Register Of Companies For England And Wales" (a PSC's register given as its country)."""
+    p = " ".join((place or "").upper().replace(".", "").split())
+    if p in UK_NAMES:
+        return True
+    return "NEW SOUTH WALES" not in p and bool(_UK_PART.search(p))
+
+
+_is_uk = is_uk
 
 
 _TITLES = {"MR", "MRS", "MS", "MISS", "MX", "DR", "SIR", "DAME", "LORD", "LADY", "PROF"}

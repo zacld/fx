@@ -32,7 +32,8 @@ export function callReadiness(lead: Lead): { status: Readiness; reasons: string[
   const webConf = String(l.website_confidence ?? "").toLowerCase();
   const hasWebsite = !!l.website;
   const signals = (l.fx_payment_signals as unknown[] | undefined) ?? [];
-  const sigCount = Number(l.signal_count ?? 0) || signals.length;
+  // FX payment signals only: signal_count also counts secondary words ("italian", "french"), which aren't FX evidence
+  const sigCount = signals.length;
   const fxConfirmed = !!l.pays_fx_confirmed;
 
   const hotWarm = l.priority === "HOT" || l.priority === "WARM" || score >= 60;

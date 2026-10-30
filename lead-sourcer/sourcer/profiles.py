@@ -548,15 +548,21 @@ def finance_team_many(companies: list[tuple], fetcher: Optional[Fetcher] = None,
     budget = MAX_SEARCHES if max_searches is None else max_searches
     found: dict[str, list[dict]] = {}
     spent = failed = 0
+    over_budget = False
+
     class Stop(Exception):
         pass
 
+    class Skip(Exception):   # this company needs a search the budget can't pay for; cached ones still go ahead
+        pass
+
     def search(query: str) -> Optional[list[tuple[str, str, str]]]:
-        nonlocal spent, failed
+        nonlocal spent, failed, over_budget
         answer = _cached(query)
         if answer is None:
             if spent >= budget:
-                raise Stop(f"budget of {budget} searches reached")
+                over_budget = True
+                raise Skip
             if spent:
                 time.sleep(pause)
             spent += 1
@@ -575,42 +581,50 @@ def finance_team_many(companies: list[tuple], fetcher: Optional[Fetcher] = None,
     def has_fd(team: list[dict]) -> bool:   # a controller alone isn't enough: keep looking for the FD
         return any(p["current"] and people.is_finance_director(p["title"]) for p in team)
 
+    def check(number: str, name: str, rest: list) -> None:
+        """One company's searches, cheapest first; its team goes into `found`."""
+        queries = queries_for(name)
+        first = search(queries[0])
+        if first is None:
+            return
+        hits = dedupe(first)
+        team = people_in_results(hits, name)
+        found[number] = team   # kept even if a later search for it has to wait for the budget
+        if not has_fd(team):
+            # staff often list a trading name online ("trading as The BakeRite Company"): one search under it
+            given = [n for n in (rest[0] if rest else []) if n]
+            seen = given + [n for url, title, snippet in hits if mentions_company(f"{title} {snippet}", name, url)
+                            for n in trading_names(f"{title} {snippet}", name)]
+            trading = next(iter(trading_names("; ".join(f"trading as {n}" for n in seen), name)), "")
+            if trading:
+                results = search(queries_for(trading)[0])
+                if results:
+                    team = merge(team, [{**p, "trading_as": trading} for p in people_in_results(results, trading)])
+                    found[number] = team
+        if not has_fd(team):
+            results = search(queries[1])
+            if results:
+                hits = dedupe(hits + results)
+                team = merge(people_in_results(hits, name), [p for p in team if p.get("trading_as")])
+                found[number] = team
+        parent = rest[1] if len(rest) > 1 else ""
+        if not has_fd(team) and parent and plain_name(parent).lower() != plain_name(name).lower():
+            results = search(queries_for(parent)[0])
+            if results:
+                group = [{**p, "parent": parent} for p in people_in_results(results, parent)
+                         if p["current"] and people.is_finance_director(p["title"])]
+                found[number] = merge(team, group)
+
     try:
         for number, name, *rest in companies:
-            hits: list[tuple[str, str, str]] = []
-            team: list[dict] = []
-            queries = queries_for(name)
-            first = search(queries[0])
-            if first is None:
-                continue
-            hits = dedupe(first)
-            team = people_in_results(hits, name)
-            if not has_fd(team):
-                # staff often list a trading name online ("trading as The BakeRite Company"): one search under it
-                given = [n for n in (rest[0] if rest else []) if n]
-                seen = given + [n for url, title, snippet in hits if mentions_company(f"{title} {snippet}", name, url)
-                                for n in trading_names(f"{title} {snippet}", name)]
-                trading = next(iter(trading_names("; ".join(f"trading as {n}" for n in seen), name)), "")
-                if trading:
-                    results = search(queries_for(trading)[0])
-                    if results:
-                        team = merge(team, [{**p, "trading_as": trading} for p in people_in_results(results, trading)])
-            if not has_fd(team):
-                results = search(queries[1])
-                if results:
-                    hits = dedupe(hits + results)
-                    team = merge(people_in_results(hits, name), [p for p in team if p.get("trading_as")])
-            parent = rest[1] if len(rest) > 1 else ""
-            if not has_fd(team) and parent and plain_name(parent).lower() != plain_name(name).lower():
-                results = search(queries_for(parent)[0])
-                if results:
-                    group = [{**p, "parent": parent} for p in people_in_results(results, parent)
-                             if p["current"] and people.is_finance_director(p["title"])]
-                    team = merge(team, group)
-            found[number] = team
+            try:
+                check(number, name, rest)
+            except Skip:
+                pass   # needs a search the budget can't pay for: a later run; cached companies after it still go
     except Stop as stop:
         return found, str(stop)
-    return found, f"ok ({spent} searches)"
+    # (over budget, companies already searched are still checked from the cache)
+    return found, f"budget of {budget} searches reached" if over_budget else f"ok ({spent} searches)"
 
 
 def merge(team: list[dict], more: list[dict]) -> list[dict]:
