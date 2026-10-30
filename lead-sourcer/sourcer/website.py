@@ -51,15 +51,15 @@ Fetcher = Callable[[str], Optional[tuple[str, str]]]
 
 def fetch(url: str) -> Optional[tuple[str, str]]:
     """(final URL, text) for an HTML or text page, or None on any failure."""
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,text/plain"})
     try:
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,text/plain"})
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
             ctype = resp.headers.get("Content-Type", "")
             if "html" not in ctype and "text/plain" not in ctype:
                 return None
             charset = resp.headers.get_content_charset() or "utf-8"
             return resp.geturl(), resp.read(MAX_BYTES).decode(charset, "replace")
-    except Exception:  # noqa: BLE001 — DNS failures, timeouts, TLS errors, 4xx/5xx: no site here
+    except Exception:  # noqa: BLE001 — bad addresses, DNS failures, timeouts, TLS errors, 4xx/5xx: no site here
         return None
 
 
@@ -148,12 +148,13 @@ def sitemap_links(base_url: str, fetcher: Fetcher, robots: urllib.robotparser.Ro
     them (menus built by scripts, pages only in the footer). The sitemap robots.txt names, else /sitemap.xml;
     for a sitemap index, the one child sitemap for pages. At most two small XML files; no pages fetched here.
     """
-    got = fetcher(next(iter(robots.site_maps() or []), "") or urllib.parse.urljoin(base_url, "/sitemap.xml"))
+    # robots.txt and sitemaps sometimes give "/sitemap.xml" rather than a full address: resolve against the site
+    got = fetcher(urllib.parse.urljoin(base_url, next(iter(robots.site_maps() or []), "") or "/sitemap.xml"))
     xml = got[1] if got else ""
     if re.search(r"<sitemapindex", xml, re.I):
         children = _LOC.findall(xml)
         child = next((c for c in children if re.search(r"page", c, re.I)), children[0] if children else "")
-        got = fetcher(child) if child else None
+        got = fetcher(urllib.parse.urljoin(base_url, child)) if child else None
         xml = got[1] if got else ""
     return _ranked(((u, "") for u in _LOC.findall(xml)), base_url, limit)
 
@@ -229,6 +230,13 @@ def look_up_many(companies: Iterable[tuple], fetcher: Optional[Fetcher] = None,
     so this is no harder on any one site than looking them up one by one.
     """
     companies = list(companies)
+
+    def one(c: tuple) -> dict:
+        try:
+            return look_up(c[0], c[1], fetcher, hints=c[2] if len(c) > 2 else ())
+        except Exception as e:  # noqa: BLE001 — one odd website must never stop the run
+            print(f"  website lookup failed for {c[1]}: {type(e).__name__}", flush=True)
+            return {"website": "", "confidence": "", "people": [], "emails": [], "qualified": []}
+
     with ThreadPoolExecutor(max_workers=max(1, min(workers or WORKERS, len(companies) or 1))) as pool:
-        results = pool.map(lambda c: look_up(c[0], c[1], fetcher, hints=c[2] if len(c) > 2 else ()), companies)
-        return {c[0]: result for c, result in zip(companies, results)}
+        return {c[0]: result for c, result in zip(companies, pool.map(one, companies))}
