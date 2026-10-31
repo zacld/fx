@@ -33242,6 +33242,50 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-27T15:01:10.886Z"
   },
+  "3ac4879202f29796": {
+    "id": "3ac4879202f29796",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/week-ahead-elections-rate-decisions-and-jobs-take-center-stage/",
+    "headline": "Week ahead: Elections, rate decisions and jobs take center stage",
+    "raw_summary": "Next week’s calendar gives traders plenty to work with. US congressional elections bring political uncertainty, the Reserve Bank of Australia and Bank of England are expected to raise rates, and Friday delivers employment reports from both the US and Canada. The central question is whether growth, inflation and employment support a more restrictive policy outlook. For traders, the releases will provide the catalysts. The technical levels will help define the bias, risk and targets as those headlines hit. Monday, November 2: US manufacturing and the RBA decision The week starts with US manufact",
+    "pre_relevance_score": 9,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
+    "detected_at": "2026-10-31T01:29:12.204Z",
+    "event_type": "Forecast / commentary",
+    "event_breadth": "broad_macro",
+    "summary": "The preview flags upcoming political and monetary events, including a likely BoE rate rise, but no actual FX movement has occurred, limiting immediate relevance for UK businesses.",
+    "currency_pairs": [],
+    "urgency_score": 3,
+    "commercial_relevance": 2,
+    "commercial_relevance_reason": "Only a forecast of a BoE rate hike; no concrete FX move yet, so limited immediate impact for UK B2B FX customers",
+    "trigger_strength": "weak",
+    "trigger_score": 27,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [],
+    "why_now": "No immediate payment deadline or invoice window is tied to the forecasted moves.",
+    "discovery_recommendation": "Context only — the event is speculative, so no discovery effort is warranted.",
+    "confidence_level": "high",
+    "confidence_reason": "The article is a forward‑looking market preview, not a confirmed policy decision or rate change",
+    "what_happened": "Analysts preview next week’s calendar, noting expectations that the Bank of England will raise rates and that US elections and jobs data could create volatility.",
+    "what_changed_financially": "No actual financial variable has changed yet; the piece only signals possible future moves.",
+    "who_pays_more": "None identified – the rate decision is still pending.",
+    "who_receives_less": "None identified – the rate decision is still pending.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "None concrete at this time",
+    "fx_payment_logic": "Since no rate change has been announced, there is no concrete FX transaction that UK firms need to manage today.",
+    "sales_angle": "There is currently no FX move to act on; we can monitor the BoE decision for future impact.",
+    "business_impact_summary": "At present, the forecasted BoE hike does not create a measurable cost or revenue change for UK firms; the impact will only materialise after an official announcement.",
+    "exposure_types": [],
+    "overall_sales_angle": "No actionable FX trigger today – watch for the BoE decision later in the week.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "3b29d444c05ce3e2": {
     "id": "3b29d444c05ce3e2",
     "headline": "Goldman Soloman: I believe AI is going to interrupt jobs, dislocate",
@@ -50006,6 +50050,213 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-07-24T07:29:41.895Z"
+  },
+  "585bc65570137c1f": {
+    "id": "585bc65570137c1f",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-fx-news-wrap-30-oct-it-s-a-wrap-nasdaq-tumbles-as-ai-costs-worry-investors-fed-speakers-keep-hikes-in-play/",
+    "headline": "investingLive Americas FX news wrap 30 Oct: It’s a wrap: Nasdaq tumbles as AI costs worry investors; Fed speakers keep hikes in play",
+    "raw_summary": "Nasdaq suffers worst month since March 2025 as technology stocks tumble Bitcoin tests key support as Binance security fears weigh Week ahead: Elections, rate decisions and jobs take center stage Earnings next week: Can Apple, Palantir and AMD restore confidence? Fed’s Logan: At least two more quarter-point rate hikes needed Carney: Canada, EU working toward deepest possible partnership, short of accession Fed’s Daly: AI matters for near- and medium-term policy Fitch on UK Budget: Policy continuity leaves a tough delivery challenge Fed's Barkin: Direction of travel is straightforward for the Fe",
+    "pre_relevance_score": 9,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba",
+    "detected_at": "2026-10-31T01:28:16.777Z",
+    "event_type": "Monetary policy",
+    "event_breadth": "broad_currency",
+    "summary": "Fed speakers signalled further US rate hikes, bolstering the dollar and pushing GBP/USD lower. UK businesses that pay US suppliers in USD will need more pounds for upcoming invoices, while exporters receiving USD see a small upside but may need to re‑price. The timing of near‑term payments makes this a good moment to reach out.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "Fed officials signalling further rate hikes strengthens USD, raising costs for UK firms with USD‑denominated payables and affecting those converting USD revenue",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK electronics component importers",
+      "UK machinery and raw‑material importers from the US",
+      "UK software/SaaS firms with US customers"
+    ],
+    "why_now": "Many USD invoices are due in the next 30‑90 days, so the weaker GBP will increase the GBP cost of settling them today",
+    "discovery_recommendation": "Limited run — two distinct payment‑flow niches (US‑payable importers and USD‑revenue exporters) merit targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "Guidance is clear but not a surprise rate decision; impact on GBP/USD is evident yet timing of payments adds moderate urgency",
+    "what_happened": "Fed officials, including Logan and Daly, said at least two more quarter‑point hikes are likely this year, keeping US monetary tightening on the agenda",
+    "what_changed_financially": "The prospect of higher US rates supports the dollar, pushing GBP/USD lower and making GBP‑denominated firms need more pounds to buy the same amount of USD",
+    "who_pays_more": "UK importers with outstanding or upcoming USD supplier invoices (e.g. electronics, raw materials)",
+    "who_receives_less": "UK exporters converting USD customer payments back to GBP see a modest benefit, but may face pricing pressure on future USD contracts",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP‑to‑USD supplier payments and USD‑to‑GBP revenue conversions",
+    "fx_payment_logic": "UK importers order goods priced in USD, receive an invoice in USD, then convert GBP to USD to settle; a stronger dollar means more GBP per USD, eroding margins. Conversely, UK exporters invoice US customers in USD and later convert the receipts back to GBP, gaining a modest boost when the pound is weak.",
+    "sales_angle": "If you have USD supplier invoices due this month, the current GBP/USD rate is worse than it was a week ago, and you could lock in a better hedge now.",
+    "business_impact_summary": "UK importers of US‑priced components and raw materials face higher landed‑costs on invoices due soon, squeezing margins. UK firms earning in USD see a slight upside on conversion but may need to adjust pricing for future contracts. Both groups benefit from a quick FX review today.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "The Fed’s hawkish tone is pushing the dollar higher, so any GBP‑denominated business with USD invoices or receipts should review their FX position now",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US electronics and semiconductor components",
+        "category_priority_score": 82,
+        "business_model": "UK distributor buying chips, PCBs and other electronic parts from US manufacturers, paying USD invoices, selling finished goods in GBP to UK OEMs",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure – USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Importer receives USD invoice → converts GBP to USD at spot → weaker GBP means more GBP needed per USD → margin compressed unless hedged",
+        "margin_risk": "Medium — a 2% GBP/USD move on £1.2 m annual spend ≈ £24 k extra cost if unhedged",
+        "payment_timing_risk": "High — typical 30‑60 day payment terms create a sizable FX window",
+        "affected_payment_flow": "USD payments to US component suppliers, £50k‑£1m per shipment, monthly",
+        "website_validation_signals": [
+          "imported from the United States",
+          "US‑based manufacturer",
+          "electronics components",
+          "sourced from US",
+          "exclusive distributor"
+        ],
+        "avoid_segments": [
+          "pure UK‑made electronics firms",
+          "retail electronics shops without import operations"
+        ],
+        "sales_angle": "Your upcoming USD invoices for chips will cost more in GBP now that the dollar has strengthened.",
+        "exposure_thesis_template": "This company imports electronic components from US manufacturers; the recent Fed‑driven USD rally raises the GBP cost of those invoices.",
+        "micro_categories": [
+          {
+            "name": "US semiconductor importers UK",
+            "why": "Pay USD to US chip fabs; margin directly hit by GBP/USD weakening",
+            "search_queries": [
+              "\"semiconductor importer\" UK",
+              "\"US chip importer\" UK",
+              "\"electronics components USA\" UK"
+            ],
+            "companies_house_terms": [
+              "semiconductor",
+              "chip importer",
+              "electronics USA"
+            ]
+          },
+          {
+            "name": "US consumer electronics importers UK",
+            "why": "Buy finished US‑made devices priced in USD, creating clear FX exposure",
+            "search_queries": [
+              "\"consumer electronics importer\" UK",
+              "\"US electronics distributor\" UK",
+              "\"imported from United States\" electronics"
+            ],
+            "companies_house_terms": [
+              "consumer electronics",
+              "US importer",
+              "electronics USA"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from the United States",
+          "US‑based manufacturer",
+          "electronics components",
+          "sourced from US",
+          "exclusive distributor"
+        ]
+      },
+      {
+        "segment_name": "UK exporters receiving USD revenue from US customers",
+        "category_priority_score": 74,
+        "business_model": "UK software, engineering or professional services firm billing US clients in USD, converting receipts back to GBP for local costs",
+        "exposure_level": "Medium",
+        "exposure_type": "Revenue conversion – USD receipts into GBP",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "US client pays invoice in USD → UK firm holds USD or converts to GBP → a weaker GBP yields slightly more GBP per USD, but future pricing may need adjustment",
+        "margin_risk": "Low to medium — a 2% GBP/USD move on £800 k annual USD revenue ≈ £16 k gain if unhedged",
+        "payment_timing_risk": "Medium — receipts may sit for 10‑30 days before conversion",
+        "affected_payment_flow": "USD receipts from US customers, typically £50k‑£500k per month",
+        "website_validation_signals": [
+          "serving US clients",
+          "US‑based customers",
+          "software as a service",
+          "US market"
+        ],
+        "avoid_segments": [
+          "purely domestic UK service firms",
+          "companies with no US client base"
+        ],
+        "sales_angle": "If you invoice US customers in USD, a stronger dollar now means you’ll get more GBP on each payment – let’s lock that benefit in.",
+        "exposure_thesis_template": "This company provides SaaS/engineering services to US clients; the Fed‑driven USD rally improves the GBP value of incoming USD payments.",
+        "micro_categories": [
+          {
+            "name": "UK SaaS firms with US customers",
+            "why": "Invoice US SaaS users in USD; conversion rate directly impacts GBP revenue",
+            "search_queries": [
+              "\"SaaS\" \"US customers\" UK",
+              "\"software as a service\" \"United States\" UK",
+              "\"cloud services\" \"US\" UK"
+            ],
+            "companies_house_terms": [
+              "SaaS",
+              "cloud services",
+              "software USA"
+            ]
+          },
+          {
+            "name": "UK engineering consultancies serving US oil & gas",
+            "why": "Bill US oil & gas firms in USD; conversion gains/losses affect project margins",
+            "search_queries": [
+              "\"engineering consultancy\" \"US oil\" UK",
+              "\"energy consulting\" \"United States\" UK",
+              "\"UK engineering firm\" \"US client\""
+            ],
+            "companies_house_terms": [
+              "engineering consultancy",
+              "energy consulting",
+              "US client"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "serving US clients",
+          "US‑based customers",
+          "software as a service",
+          "US market"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "semiconductor",
+      "chip importer",
+      "electronics USA",
+      "consumer electronics",
+      "US importer",
+      "SaaS",
+      "cloud services",
+      "software USA",
+      "engineering consultancy",
+      "energy consulting",
+      "US client"
+    ],
+    "all_search_queries": [
+      "\"semiconductor importer\" UK",
+      "\"US chip importer\" UK",
+      "\"electronics components USA\" UK",
+      "\"consumer electronics importer\" UK",
+      "\"US electronics distributor\" UK",
+      "\"imported from United States\" electronics",
+      "\"SaaS\" \"US customers\" UK",
+      "\"software as a service\" \"United States\" UK",
+      "\"cloud services\" \"US\" UK",
+      "\"engineering consultancy\" \"US oil\" UK",
+      "\"energy consulting\" \"United States\" UK",
+      "\"UK engineering firm\" \"US client\""
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-10-31T01:29:18.771Z"
   },
   "591b7faaa79b7132": {
     "id": "591b7faaa79b7132",
