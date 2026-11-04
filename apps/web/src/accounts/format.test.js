@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askFor, bankUrl, companyPath, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { askFor, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -51,9 +51,32 @@ describe("accounts helpers", () => {
     ];
     // a Guess is never presented as the contact: it's a clue, and the page says who to ask for instead
     expect(list.map(contactGroup)).toEqual(["Likely", "Ask for the FD", "Confirmed", "Ask for the FD", "Confirmed"]);
-    expect(sortRows(list).map((r) => r.rank)).toEqual([3, 5, 1, 2, 4]);
+    expect(sortRows(list, "contactFirst").map((r) => r.rank)).toEqual([3, 5, 1, 2, 4]);
     expect(sortRows(list, "rank").map((r) => r.rank)).toEqual([1, 2, 3, 4, 5]);
     expect(filterRows(list, { contact: "Confirmed" }).map((r) => r.rank)).toEqual([3, 5]);
+  });
+
+  it("leads with what their filings prove about FX, strongest first", () => {
+    const list = [
+      { rank: 1, filed_fx_score: "0", main_currency: "EUR", currency_source: "HMRC customs (estimated mix)" },
+      { rank: 2, filed_fx_score: "95", currencies_in_accounts: "USD (buys), EUR", fx_notes_url: "https://x/doc#page=31",
+        fx_forwards: "Forward contracts to buy US$5.2m (prior year US$3.1m)", fx_today: "Uses forward contracts",
+        fx_forwards_evidence: "\"…to purchase US$5.2m (2023: US$3.1m)\" (filed accounts, p31)",
+        fx_sensitivity: "10% move in sterling against USD: £450k on profit — \"If sterling had weakened…\"",
+        turnover_regions: "United Kingdom £40.1m · Europe £12m", turnover_regions_url: "https://x/doc#page=22" },
+      { rank: 3, filed_fx_score: "25", fx_today: "Uses an FX provider: Ebury", fx_today_url: "https://ch/charges" },
+    ];
+    expect(sortRows(list).map((r) => r.rank)).toEqual([2, 3, 1]);
+    expect(list.map(fxGroup)).toEqual(["No FX in the filings yet", "Strong FX proof", "Some FX proof"]);
+    const facts = Object.fromEntries(fxFacts(list[1]).map(([k, v, url, quote]) => [k, [v, url, quote]]));
+    expect(facts.Currencies).toEqual(["USD (buys), EUR", "https://x/doc#page=31", undefined]);
+    expect(facts["How they do FX"][0]).toBe("Forward contracts to buy US$5.2m (prior year US$3.1m)");   // policy not repeated
+    expect(facts["How they do FX"][2]).toMatch(/US\$5\.2m/);
+    expect(facts["Currency sensitivity"][0]).toBe("10% move in sterling against USD: £450k on profit");
+    expect(facts["Sales by region"][1]).toBe("https://x/doc#page=22");
+    expect(fxFacts(list[0])).toEqual([["Currencies", "EUR (HMRC customs (estimated mix))", "", undefined]]);
+    expect(fxFacts(list[2])[0]).toEqual(["How they do FX", "Uses an FX provider: Ebury", "https://ch/charges", undefined]);
+    expect(toCsv([list[1]]).split("\n")[0]).toContain("filed_fx_score,filed_fx,currencies_in_accounts,fx_forwards");
   });
 
   it("links the turnover to its page and says when it isn't disclosed", () => {
