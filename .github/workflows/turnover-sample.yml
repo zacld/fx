@@ -1,0 +1,80 @@
+name: Turnover sample
+
+# Why the finder has no turnover for some companies: what their latest accounts
+# actually show (lead-sourcer/tools/turnover_sample.py). By default it samples the
+# Accounts list's companies without turnover — only their numbers, names and
+# accounts type are taken from the private list, never people. Runs when this file
+# or the tool changes (free on the public repo), or by hand with company numbers.
+# Public repo: the log holds filing types and accounts lines only (public records,
+# no personal names) and there are no attachments.
+
+on:
+  workflow_dispatch:
+    inputs:
+      numbers:
+        description: 'Company numbers, space-separated (blank: companies on the Accounts list without turnover)'
+        required: false
+      max:
+        description: 'How many companies to sample from the list'
+        required: false
+        default: '30'
+  push:
+    branches: ['main', 'claude/**']
+    paths:
+      - .github/workflows/turnover-sample.yml
+      - lead-sourcer/tools/turnover_sample.py
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PDF tools (pdftotext, OCR)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils tesseract-ocr > /dev/null
+
+      - name: Install Python packages
+        run: pip install -q -r lead-sourcer/requirements.txt
+
+      - uses: actions/setup-node@v4
+        if: inputs.numbers == ''
+        with:
+          node-version: 22
+          cache: npm
+
+      # Company number, name and accounts type only: the list's people never leave the store.
+      - name: Companies on the Accounts list without turnover
+        if: inputs.numbers == ''
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web && node --input-type=module -e '
+            import { writeFileSync } from "node:fs";
+            import { getStore } from "@netlify/blobs";
+            const store = getStore({ name: "fx-accounts", siteID: process.env.NETLIFY_SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
+            const data = await store.get("latest", { type: "json" });
+            const keep = ["company_number", "company_name", "accounts_category", "accounts_format", "section", "turnover_gbp", "size_basis"];
+            const rows = (data?.rows || []).map((r) => Object.fromEntries(keep.filter((k) => r[k] !== undefined).map((k) => [k, r[k]])));
+            writeFileSync("../../lead-sourcer/sample.json", JSON.stringify(rows));
+            console.log(`${rows.length} companies on the list`);
+          '
+
+      - name: Sample
+        working-directory: lead-sourcer
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          NUMBERS: ${{ inputs.numbers }}
+          MAX: ${{ inputs.max || '30' }}
+        run: |
+          if [ -n "$NUMBERS" ]; then python3 tools/turnover_sample.py $NUMBERS
+          else python3 tools/turnover_sample.py --accounts sample.json --max "$MAX"; fi
