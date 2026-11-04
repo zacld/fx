@@ -408,6 +408,10 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 FACTS_VERSION = "2026-11-04"   # turnover / cost of sales from the profit and loss account (PDF, OCR), with its source
 
 
+# A scanned filing whose profit and loss page wasn't searched because the run's OCR time ran out.
+TURNOVER_NOT_READ_YET = "turnover not read yet: this run's OCR time for scanned accounts was used up"
+
+
 def facts_reusable(entry: dict) -> bool:
     """
     Whether cached facts were read with rules still current. Facts from
@@ -417,9 +421,11 @@ def facts_reusable(entry: dict) -> bool:
     read again, not every company's accounts (main.py caps how many a run).
     """
     version = entry.get("facts_version")
+    facts = entry.get("facts") or {}
+    if facts.get("turnover_check") == TURNOVER_NOT_READ_YET:
+        return False
     if version == FACTS_VERSION:
         return True
-    facts = entry.get("facts") or {}
     if version not in ("2026-10-26", "2026-10-26b") or facts.get("turnover") is None:
         return False
     return version == "2026-10-26b" or not (facts.get("fx_gain_loss_evidence", "").startswith(("accounts", "scanned"))
@@ -702,6 +708,8 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
             check_fx(facts)   # the FX figure's share of turnover can be checked now
         elif pl and pl["check"] and facts["turnover"] is None:
             facts.update(turnover_check=pl["check"], turnover_page=number)
+        elif facts["turnover"] is None and not pdf.pl_budget_left():
+            facts["turnover_check"] = TURNOVER_NOT_READ_YET   # read again next run, not cached as "not found"
     if how == "scanned pdf" and facts["fx_gain_loss"] is None and not facts["fx_gain_loss_check"]:
         # the FX line is in the notes, past the pages OCR'd for the company information
         page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None)

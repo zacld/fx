@@ -10,7 +10,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sourcer import accounts, turnover_text  # noqa: E402
+from sourcer import accounts, pdf, turnover_text  # noqa: E402
 
 
 def page(*lines: str) -> str:
@@ -181,6 +181,24 @@ class TestTaggedFilings(unittest.TestCase):
                 self.assertEqual((f["turnover"], f["turnover_prior"], f["turnover_basis"], f["turnover_check"]),
                                  (turnover, prior, basis, ""))
                 self.assertIn("profit and loss account", f["turnover_source"])
+
+
+class TestRereadingAndOcrOrder(unittest.TestCase):
+    def test_pages_tried_for_the_profit_and_loss(self):
+        # p21 of 43 (Loch Lomond), p13 of 29 (EDMI): tried within the first few, nearest 44% first
+        self.assertEqual(pdf.pl_pages_order(43, 6)[:5], [19, 18, 20, 17, 21])
+        self.assertIn(13, pdf.pl_pages_order(29, 6)[:3])
+        self.assertEqual(pdf.pl_pages_order(5, 6), [])
+
+    def test_which_cached_accounts_are_read_again(self):
+        current = accounts.FACTS_VERSION
+        self.assertTrue(accounts.facts_reusable({"facts_version": current, "facts": {"turnover": None}}))
+        # the run's OCR time ran out before the profit and loss page was searched: try again
+        self.assertFalse(accounts.facts_reusable({"facts_version": current,
+                                                  "facts": {"turnover_check": accounts.TURNOVER_NOT_READ_YET}}))
+        # read before the profit and loss reader: again only when no turnover was found
+        self.assertTrue(accounts.facts_reusable({"facts_version": "2026-10-26b", "facts": {"turnover": 5e7}}))
+        self.assertFalse(accounts.facts_reusable({"facts_version": "2026-10-26b", "facts": {"turnover": None}}))
 
 
 if __name__ == "__main__":

@@ -111,23 +111,27 @@ def _fx_budget_left() -> bool:
 
 # --- The profit and loss account in a scanned filing --------------------------
 # The primary statements follow the strategic, directors' and auditor's reports:
-# about 15-55% of the way through, past the first OCR_MAX_PAGES. Read one page
-# at a time until the turnover (or the "starts at gross profit" statement)
-# turns up, under its own per-run budget.
+# 37-50% of the way through in the turnover sample (p13 of 29, p21 of 43, p20 of
+# 47), past the first OCR_MAX_PAGES. Read one page at a time from about 44%
+# outwards until the turnover (or the "starts at gross profit" statement) turns
+# up, under its own per-run budget.
 PL_SEARCH_MAX_PAGES = int(os.environ.get("OCR_PL_MAX_PAGES", "10"))
 PL_SEARCH_BUDGET_SECONDS = float(os.environ.get("OCR_PL_BUDGET_SECONDS", "1500"))
 
 
-def _pl_budget_left() -> bool:
+def pl_budget_left() -> bool:
+    """Whether this run's OCR time for finding turnover (OCR_PL_BUDGET_SECONDS) is not used up yet."""
     with _stats_lock:
         return stats["pl_seconds"] < PL_SEARCH_BUDGET_SECONDS
 
 
+_pl_budget_left = pl_budget_left
+
+
 def pl_pages_order(pages: int, already: int) -> list[int]:
-    """Pages to try for the profit and loss account, best first: 15-55% of the way through, then the rest."""
-    likely = list(range(max(already + 1, round(pages * 0.15)), min(pages, round(pages * 0.55)) + 1))
-    rest = [p for p in range(already + 1, pages + 1) if p not in likely]
-    return (likely + rest)[:PL_SEARCH_MAX_PAGES]
+    """Pages to try for the profit and loss account, best first: nearest to 44% of the way through."""
+    centre = pages * 0.44
+    return sorted(range(already + 1, pages + 1), key=lambda p: (abs(p - centre), p))[:PL_SEARCH_MAX_PAGES]
 
 
 def _page_count(path: str) -> int:
