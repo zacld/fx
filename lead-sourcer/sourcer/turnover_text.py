@@ -151,7 +151,7 @@ def read_page(page: str, number: int = 0, ocr: bool = False, statement: Optional
     basis = "group" if (heading and heading.group(1)) or group_column else "company"
     out = {"turnover": None, "turnover_prior": None, "cost_of_sales": None, "cost_of_sales_prior": None,
            "basis": basis, "unit": unit, "page": number, "line": "", "check": "", "statement": bool(heading),
-           "years": years}
+           "years": years, "unit_stated": bool(fx_text._HEADING.search(page[: anchor.start()]))}
     if currency != "£":
         out["check"] = f"profit and loss in {currency} ({' '.join(anchor.group(0).split())[:80]}), not in pounds"
         return out
@@ -195,9 +195,9 @@ def read_page(page: str, number: int = 0, ocr: bool = False, statement: Optional
 # "Turnover for the year was £95.3m, compared with £104.2m", "Revenue for the year ended 30 June 2025 was
 # £129,922,001 (2024: £126,778,008)", "Group turnover increased by 8% to £45.2 million (2024: £41.9 million)".
 _PROSE = re.compile(
-    r"\b((?:the\s+)?(?:group(?:'s|’s)?\s+|company(?:'s|’s)?\s+|total\s+)?(?:turnover|revenue))"
-    r"(?:\s+for\s+the\s+(?:year|period)[^.£]{0,45}?)?"
-    r"\s+(?:was|of|amounted\s+to|totalled|totaled|(?:increased|decreased|rose|fell|grew)(?:\s+by\s+[\d.]+%)?\s+to)"
+    r"\b((?:the\s+)?(?:group(?:'s|’s)?\s+|company(?:'s|’s)?\s+|total\s+)?(?:turnover|revenue|sales))"
+    r"(?:\s+for\s+the\s+(?:year|period)[^.£]{0,45}?|\s+in\s+(?:the\s+year\s+)?20\d\d)?"
+    r"\s+(?:was|were|of|amounted\s+to|totalled|totaled|(?:increased|decreased|rose|fell|grew)(?:\s+by\s+[\d.]+%)?\s+to)"
     r"\s+£\s?(\d[\d,]*(?:\.\d+)?)\s*(m\b|million\b|bn\b|billion\b)?"
     r"(?:[^.£]{0,40}?(?:\(\s*(?:20\d\d|prior\s+year|last\s+year)\s*[:-]?\s*|compared\s+(?:with|to)\s+|from\s+)"
     r"£\s?(\d[\d,]*(?:\.\d+)?)\s*(m\b|million\b|bn\b|billion\b)?)?", re.I)
@@ -241,6 +241,28 @@ def read_document(text: str) -> Optional[dict]:
     return next((r for r in found if r["check"] and r["statement"]), None) or next((r for r in found if r["check"]), None)
 
 
+def rescale(reading: Optional[dict], others: list[float]) -> Optional[dict]:
+    """
+    A statement read without a £ / £'000 / £m heading (OCR lost it) is taken as pounds; when the same accounts
+    state turnover elsewhere (the strategic report's "sales totalled £355m", a KPI table in £m) at about a thousand
+    or a million times it, the table was in £'000 / £m: its figures are scaled and the source says why. Nisbets'
+    "Turnover 354,989" with "£355m" in the strategic report is £355.0m, not £355k. Never a guess: without such a
+    figure (within 3%) the reading stays as it is.
+    """
+    if not reading or reading.get("turnover") is None or reading.get("unit_stated", True) or reading["unit"] != "£":
+        return reading
+    for factor, unit in ((1_000.0, "£'000"), (1_000_000.0, "£m")):
+        match = next((o for o in others if o and abs(o / (reading["turnover"] * factor) - 1) <= 0.03), None)
+        if match:
+            for key in ("turnover", "turnover_prior", "cost_of_sales", "cost_of_sales_prior"):
+                if reading.get(key) is not None:
+                    reading[key] *= factor
+            reading["unit"] = unit
+            reading["line"] = f"{reading['line']} (in {unit}: the accounts state turnover as £{match / 1e6:,.1f}m elsewhere)"
+            break
+    return reading
+
+
 def read(pages: list[str], first_page: int = 1, ocr: bool = False) -> Optional[dict]:
     """
     The best profit and loss reading across the pages: the primary statement's
@@ -251,7 +273,10 @@ def read(pages: list[str], first_page: int = 1, ocr: bool = False) -> Optional[d
     found = [r for r in (read_page(p, n, ocr) for n, p in enumerate(pages, first_page)) if r]
     with_turnover = [r for r in found if r["turnover"] is not None]
     if with_turnover:
-        return min(with_turnover, key=lambda r: (not r["statement"], r["basis"] != "group", r["page"]))
+        best = min(with_turnover, key=lambda r: (not r["statement"], r["basis"] != "group", r["page"]))
+        stated = [r["turnover"] for r in with_turnover if r is not best and r.get("unit_stated")]
+        prose = from_prose(pages, first_page)
+        return rescale(best, stated + ([prose["turnover"]] if prose else []))
     return next((r for r in found if r["check"]), None)
 
 

@@ -15,6 +15,7 @@ treat None as "unknown", never as zero.
 from __future__ import annotations
 
 import html
+import os
 import re
 import time
 import urllib.error
@@ -413,6 +414,9 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 FACTS_VERSION = "2026-11-05"   # the currency notes (fx_notes) and turnover by region from accounts text
 
 
+# Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.
+OCR_NOTES_MIN_TURNOVER = float(os.environ.get("OCR_NOTES_MIN_TURNOVER", "25000000"))
+
 # A scanned filing whose profit and loss page wasn't searched because the run's OCR time ran out.
 TURNOVER_NOT_READ_YET = "turnover not read yet: this run's OCR time for scanned accounts was used up"
 
@@ -479,6 +483,29 @@ def _fx_from_text(facts: dict, text: str, how: str, ocr: bool = False) -> bool:
     facts.update(fx_gain_loss=found["value"], fx_gain_loss_prior=found["prior"],
                  fx_gain_loss_evidence=f'{how}: "{found["line"]}"')
     return True
+
+
+# Full, group and medium-sized accounts are for companies well past this; a turnover under it read from one is a
+# misread (a £'000 table taken as £, a wrong cell) or a holding company's own few charges — never a size to use.
+MIN_PLAUSIBLE_TURNOVER = 1_000_000
+_FULL_ACCOUNTS = ("full", "group", "medium")
+
+
+def check_turnover(facts: dict) -> dict:
+    """
+    A turnover of £0 or less, or under MIN_PLAUSIBLE_TURNOVER from full / group / medium accounts, moves to
+    turnover_check ("check the accounts"), never a figure (Nisbets read as £354k, Caribbean Trading Group as £0).
+    """
+    turnover, kind = facts.get("turnover"), facts.get("accounts_type", "")
+    if turnover is None:
+        return facts
+    if turnover <= 0 or (turnover < MIN_PLAUSIBLE_TURNOVER and kind in _FULL_ACCOUNTS):
+        where = f"{kind} accounts" if kind else "the accounts"
+        facts.update(turnover=None, turnover_prior=None, turnover_check=(
+            f"turnover nil in {where} (a holding company?)" if turnover <= 0 else
+            f"turnover read as {hooks.short(turnover)} from {where}: too small to be right (a £'000 table or a "
+            f"holding company's own figure?); check the accounts"))
+    return facts
 
 
 def check_fx(facts: dict) -> dict:
@@ -686,20 +713,22 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
     if not document_id:
         return None
     filed_on = filing.get("date") or ""   # for the "accounts just filed" hook
+    kind = (filing.get("description") or "").replace("accounts-with-accounts-type-", "")
     url = filing_document_url(company_number, filing)
     made_up = (filing.get("description_values") or {}).get("made_up_date") or ""
     document = None if filing.get("paper_filed") else fetch_ixbrl(document_id, api_key)
     if document:
-        facts = dict(extract_facts(document), format="ixbrl", filed_on=filed_on, accounts_url=url)
+        facts = dict(extract_facts(document), format="ixbrl", filed_on=filed_on, accounts_url=url, accounts_type=kind)
         facts["period_end"] = facts["period_end"] or made_up   # no tagged turnover or FX: the filing's made-up date
-        return facts
+        return check_turnover(facts)
     if not pdf.available():
         return None
     data = fetch_pdf(document_id, api_key) or b""
     text, how = pdf.to_text(data)
     if not text:
         return None
-    facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on, accounts_url=url)
+    facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on, accounts_url=url, accounts_type=kind)
+    check_turnover(facts)
     ocr_pages: dict[int, str] = {}   # pages OCR'd below while looking for turnover and the FX line, kept for the notes
     if how == "scanned pdf" and (facts["turnover"] is None or "profit and loss account" not in facts.get("turnover_source", "")):
         # the profit and loss account is past the pages OCR'd for the company information (a strategic report's
@@ -707,6 +736,10 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
         page, number = pdf.ocr_find(data, lambda t: bool((r := turnover_text.read_page(t, ocr=True)) and (
             r["turnover"] is not None or r["check"])), purpose="pl", seen=ocr_pages)
         pl = turnover_text.read_page(page, number, ocr=True) if page else None
+        # a page without its £'000 heading (lost to OCR): scaled by the turnover the first pages state, if any
+        earlier = [facts["turnover"]] if facts.get("turnover") is not None else []
+        pl = turnover_text.rescale(pl, earlier + [r["turnover"] for r in [turnover_text.from_prose(
+            [ocr_pages[n] for n in sorted(ocr_pages)])] if r])
         if pl and pl["turnover"] is not None:
             facts.update(turnover=pl["turnover"], turnover_prior=pl["turnover_prior"],
                          **turnover_fields(pl, True, how))
@@ -722,15 +755,29 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
         page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None, seen=ocr_pages)
         if page and _fx_from_text(facts, page, f"scanned accounts p{number}", ocr=True):
             check_fx(facts)
+    if how == "scanned pdf" and (facts["turnover"] is None or facts["turnover"] >= OCR_NOTES_MIN_TURNOVER):
+        # the currency notes: their own pages (forward contracts, sensitivity, currency risk), until one names a
+        # forward contract's size or a sensitivity, under their own OCR budget (pdf.notes_pages_order)
+        def notes_found(page_text: str) -> bool:
+            found = fx_notes.read([page_text])
+            return bool(found["fx_forwards"] or found["fx_sensitivity"])
+        pdf.ocr_find(data, notes_found, purpose="notes", seen=ocr_pages)
     if ocr_pages:
-        # the currency notes and the turnover-by-region table, from the pages OCR'd anyway (no extra OCR)
+        # the currency notes and the turnover-by-region table, from the pages OCR'd for them, turnover and the FX line
         numbers = sorted(ocr_pages)
         fx_notes.merge(facts, fx_notes.read([ocr_pages[n] for n in numbers], numbers=numbers))
+        # how they handle FX, FX providers and currencies named, on those pages too
+        later = " ".join(" ".join(ocr_pages[n].split()) for n in numbers)
+        more = {**incumbent.text_evidence(later), **hooks.text_evidence(later)}
+        for key in ("fx_policy", "fx_providers", "facility_dates", "group_abroad"):
+            if not facts.get(key) and more.get(key):
+                facts[key] = more[key]
+        facts["currency_mentions"] = (facts.get("currency_mentions") or []) + more["currency_mentions"]
         if not facts.get("regions"):
             facts["regions"], facts["regions_page"] = regions_from_pages(
                 [ocr_pages[n] for n in numbers], facts["turnover"], numbers=numbers)
             facts["overseas_share"] = overseas_share_from(facts["regions"], facts["turnover"])
-    return facts
+    return check_turnover(facts)
 
 
 # --- Accounts as plain text (PDF / OCR) --------------------------------------

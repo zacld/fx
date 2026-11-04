@@ -7,6 +7,7 @@ Accounts are public records; these lines carry no personal names.
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -189,6 +190,53 @@ class TestRereadingAndOcrOrder(unittest.TestCase):
         self.assertEqual(pdf.pl_pages_order(43, 6)[:5], [19, 18, 20, 17, 21])
         self.assertIn(13, pdf.pl_pages_order(29, 6)[:3])
         self.assertEqual(pdf.pl_pages_order(5, 6), [])
+
+    def test_currency_notes_pages_and_reuse(self):
+        # the notes near the end first (62-97% through), then the strategic report (12-40%), at most 8 pages
+        self.assertEqual(pdf.notes_pages_order(20, 6), [12, 13, 14, 15, 16, 17, 18, 19])
+        self.assertEqual(pdf.notes_pages_order(10, 6)[:4], [7, 8, 9, 10])
+        ran = []
+        seen = {13: "At the year end the company had forward foreign exchange contracts to buy US$2m."}
+        with mock.patch.object(pdf, "ocr_available", lambda: True), mock.patch.object(pdf, "_page_count", lambda p: 20), \
+                mock.patch.object(pdf, "_run", lambda args: ran.append(args[0]) or ""), \
+                mock.patch.dict(pdf.stats, {"notes_seconds": 0.0, "notes_pages": 0}):
+            text, number = pdf.ocr_find(b"%PDF", lambda t: "forward" in t, purpose="notes", seen=seen)
+            self.assertEqual(pdf.stats["notes_pages"], 1)          # page 12 OCR'd; 13 reused, not read again
+        self.assertEqual((number, text), (13, seen[13]))
+        self.assertEqual(ran, ["pdftoppm"])
+
+    def test_a_lost_thousands_heading_is_put_right_by_the_strategic_report(self):
+        # Nisbets (scanned, Nov 2026): OCR lost the profit and loss page's £'000 heading; the strategic report says £355m
+        report = ("Strategic report\nSales in 2025 totalled £355m, a total increase of £9.5m (2.8%) compared with 2024 "
+                  "and gross profit increased by £4.5m to £122.8m\n")
+        pl = ("Profit and loss account for the year ended 31 December 2025\n"
+              "                                  Note        2025        2024\n"
+              "Turnover                            5     354,989     345,495\n"
+              "Cost of sales                            (232,195)   (227,186)\n"
+              "Gross profit                              122,794     118,309\n")
+        reading = turnover_text.read([report, pl])
+        self.assertEqual((reading["turnover"], reading["turnover_prior"], reading["unit"]),
+                         (354_989_000, 345_495_000, "£'000"))
+        # …or by its KPI table in £m (what corrected the real filing)
+        kpi = "Key performance indicators\n                 £m       £m\n                 2025     2024\nTurnover        355.0    345.5\n"
+        self.assertEqual(turnover_text.read([kpi, pl])["turnover"], 354_989_000)
+        self.assertIn("the accounts state turnover as £355.0m elsewhere", reading["line"])
+        # without anything stating the turnover elsewhere, it isn't guessed (check_turnover then flags it)
+        self.assertEqual(turnover_text.read([pl])["turnover"], 354_989)
+        # a page whose columns say "£ £" is in pounds, whatever else is said
+        in_pounds = pl.replace("Note        2025        2024", "Note        2025        2024\n"
+                                                                "                                                £           £")
+        self.assertEqual(turnover_text.read([report, in_pounds])["turnover"], 354_989)
+
+    def test_implausible_turnover_is_a_check_not_a_figure(self):
+        # Nisbets' group accounts read as £354k; Caribbean Trading Group's as £0 (FX notes sample, Nov 2026)
+        nisbets = accounts.check_turnover({"turnover": 354_000.0, "turnover_prior": 340_000.0, "accounts_type": "group"})
+        self.assertIsNone(nisbets["turnover"])
+        self.assertIn("£354k from group accounts: too small to be right", nisbets["turnover_check"])
+        self.assertIsNone(accounts.check_turnover({"turnover": 0.0, "accounts_type": ""})["turnover"])
+        # small accounts can be small; full accounts of £1m+ are kept
+        self.assertEqual(accounts.check_turnover({"turnover": 354_000.0, "accounts_type": "small"})["turnover"], 354_000)
+        self.assertEqual(accounts.check_turnover({"turnover": 5_800_000.0, "accounts_type": "full"})["turnover"], 5_800_000)
 
     def test_which_cached_accounts_are_read_again(self):
         current = accounts.FACTS_VERSION

@@ -77,6 +77,10 @@ describe("accounts helpers", () => {
     expect(fxFacts(list[0])).toEqual([["Currencies", "EUR (HMRC customs (estimated mix))", "", undefined]]);
     expect(fxFacts(list[2])[0]).toEqual(["How they do FX", "Uses an FX provider: Ebury", "https://ch/charges", undefined]);
     expect(toCsv([list[1]]).split("\n")[0]).toContain("filed_fx_score,filed_fx,currencies_in_accounts,fx_forwards");
+    const sub = { group_fx: "Forward contracts to buy US$5m; FX loss £250k", group_fx_url: "https://p/doc#page=30",
+                  group_parent_accounts: "ACME HOLDINGS LIMITED (01234567): group turnover £120m" };
+    expect(fxFacts(sub)).toEqual([["Group", sub.group_fx, sub.group_fx_url, sub.group_parent_accounts]]);
+    expect(sourceDocuments(sub).map(([label]) => label)).toContain("Parent company's accounts");
   });
 
   it("links the turnover to its page and says when it isn't disclosed", () => {

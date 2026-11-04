@@ -62,8 +62,8 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Optional, Union
 
 from sourcer import (
-    accounts, banks, bulk, companies_house, currency, excel, fx_notes, hmrc, hooks, incumbent, matching, news, pdf,
-    people, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
+    accounts, banks, bulk, companies_house, currency, excel, fx_notes, group as groups, hmrc, hooks, incumbent, matching,
+    news, pdf, people, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
 
 CSV_FIELDS = [
     "section",
@@ -181,6 +181,10 @@ CSV_FIELDS = [
     "fx_today_url",
     "fx_notes_url",
     "turnover_regions_url",
+    "group_parent_accounts",
+    "group_fx",
+    "group_fx_score",
+    "group_fx_url",
 ]
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -403,6 +407,41 @@ def turnover_columns(f: dict, turnover: Optional[dict], number: str) -> dict:
             "turnover_check": check}
 
 
+def group_turnover_columns(group: dict) -> dict:
+    """The group's turnover standing in for a subsidiary's own (none filed or read), saying whose it is."""
+    g = group.get("facts") or {}
+    url = g.get("accounts_url") or ""
+    page = g.get("turnover_page") or 0
+    return {"turnover_basis": "group", "turnover_check": "",
+            "turnover_source": f"group turnover: parent {groups.label(group)}'s accounts"
+                               + (f" — {g['turnover_source']}" if g.get("turnover_source") else ""),
+            "turnover_url": f"{url}#page={page}" if url and page else url}
+
+
+def group_columns(group: Optional[dict]) -> dict:
+    """
+    What the UK parent's accounts say about the group's FX, for a subsidiary: group_parent_accounts (who, group
+    turnover), group_fx (forwards, currencies, how they handle FX, FX gain/loss, regions), group_fx_score (the
+    parent's filed-FX proof, fx_notes.filed_proof) and group_fx_url. Blank without a UK parent that files turnover.
+    """
+    if not group:
+        return {}
+    g = group.get("facts") or {}
+    url = accounts.accounts_links(group["number"], g)["accounts_url"]
+    cols = fx_notes.columns(g, group["name"], url)
+    today = incumbent.columns(g, [])
+    fx = g.get("fx_gain_loss") if not g.get("fx_gain_loss_check") else None
+    score, _ = fx_notes.filed_proof({**cols, "fx_today": today["fx_today"], "fx_gain_loss_gbp": _money(fx)})
+    parts = [cols["fx_forwards"], today["fx_today"] if not cols["fx_forwards"] else "",
+             f"currencies {cols['currencies_in_accounts']}" if cols["currencies_in_accounts"] else "",
+             f"FX {'loss' if fx < 0 else 'gain'} {hooks.short(fx)}" if fx is not None else "",
+             f"sales by region {cols['turnover_regions']}" if cols["turnover_regions"] else ""]
+    return {"group_parent_accounts": f"{groups.label(group)}: group turnover {hooks.short(group['turnover'])}",
+            "group_fx": "; ".join(p for p in parts if p),
+            "group_fx_score": str(score) if score else "",
+            "group_fx_url": cols["fx_notes_url"] or url}
+
+
 def section_for(company: dict, turnover: Optional[dict], band: tuple[int, int] = (DEFAULT_BAND_MIN, DEFAULT_BAND_MAX)) -> str:
     """Core / Above / Below the turnover band; without filed turnover, medium/large/group accounts count as core."""
     core, above, below = sections(*band)
@@ -534,6 +573,7 @@ def company_row(
     appointments: Optional[dict] = None,
     own_bank_name: str = "",
     former_fd: Optional[list[dict]] = None,
+    group: Optional[dict] = None,
 ) -> dict:
     """
     One CSV row. `directors` may include company secretaries (they count as
@@ -542,6 +582,10 @@ def company_row(
     """
     officers = directors
     directors = companies_house.directors_only(officers)
+    # No turnover of its own (an audit-exempt subsidiary, or none read): its size is its group's, and says so.
+    sized_by_group = bool(turnover is None and group and group.get("turnover") is not None)
+    if sized_by_group:
+        turnover = {"turnover": group["turnover"], "period_end": (group.get("facts") or {}).get("period_end", "")}
     site = site or {}
     history = owners or []
     owners = [o for o in history if not o.get("ceased_on")]
@@ -612,7 +656,13 @@ def company_row(
         talking.update(fx_notes.columns(f, company["company_name"], links["accounts_url"]))
         filed_score, filed_lines = fx_notes.filed_proof(
             {**talking, "fx_gain_loss_gbp": _money(f.get("fx_gain_loss")) if not f.get("fx_gain_loss_check") else ""})
-        talking.update(filed_fx_score=str(filed_score), filed_fx=" | ".join(filed_lines))
+        # the UK parent's consolidated accounts (sourcer/group.py): the group's treasury often holds the FX
+        group_cols = group_columns(group)
+        if group_cols.get("group_fx_score"):
+            points = int(group_cols["group_fx_score"]) // 2
+            filed_score += points
+            filed_lines.append(f"group ({group['name']}): {group_cols['group_fx']} (+{points})")
+        talking.update(filed_fx_score=str(filed_score), filed_fx=" | ".join(filed_lines), **group_cols)
     return people.weak_contact_to_clue(new_row(
         **talking,
         section=section_for(company, turnover, band),
@@ -659,7 +709,7 @@ def company_row(
         hmrc_match=trade["confidence"] if trade else "",
         turnover_gbp=str(round(turnover["turnover"])) if turnover else "",
         turnover_period_end=turnover["period_end"] if turnover else "",
-        **turnover_columns(f, turnover, number) if checked else {},
+        **(group_turnover_columns(group) if sized_by_group else turnover_columns(f, turnover, number) if checked else {}),
         former_finance_director="; ".join(f"{f['name']} ({f['occupation']}), left the board {f['resigned_on']}"
                                           for f in (former_fd or [])[:2]),
         fx_gain_loss_gbp=_money(f.get("fx_gain_loss")),
@@ -836,7 +886,10 @@ def run_pipeline(
     budget = 0 if not api_key else len(queue) if max_enrich is None else max_enrich
 
     def known_out(company: dict, trade) -> bool:
-        """Already read (cache) and out: filed turnover under the floor, or a subsidiary nothing confirms."""
+        """
+        Already read (cache) and out: filed turnover under the floor, or a subsidiary nothing confirms (no filed
+        turnover, no customs record, and its group's accounts — read since — don't put it in the band).
+        """
         if not turnover_check:
             return False
         entry = register_cache.load(company["company_number"], company.get("accounts_made_up_to", ""), days=float("inf"))
@@ -845,7 +898,11 @@ def run_pipeline(
         value = (entry.get("facts") or {}).get("turnover")
         if value is not None:
             return value < min_turnover
-        return company["accounts_category"] not in LIKELY_CATEGORIES and not trade
+        if "group" not in entry:
+            return False   # cached before parents were read: check it once more
+        group = entry["group"] or {}
+        return (company["accounts_category"] not in LIKELY_CATEGORIES and not trade
+                and not (group.get("turnover") or 0) >= min_turnover)
 
     # The `budget` slots go to companies still in the running: ones the cache already shows are out are still listed
     # in the stats (read from the cache, no calls) but don't take a slot, so the next candidates in line get checked.
@@ -920,7 +977,8 @@ def run_pipeline(
             spent["accounts"] += time.monotonic() - t0
             spent["accounts_read" if not (cached or reuse) and checked else "accounts_cached"] += 1
         if facts:
-            accounts.check_fx(facts)   # cached facts too, read before a check existed
+            accounts.check_turnover(facts)   # cached facts too, read before the checks existed
+            accounts.check_fx(facts)
         turnover = ({"turnover": facts["turnover"], "period_end": facts["period_end"]}
                     if facts and facts["turnover"] is not None else None)
         read_at = (cached or {}).get("facts_read_at") if cached else older.get("facts_read_at") if reuse else now
@@ -929,28 +987,54 @@ def run_pipeline(
             if not cached:
                 register_cache.store(number, made_up, {"facts": facts, **version})
             return "under_min", None
+
+        def group_for(owners_list: list[dict]) -> Optional[dict]:
+            """The UK parent's accounts (sourcer/group.py): from the cache entry, else read now (cached per parent)."""
+            if cached is not None and "group" in cached:
+                return cached["group"]
+            own = (facts or {}).get("turnover")
+            return groups.parent_accounts(owners_list, api_key, own) if checked and turnover_check else None
+
+        early_owners = None
+        group = None
         if turnover is None and company["accounts_category"] not in LIKELY_CATEGORIES and not trade:
-            if not cached and checked and turnover_check:
-                register_cache.store(number, made_up, {"facts": facts, **version})
-            return "unconfirmed", None  # audit-exempt subsidiary with no filed turnover or customs record
+            # an audit-exempt subsidiary with no filed turnover or customs record: in only when its group's accounts
+            # put it in the band (the parent's consolidated turnover)
+            if cached is not None and "group" in cached:
+                group = cached["group"]
+            elif checked and turnover_check:
+                early_owners = (cached or {}).get("owners") or companies_house.get_owners(number, api_key, with_ceased=True)
+                group = group_for([o for o in early_owners if not o.get("ceased_on")])
+            if not group or group["turnover"] < min_turnover:
+                if not cached and checked and turnover_check:
+                    register_cache.store(number, made_up, {"facts": facts, "group": group, **version})
+                return "unconfirmed", None
         if cached and "officers" in cached:
             register = {k: cached[k] for k in ("officers", "owners", "charges")}
             register["former_fd"] = cached.get("former_fd", [])   # saved before former FDs were kept: none
+            if "group" in cached:
+                group = cached["group"]
+            elif checked and turnover_check:   # cached before parents were read
+                group = groups.parent_accounts([o for o in register["owners"] if not o.get("ceased_on")], api_key,
+                                               (facts or {}).get("turnover"))
         else:
             t0 = time.monotonic()
             officers, former_fd = companies_house.get_officers_and_former(number, api_key) if checked else ([], [])
             register = {
                 "officers": officers, "former_fd": former_fd,
-                "owners": companies_house.get_owners(number, api_key, with_ceased=True) if checked else [],
+                "owners": early_owners if early_owners is not None else (
+                    companies_house.get_owners(number, api_key, with_ceased=True) if checked else []),
                 "charges": companies_house.get_charges(number, api_key) if checked else [],
             }
             with spent_lock:
                 spent["register"] += time.monotonic() - t0
                 spent["register_read"] += 1
+            if group is None and checked and turnover_check:
+                group = group_for([o for o in register["owners"] if not o.get("ceased_on")])
             if checked and turnover_check:
-                register_cache.store(number, made_up, {"facts": facts, **register, **version})
+                register_cache.store(number, made_up, {"facts": facts, **register, "group": group, **version})
         return "", {"niche": niche, "company": company, "trade": trade, "checked": checked, "facts": facts,
-                    "turnover": turnover, **register}
+                    "turnover": turnover, "group": group, **register}
 
     # Several companies at once: Companies House calls stay spaced by the shared throttle, while
     # document downloads and PDF/OCR work for one company overlap with calls for the others.
@@ -964,7 +1048,9 @@ def run_pipeline(
                 read, regs = spent["accounts_read"], spent["register_read"]
                 print(f"  …checked {done:,} of {len(to_check):,} in {(time.monotonic() - started) / 60:.0f} min"
                       f" | accounts read {read} ({spent['accounts'] / max(read, 1):.0f}s each), cached"
-                      f" {spent['accounts_cached']} | OCR {pdf.stats['pages']} pages ({pdf.stats['fx_pages']} for FX, {pdf.stats['pl_pages']} for turnover),"
+                      f" {spent['accounts_cached']} | parents read {groups.stats['read']}"
+                      f" | OCR {pdf.stats['pages']} pages ({pdf.stats['fx_pages']} for FX, {pdf.stats['pl_pages']} for turnover,"
+                      f" {pdf.stats['notes_pages']} for the currency notes),"
                       f" {pdf.stats['seconds'] / max(pdf.stats['pages'], 1):.1f}s a page | register read {regs}"
                       f" ({spent['register'] / max(regs, 1):.0f}s each)", flush=True)
         # the rest aren't checked (no calls): in queue order with the checked ones
@@ -995,7 +1081,7 @@ def run_pipeline(
                              and people.is_finance_director(known["role"]))
         pending.append({"args": (niche, company, turnover, officers, checked and turnover_check),
                         "kwargs": dict(trade=trade, months_loaded=months_loaded, facts=facts, owners=owners, bank=bank,
-                                       former_fd=g.get("former_fd", []),
+                                       former_fd=g.get("former_fd", []), group=g.get("group"),
                                        checked=checked, trade_model=trade_model, band=band, charges=charges,
                                        today=today, own_bank_name=own_bank),
                         "need_site": need_site})
@@ -1115,6 +1201,11 @@ def fx_summary(rows: list[dict]) -> list[str]:
         f"foreign-currency balances {count(lambda r: r.get('fx_balances')):,} | "
         f"sensitivity {count(lambda r: r.get('fx_sensitivity')):,} | FX gain/loss {len(fx):,} (£50k+ {big:,})",
         "  Main currency from: " + ", ".join(f"{k} {v:,}" for k, v in source.most_common()),
+        f"  Group accounts: {count(lambda r: r.get('group_parent_accounts')):,} with a UK parent's accounts, "
+        f"{count(lambda r: r.get('group_fx')):,} of them with the group's FX, "
+        f"{count(lambda r: r.get('turnover_basis') == 'group' and r.get('group_parent_accounts')):,} sized by their group "
+        f"| parents read this run {groups.stats['read']:,} (cached {groups.stats['cached']:,}, "
+        f"left for the next run {groups.stats['skipped']:,}) | currency-notes OCR {pdf.stats['notes_pages']:,} pages",
         f"  Filed FX score: 50+ {sum(s >= 50 for s in scores):,}, 1-49 {sum(0 < s < 50 for s in scores):,}, "
         f"none {sum(s == 0 for s in scores):,}",
     ]

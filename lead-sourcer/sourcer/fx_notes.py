@@ -147,6 +147,12 @@ def _negated(sentence: str, start: int) -> bool:
     return bool(incumbent._NEGATED_BEFORE.search(sentence[max(0, start - 60):start]))
 
 
+# Contracts or a fair value under this are too small to open a call on (and usually a misread).
+MIN_FORWARD_AMOUNT = 5_000
+_PNL_EFFECT = re.compile(r"taken\s+to\s+the|recognised\s+in\s+(?:the\s+)?(?:profit|statement|income)|"
+                         r"(?:credited|charged)\s+to|(?:fair\s+value\s+)?(?:profit|gain|loss)\s+on\s+(?:the\s+)?"
+                         r"(?:forward|foreign|derivative|revaluation)", re.I)
+_NUMBER_TOKEN = re.compile(r"(?<![\w.])\(?[£$€]?\d[\d,]*(?:\.\d+)?\)?(?![\w])")
 _THESE_CONTRACTS = re.compile(r"\b(?:these|the|such|open|outstanding)\s+(?:forward\s+)?contracts?\b|"
                              r"\bcontracts?\s+(?:outstanding|in\s+place|open)\b", re.I)
 
@@ -167,6 +173,10 @@ def _forward_items(sentence: str, page: int, follows_forward: bool = False) -> l
     m = _FORWARD_WORDS.search(sentence) or (_THESE_CONTRACTS.search(sentence) if follows_forward else None)
     if not m or _negated(sentence, m.start()) or incumbent._POLICY_DEFINITION.search(sentence):
         return []
+    if _PNL_EFFECT.search(sentence):
+        return []   # "the fair value profit … taken to the statement of comprehensive income": a P&L effect, not a size
+    if len(_NUMBER_TOKEN.findall(sentence)) > 6:
+        return []   # table rows run together (OCR / layout): their figures belong to other lines
     if _FORWARD_WORDS.search(sentence) and not incumbent._EXPLICIT_FX_FORWARD.search(m.group(0)) and (
             not incumbent._FX_CONTEXT.search(sentence) or incumbent._NON_FX_FORWARD.search(sentence)):
         return []   # a bare "forward contracts" for freight or materials
@@ -186,7 +196,7 @@ def _forward_items(sentence: str, page: int, follows_forward: bool = False) -> l
             if same:
                 same["prior"] = a["amount"]
             continue
-        if a["amount"] < 1_000:
+        if a["amount"] < MIN_FORWARD_AMOUNT:
             continue
         items.append({"what": what, "amount": a["amount"], "ccy": a["ccy"], "direction": direction, "prior": None,
                       "sentence": hooks._sentence(sentence, a["start"], a["end"], limit=320), "page": page})

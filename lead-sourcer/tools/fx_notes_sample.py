@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 tools/fx_notes_sample.py — what the currency-note readers find in real
-accounts, and what they may be missing.
+accounts (scanned ones' notes OCR'd), the UK parent's accounts for a
+subsidiary (sourcer/group.py), and what they may be missing.
 
 For each company: its latest accounts read the way the finder reads them
 (accounts.facts_from_latest_accounts, OCR included), then the columns the
@@ -28,7 +29,8 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sourcer import accounts, fx_notes, hooks, incumbent, pdf  # noqa: E402
+from sourcer import accounts, companies_house, fx_notes, group, hooks, incumbent, pdf  # noqa: E402
+import main as finder  # noqa: E402
 
 LOOKS_LIKE = re.compile(r"forward\s+(?:foreign\s+)?(?:exchange|currency)?\s*contract|currency\s+risk|denominated\s+in|"
                         r"sensitivity|geographical|by\s+destination|currency\s+profile", re.I)
@@ -85,6 +87,17 @@ def sample(number: str, label: str, api_key: str, stats: Counter) -> None:
     stats["main currency from " + (hooks.CURRENCY_SOURCES.get(exposure["rule"]) or "none")] += 1
     print(f"  main currency: {exposure['currency'] or '—'} ({hooks.CURRENCY_SOURCES.get(exposure['rule'], 'none')})")
     stats["filed FX score 50+" if score >= 50 else "filed FX score 1-49" if score else "filed FX score 0"] += 1
+    owners = [o for o in companies_house.get_owners(number, api_key) if not o.get("ceased_on")]
+    parent = group.parent_accounts(owners, api_key, facts.get("turnover"))
+    if parent:
+        cols = finder.group_columns(parent)
+        stats["with a UK parent's accounts"] += 1
+        stats["with the group's FX"] += bool(cols["group_fx"])
+        print(f"  group: {cols['group_parent_accounts']} | {cols['group_fx'] or 'no FX facts'}"
+              f" (group FX score {cols['group_fx_score'] or 0})")
+    elif group.uk_parent(owners):
+        stats["UK parent without turnover"] += 1
+        print(f"  group: UK parent {group.uk_parent(owners)[1]} files no turnover")
     if facts.get("format") == "scanned pdf":
         return
     text = document_text(number, api_key)
@@ -122,7 +135,8 @@ def main() -> None:
         except Exception as e:  # noqa: BLE001 — one bad filing shouldn't stop the sample
             print(f"  failed: {type(e).__name__}: {e}")
             stats["failed"] += 1
-    print(f"\nSummary of {len(picks)} companies:")
+    print(f"\nSummary of {len(picks)} companies (OCR: {pdf.stats['pages']} pages, {pdf.stats['notes_pages']} for the "
+          f"currency notes, {pdf.stats['notes_seconds']:.0f}s):")
     for k, v in sorted(stats.items()):
         print(f"  {k}: {v}")
 
