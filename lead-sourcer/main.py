@@ -991,7 +991,8 @@ def run_pipeline(
             """The UK parent's accounts (sourcer/group.py): from the cache entry, else read now (cached per parent)."""
             if cached is not None and "group" in cached:
                 return cached["group"]
-            return groups.parent_accounts(owners_list, api_key) if checked and turnover_check else None
+            own = (facts or {}).get("turnover")
+            return groups.parent_accounts(owners_list, api_key, own) if checked and turnover_check else None
 
         early_owners = None
         group = None
@@ -1013,7 +1014,8 @@ def run_pipeline(
             if "group" in cached:
                 group = cached["group"]
             elif checked and turnover_check:   # cached before parents were read
-                group = groups.parent_accounts([o for o in register["owners"] if not o.get("ceased_on")], api_key)
+                group = groups.parent_accounts([o for o in register["owners"] if not o.get("ceased_on")], api_key,
+                                               (facts or {}).get("turnover"))
         else:
             t0 = time.monotonic()
             officers, former_fd = companies_house.get_officers_and_former(number, api_key) if checked else ([], [])

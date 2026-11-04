@@ -2411,7 +2411,8 @@ class TestGroupAccounts(unittest.TestCase):
     def test_up_to_the_parent_that_files_turnover_read_once(self):
         read = []
         facts = {"00000100": {"turnover": None}, "00000200": {"turnover": 80_000_000, "period_end": "2025-12-31",
-                                                                 "fx_forwards": [], "format": "ixbrl"}}
+                                                                 "turnover_basis": "group", "fx_forwards": [],
+                                                                 "format": "ixbrl"}}
         with mock.patch.object(accounts, "facts_from_latest_accounts", lambda n, k: read.append(n) or facts[n]), \
                 mock.patch.object(companies_house, "get_owners",
                                   lambda n, k: [self.owner("TOP GROUP LIMITED", "200")] if n == "00000100" else []):
@@ -2422,6 +2423,22 @@ class TestGroupAccounts(unittest.TestCase):
         self.assertEqual(again["number"], "00000200")
         self.assertEqual(read, ["00000100", "00000200"])   # each parent read once; the second subsidiary uses the cache
         self.assertEqual(group.label(found), "TOP GROUP LIMITED (00000200) — the parent's parent")
+
+    def test_a_holding_companys_own_turnover_isnt_the_groups(self):
+        """Cromwell's parent filed £5.8m of its own over a £240m business; Caribbean Trading's £0 (FX notes sample)."""
+        self.assertFalse(group.is_group_figure({"turnover": 5_800_000, "turnover_basis": "company"}, 239_700_000))
+        self.assertFalse(group.is_group_figure({"turnover": 0, "turnover_basis": "group"}))
+        self.assertFalse(group.is_group_figure({"turnover": 30_000_000, "turnover_basis": "company"}))   # size unknown
+        self.assertTrue(group.is_group_figure({"turnover": 63_700_000, "turnover_basis": "group"}, 43_400_000))
+        self.assertTrue(group.is_group_figure({"turnover": 80_300_000, "turnover_basis": ""}, 80_300_000))
+        # the holding company isn't the group: one level up to its own UK parent, which is
+        facts = {"00000100": {"turnover": 5_800_000, "turnover_basis": "company"},
+                 "00000200": {"turnover": 300_000_000, "turnover_basis": "group"}}
+        with mock.patch.object(accounts, "facts_from_latest_accounts", lambda n, k: facts[n]), \
+                mock.patch.object(companies_house, "get_owners",
+                                  lambda n, k: [self.owner("TOP GROUP LIMITED", "200")] if n == "00000100" else []):
+            found = group.parent_accounts([self.owner("HOLDCO LIMITED", "100")], "key", own_turnover=239_700_000)
+        self.assertEqual((found["number"], found["hops"]), ("00000200", 2))
 
     def test_parent_reads_are_capped_a_run(self):
         with mock.patch.object(group, "READS_MAX_PER_RUN", 0), \
@@ -2457,7 +2474,9 @@ class TestGroupInThePipeline(PipelineTestCase):
         parent = {"kind": "corporate-entity-person-with-significant-control", "name": "PLAIN WHOLESALE LIMITED",
                   "notified_on": "2016-04-06", "identification": {"country_registered": "England", "registration_number": "05"}}
         with mock.patch.object(register_cache, "CACHE_DAYS", 7), \
-                mock.patch.dict(FILINGS, {"06": [], "00000005": FILINGS["05"]}):   # SUB WINES files no figures
+                mock.patch.dict(FILINGS, {"06": [], "00000005": FILINGS["05"]}), \
+                mock.patch.object(pdf, "to_text", lambda data: (PDF_TEXT_05.replace(   # the parent's group accounts
+                    "Profit and loss account", "Consolidated profit and loss account"), "pdf")):   # SUB WINES: no figures
             with mock.patch.object(register_cache, "CACHE_DIR", os.path.join(self.tmp.name, "one")):
                 alone = {r["company_number"] for r in self.run_bulk(news_check=False, min_turnover=25_000_000)}
             self.assertNotIn("06", alone)                       # nothing confirms its size: dropped, as before

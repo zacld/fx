@@ -7,9 +7,11 @@ the forward contracts and the group's turnover. An audit-exempt subsidiary may
 file no figures at all. So for a company owned by a UK company (its PSC
 register names a corporate owner with a Companies House number), the parent's
 latest accounts are read the way the company's own are
-(accounts.facts_from_latest_accounts). A parent that files no turnover (an
-intermediate holding company exempt from consolidating) leads one level up,
-to its own UK parent (MAX_HOPS).
+(accounts.facts_from_latest_accounts). Only a figure that stands for the
+group counts (consolidated, or at least the subsidiary's own size —
+is_group_figure); a parent without one (an intermediate holding company
+exempt from consolidating, or one whose own turnover is a few management
+charges) leads one level up, to its own UK parent (MAX_HOPS).
 
 Each parent is read once and cached (register_cache lookup "group", FACTS_DAYS),
 so twenty subsidiaries of one group cost one read; at most READS_MAX_PER_RUN
@@ -67,19 +69,30 @@ def _read_parent(number: str, name: str, api_key: str) -> Optional[dict]:
             stats["read"] += 1
         facts = accounts.facts_from_latest_accounts(number, api_key)
         up = None
-        if not facts or facts.get("turnover") is None:
-            up = uk_parent(companies_house.get_owners(number, api_key))
+        if not facts or facts.get("turnover") is None or facts.get("turnover_basis") != "group":
+            up = uk_parent(companies_house.get_owners(number, api_key))   # its own owner, if this isn't the group
         entry = {"facts": facts, "parent": list(up) if up else None, "name": name,
                  "facts_version": accounts.FACTS_VERSION}
         register_cache.store_lookup("group", number, entry)
         return entry
 
 
-def parent_accounts(owners: list[dict], api_key: str) -> Optional[dict]:
+def is_group_figure(facts: dict, own_turnover: Optional[float] = None) -> bool:
     """
-    {"number", "name", "turnover", "facts", "hops"} for the nearest UK parent whose latest accounts give a
-    turnover (consolidated when it's a group), or None: no UK parent, none of them files turnover within
-    MAX_HOPS, or this run's parent reads are used up.
+    Whether a parent's turnover stands for the group: a consolidated figure, or at least as big as the
+    subsidiary's own. A holding company's own turnover (£5.8m of management charges over a £240m group, or £0) isn't.
+    """
+    turnover = facts.get("turnover")
+    if not turnover or turnover <= 0:
+        return False
+    return facts.get("turnover_basis") == "group" or bool(own_turnover and turnover >= own_turnover)
+
+
+def parent_accounts(owners: list[dict], api_key: str, own_turnover: Optional[float] = None) -> Optional[dict]:
+    """
+    {"number", "name", "turnover", "facts", "hops"} for the nearest UK parent whose latest accounts give the
+    group's turnover (is_group_figure), or None: no UK parent, none of them files one within MAX_HOPS, or this
+    run's parent reads are used up.
     """
     parent = uk_parent(owners)
     for hop in range(1, MAX_HOPS + 1):
@@ -90,7 +103,7 @@ def parent_accounts(owners: list[dict], api_key: str) -> Optional[dict]:
         if entry is None:
             return None
         facts = entry.get("facts") or {}
-        if facts.get("turnover") is not None:
+        if is_group_figure(facts, own_turnover):
             return {"number": number, "name": name or entry.get("name", ""), "turnover": facts["turnover"],
                     "facts": facts, "hops": hop}
         parent = tuple(entry["parent"]) if entry.get("parent") else None

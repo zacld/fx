@@ -88,7 +88,7 @@ def sample(number: str, label: str, api_key: str, stats: Counter) -> None:
     print(f"  main currency: {exposure['currency'] or '—'} ({hooks.CURRENCY_SOURCES.get(exposure['rule'], 'none')})")
     stats["filed FX score 50+" if score >= 50 else "filed FX score 1-49" if score else "filed FX score 0"] += 1
     owners = [o for o in companies_house.get_owners(number, api_key) if not o.get("ceased_on")]
-    parent = group.parent_accounts(owners, api_key)
+    parent = group.parent_accounts(owners, api_key, facts.get("turnover"))
     if parent:
         cols = finder.group_columns(parent)
         stats["with a UK parent's accounts"] += 1
