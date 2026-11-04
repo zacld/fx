@@ -485,6 +485,28 @@ def _fx_from_text(facts: dict, text: str, how: str, ocr: bool = False) -> bool:
     return True
 
 
+# Full, group and medium-sized accounts are for companies well past this; a turnover under it read from one is a
+# misread (a £'000 table taken as £, a wrong cell) or a holding company's own few charges — never a size to use.
+MIN_PLAUSIBLE_TURNOVER = 1_000_000
+_FULL_ACCOUNTS = ("full", "group", "medium")
+
+
+def check_turnover(facts: dict) -> dict:
+    """
+    A turnover of £0 or less, or under MIN_PLAUSIBLE_TURNOVER from full / group / medium accounts, moves to
+    turnover_check ("check the accounts"), never a figure (Nisbets read as £354k, Caribbean Trading Group as £0).
+    """
+    turnover, kind = facts.get("turnover"), facts.get("accounts_type", "")
+    if turnover is None:
+        return facts
+    if turnover <= 0 or (turnover < MIN_PLAUSIBLE_TURNOVER and kind in _FULL_ACCOUNTS):
+        where = f"{kind} accounts" if kind else "the accounts"
+        facts.update(turnover=None, turnover_prior=None, turnover_check=(
+            f"turnover read as {hooks.short(turnover) if turnover > 0 else '£0'} from {where}: too small to be "
+            f"right (a £'000 table or a holding company's own figure?); check the accounts"))
+    return facts
+
+
 def check_fx(facts: dict) -> dict:
     """
     Sanity checks on the FX gain/loss just read. A figure that fails moves to
@@ -690,20 +712,22 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
     if not document_id:
         return None
     filed_on = filing.get("date") or ""   # for the "accounts just filed" hook
+    kind = (filing.get("description") or "").replace("accounts-with-accounts-type-", "")
     url = filing_document_url(company_number, filing)
     made_up = (filing.get("description_values") or {}).get("made_up_date") or ""
     document = None if filing.get("paper_filed") else fetch_ixbrl(document_id, api_key)
     if document:
-        facts = dict(extract_facts(document), format="ixbrl", filed_on=filed_on, accounts_url=url)
+        facts = dict(extract_facts(document), format="ixbrl", filed_on=filed_on, accounts_url=url, accounts_type=kind)
         facts["period_end"] = facts["period_end"] or made_up   # no tagged turnover or FX: the filing's made-up date
-        return facts
+        return check_turnover(facts)
     if not pdf.available():
         return None
     data = fetch_pdf(document_id, api_key) or b""
     text, how = pdf.to_text(data)
     if not text:
         return None
-    facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on, accounts_url=url)
+    facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on, accounts_url=url, accounts_type=kind)
+    check_turnover(facts)
     ocr_pages: dict[int, str] = {}   # pages OCR'd below while looking for turnover and the FX line, kept for the notes
     if how == "scanned pdf" and (facts["turnover"] is None or "profit and loss account" not in facts.get("turnover_source", "")):
         # the profit and loss account is past the pages OCR'd for the company information (a strategic report's
@@ -748,7 +772,7 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
             facts["regions"], facts["regions_page"] = regions_from_pages(
                 [ocr_pages[n] for n in numbers], facts["turnover"], numbers=numbers)
             facts["overseas_share"] = overseas_share_from(facts["regions"], facts["turnover"])
-    return facts
+    return check_turnover(facts)
 
 
 # --- Accounts as plain text (PDF / OCR) --------------------------------------

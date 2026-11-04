@@ -977,7 +977,8 @@ def run_pipeline(
             spent["accounts"] += time.monotonic() - t0
             spent["accounts_read" if not (cached or reuse) and checked else "accounts_cached"] += 1
         if facts:
-            accounts.check_fx(facts)   # cached facts too, read before a check existed
+            accounts.check_turnover(facts)   # cached facts too, read before the checks existed
+            accounts.check_fx(facts)
         turnover = ({"turnover": facts["turnover"], "period_end": facts["period_end"]}
                     if facts and facts["turnover"] is not None else None)
         read_at = (cached or {}).get("facts_read_at") if cached else older.get("facts_read_at") if reuse else now

@@ -205,6 +205,16 @@ class TestRereadingAndOcrOrder(unittest.TestCase):
         self.assertEqual((number, text), (13, seen[13]))
         self.assertEqual(ran, ["pdftoppm"])
 
+    def test_implausible_turnover_is_a_check_not_a_figure(self):
+        # Nisbets' group accounts read as £354k; Caribbean Trading Group's as £0 (FX notes sample, Nov 2026)
+        nisbets = accounts.check_turnover({"turnover": 354_000.0, "turnover_prior": 340_000.0, "accounts_type": "group"})
+        self.assertIsNone(nisbets["turnover"])
+        self.assertIn("£354k from group accounts: too small to be right", nisbets["turnover_check"])
+        self.assertIsNone(accounts.check_turnover({"turnover": 0.0, "accounts_type": ""})["turnover"])
+        # small accounts can be small; full accounts of £1m+ are kept
+        self.assertEqual(accounts.check_turnover({"turnover": 354_000.0, "accounts_type": "small"})["turnover"], 354_000)
+        self.assertEqual(accounts.check_turnover({"turnover": 5_800_000.0, "accounts_type": "full"})["turnover"], 5_800_000)
+
     def test_which_cached_accounts_are_read_again(self):
         current = accounts.FACTS_VERSION
         self.assertTrue(accounts.facts_reusable({"facts_version": current, "facts": {"turnover": None}}))
