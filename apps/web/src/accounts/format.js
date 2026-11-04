@@ -136,10 +136,15 @@ export function detailSections(r) {
       ["Lenders", r.lenders], ["Banking", r.banking_relationships], ["Existing client", r.own_bank_client],
     ]],
     ["FX exposure", [
+      ["FX proof in the filings", r.filed_fx_score ? `${r.filed_fx_score} — ${parts(r.filed_fx).join(" · ")}` : ""],
+      ["Forward contracts", r.fx_forwards_evidence || r.fx_forwards, r.fx_notes_url],
+      ["Currencies in the accounts", join(r.currencies_in_accounts, r.currencies_in_accounts_evidence), r.fx_notes_url],
+      ["Currency sensitivity", r.fx_sensitivity, r.fx_notes_url], ["Foreign-currency balances", r.fx_balances, r.fx_notes_url],
+      ["Turnover by region", r.turnover_regions, r.turnover_regions_url || r.accounts_url],
       ["FX gain/loss", fxLine(r), r.fx_gain_loss_url], ["Recent FX loss", r.recent_fx_loss, r.fx_gain_loss_url],
       ["FX figure to check", r.fx_gain_loss_check, r.fx_gain_loss_url], ["FX line in the accounts", r.fx_gain_loss_evidence, r.fx_gain_loss_url],
       ["FX size", r.fx_estimate], ["Wallet basis", r.fx_wallet_basis],
-      ["Main currency", [r.main_currency, r.currency_direction, r.currency_confidence && `${r.currency_confidence} confidence`].filter(Boolean).join(" · ")],
+      ["Main currency", [r.main_currency, r.currency_direction, r.currency_confidence && `${r.currency_confidence} confidence`, r.currency_source].filter(Boolean).join(" · ")],
       ["Currency evidence", r.currency_evidence], ["Imports in", r.import_currencies], ["Exports in", r.export_currencies],
       ["Trade", r.trade_countries], ["Customs goods", r.hmrc_goods], ["Why FX", r.fx_evidence], ["Niche", r.fx_niche],
       ["Exposure", r.fx_exposure], ["Why untapped", r.untapped_reasons],
@@ -170,7 +175,8 @@ export function sourceDocuments(r) {
   const ch = r.companies_house_url || "";
   const docs = [
     ["Latest filed accounts", r.accounts_url], ["Accounts at the turnover line", r.turnover_url],
-    ["Accounts at the FX line", r.fx_gain_loss_url],
+    ["Accounts at the FX line", r.fx_gain_loss_url], ["Accounts at the currency notes", r.fx_notes_url],
+    ["Accounts at turnover by region", r.turnover_regions_url],
     [`Charge: ${r.main_bank || "bank"}`, r.incumbent_bank_url], ["FX provider's charge", r.fx_today_url],
     ["Companies House record", ch], ["Filing history", ch && `${ch}/filing-history`], ["Charges register", ch && `${ch}/charges`],
     ["Officers", ch && `${ch}/officers`], ["Owners (PSCs)", ch && `${ch}/persons-with-significant-control`],
@@ -186,10 +192,36 @@ const fxLossKey = (r) => {
   return fx < 0 ? fx : 2e15 - fx;
 };
 
-// "Hottest": confirmed contacts first, then likely ones, then "ask for the FD"; within each, the finder's ranking
-// (FX evidence + untapped + triggers + a recent FX loss).
+// What the company's own filings prove about its FX (the finder's filed_fx_score: forward contracts with a size,
+// how they handle FX, sensitivity, FX gain/loss, turnover by region, currencies named, foreign-currency balances).
+export const FX_GROUPS = ["Strong FX proof", "Some FX proof", "No FX in the filings yet"];
+export const fxScore = (r) => Number(r.filed_fx_score) || 0;
+export const fxGroup = (r) => (fxScore(r) >= 50 ? FX_GROUPS[0] : fxScore(r) > 0 ? FX_GROUPS[1] : FX_GROUPS[2]);
+
+// The FX facts a card leads with, each [label, value, source link, the quote behind it]; empty ones left out.
+// "Currencies" are the ones the accounts tie to the business, else the main currency and where it came from.
+export function fxFacts(r) {
+  const before = (s = "") => s.split(" — ")[0];
+  const after = (s = "") => s.split(" — ").slice(1).join(" — ");
+  const currencies = r.currencies_in_accounts ||
+    (r.main_currency ? `${r.main_currency}${r.currency_source ? ` (${r.currency_source})` : ""}` : "");
+  const handles = [r.fx_forwards, !r.fx_forwards || /provider/i.test(r.fx_today || "") ? r.fx_today : ""].filter(Boolean).join(" · ");
+  return [
+    ["Currencies", currencies, r.currencies_in_accounts ? r.fx_notes_url || r.accounts_url : "",
+     r.currencies_in_accounts_evidence || r.currency_evidence],
+    ["How they do FX", handles, r.fx_forwards ? r.fx_notes_url || r.accounts_url : r.fx_today_url,
+     r.fx_forwards ? r.fx_forwards_evidence : r.fx_today_evidence],
+    ["FX gain/loss", fxLine(r), r.fx_gain_loss_url, r.fx_gain_loss_evidence],
+    ["Sales by region", r.turnover_regions, r.turnover_regions_url || r.accounts_url, ""],
+    ["Currency sensitivity", before(r.fx_sensitivity), r.fx_notes_url || r.accounts_url, after(r.fx_sensitivity)],
+    ["Foreign-currency balances", r.fx_balances, r.fx_notes_url || r.accounts_url, ""],
+  ].filter(([, v]) => v);
+}
+
+// "Hottest": the strongest FX proof in the company's own filings first; within the same score, the finder's ranking
+// (FX evidence + untapped + triggers + a recent FX loss). Who to ask for is a quick Google: see "Contact confidence".
 export const SORTS = {
-  hot: { label: "Hottest (confirmed first)", key: (r) => CONTACT_GROUPS.indexOf(contactGroup(r)) * 1e6 + r.rank },
+  hot: { label: "Hottest (strongest FX proof)", key: (r) => -fxScore(r) * 1e6 + r.rank },
   rank: { label: "Our score", key: (r) => r.rank },
   // Most senior finance role first (CFO/FD, head of finance, controller, manager…); within a role, hottest first.
   role: { label: "Job role (CFO/FD first)", key: (r) => ROLE_GROUPS.indexOf(roleGroup(r)) * 1e7 + SORTS.hot.key(r) },
@@ -197,6 +229,7 @@ export const SORTS = {
   wallet: { label: "FX wallet", key: (r) => -(Number(r.fx_wallet_high_gbp) || 0) },
   fxLoss: { label: "Largest FX loss", key: fxLossKey },
   confidence: { label: "Contact confidence", key: (r) => (presentedContact(r) ? CONFIDENCE.indexOf(r.finance_contact_confidence) : 9) * 10000 + r.rank },
+  contactFirst: { label: "Confirmed contact first", key: (r) => CONTACT_GROUPS.indexOf(contactGroup(r)) * 1e6 + r.rank },
 };
 
 export const sortRows = (rows, by = "hot") =>
@@ -204,6 +237,8 @@ export const sortRows = (rows, by = "hot") =>
 
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
+  "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
+  "currency_source",
   "finance_contact", "finance_contact_role",
   "finance_contact_confidence", "finance_contact_clues", "finance_contact_linkedin", "search_check", "no_fd_likely", "former_finance_director", "lead_director", "turnover_gbp", "turnover_basis", "turnover_check",
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",

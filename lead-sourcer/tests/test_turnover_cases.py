@@ -196,8 +196,8 @@ class TestRereadingAndOcrOrder(unittest.TestCase):
         # the run's OCR time ran out before the profit and loss page was searched: try again
         self.assertFalse(accounts.facts_reusable({"facts_version": current,
                                                   "facts": {"turnover_check": accounts.TURNOVER_NOT_READ_YET}}))
-        # read before the profit and loss reader: again only when no turnover was found
-        self.assertTrue(accounts.facts_reusable({"facts_version": "2026-10-26b", "facts": {"turnover": 5e7}}))
+        # read before the currency notes were: every company's accounts again (capped a run by main.py)
+        self.assertFalse(accounts.facts_reusable({"facts_version": "2026-11-04", "facts": {"turnover": 5e7}}))
         self.assertFalse(accounts.facts_reusable({"facts_version": "2026-10-26b", "facts": {"turnover": None}}))
 
 

@@ -26,6 +26,7 @@ NOT_CHECKED = "not checked"
 # The spot-check sheet: who to call, how sure we are, and why they're worth it.
 CHECKED_FIELDS = [
     "section", "company_name", "company_number", "trading_as",
+    "filed_fx_score", "fx_forwards", "currencies_in_accounts", "turnover_regions", "fx_sensitivity", "fx_balances",
     "finance_contact", "finance_contact_role", "finance_contact_confidence", "finance_contact_evidence", "search_check", "finance_contact_linkedin",
     "finance_contact_source",
     "verify_finance_contact_url", "linkedin_search_url", "lead_director", "lead_director_occupation",
@@ -49,7 +50,9 @@ _WIDTHS = {"company_name": 34, "finance_contact": 22, "finance_contact_source": 
            "when_to_call": 36, "fx_evidence": 50, "untapped_reasons": 40, "banking_relationships": 40,
            "registered_address": 40, "trade_countries": 40, "fx_wallet_basis": 36,
            "fact_1": 60, "fact_2": 60, "qualify_reason": 40, "warm_route": 36, "incumbent_bank": 36,
-           "facility_ends_evidence": 50, "lenders": 50, "fx_today_evidence": 50, "fx_estimate": 50, "currency_evidence": 50, "opener": 60}
+           "facility_ends_evidence": 50, "lenders": 50, "fx_today_evidence": 50, "fx_estimate": 50, "currency_evidence": 50, "opener": 60,
+           "fx_forwards": 50, "currencies_in_accounts": 30, "turnover_regions": 50, "fx_sensitivity": 60,
+           "fx_balances": 50, "filed_fx": 60}
 MAX_LINKS_PER_SHEET = 60_000   # Excel stops at 65,530 hyperlinks a sheet; past this, links stay as text
 MAX_CELL_CHARS = 32_000        # Excel's limit is 32,767
 _BAD_XML = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")

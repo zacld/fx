@@ -137,8 +137,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `HOOK_RULES`): the two strongest facts, `fact_1`/`fact_2` (new FD ≤90 days → FX gain/loss
   ≥£50k → new charge ≤12 months → growth ≥20% → overseas parent/subsidiary →
   accounts filed ≤30 days), main currency + direction + evidence +
-  confidence (geography note → currency named in accounts → overseas group →
-  HMRC customs mix → niche default), and a one-sentence opener built only from the detail
+  confidence (forward contracts in a foreign currency → geography note → currency named in
+  accounts → overseas group → HMRC customs mix → niche default; `currency_source` says
+  which), and a one-sentence opener built only from the detail
   columns. Every detail names its fetched source; blank beats a guess; no
   extra API calls and no AI. On the Accounts page each fact links to that source on the public
   Companies House site: the accounts document (`accounts_url`; the FX line's page, `fx_gain_loss_url`,
@@ -155,10 +156,36 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   never scored. Triggers lift ranking a little (10 each, max 20); an FX loss
   of £50k+ in accounts filed in the last 183 days (`recent_fx_loss`,
   `RECENT_FX_LOSS` in `main.py`) lifts it 15.
-- **Accounts page order:** "Hottest" by default — finance contact Confirmed
+- **Currency notes** (`sourcer/fx_notes.py`, read from the accounts already
+  downloaded — tagged, text, and the pages of scanned filings OCR'd anyway):
+  forward contracts with their size (`fx_forwards`: "to purchase US$5.2m
+  (2023: US$3.1m)", fair value, or the financial-instruments table row),
+  currencies the accounts tie to the business (`currencies_in_accounts`:
+  "principal exposures are to the US dollar"), foreign-currency balances
+  (`fx_balances`, sentences and currency-profile tables), sensitivity
+  (`fx_sensitivity`: "a 10% weakening of sterling ... £450,000"), and turnover
+  by region from the note's table (`turnover_regions`, also for tagged filings
+  without tagged regions; overseas share when the rows add up to turnover).
+  Each keeps its sentence and page (`fx_notes_url`, `turnover_regions_url`);
+  amounts stay in the accounts' own currency, never converted. Not: gains or
+  losses on the contracts, accounting-policy definitions, freight/commodity
+  forwards, the translation policy. **Filed FX proof** (`filed_fx_score`,
+  `filed_fx`; weights in `FILED_FX_POINTS`): what the company's own filings
+  prove — forwards with a size 40, FX provider 30, sensitivity 25, FX
+  gain/loss £50k+ 25 (smaller 10), how they handle FX 20, regions 20,
+  currencies 15, balances 15 — added to the finder's ranking. The run summary
+  counts each FX fact and where the main currency came from
+  (`main.fx_summary`). Real-accounts check: `tools/fx_notes_sample.py`
+  (workflow "FX notes sample").
+- **Accounts page order:** "Hottest" by default — the strongest filed FX
+  proof first (headed Strong FX proof (50+) / Some FX proof / No FX in the
+  filings yet), each in the finder's rank: the FD is a quick Google, the FX
+  facts aren't. Each card leads with an FX strip — currencies, how they do FX
+  (forwards with their size), FX gain/loss, sales by region, sensitivity,
+  balances — each linked to its page, the quote on hover (in full on the
+  company page). "Confirmed contact first" sort: finance contact Confirmed
   (Verified/Confirmed) first, then Likely, then "Ask for the FD" (no one
-  confirmed; research clues shown),
-  each in the finder's rank; buttons filter by those groups. "Job role" sort
+  confirmed; research clues shown); buttons filter by those groups. "Job role" sort
   and filter: CFO/FD → Head of Finance/Treasurer → Financial Controller →
   Finance Manager → Accountant → Other director → other / no one
   (`ROLES` in `apps/web/src/accounts/format.js`). Companies added
@@ -185,7 +212,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Evidence comes from raw records, in this order:**
   1. HMRC monthly importer/exporter lists, matched to Companies House.
   2. Filed accounts: tagged iXBRL figures (turnover, cost of sales, FX
-     gain/loss, currency or region breakdowns, hedging, bankers), else the
+     gain/loss, currency or region breakdowns, hedging, bankers, and the
+     currency notes above), else the
      PDF's text (pdftotext, or Tesseract OCR of the first pages for scanned
      filings, more pages for turnover and the FX line — system tools
      installed in the workflow, not Python packages).

@@ -146,13 +146,15 @@ def fx_pages_order(pages: int, already: int) -> list[int]:
     return (likely + rest)[:FX_SEARCH_MAX_PAGES]
 
 
-def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES, purpose: str = "fx") -> tuple[str, int]:
+def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES, purpose: str = "fx",
+             seen: dict | None = None) -> tuple[str, int]:
     """
     (page text, page number) of the first page after the first `already`
     that `wanted(text)` accepts, OCR'd one page at a time — the FX note's
     pages (fx_pages_order) or, with purpose="pl", the profit and loss
     account's (pl_pages_order), each under its own per-run budget; ("", 0)
-    when none does, OCR isn't installed or the budget is spent.
+    when none does, OCR isn't installed or the budget is spent. Every page
+    OCR'd goes into `seen` ({page number: text}) when given, for other notes.
     """
     budget_left, order = (_pl_budget_left, pl_pages_order) if purpose == "pl" else (_fx_budget_left, fx_pages_order)
     if not data or not ocr_available() or not budget_left():
@@ -170,6 +172,8 @@ def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES, purpose: str = "
             images = sorted(glob.glob(stem + "*.png"))
             text = _run(["tesseract", images[0], "stdout", "--psm", "6"]) if images else ""
             _count(time.monotonic() - started, pages=1, **({"pl_pages": 1} if purpose == "pl" else {"fx_pages": 1}))
+            if text and seen is not None:
+                seen[number] = text
             if text and wanted(text):
                 return text, number
     return "", 0

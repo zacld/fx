@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -182,17 +182,20 @@ function Accounts({ data, password }) {
   const followUpsDue = rows.filter((r) => ["overdue", "due", "replied"].includes(followUp(contacted[r.company_number], r)?.state)).length;
   const stats = [
     { n: open.length, l: "Accounts", s: "Not yet contacted", c: "#6366F1" },
+    { n: open.filter((r) => fxScore(r) >= 50).length, l: "Strong FX proof", s: "Forwards, FX loss, regions… in their filings", c: "#A5B4FC" },
     { n: open.filter((r) => contactGroup(r) === "Confirmed").length, l: "Confirmed contact", s: "Verified or confirmed", c: "#10B981" },
     { n: open.filter((r) => r.recent_fx_loss).length, l: "Recent FX loss", s: "Accounts filed in the last 6 months", c: "#F87171" },
     { n: open.filter((r) => isNew(r, data.made_at)).length, l: "New", s: "Added by the latest scan", c: "#38BDF8" },
     { n: followUpsDue, l: "Follow-ups due", s: `Today or overdue · ${contactedCount} contacted`, c: followUpsDue ? "#F87171" : "#A5B4FC" },
     { n: open.filter((r) => r.triggers).length, l: "With triggers", s: "New owner, charges, directors", c: "#F59E0B" },
   ];
-  // Headings between groups: follow-up state on the Contacted tab, contact groups in the hottest order, job roles
-  // in the role order.
+  // Headings between groups: follow-up state on the Contacted tab, FX proof bands in the hottest order, contact
+  // groups in the confirmed-first order, job roles in the role order.
   const stateOf = (r) => STATES[followUp(contacted[r.company_number], r)?.state] || "";
+  const hasFxScores = rows.some((r) => r.filed_fx_score !== undefined);   // lists made before the score existed: no headings
   const groupOf = filters.view === "contacted" ? stateOf
-    : sort === "hot" && !filters.contact ? contactGroup : sort === "role" && !filters.role ? roleGroup : null;
+    : sort === "hot" && hasFxScores ? fxGroup : sort === "contactFirst" && !filters.contact ? contactGroup
+    : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
     const blob = new Blob([toCsv(visible.map((r) => ({ ...r, notes: notes[r.company_number]?.text || "" })))], { type: "text/csv;charset=utf-8" });
@@ -424,6 +427,29 @@ function FxFigure({ r }) {
     : null;
 }
 
+// What their own filings say about FX, first on the card: currencies, how they do FX (forwards with their size),
+// the FX gain/loss, sales by region, sensitivity, balances — each linked to its page, the quote on hover.
+function FxStrip({ r, full = false }) {
+  const facts = fxFacts(r);
+  if (!facts.length) return null;
+  return (
+    <div className={`fxstrip${full ? " full" : ""}`}>
+      {r.filed_fx_score !== undefined && (
+        <span className="fxscore" title={r.filed_fx ? r.filed_fx.split(" | ").join("\n") : "Nothing about FX in their filings yet"}>
+          FX proof {fxScore(r)}
+        </span>
+      )}
+      {facts.map(([label, value, href, quote]) => (
+        <div className="fxfact" key={label}>
+          <span className="fxl">{label}</span>
+          <Src href={href} title={quote || undefined}>{value}</Src>
+          {full && quote && quote !== value && <div className="fxq">{quote}</div>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ContactLine({ r }) {
   const conf = r.finance_contact_confidence;
   return (
@@ -466,7 +492,6 @@ function Chips({ r }) {
       {r.warm_route && <span className="chip own">Warm: {r.warm_route}</span>}
       {r.main_bank && <Src className="chip" href={bankUrl(r)} title="Open where this bank is named">{r.main_bank}{r.bank_type ? ` · ${r.bank_type}` : ""}</Src>}
       {r.facility_ends && <Src className="chip trig" href={r.accounts_url} title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</Src>}
-      {r.fx_today && <Src className="chip fx" href={r.fx_today_url} title={r.fx_today_evidence}>{r.fx_today}</Src>}
       {r.own_bank_client && <span className="chip own">Existing client</span>}
       {r.pe_backed && <span className="chip warn">PE-backed</span>}
       {r.family_run && <span className="chip">Family-run</span>}
@@ -488,7 +513,7 @@ function CallPrep({ r }) {
         <div key={fact} className="fact"><Src href={factUrl(r, fact)}>{fact}</Src></div>
       ))}
       {r.main_currency && (
-        <div className="when">Currency: {r.main_currency} · {r.currency_direction} · {r.currency_confidence} confidence</div>
+        <div className="when">Currency: {[r.main_currency, r.currency_direction, r.currency_confidence && `${r.currency_confidence} confidence`].filter(Boolean).join(" · ")}</div>
       )}
       {(r.opener || r.call_angle) && (
         <div className="angle">
@@ -529,6 +554,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen })
           <ContactedButton number={r.company_number} name={r.company_name} mark={mark} onContact={onContact} />
         </div>
       </div>
+      <FxStrip r={r} />
       <ContactLine r={r} />
       {mark && <FollowUpPanel r={r} mark={mark} onContact={onContact} />}
       <Chips r={r} />
@@ -604,6 +630,13 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
             </div>
           ))}
         </div>
+      )}
+
+      {fxFacts(r).length > 0 && (
+        <section className="panel">
+          <h2 className="panel-h">FX in their accounts</h2>
+          <FxStrip r={r} full />
+        </section>
       )}
 
       <div className="pg-grid">
@@ -716,6 +749,12 @@ select.input option{background:#0F141F}
 .grp{padding:5px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:none;color:rgba(255,255,255,.55);font:600 12px 'Inter',sans-serif;cursor:pointer}
 .grp.on{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.35);color:#7DD3FC}
 .contacted-tab{margin-left:8px}
+.fxstrip{margin-top:10px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:baseline;padding:8px 10px;border-radius:9px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.14);font-size:12.5px}
+.fxstrip.full{flex-direction:column;gap:10px;padding:12px 14px}
+.fxscore{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#A5B4FC;padding:2px 7px;border-radius:6px;background:rgba(99,102,241,.16);cursor:help}
+.fxfact{color:#E2E8F0;min-width:0;overflow-wrap:anywhere}
+.fxl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(165,180,252,.7);margin-right:6px}
+.fxq{margin-top:3px;font-size:12px;color:rgba(255,255,255,.45);font-style:italic}
 .group-h{margin-top:10px;font-size:13px;font-weight:800;color:#F8FAFC;letter-spacing:.02em}
 .group-h:first-of-type{margin-top:0}
 .group-h span{font-size:11px;font-weight:500;color:rgba(255,255,255,.35);margin-left:6px}
