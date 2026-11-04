@@ -64794,16 +64794,13 @@
   },
   "72ca813d96c8a96a": {
     "id": "72ca813d96c8a96a",
+    "headline": "investingLive Asia-Pacific market news: RBA hikes to 18-year high",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/investinglive-asia-pacific-market-news-rba-hikes-to-18-year-high/",
-    "headline": "investingLive Asia-Pacific market news: RBA hikes to 18-year high",
-    "raw_summary": "Apple and Palantir beat earnings. Why did both stocks fall? More: RBA lifts cash rate to 4.85% in split 6-3 vote, sees inflation above 3% until late 2027 Reserve Bank of Australia (RBA) 25bp rate hike, as widely expected After the Binance hack, the simple security rule regulators keep coming back to, hot vs. cold wallets Nasdaq’s worst month since March 2025 puts returns on AI spending in focus, says BlackRock Blackstone’s Gray sees more AI equity fundraising ahead from major tech firms JPMorgan’s four midterm scenarios: S&amp;P 500 seen moving between -0.25% and +1.25% More on US strikes on Q",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-11-03T12:35:35.825Z",
+    "status": "ready",
     "event_type": "Monetary policy move",
     "event_breadth": "sector_specific",
-    "summary": "The RBA’s 25bp rate hike pushes the AUD higher against the GBP. UK importers of Australian goods now need more pounds to settle AUD‑priced invoices, while exporters receiving AUD see a modest upside on conversion. The move creates an immediate FX risk for firms with pending AUD payments.",
     "currency_pairs": [
       "AUD/GBP"
     ],
@@ -64821,49 +64818,40 @@
       "UK engineering firms exporting services to Australia"
     ],
     "why_now": "Many UK importers have placed orders before the rate hike and now face higher GBP settlement amounts on upcoming AUD invoices",
-    "discovery_recommendation": "Limited run – two to three distinct payment‑flow niches are clearly exposed and can be validated via company websites",
     "confidence_level": "medium",
     "confidence_reason": "Policy move is real but fully expected, so impact is moderate and timing is immediate for pending invoices",
+    "discovery_recommendation": "Limited run – two to three distinct payment‑flow niches are clearly exposed and can be validated via company websites",
     "what_happened": "The Reserve Bank of Australia raised its cash rate by 25 basis points to 4.85%, the highest in 18 years",
     "what_changed_financially": "AUD has appreciated modestly against the GBP, increasing the GBP cost of AUD‑denominated invoices",
     "who_pays_more": "UK businesses that import Australian wine, beef, wool, iron ore or other commodities priced in AUD",
     "who_receives_less": "UK exporters that bill Australian customers in AUD and convert receipts back to GBP",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP revenue versus AUD supplier payments (or AUD revenue converted to GBP)",
     "fx_payment_logic": "A UK importer receives an invoice from an Australian supplier in AUD, converts GBP to AUD to pay, and because the AUD has strengthened, the GBP outlay is larger than originally budgeted. Conversely, a UK exporter invoicing an Australian client in AUD will receive more GBP when converting the AUD receipt if the AUD remains strong.",
-    "sales_angle": "If you have upcoming AUD‑denominated supplier invoices, the new RBA rate means they’ll cost more in GBP than they did last week.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers of Australian wine, beef, wool and raw materials face higher landed‑costs on recent orders, squeezing margins. UK exporters with AUD revenue see a small conversion gain but also face pricing pressure on future contracts.",
-    "exposure_types": [
-      "AUD supplier payment exposure",
-      "AUD revenue conversion risk"
-    ],
+    "sales_angle": "If you have upcoming AUD‑denominated supplier invoices, the new RBA rate means they’ll cost more in GBP than they did last week.",
     "overall_sales_angle": "The RBA hike has made AUD‑priced invoices more expensive in GBP – a timely reason to review your FX strategy today.",
+    "summary": "The RBA’s 25bp rate hike pushes the AUD higher against the GBP. UK importers of Australian goods now need more pounds to settle AUD‑priced invoices, while exporters receiving AUD see a modest upside on conversion. The move creates an immediate FX risk for firms with pending AUD payments.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK Australian wine and spirits importers",
-        "category_priority_score": 78,
         "business_model": "UK wholesaler buying wine and spirits from Australian producers, selling to UK retailers in GBP. Supplier invoices are in AUD.",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure – AUD supplier payments vs GBP revenue",
         "likely_currency_pairs": [
           "AUD/GBP"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Importer receives AUD invoice → converts GBP to AUD → stronger AUD means more GBP needed → margin compressed",
         "margin_risk": "High — a 2% AUD/GBP move on £300k annual purchases ≈ £6k extra cost if unhedged",
         "payment_timing_risk": "Medium — typical 30‑60 day payment terms create an open FX window",
         "affected_payment_flow": "AUD payments to Australian wineries, usually £50k‑£250k per shipment, quarterly",
-        "website_validation_signals": [
-          "imported from Australia",
-          "Australian winery",
-          "exclusive distributor",
-          "sourced from Australia"
-        ],
-        "avoid_segments": [
-          "retail wine shops that do not import"
-        ],
-        "sales_angle": "Your upcoming AUD‑priced wine shipments will now cost more GBP per litre.",
-        "exposure_thesis_template": "This company imports Australian wine in AUD – the RBA hike raises the GBP cost of those invoices.",
+        "ideal_company_profile": "",
+        "category_priority_score": 78,
         "micro_categories": [
           {
             "name": "Australian premium wine importers UK",
@@ -64894,37 +64882,42 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from Australia",
+          "Australian winery",
+          "exclusive distributor",
+          "sourced from Australia"
+        ],
         "segment_signals": [
           "imported from Australia",
           "Australian winery",
           "exclusive distributor",
           "sourced from Australia"
-        ]
+        ],
+        "avoid_segments": [
+          "retail wine shops that do not import"
+        ],
+        "sales_angle": "Your upcoming AUD‑priced wine shipments will now cost more GBP per litre.",
+        "exposure_thesis_template": "This company imports Australian wine in AUD – the RBA hike raises the GBP cost of those invoices."
       },
       {
         "segment_name": "UK importers of Australian beef and livestock",
-        "category_priority_score": 74,
         "business_model": "UK foodservice distributor buying beef, lamb and other livestock from Australian producers, selling to restaurants and retailers in GBP. Supplier invoices in AUD.",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure – AUD supplier payments vs GBP revenue",
         "likely_currency_pairs": [
           "AUD/GBP"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Importer receives AUD invoice for livestock → converts GBP to AUD → stronger AUD raises GBP cost per kilogram → margin pressure",
         "margin_risk": "Medium — 1.5% AUD/GBP move on £2m annual spend ≈ £30k extra cost if unhedged",
         "payment_timing_risk": "High — live animal shipments often have 45‑90 day payment windows",
         "affected_payment_flow": "AUD payments to Australian farms, typically £200k‑£1m per shipment, semi‑annual",
-        "website_validation_signals": [
-          "imported from Australia",
-          "Australian beef",
-          "livestock supplier",
-          "sourced from Australian farms"
-        ],
-        "avoid_segments": [
-          "UK farms that source locally"
-        ],
-        "sales_angle": "Your next batch of Australian beef will now cost more GBP per tonne.",
-        "exposure_thesis_template": "This company imports Australian beef in AUD – the RBA rate hike inflates the GBP cost of those purchases.",
+        "ideal_company_profile": "",
+        "category_priority_score": 74,
         "micro_categories": [
           {
             "name": "Australian premium beef importers UK",
@@ -64955,37 +64948,42 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from Australia",
+          "Australian beef",
+          "livestock supplier",
+          "sourced from Australian farms"
+        ],
         "segment_signals": [
           "imported from Australia",
           "Australian beef",
           "livestock supplier",
           "sourced from Australian farms"
-        ]
+        ],
+        "avoid_segments": [
+          "UK farms that source locally"
+        ],
+        "sales_angle": "Your next batch of Australian beef will now cost more GBP per tonne.",
+        "exposure_thesis_template": "This company imports Australian beef in AUD – the RBA rate hike inflates the GBP cost of those purchases."
       },
       {
         "segment_name": "UK manufacturers sourcing Australian iron ore and coal",
-        "category_priority_score": 70,
         "business_model": "UK steel and energy firms buying raw material contracts priced in AUD, converting GBP to AUD for payment, then selling finished product in GBP.",
         "exposure_level": "Medium",
         "exposure_type": "Import cost exposure – AUD commodity payments vs GBP revenue",
         "likely_currency_pairs": [
           "AUD/GBP"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Supplier invoices in AUD for iron ore/coal → GBP converted to AUD → stronger AUD raises raw‑material cost in GBP",
         "margin_risk": "Medium — 2% AUD/GBP move on £5m annual spend ≈ £100k extra cost if unhedged",
         "payment_timing_risk": "High — long‑term contracts often settle quarterly with price‑linked adjustments",
         "affected_payment_flow": "AUD payments for bulk commodity shipments, typically £500k‑£3m per contract, quarterly",
-        "website_validation_signals": [
-          "imported from Australia",
-          "Australian iron ore",
-          "Australian coal",
-          "sourced from Australia"
-        ],
-        "avoid_segments": [
-          "UK firms that source domestically"
-        ],
-        "sales_angle": "Your next iron‑ore purchase from Australia will cost more GBP per tonne after the RBA hike.",
-        "exposure_thesis_template": "This company buys Australian iron ore in AUD – the RBA rate hike raises the GBP cost of those purchases.",
+        "ideal_company_profile": "",
+        "category_priority_score": 70,
         "micro_categories": [
           {
             "name": "Australian iron ore importers UK",
@@ -65016,12 +65014,25 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "imported from Australia",
+          "Australian iron ore",
+          "Australian coal",
+          "sourced from Australia"
+        ],
         "segment_signals": [
           "imported from Australia",
           "Australian iron ore",
           "Australian coal",
           "sourced from Australia"
-        ]
+        ],
+        "avoid_segments": [
+          "UK firms that source domestically"
+        ],
+        "sales_angle": "Your next iron‑ore purchase from Australia will cost more GBP per tonne after the RBA hike.",
+        "exposure_thesis_template": "This company buys Australian iron ore in AUD – the RBA rate hike raises the GBP cost of those purchases."
       }
     ],
     "companies_house_terms": [
@@ -65064,8 +65075,13 @@
       "\"thermal coal\" Australia UK",
       "\"coal imports\" Australia UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "Apple and Palantir beat earnings. Why did both stocks fall? More: RBA lifts cash rate to 4.85% in split 6-3 vote, sees inflation above 3% until late 2027 Reserve Bank of Australia (RBA) 25bp rate hike, as widely expected After the Binance hack, the simple security rule regulators keep coming back to, hot vs. cold wallets Nasdaq’s worst month since March 2025 puts returns on AI spending in focus, says BlackRock Blackstone’s Gray sees more AI equity fundraising ahead from major tech firms JPMorgan’s four midterm scenarios: S&amp;P 500 seen moving between -0.25% and +1.25% More on US strikes on Q",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "AUD supplier payment exposure",
+      "AUD revenue conversion risk"
+    ],
     "ai_model": "openai/gpt-oss-120b",
     "web_discovery_done": true,
     "web_discovery_at": "2026-11-03T12:35:43.176Z"
@@ -96785,6 +96801,61 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-03T23:44:47.514Z"
   },
+  "a40b0e7ef4aa862c": {
+    "id": "a40b0e7ef4aa862c",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/carney-says-us-trade-talks-to-intensify-as-washington-asks-less-and-offers-mor/",
+    "headline": "Carney says US trade talks to intensify as Washington asks less and offers mor",
+    "raw_summary": "Carney’s remarks offer modest support for the Canadian dollar, as any easing of the 50% US tariff would lift a weight on Canadian exporters and the growth outlook. The lack of a timeline limits how much a trade-deal premium can build, so USD/CAD is likely to stay more sensitive to the US midterm results and oil prices in the near term. Canada is the largest foreign supplier of crude to the US, so a broader settlement would also reduce one source of uncertainty for North American energy flows. Sectors hit by Canada’s counter-tariffs, including US steel, dairy and farm equipment exporters, stand",
+    "pre_relevance_score": 8,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-11-04T02:02:47.800Z",
+    "event_type": "Tariff talk",
+    "event_breadth": "tariff",
+    "summary": "Carney’s comments suggest the US may lower its 50% tariff on Canadian exports, which could boost the Canadian dollar. UK firms that import Canadian goods priced in CAD could see higher GBP costs on pending invoices, while exporters receiving CAD may see modest changes. The lack of a concrete timeline limits immediate urgency.",
+    "currency_pairs": [
+      "USD/CAD",
+      "GBP/CAD"
+    ],
+    "urgency_score": 3,
+    "commercial_relevance": 5,
+    "commercial_relevance_reason": "Potential easing of a 50% US tariff on Canadian goods could affect UK firms that import CAD‑priced steel, dairy or farm equipment",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK steel importers sourcing Canadian steel",
+      "UK dairy processors importing Canadian dairy",
+      "UK agricultural machinery importers of Canadian farm equipment",
+      "UK manufacturers exporting to Canada and receiving CAD"
+    ],
+    "why_now": "If the tariff is eased soon, the CAD could appreciate, making upcoming CAD‑denominated invoices more expensive in GBP today",
+    "discovery_recommendation": "Context only — the event provides macro background but no immediate actionable payment‑flow trigger",
+    "confidence_level": "medium",
+    "confidence_reason": "The remarks are speculative policy commentary without a firm timeline, so FX impact is uncertain",
+    "what_happened": "Former BoC governor Mark Carney said US trade talks with Canada are intensifying and that Washington is asking less and offering more, raising the prospect of easing the 50% US tariff on Canadian exports",
+    "what_changed_financially": "Possible reduction of the 50% US tariff on Canadian goods, which could strengthen the Canadian dollar against the US dollar and indirectly affect GBP/CAD rates",
+    "who_pays_more": "UK importers of Canadian steel, dairy and farm‑equipment who settle invoices in CAD may face higher GBP costs if the CAD appreciates",
+    "who_receives_less": "UK exporters that receive CAD revenue could see a lower GBP value if the CAD weakens, though the effect is likely modest",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP→CAD for imports and CAD→GBP for exporters",
+    "fx_payment_logic": "UK importers receive invoices from Canadian suppliers in CAD, convert GBP to CAD to pay, and any CAD appreciation raises the GBP amount needed, compressing margins. Conversely, UK exporters invoicing Canadian customers receive CAD and must convert back to GBP, so CAD movements affect the GBP value of those receipts.",
+    "sales_angle": "If you have upcoming CAD‑priced invoices from Canadian suppliers, the potential tariff easing could make those payments cost more in GBP right now.",
+    "business_impact_summary": "UK importers of Canadian steel, dairy and farm equipment face higher landed‑cost risk if the CAD strengthens after a tariff cut, while exporters to Canada may see a slight shift in the GBP value of their CAD receipts. The speculative nature of the talks means the risk is present but not imminent.",
+    "exposure_types": [
+      "CAD supplier payment exposure",
+      "CAD revenue conversion risk"
+    ],
+    "overall_sales_angle": "Potential US tariff relief for Canada could push the CAD higher, meaning your CAD‑denominated invoices may cost more in GBP today.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "a417a85033a77cbd": {
     "id": "a417a85033a77cbd",
     "headline": "British Pound rebounds as US Dollar rally fades, UK politics stabilize",
@@ -118535,6 +118606,60 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-10-22T02:33:38.640Z"
   },
+  "c89b50babe6430d1": {
+    "id": "c89b50babe6430d1",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/nz-q3-unemployment-rate-5-7-expected-5-5-prior-5-6/",
+    "headline": "NZ Q3 Unemployment rate 5.7% (expected 5.5%, prior 5.6%)",
+    "raw_summary": "The miss on every major measure is likely to weigh on the New Zealand dollar and trim pricing for a December rate hike. The kiwi was already near a cycle low against the Australian dollar after last week’s RBNZ hold, and the gap with a more hawkish RBA now looks set to widen. The weak jobs figures argue against tightening, but the RBNZ’s hawks have focused on core inflation and fuel costs. A labour market miss alone may not settle the debate, so inflation expectations surveys later this month carry extra weight. Front-end swap rates are the market to watch for how far hike bets are pared. --- ",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-11-04T02:03:55.641Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "NZ unemployment missed expectations, pushing the kiwi lower against the pound and the Australian dollar. UK firms with NZ‑dollar exposure will see slightly higher costs on imports or a modest benefit on NZ‑dollar revenue, but the effect is limited.",
+    "currency_pairs": [
+      "NZD/GBP",
+      "NZD/AUD"
+    ],
+    "urgency_score": 3,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "NZD move may affect niche UK importers of New Zealand dairy/meat or exporters to NZ but impact is limited",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK dairy importers sourcing from New Zealand",
+      "UK meat importers of New Zealand lamb",
+      "UK fashion exporters to New Zealand"
+    ],
+    "why_now": "Any NZD‑denominated invoices or revenue conversions due in the next weeks will be settled at a weaker NZD rate",
+    "discovery_recommendation": "Context only — NZD move is minor for UK B2B FX, no dedicated discovery needed",
+    "confidence_level": "medium",
+    "confidence_reason": "NZD is a minor currency for most UK firms; exposure is narrow and indirect",
+    "what_happened": "New Zealand Q3 unemployment rose to 5.7% versus the expected 5.5%",
+    "what_changed_financially": "The miss pressured the NZD lower against the GBP and AUD as markets trim expectations of a December RBNZ rate hike",
+    "who_pays_more": "UK importers that pay NZ‑based suppliers in NZD (e.g., dairy, meat, specialty food importers)",
+    "who_receives_less": "UK exporters that receive revenue in NZD (e.g., fashion or technology firms selling to New Zealand)",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP→NZD supplier payments or NZD→GBP revenue conversion",
+    "fx_payment_logic": "UK importers that buy dairy, meat or other goods from New Zealand receive invoices in NZD; they must convert GBP to NZD to pay, and a weaker NZD means they need fewer pounds per NZD, reducing cost. Conversely, UK exporters invoicing NZ customers receive NZD and convert it back to GBP; a weaker NZD yields slightly fewer pounds per NZD received, marginally reducing revenue.",
+    "sales_angle": "If you have upcoming NZ‑dollar invoices or revenue, the recent kiwi weakness means the rate you’ll get today is less favorable than a week ago.",
+    "business_impact_summary": "UK importers of New Zealand dairy or meat will see a small reduction in GBP cost on pending invoices, while exporters earning NZD will get marginally fewer pounds on conversion. The impact is modest and limited to niche sectors.",
+    "exposure_types": [
+      "NZD supplier payment exposure",
+      "NZD revenue conversion"
+    ],
+    "overall_sales_angle": "The kiwi’s recent slide means any NZ‑dollar invoices or receipts this month are priced at a less favorable rate for UK businesses.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "c973cb0b9ccd9336": {
     "id": "c973cb0b9ccd9336",
     "headline": "US S&P Global services final PMI 54.6 vs 53.6 prelim",
@@ -134794,6 +134919,59 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-11-02T13:06:09.314Z"
   },
+  "ea87606dc2f100ed": {
+    "id": "ea87606dc2f100ed",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/jolts-job-openings-7-523m-vs-7-100m-estimate/",
+    "headline": "JOLTs Job openings 7.523M vs 7.100M estimate",
+    "raw_summary": "Prior month 7.079M revised to 7.19M Details of the JOLTs Job openings:&nbsp; Job openings: 7.523 million vs 7.190 million, up 333,000.&nbsp; August revised up by 111,000 to 7.2 million. Job openings rate: 4.5%. Hires: 5.402 million vs 5.271 million, up 131,000. Total separations: 5.319 million vs 5.175 million, up 144,000. Quits: 3.4 million vs 3.0 million in August, revised down by 22,000. Layoffs and discharges: 1.6 million vs 1.8 million in August, revised up by 127,000. Quits rate: 2.1%. Layoffs and discharges rate: 1.0%. Private-sector openings: 6.644 million vs 6.408 million, up 236,000.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b",
+    "detected_at": "2026-11-04T02:04:51.387Z",
+    "event_type": "Macro data",
+    "event_breadth": "broad_macro",
+    "summary": "US job openings beat expectations, nudging the USD higher. UK firms with USD‑denominated payables may see higher GBP costs on imminent invoices, while exporters to the US get a modest conversion benefit.",
+    "currency_pairs": [
+      "USD/GBP"
+    ],
+    "urgency_score": 3,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Higher US job openings may lift USD, modestly affecting UK firms with USD‑denominated payables or receivables.",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK electronics importers",
+      "UK raw‑material importers from the US",
+      "UK manufacturers exporting to the US"
+    ],
+    "why_now": "Upcoming USD invoices will be settled at a stronger USD rate, increasing GBP costs today.",
+    "discovery_recommendation": "Context only – useful for messaging but not a fresh lead source.",
+    "confidence_level": "medium",
+    "confidence_reason": "The data point is factual and widely reported; FX impact is indirect and depends on timing of invoices.",
+    "what_happened": "US JOLTs job openings rose to 7.523 million, beating the 7.190 million consensus estimate.",
+    "what_changed_financially": "The stronger‑than‑expected US labour market supports USD, putting upward pressure on USD/GBP.",
+    "who_pays_more": "UK importers of USD‑priced goods such as electronics, raw materials and US‑origin software licences.",
+    "who_receives_less": "UK exporters receiving USD revenue see a slight upside, but the effect is marginal.",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP→USD payments for imports and USD→GBP receipts for exporters.",
+    "fx_payment_logic": "A UK importer receives an invoice in USD, converts GBP to USD to pay the supplier, and a stronger USD means more GBP is required per dollar, squeezing margins; conversely, a UK exporter receiving USD must convert it back to GBP, gaining a small upside when the USD is strong.",
+    "sales_angle": "If you have USD invoices due this week, the recent US jobs data has pushed the dollar higher, meaning you'll need more pounds to settle them.",
+    "business_impact_summary": "UK businesses that import US‑priced components or software will face higher GBP costs on near‑term payments, while exporters to the US see a modest upside on conversion. The timing aligns with upcoming invoice windows, making it a relevant talking point today.",
+    "exposure_types": [
+      "USD payment cost exposure",
+      "USD revenue conversion benefit"
+    ],
+    "overall_sales_angle": "Stronger USD after the jobs data means your next USD invoice could cost more in pounds – worth reviewing now.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "eaa5bd9d8bb083e3": {
     "id": "eaa5bd9d8bb083e3",
     "headline": "Singapore Dollar: Stronger Singapore growth with contained inflation – Commerzbank",
@@ -142467,6 +142645,138 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-08T02:10:30.058Z"
+  },
+  "f5cd77afe5284040": {
+    "id": "f5cd77afe5284040",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-americas-market-news-wrap-job-openings-jump-as-the-us-votes/",
+    "headline": "investingLive Americas market news wrap: Job openings jump as the US votes",
+    "raw_summary": "JOLTs Job openings 7.523M vs 7.100M estimate US September factory orders +1.8% vs +1.2% expected Trump on Israel: The aid gets cut off at year-end Never tell me the odds: Prediction markets see Democrats taking control of House and Senate BOC's Macklem: There could be a need to raise the policy rate further ECB’s Nagel says a December rate hike is very likely to be necessary Two reasons why the US could attack Iran as soon as tomorrow If you squint, the odds are improving slightly for Republican Senate control Markets: Gold down $19 to $3928 US 10-year yields up 7.2 bps to 4.97% S&amp;P 500 up",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-11-04T02:03:24.209Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "ECB’s hint of a December rate hike is set to strengthen the euro. UK businesses that pay European suppliers in euros will face higher GBP costs on upcoming invoices, while exporters converting euro revenue back to pounds may see a modest benefit but also future pricing pressure. The timing makes it relevant to act now on pending payments.",
+    "currency_pairs": [
+      "GBP/EUR"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "ECB signals a December rate hike, likely strengthening EUR and raising costs for UK importers paying EUR and affecting exporters receiving EUR revenue",
+    "trigger_strength": "medium",
+    "trigger_score": 58,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK importers of European consumer goods",
+      "UK manufacturers exporting machinery to the EU",
+      "UK food and beverage importers from the EU"
+    ],
+    "why_now": "EUR invoices due in the next weeks will be settled at a weaker GBP rate than when the orders were placed",
+    "discovery_recommendation": "Limited run — two distinct payment‑flow niches worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "The comment is a forward‑looking central‑bank statement rather than a surprise decision, but it clearly moves EUR expectations",
+    "what_happened": "ECB policy chief Nagel said a December rate hike is very likely, pushing up expectations for a stronger euro",
+    "what_changed_financially": "EUR is expected to appreciate versus GBP, increasing the GBP cost of euro‑denominated invoices for UK businesses",
+    "who_pays_more": "UK importers with outstanding EUR‑denominated supplier invoices",
+    "who_receives_less": "UK exporters receiving EUR revenue may see only modest gains and could face future pricing pressure",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue versus EUR supplier costs (imports) and EUR revenue versus GBP conversion (exports)",
+    "fx_payment_logic": "UK importers receive invoices in euros from EU suppliers, then convert pounds to euros to pay; a stronger euro means they need more pounds per euro, squeezing margins. Conversely, UK exporters earn euros from EU customers and convert them back to pounds; a stronger euro gives them more pounds per euro, but may affect future pricing negotiations.",
+    "sales_angle": "If you have EUR supplier invoices due this month, the euro is now stronger than when you placed the orders, so your GBP cost is higher today.",
+    "business_impact_summary": "UK importers of European goods will see higher landed‑costs on recent orders, eroding margins, while exporters receiving euro revenue may see a short‑term boost but could face pricing challenges later. The rate move is immediate enough to merit a quick FX review.",
+    "exposure_types": [
+      "EUR supplier payment exposure",
+      "EUR revenue conversion"
+    ],
+    "overall_sales_angle": "The ECB’s rate‑hike signal means the euro is set to rise, so any upcoming EUR invoices will cost more in pounds – a timely reason to discuss hedging options today.",
+    "target_segments": [
+      {
+        "segment_name": "UK exporters receiving EUR revenue from EU customers",
+        "category_priority_score": 74,
+        "business_model": "UK manufacturer or service firm selling goods or services to EU customers in euros, then converting receipts back to pounds",
+        "exposure_level": "Medium",
+        "exposure_type": "Revenue conversion – EUR receipts vs GBP conversion",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EU customer pays in EUR → UK exporter receives EUR → converts to GBP → stronger euro yields more pounds per euro",
+        "margin_risk": "Low to medium — a 2% EUR/GBP rise on £500k annual euro revenue ≈ £10 k extra GBP if unhedged",
+        "payment_timing_risk": "Medium — cash may sit unconverted for 1‑4 weeks before FX settlement",
+        "affected_payment_flow": "EUR receipts from EU customers, typically £100k‑£1 m per quarter",
+        "website_validation_signals": [
+          "export to Europe",
+          "EU customers",
+          "sold throughout EU",
+          "European market"
+        ],
+        "avoid_segments": [
+          "purely domestic UK sellers",
+          "companies without EU client base"
+        ],
+        "sales_angle": "If you bill EU customers in euros, the current stronger euro means you’ll get more pounds on each payment today.",
+        "exposure_thesis_template": "This company exports to EU buyers in euros. A stronger euro increases the GBP value of their euro receipts.",
+        "micro_categories": [
+          {
+            "name": "UK machinery manufacturers exporting to EU",
+            "why": "Invoices EU buyers in euros; a stronger euro boosts GBP value of each payment",
+            "search_queries": [
+              "\"UK machinery exporter\" EU",
+              "\"machine tool exporter\" UK Europe",
+              "\"industrial equipment exporter\" UK"
+            ],
+            "companies_house_terms": [
+              "machinery export",
+              "industrial export",
+              "equipment exporter"
+            ]
+          },
+          {
+            "name": "UK SaaS providers billing EU customers in EUR",
+            "why": "Subscription fees in euros; a stronger euro improves GBP conversion on revenue",
+            "search_queries": [
+              "\"UK SaaS\" \"European customers\"",
+              "\"software as a service\" UK EUR billing",
+              "\"cloud services\" UK Europe"
+            ],
+            "companies_house_terms": [
+              "software services",
+              "cloud provider",
+              "saas"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "export to Europe",
+          "EU customers",
+          "sold throughout EU",
+          "European market"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "machinery export",
+      "industrial export",
+      "equipment exporter",
+      "software services",
+      "cloud provider",
+      "saas"
+    ],
+    "all_search_queries": [
+      "\"UK machinery exporter\" EU",
+      "\"machine tool exporter\" UK Europe",
+      "\"industrial equipment exporter\" UK",
+      "\"UK SaaS\" \"European customers\"",
+      "\"software as a service\" UK EUR billing",
+      "\"cloud services\" UK Europe"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-11-04T02:04:55.554Z"
   },
   "f5da6ab926c39320": {
     "id": "f5da6ab926c39320",
