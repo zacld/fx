@@ -26,7 +26,7 @@ _FINANCE_TITLE_RE = re.compile(
     r"\b(?:Group\s+|Interim\s+|Deputy\s+|UK\s+)?(?:Chief\s+Financial\s+Officer|Chief\s+Finance\s+Officer|CFO|"
     r"Finance\s+(?:(?:&|and)\s+(?:Administration|Operations|Commercial|IT|Business)\s+)?Director|Financial\s+Director|Director\s+of\s+Finance|Financial\s+Controller|Finance\s+Controller|"
     r"Head\s+of\s+Finance|Finance\s+Manager|Treasurer|Head\s+of\s+Treasury|Treasury\s+Manager|"
-    r"V\.?P\.?,?\s+(?:of\s+)?Finance|Vice\s+President,?\s+(?:of\s+)?Finance|Director\s*[,–—-]\s*Finance|Chief\s+Accountant)\b",
+    r"V\.?P\.?,?\s+(?:of\s+)?Finance|Vice\s+President,?\s+(?:of\s+)?Finance|Director\s*[(,–—-]\s*Finance|Chief\s+Accountant)\b",
     re.I)
 _TOKEN = r"[A-ZÀ-ÖØ-Þ](?:[^\W\d_]|['’-])*\.?"   # letters with accents too ("Bauló")
 _NAME_AT_END = re.compile(rf"((?:{_TOKEN}\s+){{1,4}}{_TOKEN})$")

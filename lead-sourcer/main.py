@@ -986,14 +986,26 @@ def run_pipeline(
             parents[number] = parent
 
     # Company websites, several at once (each is a different site), after the rate-limited CH loop.
+    # addresses to try before guessing from the name: those printed in the accounts, then the company's own site in
+    # its earlier search results (cached; no search made here)
     wanted = [(p["args"][1]["company_number"], p["args"][1]["company_name"],
-               (p["kwargs"]["facts"] or {}).get("web_addresses", [])) for p in pending if p["need_site"]]
+               list(dict.fromkeys([*(p["kwargs"]["facts"] or {}).get("web_addresses", []),
+                                   *profiles.own_sites_in_cache(p["args"][1]["company_name"])])))
+              for p in pending if p["need_site"]]
     if wanted:
         print(f"  Reading {len(wanted):,} company websites (no finance director named in the register or accounts)…",
               flush=True)
     # websites read in the last LOOKUP_CACHE_DAYS (7) come from the cache: they rarely change, and reading ~800 a day
     # took ~20 minutes of each run
-    sites, stats["site_cached"] = register_cache.cached_many("website", wanted, website.look_up_many)
+    def look_up_sites(todo: list[tuple]) -> dict:
+        got = website.look_up_many(todo)
+        return {item[0]: {**got[item[0]], "tried": list(item[2])} for item in todo}   # the addresses it was given
+
+    # a cached "no website" is looked up again when there's an address it wasn't given (a new search result)
+    sites, stats["site_cached"] = register_cache.cached_many(
+        "website", wanted, look_up_sites,
+        stale=lambda item, cached: not cached.get("website") and bool(set(item[2]) - set(cached.get("tried", []))))
+    stats["site_hinted"] = sum(1 for item in wanted if item[2])
     stats["site_tried"], stats["site_found"] = len(wanted), sum(bool(s["website"]) for s in sites.values())
     # Finance appointments in the news, for companies whose finance contact still isn't confirmed.
     unconfirmed = []
@@ -1093,7 +1105,8 @@ def print_summary(rows: list[dict], stats: Counter, min_turnover: int,
           f"{sum(1 for r in rows if r['untapped_reasons'] != 'not checked' and not r['finance_contact']):,}, "
           f"of them with research clues (secretary / signatory / weak pick): "
           f"{sum(1 for r in rows if not r['finance_contact'] and r['finance_contact_clues']):,}")
-    print(f"  Company websites tried: {stats['site_tried']:,} ({stats['site_cached']:,} from the last week), "
+    print(f"  Company websites tried: {stats['site_tried']:,} ({stats['site_cached']:,} from the last week, "
+          f"{stats['site_hinted']:,} with an address from the accounts or earlier search results), "
           f"confirmed: {stats['site_found']:,} | "
           f"news checked: {stats['news_tried']:,} ({stats['news_cached']:,} from the last week), "
           f"with a finance appointment: {stats['news_found']:,} | "

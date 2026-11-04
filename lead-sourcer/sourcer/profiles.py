@@ -382,9 +382,14 @@ def trading_names(text: str, company_name: str = "") -> list[str]:
 
 
 def queries_for(company_name: str) -> list[str]:
-    """The wordings tried in turn until one finds a finance person (cheapest first)."""
+    """
+    The wordings tried in turn until one finds a finance person (cheapest first): the FD, then the other FD titles,
+    then — only once every company has had its searches, for one where nobody in finance turned up — the people
+    under or instead of an FD (a controller or finance manager is a name to ask for).
+    """
     name = plain_name(company_name)
-    return [f"{name} finance director", f'"{name}" CFO OR FD OR "director of finance" OR "head of finance"']
+    return [f"{name} finance director", f'"{name}" CFO OR FD OR "director of finance" OR "head of finance"',
+            f'"{name}" "financial controller" OR "finance manager" OR "chief accountant" OR "head of accounts"']
 
 
 def split_title(title: str) -> tuple[str, str]:
@@ -527,6 +532,31 @@ def _store(query: str, answer: str) -> None:
         f.write(answer)
 
 
+# Directories, registries, social and job sites: they name the company but aren't its website.
+_NOT_OWN_SITE = ("linkedin.", "company-information.service.gov.uk", "companieshouse.", "endole.", "opencorporates.",
+                 "dnb.com", "zoominfo.", "rocketreach.", "crunchbase.", "bloomberg.", "facebook.", "twitter.", "x.com",
+                 "instagram.", "youtube.", "glassdoor.", "indeed.", "yell.com", "thegazette.", "companycheck.",
+                 "bizdb.", "creditsafe.", "wikipedia.", "tiktok.", "pinterest.", "cylex", "192.com", "checkcompany.",
+                 "companiesintheuk.", "find-and-update.", "theorg.com", "apollo.io", "signalhire.", "lusha.")
+
+
+def own_sites_in_cache(company_name: str, limit: int = 2) -> list[str]:
+    """
+    The company's own web addresses seen in its cached search results (no search is made): only a site whose name
+    holds the company's ("fairburnseggs.co.uk"), never a directory, registry or social site — a stockist's page that
+    merely names the company would pass the website check and give us its staff. For the website step to try before
+    guessing from the name ("https://host/"); the site must still show the company's number or name.
+    """
+    phrases = company_phrases(company_name)
+    found = []
+    for query in queries_for(company_name):
+        for url, title, snippet in parse(_cached(query) or "") or []:
+            host = urllib.parse.urlparse(url).netloc.lower()
+            if host and not any(n in host for n in _NOT_OWN_SITE) and _own_site(url, phrases):
+                found.append(f"https://{host}/")
+    return list(dict.fromkeys(found))[:limit]
+
+
 def finance_team_many(companies: list[tuple], fetcher: Optional[Fetcher] = None,
                       pause: Optional[float] = None, key: Optional[str] = None,
                       max_searches: Optional[int] = None) -> tuple[dict[str, list[dict]], str]:
@@ -581,6 +611,11 @@ def finance_team_many(companies: list[tuple], fetcher: Optional[Fetcher] = None,
     def has_fd(team: list[dict]) -> bool:   # a controller alone isn't enough: keep looking for the FD
         return any(p["current"] and people.is_finance_director(p["title"]) for p in team)
 
+    def anyone_in_finance(team: list[dict]) -> bool:
+        return any(p["current"] and people.is_finance_title(p["title"]) for p in team)
+
+    nobody: list[tuple[str, str]] = []   # searched, nobody in finance found: one more wording if the budget allows
+
     def check(number: str, name: str, rest: list) -> None:
         """One company's searches, cheapest first; its team goes into `found`."""
         queries = queries_for(name)
@@ -614,6 +649,14 @@ def finance_team_many(companies: list[tuple], fetcher: Optional[Fetcher] = None,
                 group = [{**p, "parent": parent} for p in people_in_results(results, parent)
                          if p["current"] and people.is_finance_director(p["title"])]
                 found[number] = merge(team, group)
+        if not anyone_in_finance(found[number]):
+            nobody.append((number, name))
+
+    def below_fd(number: str, name: str) -> None:
+        """The controller / finance manager wording, for a company where nobody in finance turned up."""
+        results = search(queries_for(name)[2])
+        if results:
+            found[number] = merge(found[number], people_in_results(dedupe(results), name))
 
     try:
         for number, name, *rest in companies:
@@ -621,6 +664,12 @@ def finance_team_many(companies: list[tuple], fetcher: Optional[Fetcher] = None,
                 check(number, name, rest)
             except Skip:
                 pass   # needs a search the budget can't pay for: a later run; cached companies after it still go
+        # second pass, with what's left of the budget: every company has had its own searches first
+        for number, name in nobody:
+            try:
+                below_fd(number, name)
+            except Skip:
+                pass
     except Stop as stop:
         return found, str(stop)
     # (over budget, companies already searched are still checked from the cache)

@@ -330,6 +330,7 @@ class PipelineTestCase(unittest.TestCase):
             mock.patch.object(website, "PAUSE_SECONDS", 0),
             mock.patch.object(news, "fetch", NEWS_FEEDS.get),
             mock.patch.object(registries, "fetch", REGISTRY_FILES.get),
+            mock.patch.object(profiles, "CACHE_DIR", os.path.join(self.tmp.name, "search")),   # never the real cache
             mock.patch.dict(os.environ, {"COMPANIES_HOUSE_API_KEY": "test-key"}),
             mock.patch("sys.stdout"),
         ):
@@ -420,6 +421,26 @@ class TestLookupCache(PipelineTestCase):
             self.assertGreater(len(fetched), sites_read)
         found, value = register_cache.load_lookup("website", "01")   # outside the patched cache: nothing
         self.assertEqual((found, value), (False, None))
+
+
+    def test_no_website_looked_up_again_when_a_new_address_turns_up(self):
+        calls = []
+
+        def look_up_many(todo):
+            calls.append([item[0] for item in todo])
+            return {item[0]: {"website": "", "tried": list(item[2])} for item in todo}
+        stale = lambda item, cached: not cached.get("website") and bool(set(item[2]) - set(cached.get("tried", [])))
+        with mock.patch.object(register_cache, "CACHE_DIR", os.path.join(self.tmp.name, "register")), \
+                mock.patch.object(register_cache, "CACHE_DAYS", 7):
+            register_cache.cached_many("website", [("01", "A LTD", [])], look_up_many, stale=stale)
+            _, hits = register_cache.cached_many("website", [("01", "A LTD", [])], look_up_many, stale=stale)
+            self.assertEqual((calls, hits), ([["01"]], 1))   # nothing new to try: the cached answer stands
+            _, hits = register_cache.cached_many("website", [("01", "A LTD", ["https://a.co.uk/"])], look_up_many,
+                                                 stale=stale)
+            self.assertEqual((calls, hits), ([["01"], ["01"]], 0))   # a new address: looked up again
+            _, hits = register_cache.cached_many("website", [("01", "A LTD", ["https://a.co.uk/"])], look_up_many,
+                                                 stale=stale)
+            self.assertEqual(hits, 1)
 
 
 class TestSlotsGoToCompaniesStillInTheRunning(PipelineTestCase):
@@ -1179,6 +1200,23 @@ class TestPeople(unittest.TestCase):
         pick = people.choose_finance_contact(officers, [], [], qualified=[{"name": "Jane Smith", "letters": "ACA"}])
         self.assertEqual(people.research_clues(officers, "J Smith", pick), [])
 
+    def test_finance_occupations_filed_on_the_register(self):
+        # job titles finance people file at Companies House, all of which the role reader used to miss
+        cases = {"Chief Finance Officer": "CFO", "Director Of Finance": "Finance Director",
+                 "Director (Finance)": "Finance Director", "Director - Finance": "Finance Director",
+                 "Finance & Operations Director": "Finance Director", "Finance And Commercial Director": "Finance Director",
+                 "Financial Controller": "Financial Controller", "Group Financial Controller": "Financial Controller"}
+        for occupation, label in cases.items():
+            with self.subTest(occupation):
+                director = {"name": "Ann Lee", "role": "Director", "occupation": occupation, "appointed_on": "2020-01-01"}
+                self.assertEqual(roles.classify_role(occupation)[1], label)
+                pick = people.choose_finance_contact([director], [], [])
+                self.assertEqual((pick["name"], pick["source"], pick["confidence"]),
+                                 ("Ann Lee", "Companies House occupation", people.CONFIRMED))
+        for not_finance in ("Commercial Director", "Operations Director", "Company Director"):
+            self.assertIsNone(people.choose_finance_contact(
+                [{"name": "Ann Lee", "role": "Director", "occupation": not_finance, "appointed_on": ""}], [], []))
+
     def test_weak_contact_becomes_a_clue(self):
         row = {"finance_contact": "Ann Lee", "finance_contact_role": "Director (FCA)", "finance_contact_source": "x",
                "finance_contact_confidence": "Guess", "finance_contact_linkedin": "",
@@ -1699,7 +1737,45 @@ class TestConfirmation(unittest.TestCase):
         found, _ = profiles.finance_team_many([("1", "ACME FOODS LIMITED", ["Sunny Snacks"])],
                                               fetcher=lambda q, k: asked.append(q) or search_answer(), pause=0, key="k")
         self.assertEqual(asked, ["Acme Foods finance director", "Sunny Snacks finance director",
-                                 '"Acme Foods" CFO OR FD OR "director of finance" OR "head of finance"'])
+                                 '"Acme Foods" CFO OR FD OR "director of finance" OR "head of finance"',
+                                 # nobody in finance: the controller / finance manager wording, after every company
+                                 '"Acme Foods" "financial controller" OR "finance manager" OR "chief accountant" '
+                                 'OR "head of accounts"'])
+
+    def test_controller_wording_only_after_every_company_had_its_searches(self):
+        asked = []
+        controller = ("https://uk.linkedin.com/in/kim-roe", "Kim Roe - Financial Controller at Acme Foods Limited", "")
+
+        def fetcher(query, key):
+            asked.append(query)
+            return search_answer(controller) if "financial controller" in query and "Acme" in query else search_answer()
+        companies = [("1", "ACME FOODS LIMITED"), ("2", "BETA BAKES LIMITED")]
+        found, status = profiles.finance_team_many(companies, fetcher=fetcher, pause=0, key="k")
+        self.assertEqual([q.split('"')[1] if q.startswith('"') else q for q in asked],
+                         ["Acme Foods finance director", "Acme Foods", "Beta Bakes finance director", "Beta Bakes",
+                          "Acme Foods", "Beta Bakes"])
+        self.assertIn("financial controller", asked[4])
+        self.assertEqual([p["name"] for p in found["1"]], ["Kim Roe"])
+        self.assertEqual(found["2"], [])
+        # a tight budget goes on each company's own searches first: no controller wording at all
+        asked.clear()
+        for f in os.listdir(profiles.CACHE_DIR):
+            os.remove(os.path.join(profiles.CACHE_DIR, f))
+        found, status = profiles.finance_team_many(companies, fetcher=fetcher, pause=0, key="k", max_searches=4)
+        self.assertEqual(len(asked), 4)
+        self.assertFalse(any("financial controller" in q for q in asked))
+        self.assertEqual(status, "budget of 4 searches reached")
+
+    def test_own_website_from_earlier_search_results(self):
+        profiles._store("Acme Foods finance director", search_answer(
+            ("https://uk.linkedin.com/in/kim-roe", "Kim Roe - Acme Foods Limited", ""),
+            ("https://find-and-update.company-information.service.gov.uk/company/1", "ACME FOODS LIMITED", ""),
+            ("https://www.endole.co.uk/company/1/acme-foods", "Acme Foods Limited - Endole", ""),
+            ("https://www.acmefoods.co.uk/about/team", "Our team", ""),
+            ("https://www.snackdistributors.com/brands", "Acme Foods Limited - brands we carry", "")))
+        # a stockist's page naming the company isn't its website
+        self.assertEqual(profiles.own_sites_in_cache("ACME FOODS LIMITED"), ["https://www.acmefoods.co.uk/"])
+        self.assertEqual(profiles.own_sites_in_cache("BETA BAKES LIMITED"), [])   # nothing cached: no search made
 
     def test_provider_checks_say_why_without_results(self):
         answers = {"api.search1api.com": (200, '{"error": "Invalid API key"}'), "api.tavily.com": (401, ""),

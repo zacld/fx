@@ -88,15 +88,16 @@ def store_lookup(kind: str, number: str, value: object) -> None:
         pass   # a value that won't store is simply looked up again next run
 
 
-def cached_many(kind: str, items: list[tuple], look_up_many) -> tuple[dict, int]:
+def cached_many(kind: str, items: list[tuple], look_up_many, stale=None) -> tuple[dict, int]:
     """
     look_up_many(items) for the companies (item[0] = company number) not looked up in the last LOOKUP_DAYS, the
-    others from the cache: ({company_number: value}, how many came from the cache).
+    others from the cache: ({company_number: value}, how many came from the cache). `stale(item, value)` True looks
+    a cached company up again anyway (a website lookup that found nothing, with a new address to try).
     """
     hits, todo = {}, []
     for item in items:
         found, value = load_lookup(kind, item[0])
-        if found:
+        if found and not (stale and stale(item, value)):
             hits[item[0]] = value
         else:
             todo.append(item)
