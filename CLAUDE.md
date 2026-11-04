@@ -176,7 +176,24 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   currencies 15, balances 15 — added to the finder's ranking. The run summary
   counts each FX fact and where the main currency came from
   (`main.fx_summary`). Real-accounts check: `tools/fx_notes_sample.py`
-  (workflow "FX notes sample").
+  (workflow "FX notes sample"). Scanned filings get their own OCR pass for
+  the currency notes (`pdf.notes_pages_order`: 62–97% through, then the
+  strategic report 12–40%; ≤ `OCR_NOTES_MAX_PAGES` (8) a filing, stopping
+  at a forward contract's size or a sensitivity; `OCR_NOTES_BUDGET_SECONDS`
+  (1500) a run; not for filed turnover under `OCR_NOTES_MIN_TURNOVER`, £25m);
+  pages OCR'd for turnover or the FX line are reused, never read twice.
+- **Group accounts** (`sourcer/group.py`): for a company whose PSC register
+  names a current UK corporate owner (a Companies House number), the parent's
+  latest accounts are read like the company's own — one level further up when
+  the parent files no turnover (`MAX_HOPS` 2) — cached per parent (lookup
+  "group", `FACTS_DAYS`), at most `GROUP_READS_MAX` (200) new parents a run.
+  An audit-exempt subsidiary with no turnover or customs record of its own is
+  kept when its group's turnover is in the band, its size shown as the
+  group's (`turnover_basis` group, the source naming the parent). Every
+  subsidiary row shows `group_parent_accounts` and `group_fx` (the group's
+  forwards, currencies, how it handles FX, FX gain/loss, regions;
+  `group_fx_url`), and half the group's filed-FX proof counts towards its own
+  `filed_fx_score`.
 - **Accounts page order:** "Hottest" by default — the strongest filed FX
   proof first (headed Strong FX proof (50+) / Some FX proof / No FX in the
   filings yet), each in the finder's rank: the FD is a quick Google, the FX

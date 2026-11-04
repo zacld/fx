@@ -33,7 +33,7 @@ sys.path.insert(0, ROOT)
 
 import main  # noqa: E402
 import server  # noqa: E402
-from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, fx_notes, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
+from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, fx_notes, group, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
 
 # api/ is a Vercel functions folder, not a package — load run.py by path.
 _spec = importlib.util.spec_from_file_location("api_run", os.path.join(ROOT, "api", "run.py"))
@@ -2371,7 +2371,97 @@ class TestFxNotes(unittest.TestCase):
         self.assertIn("how they handle FX Uses forward contracts 1", lines[0])
         self.assertIn("FX gain/loss 1 (£50k+ 1)", lines[0])
         self.assertIn("HMRC customs (estimated mix) 1", lines[1])
-        self.assertIn("50+ 0, 1-49 1, none 1", lines[2])
+        self.assertIn("50+ 0, 1-49 1, none 1", lines[3])
+
+
+class TestGroupAccounts(unittest.TestCase):
+    """A subsidiary's UK parent's accounts: size and FX from the group (sourcer/group.py)."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        for patcher in (mock.patch.object(register_cache, "CACHE_DIR", tmp.name),
+                        mock.patch.object(register_cache, "CACHE_DAYS", 7),
+                        mock.patch.dict(group.stats, {"read": 0, "cached": 0, "skipped": 0})):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    @staticmethod
+    def owner(name, number, country="England", ceased=""):
+        return {"kind": "corporate", "name": name, "registration_number": number, "country": country, "ceased_on": ceased}
+
+    def test_uk_parent(self):
+        self.assertEqual(group.uk_parent([self.owner("VINI HOLDING SPA", "IT998", "Italy"),
+                                          self.owner("OLD HOLDCO LTD", "123", ceased="2024-01-01"),
+                                          self.owner("ACME HOLDINGS LIMITED", "1234567")]),
+                         ("01234567", "ACME HOLDINGS LIMITED"))
+        self.assertEqual(group.uk_parent([self.owner("SCOT HOLDINGS LTD", "SC123456", "Scotland")]),
+                         ("SC123456", "SCOT HOLDINGS LTD"))
+        self.assertIsNone(group.uk_parent([{"kind": "individual", "name": "Mr A", "registration_number": ""}]))
+
+    def test_up_to_the_parent_that_files_turnover_read_once(self):
+        read = []
+        facts = {"00000100": {"turnover": None}, "00000200": {"turnover": 80_000_000, "period_end": "2025-12-31",
+                                                                 "fx_forwards": [], "format": "ixbrl"}}
+        with mock.patch.object(accounts, "facts_from_latest_accounts", lambda n, k: read.append(n) or facts[n]), \
+                mock.patch.object(companies_house, "get_owners",
+                                  lambda n, k: [self.owner("TOP GROUP LIMITED", "200")] if n == "00000100" else []):
+            found = group.parent_accounts([self.owner("MID HOLDCO LIMITED", "100")], "key")
+            again = group.parent_accounts([self.owner("MID HOLDCO LIMITED", "100")], "key")
+        self.assertEqual((found["number"], found["name"], found["turnover"], found["hops"]),
+                         ("00000200", "TOP GROUP LIMITED", 80_000_000, 2))
+        self.assertEqual(again["number"], "00000200")
+        self.assertEqual(read, ["00000100", "00000200"])   # each parent read once; the second subsidiary uses the cache
+        self.assertEqual(group.label(found), "TOP GROUP LIMITED (00000200) — the parent's parent")
+
+    def test_parent_reads_are_capped_a_run(self):
+        with mock.patch.object(group, "READS_MAX_PER_RUN", 0), \
+                mock.patch.object(accounts, "facts_from_latest_accounts", lambda n, k: self.fail("read over budget")):
+            self.assertIsNone(group.parent_accounts([self.owner("ACME HOLDINGS LIMITED", "1234567")], "key"))
+        self.assertEqual(group.stats["skipped"], 1)
+
+    def test_subsidiary_row_sized_and_scored_by_its_group(self):
+        g = {"number": "01234567", "name": "ACME HOLDINGS LIMITED", "turnover": 120_000_000, "hops": 1,
+             "facts": {"turnover": 120_000_000, "period_end": "2025-12-31", "format": "pdf", "turnover_page": 12,
+                       "accounts_url": "https://doc", "turnover_source": "accounts p12: group profit and loss account",
+                       "fx_gain_loss": -250_000,
+                       "fx_forwards": [{"what": "contracts", "amount": 5_000_000, "ccy": "USD", "direction": "buy",
+                                        "prior": None, "sentence": "contracts to buy US$5m", "page": 30}]}}
+        company = {"company_name": "ACME TRADING LIMITED", "company_number": "07654321",
+                   "accounts_category": "audit-exemption-subsidiary", "sic_codes": ["46900"]}
+        row = main.company_row({"id": "x", "name": "N", "currency_pairs": []}, company, None, [], True,
+                               facts={}, owners=[], charges=[], today=date(2026, 11, 4), group=g)
+        self.assertEqual((row["turnover_gbp"], row["turnover_basis"]), ("120000000", "group"))
+        self.assertTrue(row["turnover_source"].startswith("group turnover: parent ACME HOLDINGS LIMITED (01234567)'s accounts"))
+        self.assertEqual(row["turnover_url"], "https://doc#page=12")
+        self.assertEqual(row["group_parent_accounts"], "ACME HOLDINGS LIMITED (01234567): group turnover £120m")
+        self.assertEqual(row["group_fx"], "Forward contracts to buy US$5m; FX loss £250k")
+        self.assertEqual(row["group_fx_url"], "https://doc#page=30")
+        self.assertEqual(row["group_fx_score"], "65")                     # forwards 40 + FX loss 25
+        self.assertEqual(row["filed_fx_score"], "32")                     # half of the group's, none of its own
+        self.assertIn("group (ACME HOLDINGS LIMITED)", row["filed_fx"])
+        self.assertTrue(row["section"].startswith("Core"))
+
+
+class TestGroupInThePipeline(PipelineTestCase):
+    def test_audit_exempt_subsidiary_kept_when_its_group_is_in_the_band(self):
+        parent = {"kind": "corporate-entity-person-with-significant-control", "name": "PLAIN WHOLESALE LIMITED",
+                  "notified_on": "2016-04-06", "identification": {"country_registered": "England", "registration_number": "05"}}
+        with mock.patch.object(register_cache, "CACHE_DAYS", 7), \
+                mock.patch.dict(FILINGS, {"06": [], "00000005": FILINGS["05"]}):   # SUB WINES files no figures
+            with mock.patch.object(register_cache, "CACHE_DIR", os.path.join(self.tmp.name, "one")):
+                alone = {r["company_number"] for r in self.run_bulk(news_check=False, min_turnover=25_000_000)}
+            self.assertNotIn("06", alone)                       # nothing confirms its size: dropped, as before
+            with mock.patch.dict(OWNERS, {"06": [parent]}), \
+                    mock.patch.object(register_cache, "CACHE_DIR", os.path.join(self.tmp.name, "two")):
+                rows = {r["company_number"]: r for r in self.run_bulk(news_check=False, min_turnover=25_000_000)}
+                calls = len(self.fake.calls)
+                again = {r["company_number"]: r for r in self.run_bulk(news_check=False, min_turnover=25_000_000)}
+            self.assertEqual(again["06"]["turnover_gbp"], "31500000")   # next run: from the cache…
+            self.assertFalse([u for u in self.fake.calls[calls:] if "/00000005/" in u])   # …no parent calls
+        sub = rows["06"]
+        self.assertEqual((sub["turnover_gbp"], sub["turnover_basis"]), ("31500000", "group"))   # its parent's £31.5m
+        self.assertTrue(sub["group_parent_accounts"].startswith("PLAIN WHOLESALE LIMITED (00000005)"))
 
 
 class TestQualify(unittest.TestCase):

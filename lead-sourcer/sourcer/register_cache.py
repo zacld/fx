@@ -62,12 +62,13 @@ def _lookup_path(kind: str, number: str) -> str:
     return os.path.join(CACHE_DIR, kind, f"{number}.json")
 
 
-def load_lookup(kind: str, number: str) -> tuple[bool, object]:
-    """(found, value) for this company's `kind` lookup ("website", "news") from the last LOOKUP_DAYS."""
-    if CACHE_DAYS <= 0 or LOOKUP_DAYS <= 0 or not number:
+def load_lookup(kind: str, number: str, days: Optional[float] = None) -> tuple[bool, object]:
+    """(found, value) for this company's `kind` lookup ("website", "news") from the last LOOKUP_DAYS (or `days`)."""
+    days = LOOKUP_DAYS if days is None else days
+    if CACHE_DAYS <= 0 or days <= 0 or not number:
         return False, None
     try:
-        if time.time() - os.path.getmtime(_lookup_path(kind, number)) > LOOKUP_DAYS * 86400:
+        if time.time() - os.path.getmtime(_lookup_path(kind, number)) > days * 86400:
             return False, None
         with open(_lookup_path(kind, number), encoding="utf-8") as f:
             return True, json.load(f)["value"]

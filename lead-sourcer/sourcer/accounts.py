@@ -15,6 +15,7 @@ treat None as "unknown", never as zero.
 from __future__ import annotations
 
 import html
+import os
 import re
 import time
 import urllib.error
@@ -413,6 +414,9 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 FACTS_VERSION = "2026-11-05"   # the currency notes (fx_notes) and turnover by region from accounts text
 
 
+# Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.
+OCR_NOTES_MIN_TURNOVER = float(os.environ.get("OCR_NOTES_MIN_TURNOVER", "25000000"))
+
 # A scanned filing whose profit and loss page wasn't searched because the run's OCR time ran out.
 TURNOVER_NOT_READ_YET = "turnover not read yet: this run's OCR time for scanned accounts was used up"
 
@@ -722,10 +726,24 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
         page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None, seen=ocr_pages)
         if page and _fx_from_text(facts, page, f"scanned accounts p{number}", ocr=True):
             check_fx(facts)
+    if how == "scanned pdf" and (facts["turnover"] is None or facts["turnover"] >= OCR_NOTES_MIN_TURNOVER):
+        # the currency notes: their own pages (forward contracts, sensitivity, currency risk), until one names a
+        # forward contract's size or a sensitivity, under their own OCR budget (pdf.notes_pages_order)
+        def notes_found(page_text: str) -> bool:
+            found = fx_notes.read([page_text])
+            return bool(found["fx_forwards"] or found["fx_sensitivity"])
+        pdf.ocr_find(data, notes_found, purpose="notes", seen=ocr_pages)
     if ocr_pages:
-        # the currency notes and the turnover-by-region table, from the pages OCR'd anyway (no extra OCR)
+        # the currency notes and the turnover-by-region table, from the pages OCR'd for them, turnover and the FX line
         numbers = sorted(ocr_pages)
         fx_notes.merge(facts, fx_notes.read([ocr_pages[n] for n in numbers], numbers=numbers))
+        # how they handle FX, FX providers and currencies named, on those pages too
+        later = " ".join(" ".join(ocr_pages[n].split()) for n in numbers)
+        more = {**incumbent.text_evidence(later), **hooks.text_evidence(later)}
+        for key in ("fx_policy", "fx_providers", "facility_dates", "group_abroad"):
+            if not facts.get(key) and more.get(key):
+                facts[key] = more[key]
+        facts["currency_mentions"] = (facts.get("currency_mentions") or []) + more["currency_mentions"]
         if not facts.get("regions"):
             facts["regions"], facts["regions_page"] = regions_from_pages(
                 [ocr_pages[n] for n in numbers], facts["turnover"], numbers=numbers)

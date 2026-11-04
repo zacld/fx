@@ -7,6 +7,7 @@ Accounts are public records; these lines carry no personal names.
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -189,6 +190,20 @@ class TestRereadingAndOcrOrder(unittest.TestCase):
         self.assertEqual(pdf.pl_pages_order(43, 6)[:5], [19, 18, 20, 17, 21])
         self.assertIn(13, pdf.pl_pages_order(29, 6)[:3])
         self.assertEqual(pdf.pl_pages_order(5, 6), [])
+
+    def test_currency_notes_pages_and_reuse(self):
+        # the notes near the end first (62-97% through), then the strategic report (12-40%), at most 8 pages
+        self.assertEqual(pdf.notes_pages_order(20, 6), [12, 13, 14, 15, 16, 17, 18, 19])
+        self.assertEqual(pdf.notes_pages_order(10, 6)[:4], [7, 8, 9, 10])
+        ran = []
+        seen = {13: "At the year end the company had forward foreign exchange contracts to buy US$2m."}
+        with mock.patch.object(pdf, "ocr_available", lambda: True), mock.patch.object(pdf, "_page_count", lambda p: 20), \
+                mock.patch.object(pdf, "_run", lambda args: ran.append(args[0]) or ""), \
+                mock.patch.dict(pdf.stats, {"notes_seconds": 0.0, "notes_pages": 0}):
+            text, number = pdf.ocr_find(b"%PDF", lambda t: "forward" in t, purpose="notes", seen=seen)
+            self.assertEqual(pdf.stats["notes_pages"], 1)          # page 12 OCR'd; 13 reused, not read again
+        self.assertEqual((number, text), (13, seen[13]))
+        self.assertEqual(ran, ["pdftoppm"])
 
     def test_which_cached_accounts_are_read_again(self):
         current = accounts.FACTS_VERSION

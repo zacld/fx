@@ -42,20 +42,24 @@ def ocr_available() -> bool:
 # (main.CH_WORKERS) they fight over the CPU, so each process gets one thread.
 _ENV = {**os.environ, "OMP_THREAD_LIMIT": "1"}
 # OCR time and pages this run, for the finder's progress line (thread-safe).
-stats = {"seconds": 0.0, "pages": 0, "fx_pages": 0, "fx_seconds": 0.0, "pl_pages": 0, "pl_seconds": 0.0}
+stats = {"seconds": 0.0, "pages": 0, "fx_pages": 0, "fx_seconds": 0.0, "pl_pages": 0, "pl_seconds": 0.0,
+         "notes_pages": 0, "notes_seconds": 0.0}
 _stats_lock = threading.Lock()
 
 
-def _count(seconds: float, pages: int = 0, fx_pages: int = 0, pl_pages: int = 0) -> None:
+def _count(seconds: float, pages: int = 0, fx_pages: int = 0, pl_pages: int = 0, notes_pages: int = 0) -> None:
     with _stats_lock:
         stats["seconds"] += seconds
         stats["pages"] += pages
         stats["fx_pages"] += fx_pages
         stats["pl_pages"] += pl_pages
+        stats["notes_pages"] += notes_pages
         if fx_pages:
             stats["fx_seconds"] += seconds
         if pl_pages:
             stats["pl_seconds"] += seconds
+        if notes_pages:
+            stats["notes_seconds"] += seconds
 
 
 def _run(args: list[str]) -> str:
@@ -146,6 +150,29 @@ def fx_pages_order(pages: int, already: int) -> list[int]:
     return (likely + rest)[:FX_SEARCH_MAX_PAGES]
 
 
+# --- The currency notes in a scanned filing -----------------------------------
+# Forward contracts, currency risk and sensitivity sit in the financial
+# instruments / commitments notes near the end (62-97% through) and the
+# strategic report's principal risks (12-40%). Read up to OCR_NOTES_MAX_PAGES
+# a filing, notes first, under their own per-run budget; pages already OCR'd
+# for turnover or the FX line are reused, not read again.
+NOTES_SEARCH_MAX_PAGES = int(os.environ.get("OCR_NOTES_MAX_PAGES", "8"))
+NOTES_SEARCH_BUDGET_SECONDS = float(os.environ.get("OCR_NOTES_BUDGET_SECONDS", "1500"))
+
+
+def notes_budget_left() -> bool:
+    """Whether this run's OCR time for the currency notes (OCR_NOTES_BUDGET_SECONDS) is not used up yet."""
+    with _stats_lock:
+        return stats["notes_seconds"] < NOTES_SEARCH_BUDGET_SECONDS
+
+
+def notes_pages_order(pages: int, already: int) -> list[int]:
+    """Pages to try for the currency notes, best first: the notes 62-97% through, then the strategic report."""
+    late = list(range(max(already + 1, round(pages * 0.62)), min(pages, round(pages * 0.97)) + 1))
+    early = [p for p in range(max(already + 1, round(pages * 0.12)), round(pages * 0.40) + 1) if p not in late]
+    return (late + early)[:NOTES_SEARCH_MAX_PAGES]
+
+
 def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES, purpose: str = "fx",
              seen: dict | None = None) -> tuple[str, int]:
     """
@@ -156,7 +183,8 @@ def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES, purpose: str = "
     when none does, OCR isn't installed or the budget is spent. Every page
     OCR'd goes into `seen` ({page number: text}) when given, for other notes.
     """
-    budget_left, order = (_pl_budget_left, pl_pages_order) if purpose == "pl" else (_fx_budget_left, fx_pages_order)
+    budget_left, order = {"pl": (_pl_budget_left, pl_pages_order),
+                          "notes": (notes_budget_left, notes_pages_order)}.get(purpose, (_fx_budget_left, fx_pages_order))
     if not data or not ocr_available() or not budget_left():
         return "", 0
     with tempfile.TemporaryDirectory() as tmp:
@@ -164,6 +192,10 @@ def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES, purpose: str = "
         with open(path, "wb") as f:
             f.write(data)
         for number in order(_page_count(path), already):
+            if seen is not None and number in seen:   # OCR'd already (turnover or the FX line): no need to read it again
+                if wanted(seen[number]):
+                    return seen[number], number
+                continue
             if not budget_left():
                 break
             started = time.monotonic()
@@ -171,7 +203,7 @@ def ocr_find(data: bytes, wanted, already: int = OCR_MAX_PAGES, purpose: str = "
             _run(["pdftoppm", "-r", "200", "-gray", "-f", str(number), "-l", str(number), "-png", path, stem])
             images = sorted(glob.glob(stem + "*.png"))
             text = _run(["tesseract", images[0], "stdout", "--psm", "6"]) if images else ""
-            _count(time.monotonic() - started, pages=1, **({"pl_pages": 1} if purpose == "pl" else {"fx_pages": 1}))
+            _count(time.monotonic() - started, pages=1, **{f"{purpose if purpose in ('pl', 'notes') else 'fx'}_pages": 1})
             if text and seen is not None:
                 seen[number] = text
             if text and wanted(text):

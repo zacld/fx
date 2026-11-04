@@ -141,6 +141,7 @@ export function detailSections(r) {
       ["Currencies in the accounts", join(r.currencies_in_accounts, r.currencies_in_accounts_evidence), r.fx_notes_url],
       ["Currency sensitivity", r.fx_sensitivity, r.fx_notes_url], ["Foreign-currency balances", r.fx_balances, r.fx_notes_url],
       ["Turnover by region", r.turnover_regions, r.turnover_regions_url || r.accounts_url],
+      ["Group accounts", join(r.group_parent_accounts, r.group_fx), r.group_fx_url],
       ["FX gain/loss", fxLine(r), r.fx_gain_loss_url], ["Recent FX loss", r.recent_fx_loss, r.fx_gain_loss_url],
       ["FX figure to check", r.fx_gain_loss_check, r.fx_gain_loss_url], ["FX line in the accounts", r.fx_gain_loss_evidence, r.fx_gain_loss_url],
       ["FX size", r.fx_estimate], ["Wallet basis", r.fx_wallet_basis],
@@ -176,7 +177,7 @@ export function sourceDocuments(r) {
   const docs = [
     ["Latest filed accounts", r.accounts_url], ["Accounts at the turnover line", r.turnover_url],
     ["Accounts at the FX line", r.fx_gain_loss_url], ["Accounts at the currency notes", r.fx_notes_url],
-    ["Accounts at turnover by region", r.turnover_regions_url],
+    ["Accounts at turnover by region", r.turnover_regions_url], ["Parent company's accounts", r.group_fx_url],
     [`Charge: ${r.main_bank || "bank"}`, r.incumbent_bank_url], ["FX provider's charge", r.fx_today_url],
     ["Companies House record", ch], ["Filing history", ch && `${ch}/filing-history`], ["Charges register", ch && `${ch}/charges`],
     ["Officers", ch && `${ch}/officers`], ["Owners (PSCs)", ch && `${ch}/persons-with-significant-control`],
@@ -215,6 +216,8 @@ export function fxFacts(r) {
     ["Sales by region", r.turnover_regions, r.turnover_regions_url || r.accounts_url, ""],
     ["Currency sensitivity", before(r.fx_sensitivity), r.fx_notes_url || r.accounts_url, after(r.fx_sensitivity)],
     ["Foreign-currency balances", r.fx_balances, r.fx_notes_url || r.accounts_url, ""],
+    // the UK parent's consolidated accounts: the group's treasury often holds the FX
+    ["Group", r.group_fx, r.group_fx_url, r.group_parent_accounts],
   ].filter(([, v]) => v);
 }
 
@@ -238,7 +241,7 @@ export const sortRows = (rows, by = "hot") =>
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
-  "currency_source",
+  "currency_source", "group_parent_accounts", "group_fx",
   "finance_contact", "finance_contact_role",
   "finance_contact_confidence", "finance_contact_clues", "finance_contact_linkedin", "search_check", "no_fd_likely", "former_finance_director", "lead_director", "turnover_gbp", "turnover_basis", "turnover_check",
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",
