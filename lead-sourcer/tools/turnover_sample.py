@@ -152,8 +152,24 @@ def raw_turnover_row(document: bytes) -> None:
     print(f"    raw tag names on that row: {names or 'none'}")
 
 
+def officers_probe(number: str, api_key: str) -> None:
+    """What the officers call returns, without names: each item's role, filed occupation and the fields present."""
+    from sourcer import companies_house
+    companies_house._throttle()
+    data = companies_house._get(companies_house.CH_OFFICERS.format(number=number), {"items_per_page": 100}, api_key)
+    items = (data or {}).get("items", [])
+    print(f"  officers: {len(items)} items; response keys {sorted((data or {}).keys())}")
+    for item in items[:8]:
+        print(f"    role={item.get('officer_role')!r} occupation={item.get('occupation')!r} "
+              f"resigned={'yes' if item.get('resigned_on') else 'no'} fields={sorted(k for k in item if k != 'name')}")
+    print(f"  finder reads: {[o['occupation'] or o['role'] for o in companies_house.get_officers_and_former(number, api_key)[0]]}")
+
+
 def sample(number: str, api_key: str, ocr_budget: float, stats: Counter, label: str = "") -> None:
     print(f"\n=== {number} {label}".rstrip())
+    if os.environ.get("SAMPLE_OFFICERS") == "1":
+        officers_probe(number, api_key)
+        return
     facts = finder_reads(number, api_key, stats)
     if os.environ.get("SAMPLE_DETAIL", "") != "1":
         if facts and facts.get("format") == "ixbrl" and facts["turnover"] is None:

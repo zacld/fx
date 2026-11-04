@@ -84,5 +84,5 @@ jobs:
           if [ -z "$NUMBERS" ] && [ -s tools/turnover_sample_numbers.txt ]; then
             NUMBERS="$(grep -v '^#' tools/turnover_sample_numbers.txt | tr '\n' ' ')"
           fi
-          if [ -n "$NUMBERS" ]; then SAMPLE_DETAIL=1 python3 tools/turnover_sample.py $NUMBERS
+          if [ -n "$NUMBERS" ]; then SAMPLE_DETAIL=1 SAMPLE_OFFICERS="$(grep -qi 'SAMPLE_OFFICERS' tools/turnover_sample_numbers.txt && echo 1)" python3 tools/turnover_sample.py $NUMBERS
           else python3 tools/turnover_sample.py --accounts sample.json --max "$MAX"; fi
