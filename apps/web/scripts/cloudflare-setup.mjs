@@ -7,11 +7,11 @@
 import { appendFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { BINDING } from "../api/kv.mjs";
-import { cloudflareConfigured, kvNamespaceId } from "./store.mjs";
+import { accountIdProblem, cloudflareConfigured, kvNamespaceId } from "./store.mjs";
 
 export const PROJECT = process.env.CLOUDFLARE_PAGES_PROJECT || "fx-dashboard";
-const API = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}`;
-const headers = { authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, "content-type": "application/json" };
+const API = `https://api.cloudflare.com/client/v4/accounts/${(process.env.CLOUDFLARE_ACCOUNT_ID || "").trim()}`;
+const headers = { authorization: `Bearer ${(process.env.CLOUDFLARE_API_TOKEN || "").trim()}`, "content-type": "application/json" };
 
 async function call(path, init = {}) {
   const res = await fetch(`${API}${path}`, { ...init, headers });
@@ -27,6 +27,10 @@ const fail = (what, r) => {
 
 if (!cloudflareConfigured()) {
   console.error("CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are needed");
+  process.exit(2);
+}
+if (accountIdProblem()) {
+  console.error(accountIdProblem());
   process.exit(2);
 }
 const namespace = await kvNamespaceId();

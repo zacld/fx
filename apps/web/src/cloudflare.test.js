@@ -93,7 +93,8 @@ describe("the workflows' store (scripts/store.mjs)", () => {
   });
 
   it("writes to Cloudflare KV through its API, reading Netlify's copy only while Cloudflare has none", async () => {
-    Object.assign(process.env, { CLOUDFLARE_API_TOKEN: "t", CLOUDFLARE_ACCOUNT_ID: "acc" });
+    // pasted with a stray space, a line break and capitals: still the account
+    Object.assign(process.env, { CLOUDFLARE_API_TOKEN: " t\n", CLOUDFLARE_ACCOUNT_ID: " 0123456789ABCDEF0123456789abcdef\n" });
     delete process.env.NETLIFY_SITE_ID;
     const kv = new Map();
     const calls = [];
@@ -115,8 +116,19 @@ describe("the workflows' store (scripts/store.mjs)", () => {
     await store.set("latest", list);
     expect((await store.get("latest")).rows).toHaveLength(1);
     expect([...kv.keys()]).toEqual(["fx-accounts/latest"]);
-    expect(calls).toContain("POST /client/v4/accounts/acc/storage/kv/namespaces");   // created the first time
-    expect(calls.filter((c) => c === "POST /client/v4/accounts/acc/storage/kv/namespaces")).toHaveLength(1);
+    const create = "POST /client/v4/accounts/0123456789abcdef0123456789abcdef/storage/kv/namespaces";
+    expect(calls).toContain(create);   // created the first time
+    expect(calls.filter((c) => c === create)).toHaveLength(1);
+  });
+
+  it("says plainly when the account ID isn't one, before calling Cloudflare", async () => {
+    Object.assign(process.env, { CLOUDFLARE_API_TOKEN: "t", CLOUDFLARE_ACCOUNT_ID: "zac@example.com" });
+    const fetched = vi.fn();
+    vi.stubGlobal("fetch", fetched);
+    const { openStore, accountIdProblem } = await import("../scripts/store.mjs");
+    expect(accountIdProblem()).toMatch(/an email address.*Account ID/);
+    await expect((await openStore("fx-market")).get("latest")).rejects.toThrow(/isn't a Cloudflare account ID/);
+    expect(fetched).not.toHaveBeenCalled();
   });
 
   it("refuses to run with no store configured", async () => {
