@@ -1104,6 +1104,14 @@ class TestAccountsExtras(unittest.TestCase):
             "</table>", '<tr><td><ix:nonFraction name="core:TurnoverRevenue" contextRef="FY2024-UK" unitRef="CUR" '
                         'scale="3">14,411</ix:nonFraction></td></tr></table>')
         self.assertAlmostEqual(accounts.extract_facts(split.encode())["overseas_share"], 9_001 / 23_412, places=3)
+        # a "total of all regions" member is the whole, not a region (seen in real filings)
+        total = split.replace("</ix:resources>", extra.replace("FY2024-UK", "FY2024-ALL").replace(
+            "core:UnitedKingdom", "core:TotalGeographicSegmentsIncludingAnyUnallocatedAmount") + "</ix:resources>").replace(
+            "</table>", '<tr><td><ix:nonFraction name="core:TurnoverRevenue" contextRef="FY2024-ALL" unitRef="CUR" '
+                        'scale="3">23,412</ix:nonFraction></td></tr></table>')
+        facts = accounts.extract_facts(total.encode())
+        self.assertNotIn("Total", " ".join(r["region"] for r in facts["regions"]))
+        self.assertAlmostEqual(facts["overseas_share"], 9_001 / 23_412, places=3)
 
     def test_auditor(self):
         self.assertEqual(accounts.auditor_from_text("Statutory Auditor KPMG LLP 1 Sovereign Square"), ("KPMG", "Big Four"))
@@ -2303,6 +2311,29 @@ class TestFxNotes(unittest.TestCase):
         # the translation policy every company has names no currency of its own
         self.assertEqual(fx_notes.read(["Assets denominated in US dollars are translated at the closing rate."])
                          ["fx_currencies"], [])
+
+    def test_real_cases_from_the_sample(self):
+        """Sentences from real filings (tools/fx_notes_sample.py, Nov 2026)."""
+        def forwards(text):
+            return [(x["what"], x["amount"], x["ccy"], x["direction"], x["prior"]) for x in fx_notes.read([text])["fx_forwards"]]
+        # a pension line before a numbered note heading isn't the contracts' size
+        self.assertEqual(forwards("Contributions totalling £12,342 (2024 - £8,728) were payable to the fund at the balance "
+                                  "sheet date and are included in creditors. 20.Other financial commitments The Company has "
+                                  "entered into forward currency contracts to purchase US dollars and euros totalling "
+                                  "£11,600,000 (2024 - £2,900,000)."),
+                         [("contracts", 11_600_000, "GBP", "buy", 2_900_000)])
+        # last year's figure in "(At 31 December 2024, there were … €2,400,000)"
+        self.assertEqual(forwards("At 31 December 2025, there were EURO forward foreign currency contracts in place which "
+                                  "all matured within nine months of the period end amounting to €2,269,479 (At 31 December "
+                                  "2024, there were Euro forward foreign currency contracts in place amounting to €2,400,000)."),
+                         [("contracts", 2_269_479, "EUR", "", 2_400_000)])
+        self.assertEqual(forwards("The fair value of the forward-foreign currency contracts at 31 December 2025 is $92,741, "
+                                  "and is included within other creditors."), [("fair value", 92_741, "USD", "", None)])
+        # "outstanding contracts" in the sentence after the one naming forward contracts
+        self.assertEqual(forwards("The Company enters into forward exchange contracts to hedge certain portions of forecasted "
+                                  "cash flows denominated in foreign currencies. At the year end the company had outstanding "
+                                  "contracts to sell US$1,250,000 (2024: US$900,000)."),
+                         [("contracts", 1_250_000, "USD", "sell", 900_000)])
 
     def test_tables_in_the_notes(self):
         page = ("Financial instruments\n                                      Note    2024     2023\n"

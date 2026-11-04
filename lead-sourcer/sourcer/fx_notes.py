@@ -83,7 +83,8 @@ def amounts(sentence: str) -> list[dict]:
 
 # --- Sentences ---------------------------------------------------------------------------------------------------
 
-_SENTENCE_END = re.compile(r"(?<=[.;])\s+(?=[A-Z(])")
+# A sentence ends at ". " before a capital, a bracket or a numbered note heading ("creditors. 20.Other commitments").
+_SENTENCE_END = re.compile(r"(?<=[.;])\s+(?=[A-Z(]|\d{1,2}\.\s?[A-Z])")
 # A table row in layout text: a wide gap, then a figure ("Euro      567", "Turnover   3   45,123").
 _TABULAR = re.compile(r"\S\s{3,}[(\-–]?[£$€]?\d")
 
@@ -146,23 +147,41 @@ def _negated(sentence: str, start: int) -> bool:
     return bool(incumbent._NEGATED_BEFORE.search(sentence[max(0, start - 60):start]))
 
 
-def _forward_items(sentence: str, page: int) -> list[dict]:
-    m = _FORWARD_WORDS.search(sentence)
+_THESE_CONTRACTS = re.compile(r"\b(?:these|the|such|open|outstanding)\s+(?:forward\s+)?contracts?\b|"
+                             r"\bcontracts?\s+(?:outstanding|in\s+place|open)\b", re.I)
+
+
+def _in_brackets_about_another_year(sentence: str, start: int) -> bool:
+    """An amount inside "(2024: £3.1m)" / "(At 31 December 2024, there were … €2.4m)": last year's figure."""
+    opened = sentence.rfind("(", 0, start)
+    if opened < 0 or ")" in sentence[opened:start]:
+        return False
+    return bool(re.search(r"(?:19|20)\d\d|prior|previous|last\s+year|comparative", sentence[opened:start], re.I))
+
+
+def _forward_items(sentence: str, page: int, follows_forward: bool = False) -> list[dict]:
+    """
+    Forward contracts' sizes in a sentence that names them — or, right after one that does, says "these contracts"
+    ("The company enters into forward contracts … At the year end it had outstanding contracts of $1.2m").
+    """
+    m = _FORWARD_WORDS.search(sentence) or (_THESE_CONTRACTS.search(sentence) if follows_forward else None)
     if not m or _negated(sentence, m.start()) or incumbent._POLICY_DEFINITION.search(sentence):
         return []
-    if not incumbent._EXPLICIT_FX_FORWARD.search(m.group(0)) and (
+    if _FORWARD_WORDS.search(sentence) and not incumbent._EXPLICIT_FX_FORWARD.search(m.group(0)) and (
             not incumbent._FX_CONTEXT.search(sentence) or incumbent._NON_FX_FORWARD.search(sentence)):
         return []   # a bare "forward contracts" for freight or materials
     direction = "buy" if _BUY.search(sentence) and not _SELL.search(sentence) else \
         "sell" if _SELL.search(sentence) and not _BUY.search(sentence) else ""
     items: list[dict] = []
     for a in amounts(sentence):
-        before = sentence[max(0, a["start"] - 70):a["start"]]
+        if a["end"] < m.start() - 100:
+            continue   # well before the contracts are named: another fact run into the sentence
+        before = sentence[max(0, a["start"] - 120):a["start"]]
         if (_GAIN_LOSS_BEFORE.search(before) and not _FAIR_VALUE_BEFORE.search(before)) or \
                 _GAIN_LOSS_AFTER.search(sentence[a["end"]:a["end"] + 30]):
             continue   # a gain or loss on the contracts ("a loss of £120,000 on …", "£120,000 loss"), not their size
         what = "fair value" if _FAIR_VALUE_BEFORE.search(before) else "contracts"
-        if a["prior"]:
+        if a["prior"] or _in_brackets_about_another_year(sentence, a["start"]):
             same = next((i for i in reversed(items) if i["what"] == what and i.get("prior") is None), None)
             if same:
                 same["prior"] = a["amount"]
@@ -321,6 +340,7 @@ def read(pages: list[str], numbers: Optional[list[int]] = None, table_pages: Opt
     balances: list[dict] = []
     sensitivity: list[dict] = []
     for page, number in zip(pages, numbers):
+        follows_forward = False
         for s in sentences(page):
             codes = _codes(s)
             if codes and _TIED.search(s) and not _TRANSLATION_POLICY.search(s):
@@ -335,7 +355,8 @@ def read(pages: list[str], numbers: Optional[list[int]] = None, table_pages: Opt
                     if (strength, -len(s)) > (entry["strength"], -len(entry["sentence"] or s * 2)):
                         entry.update(sentence=hooks._sentence(s, 0, 0, limit=320), page=number, strength=strength)
             if len(forwards) < 4:
-                forwards += _forward_items(s, number)
+                forwards += _forward_items(s, number, follows_forward)
+            follows_forward = bool(_FORWARD_WORDS.search(s))
             if len(balances) < 4:
                 balances += _balance_items(s, number)
             if len(sensitivity) < 3:

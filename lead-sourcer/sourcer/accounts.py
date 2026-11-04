@@ -346,6 +346,9 @@ def _is_uk_member(member: str) -> bool:
     return m.startswith(_UK_MEMBERS) or m == "UK" or (m.startswith("UK") and not m.startswith("UKRAINE"))
 
 
+_TOTAL_MEMBER = re.compile(r"Total|Unallocated|AllSegments|Elimination|Consolidat|Reconcil", re.I)
+
+
 def _turnover_by_member(scanner: "_IxbrlScanner", period_end: str) -> list[tuple[str, float]]:
     """(member, value) for turnover tagged against one country/region member for `period_end`."""
     found = []
@@ -356,6 +359,8 @@ def _turnover_by_member(scanner: "_IxbrlScanner", period_end: str) -> list[tuple
         members = context.get("members") or []
         if len(members) != 1 or not any(k in members[0][0] for k in ("Geographic", "CountriesRegions")) or not members[0][1]:
             continue
+        if _TOTAL_MEMBER.search(members[0][1]):
+            continue   # "TotalGeographicSegmentsIncludingAnyUnallocatedAmount": the whole, not a region
         value = _fact_value(fact)
         if value is not None and value >= 0:
             found.append((members[0][1], value))

@@ -92,7 +92,8 @@ def sample(number: str, label: str, api_key: str, stats: Counter) -> None:
                     for k in ("fx_forwards", "fx_balances", "fx_sensitivity", "fx_currencies"))
     missed = []
     for line in text.split("\n"):
-        if LOOKS_LIKE.search(line) and DIGITS.search(line) and short(line, 60)[:40] not in read:
+        if LOOKS_LIKE.search(line) and DIGITS.search(line) and short(line, 60)[:40] not in read \
+                and not re.search(r"denominated in (?:pounds )?sterling", line, re.I):
             missed.append(short(line))
     for line in list(dict.fromkeys(missed))[:4]:
         print(f"  missed? {line}")
