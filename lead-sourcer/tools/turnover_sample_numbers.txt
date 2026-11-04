@@ -1,8 +1,5 @@
 # Companies the turnover sample reads in full detail on a push (no numbers: the Accounts list's companies without
-# turnover). Nov 2026: the officers call (SAMPLE_OFFICERS=1: roles and occupations, no names) for companies on the
-# list — every director there showed "Director", none a filed job title.
-01693112
-00986161
-04918799
-00971152
-05440764
+# turnover). Add "SAMPLE_OFFICERS" in a comment line to print what the officers call returns instead.
+# Used Nov 2026: Nisbets 01693112 (a lost £'000 heading), Caribbean Trading Group 15532721 (nil turnover),
+# Cromwell Group (Holdings) 01756362, Marketing And Service Holdings 14553106; and the officers probe that found
+# Companies House no longer returns occupations.

@@ -72,6 +72,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`profiles.own_sites_in_cache`; never a directory, registry, social or
   stockist site, no search made); a cached "no website" is looked up again
   when such an address is new.
+- **Companies House no longer publishes occupations (Nov 2026):** the
+  officers and appointments API calls stopped returning `occupation` (they
+  now carry identity-verification fields instead), so every director reads
+  "Director" — checked on the Accounts list's 3,507 directors and with
+  `tools/turnover_sample.py` (SAMPLE_OFFICERS). The register-occupation
+  source and the former-FD trigger below find nothing until it returns; the
+  code is kept and works again if it does. Finance contacts come from the
+  other sources.
 - **Former finance directors:** from the same Companies House officers call
   (no extra calls), directors who resigned with a finance occupation
   (`former_finance_director`); one who left within `FORMER_FD_TRIGGER_DAYS`
