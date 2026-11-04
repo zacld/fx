@@ -31,6 +31,7 @@ import sys
 import tempfile
 import time
 from collections import Counter
+from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -113,8 +114,55 @@ def ocr_until_pl(data: bytes, first: int, budget_s: float) -> tuple[list[str], i
     return out, read
 
 
+def finder_reads(number: str, api_key: str, stats: Counter) -> Optional[dict]:
+    """What the finder's reader (accounts.facts_from_latest_accounts) now gets: the figure, what it is, where from."""
+    t0 = time.monotonic()
+    facts = accounts.facts_from_latest_accounts(number, api_key)
+    took = time.monotonic() - t0
+    if not facts:
+        print(f"  NOW: nothing read ({took:.0f}s)")
+        stats["now: nothing read"] += 1
+        return None
+    fmt = facts.get("format", "")
+    if facts["turnover"] is not None:
+        stats[f"now: turnover found ({fmt})"] += 1
+        if "strategic report" in facts.get("turnover_source", ""):
+            stats["now: from the strategic report"] += 1
+        if "cost of sales + gross profit" in facts.get("turnover_source", ""):
+            stats["now: derived from cost + gross profit"] += 1
+        print(f"  NOW: turnover £{facts['turnover']:,.0f} (prior {facts.get('turnover_prior')}) cost {facts.get('cost_of_sales')} "
+              f"| {facts.get('turnover_basis') or '-'} | to {facts.get('period_end')} | {facts.get('turnover_source')} ({took:.0f}s)")
+    else:
+        stats[f"now: none ({fmt})"] += 1
+        stats[f"now check: {(facts.get('turnover_check') or 'no reason given')[:70]}"] += 1
+        print(f"  NOW: no turnover ({fmt}) — {facts.get('turnover_check') or 'no reason given'} ({took:.0f}s)")
+    return facts
+
+
+def raw_turnover_row(document: bytes) -> None:
+    """The markup around the first "Turnover"/"Revenue" label followed by figures (attributes trimmed)."""
+    text = document.decode("utf-8", "replace")
+    m = re.search(r">\s*(?:Group\s+)?(?:Turnover|Revenue)\s*<(?=(?:(?!Turnover|Revenue).){0,1500}?\d{1,3},\d{3})", text, re.I | re.S)
+    if not m:
+        print("    raw: no Turnover/Revenue label followed by figures")
+        return
+    snippet = re.sub(r'\s(?:style|class|id)="[^"]*"', "", text[m.start(): m.start() + 1500])
+    print("    raw: " + short(snippet, 700))
+    names = sorted({a.rsplit(":", 1)[-1] for a in re.findall(r'name="([^"]+)"', snippet)})
+    print(f"    raw tag names on that row: {names or 'none'}")
+
+
 def sample(number: str, api_key: str, ocr_budget: float, stats: Counter, label: str = "") -> None:
     print(f"\n=== {number} {label}".rstrip())
+    facts = finder_reads(number, api_key, stats)
+    if os.environ.get("SAMPLE_DETAIL", "") != "1":
+        if facts and facts.get("format") == "ixbrl" and facts["turnover"] is None:
+            filing = accounts.latest_accounts_filing(number, api_key) or {}
+            doc_id = ((filing.get("links") or {}).get("document_metadata") or "").rstrip("/").rsplit("/", 1)[-1]
+            document = accounts.fetch_ixbrl(doc_id, api_key) if doc_id else None
+            if document:
+                raw_turnover_row(document)
+        return
     filing = accounts.latest_accounts_filing(number, api_key)
     if not filing:
         print("  no accounts filing")
@@ -142,6 +190,8 @@ def sample(number: str, api_key: str, ocr_budget: float, stats: Counter, label: 
         if not rows:
             print("    no turnover/revenue/cost/gross-profit tags at all")
             stats["ixbrl, no turnover tag"] += 1
+        if facts["turnover"] is None:
+            raw_turnover_row(document)
         plain = html.unescape(re.sub(r"<[^>]*>", "\n", document.decode("utf-8", "replace")))
         text_lines = page_lines(re.sub(r"\n\s*\n+", "\n", plain), 0)
         for line in text_lines[:8]:

@@ -74,7 +74,8 @@ jobs:
         env:
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           NUMBERS: ${{ inputs.numbers }}
-          MAX: ${{ inputs.max || '30' }}
+          MAX: ${{ inputs.max || '40' }}
+          PYTHONUNBUFFERED: "1"
         run: |
           if [ -n "$NUMBERS" ]; then python3 tools/turnover_sample.py $NUMBERS
           else python3 tools/turnover_sample.py --accounts sample.json --max "$MAX"; fi

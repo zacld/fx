@@ -569,7 +569,12 @@ class TestPipeline(PipelineTestCase):
         with self.assertRaises(ValueError):
             self.run_bulk(band_min=20_000_000, band_max=5_000_000)
         self.assertEqual(rows["04"]["size_basis"], "last accounts filed as full; turnover not in the filing")  # paper filing
-        self.assertEqual(rows["05"]["size_basis"], "filed turnover £31.5m (accounts to 2024-12-31)")  # read from the PDF
+        self.assertEqual(rows["05"]["size_basis"], "filed turnover (company) £31.5m (accounts to 2024-12-31)")  # from the PDF
+        # where it came from: the profit and loss page, its unit and line, and a link to that page
+        self.assertEqual(rows["05"]["turnover_source"],
+                         "accounts p1: company profit and loss account, £'000 — \"Turnover 3 31,500 28,000\"")
+        self.assertTrue(rows["05"]["turnover_url"].endswith("/company/05/filing-history?category=accounts"))  # no doc link
+        self.assertEqual((rows["01"]["turnover_source"], rows["01"]["turnover_check"]), ("tagged in the accounts (iXBRL)", ""))
         self.assertEqual((rows["05"]["accounts_format"], rows["05"]["cost_of_sales_gbp"], rows["05"]["turnover_growth"]),
                          ("pdf", "24000000", "+12%"))
         self.assertEqual(rows["05"]["main_bank"], "HSBC")
