@@ -50,3 +50,57 @@ def store(number: str, made_up_to: str, entry: dict) -> None:
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump({**entry, "made_up_to": made_up_to or ""}, f)
     os.replace(tmp, _path(number))
+
+
+# --- Other per-company lookups: the company's website, finance appointments in the news ----------------------------
+# Re-read every day they took ~20 minutes of each finder run and rarely change: kept LOOKUP_CACHE_DAYS (7), under the
+# same directory (so the workflow's register cache saves them too), only while the register cache is on.
+LOOKUP_DAYS = float(os.environ.get("LOOKUP_CACHE_DAYS", "7"))
+
+
+def _lookup_path(kind: str, number: str) -> str:
+    return os.path.join(CACHE_DIR, kind, f"{number}.json")
+
+
+def load_lookup(kind: str, number: str) -> tuple[bool, object]:
+    """(found, value) for this company's `kind` lookup ("website", "news") from the last LOOKUP_DAYS."""
+    if CACHE_DAYS <= 0 or LOOKUP_DAYS <= 0 or not number:
+        return False, None
+    try:
+        if time.time() - os.path.getmtime(_lookup_path(kind, number)) > LOOKUP_DAYS * 86400:
+            return False, None
+        with open(_lookup_path(kind, number), encoding="utf-8") as f:
+            return True, json.load(f)["value"]
+    except (OSError, ValueError, KeyError):
+        return False, None
+
+
+def store_lookup(kind: str, number: str, value: object) -> None:
+    if CACHE_DAYS <= 0 or LOOKUP_DAYS <= 0 or not number:
+        return
+    path = _lookup_path(kind, number)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    try:
+        with open(path + ".tmp", "w", encoding="utf-8") as f:
+            json.dump({"value": value}, f)
+        os.replace(path + ".tmp", path)
+    except (OSError, TypeError, ValueError):
+        pass   # a value that won't store is simply looked up again next run
+
+
+def cached_many(kind: str, items: list[tuple], look_up_many) -> tuple[dict, int]:
+    """
+    look_up_many(items) for the companies (item[0] = company number) not looked up in the last LOOKUP_DAYS, the
+    others from the cache: ({company_number: value}, how many came from the cache).
+    """
+    hits, todo = {}, []
+    for item in items:
+        found, value = load_lookup(kind, item[0])
+        if found:
+            hits[item[0]] = value
+        else:
+            todo.append(item)
+    fresh = look_up_many(todo) if todo else {}
+    for number, value in fresh.items():
+        store_lookup(kind, number, value)
+    return {**hits, **fresh}, len(hits)

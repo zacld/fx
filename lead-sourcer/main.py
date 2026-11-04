@@ -50,7 +50,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import itertools
 import json
 import os
 import sys
@@ -817,8 +816,32 @@ def run_pipeline(
     ))
 
     budget = 0 if not api_key else len(queue) if max_enrich is None else max_enrich
+
+    def known_out(company: dict, trade) -> bool:
+        """Already read (cache) and out: filed turnover under the floor, or a subsidiary nothing confirms."""
+        if not turnover_check:
+            return False
+        entry = register_cache.load(company["company_number"], company.get("accounts_made_up_to", ""), days=float("inf"))
+        if not entry or not accounts.facts_reusable(entry):
+            return False
+        value = (entry.get("facts") or {}).get("turnover")
+        if value is not None:
+            return value < min_turnover
+        return company["accounts_category"] not in LIKELY_CATEGORIES and not trade
+
+    # The `budget` slots go to companies still in the running: ones the cache already shows are out are still listed
+    # in the stats (read from the cache, no calls) but don't take a slot, so the next candidates in line get checked.
+    checked_positions: set[int] = set()
+    skipped_out = 0
+    for position, (_niche, company, trade) in enumerate(queue):
+        if len(checked_positions) - skipped_out >= budget:
+            break
+        checked_positions.add(position)
+        if known_out(company, trade):
+            skipped_out += 1
     print(f"  Candidates: {len(queue):,} ({sum(1 for q in queue if q[2]):,} with customs evidence) | "
-          f"checking {min(budget, len(queue)):,}")
+          f"checking {len(checked_positions) - skipped_out:,}"
+          + (f" (and {skipped_out:,} already known to be out, from the cache)" if skipped_out else ""))
 
     # gov.uk registries naming a person with a job title (gender pay gap, modern slavery): two bulk files a year.
     in_registries = registries.load(today) if registry_check and budget else {}
@@ -836,7 +859,7 @@ def run_pipeline(
     def gather(item: tuple) -> tuple:
         """Accounts + register lookups for one company: (skip reason or "", details)."""
         position, (niche, company, trade) = item
-        checked = position < budget
+        checked = position in checked_positions
         if checked and deadline and time.monotonic() > deadline:
             return "time_budget", None
         number = company["company_number"]
@@ -914,18 +937,20 @@ def run_pipeline(
     # Several companies at once: Companies House calls stay spaced by the shared throttle, while
     # document downloads and PDF/OCR work for one company overlap with calls for the others.
     items = list(enumerate(queue))
+    to_check = [i for i in items if i[0] in checked_positions]
     with ThreadPoolExecutor(max_workers=CH_WORKERS) as pool:
-        results = itertools.chain(pool.map(gather, items[:budget]), map(gather, items[budget:]))
-        gathered = []
-        for done, result in enumerate(results, 1):
-            if done < budget and done % 50 == 0:
+        by_position: dict[int, tuple] = {}
+        for done, (item, result) in enumerate(zip(to_check, pool.map(gather, to_check)), 1):
+            by_position[item[0]] = result
+            if done < len(to_check) and done % 50 == 0:
                 read, regs = spent["accounts_read"], spent["register_read"]
-                print(f"  …checked {done:,} of {min(budget, len(queue)):,} in {(time.monotonic() - started) / 60:.0f} min"
+                print(f"  …checked {done:,} of {len(to_check):,} in {(time.monotonic() - started) / 60:.0f} min"
                       f" | accounts read {read} ({spent['accounts'] / max(read, 1):.0f}s each), cached"
                       f" {spent['accounts_cached']} | OCR {pdf.stats['pages']} pages ({pdf.stats['fx_pages']} for FX, {pdf.stats['pl_pages']} for turnover),"
                       f" {pdf.stats['seconds'] / max(pdf.stats['pages'], 1):.1f}s a page | register read {regs}"
                       f" ({spent['register'] / max(regs, 1):.0f}s each)", flush=True)
-            gathered.append(result)
+        # the rest aren't checked (no calls): in queue order with the checked ones
+        gathered = [by_position[i[0]] if i[0] in by_position else gather(i) for i in items]
     if os.path.exists(PARTIAL_FILE):
         os.remove(PARTIAL_FILE)
     if stats_left := sum(1 for skip, _ in gathered if skip == "time_budget"):
@@ -966,7 +991,9 @@ def run_pipeline(
     if wanted:
         print(f"  Reading {len(wanted):,} company websites (no finance director named in the register or accounts)…",
               flush=True)
-    sites = website.look_up_many(wanted) if wanted else {}
+    # websites read in the last LOOKUP_CACHE_DAYS (7) come from the cache: they rarely change, and reading ~800 a day
+    # took ~20 minutes of each run
+    sites, stats["site_cached"] = register_cache.cached_many("website", wanted, website.look_up_many)
     stats["site_tried"], stats["site_found"] = len(wanted), sum(bool(s["website"]) for s in sites.values())
     # Finance appointments in the news, for companies whose finance contact still isn't confirmed.
     unconfirmed = []
@@ -980,7 +1007,8 @@ def run_pipeline(
             unconfirmed.append((number, p["args"][1]["company_name"]))
     if unconfirmed:
         print(f"  Checking the news for {len(unconfirmed):,} finance appointments…", flush=True)
-    in_news = news.appointments_many(unconfirmed, today=today)
+    in_news, stats["news_cached"] = register_cache.cached_many(
+        "news", unconfirmed, lambda todo: news.appointments_many(todo, today=today))
     stats["news_tried"], stats["news_found"] = len(unconfirmed), sum(bool(v) for v in in_news.values())
     # Is a secretary or signatory pick a group-wide officer or a professional secretary? One call each.
     appointments: dict[str, dict] = {}
@@ -1065,8 +1093,10 @@ def print_summary(rows: list[dict], stats: Counter, min_turnover: int,
           f"{sum(1 for r in rows if r['untapped_reasons'] != 'not checked' and not r['finance_contact']):,}, "
           f"of them with research clues (secretary / signatory / weak pick): "
           f"{sum(1 for r in rows if not r['finance_contact'] and r['finance_contact_clues']):,}")
-    print(f"  Company websites tried: {stats['site_tried']:,}, confirmed: {stats['site_found']:,} | "
-          f"news checked: {stats['news_tried']:,}, with a finance appointment: {stats['news_found']:,} | "
+    print(f"  Company websites tried: {stats['site_tried']:,} ({stats['site_cached']:,} from the last week), "
+          f"confirmed: {stats['site_found']:,} | "
+          f"news checked: {stats['news_tried']:,} ({stats['news_cached']:,} from the last week), "
+          f"with a finance appointment: {stats['news_found']:,} | "
           f"in a gender pay gap / modern slavery filing: {stats['in_registry']:,}")
     print(f"  Dropped — filed turnover under £{min_turnover / 1e6:,.0f}m: {stats['under_min']:,}; "
           f"subsidiaries with nothing to confirm them: {stats['unconfirmed']:,}")
