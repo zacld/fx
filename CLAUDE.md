@@ -66,12 +66,19 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   leadership / about / contact — when the homepage links no team page, the
   sitemap robots.txt names, or /sitemap.xml, is read to find one: XML only,
   at most two files); robots.txt respected; keeps names with
-  finance titles and generic company emails only.
+  finance titles and generic company emails only. Addresses tried first:
+  those printed in the accounts, then a site in the company's earlier
+  (cached) search results whose host name holds the company's name
+  (`profiles.own_sites_in_cache`; never a directory, registry, social or
+  stockist site, no search made); a cached "no website" is looked up again
+  when such an address is new.
 - **Former finance directors:** from the same Companies House officers call
   (no extra calls), directors who resigned with a finance occupation
   (`former_finance_director`); one who left within `FORMER_FD_TRIGGER_DAYS`
   (365) is a trigger, and any stops `no_fd_likely`.
-- **Finance contact order:** CH occupation → finance title in the accounts
+- **Finance contact order:** CH occupation (as filed: "Chief Finance
+  Officer", "Director Of Finance", "Director (Finance)", "Finance &
+  Operations Director", "Group Financial Controller" — `sourcer/roles.py`) → finance title in the accounts
   → company website → gov.uk registry filing with a finance title (gender
   pay gap "responsible person", modern slavery statement approver; ≤3
   years) → finance appointment in the news (Google News RSS, headline must
@@ -103,7 +110,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   titles, company board pages, news, org charts — to confirm or replace the
   pick (when no finance director turns up, one more search under the
   company's trading name, from "trading as" in its accounts or the results) (2+ separate sites naming them = Verified; a pick shown as MD etc. is
-  replaced; a current FD named by the search also replaces a controller /
+  replaced; once every company has had its own searches, the budget left
+  buys one more wording — financial controller / finance manager / chief
+  accountant / head of accounts — for each company where nobody in finance
+  turned up; a current FD named by the search also replaces a controller /
   manager pick, whatever its grade; for a subsidiary with no FD found, one
   more search under its parent's name for the group FD). The picker takes the
   most senior finance title any source gives (a board "Finance Manager" no

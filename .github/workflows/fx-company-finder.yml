@@ -125,6 +125,15 @@ jobs:
           key: register-${{ github.run_id }}
           restore-keys: register-
 
+      # Search results are kept for 60 days, so a company re-checked within that costs no credits. Restored before
+      # the finder too: the company's own web address in last run's results is tried for its website.
+      - name: Restore search results
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/search
+          key: search-${{ github.run_id }}
+          restore-keys: search-
+
       - name: Find companies
         working-directory: lead-sourcer
         timeout-minutes: 200
@@ -178,14 +187,6 @@ jobs:
         with:
           path: ~/.cache/fx-lead-sourcer/hmrc
           key: hmrc-v2-${{ steps.month.outputs.month }}
-
-      # Search results are kept for 60 days, so a company re-checked within that costs no credits.
-      - name: Restore search results
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cache/fx-lead-sourcer/search
-          key: search-${{ github.run_id }}
-          restore-keys: search-
 
       # Who really runs the finance: a Google search (Search1API) per checked company, best first,
       # re-grading the finance contact. Skipped (list still written) without the SEARCH1API_KEY secret.

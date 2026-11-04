@@ -23,11 +23,15 @@ from typing import Optional
 # patterns sit above less specific ones ("Finance Director" before "Director").
 ROLE_PATTERNS: list[tuple[re.Pattern[str], int, str]] = [
     # Tier 1 — finance + ownership
-    (re.compile(r"\b(financ\w* director|financial director)\b", re.I), 1, "Finance Director"),
+    # "Finance Director", "Financial Director", "Director of Finance", "Director (Finance)", "Director - Finance",
+    # "Finance & Operations Director", "Finance and Commercial Director" (filed occupations seen on the register)
+    (re.compile(r"\b(financ\w* director|director of financ\w*|director\s*[(,–—-]\s*financ\w*"
+                r"|financ\w*\s*(?:&|and|/|,)\s*\w+(?:\s+\w+)?\s+director)\b", re.I), 1, "Finance Director"),
     (re.compile(r"\bFD\b"), 1, "Finance Director"),
-    (re.compile(r"\b(chief financial officer|CFO)\b", re.I), 1, "CFO"),
+    (re.compile(r"\b(chief financ\w* officer|CFO)\b", re.I), 1, "CFO"),
     (re.compile(r"\b(head of finance|head of accounts)\b", re.I), 1, "Head of Finance"),
     (re.compile(r"\b(treasury manager|treasurer)\b", re.I), 1, "Treasurer"),
+    (re.compile(r"\b(financ\w* controller)\b", re.I), 1, "Financial Controller"),
     (re.compile(r"\b(finance manager)\b", re.I), 1, "Finance Manager"),
     # Not in people.ts: Companies House-only. Owner-managed companies' finance
     # directors very often file their occupation as "Chartered Accountant".
@@ -71,7 +75,8 @@ def _rank(text: str) -> int:
     return len(ROLE_PATTERNS)
 
 
-FINANCE_LABELS = {"Finance Director", "CFO", "Head of Finance", "Treasurer", "Finance Manager", "Accountant"}
+FINANCE_LABELS = {"Finance Director", "CFO", "Head of Finance", "Treasurer", "Financial Controller", "Finance Manager",
+                  "Accountant"}
 LEADER_LABELS = {"Managing Director", "CEO", "Founder", "Owner"}
 
 
