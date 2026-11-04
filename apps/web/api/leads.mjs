@@ -1,11 +1,10 @@
 // GET /api/leads — the event engine's leads (director names, phones, emails),
 // gzipped, only for a request carrying the Accounts password:
 //   Authorization: Bearer <password>
-// The file lives in the site's private Blobs store ("fx-leads"), put there by
-// the discovery workflow (scripts/leads-store.mjs) — never in the repo or the
-// public build. The dashboard un-gzips it in the browser.
-import { getStore } from "@netlify/blobs";
-import { expectedPassword, samePassword } from "./accounts.mjs";
+// The file lives in the site's private KV store ("fx-leads/leads.json.gz"),
+// put there by the discovery workflow (scripts/leads-store.mjs) — never in the
+// repo or the public build. The dashboard un-gzips it in the browser.
+import { samePassword } from "./accounts.mjs";
 
 export const STORE = "fx-leads";
 export const KEY = "leads.json.gz";
@@ -17,9 +16,9 @@ const fail = (error, status) =>
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex" },
   });
 
-export async function handle(req, { password = expectedPassword(), store = () => getStore(STORE), delay = WRONG_PASSWORD_DELAY_MS } = {}) {
+export async function handle(req, { password = "", store, delay = WRONG_PASSWORD_DELAY_MS } = {}) {
   if (req.method !== "GET") return fail("method not allowed", 405);
-  if (!password) return fail("ACCOUNTS_PASSWORD is not set on Netlify yet", 503);
+  if (!password) return fail("ACCOUNTS_PASSWORD is not set on the site yet", 503);
   const given = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
   if (!given || !(await samePassword(given, password))) {
     await new Promise((r) => setTimeout(r, delay));
@@ -32,7 +31,3 @@ export async function handle(req, { password = expectedPassword(), store = () =>
     headers: { "content-type": "application/octet-stream", "cache-control": "no-store", "x-robots-tag": "noindex" },
   });
 }
-
-export default (req) => handle(req);
-
-export const config = { path: "/api/leads" };

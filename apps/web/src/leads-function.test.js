@@ -1,6 +1,6 @@
 import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { handle } from "../netlify/functions/leads.mjs";
+import { handle } from "../api/leads.mjs";
 
 const leads = { a1: { company_name: "A LTD", director_name: "Jo Bloggs", score: 81 } };
 const gz = gzipSync(Buffer.from(JSON.stringify(leads)));

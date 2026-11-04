@@ -18,3 +18,7 @@ data/cache/
 data/leads.json
 apps/web/public/data/leads.json
 public/data/leads.json
+
+# Cloudflare: written by apps/web/scripts/cloudflare-setup.mjs before each deploy; wrangler's local state
+apps/web/wrangler.toml
+.wrangler/

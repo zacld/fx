@@ -7,7 +7,7 @@ export const rememberedPw = () => { try { return sessionStorage.getItem(PW_KEY) 
 export const rememberPw = (pw) => { try { pw ? sessionStorage.setItem(PW_KEY, pw) : sessionStorage.removeItem(PW_KEY); } catch { /* private mode */ } };
 
 export async function fetchLeads(password) {
-  if (import.meta.env.DEV) {   // local dev: the file the pipeline writes (no Netlify functions under vite)
+  if (import.meta.env.DEV) {   // local dev: the file the pipeline writes (no Pages Functions under vite)
     const r = await fetch(`${import.meta.env.BASE_URL}data/leads.json?t=${Date.now()}`);
     return { leads: r.ok ? await r.json() : {}, locked: false };
   }

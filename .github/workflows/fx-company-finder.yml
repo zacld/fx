@@ -216,10 +216,10 @@ jobs:
       # names finance directors. The list goes only to the password-protected Accounts page below (CSV export there).
 
       # The dashboard's Accounts page (/accounts): the checked companies go to the
-      # site's private Netlify Blobs store, readable only through the page's
-      # password check — never committed, never in the public build. Uses the
-      # dashboard deploy's secrets (NETLIFY_SITE_ID, NETLIFY_AUTH_TOKEN); skipped
-      # without them. The log shows counts only.
+      # site's private store (Cloudflare KV; Netlify Blobs until the Cloudflare
+      # secrets exist — apps/web/scripts/store.mjs), readable only through the
+      # page's password check — never committed, never in the public build.
+      # Skipped without the secrets. The log shows counts only.
       - name: Accounts page data
         id: accounts
         continue-on-error: true
@@ -240,12 +240,14 @@ jobs:
         if: steps.accounts.outcome == 'success'
         continue-on-error: true
         env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           MAX_ENRICH: ${{ inputs.max_enrich }}
         run: |
-          if [ -z "$NETLIFY_SITE_ID" ] || [ -z "$NETLIFY_AUTH_TOKEN" ]; then
-            echo "No Netlify secrets: Accounts page not updated"; exit 0
+          if { [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; } && { [ -z "$NETLIFY_SITE_ID" ] || [ -z "$NETLIFY_AUTH_TOKEN" ]; }; then
+            echo "No Cloudflare (or Netlify) secrets: Accounts page not updated"; exit 0
           fi
           if [ -n "$MAX_ENRICH" ] && [ "$MAX_ENRICH" -lt 200 ]; then
             echo "Test run ($MAX_ENRICH companies): Accounts page not updated"; exit 0

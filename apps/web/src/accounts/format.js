@@ -122,7 +122,7 @@ export function factUrl(r, fact = "") {
   return "";
 }
 
-// A company's own page: /accounts/<company number> (Netlify serves accounts.html for it).
+// A company's own page: /accounts/<company number> (functions/accounts/[[path]].js serves accounts.html for it).
 export const companyPath = (number) => `/accounts/${number}`;
 export const numberFromPath = (path = "") => (path.match(/^\/accounts\/([A-Z0-9]{8})\/?$/i) || [])[1]?.toUpperCase() || "";
 

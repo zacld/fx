@@ -6,12 +6,12 @@
 // followups.js), and {notes: "..."} saves its notes ("" deletes them). Only
 // for a request carrying the Accounts password:
 //   Authorization: Bearer <password>
-// The password is the ACCOUNTS_PASSWORD environment variable on Netlify
-// (Site configuration → Environment variables). The list itself lives in
-// the site's private Blobs store ("fx-accounts", key "latest"), put there by
-// the finder workflow — never in the repo or the public build.
-import { getStore } from "@netlify/blobs";
-import { applyContact, invalidChange } from "../../src/accounts/followups.js";
+// The password is the ACCOUNTS_PASSWORD secret on the Cloudflare Pages
+// project (set by the deploy workflow from the GitHub secret of that name).
+// The list itself lives in the site's private KV store ("fx-accounts/latest"),
+// put there by the finder workflow — never in the repo or the public build.
+// Platform-free: functions/api/accounts.js passes the password and the store.
+import { applyContact, invalidChange } from "../src/accounts/followups.js";
 
 export const STORE = "fx-accounts";
 export const KEY = "latest";
@@ -41,11 +41,6 @@ export async function samePassword(given, expected) {
   return diff === 0;
 }
 
-export function expectedPassword() {
-  const fromNetlify = typeof Netlify !== "undefined" ? Netlify.env.get("ACCOUNTS_PASSWORD") : undefined;
-  return fromNetlify ?? process.env.ACCOUNTS_PASSWORD ?? "";
-}
-
 // When each company first appeared: kept from the list it replaces, so the page can label the latest scan's
 // additions "new". Companies already listed before first_seen existed date from that list.
 export function markFirstSeen(previous, next) {
@@ -53,12 +48,12 @@ export function markFirstSeen(previous, next) {
   return { ...next, rows: (next.rows || []).map((r) => ({ ...r, first_seen: before.get(r.company_number) || next.made_at })) };
 }
 
-// Strong consistency: a save reads the marks the previous save just wrote (the default is eventually consistent, so two
-// quick clicks could each read the old map and the second would drop the first's change).
-export async function handle(req, { password = expectedPassword(), store = () => getStore({ name: STORE, consistency: "strong" }),
-                                    delay = WRONG_PASSWORD_DELAY_MS } = {}) {
+// `store()` gives {get(key, {type: "json"}), setJSON(key, value)} (api/kv.mjs over the KV binding). A save reads the
+// marks the previous one wrote: KV shows a write at once to later requests in the same Cloudflare location, and the
+// page sends saves one at a time.
+export async function handle(req, { password = "", store, delay = WRONG_PASSWORD_DELAY_MS } = {}) {
   if (req.method !== "GET" && req.method !== "POST") return reply({ error: "method not allowed" }, 405);
-  if (!password) return reply({ error: "ACCOUNTS_PASSWORD is not set on Netlify yet" }, 503);
+  if (!password) return reply({ error: "ACCOUNTS_PASSWORD is not set on the site yet" }, 503);
   const given = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
   if (!given || !(await samePassword(given, password))) {
     await new Promise((r) => setTimeout(r, delay));
@@ -89,7 +84,3 @@ export async function handle(req, { password = expectedPassword(), store = () =>
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);
   return reply({ ...data, contacted: marks || {}, notes: noted || {} }, 200);
 }
-
-export default (req) => handle(req);
-
-export const config = { path: "/api/accounts" };
