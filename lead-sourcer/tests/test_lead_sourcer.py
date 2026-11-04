@@ -14,6 +14,7 @@ import json
 import os
 import random
 import re
+import subprocess
 import sys
 import tempfile
 import threading
@@ -341,6 +342,100 @@ class PipelineTestCase(unittest.TestCase):
         kwargs.setdefault("min_turnover", 2_000_000)  # the fixtures are small companies
         kwargs.setdefault("today", date(2026, 10, 19))
         return main.run_pipeline(niches_path=self.niches_path, bulk_file=self.bulk_path, **kwargs)
+
+
+class TestEndToEnd(PipelineTestCase):
+    """
+    The finder workflow's whole chain on the fixtures: main.py's list -> its CSV -> tools/confirm_contacts.py ->
+    tools/to_accounts_json.py, the file uploaded to the Accounts page. Each step's own tests passed when the chain
+    broke (a row with a column the CSV writer refused): this one runs them as the workflow does.
+    """
+
+    def test_finder_list_to_accounts_page_file(self):
+        tools = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools")
+        out = self.tmp.name
+        # one pick contradicted (as a registry or search would): the finder moves it to the clues — the path that
+        # once added a column the CSV writer refused
+        real = people.corroborate
+
+        def contradicted(contact, *args, **kwargs):
+            proof = real(contact, *args, **kwargs)
+            if contact and contact["name"] == "Jane Smith":
+                return {**proof, "confidence": people.GUESS, "evidence": proof["evidence"] + ["but a filing lists them as HR Director"]}
+            return proof
+
+        with mock.patch.object(people, "corroborate", contradicted):
+            rows = self.run_bulk(news_check=False)        # also a secretary-only company: a research clue
+        self.assertTrue(any(r["finance_contact_clues"].startswith("Jane Smith (Finance Director) — not confirmed") for r in rows))
+        self.assertTrue(any(r["finance_contact_clues"].startswith("Sally Sec") for r in rows))
+        found_csv = os.path.join(out, "fx_companies.csv")
+        main.write_output(rows, found_csv)
+        # the two tools as the workflow runs them: separate processes, no search key (no searches), own cache dir
+        env = {k: v for k, v in os.environ.items() if not k.endswith("_API_KEY")}
+        env["HOME"] = out
+        run = lambda *args: subprocess.run([sys.executable, *args], cwd=os.path.dirname(tools), env=env,
+                                           capture_output=True, text=True, timeout=120)
+        done = run(os.path.join(tools, "confirm_contacts.py"), found_csv, "--output", os.path.join(out, "fx.xlsx"),
+                   "--csv-out", os.path.join(out, "confirmed.csv"))
+        self.assertEqual(done.returncode, 0, done.stderr[-2000:])
+        done = run(os.path.join(tools, "to_accounts_json.py"), os.path.join(out, "confirmed.csv"),
+                   "--output", os.path.join(out, "accounts.json"))
+        self.assertEqual(done.returncode, 0, done.stderr[-2000:])
+        with open(os.path.join(out, "accounts.json"), encoding="utf-8") as f:
+            page = json.load(f)
+        checked = [r for r in rows if r["untapped_reasons"] != "not checked"]
+        self.assertEqual(page["count"], len(checked))
+        by_number = {r["company_number"]: r for r in page["rows"]}       # numbers padded to 8, as on the register
+        self.assertEqual(by_number["00000004"]["finance_contact_clues"], "Sally Sec — company secretary")
+        self.assertNotIn("finance_contact", by_number["00000004"])         # nobody presented on a guess
+        self.assertIn("turnover_source", by_number["00000005"])            # turnover with where it came from
+        self.assertEqual([r["rank"] for r in page["rows"]], list(range(1, len(page["rows"]) + 1)))
+
+        # the search step's re-grading, in-process with a fake search, then the strict CSV writer
+        confirmed, _ = confirm.confirm_rows([dict(r) for r in rows], fetcher=lambda q, k: [], pause=0, key="k")
+        strict = os.path.join(out, "strict.csv")
+        with open(strict, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=confirm.fields_with_confirmation(main.CSV_FIELDS))
+            writer.writeheader()
+            writer.writerows(people.weak_contact_to_clue(r) for r in confirmed)
+
+
+class TestLookupCache(PipelineTestCase):
+    def test_websites_and_news_reused_for_a_week(self):
+        fetched, headlines = [], []
+        with mock.patch.object(register_cache, "CACHE_DIR", os.path.join(self.tmp.name, "register")), \
+                mock.patch.object(register_cache, "CACHE_DAYS", 7), \
+                mock.patch.object(website, "fetch", lambda url: fetched.append(url) or SITES.get(url)), \
+                mock.patch.object(news, "fetch", lambda url: headlines.append(url) or NEWS_FEEDS.get(url)):
+            first = self.run_bulk()
+            sites_read, news_read = len(fetched), len(headlines)
+            self.assertGreater(sites_read, 0)
+            self.assertGreater(news_read, 0)
+            again = self.run_bulk()
+            self.assertEqual(again, first)
+            self.assertEqual((len(fetched), len(headlines)), (sites_read, news_read))   # nothing fetched again
+            # a week on, they're read afresh
+            with mock.patch.object(register_cache, "LOOKUP_DAYS", 0.0):
+                self.run_bulk()
+            self.assertGreater(len(fetched), sites_read)
+        found, value = register_cache.load_lookup("website", "01")   # outside the patched cache: nothing
+        self.assertEqual((found, value), (False, None))
+
+
+class TestSlotsGoToCompaniesStillInTheRunning(PipelineTestCase):
+    def test_a_company_known_to_be_out_frees_its_slot(self):
+        looked_up = lambda since: sorted({re.search(r"/company/(\w+)", u).group(1)
+                                          for u in self.fake.calls[since:] if "/company/" in u})
+        with mock.patch.object(register_cache, "CACHE_DIR", os.path.join(self.tmp.name, "register")), \
+                mock.patch.object(register_cache, "CACHE_DAYS", 7):
+            first = self.run_bulk(news_check=False, max_enrich=2, min_turnover=25_000_000)
+            self.assertEqual(looked_up(0), ["01", "05"])        # 01 files £23.4m: under the floor, so dropped
+            self.assertNotIn("01", {r["company_number"] for r in first})
+            since = len(self.fake.calls)
+            self.run_bulk(news_check=False, max_enrich=2, min_turnover=25_000_000)
+            # next run: 01 is known to be out (no calls, no slot), 05 comes from the cache, and the freed slot
+            # goes to the next candidate in line
+            self.assertEqual(looked_up(since), ["02"])
 
 
 class TestRegisterCache(PipelineTestCase):

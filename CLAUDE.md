@@ -217,7 +217,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   in the repo or the public build). A finance director outranks a financial
   controller when picking the contact. Each company's Companies House lookups
   are cached 7 days (`sourcer/register_cache.py`, `REGISTER_CACHE_DAYS`; sooner
-  when newer accounts are filed) to keep within the GitHub Actions minutes.
+  when newer accounts are filed) to keep within the GitHub Actions minutes; its
+  website and news lookups likewise (`LOOKUP_CACHE_DAYS`, 7 — they took ~20 min
+  of each run). The 1,200 slots a run (`DEFAULT_ENRICH`) go to companies still in
+  the running: ones the cache already shows are out (filed turnover under the
+  floor, an unconfirmed subsidiary) don't take one, so the next candidates in line
+  get checked. Scheduled Sun–Thu 19:43 UTC (GitHub starts free scheduled runs
+  hours late), so the list is ready by the morning. `tests/test_lead_sourcer.py`
+  `TestEndToEnd` runs the workflow's whole chain (list → CSV → contact search →
+  Accounts page file) on every PR.
 
 ## Market moves (`market-moves/`, `/moves`) — the day-to-day dashboard
 

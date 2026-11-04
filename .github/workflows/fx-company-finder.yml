@@ -39,15 +39,17 @@ on:
       max_enrich:
         description: "How many companies to check (under 200 = a test run: the Accounts page is left as it is)"
         required: false
-        default: "1000"
+        default: "1200"
       own_bank:
         description: "Your bank's name — its existing clients get flagged (blank = repository variable OWN_BANK, else Investec)"
         required: false
         default: ""
   schedule:
-    - cron: '17 5 * * 1-5'   # weekdays 05:17 UTC (06:17 UK in summer): the list is ready before 7am
+    # Sun–Thu 19:43 UTC, the evening before each working day: GitHub starts free scheduled runs hours late (a 05:17
+    # schedule started 11:30–13:30), so an evening start still has the list ready before the morning.
+    - cron: '43 19 * * 0-4'
   # A change to this workflow runs it straight away (free on the public repo; the Claude GitHub app can't
-  # start runs by hand). Same 1,000 companies as a scheduled run, so a run that finishes updates the page.
+  # start runs by hand). Same companies as a scheduled run, so a run that finishes updates the page.
   push:
     branches: [main]
     paths:
@@ -140,7 +142,9 @@ jobs:
           WARM_AUDITORS: ${{ vars.WARM_AUDITORS }}   # introducer audit firms, comma-separated (optional)
           # Each company checked costs 5 Companies House calls (~4s) plus reading its accounts (OCR for
           # scanned filings); a filing once read is cached 90 days. Customs-proven traders are checked first.
-          DEFAULT_ENRICH: "1000"
+          # slots for companies still in the running (ones already known to be out don't take one); 1,200 fits
+          # now that websites and news are cached for a week
+          DEFAULT_ENRICH: "1200"
         run: python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv
 
       - name: Save Companies House lookups
