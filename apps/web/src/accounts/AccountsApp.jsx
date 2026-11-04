@@ -520,7 +520,9 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen })
         </div>
         <div className="card-r">
           <div className="figures">
-            {r.turnover_gbp && <span><b>{money(r.turnover_gbp)}</b> turnover</span>}
+            {r.turnover_gbp
+              ? <Src href={r.turnover_url || r.accounts_url} title={r.turnover_source || "Open the accounts"}><b>{money(r.turnover_gbp)}</b> {r.turnover_basis === "group" ? "group " : ""}turnover</Src>
+              : r.turnover_check && <span className="muted" title={r.turnover_check}>{/not disclosed/.test(r.turnover_check) ? "Turnover not disclosed" : "Turnover: check accounts"}</span>}
             {wallet(r) && <span><b>{wallet(r)}</b> FX a year</span>}
             <FxFigure r={r} />
           </div>
@@ -554,7 +556,9 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
     );
   }
   const figures = [
-    ["Turnover", money(r.turnover_gbp), r.accounts_url, r.turnover_period_end && `accounts to ${r.turnover_period_end}`],
+    ["Turnover", r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_check, r.turnover_url || r.accounts_url,
+     [r.turnover_basis && `${r.turnover_basis} figure`, r.turnover_period_end && `accounts to ${r.turnover_period_end}`,
+      r.turnover_source].filter(Boolean).join(" · ")],
     ["FX a year (estimate)", wallet(r), "", r.fx_wallet_basis],
     ["FX gain/loss", r.fx_gain_loss_gbp ? `${money(r.fx_gain_loss_gbp)} ${Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "gain"}` : "", r.fx_gain_loss_url,
      [fxShare(r), r.fx_gain_loss_prior_gbp && `prior year ${money(r.fx_gain_loss_prior_gbp)}`].filter(Boolean).join(" · ")],

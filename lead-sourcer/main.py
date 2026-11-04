@@ -922,7 +922,7 @@ def run_pipeline(
                 read, regs = spent["accounts_read"], spent["register_read"]
                 print(f"  …checked {done:,} of {min(budget, len(queue)):,} in {(time.monotonic() - started) / 60:.0f} min"
                       f" | accounts read {read} ({spent['accounts'] / max(read, 1):.0f}s each), cached"
-                      f" {spent['accounts_cached']} | OCR {pdf.stats['pages']} pages ({pdf.stats['fx_pages']} for FX),"
+                      f" {spent['accounts_cached']} | OCR {pdf.stats['pages']} pages ({pdf.stats['fx_pages']} for FX, {pdf.stats['pl_pages']} for turnover),"
                       f" {pdf.stats['seconds'] / max(pdf.stats['pages'], 1):.1f}s a page | register read {regs}"
                       f" ({spent['register'] / max(regs, 1):.0f}s each)", flush=True)
             gathered.append(result)

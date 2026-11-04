@@ -169,7 +169,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   2. Filed accounts: tagged iXBRL figures (turnover, cost of sales, FX
      gain/loss, currency or region breakdowns, hedging, bankers), else the
      PDF's text (pdftotext, or Tesseract OCR of the first pages for scanned
-     filings — system tools installed in the workflow, not Python packages).
+     filings, more pages for turnover and the FX line — system tools
+     installed in the workflow, not Python packages).
      The FX gain/loss: a tag counts only when its row is an exchange/currency
      line in pounds (Wanis tagged "Stocks recognised as expenses"); otherwise
      the "Exchange differences / losses/(gains)" line in the notes text
@@ -177,6 +178,21 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      `OCR_FX_BUDGET_SECONDS` a run). Over 20% of turnover, no gain/loss
      direction, or not in pounds → `fx_gain_loss_check`, never a fact.
      Real cases: `tests/test_fx_cases.py` (`tools/fx_case_study.py`).
+     Turnover and cost of sales (`sourcer/turnover_text.py`): a tagged total
+     (a consolidated — `GroupCompanyDataDimension` — figure is the group's,
+     before the parent's own), else the profit and loss account's row (the
+     table row in a tagged filing; scanned filings: OCR of the pages 15–55%
+     through, `OCR_PL_BUDGET_SECONDS` a run), saying group or company, this
+     year v last (column years), £ / £'000 / £m (the table heading), the page
+     (`turnover_source`, `turnover_basis`, `turnover_url`). Turnover must equal
+     cost of sales + gross profit: a misread or missing turnover cell is worked
+     out from them, and says so. A strategic report sentence ("turnover for the
+     year was £95.3m") only when no statement can be read. Never an estimate:
+     $/€ accounts, a statement starting at gross profit (abridged) or no profit
+     and loss account → `turnover_check` ("turnover not disclosed: …").
+     Real cases: `tests/test_turnover_cases.py` (`tools/turnover_sample.py`,
+     workflow "Turnover sample"). Cached accounts without turnover are read
+     again, `FINDER_REREAD_MAX` (300) a run.
   3. Companies House owners, charges and directors.
   4. The FX niches (`lead-sourcer/config/fx_niches.json`).
 - **Scores:** every score and estimate lists its evidence or basis. Weights

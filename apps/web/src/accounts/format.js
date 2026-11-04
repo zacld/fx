@@ -153,7 +153,8 @@ export function detailSections(r) {
       ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
     ]],
     ["Company", [
-      ["Accounts", r.size_basis, r.accounts_url], ["Accounts filed", r.accounts_filed_on, r.accounts_url],
+      ["Accounts", r.size_basis, r.accounts_url], ["Turnover source", r.turnover_source, r.turnover_url],
+      ["Turnover", r.turnover_gbp ? "" : r.turnover_check, r.turnover_url], ["Accounts filed", r.accounts_filed_on, r.accounts_url],
       ["Growth", r.turnover_growth, r.accounts_url], ["Overseas sales", r.overseas_turnover_share, r.accounts_url],
       ["Cash / borrowings", [money(r.cash_gbp), money(r.bank_borrowings_gbp)].filter(Boolean).join(" / "), r.accounts_url],
       ["Net assets", money(r.net_assets_gbp), r.accounts_url], ["Auditor", join(r.auditor, r.auditor_tier)],
@@ -168,7 +169,8 @@ export function detailSections(r) {
 export function sourceDocuments(r) {
   const ch = r.companies_house_url || "";
   const docs = [
-    ["Latest filed accounts", r.accounts_url], ["Accounts at the FX line", r.fx_gain_loss_url],
+    ["Latest filed accounts", r.accounts_url], ["Accounts at the turnover line", r.turnover_url],
+    ["Accounts at the FX line", r.fx_gain_loss_url],
     [`Charge: ${r.main_bank || "bank"}`, r.incumbent_bank_url], ["FX provider's charge", r.fx_today_url],
     ["Companies House record", ch], ["Filing history", ch && `${ch}/filing-history`], ["Charges register", ch && `${ch}/charges`],
     ["Officers", ch && `${ch}/officers`], ["Owners (PSCs)", ch && `${ch}/persons-with-significant-control`],
@@ -184,7 +186,7 @@ const fxLossKey = (r) => {
   return fx < 0 ? fx : 2e15 - fx;
 };
 
-// "Hottest": confirmed contacts first, then guesses, then no one named; within each, the finder's ranking
+// "Hottest": confirmed contacts first, then likely ones, then "ask for the FD"; within each, the finder's ranking
 // (FX evidence + untapped + triggers + a recent FX loss).
 export const SORTS = {
   hot: { label: "Hottest (confirmed first)", key: (r) => CONTACT_GROUPS.indexOf(contactGroup(r)) * 1e6 + r.rank },
@@ -203,7 +205,7 @@ export const sortRows = (rows, by = "hot") =>
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "finance_contact", "finance_contact_role",
-  "finance_contact_confidence", "finance_contact_clues", "finance_contact_linkedin", "search_check", "no_fd_likely", "former_finance_director", "lead_director", "turnover_gbp",
+  "finance_contact_confidence", "finance_contact_clues", "finance_contact_linkedin", "search_check", "no_fd_likely", "former_finance_director", "lead_director", "turnover_gbp", "turnover_basis", "turnover_check",
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",
   "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_check", "recent_fx_loss", "accounts_filed_on", "first_seen",
   "main_bank", "bank_type", "fact_1", "fact_2", "main_currency", "currency_direction",

@@ -56,6 +56,17 @@ describe("accounts helpers", () => {
     expect(filterRows(list, { contact: "Confirmed" }).map((r) => r.rank)).toEqual([3, 5]);
   });
 
+  it("links the turnover to its page and says when it isn't disclosed", () => {
+    const r = { company_number: "07810330", accounts_url: "https://x/doc", turnover_url: "https://x/doc#page=13",
+                turnover_gbp: "80354000", turnover_source: "accounts p13: company profit and loss account, £'000 — \"Turnover 2 80,354 70,650\"" };
+    expect(sourceDocuments(r).map(([label]) => label)).toContain("Accounts at the turnover line");
+    const company = Object.fromEntries(detailSections(r).find(([s]) => s === "Company")[1].map(([k, v, u]) => [k, [v, u]]));
+    expect(company["Turnover source"]).toEqual([r.turnover_source, r.turnover_url]);
+    const none = { turnover_check: "turnover not disclosed: the profit and loss account starts at gross profit (abridged accounts)" };
+    expect(Object.fromEntries(detailSections(none).find(([s]) => s === "Company")[1].map(([k, v]) => [k, v])).Turnover)
+      .toMatch(/not disclosed/);
+  });
+
   it("shows who to ask for, with research clues, when nobody is confirmed", () => {
     const guess = { finance_contact: "Sally Sec", finance_contact_role: "Company Secretary", finance_contact_confidence: "Guess",
                     finance_contact_clues: "Bob Jones — signed the accounts" };
