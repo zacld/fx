@@ -22,7 +22,7 @@ import urllib.request
 from html.parser import HTMLParser
 from typing import Optional
 
-from sourcer import turnover_text, banks, companies_house, fx_text, hooks, incumbent, pdf, people, profiles, website
+from sourcer import turnover_text, banks, companies_house, fx_notes, fx_text, hooks, incumbent, pdf, people, profiles, website
 
 CH_FILING_HISTORY = f"{companies_house.CH_BASE}/company/{{number}}/filing-history"
 DOCUMENT_CONTENT = "https://document-api.company-information.service.gov.uk/document/{id}/content"
@@ -405,7 +405,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-04"   # turnover / cost of sales from the profit and loss account (PDF, OCR), with its source
+FACTS_VERSION = "2026-11-05"   # the currency notes (fx_notes) and turnover by region from accounts text
 
 
 # A scanned filing whose profit and loss page wasn't searched because the run's OCR time ran out.
@@ -414,22 +414,16 @@ TURNOVER_NOT_READ_YET = "turnover not read yet: this run's OCR time for scanned 
 
 def facts_reusable(entry: dict) -> bool:
     """
-    Whether cached facts were read with rules still current. Facts from
-    "2026-10-26" differ only where the FX line came from the accounts text
-    or a $/€ check was raised; facts from "2026-10-26b" only where no
-    turnover was found (the profit and loss reader is new). Only those are
-    read again, not every company's accounts (main.py caps how many a run).
+    Whether cached facts were read with rules still current. Older facts are
+    read again (main.py caps how many a run; until then the older facts
+    are used, without the newer fields): "2026-11-05" added the currency
+    notes (forward contracts, currencies, balances, sensitivity) and turnover
+    by region from accounts text, which every filing can have.
     """
-    version = entry.get("facts_version")
     facts = entry.get("facts") or {}
     if facts.get("turnover_check") == TURNOVER_NOT_READ_YET:
         return False
-    if version == FACTS_VERSION:
-        return True
-    if version not in ("2026-10-26", "2026-10-26b") or facts.get("turnover") is None:
-        return False
-    return version == "2026-10-26b" or not (facts.get("fx_gain_loss_evidence", "").startswith(("accounts", "scanned"))
-                                            or re.search(r"[$€]", facts.get("fx_gain_loss_check", "")))
+    return entry.get("facts_version") == FACTS_VERSION
 
 # An FX gain/loss bigger than this share of turnover is almost certainly a
 # different figure tagged or read as FX (Wanis: purchases in foreign currency,
@@ -564,12 +558,16 @@ def extract_facts(document: bytes) -> dict:
         "web_addresses": website.addresses_in_text(plain),
         "qualified": people.qualified_people(plain),
         "regions": _regions(scanner, turnover[0] if turnover else None, end),
+        "regions_page": 0,
         "trading_names": profiles.trading_names(plain),
         **hooks.text_evidence(plain),
         **incumbent.text_evidence(plain),
         "fx_gain_loss_evidence": "tagged in the accounts" if fx else "",
         "fx_gain_loss_check": "",
     }
+    rows_text = ixbrl_table_text(text)
+    # the currency notes, from the document laid out as paragraphs and table rows (no page numbers in iXBRL)
+    facts.update(fx_notes.read([rows_text], numbers=[0]))
     if turnover:
         facts.update(turnover_basis=turnover_basis.get(turnover[1], ""), turnover_unit="", turnover_page=0,
                      turnover_check="", turnover_source="tagged in the accounts (iXBRL)"
@@ -577,7 +575,6 @@ def extract_facts(document: bytes) -> dict:
     else:
         # Turnover not tagged (or tagged under another name): its row in the profit and loss table, else the
         # strategic report's sentence; why not when the statement starts at gross profit.
-        rows_text = ixbrl_table_text(text)
         pl = turnover_text.read_document(rows_text) or turnover_text.from_prose([plain])
         found = bool(pl and pl["turnover"] is not None)
         if found:
@@ -586,6 +583,10 @@ def extract_facts(document: bytes) -> dict:
             if facts["cost_of_sales"] is None and pl["cost_of_sales"] is not None:
                 facts["cost_of_sales"] = pl["cost_of_sales"]
         facts.update(turnover_fields(pl, found, "ixbrl", plain))
+    if not facts["regions"]:   # turnover by region not tagged: the note's table, as laid out
+        facts["regions"] = regions_from_pages([rows_text], facts["turnover"], numbers=[0])[0]
+        if facts["overseas_share"] is None:
+            facts["overseas_share"] = overseas_share_from(facts["regions"], facts["turnover"])
     if not fx and not _fx_from_text(facts, plain, "accounts text") and fx_tag_problem:
         facts["fx_gain_loss_check"] = fx_tag_problem
     return check_fx(facts)
@@ -694,11 +695,12 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
     if not text:
         return None
     facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on, accounts_url=url)
+    ocr_pages: dict[int, str] = {}   # pages OCR'd below while looking for turnover and the FX line, kept for the notes
     if how == "scanned pdf" and (facts["turnover"] is None or "profit and loss account" not in facts.get("turnover_source", "")):
         # the profit and loss account is past the pages OCR'd for the company information (a strategic report's
         # sentence is kept only when the statement can't be found)
         page, number = pdf.ocr_find(data, lambda t: bool((r := turnover_text.read_page(t, ocr=True)) and (
-            r["turnover"] is not None or r["check"])), purpose="pl")
+            r["turnover"] is not None or r["check"])), purpose="pl", seen=ocr_pages)
         pl = turnover_text.read_page(page, number, ocr=True) if page else None
         if pl and pl["turnover"] is not None:
             facts.update(turnover=pl["turnover"], turnover_prior=pl["turnover_prior"],
@@ -712,9 +714,17 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
             facts["turnover_check"] = TURNOVER_NOT_READ_YET   # read again next run, not cached as "not found"
     if how == "scanned pdf" and facts["fx_gain_loss"] is None and not facts["fx_gain_loss_check"]:
         # the FX line is in the notes, past the pages OCR'd for the company information
-        page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None)
+        page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None, seen=ocr_pages)
         if page and _fx_from_text(facts, page, f"scanned accounts p{number}", ocr=True):
             check_fx(facts)
+    if ocr_pages:
+        # the currency notes and the turnover-by-region table, from the pages OCR'd anyway (no extra OCR)
+        numbers = sorted(ocr_pages)
+        fx_notes.merge(facts, fx_notes.read([ocr_pages[n] for n in numbers], numbers=numbers))
+        if not facts.get("regions"):
+            facts["regions"], facts["regions_page"] = regions_from_pages(
+                [ocr_pages[n] for n in numbers], facts["turnover"], numbers=numbers)
+            facts["overseas_share"] = overseas_share_from(facts["regions"], facts["turnover"])
     return facts
 
 
@@ -778,44 +788,81 @@ def _period_end(text: str) -> str:
     return f"{int(m.group(3)):04d}-{_MONTH_NUMBERS[m.group(2).lower()]:02d}-{int(m.group(1)):02d}"
 
 
-_GEOGRAPHY_HEADING = re.compile(r"geographic(?:al)?\s+(?:market|area|analysis|segment|location|split)|"
-                                r"by\s+(?:geographical\s+)?destination|by\s+geograph", re.I)
-_REGION_ROW = re.compile(
-    r"^\s*(United\s+Kingdom|UK|Europe(?:an\s+Union)?|Rest\s+of\s+(?:the\s+)?(?:world|Europe)|North\s+America|"
-    r"United\s+States(?:\s+of\s+America)?|USA|Americas|Asia(?:\s+Pacific)?|Far\s+East|Middle\s+East|Africa|"
-    r"Australasia|Overseas|Ireland|Republic\s+of\s+Ireland|Germany|France|Netherlands|Spain|Italy|China|Japan|"
-    r"Canada|Australia)\b(.*)$", re.I | re.M)
+_GEOGRAPHY_HEADING = re.compile(r"geographic(?:al)?\s+(?:markets?|areas?|analysis|segments?|locations?|split|regions?|"
+                                r"information)|by\s+(?:geographical\s+)?destination|by\s+geograph|"
+                                r"(?:turnover|revenue|sales)\s+(?:is\s+)?(?:analysed\s+)?by\s+(?:country|region|market)\b|"
+                                r"(?:turnover|revenue|sales)\s+by\s+(?:location\s+of\s+)?customers?", re.I)
+_PLACE = (r"United\s+Kingdom|UK|Great\s+Britain|Europe(?:an\s+Union)?|EU|Non-EU|Eurozone|Rest\s+of\s+(?:the\s+)?"
+          r"(?:world|Europe)|ROW|North\s+America|South\s+America|Latin\s+America|Central\s+America|"
+          r"United\s+States(?:\s+of\s+America)?|USA|US|Americas|Asia(?:\s+Pacific)?|Asia\s+and\s+Pacific|APAC|"
+          r"Far\s+East|Middle\s+East|Africa|Australasia|Oceania|Scandinavia|Nordics?|Overseas|Exports?|"
+          r"Ireland|Republic\s+of\s+Ireland|Germany|France|Netherlands|Belgium|Spain|Italy|Switzerland|Sweden|"
+          r"Norway|Denmark|Poland|China|Hong\s+Kong|Japan|India|Singapore|Canada|Australia|New\s+Zealand|"
+          r"South\s+Africa|UAE|United\s+Arab\s+Emirates")
+_REGION_ROW = re.compile(rf"^\s*((?:The\s+)?(?:{_PLACE})(?:\s*(?:&|and|/|,)\s*(?:the\s+)?(?:{_PLACE}))?)\b(.*)$",
+                         re.I | re.M)
 
 
 _CELL_RE = re.compile(r"\(?-?\d[\d,]*(?:\.\d+)?\)?")   # any number in a table cell, "856" included
 
 
-def _regions_from_text(pages: list[str], turnover: Optional[float] = None) -> list[dict]:
+def _scale_around(page: str, start: int, end: int) -> int:
+    """The £'000 / £m heading for a table: in the table itself, else the nearest one above it (2,500 characters)."""
+    inside = page[start:end]
+    if _THOUSANDS_RE.search(inside) or _MILLIONS_RE.search(inside):
+        return 1_000 if _THOUSANDS_RE.search(inside) else 1_000_000
+    before = page[max(0, start - 2500):start]
+    marks = [(m.end(), 1_000) for m in _THOUSANDS_RE.finditer(before)] + \
+            [(m.end(), 1_000_000) for m in _MILLIONS_RE.finditer(before)]
+    return max(marks)[1] if marks else 1
+
+
+def regions_from_pages(pages: list[str], turnover: Optional[float] = None,
+                       numbers: Optional[list[int]] = None) -> tuple[list[dict], int]:
     """
-    [{"region", "value"}] from a turnover-by-geography table in accounts text
-    (the rows under a "geographical market" heading), this year's column,
-    the page's "£'000" heading applied. [] when there's no such table.
+    ([{"region", "value"}], page number) from a turnover-by-geography table
+    in accounts text (the rows under a "geographical market" heading), this
+    year's column, the table's "£'000" / "£m" heading applied; ([], 0) when
+    there's no such table. Only with turnover known, and never a region
+    bigger than the company (a misread scale or column).
     """
-    for page in pages:
-        heading = _GEOGRAPHY_HEADING.search(page)
-        if not heading or (_OTHER_CURRENCY_RE.search(page) and "£" not in page):
+    numbers = numbers if numbers is not None else list(range(1, len(pages) + 1))
+    for page, number in zip(pages, numbers):
+        if _OTHER_CURRENCY_RE.search(page) and "£" not in page:
             continue
-        scale = 1_000 if _THOUSANDS_RE.search(page) else 1_000_000 if _MILLIONS_RE.search(page) else 1
-        block = "\n".join(page[heading.end():].split("\n")[:40])
-        found: dict[str, float] = {}
-        for m in _REGION_ROW.finditer(block):
-            rest = m.group(2)
-            if re.search(r"[A-Za-z]{3,}", rest):
-                continue  # words after the place ("United Kingdom corporation tax"): not a turnover row
-            tokens = [t for t in _CELL_RE.findall(rest) if not re.fullmatch(r"(?:19[9]\d|20[0-4]\d)", t)]
-            amounts = [a for a in (_amount(t) for t in tokens) if a is not None and a > 0]
-            label = " ".join(m.group(1).split())
-            if amounts and label not in found:
-                found[label] = amounts[0] * scale
-        # Only with turnover known, and never a region bigger than the company (a misread scale or column).
-        if found and turnover and max(found.values()) <= turnover * 1.01:
-            return sorted(({"region": k, "value": v} for k, v in found.items()), key=lambda r: -r["value"])
-    return []
+        for heading in _GEOGRAPHY_HEADING.finditer(page):
+            lines = page[heading.end():].split("\n")[:40]
+            block = "\n".join(lines)
+            scale = _scale_around(page, heading.start(), heading.end() + len(block))
+            found: dict[str, float] = {}
+            for m in _REGION_ROW.finditer(block):
+                rest = re.sub(r"\([^)]*\)", " ", m.group(2))   # "Europe (excluding UK)  12,300"
+                if re.search(r"[A-Za-z]{3,}", rest):
+                    continue  # words after the place ("United Kingdom corporation tax"): not a turnover row
+                tokens = [t for t in _CELL_RE.findall(rest) if not re.fullmatch(r"(?:19[9]\d|20[0-4]\d)", t)]
+                amounts = [a for a in (_amount(t) for t in tokens) if a is not None and a > 0]
+                label = " ".join(m.group(1).split())
+                if amounts and label not in found:
+                    found[label] = amounts[0] * scale
+            if found and turnover and max(found.values()) <= turnover * 1.01:
+                return sorted(({"region": k, "value": v} for k, v in found.items()), key=lambda r: -r["value"]), number
+    return [], 0
+
+
+def _regions_from_text(pages: list[str], turnover: Optional[float] = None) -> list[dict]:
+    return regions_from_pages(pages, turnover)[0]
+
+
+def overseas_share_from(regions: list[dict], turnover: Optional[float]) -> Optional[float]:
+    """Share of turnover from outside the UK, from a regions table whose rows add up to turnover (within 5%)."""
+    if not regions or not turnover:
+        return None
+    total = sum(r["value"] for r in regions)
+    if abs(total - turnover) > 0.05 * turnover:
+        return None
+    foreign = sum(r["value"] for r in regions if not hooks.is_uk(r["region"]) and
+                  not re.fullmatch(r"(?:the\s+)?(?:UK|United\s+Kingdom|Great\s+Britain)", r["region"], re.I))
+    return round(foreign / turnover, 3)
 
 
 def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf") -> dict:
@@ -863,15 +910,17 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
         "signatory": people.signatory_from_text(text),
         "web_addresses": website.addresses_in_text(plain),
         "qualified": people.qualified_people(text),
-        "regions": _regions_from_text(pages, abs(turnover[0]) if turnover else None),
         "trading_names": profiles.trading_names(plain),
         **hooks.text_evidence(plain),
         **incumbent.text_evidence(plain),
+        **fx_notes.read(pages),
         "format": how,
         "fx_gain_loss_check": "",
         "fx_gain_loss_evidence": "",
         **turnover_fields(pl, turnover is not None, how, text),
     }
+    facts["regions"], facts["regions_page"] = regions_from_pages(pages, facts["turnover"])
+    facts["overseas_share"] = overseas_share_from(facts["regions"], facts["turnover"])
     for number, page in enumerate(pages, 1):
         if _fx_from_text(facts, page, f"{'scanned ' if how == 'scanned pdf' else ''}accounts p{number}",
                          ocr=how == "scanned pdf"):

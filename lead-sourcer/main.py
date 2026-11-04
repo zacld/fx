@@ -62,8 +62,8 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Optional, Union
 
 from sourcer import (
-    accounts, banks, bulk, companies_house, currency, excel, hmrc, hooks, incumbent, matching, news, pdf, people,
-    profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
+    accounts, banks, bulk, companies_house, currency, excel, fx_notes, hmrc, hooks, incumbent, matching, news, pdf,
+    people, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
 
 CSV_FIELDS = [
     "section",
@@ -92,7 +92,17 @@ CSV_FIELDS = [
     "currency_direction",
     "currency_evidence",
     "currency_confidence",
+    "currency_source",
     "opener",
+    "filed_fx_score",
+    "filed_fx",
+    "currencies_in_accounts",
+    "currencies_in_accounts_evidence",
+    "fx_forwards",
+    "fx_forwards_evidence",
+    "fx_balances",
+    "fx_sensitivity",
+    "turnover_regions",
     "fx_estimate",
     "incumbent_bank",
     "facility_ends",
@@ -169,6 +179,8 @@ CSV_FIELDS = [
     "fx_gain_loss_url",
     "incumbent_bank_url",
     "fx_today_url",
+    "fx_notes_url",
+    "turnover_regions_url",
 ]
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -595,6 +607,12 @@ def company_row(
                                       customs["import_months"] + customs["export_months"], bool(bank.get("own_bank")),
                                       own_bank_name or os.environ.get("OWN_BANK", "").strip(), triggers.investor_owner(owners)))
         talking["fx_estimate"] = hooks.size_estimate(wallet["low"], wallet["high"], wallet["basis"]) if wallet else ""
+        # What the accounts' currency notes say (forwards, currencies, balances, sensitivity, turnover by region),
+        # and how much the filings themselves prove about the company's FX.
+        talking.update(fx_notes.columns(f, company["company_name"], links["accounts_url"]))
+        filed_score, filed_lines = fx_notes.filed_proof(
+            {**talking, "fx_gain_loss_gbp": _money(f.get("fx_gain_loss")) if not f.get("fx_gain_loss_check") else ""})
+        talking.update(filed_fx_score=str(filed_score), filed_fx=" | ".join(filed_lines))
     return people.weak_contact_to_clue(new_row(
         **talking,
         section=section_for(company, turnover, band),
@@ -1061,11 +1079,13 @@ def run_pipeline(
 
     stats["groups"] = add_group_rollup(rows, parents)
     section_order = {label: i for i, label in enumerate(sections(*band))}
-    # Triggers lift a company a little (10 each, up to 20), a recent FX loss by RECENT_FX_LOSS["lift"];
+    # What the company's own filings prove about its FX (fx_notes.FILED_FX_POINTS) counts on top of the FX evidence;
+    # triggers lift a company a little (10 each, up to 20), a recent FX loss by RECENT_FX_LOSS["lift"];
     # when-to-call never does.
     rows.sort(key=lambda r: (
         section_order[r["section"]],
         -(int(r["fx_evidence_score"]) + (int(r["untapped_score"]) if r["untapped_score"] != "" else 0)
+          + int(r.get("filed_fx_score") or 0)
           + 10 * min(len(r["triggers"].split(" | ")) if r["triggers"] else 0, 2)
           + (RECENT_FX_LOSS["lift"] if r.get("recent_fx_loss") else 0)),
         -float(r["fx_wallet_high_gbp"] or 0),
@@ -1073,6 +1093,31 @@ def run_pipeline(
     ))
     print_summary(rows, stats, min_turnover, band, own_bank)
     return rows
+
+
+def fx_summary(rows: list[dict]) -> list[str]:
+    """How often each FX fact turned up in the companies checked in full: what to improve next."""
+    checked = [r for r in rows if excel.is_checked(r)]
+    n = len(checked)
+    if not n:
+        return []
+    count = lambda test: sum(1 for r in checked if test(r))   # noqa: E731
+    today = Counter(r["fx_today"].split(":")[0] for r in checked if r.get("fx_today"))
+    source = Counter(r.get("currency_source") or "none" for r in checked)
+    fx = [r for r in checked if r.get("fx_gain_loss_gbp")]
+    big = sum(1 for r in fx if abs(float(r["fx_gain_loss_gbp"])) >= hooks.HOOK_RULES["fx_gain_loss_min_gbp"])
+    scores = [int(r.get("filed_fx_score") or 0) for r in checked]
+    return [
+        f"  FX in the filings, of {n:,} checked: forward contracts with a size {count(lambda r: r.get('fx_forwards')):,} | "
+        f"how they handle FX " + (", ".join(f"{k} {v:,}" for k, v in today.most_common()) or "0") + " | "
+        f"currencies named {count(lambda r: r.get('currencies_in_accounts')):,} | "
+        f"turnover by region {count(lambda r: r.get('turnover_regions')):,} | "
+        f"foreign-currency balances {count(lambda r: r.get('fx_balances')):,} | "
+        f"sensitivity {count(lambda r: r.get('fx_sensitivity')):,} | FX gain/loss {len(fx):,} (£50k+ {big:,})",
+        "  Main currency from: " + ", ".join(f"{k} {v:,}" for k, v in source.most_common()),
+        f"  Filed FX score: 50+ {sum(s >= 50 for s in scores):,}, 1-49 {sum(0 < s < 50 for s in scores):,}, "
+        f"none {sum(s == 0 for s in scores):,}",
+    ]
 
 
 def print_summary(rows: list[dict], stats: Counter, min_turnover: int,
@@ -1092,6 +1137,8 @@ def print_summary(rows: list[dict], stats: Counter, min_turnover: int,
     print(f"  FX evidence High: {sum(r['fx_evidence_level'] == 'High' for r in rows):,} | "
           f"Medium: {sum(r['fx_evidence_level'] == 'Medium' for r in rows):,}")
     print(f"  Untapped High: {sum(r['untapped_level'] == 'High' for r in rows):,} | family-run: {stats['family']:,}")
+    for line in fx_summary(rows):
+        print(line)
     print(f"  Turnover confirmed from filed accounts: {stats['confirmed']:,}; "
           f"checked, turnover not filed: {stats['by_category']:,}")
     if stats["unchecked"]:

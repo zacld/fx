@@ -43,7 +43,12 @@ HOOK_RULES = {
 }
 
 COLUMNS = ["fact_1", "fact_2", "main_currency", "currency_direction",
-           "currency_evidence", "currency_confidence", "opener"]
+           "currency_evidence", "currency_confidence", "currency_source", "opener"]
+
+# Which rule gave the main currency, for the row and the run summary's count.
+CURRENCY_SOURCES = {"forwards": "forward contracts in the accounts", "geography": "turnover by region",
+                    "text": "currencies named in the accounts", "group": "overseas parent or group company",
+                    "customs": "HMRC customs (estimated mix)", "niche": "niche default (not the company's documents)"}
 
 BUYS, SELLS, BOTH, UNKNOWN = "Buys (importer)", "Sells (exporter)", "Both", "Unknown"
 BANK_KINDS = ("facility_end", "charge", "bank_since")
@@ -405,6 +410,8 @@ def currency_exposure(company_name: str, facts: Optional[dict], owners: list[dic
     """
     {"currency", "direction", "evidence", "confidence", "rule"} from the
     strongest evidence that gives an answer (all blank when none does):
+      0. forward contracts in a foreign currency (accounts: "contracts to
+         purchase US$5.2m")                           -> High, Buys / Sells from the wording
       1. turnover by geography (accounts)             -> High, Sells
       2. currency names/codes in the accounts text     -> High / Medium, direction from the sentence
       3. overseas parent or group company              -> Medium
@@ -417,6 +424,14 @@ def currency_exposure(company_name: str, facts: Optional[dict], owners: list[dic
     f = facts or {}
     blank = {"currency": "", "direction": "", "evidence": "", "confidence": "", "rule": ""}
     source = _source_accounts(f).replace(", tagged figure", "")
+
+    # 0. Forward contracts held in a foreign currency: the flow they already cover.
+    fwd = next((x for x in f.get("fx_forwards") or [] if x.get("ccy") not in ("GBP", "", None)), None)
+    if fwd:
+        direction = {"buy": BUYS, "sell": SELLS}.get(fwd.get("direction", ""), UNKNOWN)
+        page = f", p{fwd['page']}" if fwd.get("page") else ""
+        return {"currency": fwd["ccy"], "direction": direction, "confidence": HIGH, "rule": "forwards",
+                "evidence": f"\"{fwd['sentence']}\" ({source}{page})"}
 
     # 1. Turnover by geography: the biggest non-UK region that maps to a currency.
     regions = [r for r in f.get("regions") or [] if not is_uk(r["region"]) and r.get("value", 0) > 0]
@@ -586,5 +601,6 @@ def columns(company_name: str, facts: Optional[dict], officers: list[dict], char
         "fact_1": first.get("detail", ""), "fact_2": second.get("detail", ""),
         "main_currency": exposure["currency"], "currency_direction": exposure["direction"],
         "currency_evidence": exposure["evidence"], "currency_confidence": exposure["confidence"],
+        "currency_source": CURRENCY_SOURCES.get(exposure["rule"], ""),
         "opener": opener([h for h in (first, second) if h], exposure),
     }

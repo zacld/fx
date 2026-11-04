@@ -33,7 +33,7 @@ sys.path.insert(0, ROOT)
 
 import main  # noqa: E402
 import server  # noqa: E402
-from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
+from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, fx_notes, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
 
 # api/ is a Vercel functions folder, not a package — load run.py by path.
 _spec = importlib.util.spec_from_file_location("api_run", os.path.join(ROOT, "api", "run.py"))
@@ -2258,6 +2258,89 @@ class TestHooks(unittest.TestCase):
         self.assertIn("US dollars", ev(long)["currency_mentions"][0]["sentence"])   # the match survives trimming
         usa = [{"kind": "corporate", "name": "Acme Inc", "country": "USA", "ceased_on": ""}]
         self.assertIn("registered in USA", hooks.find_hooks({}, [], [], usa, today=self.TODAY)[0]["detail"])
+
+
+class TestFxNotes(unittest.TestCase):
+    """What the accounts' currency notes say: forwards with their size, currencies, balances, sensitivity."""
+    NOTE = ("Foreign currency risk\nThe company's principal foreign currency exposures are to the US dollar and the "
+            "euro, as purchases from overseas suppliers are invoiced in US dollars. At 31 December 2024 the company had "
+            "outstanding forward foreign exchange contracts to purchase US$5.2m (2023: US$3.1m). Included in trade "
+            "debtors are amounts of £2,345,000 denominated in euros. If sterling had weakened by 10% against the US "
+            "dollar, profit before tax would have been £450,000 lower.\nTransactions in foreign currencies are "
+            "translated at the rate ruling at the date of the transaction.")
+
+    def test_reading_the_currency_note(self):
+        found = fx_notes.read(["Directors' report", self.NOTE])
+        fwd = found["fx_forwards"][0]
+        self.assertEqual((fwd["amount"], fwd["ccy"], fwd["direction"], fwd["prior"], fwd["page"]),
+                         (5_200_000, "USD", "buy", 3_100_000, 2))
+        self.assertEqual([c["code"] for c in found["fx_currencies"]], ["USD", "EUR"])   # forwards count extra
+        self.assertIn("principal foreign currency exposures", found["fx_currencies"][0]["sentence"])
+        bal = found["fx_balances"][0]
+        self.assertEqual((bal["what"], bal["amount"], bal["in"]), ("receivables", 2_345_000, "EUR"))
+        sens = found["fx_sensitivity"][0]
+        self.assertEqual((sens["pct"], sens["codes"], sens["amount"]), (10, ["USD"], 450_000))
+        cols = fx_notes.columns({**found, "format": "pdf", "period_end": "2024-12-31"}, "ACME LTD", "https://doc")
+        self.assertEqual(cols["fx_forwards"], "Forward contracts to buy US$5.2m (prior year US$3.1m)")
+        self.assertEqual(cols["currencies_in_accounts"], "USD (buys), EUR")
+        self.assertEqual(cols["fx_notes_url"], "https://doc#page=2")
+        self.assertTrue(cols["fx_sensitivity"].startswith("10% move in sterling against USD: £450k on profit"))
+        score, lines = fx_notes.filed_proof({**cols, "fx_today": "Uses forward contracts", "fx_gain_loss_gbp": "-75000"})
+        self.assertEqual(score, 40 + 25 + 25 + 15 + 15)   # forwards (policy not counted twice), sensitivity, FX loss…
+        self.assertIn("FX loss £75k (+25)", lines)
+        exposure = hooks.currency_exposure("ACME LTD", {**found, "format": "pdf"}, [], {})
+        self.assertEqual((exposure["currency"], exposure["direction"], exposure["rule"]), ("USD", hooks.BUYS, "forwards"))
+
+    def test_what_isnt_a_forward_contract(self):
+        for text in ["The company does not use forward foreign exchange contracts of any size, £1m or more.",
+                     "Derivatives, including forward foreign exchange contracts of £2m, are initially recognised at "
+                     "fair value.",
+                     "The company holds forward contracts for freight of £2,000,000 with its shipping line.",
+                     "A loss of £120,000 on forward foreign exchange contracts was recognised in the year."]:
+            self.assertEqual(fx_notes.read([text])["fx_forwards"], [], text)
+        valued = fx_notes.read(["The fair value of forward foreign exchange contracts was a liability of £45,000."])
+        self.assertEqual([(f["what"], f["amount"]) for f in valued["fx_forwards"]], [("fair value", 45_000)])
+        # the translation policy every company has names no currency of its own
+        self.assertEqual(fx_notes.read(["Assets denominated in US dollars are translated at the closing rate."])
+                         ["fx_currencies"], [])
+
+    def test_tables_in_the_notes(self):
+        page = ("Financial instruments\n                                      Note    2024     2023\n"
+                "                                              £'000    £'000\n"
+                "Forward foreign exchange contracts    21     (123)       45\n\n"
+                "Currency profile\n                     £'000\nUS dollars          1,234\nEuro                  567\n"
+                "Sterling            9,999\n")
+        found = fx_notes.read([page])
+        self.assertEqual([(f["what"], f["amount"], f["prior"]) for f in found["fx_forwards"]], [("table", 123_000, 45_000)])
+        self.assertEqual([(b["in"], b["amount"]) for b in found["fx_balances"]], [("USD", 1_234_000), ("EUR", 567_000)])
+
+    def test_turnover_by_region_from_text(self):
+        page = ("Turnover\nAn analysis of turnover by geographical market is given below:\n"
+                "                         2025     2024\n                          £m       £m\n"
+                "United Kingdom            40.1     38.0\nEurope (excluding UK)      12.0     11.5\n"
+                "USA and Canada             8.0      6.0\n")
+        regions, number = accounts.regions_from_pages(["Strategic report", page], turnover=60_100_000)
+        self.assertEqual(number, 2)
+        self.assertEqual(regions[1:], [{"region": "Europe", "value": 12_000_000},
+                                       {"region": "USA and Canada", "value": 8_000_000}])
+        self.assertEqual(accounts.overseas_share_from(regions, 60_100_000), round(20_000_000 / 60_100_000, 3))
+        self.assertIsNone(accounts.overseas_share_from(regions, 90_000_000))   # rows don't add up to turnover
+        cols = fx_notes.columns({"regions": regions, "regions_page": 2, "format": "pdf"}, "X LTD", "https://doc")
+        self.assertEqual(cols["turnover_regions"], "United Kingdom £40.1m · Europe £12m · USA and Canada £8m")
+        self.assertEqual(cols["turnover_regions_url"], "https://doc#page=2")
+        self.assertEqual(fx_notes.filed_proof(cols)[0], 20)
+
+    def test_run_summary_counts_the_fx_facts(self):
+        rows = [main.new_row(untapped_reasons="x", fx_forwards="Forward contracts to buy US$5m", fx_today="Uses forward contracts",
+                             currency_source="forward contracts in the accounts", filed_fx_score="40", fx_gain_loss_gbp="-60000"),
+                main.new_row(untapped_reasons="x", currency_source="HMRC customs (estimated mix)", filed_fx_score="0")]
+        with mock.patch.object(excel, "is_checked", lambda r: True):
+            lines = main.fx_summary(rows)
+        self.assertIn("forward contracts with a size 1", lines[0])
+        self.assertIn("how they handle FX Uses forward contracts 1", lines[0])
+        self.assertIn("FX gain/loss 1 (£50k+ 1)", lines[0])
+        self.assertIn("HMRC customs (estimated mix) 1", lines[1])
+        self.assertIn("50+ 0, 1-49 1, none 1", lines[2])
 
 
 class TestQualify(unittest.TestCase):
