@@ -11,10 +11,29 @@ import { kvKey } from "../api/kv.mjs";
 export const NAMESPACE_TITLE = process.env.CLOUDFLARE_KV_NAMESPACE || "fx-dashboard-store";
 const API = "https://api.cloudflare.com/client/v4";
 
+// Secrets pasted with a stray space or line break still work; an account ID that isn't one says so plainly.
+for (const k of ["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID"]) {
+  if (process.env[k] !== undefined) process.env[k] = process.env[k].trim();
+}
+if (/^[0-9a-f]{32}$/i.test(process.env.CLOUDFLARE_ACCOUNT_ID || "")) {
+  process.env.CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID.toLowerCase();
+}
 export const cloudflareConfigured = () => Boolean(process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_ID);
+
+/** Why CLOUDFLARE_ACCOUNT_ID can't be an account ID, or "" — the API only answers "could not route" otherwise. */
+export function accountIdProblem(id = process.env.CLOUDFLARE_ACCOUNT_ID || "") {
+  if (/^[0-9a-f]{32}$/.test(id)) return "";
+  const shape = id.includes("@") ? "an email address" : /^[0-9a-f]{32}$/i.test(id) ? "in capitals"
+    : `${id.length} characters${/[^0-9a-f]/i.test(id) ? ", not all hex digits" : ""}`;
+  return `CLOUDFLARE_ACCOUNT_ID isn't a Cloudflare account ID (expected 32 lower-case hex characters; got ${shape}). ` +
+    "Copy the Account ID from the Cloudflare dashboard → Workers & Pages (right-hand side) or Account home → ⋯ → " +
+    "Copy account ID — not the Zone ID or your email — into the GitHub secret.";
+}
 export const netlifyConfigured = () => Boolean(process.env.NETLIFY_SITE_ID && process.env.NETLIFY_AUTH_TOKEN);
 
 async function cf(path, init = {}) {
+  const problem = accountIdProblem();
+  if (problem) throw new Error(problem);
   const res = await fetch(`${API}/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}${path}`, {
     ...init,
     headers: { authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, ...(init.headers || {}) },
