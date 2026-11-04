@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, companyPath, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -18,8 +18,8 @@ const ago = (iso) => {
 };
 
 const CONF_COLOUR = { Verified: "#10B981", Confirmed: "#38BDF8", Likely: "#F59E0B", Guess: "rgba(255,255,255,.4)" };
-const GROUP_NOTE = { Confirmed: "finance contact verified or confirmed", Guess: "likely or best guess — check before calling",
-                     "No one named": "no finance person found yet" };
+const GROUP_NOTE = { Confirmed: "finance contact verified or confirmed", Likely: "a likely finance lead — check before calling",
+                     "Ask for the FD": "no finance contact confirmed — ask for the Finance Director by title" };
 const day = (iso) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "");
 
 export default function AccountsApp() {
@@ -428,19 +428,24 @@ function ContactLine({ r }) {
   const conf = r.finance_contact_confidence;
   return (
     <div className="contact">
-      {r.finance_contact ? (
+      {presentedContact(r) ? (
         <>
           <span className="person">{r.finance_contact}</span>
           <span className="role">{r.finance_contact_role}</span>
           {conf && <span className="badge" style={{ color: CONF_COLOUR[conf], borderColor: CONF_COLOUR[conf] }}>{conf}</span>}
         </>
-      ) : <span className="role">No finance contact found yet</span>}
+      ) : <span className="person ask">{askFor(r)}</span>}
       <span className="links">
-        {r.finance_contact_linkedin
+        {presentedContact(r) && r.finance_contact_linkedin
           ? <a href={r.finance_contact_linkedin} target="_blank" rel="noreferrer">LinkedIn profile</a>
           : r.linkedin_search_url && <a href={r.linkedin_search_url} target="_blank" rel="noreferrer">LinkedIn search</a>}
         {r.company_name && <a href={googleFd(r)} target="_blank" rel="noreferrer">Check on Google</a>}
       </span>
+      {!presentedContact(r) && contactClues(r).length > 0 && (
+        <div className="clues" title="Research clues: named in the register or accounts, but nothing says they run finance">
+          Clues: {contactClues(r).join(" · ")}
+        </div>
+      )}
       {r.no_fd_likely && (
         <div className="no-fd" title={r.no_fd_likely}>
           <b>Probably no FD</b> — {r.no_fd_likely}.
@@ -740,6 +745,8 @@ a.co:hover{color:#34D399}
 .docs{list-style:none;margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 20px;font-size:13px}
 .no-fd{flex-basis:100%;font-size:12.5px;color:rgba(255,255,255,.65);padding:6px 10px;border-radius:7px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18)}
 .no-fd b{color:#FBBF24;font-weight:700}
+.person.ask{color:#A5B4FC}
+.clues{flex-basis:100%;font-size:12.5px;color:rgba(255,255,255,.55)}
 .due-n{margin-left:6px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:9px;background:rgba(248,113,113,.18);color:#FCA5A5}
 .channels{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .channels-l{font-size:11px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.05em}

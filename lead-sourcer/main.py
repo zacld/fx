@@ -76,6 +76,7 @@ CSV_FIELDS = [
     "finance_contact_source",
     "finance_contact_confidence",
     "finance_contact_evidence",
+    "finance_contact_clues",
     "verify_finance_contact_url",
     "linkedin_search_url",
     "lead_director",
@@ -565,7 +566,7 @@ def company_row(
                                       customs["import_months"] + customs["export_months"], bool(bank.get("own_bank")),
                                       own_bank_name or os.environ.get("OWN_BANK", "").strip(), triggers.investor_owner(owners)))
         talking["fx_estimate"] = hooks.size_estimate(wallet["low"], wallet["high"], wallet["basis"]) if wallet else ""
-    return new_row(
+    return people.weak_contact_to_clue(new_row(
         **talking,
         section=section_for(company, turnover, band),
         company_name=company["company_name"],
@@ -627,6 +628,7 @@ def company_row(
         finance_contact_source=contact["source"] if contact else "",
         finance_contact_confidence=proof["confidence"],
         finance_contact_evidence="; ".join(proof["evidence"]),
+        finance_contact_clues=" | ".join(people.research_clues(officers, f.get("signatory", ""), contact)),
         verify_finance_contact_url=verify_url if checked else "",
         linkedin_search_url=linkedin_url if checked else "",
         company_secretary=secretary,
@@ -642,7 +644,7 @@ def company_row(
         postcode=company.get("postcode", ""),
         registered_address=company.get("registered_address", ""),
         companies_house_url=f"https://find-and-update.company-information.service.gov.uk/company/{number}",
-    )
+    ))
 
 
 # ---------------------------------------------------------------------------
@@ -1016,7 +1018,10 @@ def print_summary(rows: list[dict], stats: Counter, min_turnover: int,
           + (", ".join(f"{k}: {v:,}" for k, v in sorted(by_source.items(), key=lambda kv: -kv[1])) or "none"))
     print(f"  Finance contact confidence — Verified: {stats['confidence Verified']:,}, "
           f"Confirmed: {stats['confidence Confirmed']:,}, "
-          f"Likely: {stats['confidence Likely']:,}, Guess: {stats['confidence Guess']:,}")
+          f"Likely: {stats['confidence Likely']:,} | no one named (ask for the FD): "
+          f"{sum(1 for r in rows if r['untapped_reasons'] != 'not checked' and not r['finance_contact']):,}, "
+          f"of them with research clues (secretary / signatory / weak pick): "
+          f"{sum(1 for r in rows if not r['finance_contact'] and r['finance_contact_clues']):,}")
     print(f"  Company websites tried: {stats['site_tried']:,}, confirmed: {stats['site_found']:,} | "
           f"news checked: {stats['news_tried']:,}, with a finance appointment: {stats['news_found']:,} | "
           f"in a gender pay gap / modern slavery filing: {stats['in_registry']:,}")

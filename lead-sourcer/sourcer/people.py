@@ -215,9 +215,11 @@ def choose_finance_contact(officers: list[dict], accounts_people: list[dict], we
       Confirmed  a finance job title says so: filed occupation, accounts,
                  the company's website, a registry filing or a dated news
                  item (2 years or less);
-      Likely     a qualified accountant on the board / as secretary, or the
-                 secretary also signed the accounts, or older news;
-      Guess      company secretary alone, or the director who signed the accounts.
+      Likely     a qualified accountant on the board / as secretary, a director
+                 filed only as "Accountant", or older news.
+    A company secretary or the director who signed the accounts is not, on
+    that alone, a finance decision-maker: they're research clues
+    (research_clues()), and the page says "Ask for the Finance Director".
     """
     def officer_for(name: str) -> Optional[dict]:
         return next((o for o in officers if same_person(o["name"], name)), None)
@@ -266,19 +268,55 @@ def choose_finance_contact(officers: list[dict], accounts_people: list[dict], we
         return {"name": pick["name"], "role": f"{role} ({letters_for(pick['name'])})",
                 "source": f"qualified accountant ({letters_for(pick['name'])}) and {role.lower()} — likely the finance lead",
                 "confidence": LIKELY, "officer": director}
-    if secretary:
-        director = next((d for d in directors if same_person(d["name"], secretary["name"])), None)
-        signed = bool(signatory) and same_person(secretary["name"], signatory)
-        return {"name": secretary["name"], "role": "Company Secretary",
-                "source": "company secretary" + (" and director" if director else "")
-                          + (", signed the accounts" if signed else "") + " — often the finance lead",
-                "confidence": LIKELY if signed else GUESS, "officer": director}
-    if signatory and len(directors) > 1:
+    return None   # a secretary or signatory alone is a clue (research_clues), not a finance contact
+
+
+def research_clues(officers: list[dict], signatory: str = "", contact: Optional[dict] = None) -> list[str]:
+    """
+    People who might lead finance but whom no finance title names: the company
+    secretary and the director who signed the accounts (not the MD / CEO), one
+    line each, merged when they're the same person; the picked contact left out.
+    ["JANE SMITH — company secretary and director, signed the accounts"].
+    """
+    directors = [o for o in officers if o["role"] != "Company Secretary"]
+    picked = contact["name"] if contact else ""
+    clues: dict[str, list[str]] = {}
+
+    def add(name: str, what: str) -> None:
+        if picked and same_person(name, picked):
+            return
+        key = next((k for k in clues if same_person(k, name)), name)
+        clues.setdefault(key, []).append(what)
+
+    for o in officers:
+        if o["role"] == "Company Secretary":
+            add(o["name"], "company secretary" + (" and director" if any(same_person(d["name"], o["name"])
+                                                                       for d in directors) else ""))
+    if signatory:
         officer = next((d for d in directors if same_person(d["name"], signatory)), None)
-        if officer and roles.classify_role(officer.get("occupation") or "") not in ((1, "Managing Director"), (1, "CEO")):
-            return {"name": officer["name"], "role": "Director", "source": "signed the accounts — often the finance director",
-                    "confidence": GUESS, "officer": officer}
-    return None
+        if not officer or roles.classify_role(officer.get("occupation") or "") not in (
+                (1, "Managing Director"), (1, "CEO")):
+            add(officer["name"] if officer else signatory, "signed the accounts")
+    return [f"{name} — {', '.join(what)}" for name, what in clues.items()]
+
+
+def weak_contact_to_clue(row: dict) -> dict:
+    """
+    A row whose finance contact ended up a Guess (a registry or search gives them
+    a non-finance or former role, or they look like a professional secretary):
+    the name moves to `finance_contact_clues` with why, and the contact columns
+    are cleared, so no one is presented as the finance contact on weak evidence.
+    """
+    if not row.get("finance_contact") or row.get("finance_contact_confidence") != GUESS:
+        return row
+    why = next((e[4:] for e in reversed((row.get("finance_contact_evidence") or "").split("; ")) if e.startswith("but ")),
+               row.get("search_check") or "weak evidence")
+    role = f" ({row['finance_contact_role']})" if row.get("finance_contact_role") else ""
+    clue = f"{row['finance_contact']}{role} — not confirmed: {why}"
+    clues = [c for c in (row.get("finance_contact_clues") or "").split(" | ") if c]
+    return {**row, "finance_contact": "", "finance_contact_role": "", "finance_contact_source": "",
+            "finance_contact_confidence": "", "finance_contact_evidence": "", "finance_contact_linkedin": "",
+            "finance_contact_clues": " | ".join([clue, *clues])}
 
 
 def corroborate(contact: Optional[dict], officers: list[dict], accounts_people: list[dict] = (),

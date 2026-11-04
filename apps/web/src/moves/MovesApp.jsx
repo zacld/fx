@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { WINDOW_WORDS, affected, describeMove, eventsFor, impactLine, mainWindow, pct } from "./moves.js";
+import { askFor, presentedContact } from "../accounts/format.js";
 
 // The day-to-day market moves: how the pound has moved against each currency
 // (official ECB rates, /api/market), why (the event engine's recent events,
@@ -145,7 +146,7 @@ function Move({ cur, events, accounts }) {
               <div className="hit-top">
                 <b>{a.company_name}</b>
                 <span className="chip">{effect.angle}</span>
-                {a.finance_contact && <span className="muted">{a.finance_contact}{a.finance_contact_role ? `, ${a.finance_contact_role}` : ""}</span>}
+                <span className="muted">{presentedContact(a) ? `${a.finance_contact}${a.finance_contact_role ? `, ${a.finance_contact_role}` : ""}` : askFor(a)}</span>
                 {a.currency_confidence && <span className="muted small">currency: {a.currency_confidence}{a.currency_confidence === "Low" ? " (niche default — check)" : ""}</span>}
               </div>
               <div className="hit-line">
