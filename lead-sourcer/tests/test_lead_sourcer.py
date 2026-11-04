@@ -2329,6 +2329,15 @@ class TestFxNotes(unittest.TestCase):
                          [("contracts", 2_269_479, "EUR", "", 2_400_000)])
         self.assertEqual(forwards("The fair value of the forward-foreign currency contracts at 31 December 2025 is $92,741, "
                                   "and is included within other creditors."), [("fair value", 92_741, "USD", "", None)])
+        # a profit or loss on the contracts taken to the P&L isn't their size (Jeroboams); nor is a table run together
+        # by OCR (Needwood)
+        self.assertEqual(forwards("The fair value profit on forward exchange contracts taken to the statement of "
+                                  "comprehensive income was £1,984 (2024 loss: £40,249)."), [])
+        self.assertEqual(forwards("Trade creditors 3,941,358 3,644,726 Other creditors 143,196 116,513 Accruals and "
+                                  "deferred income 86,193 $2,715 Financial instruments loss on forward contracts 54,891 -"), [])
+        # a fair value given as a gain is still the contracts' value (D.R. Wakefield)
+        self.assertEqual(forwards("The fair value of the forward foreign currency contracts at 31 January 2026 was a gain "
+                                  "of £530,752 (2025: loss of £172,023)."), [("fair value", 530_752, "GBP", "", 172_023)])
         # "outstanding contracts" in the sentence after the one naming forward contracts
         self.assertEqual(forwards("The Company enters into forward exchange contracts to hedge certain portions of forecasted "
                                   "cash flows denominated in foreign currencies. At the year end the company had outstanding "

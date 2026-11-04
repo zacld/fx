@@ -30,7 +30,7 @@ from collections import Counter
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sourcer import accounts, companies_house, fx_notes, group, hooks, incumbent, pdf  # noqa: E402
-import main  # noqa: E402
+import main as finder  # noqa: E402
 
 LOOKS_LIKE = re.compile(r"forward\s+(?:foreign\s+)?(?:exchange|currency)?\s*contract|currency\s+risk|denominated\s+in|"
                         r"sensitivity|geographical|by\s+destination|currency\s+profile", re.I)
@@ -90,7 +90,7 @@ def sample(number: str, label: str, api_key: str, stats: Counter) -> None:
     owners = [o for o in companies_house.get_owners(number, api_key) if not o.get("ceased_on")]
     parent = group.parent_accounts(owners, api_key)
     if parent:
-        cols = main.group_columns(parent)
+        cols = finder.group_columns(parent)
         stats["with a UK parent's accounts"] += 1
         stats["with the group's FX"] += bool(cols["group_fx"])
         print(f"  group: {cols['group_parent_accounts']} | {cols['group_fx'] or 'no FX facts'}"

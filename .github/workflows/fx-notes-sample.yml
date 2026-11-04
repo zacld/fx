@@ -67,6 +67,17 @@ jobs:
             const rows = (data?.rows || []).map((r) => Object.fromEntries(keep.filter((k) => r[k] !== undefined).map((k) => [k, r[k]])));
             writeFileSync("../../lead-sourcer/sample.json", JSON.stringify(rows));
             console.log(`${rows.length} companies on the list`);
+            // Why so few finance contacts come from Companies House job titles: how many directors on the list are
+            // filed with a finance occupation, and which titles (job titles and counts only — never names)
+            const fin = /financ|cfo|treasur|controller|accountant|\bfd\b/i;
+            const occs = (data?.rows || []).map((r) => (r.all_directors || "").split("; ")
+              .map((d) => (d.match(/\(([^()]*)\)$/) || [])[1] || ""));
+            const titles = {};
+            occs.flat().filter((o) => fin.test(o)).forEach((o) => { titles[o] = (titles[o] || 0) + 1; });
+            const fromCh = (data?.rows || []).filter((r) => /^Companies House/.test(r.finance_contact_source || "")).length;
+            console.log(`companies with a director filed with a finance occupation: ${occs.filter((o) => o.some((x) => fin.test(x))).length}; ` +
+                        `finance contact from a Companies House occupation: ${fromCh}`);
+            console.log("finance occupations as filed: " + JSON.stringify(Object.entries(titles).sort((a, b) => b[1] - a[1]).slice(0, 25)));
           '
 
       - name: Sample
