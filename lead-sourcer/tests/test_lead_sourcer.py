@@ -1093,6 +1093,15 @@ class TestPeople(unittest.TestCase):
         self.assertEqual((out["finance_contact"], out["finance_contact_confidence"], out["finance_contact_evidence"]), ("", "", ""))
         self.assertEqual(out["finance_contact_clues"], "Ann Lee (Director (FCA)) — not confirmed: modern slavery statement "
                                                        "lists them as HR Director | Sam Roe — signed the accounts")
+        # a finder row (no LinkedIn column until the search step) keeps exactly its columns: the CSV writer refuses others
+        finder_row = main.new_row(finance_contact="Ann Lee", finance_contact_role="Director (FCA)",
+                                  finance_contact_confidence="Guess",
+                                  finance_contact_evidence="but modern slavery statement lists them as HR Director")
+        demoted = people.weak_contact_to_clue(finder_row)
+        self.assertEqual(set(demoted), set(finder_row))
+        out_path = os.path.join(tempfile.mkdtemp(), "rows.csv")
+        main.write_csv([demoted], out_path)
+        self.assertIn("not confirmed: modern slavery statement", open(out_path, encoding="utf-8").read())
         for keep in ("Likely", "Confirmed", "Verified"):
             self.assertEqual(people.weak_contact_to_clue({**row, "finance_contact_confidence": keep}), {**row, "finance_contact_confidence": keep})
 

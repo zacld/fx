@@ -314,9 +314,10 @@ def weak_contact_to_clue(row: dict) -> dict:
     role = f" ({row['finance_contact_role']})" if row.get("finance_contact_role") else ""
     clue = f"{row['finance_contact']}{role} — not confirmed: {why}"
     clues = [c for c in (row.get("finance_contact_clues") or "").split(" | ") if c]
-    return {**row, "finance_contact": "", "finance_contact_role": "", "finance_contact_source": "",
-            "finance_contact_confidence": "", "finance_contact_evidence": "", "finance_contact_linkedin": "",
-            "finance_contact_clues": " | ".join([clue, *clues])}
+    cleared = {k: "" for k in ("finance_contact", "finance_contact_role", "finance_contact_source",
+                               "finance_contact_confidence", "finance_contact_evidence", "finance_contact_linkedin")
+               if k in row}   # only columns the row has: the finder's CSV has no LinkedIn column before the search step
+    return {**row, **cleared, "finance_contact_clues": " | ".join([clue, *clues])}
 
 
 def corroborate(contact: Optional[dict], officers: list[dict], accounts_people: list[dict] = (),
