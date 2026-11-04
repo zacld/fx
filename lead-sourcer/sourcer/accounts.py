@@ -502,8 +502,9 @@ def check_turnover(facts: dict) -> dict:
     if turnover <= 0 or (turnover < MIN_PLAUSIBLE_TURNOVER and kind in _FULL_ACCOUNTS):
         where = f"{kind} accounts" if kind else "the accounts"
         facts.update(turnover=None, turnover_prior=None, turnover_check=(
-            f"turnover read as {hooks.short(turnover) if turnover > 0 else '£0'} from {where}: too small to be "
-            f"right (a £'000 table or a holding company's own figure?); check the accounts"))
+            f"turnover nil in {where} (a holding company?)" if turnover <= 0 else
+            f"turnover read as {hooks.short(turnover)} from {where}: too small to be right (a £'000 table or a "
+            f"holding company's own figure?); check the accounts"))
     return facts
 
 
@@ -735,6 +736,10 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
         page, number = pdf.ocr_find(data, lambda t: bool((r := turnover_text.read_page(t, ocr=True)) and (
             r["turnover"] is not None or r["check"])), purpose="pl", seen=ocr_pages)
         pl = turnover_text.read_page(page, number, ocr=True) if page else None
+        # a page without its £'000 heading (lost to OCR): scaled by the turnover the first pages state, if any
+        earlier = [facts["turnover"]] if facts.get("turnover") is not None else []
+        pl = turnover_text.rescale(pl, earlier + [r["turnover"] for r in [turnover_text.from_prose(
+            [ocr_pages[n] for n in sorted(ocr_pages)])] if r])
         if pl and pl["turnover"] is not None:
             facts.update(turnover=pl["turnover"], turnover_prior=pl["turnover_prior"],
                          **turnover_fields(pl, True, how))

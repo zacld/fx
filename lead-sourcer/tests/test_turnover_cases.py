@@ -205,6 +205,29 @@ class TestRereadingAndOcrOrder(unittest.TestCase):
         self.assertEqual((number, text), (13, seen[13]))
         self.assertEqual(ran, ["pdftoppm"])
 
+    def test_a_lost_thousands_heading_is_put_right_by_the_strategic_report(self):
+        # Nisbets (scanned, Nov 2026): OCR lost the profit and loss page's £'000 heading; the strategic report says £355m
+        report = ("Strategic report\nSales in 2025 totalled £355m, a total increase of £9.5m (2.8%) compared with 2024 "
+                  "and gross profit increased by £4.5m to £122.8m\n")
+        pl = ("Profit and loss account for the year ended 31 December 2025\n"
+              "                                  Note        2025        2024\n"
+              "Turnover                            5     354,989     345,495\n"
+              "Cost of sales                            (232,195)   (227,186)\n"
+              "Gross profit                              122,794     118,309\n")
+        reading = turnover_text.read([report, pl])
+        self.assertEqual((reading["turnover"], reading["turnover_prior"], reading["unit"]),
+                         (354_989_000, 345_495_000, "£'000"))
+        # …or by its KPI table in £m (what corrected the real filing)
+        kpi = "Key performance indicators\n                 £m       £m\n                 2025     2024\nTurnover        355.0    345.5\n"
+        self.assertEqual(turnover_text.read([kpi, pl])["turnover"], 354_989_000)
+        self.assertIn("the accounts state turnover as £355.0m elsewhere", reading["line"])
+        # without anything stating the turnover elsewhere, it isn't guessed (check_turnover then flags it)
+        self.assertEqual(turnover_text.read([pl])["turnover"], 354_989)
+        # a page whose columns say "£ £" is in pounds, whatever else is said
+        in_pounds = pl.replace("Note        2025        2024", "Note        2025        2024\n"
+                                                                "                                                £           £")
+        self.assertEqual(turnover_text.read([report, in_pounds])["turnover"], 354_989)
+
     def test_implausible_turnover_is_a_check_not_a_figure(self):
         # Nisbets' group accounts read as £354k; Caribbean Trading Group's as £0 (FX notes sample, Nov 2026)
         nisbets = accounts.check_turnover({"turnover": 354_000.0, "turnover_prior": 340_000.0, "accounts_type": "group"})
