@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { handle } from "../netlify/functions/market.mjs";
+import { handle } from "../api/market.mjs";
 
 describe("/api/market", () => {
   it("serves the latest moves, never cached; 404 before the first run", async () => {

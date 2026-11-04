@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { handle, markFirstSeen } from "../netlify/functions/accounts.mjs";
+import { handle, markFirstSeen } from "../api/accounts.mjs";
 
 const list = { made_at: "2026-10-21T06:00:00+00:00", count: 1, rows: [{ company_name: "A LTD", rank: 1 }] };
 // An in-memory Blobs store: the list under "latest", Zac's contacted marks under "contacted".

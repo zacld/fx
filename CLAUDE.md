@@ -14,9 +14,17 @@ SQLite/Drizzle, `db:import`/`db:export`), `packages/pipeline` (the CLI stages �
 `apps/web` (the React + Vite dashboard). The data lives in `data/fx.db` (SQLite,
 gitignored), seeded each run from `data/events.json` (committed; market analysis
 only) and `data/leads.json` (names, phones, emails: kept out of git, in the site's
-private Blobs store, fetched and saved by the discovery workflows with
+private store, fetched and saved by the discovery workflows with
 `apps/web/scripts/leads-store.mjs`; the dashboard reads it from `/api/leads` behind
-the Accounts password) and exported back at the end. Run it with `npm run pipeline` (or one stage at a time);
+the Accounts password) and exported back at the end. **Hosting:** Cloudflare Pages
+(moved from Netlify, Nov 2026 — its free plan ran out of deploy credits): the build plus
+the Pages Functions in `apps/web/functions` (thin wrappers over the platform-free
+handlers in `apps/web/api/*.mjs`), the private data in one Workers KV namespace
+(`fx-dashboard-store`, keys `<store>/<key>`, binding `FX_STORE`; workflows write it
+through Cloudflare's API with `apps/web/scripts/store.mjs`). Deployed by
+`deploy-pages.yml` with secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
+`ACCOUNTS_PASSWORD`; it creates the KV store and project the first time and copies
+the private data over from Netlify once (never overwriting what's newer). Run it with `npm run pipeline` (or one stage at a time);
 the daily production run is `.github/workflows/discovery.yml`. See `ARCHITECTURE_V2.md`.
 
 The original Python pipeline (`scripts/*.py`) was ported 1:1 — **same Brain 1/2
@@ -146,7 +154,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`ROLES` in `apps/web/src/accounts/format.js`). Companies added
   by the latest upload are labelled New (`first_seen`, carried over by
   `upload-accounts.mjs`). The Contacted button moves a company to the
-  Contacted tab (marks kept in the Blobs store under `contacted`, via POST
+  Contacted tab (marks kept in the private store under `contacted`, via POST
   `/api/accounts`; the finder never touches them). Follow-ups
   (`apps/web/src/accounts/followups.js`, shared by the page and the API):
   "Contacted" asks the channel (phone / email / LinkedIn / in person) and
@@ -156,10 +164,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   / Upcoming / Nurture / Meeting booked / Not interested, with the suggested
   next action and a copy-ready line (event reminder → new angle → soft bump
   → break-up, from the company's own facts; no AI, nothing sent). Each card has a Notes box
-  (Blobs key `notes`, same POST with `{company_number, notes}`; "" deletes;
+  (store key `notes`, same POST with `{company_number, notes}`; "" deletes;
   searched by the search box and included in the CSV export). Clicking a
   company's name opens its own page, `/accounts/<company number>`
-  (`_redirects` serves accounts.html; same password): key figures, finance
+  (`functions/accounts/[[path]].js` serves accounts.html; same password): key figures, finance
   contact, notes, Contacted, why call, every detail grouped Banking / FX
   exposure / People / Company with each fact linked to its filing or charge,
   and a Source documents list (`detailSections`, `sourceDocuments` in
@@ -205,7 +213,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Running it:** the GitHub workflow `fx-company-finder.yml` fills the
   dashboard's password-protected Accounts page (no run attachments: the
   repo is public)
-  (`/accounts`; the list sits in Netlify Blobs behind `/api/accounts`, never
+  (`/accounts`; the list sits in the private KV store behind `/api/accounts`, never
   in the repo or the public build). A finance director outranks a financial
   controller when picking the contact. Each company's Companies House lookups
   are cached 7 days (`sourcer/register_cache.py`, `REGISTER_CACHE_DAYS`; sooner
@@ -218,7 +226,7 @@ Official ECB reference rates → the pound's moves against each currency
 (arithmetic on official rates). The `/moves` page adds the event engine's
 recent events for the pair ("why it moved", read-only from `events.json`)
 and, behind the Accounts password, the accounts each move hits with a call
-line. Workflow `fx-market-moves.yml`; data in Netlify Blobs behind
+line. Workflow `fx-market-moves.yml`; data in the private KV store behind
 `/api/market`. No AI; doesn't touch the company finder or the event engine.
 
 ---

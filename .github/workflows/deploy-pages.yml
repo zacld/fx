@@ -1,5 +1,16 @@
-name: Deploy dashboard to Netlify
+name: Deploy dashboard to Cloudflare
 
+# The dashboard (apps/web) on Cloudflare Pages: the static build plus the Pages Functions in apps/web/functions
+# (/api/accounts and /api/leads behind the Accounts password, /api/market, and /accounts/<company number>), with the
+# private data in a Workers KV store. Moved from Netlify (Nov 2026), whose free plan ran out of deploy credits.
+#
+# Needs these GitHub secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   a token with Account → Cloudflare Pages: Edit and Account → Workers KV Storage: Edit
+#   CLOUDFLARE_ACCOUNT_ID  the account's ID (Cloudflare dashboard → Workers & Pages, right-hand side)
+#   ACCOUNTS_PASSWORD      the Accounts page password (set on the Pages project on each deploy)
+# The first deploys also copy the private data over from Netlify while NETLIFY_SITE_ID / NETLIFY_AUTH_TOKEN exist
+# (never overwriting what the new site has saved). Without the Cloudflare secrets the job says so and stops.
+#
 # Public repo: anyone can read this workflow's logs, so print counts and company names only, never people's
 # names, emails or phones, and attach no files that hold them. Keys stay in secrets.
 
@@ -18,30 +29,76 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: deploy-dashboard
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
+      - name: Cloudflare secrets
+        id: secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set yet: nothing deployed (see this workflow's header)"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ok == 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.ok == 'true'
         with:
-          node-version: 22   # netlify-cli 27 requires Node >= 22.13
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        if: steps.secrets.outputs.ok == 'true'
+        run: npm ci --no-audit --no-fund
 
       - name: Build dashboard
+        if: steps.secrets.outputs.ok == 'true'
         working-directory: apps/web
         run: npm run build
         env:
           VITE_COMPANIES_HOUSE_API_KEY: ${{ secrets.VITE_COMPANIES_HOUSE_API_KEY }}
 
-      # --filter: netlify-cli sees the npm workspaces (@fx/core, @fx/pipeline,
-      # @fx/web) and refuses to deploy until told which one is the site.
-      # Major version pinned so a new release can't silently break this again.
-      # --functions: /api/accounts and /api/leads (the account list and the event leads, both behind the
-      # Accounts password) and /api/market (the public market moves).
-      - name: Deploy to Netlify
-        run: npx netlify-cli@27 deploy --prod --filter @fx/web --dir="$(pwd)/apps/web/dist" --functions="$(pwd)/apps/web/netlify/functions" --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }}
+      # The KV store and the Pages project (created the first time), the Accounts password, and wrangler.toml
+      # binding the store for the functions.
+      - name: Cloudflare project, store and password
+        id: cf
+        if: steps.secrets.outputs.ok == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ACCOUNTS_PASSWORD: ${{ secrets.ACCOUNTS_PASSWORD }}
+        run: node apps/web/scripts/cloudflare-setup.mjs
+
+      # The move: each private key copied from Netlify Blobs once, only while Cloudflare has nothing under it.
+      - name: Copy the private data from Netlify (first deploys only)
+        if: steps.secrets.outputs.ok == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: node apps/web/scripts/copy-to-cloudflare.mjs
+
+      # Major version pinned so a new release can't silently break the deploy.
+      - name: Deploy to Cloudflare Pages
+        if: steps.secrets.outputs.ok == 'true'
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@4 pages deploy dist --project-name "${{ steps.cf.outputs.project }}" --branch main --commit-dirty=true
+          echo "Dashboard: ${{ steps.cf.outputs.url }} (Accounts: ${{ steps.cf.outputs.url }}/accounts)" | tee -a "$GITHUB_STEP_SUMMARY"
