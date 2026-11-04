@@ -43,10 +43,16 @@ _WORDS = re.compile(r"[A-Za-z]{3,}")
 MIN_TURNOVER = 100_000   # under this a "turnover" is a misread (a note number, a ratio, a £m figure without its heading)
 
 
+_KPI = re.compile(r"\b(?:million|bn|billion)\b|£\s?\d[\d.,]*\s?m\b|%", re.I)
+
+
 def _row(page: str, label: str) -> Optional[re.Match]:
-    """The first table row starting with `label` (not a sentence: at most 3 words after the label)."""
+    """
+    The first table row starting with `label` — not a sentence (at most 3 words after the label) and not a KPI
+    line ("Turnover: £42.2 million (2025: £36.5million)", "Turnover 11,984 16,540 (28)%").
+    """
     for m in re.finditer(rf"^[ \t]*({label})\b[ \t:.]*(.*)$", page, re.I | re.M):
-        if len(_WORDS.findall(m.group(2))) <= 3 and _CELL.search(m.group(2)):
+        if len(_WORDS.findall(m.group(2))) <= 3 and _CELL.search(m.group(2)) and not _KPI.search(m.group(2)):
             return m
     return None
 
@@ -98,7 +104,28 @@ def _says_dollars(text: str) -> bool:
     return re.search(r"US\$|USD|dollar", text, re.I) is not None
 
 
-def read_page(page: str, number: int = 0, ocr: bool = False) -> Optional[dict]:
+_HEADING_LINE = re.compile(
+    r"^[ \t]*(?:the\s+)?(?:(?:consolidated|group)\s+(?:and\s+company\s+)?|company\s+)?"
+    r"(?:statement\s+of\s+(?:comprehensive\s+)?income|(?:statement\s+of\s+)?profit\s+(?:and|or)\s+loss|income\s+statement)"
+    r"[^\n]{0,80}$", re.I | re.M)
+
+
+def statement_pages(text: str) -> tuple[list[str], list[bool]]:
+    """
+    One long text (a tagged filing) cut into sections at the primary statements' heading lines ("Consolidated
+    profit and loss account", "Statement of comprehensive income"), so the statement's turnover row is read, not a
+    KPI table's or a note's: (sections, whether each starts at a statement heading).
+    """
+    cuts = [m.start() for m in _HEADING_LINE.finditer(text) if len(m.group(0).split()) <= 12]
+    bounds = [0, *cuts, len(text)]
+    sections = [text[a:b] for a, b in zip(bounds, bounds[1:]) if text[a:b].strip()]
+    starts = [i > 0 or (cuts[:1] == [0]) for i in range(len(sections))] if cuts else [False] * len(sections)
+    if cuts and cuts[0] != 0 and not text[:cuts[0]].strip():
+        starts[0] = True
+    return sections, starts
+
+
+def read_page(page: str, number: int = 0, ocr: bool = False, statement: Optional[bool] = None) -> Optional[dict]:
     """
     The profit and loss figures on one page of accounts text, or None when the
     page has no turnover or gross-profit row:
@@ -118,6 +145,8 @@ def read_page(page: str, number: int = 0, ocr: bool = False) -> Optional[dict]:
         currency = "£"   # OCR often reads "£" as "$": only a page that says dollars and never £ is in dollars
     unit = {1.0: "£", 1_000.0: "£'000", 1_000_000.0: "£m"}[multiplier]
     heading = PL_HEADING.search(page[: anchor.start()]) or PL_HEADING.search(page)
+    if statement is not None:   # a tagged filing's section: only one starting at a statement heading is one
+        heading = heading if statement else None
     years, group_column = _columns(page, anchor.start())
     basis = "group" if (heading and heading.group(1)) or group_column else "company"
     out = {"turnover": None, "turnover_prior": None, "cost_of_sales": None, "cost_of_sales_prior": None,
@@ -202,6 +231,16 @@ def from_prose(pages: list[str], first_page: int = 1) -> Optional[dict]:
     return None
 
 
+def read_document(text: str) -> Optional[dict]:
+    """read() for one long text (a tagged filing): the statement's section first, page numbers left out."""
+    sections, starts = statement_pages(text)
+    found = [r for r in (read_page(sec, 0, statement=st) for sec, st in zip(sections, starts)) if r]
+    with_turnover = [r for r in found if r["turnover"] is not None]
+    if with_turnover:
+        return min(with_turnover, key=lambda r: (not r["statement"], r["basis"] != "group"))
+    return next((r for r in found if r["check"] and r["statement"]), None) or next((r for r in found if r["check"]), None)
+
+
 def read(pages: list[str], first_page: int = 1, ocr: bool = False) -> Optional[dict]:
     """
     The best profit and loss reading across the pages: the primary statement's
@@ -220,7 +259,7 @@ def describe(reading: dict) -> str:
     """Where the figure came from, for the turnover_source column: "accounts p12: group profit and loss, £'000"."""
     what = "group" if reading["basis"] == "group" else "company"
     where = ("strategic report" if reading.get("prose") else "profit and loss account" if reading["statement"]
-             else "notes")
+             else "table in the accounts")
     page = f"accounts p{reading['page']}" if reading["page"] else "accounts"
     unit = "" if reading.get("prose") else f", {reading['unit']}"
     return f"{page}: {what} {where}{unit} — \"{reading['line']}\""

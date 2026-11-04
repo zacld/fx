@@ -572,7 +572,7 @@ def extract_facts(document: bytes) -> dict:
         # Turnover not tagged (or tagged under another name): its row in the profit and loss table, else the
         # strategic report's sentence; why not when the statement starts at gross profit.
         rows_text = ixbrl_table_text(text)
-        pl = turnover_text.read([rows_text]) or turnover_text.from_prose([plain])
+        pl = turnover_text.read_document(rows_text) or turnover_text.from_prose([plain])
         found = bool(pl and pl["turnover"] is not None)
         if found:
             facts.update(turnover=pl["turnover"], turnover_prior=pl["turnover_prior"],
@@ -598,7 +598,17 @@ def ixbrl_table_text(document_text: str) -> str:
     t = re.sub(r"</t[dh]\s*>", "    ", t, flags=re.I)
     t = re.sub(r"</tr\s*>|<br\s*/?>|</p\s*>|</div\s*>|</h\d\s*>|</li\s*>", "\n", t, flags=re.I)
     t = html.unescape(re.sub(r"<[^>]+>", "", t))
-    return "\n".join(" ".join(line.split(" ")) for line in re.sub(r"[ \t\u00a0]+", " ", t).split("\n") if line.strip())
+    lines = [line.strip() for line in re.sub(r"[ \t\u00a0]+", " ", t).split("\n") if line.strip()]
+    # Tables laid out one cell per block ("<div>Turnover</div><div>3</div><div>43,423,259</div>…", or a <p> per
+    # cell): a figure-only line joins the short label line before it, rebuilding "Turnover 3 43,423,259 42,553,761".
+    out: list[str] = []
+    for line in lines:
+        figures_only = re.fullmatch(r"[£$€]?\s?[\d,.()\-–—%£$€' ]+", line) is not None
+        if figures_only and out and len(out[-1].split()) <= 14 and not out[-1].endswith((".", ":")):
+            out[-1] += "    " + line
+        else:
+            out.append(line)
+    return "\n".join(out)
 
 
 # Audit firms by tier — the tier hints at how sophisticated the finance function
@@ -678,7 +688,7 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
     if not text:
         return None
     facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on, accounts_url=url)
-    if how == "scanned pdf" and (facts["turnover"] is None or "strategic report" in facts.get("turnover_source", "")):
+    if how == "scanned pdf" and (facts["turnover"] is None or "profit and loss account" not in facts.get("turnover_source", "")):
         # the profit and loss account is past the pages OCR'd for the company information (a strategic report's
         # sentence is kept only when the statement can't be found)
         page, number = pdf.ocr_find(data, lambda t: bool((r := turnover_text.read_page(t, ocr=True)) and (

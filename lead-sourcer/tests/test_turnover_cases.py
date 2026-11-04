@@ -152,6 +152,36 @@ class TestTaggedFilings(unittest.TestCase):
         self.assertTrue(f["turnover_source"].startswith("accounts: company profit and loss account, £"))
         self.assertEqual(f["turnover_page"], 0)
 
+    def test_untagged_rows_in_block_layouts_and_kpis_skipped(self):
+        ctx = ('<xbrli:context id="C"><xbrli:entity></xbrli:entity><xbrli:period><xbrli:endDate>2025-12-31'
+               '</xbrli:endDate></xbrli:period></xbrli:context>')
+        kpi = ('<div>Strategic report</div><table><tr><td>Turnover: £42.2 million (2025: £36.5million)</td></tr></table>'
+               '<table><tr><td>Turnover</td><td>11,984</td><td>16,540</td><td>(28)%</td></tr></table>')
+        cases = [
+            # NATOORA: one <div> per cell, only distribution costs tagged; a KPI table and line come first (WOODS).
+            ("NATOORA", kpi + '<div>Profit and loss account</div><div>For the year ended 31 December 2025</div>'
+             '<div>Note</div><div>2025</div><div>2024</div><div>£</div><div>£</div><div>Turnover</div><div>3</div>'
+             '<div>43,423,259</div><div>42,553,761</div><div>Cost of sales</div><div>(30,676,427)</div>'
+             '<div>(30,126,972)</div><div/><div/><div>Gross profit</div><div>12,746,832</div><div>12,426,789</div>',
+             43_423_259, 42_553_761, "company"),
+            # INTERFISH: consolidated, <td><span> cells, £'000 in a separate table.
+            ("INTERFISH", '<p>CONSOLIDATED PROFIT AND LOSS ACCOUNT</p><table><tr><td></td><td>Note</td><td>2025</td>'
+             "<td></td><td>2024</td></tr><tr><td></td><td></td><td>£'000</td><td/><td>£'000</td></tr></table><table>"
+             '<tr><td><span>TURNOVER</span></td> <td><span>3</span></td> <td><span>139,535</span></td> <td/> '
+             '<td><span>109,392</span></td> <td/> <td/> </tr></table>', 139_535_000, 109_392_000, "group"),
+            # ASKO FOODS: <td><div><p><span> cells with the £ in each.
+            ("ASKO FOODS", '<p>Statement of comprehensive income</p><table><tr><td><div><p><span>2025</span></p></div>'
+             '</td><td><div><p><span>2024</span></p></div></td></tr><tr><td><div><p><span>Turnover</span></p></div></td>'
+             '<td><div><p><span> £37,284,099 </span></p></div></td><td><div><p><span> £28,985,269 </span></p></div>'
+             '</td></tr></table>', 37_284_099, 28_985_269, "company"),
+        ]
+        for company, body, turnover, prior, basis in cases:
+            with self.subTest(company):
+                f = accounts.extract_facts(self.ixbrl(body, ctx))
+                self.assertEqual((f["turnover"], f["turnover_prior"], f["turnover_basis"], f["turnover_check"]),
+                                 (turnover, prior, basis, ""))
+                self.assertIn("profit and loss account", f["turnover_source"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -251,6 +251,9 @@ def main() -> None:
         except Exception as e:  # noqa: BLE001 — one bad filing shouldn't stop the sample
             print(f"  failed: {type(e).__name__}: {e}")
             stats["failed"] += 1
+    found = sum(v for k, v in stats.items() if k.startswith("now: turnover found"))
+    checked = found + sum(v for k, v in stats.items() if k.startswith(("now: none", "now: nothing")))
+    print(f"\nTurnover now found for {found} of {checked} sampled companies that had none")
     print("\nSummary:")
     for k, v in sorted(stats.items()):
         print(f"  {k}: {v}")
