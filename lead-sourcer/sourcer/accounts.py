@@ -22,7 +22,7 @@ import urllib.request
 from html.parser import HTMLParser
 from typing import Optional
 
-from sourcer import banks, companies_house, fx_text, hooks, incumbent, pdf, people, profiles, website
+from sourcer import turnover_text, banks, companies_house, fx_text, hooks, incumbent, pdf, people, profiles, website
 
 CH_FILING_HISTORY = f"{companies_house.CH_BASE}/company/{{number}}/filing-history"
 DOCUMENT_CONTENT = "https://document-api.company-information.service.gov.uk/document/{id}/content"
@@ -271,28 +271,56 @@ def _fact_value(fact: dict) -> Optional[float]:
     return -value if fact.get("sign") == "-" else value
 
 
-def _by_period(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool) -> dict[str, float]:
-    """{period end: value} of the whole-company GBP facts for any of `concepts`."""
-    values: dict[str, float] = {}
+# Group accounts tag the group's figures with GroupCompanyDataDimension = Consolidated (the parent's own with another
+# member): the whole entity, not a breakdown. Any other dimension (region, segment, currency) is a breakdown.
+_ENTITY_DIMENSIONS = {"GroupCompanyDataDimension", "ConsolidatedGroupCompanyDimension"}
+
+
+def _entity(context: dict) -> Optional[str]:
+    """ "group" / "company" for a whole-entity context ("" when it doesn't say), None for a breakdown."""
+    if not context["dimensional"]:
+        return ""
+    if not context["members"] or any(d not in _ENTITY_DIMENSIONS for d, _ in context["members"]):
+        return None
+    member = " ".join(m for _, m in context["members"]).lower()
+    return "group" if "consolidat" in member or "group" in member else "company"
+
+
+def _by_period(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool,
+               basis: Optional[dict] = None) -> dict[str, float]:
+    """
+    {period end: value} of the whole-entity GBP facts for any of `concepts`: the group's (consolidated) figure
+    before an undimensioned one before the parent company's own. `basis`, if given, gets {period end: "group" /
+    "company" / ""}.
+    """
+    best: dict[str, tuple[int, float, str]] = {}
     for fact in scanner.facts:
         if fact["concept"] not in concepts:
             continue
         context = scanner.contexts.get(fact["context"])
-        if not context or context["dimensional"] or not context["end"]:
-            continue  # unknown period, or a breakdown (by region, segment…) rather than the total
+        if not context or not context["end"]:
+            continue  # unknown period
+        entity = _entity(context)
+        if entity is None:
+            continue  # a breakdown (by region, segment…) rather than the total
         measure = scanner.units.get(fact["unit"], fact["unit"])
         if not measure.upper().endswith("GBP"):
             continue
         value = _fact_value(fact)
         if value is None or (value < 0 and not allow_negative):
             continue
-        values.setdefault(context["end"], value)
-    return values
+        rank = {"group": 0, "": 1, "company": 2}[entity]
+        if context["end"] not in best or rank < best[context["end"]][0]:
+            best[context["end"]] = (rank, value, entity)
+    if basis is not None:
+        basis.update({end: b[2] for end, b in best.items()})
+    return {end: b[1] for end, b in best.items()}
 
 
-def _latest(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool) -> Optional[tuple[float, str]]:
-    """(value, period end) of the latest whole-company GBP fact for any of `concepts`."""
-    values = _by_period(scanner, concepts, allow_negative)
+def _latest(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool,
+            basis: Optional[dict] = None) -> Optional[tuple[float, str]]:
+    """(value, period end) of the latest whole-entity GBP fact for any of `concepts` (the group's when consolidated)."""
+    values = _by_period(scanner, concepts, allow_negative, basis)
     if not values:
         return None
     end = max(values)
@@ -377,22 +405,31 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-10-26b"   # b: FX reader review fixes (bare figures, minus signs, £000s headings)
+FACTS_VERSION = "2026-11-04"   # turnover / cost of sales from the profit and loss account (PDF, OCR), with its source
+
+
+# A scanned filing whose profit and loss page wasn't searched because the run's OCR time ran out.
+TURNOVER_NOT_READ_YET = "turnover not read yet: this run's OCR time for scanned accounts was used up"
 
 
 def facts_reusable(entry: dict) -> bool:
     """
     Whether cached facts were read with rules still current. Facts from
     "2026-10-26" differ only where the FX line came from the accounts text
-    or a $/€ check was raised, so only those are read again (not every
-    company's accounts).
+    or a $/€ check was raised; facts from "2026-10-26b" only where no
+    turnover was found (the profit and loss reader is new). Only those are
+    read again, not every company's accounts (main.py caps how many a run).
     """
     version = entry.get("facts_version")
+    facts = entry.get("facts") or {}
+    if facts.get("turnover_check") == TURNOVER_NOT_READ_YET:
+        return False
     if version == FACTS_VERSION:
         return True
-    facts = entry.get("facts") or {}
-    return version == "2026-10-26" and not (facts.get("fx_gain_loss_evidence", "").startswith(("accounts", "scanned"))
-                                           or re.search(r"[$€]", facts.get("fx_gain_loss_check", "")))
+    if version not in ("2026-10-26", "2026-10-26b") or facts.get("turnover") is None:
+        return False
+    return version == "2026-10-26b" or not (facts.get("fx_gain_loss_evidence", "").startswith(("accounts", "scanned"))
+                                            or re.search(r"[$€]", facts.get("fx_gain_loss_check", "")))
 
 # An FX gain/loss bigger than this share of turnover is almost certainly a
 # different figure tagged or read as FX (Wanis: purchases in foreign currency,
@@ -491,7 +528,8 @@ def extract_facts(document: bytes) -> dict:
         scanner.close()
     except Exception:  # noqa: BLE001 — a malformed tail shouldn't lose facts already read
         pass
-    turnover = _latest(scanner, TURNOVER_CONCEPTS, allow_negative=False)
+    turnover_basis: dict = {}
+    turnover = _latest(scanner, TURNOVER_CONCEPTS, allow_negative=False, basis=turnover_basis)
     fx_tag_problem = _screen_fx_tags(scanner)
     fx = _latest(scanner, FX_GAIN_LOSS_CONCEPTS, allow_negative=True)
     cost = _latest(scanner, COST_OF_SALES_CONCEPTS, allow_negative=True)  # some filings tag it as a negative
@@ -532,9 +570,51 @@ def extract_facts(document: bytes) -> dict:
         "fx_gain_loss_evidence": "tagged in the accounts" if fx else "",
         "fx_gain_loss_check": "",
     }
+    if turnover:
+        facts.update(turnover_basis=turnover_basis.get(turnover[1], ""), turnover_unit="", turnover_page=0,
+                     turnover_check="", turnover_source="tagged in the accounts (iXBRL)"
+                     + (" — consolidated" if turnover_basis.get(turnover[1]) == "group" else ""))
+    else:
+        # Turnover not tagged (or tagged under another name): its row in the profit and loss table, else the
+        # strategic report's sentence; why not when the statement starts at gross profit.
+        rows_text = ixbrl_table_text(text)
+        pl = turnover_text.read_document(rows_text) or turnover_text.from_prose([plain])
+        found = bool(pl and pl["turnover"] is not None)
+        if found:
+            facts.update(turnover=pl["turnover"], turnover_prior=pl["turnover_prior"],
+                         period_end=facts["period_end"] or "")
+            if facts["cost_of_sales"] is None and pl["cost_of_sales"] is not None:
+                facts["cost_of_sales"] = pl["cost_of_sales"]
+        facts.update(turnover_fields(pl, found, "ixbrl", plain))
     if not fx and not _fx_from_text(facts, plain, "accounts text") and fx_tag_problem:
         facts["fx_gain_loss_check"] = fx_tag_problem
     return check_fx(facts)
+
+
+_HIDDEN_RE = re.compile(r"<ix:header\b.*?</ix:header>|<(script|style)\b.*?</\1>", re.I | re.S)
+
+
+def ixbrl_table_text(document_text: str) -> str:
+    """
+    A tagged filing as layout-like text: one line per table row (cells
+    separated by wide spaces), one per paragraph — so "Turnover  3  45,123
+    41,000" reads as it does in a PDF.
+    """
+    t = _HIDDEN_RE.sub(" ", document_text)
+    t = re.sub(r"</t[dh]\s*>", "    ", t, flags=re.I)
+    t = re.sub(r"</tr\s*>|<br\s*/?>|</p\s*>|</div\s*>|</h\d\s*>|</li\s*>", "\n", t, flags=re.I)
+    t = html.unescape(re.sub(r"<[^>]+>", "", t))
+    lines = [line.strip() for line in re.sub(r"[ \t\u00a0]+", " ", t).split("\n") if line.strip()]
+    # Tables laid out one cell per block ("<div>Turnover</div><div>3</div><div>43,423,259</div>…", or a <p> per
+    # cell): a figure-only line joins the short label line before it, rebuilding "Turnover 3 43,423,259 42,553,761".
+    out: list[str] = []
+    for line in lines:
+        figures_only = re.fullmatch(r"[£$€]?\s?[\d,.()\-–—%£$€' ]+", line) is not None
+        if figures_only and out and len(out[-1].split()) <= 14 and not out[-1].endswith((".", ":")):
+            out[-1] += "    " + line
+        else:
+            out.append(line)
+    return "\n".join(out)
 
 
 # Audit firms by tier — the tier hints at how sophisticated the finance function
@@ -614,6 +694,22 @@ def facts_from_latest_accounts(company_number: str, api_key: str) -> Optional[di
     if not text:
         return None
     facts = dict(extract_facts_from_text(text, made_up, how), filed_on=filed_on, accounts_url=url)
+    if how == "scanned pdf" and (facts["turnover"] is None or "profit and loss account" not in facts.get("turnover_source", "")):
+        # the profit and loss account is past the pages OCR'd for the company information (a strategic report's
+        # sentence is kept only when the statement can't be found)
+        page, number = pdf.ocr_find(data, lambda t: bool((r := turnover_text.read_page(t, ocr=True)) and (
+            r["turnover"] is not None or r["check"])), purpose="pl")
+        pl = turnover_text.read_page(page, number, ocr=True) if page else None
+        if pl and pl["turnover"] is not None:
+            facts.update(turnover=pl["turnover"], turnover_prior=pl["turnover_prior"],
+                         **turnover_fields(pl, True, how))
+            if pl["cost_of_sales"] is not None:
+                facts["cost_of_sales"] = pl["cost_of_sales"]
+            check_fx(facts)   # the FX figure's share of turnover can be checked now
+        elif pl and pl["check"] and facts["turnover"] is None:
+            facts.update(turnover_check=pl["check"], turnover_page=number)
+        elif facts["turnover"] is None and not pdf.pl_budget_left():
+            facts["turnover_check"] = TURNOVER_NOT_READ_YET   # read again next run, not cached as "not found"
     if how == "scanned pdf" and facts["fx_gain_loss"] is None and not facts["fx_gain_loss_check"]:
         # the FX line is in the notes, past the pages OCR'd for the company information
         page, number = pdf.ocr_find(data, lambda t: fx_text.read(t) is not None)
@@ -732,10 +828,15 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
     A turnover under £100k is treated as a misread.
     """
     pages = text.split("\f")
-    turnover = _line_amounts(pages, r"(?:Turnover|Revenue)")
-    if turnover and abs(turnover[0]) < 100_000:
-        turnover = None
-    cost = _line_amounts(pages, r"Cost\s+of\s+sales")
+    pl = turnover_text.read(pages, ocr=how == "scanned pdf") or turnover_text.from_prose(pages)
+    if pl and pl["turnover"] is not None:
+        turnover = (pl["turnover"], pl["turnover_prior"])
+        cost = (pl["cost_of_sales"], pl["cost_of_sales_prior"]) if pl["cost_of_sales"] is not None else None
+    else:
+        turnover = _line_amounts(pages, r"(?:Turnover|Revenue)")   # a row outside a recognisable statement
+        if turnover and abs(turnover[0]) < turnover_text.MIN_TURNOVER:
+            turnover = None
+        cost = _line_amounts(pages, r"Cost\s+of\s+sales")
     cash = _line_amounts(pages, r"Cash\s+at\s+bank(?:\s+and\s+in\s+hand)?")
     net = _line_amounts(pages, r"Net\s+assets")
     plain = " ".join(text.split())
@@ -769,12 +870,43 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
         "format": how,
         "fx_gain_loss_check": "",
         "fx_gain_loss_evidence": "",
+        **turnover_fields(pl, turnover is not None, how, text),
     }
     for number, page in enumerate(pages, 1):
         if _fx_from_text(facts, page, f"{'scanned ' if how == 'scanned pdf' else ''}accounts p{number}",
                          ocr=how == "scanned pdf"):
             break
     return check_fx(facts)
+
+
+def turnover_fields(pl: Optional[dict], found: bool, how: str, text: str = "") -> dict:
+    """
+    What the turnover figure is and where it came from, for the row and the Accounts page:
+      turnover_basis   "group" | "company" | "" (tagged figures: the filing's own total)
+      turnover_unit    the table's "£" / "£'000" / "£m"
+      turnover_page    the PDF page it's on (0: not known)
+      turnover_source  "accounts p12: group profit and loss account, £'000 — \"Turnover 3 45,123 41,000\""
+      turnover_check   why there's no figure when the accounts show why (not disclosed, not in pounds), else ""
+    """
+    if pl and found and pl["turnover"] is not None:
+        source = turnover_text.describe(pl)
+        if how == "ixbrl":
+            source = source.replace("accounts p1: ", "accounts: ").replace("accounts p0: ", "accounts: ")
+        return {"turnover_basis": pl["basis"], "turnover_unit": pl["unit"],
+                "turnover_page": pl["page"] if how != "ixbrl" else 0,
+                "turnover_source": source, "turnover_check": ""}
+    out = {"turnover_basis": "", "turnover_unit": "", "turnover_page": 0, "turnover_check": "",
+           "turnover_source": "accounts text: first turnover row" if found else ""}
+    if not found:
+        if pl and pl["check"]:
+            out.update(turnover_check=pl["check"], turnover_page=pl["page"])
+        elif how in ("pdf", "ixbrl") and turnover_text.PL_HEADING.search(text) and re.search(r"turnover|revenue", text, re.I):
+            out["turnover_check"] = "turnover shown in the profit and loss account but not readable; check the accounts"
+        elif how in ("pdf", "ixbrl"):
+            out["turnover_check"] = "turnover not disclosed: no profit and loss account in the filed accounts"
+        elif how == "scanned pdf":
+            out["turnover_check"] = "turnover not found in the scanned pages read"
+    return out
 
 
 def turnover_from_latest_accounts(company_number: str, api_key: str) -> Optional[dict]:

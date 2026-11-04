@@ -76,6 +76,7 @@ CSV_FIELDS = [
     "finance_contact_source",
     "finance_contact_confidence",
     "finance_contact_evidence",
+    "finance_contact_clues",
     "verify_finance_contact_url",
     "linkedin_search_url",
     "lead_director",
@@ -102,6 +103,10 @@ CSV_FIELDS = [
     "fx_today_evidence",
     "turnover_gbp",
     "turnover_period_end",
+    "turnover_basis",
+    "turnover_source",
+    "turnover_check",
+    "turnover_url",
     "former_finance_director",
     "fx_wallet_low_gbp",
     "fx_wallet_high_gbp",
@@ -357,11 +362,34 @@ def candidates_from_api(niches: list[dict], max_per_sic: int, api_key: str) -> l
 # Rows
 # ---------------------------------------------------------------------------
 
-def describe_size(category: str, turnover: Optional[dict], turnover_checked: bool) -> str:
+def describe_size(category: str, turnover: Optional[dict], turnover_checked: bool, facts: Optional[dict] = None) -> str:
+    f = facts or {}
     if turnover:
-        return f"filed turnover £{turnover['turnover'] / 1e6:,.1f}m (accounts to {turnover['period_end']})"
+        what = f" ({f['turnover_basis']})" if f.get("turnover_basis") else ""
+        return f"filed turnover{what} £{turnover['turnover'] / 1e6:,.1f}m (accounts to {turnover['period_end']})"
+    if turnover_checked and f.get("turnover_check"):
+        return f"last accounts filed as {category}; {f['turnover_check']}"
     found = "not in the filing" if turnover_checked else "not checked"
     return f"last accounts filed as {category}; turnover {found}"
+
+
+def turnover_columns(f: dict, turnover: Optional[dict], number: str) -> dict:
+    """
+    Where the turnover figure came from (turnover_source, turnover_basis group/company, turnover_url: the accounts at
+    its page), or, with no figure, why not (turnover_check: "turnover not disclosed: …"). Never an estimate.
+    """
+    url = f.get("accounts_url") or ""
+    page = f.get("turnover_page") or 0
+    # the accounts document at the figure's page; without the document's link, the company's accounts filings
+    at_page = f"{url}#page={page}" if url and page else url or accounts.accounts_links(number, f)["accounts_url"]
+    if turnover:
+        source = f.get("turnover_source") or ("tagged in the accounts (iXBRL)" if f.get("format") == "ixbrl" else
+                                              "accounts text")
+        return {"turnover_basis": f.get("turnover_basis", ""), "turnover_source": source, "turnover_url": at_page,
+                "turnover_check": ""}
+    check = f.get("turnover_check") or ("" if f else "accounts not read")
+    return {"turnover_basis": "", "turnover_source": "", "turnover_url": at_page if check else "",
+            "turnover_check": check}
 
 
 def section_for(company: dict, turnover: Optional[dict], band: tuple[int, int] = (DEFAULT_BAND_MIN, DEFAULT_BAND_MAX)) -> str:
@@ -388,6 +416,9 @@ def _money(value: Optional[float]) -> str:
     return str(round(value)) if value is not None else ""
 
 
+# Cached accounts read under older rules (accounts.facts_reusable) are read again, at most this many a run, so a change
+# to the readers spreads over a few runs instead of blowing one run's time budget.
+REREAD_MAX_PER_RUN = int(os.environ.get("FINDER_REREAD_MAX", "300"))
 NO_FACTS_RETRY_DAYS = 3   # accounts that gave nothing are read again after this (FACTS_DAYS for readable ones)
 FORMER_FD_TRIGGER_DAYS = 365   # a finance director who left the board within this is a trigger
 
@@ -565,7 +596,7 @@ def company_row(
                                       customs["import_months"] + customs["export_months"], bool(bank.get("own_bank")),
                                       own_bank_name or os.environ.get("OWN_BANK", "").strip(), triggers.investor_owner(owners)))
         talking["fx_estimate"] = hooks.size_estimate(wallet["low"], wallet["high"], wallet["basis"]) if wallet else ""
-    return new_row(
+    return people.weak_contact_to_clue(new_row(
         **talking,
         section=section_for(company, turnover, band),
         company_name=company["company_name"],
@@ -611,13 +642,14 @@ def company_row(
         hmrc_match=trade["confidence"] if trade else "",
         turnover_gbp=str(round(turnover["turnover"])) if turnover else "",
         turnover_period_end=turnover["period_end"] if turnover else "",
+        **turnover_columns(f, turnover, number) if checked else {},
         former_finance_director="; ".join(f"{f['name']} ({f['occupation']}), left the board {f['resigned_on']}"
                                           for f in (former_fd or [])[:2]),
         fx_gain_loss_gbp=_money(f.get("fx_gain_loss")),
         recent_fx_loss=recent_fx_loss(f.get("fx_gain_loss"), f.get("filed_on") or "", today) if checked else "",
         accounts_filed_on=(f.get("filed_on") or "")[:10],
         cost_of_sales_gbp=_money(cost_of_sales),
-        size_basis=describe_size(company["accounts_category"], turnover, turnover_checked),
+        size_basis=describe_size(company["accounts_category"], turnover, turnover_checked, f),
         accounts_category=company["accounts_category"],
         accounts_format=f.get("format", ""),
         trading_as="; ".join(profiles.trading_names("; ".join(f"trading as {n}" for n in f.get("trading_names") or []),
@@ -627,6 +659,7 @@ def company_row(
         finance_contact_source=contact["source"] if contact else "",
         finance_contact_confidence=proof["confidence"],
         finance_contact_evidence="; ".join(proof["evidence"]),
+        finance_contact_clues=" | ".join(people.research_clues(officers, f.get("signatory", ""), contact)),
         verify_finance_contact_url=verify_url if checked else "",
         linkedin_search_url=linkedin_url if checked else "",
         company_secretary=secretary,
@@ -642,7 +675,7 @@ def company_row(
         postcode=company.get("postcode", ""),
         registered_address=company.get("registered_address", ""),
         companies_house_url=f"https://find-and-update.company-information.service.gov.uk/company/{number}",
-    )
+    ))
 
 
 # ---------------------------------------------------------------------------
@@ -810,7 +843,18 @@ def run_pipeline(
         made_up = company.get("accounts_made_up_to", "")
         # read on an earlier run within REGISTER_CACHE_DAYS (and no newer accounts since): no Companies House calls
         cached = register_cache.load(number, made_up) if checked and turnover_check else None
-        if cached and not accounts.facts_reusable(cached):
+        rereading = False
+
+        def may_reread() -> bool:
+            """Facts read with older rules: read again while this run's REREAD_MAX_PER_RUN lasts (counted once)."""
+            nonlocal rereading
+            with spent_lock:
+                if not rereading and spent["reread"] < REREAD_MAX_PER_RUN:
+                    spent["reread"] += 1
+                    rereading = True
+            return rereading
+
+        if cached and not accounts.facts_reusable(cached) and may_reread():
             cached = None   # read with older rules: read the accounts again
         if cached and cached.get("facts") is None and time.time() - cached.get("facts_read_at", 0) > NO_FACTS_RETRY_DAYS * 86400:
             cached = None   # accounts that gave nothing: try again (see NO_FACTS_RETRY_DAYS)
@@ -824,8 +868,9 @@ def run_pipeline(
         # are tried again after NO_FACTS_RETRY_DAYS, not kept for FACTS_DAYS: a passing 503 mustn't hide a
         # company's figures for three months.
         keep_days = register_cache.FACTS_DAYS if (older or {}).get("facts") else NO_FACTS_RETRY_DAYS
-        reuse = bool(older and accounts.facts_reusable(older)
-                     and now - older.get("facts_read_at", now) < keep_days * 86400)
+        current_rules = bool(older) and (accounts.facts_reusable(older) or (older.get("facts") is not None
+                                                                          and not may_reread()))
+        reuse = bool(older and current_rules and now - older.get("facts_read_at", now) < keep_days * 86400)
         # (entries saved before facts_read_at existed count from now)
         t0 = time.monotonic()
         facts = cached["facts"] if cached else older["facts"] if reuse else (
@@ -877,7 +922,7 @@ def run_pipeline(
                 read, regs = spent["accounts_read"], spent["register_read"]
                 print(f"  …checked {done:,} of {min(budget, len(queue)):,} in {(time.monotonic() - started) / 60:.0f} min"
                       f" | accounts read {read} ({spent['accounts'] / max(read, 1):.0f}s each), cached"
-                      f" {spent['accounts_cached']} | OCR {pdf.stats['pages']} pages ({pdf.stats['fx_pages']} for FX),"
+                      f" {spent['accounts_cached']} | OCR {pdf.stats['pages']} pages ({pdf.stats['fx_pages']} for FX, {pdf.stats['pl_pages']} for turnover),"
                       f" {pdf.stats['seconds'] / max(pdf.stats['pages'], 1):.1f}s a page | register read {regs}"
                       f" ({spent['register'] / max(regs, 1):.0f}s each)", flush=True)
             gathered.append(result)
@@ -1016,7 +1061,10 @@ def print_summary(rows: list[dict], stats: Counter, min_turnover: int,
           + (", ".join(f"{k}: {v:,}" for k, v in sorted(by_source.items(), key=lambda kv: -kv[1])) or "none"))
     print(f"  Finance contact confidence — Verified: {stats['confidence Verified']:,}, "
           f"Confirmed: {stats['confidence Confirmed']:,}, "
-          f"Likely: {stats['confidence Likely']:,}, Guess: {stats['confidence Guess']:,}")
+          f"Likely: {stats['confidence Likely']:,} | no one named (ask for the FD): "
+          f"{sum(1 for r in rows if r['untapped_reasons'] != 'not checked' and not r['finance_contact']):,}, "
+          f"of them with research clues (secretary / signatory / weak pick): "
+          f"{sum(1 for r in rows if not r['finance_contact'] and r['finance_contact_clues']):,}")
     print(f"  Company websites tried: {stats['site_tried']:,}, confirmed: {stats['site_found']:,} | "
           f"news checked: {stats['news_tried']:,}, with a finance appointment: {stats['news_found']:,} | "
           f"in a gender pay gap / modern slavery filing: {stats['in_registry']:,}")

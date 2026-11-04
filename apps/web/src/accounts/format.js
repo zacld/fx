@@ -30,11 +30,24 @@ export const hasConfirmedFd = (r) =>
 // Older lists have no `qualified` column: every row counts as in.
 export const isOut = (r) => r.qualified === "Out";
 
-// Who to ask for: a finance contact a search or registry stands behind (Verified/Confirmed), one worked out from
-// weaker clues (Likely/Guess), or nobody named yet.
-export const CONTACT_GROUPS = ["Confirmed", "Guess", "No one named"];
+// A finance contact we can put a name to: a finance title says so (Verified/Confirmed) or a qualified accountant /
+// "Accountant" on the board (Likely). A Guess — a company secretary or accounts signatory alone, or a pick a registry
+// or search contradicts — is never presented as the contact: it's a research clue (lists before the finder stopped
+// picking them still carry a few).
+export const presentedContact = (r) => Boolean(r.finance_contact) && r.finance_contact_confidence !== "Guess";
+export const contactClues = (r) => [
+  ...(r.finance_contact && !presentedContact(r)
+    ? [`${r.finance_contact}${r.finance_contact_role ? ` (${r.finance_contact_role})` : ""} — not confirmed`] : []),
+  ...parts(r.finance_contact_clues),
+];
+// Who to ask for when nobody is confirmed: the MD where the company probably has no FD, else the Finance Director.
+export const askFor = (r) => (r.no_fd_likely ? "Ask for the Managing Director" : "Ask for the Finance Director");
+
+// Who to ask for: a finance contact a search or registry stands behind (Verified/Confirmed), a likely finance lead
+// (Likely), or nobody confirmed — ask for the FD by title.
+export const CONTACT_GROUPS = ["Confirmed", "Likely", "Ask for the FD"];
 export const contactGroup = (r) =>
-  !r.finance_contact ? "No one named" : ["Verified", "Confirmed"].includes(r.finance_contact_confidence) ? "Confirmed" : "Guess";
+  !presentedContact(r) ? "Ask for the FD" : ["Verified", "Confirmed"].includes(r.finance_contact_confidence) ? "Confirmed" : "Likely";
 
 // The finance contact's job role, most senior first. A finance title beats a general one ("Finance Director"
 // is FD, not "Other director"); "Assistant Financial Controller" counts as a controller.
@@ -48,7 +61,7 @@ export const ROLES = [
 ];
 export const ROLE_GROUPS = [...ROLES.map(([label]) => label), "Other role", "No one named"];
 export function roleGroup(r) {
-  if (!r.finance_contact) return "No one named";
+  if (!presentedContact(r)) return "No one named";
   return ROLES.find(([, re]) => re.test(r.finance_contact_role || ""))?.[0] || "Other role";
 }
 
@@ -77,7 +90,7 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!pair || parts(r.currency_pairs).includes(pair)) &&
     (!triggersOnly || Boolean(r.triggers)) &&
     (showOut || !isOut(r)) &&
-    (!q || [r.company_name, r.finance_contact, r.fx_niche, r.main_bank, r.postcode, r.company_number, notes[r.company_number]?.text]
+    (!q || [r.company_name, r.finance_contact, r.finance_contact_clues, r.fx_niche, r.main_bank, r.postcode, r.company_number, notes[r.company_number]?.text]
       .some((v) => (v || "").toLowerCase().includes(q))));
 }
 
@@ -132,14 +145,16 @@ export function detailSections(r) {
       ["Exposure", r.fx_exposure], ["Why untapped", r.untapped_reasons],
     ]],
     ["People", [
-      ["Contact source", r.finance_contact_source], ["Probably no FD", r.no_fd_likely],
+      ["Contact source", presentedContact(r) && r.finance_contact_source], ["Probably no FD", r.no_fd_likely],
+      ["Research clues", contactClues(r).join(" · ")],
       ["Former FD", r.former_finance_director], ["Contact evidence", r.finance_contact_evidence], ["Search check", r.search_check],
       ["Lead director", join(r.lead_director, r.lead_director_occupation)], ["Directors", r.all_directors],
       ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by], ["Owners", r.owners],
       ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
     ]],
     ["Company", [
-      ["Accounts", r.size_basis, r.accounts_url], ["Accounts filed", r.accounts_filed_on, r.accounts_url],
+      ["Accounts", r.size_basis, r.accounts_url], ["Turnover source", r.turnover_source, r.turnover_url],
+      ["Turnover", r.turnover_gbp ? "" : r.turnover_check, r.turnover_url], ["Accounts filed", r.accounts_filed_on, r.accounts_url],
       ["Growth", r.turnover_growth, r.accounts_url], ["Overseas sales", r.overseas_turnover_share, r.accounts_url],
       ["Cash / borrowings", [money(r.cash_gbp), money(r.bank_borrowings_gbp)].filter(Boolean).join(" / "), r.accounts_url],
       ["Net assets", money(r.net_assets_gbp), r.accounts_url], ["Auditor", join(r.auditor, r.auditor_tier)],
@@ -154,7 +169,8 @@ export function detailSections(r) {
 export function sourceDocuments(r) {
   const ch = r.companies_house_url || "";
   const docs = [
-    ["Latest filed accounts", r.accounts_url], ["Accounts at the FX line", r.fx_gain_loss_url],
+    ["Latest filed accounts", r.accounts_url], ["Accounts at the turnover line", r.turnover_url],
+    ["Accounts at the FX line", r.fx_gain_loss_url],
     [`Charge: ${r.main_bank || "bank"}`, r.incumbent_bank_url], ["FX provider's charge", r.fx_today_url],
     ["Companies House record", ch], ["Filing history", ch && `${ch}/filing-history`], ["Charges register", ch && `${ch}/charges`],
     ["Officers", ch && `${ch}/officers`], ["Owners (PSCs)", ch && `${ch}/persons-with-significant-control`],
@@ -170,7 +186,7 @@ const fxLossKey = (r) => {
   return fx < 0 ? fx : 2e15 - fx;
 };
 
-// "Hottest": confirmed contacts first, then guesses, then no one named; within each, the finder's ranking
+// "Hottest": confirmed contacts first, then likely ones, then "ask for the FD"; within each, the finder's ranking
 // (FX evidence + untapped + triggers + a recent FX loss).
 export const SORTS = {
   hot: { label: "Hottest (confirmed first)", key: (r) => CONTACT_GROUPS.indexOf(contactGroup(r)) * 1e6 + r.rank },
@@ -180,7 +196,7 @@ export const SORTS = {
   turnover: { label: "Turnover", key: (r) => -(Number(r.turnover_gbp) || 0) },
   wallet: { label: "FX wallet", key: (r) => -(Number(r.fx_wallet_high_gbp) || 0) },
   fxLoss: { label: "Largest FX loss", key: fxLossKey },
-  confidence: { label: "Contact confidence", key: (r) => (r.finance_contact ? CONFIDENCE.indexOf(r.finance_contact_confidence) : 9) * 10000 + r.rank },
+  confidence: { label: "Contact confidence", key: (r) => (presentedContact(r) ? CONFIDENCE.indexOf(r.finance_contact_confidence) : 9) * 10000 + r.rank },
 };
 
 export const sortRows = (rows, by = "hot") =>
@@ -189,7 +205,7 @@ export const sortRows = (rows, by = "hot") =>
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "finance_contact", "finance_contact_role",
-  "finance_contact_confidence", "finance_contact_linkedin", "search_check", "no_fd_likely", "former_finance_director", "lead_director", "turnover_gbp",
+  "finance_contact_confidence", "finance_contact_clues", "finance_contact_linkedin", "search_check", "no_fd_likely", "former_finance_director", "lead_director", "turnover_gbp", "turnover_basis", "turnover_check",
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",
   "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_check", "recent_fx_loss", "accounts_filed_on", "first_seen",
   "main_bank", "bank_type", "fact_1", "fact_2", "main_currency", "currency_direction",

@@ -569,7 +569,12 @@ class TestPipeline(PipelineTestCase):
         with self.assertRaises(ValueError):
             self.run_bulk(band_min=20_000_000, band_max=5_000_000)
         self.assertEqual(rows["04"]["size_basis"], "last accounts filed as full; turnover not in the filing")  # paper filing
-        self.assertEqual(rows["05"]["size_basis"], "filed turnover £31.5m (accounts to 2024-12-31)")  # read from the PDF
+        self.assertEqual(rows["05"]["size_basis"], "filed turnover (company) £31.5m (accounts to 2024-12-31)")  # from the PDF
+        # where it came from: the profit and loss page, its unit and line, and a link to that page
+        self.assertEqual(rows["05"]["turnover_source"],
+                         "accounts p1: company profit and loss account, £'000 — \"Turnover 3 31,500 28,000\"")
+        self.assertTrue(rows["05"]["turnover_url"].endswith("/company/05/filing-history?category=accounts"))  # no doc link
+        self.assertEqual((rows["01"]["turnover_source"], rows["01"]["turnover_check"]), ("tagged in the accounts (iXBRL)", ""))
         self.assertEqual((rows["05"]["accounts_format"], rows["05"]["cost_of_sales_gbp"], rows["05"]["turnover_growth"]),
                          ("pdf", "24000000", "+12%"))
         self.assertEqual(rows["05"]["main_bank"], "HSBC")
@@ -593,10 +598,11 @@ class TestPipeline(PipelineTestCase):
         self.assertIn("new finance lead Nina Patel (2026-03, news)", beer["triggers"])
         self.assertTrue(beer["verify_finance_contact_url"].endswith("?q=Beer+Imports+finance+director"))
         self.assertEqual(beer["company_secretary"], "Sally Sec")
-        # ... without it, the company secretary is the (unconfirmed) guess.
+        # ... without it, nobody is named: the company secretary alone is a research clue, not the finance contact.
         beer = {r["company_number"]: r for r in self.run_bulk(news_check=False)}["04"]
         self.assertEqual((beer["finance_contact"], beer["finance_contact_source"], beer["finance_contact_confidence"]),
-                         ("Sally Sec", "company secretary — often the finance lead", "Guess"))
+                         ("", "", ""))
+        self.assertEqual(beer["finance_contact_clues"], "Sally Sec — company secretary")
         self.assertNotIn("Sally Sec", beer["all_directors"])
         self.assertEqual((beer["lead_director"], beer["lead_director_occupation"]), ("Fran Founding", "Company Director"))
 
@@ -605,10 +611,9 @@ class TestPipeline(PipelineTestCase):
         # Register says Finance Director; the gender pay gap report (2026) names her with that title: two sources.
         self.assertEqual((rows["01"]["finance_contact_confidence"], rows["01"]["finance_contact_evidence"]),
                          ("Verified", "Companies House: director since 2020; gender pay gap report: Finance Director (2026-03)"))
-        # The secretary guess is named in a modern slavery statement — as HR Director: the wrong person.
+        # The secretary (named in a modern slavery statement as HR Director) is never picked: she stays a clue.
         beer = {r["company_number"]: r for r in self.run_bulk(news_check=False)}["04"]
-        self.assertEqual(beer["finance_contact_confidence"], "Guess")
-        self.assertIn("but modern slavery statement lists them as HR Director", beer["finance_contact_evidence"])
+        self.assertEqual((beer["finance_contact"], beer["finance_contact_clues"]), ("", "Sally Sec — company secretary"))
         plain = {r["company_number"]: r for r in self.run_bulk(registry_check=False)}["01"]
         self.assertEqual(plain["finance_contact_confidence"], "Confirmed")
 
@@ -1063,16 +1068,33 @@ class TestPeople(unittest.TestCase):
         pick = people.choose_finance_contact(officers, accounts_people, [])
         self.assertEqual((pick["name"], pick["source"], pick["confidence"]),
                          ("Jane Smith", "filed accounts: listed as Finance Director (also a director)", "Confirmed"))
-        pick = people.choose_finance_contact(officers, [], [])
-        self.assertEqual((pick["source"], pick["confidence"]), ("company secretary and director — often the finance lead", "Guess"))
-        pick = people.choose_finance_contact(officers, [], [], signatory="J Smith")   # secretary also signed: Likely
-        self.assertEqual((pick["source"], pick["confidence"]),
-                         ("company secretary and director, signed the accounts — often the finance lead", "Likely"))
+        # A company secretary or the director who signed the accounts is not a finance contact on that alone,
+        # even both together: they're research clues.
+        self.assertIsNone(people.choose_finance_contact(officers, [], []))
+        self.assertIsNone(people.choose_finance_contact(officers, [], [], signatory="J Smith"))
+        self.assertIsNone(people.choose_finance_contact(officers[:2], [], [], signatory="J Smith"))
+        self.assertEqual(people.research_clues(officers, "J Smith"),
+                         ["Jane Smith — company secretary and director, signed the accounts"])
+        self.assertEqual(people.research_clues(officers[:2], "J Smith"), ["Jane Smith — signed the accounts"])
+        # a qualified accountant on the board still counts (Likely), and isn't repeated as a clue
         pick = people.choose_finance_contact(officers[:2], [], [], qualified=[{"name": "Bob Jones", "letters": "FCA"}])
         self.assertEqual((pick["name"], pick["role"], pick["confidence"]), ("Bob Jones", "Director (FCA)", "Likely"))
-        pick = people.choose_finance_contact(officers[:2], [], [], signatory="J Smith")
-        self.assertEqual((pick["name"], pick["source"]), ("Jane Smith", "signed the accounts — often the finance director"))
-        self.assertIsNone(people.choose_finance_contact(officers[:1], [], [], signatory="Bob Jones"))  # sole director
+        md = [{"name": "Bob Jones", "role": "Director", "occupation": "Managing Director", "appointed_on": ""}]
+        self.assertEqual(people.research_clues(md, "Bob Jones"), [])   # the MD signing isn't a finance clue
+        pick = people.choose_finance_contact(officers, [], [], qualified=[{"name": "Jane Smith", "letters": "ACA"}])
+        self.assertEqual(people.research_clues(officers, "J Smith", pick), [])
+
+    def test_weak_contact_becomes_a_clue(self):
+        row = {"finance_contact": "Ann Lee", "finance_contact_role": "Director (FCA)", "finance_contact_source": "x",
+               "finance_contact_confidence": "Guess", "finance_contact_linkedin": "",
+               "finance_contact_evidence": "Companies House: director since 2019; but modern slavery statement lists them as HR Director",
+               "finance_contact_clues": "Sam Roe — signed the accounts"}
+        out = people.weak_contact_to_clue(row)
+        self.assertEqual((out["finance_contact"], out["finance_contact_confidence"], out["finance_contact_evidence"]), ("", "", ""))
+        self.assertEqual(out["finance_contact_clues"], "Ann Lee (Director (FCA)) — not confirmed: modern slavery statement "
+                                                       "lists them as HR Director | Sam Roe — signed the accounts")
+        for keep in ("Likely", "Confirmed", "Verified"):
+            self.assertEqual(people.weak_contact_to_clue({**row, "finance_contact_confidence": keep}), {**row, "finance_contact_confidence": keep})
 
     def test_qualified_accountants_and_news_style_names(self):
         self.assertEqual(people.qualified_people("Directors\nJ A Smith FCA\nJane Doe BSc (Hons), ACMA\nBob Jones"),
@@ -1713,6 +1735,28 @@ class TestConfirmation(unittest.TestCase):
         self.assertEqual(len(asked), 1)
         self.assertEqual([r["finance_contact"] for r in out], ["Pat Jones", "Alan Metcalfe", "Kim Fox"])   # the guess went first
         self.assertEqual((stats["to check"], stats["not searched: FD already confirmed"]), (2, 1))
+
+    def test_sized_companies_searched_first_and_contradicted_picks_become_clues(self):
+        rows = [{**self.ROW, "company_number": "1", "finance_contact": "", "finance_contact_confidence": ""},  # no turnover
+                {**self.ROW, "company_number": "2", "company_name": "TARRANT FOODS LIMITED", "turnover_gbp": "41000000",
+                 "finance_contact": "Pat Jones", "finance_contact_role": "Finance Manager",
+                 "finance_contact_confidence": "Likely"}]                       # turnover passes: searched first
+        asked = []
+        fetcher = lambda query, key: asked.append(query) or search_answer(ALAN)
+        _, stats = confirm.confirm_rows(rows, fetcher=fetcher, pause=0, key="k", max_searches=1)
+        self.assertEqual(len(asked), 1)
+        self.assertIn("TARRANT", asked[0].upper())
+        self.assertEqual((stats["to check: filed turnover passes"], stats["checked: filed turnover passes"]), (1, 1))
+        # the search shows our pick as MD: a Guess, so the name moves to the clues and nobody is presented
+        row = {**self.ROW, "finance_contact": "Alan Metcalfe", "finance_contact_role": "Director",
+               "finance_contact_confidence": "Likely"}
+        found = [{"name": "Alan Metcalfe", "title": "Managing Director", "current": True, "sites": ["linkedin.com"],
+                  "url": "https://uk.linkedin.com/in/x"}]
+        out, outcome = confirm.confirm_row(row, found)
+        self.assertEqual((outcome, out["finance_contact_confidence"]), ("pick is not finance (other title)", "Guess"))
+        out = people.weak_contact_to_clue(out)
+        self.assertEqual(out["finance_contact"], "")
+        self.assertTrue(out["finance_contact_clues"].startswith("Alan Metcalfe (Director) — not confirmed: shown as Managing Director"))
 
     def test_cached_companies_still_checked_when_the_budget_runs_out(self):
         fetcher = lambda query, key: search_answer(ALAN)

@@ -69,18 +69,25 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   years) → finance appointment in the news (Google News RSS, headline must
   name the company, ≤4 years) → qualified accountant (ACA/FCA/ACCA/…, or a
   director filed only as "Accountant": Likely) on
-  the board → company secretary → director who signed the accounts.
+  the board. A company secretary or the director who signed the accounts is
+  never a finance contact on that alone (even both together): they're research
+  clues (`finance_contact_clues`), and the page says "Ask for the Finance
+  Director" (the MD when `no_fd_likely`).
   `finance_contact_source` records which, `finance_contact_evidence` lists
   every source naming that person, and `finance_contact_confidence` grades
   it Verified (finance title + 2 independent sources, one current) /
-  Confirmed / Likely / Guess. A registry giving the pick a non-finance
-  title, or a professional secretary (10+ unrelated appointments), drops
-  it to Guess.
+  Confirmed / Likely. A registry giving the pick a non-finance title, a
+  professional secretary (10+ unrelated appointments) or a search showing
+  them in a former / non-finance role makes it a Guess, and a Guess is moved
+  to the clues with why (`people.weak_contact_to_clue`): no one is presented
+  as the finance contact on weak evidence.
   Then the confirmation step (`tools/confirm_contacts.py`, run in the
   finder workflow): a web search per checked company through search APIs
   used within their free/paid allowances in turn — Search1API, Tavily, Exa,
   Serper (secrets `*_API_KEY`, monthly caps `*_MONTHLY`, ≤
-  `SEARCH_MAX_PER_RUN` searches a run, neediest first (nobody / Guess →
+  `SEARCH_MAX_PER_RUN` searches a run — companies whose filed turnover passes
+  the size test (≥ £25m, `SEARCH_MIN_TURNOVER`) first: size established, then
+  the contact confirmed — and within that neediest first (nobody →
   Likely → a Confirmed controller or manager); a finance director already
   Confirmed by a finance title isn't searched — 150 on weekday mornings while Serper's
   2,500 sign-up searches last — results cached 60 days (`SEARCH_CACHE_DAYS`), so steady-state re-checks fit Tavily's free 1,000 a month; accounts qualified Out
@@ -131,7 +138,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   of £50k+ in accounts filed in the last 183 days (`recent_fx_loss`,
   `RECENT_FX_LOSS` in `main.py`) lifts it 15.
 - **Accounts page order:** "Hottest" by default — finance contact Confirmed
-  (Verified/Confirmed) first, then Guess (Likely/Guess), then No one named,
+  (Verified/Confirmed) first, then Likely, then "Ask for the FD" (no one
+  confirmed; research clues shown),
   each in the finder's rank; buttons filter by those groups. "Job role" sort
   and filter: CFO/FD → Head of Finance/Treasurer → Financial Controller →
   Finance Manager → Accountant → Other director → other / no one
@@ -161,7 +169,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   2. Filed accounts: tagged iXBRL figures (turnover, cost of sales, FX
      gain/loss, currency or region breakdowns, hedging, bankers), else the
      PDF's text (pdftotext, or Tesseract OCR of the first pages for scanned
-     filings — system tools installed in the workflow, not Python packages).
+     filings, more pages for turnover and the FX line — system tools
+     installed in the workflow, not Python packages).
      The FX gain/loss: a tag counts only when its row is an exchange/currency
      line in pounds (Wanis tagged "Stocks recognised as expenses"); otherwise
      the "Exchange differences / losses/(gains)" line in the notes text
@@ -169,6 +178,21 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      `OCR_FX_BUDGET_SECONDS` a run). Over 20% of turnover, no gain/loss
      direction, or not in pounds → `fx_gain_loss_check`, never a fact.
      Real cases: `tests/test_fx_cases.py` (`tools/fx_case_study.py`).
+     Turnover and cost of sales (`sourcer/turnover_text.py`): a tagged total
+     (a consolidated — `GroupCompanyDataDimension` — figure is the group's,
+     before the parent's own), else the profit and loss account's row (the
+     table row in a tagged filing; scanned filings: OCR of the pages 15–55%
+     through, `OCR_PL_BUDGET_SECONDS` a run), saying group or company, this
+     year v last (column years), £ / £'000 / £m (the table heading), the page
+     (`turnover_source`, `turnover_basis`, `turnover_url`). Turnover must equal
+     cost of sales + gross profit: a misread or missing turnover cell is worked
+     out from them, and says so. A strategic report sentence ("turnover for the
+     year was £95.3m") only when no statement can be read. Never an estimate:
+     $/€ accounts, a statement starting at gross profit (abridged) or no profit
+     and loss account → `turnover_check` ("turnover not disclosed: …").
+     Real cases: `tests/test_turnover_cases.py` (`tools/turnover_sample.py`,
+     workflow "Turnover sample"). Cached accounts without turnover are read
+     again, `FINDER_REREAD_MAX` (300) a run.
   3. Companies House owners, charges and directors.
   4. The FX niches (`lead-sourcer/config/fx_niches.json`).
 - **Scores:** every score and estimate lists its evidence or basis. Weights

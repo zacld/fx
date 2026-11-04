@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bankUrl, companyPath, contactGroup, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { askFor, bankUrl, companyPath, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -30,7 +30,7 @@ describe("accounts helpers", () => {
   it("filters and sorts", () => {
     expect(filterRows(rows, { fdOnly: true }).map((r) => r.rank)).toEqual([1]);
     expect(filterRows(rows, { pair: "GBP/USD" }).map((r) => r.rank)).toEqual([1, 2]);
-    expect(filterRows(rows, { contact: "No one named" }).map((r) => r.rank)).toEqual([3]);
+    expect(filterRows(rows, { contact: "Ask for the FD" }).map((r) => r.rank)).toEqual([3]);
     expect(filterRows(rows, { query: "natco" }).map((r) => r.rank)).toEqual([2]);
     expect(filterRows(rows, { section: "Above" }).map((r) => r.rank)).toEqual([3]);
     expect(filterRows(rows, { triggersOnly: true }).map((r) => r.rank)).toEqual([1]);
@@ -49,10 +49,34 @@ describe("accounts helpers", () => {
       { rank: 4, finance_contact: "D", finance_contact_confidence: "Guess" },
       { rank: 5, finance_contact: "E", finance_contact_confidence: "Confirmed" },
     ];
-    expect(list.map(contactGroup)).toEqual(["Guess", "No one named", "Confirmed", "Guess", "Confirmed"]);
-    expect(sortRows(list).map((r) => r.rank)).toEqual([3, 5, 1, 4, 2]);
+    // a Guess is never presented as the contact: it's a clue, and the page says who to ask for instead
+    expect(list.map(contactGroup)).toEqual(["Likely", "Ask for the FD", "Confirmed", "Ask for the FD", "Confirmed"]);
+    expect(sortRows(list).map((r) => r.rank)).toEqual([3, 5, 1, 2, 4]);
     expect(sortRows(list, "rank").map((r) => r.rank)).toEqual([1, 2, 3, 4, 5]);
     expect(filterRows(list, { contact: "Confirmed" }).map((r) => r.rank)).toEqual([3, 5]);
+  });
+
+  it("links the turnover to its page and says when it isn't disclosed", () => {
+    const r = { company_number: "07810330", accounts_url: "https://x/doc", turnover_url: "https://x/doc#page=13",
+                turnover_gbp: "80354000", turnover_source: "accounts p13: company profit and loss account, £'000 — \"Turnover 2 80,354 70,650\"" };
+    expect(sourceDocuments(r).map(([label]) => label)).toContain("Accounts at the turnover line");
+    const company = Object.fromEntries(detailSections(r).find(([s]) => s === "Company")[1].map(([k, v, u]) => [k, [v, u]]));
+    expect(company["Turnover source"]).toEqual([r.turnover_source, r.turnover_url]);
+    const none = { turnover_check: "turnover not disclosed: the profit and loss account starts at gross profit (abridged accounts)" };
+    expect(Object.fromEntries(detailSections(none).find(([s]) => s === "Company")[1].map(([k, v]) => [k, v])).Turnover)
+      .toMatch(/not disclosed/);
+  });
+
+  it("shows who to ask for, with research clues, when nobody is confirmed", () => {
+    const guess = { finance_contact: "Sally Sec", finance_contact_role: "Company Secretary", finance_contact_confidence: "Guess",
+                    finance_contact_clues: "Bob Jones — signed the accounts" };
+    expect(presentedContact(guess)).toBe(false);
+    expect(contactClues(guess)).toEqual(["Sally Sec (Company Secretary) — not confirmed", "Bob Jones — signed the accounts"]);
+    expect(askFor(guess)).toBe("Ask for the Finance Director");
+    expect(askFor({ no_fd_likely: "no finance director …" })).toBe("Ask for the Managing Director");
+    const likely = { finance_contact: "Ann Lee", finance_contact_role: "Director (FCA)", finance_contact_confidence: "Likely" };
+    expect([presentedContact(likely), contactClues(likely)]).toEqual([true, []]);
+    expect(filterRows([{ rank: 1, ...guess }], { query: "bob jones" }).length).toBe(1);   // clues are searchable
   });
 
   it("sorts and filters by the finance contact's job role, most senior first", () => {
@@ -64,11 +88,11 @@ describe("accounts helpers", () => {
       person(10, "Commercial Finance Manager"), person(11, "Head of Logistics"),
     ];
     expect(list.map(roleGroup)).toEqual([
-      "Finance Manager", "Other director", "CFO / Finance Director", "Financial Controller", "No one named",
+      "Finance Manager", "Other director", "No one named", "Financial Controller", "No one named",
       "CFO / Finance Director", "Accountant", "Head of Finance / Treasurer", "Financial Controller", "Finance Manager", "Other role",
     ]);
-    // CFO/FD first (confirmed before a guess), then head of finance, controllers, managers, accountants, other directors…
-    expect(sortRows(list, "role").map((r) => r.rank)).toEqual([6, 3, 8, 4, 9, 1, 10, 7, 2, 11, 5]);
+    // CFO/FD first, then head of finance, controllers, managers, accountants, other directors… (a Guess counts as no one)
+    expect(sortRows(list, "role").map((r) => r.rank)).toEqual([6, 8, 4, 9, 1, 10, 7, 2, 11, 3, 5]);
     expect(filterRows(list, { role: "Finance Manager" }).map((r) => r.rank)).toEqual([1, 10]);
   });
 

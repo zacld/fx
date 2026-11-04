@@ -6,9 +6,11 @@ charts), then the finance contact is re-graded:
 
   - the search names our pick with a finance title  -> Verified
     (the pick's own source plus the search: two independent sources);
-  - the search shows our pick in a former or non-finance role (e.g. MD) -> Guess;
+  - the search shows our pick in a former or non-finance role (e.g. MD) -> Guess,
+    and a Guess is then moved to the research clues (no one is shown as the
+    finance contact on weak evidence: the page says "Ask for the Finance Director");
   - the search names a different finance person:
-      our pick was a Guess (or nobody) -> a finance director over a
+      nobody named (or a Guess)      -> a finance director over a
                                           controller, then the one most sites
                                           name, then the most senior, replaces it:
                                           Verified when 2+ separate websites
@@ -37,6 +39,8 @@ NOT_CHECKED = "not checked"
 NEW_FIELDS = ["search_check", "finance_contact_linkedin", "no_fd_likely"]
 # Owner-managed firms this size often have no FD: the MD decides on FX, a controller or manager makes the payments.
 NO_FD_MAX_TURNOVER = 50_000_000
+# Companies whose filed turnover is at least this (the core band's floor) are searched before those without a figure.
+SEARCH_MIN_TURNOVER = 25_000_000
 
 
 def fields_with_confirmation(fields: list[str]) -> list[str]:
@@ -142,6 +146,14 @@ def no_fd_reason(row: dict) -> str:
     ) if x)
 
 
+def sized(row: dict) -> bool:
+    """The company's filed turnover passes the size test (SEARCH_MIN_TURNOVER or more): search these first."""
+    try:
+        return float(row.get("turnover_gbp") or 0) >= SEARCH_MIN_TURNOVER
+    except ValueError:
+        return False
+
+
 def parent_name(group_parent: str) -> str:
     """The parent's name from the group_parent column ("ACME HOLDINGS LIMITED (01234567)")."""
     return re.sub(r"\s*\([^)]*\)\s*$", "", group_parent or "").strip()
@@ -150,15 +162,18 @@ def parent_name(group_parent: str) -> str:
 def confirm_rows(rows: list[dict], fetcher: Optional[profiles.Fetcher] = None, pause: Optional[float] = None,
                  key: Optional[str] = None, max_searches: Optional[int] = None) -> tuple[list[dict], Counter]:
     """
-    Every checked row that still needs a search, neediest first (nobody or a guess, then a likely pick, then a
-    confirmed controller / manager who may report to an FD; list order within each), searched and re-graded until
-    the search budget runs out; the others unchanged. Not searched: Verified contacts, a finance director already
+    Every checked row that still needs a search — companies whose filed turnover passes the size test first (size
+    established, then the contact confirmed), then the rest; within each, neediest first (nobody named, then a likely
+    pick, then a confirmed controller / manager who may report to an FD; list order within each) — searched and
+    re-graded until the search budget runs out; the others unchanged. A pick the search leaves a Guess becomes a
+    research clue (people.weak_contact_to_clue). Not searched: Verified contacts, a finance director already
     Confirmed by a finance title in the register, accounts, website or a filing (a search would only re-grade
     them), and companies qualified Out. Returns (rows, counts of outcomes — no names).
     """
-    def need(r: dict) -> int:
+    def need(r: dict) -> tuple[int, int]:
         confidence = r.get("finance_contact_confidence") or ""
-        return 0 if confidence in ("", people.GUESS) else 1 if confidence == people.LIKELY else 2
+        return (0 if sized(r) else 1,
+                0 if confidence in ("", people.GUESS) else 1 if confidence == people.LIKELY else 2)
 
     candidates = [r for r in rows if r.get("untapped_reasons") != NOT_CHECKED and r.get("qualified") != "Out"]
     wanted = sorted((r for r in candidates if r.get("finance_contact_confidence") != people.VERIFIED and not (
@@ -169,7 +184,10 @@ def confirm_rows(rows: list[dict], fetcher: Optional[profiles.Fetcher] = None, p
                                                  parent_name(r.get("group_parent", "")))
                                                 for r in wanted],
                                                fetcher=fetcher, pause=pause, key=key, max_searches=max_searches)
-    stats: Counter = Counter({"to check": len(wanted), "checked": len(found), f"search {status}": 1,
+    stats: Counter = Counter({"to check": len(wanted), "to check: filed turnover passes": sum(map(sized, wanted)),
+                              "checked": len(found), "checked: filed turnover passes": sum(
+                                  sized(r) for r in wanted if r["company_number"] in found),
+                              f"search {status}": 1,
                               "not searched: FD already confirmed": sum(
                                   r.get("finance_contact_confidence") == people.CONFIRMED
                                   and people.is_finance_director(r.get("finance_contact_role", "")) for r in candidates)})
@@ -179,6 +197,7 @@ def confirm_rows(rows: list[dict], fetcher: Optional[profiles.Fetcher] = None, p
         if id(row) in searched:
             before = row.get("finance_contact_confidence") or "none"
             row, outcome = confirm_row(row, found[row["company_number"]])
+            row = people.weak_contact_to_clue(row)
             row["no_fd_likely"] = no_fd_reason(row)
             stats["probably no FD"] += bool(row["no_fd_likely"])
             stats[outcome] += 1
