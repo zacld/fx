@@ -4,7 +4,8 @@ name: Turnover sample
 # actually show (lead-sourcer/tools/turnover_sample.py). By default it samples the
 # Accounts list's companies without turnover — only their numbers, names and
 # accounts type are taken from the private list, never people. Runs when this file
-# or the tool changes (free on the public repo), or by hand with company numbers.
+# or the tool changes (free on the public repo), or by hand with company numbers; on a
+# push, the companies in lead-sourcer/tools/turnover_sample_numbers.txt if it lists any.
 # Public repo: the log holds filing types and accounts lines only (public records,
 # no personal names) and there are no attachments.
 
@@ -23,6 +24,7 @@ on:
     paths:
       - .github/workflows/turnover-sample.yml
       - lead-sourcer/tools/turnover_sample.py
+      - lead-sourcer/tools/turnover_sample_numbers.txt
 
 permissions:
   contents: read
@@ -78,5 +80,9 @@ jobs:
           MAX: ${{ inputs.max || '40' }}
           PYTHONUNBUFFERED: "1"
         run: |
-          if [ -n "$NUMBERS" ]; then python3 tools/turnover_sample.py $NUMBERS
+          # on a push: the companies listed in tools/turnover_sample_numbers.txt (comment lines skipped), in full detail
+          if [ -z "$NUMBERS" ] && [ -s tools/turnover_sample_numbers.txt ]; then
+            NUMBERS="$(grep -v '^#' tools/turnover_sample_numbers.txt | tr '\n' ' ')"
+          fi
+          if [ -n "$NUMBERS" ]; then SAMPLE_DETAIL=1 python3 tools/turnover_sample.py $NUMBERS
           else python3 tools/turnover_sample.py --accounts sample.json --max "$MAX"; fi

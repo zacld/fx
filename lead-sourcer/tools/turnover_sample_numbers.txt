@@ -1,0 +1,7 @@
+# Companies the turnover sample reads in full detail on a push (blank: the Accounts list's companies without turnover).
+# Parents whose turnover read wrong in the FX notes sample (Nov 2026): Nisbets £354k, Caribbean Trading Group £0,
+# Cromwell Group (Holdings) £5.8m, Marketing And Service Holdings £1.3m.
+01693112
+15532721
+01756362
+14553106
