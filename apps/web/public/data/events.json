@@ -30913,6 +30913,217 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-08-18T22:14:36.200Z"
   },
+  "363f7bfea1010c9d": {
+    "id": "363f7bfea1010c9d",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/2026/nov/04/uk-interest-rates-increase-expected-service-sector-activity-accelerates-pmi",
+    "headline": "UK interest rates increase expected after services sector activity accelerates",
+    "raw_summary": "Purchasing manager’s index at eight-month high, bolstered by spending on AI as firms regain momentum since start of Iran war Business live – latest updates The Bank of England is expected to raise interest rates on Thursday after a closely watched survey showed growth across the UK’s services sector leapt last month to an eight-month high, bolstered by spending on artificial intelligence. S&amp;P Global’s survey of the services sector in October showed businesses regained much of the momentum they lost after the start of the Iran war, but also felt the impact of a renewed spurt of input price ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-11-04T14:23:58.302Z",
+    "event_type": "Central bank policy expectation",
+    "event_breadth": "broad_macro",
+    "summary": "The BoE is expected to raise rates after a strong services‑sector PMI, likely strengthening the GBP. UK importers of US/EU goods will see cheaper foreign invoices, while exporters earning in USD/EUR will receive fewer pounds per foreign currency. Companies with upcoming cross‑border payments should review their FX exposure today.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "Expected BoE rate hike may strengthen GBP, impacting UK importers paying USD/EUR suppliers and exporters receiving USD/EUR revenue.",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK manufacturers importing US electronic components",
+      "UK fashion retailers importing EU apparel",
+      "UK SaaS firms exporting subscription revenue to EU clients",
+      "UK engineering firms exporting services to US customers"
+    ],
+    "why_now": "The rate decision could be implemented within days, so any invoices settled after Thursday will be priced on a stronger GBP.",
+    "discovery_recommendation": "Limited run — two distinct payment‑flow niches (importers of US/EU goods and exporters with foreign‑currency revenue) are worth targeting.",
+    "confidence_level": "medium",
+    "confidence_reason": "The event is an expectation rather than a confirmed move, but the direction of GBP is clear and the payment‑flow impact is concrete.",
+    "what_happened": "The Bank of England is expected to raise interest rates on Thursday after a services‑sector PMI hit an eight‑month high.",
+    "what_changed_financially": "Higher UK rates are likely to push GBP up against major currencies, making foreign‑currency purchases cheaper for importers and reducing the GBP value of foreign‑currency revenue for exporters.",
+    "who_pays_more": "UK exporters receiving USD or EUR revenue will convert fewer GBP per foreign currency unit.",
+    "who_receives_less": "UK importers buying US‑ or EU‑priced goods will need fewer GBP to settle foreign invoices.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs USD/EUR supplier costs (imports) and USD/EUR revenue vs GBP conversion (exports)",
+    "fx_payment_logic": "UK importers receive invoices in USD or EUR, convert GBP to pay them, and a stronger GBP means they spend less GBP per foreign unit. Conversely, UK exporters receive USD/EUR from overseas customers and must convert it back to GBP; a stronger GBP reduces the GBP amount they receive for the same foreign revenue.",
+    "sales_angle": "If you have EUR or USD invoices due after Thursday, the expected rate hike means you’ll pay less in GBP than you would have a week ago.",
+    "business_impact_summary": "Importers of US‑priced technology components or EU‑sourced fashion will benefit from a cheaper foreign currency cost base, improving margins on upcoming shipments. Exporters of SaaS or engineering services to the US/EU will see a modest erosion of GBP revenue on new contracts, making hedging or pricing adjustments timely.",
+    "exposure_types": [
+      "Import cost exposure (USD/EUR supplier payments)",
+      "Export revenue conversion exposure (USD/EUR receipts)"
+    ],
+    "overall_sales_angle": "The looming BoE rate hike will shift GBP strength, so any upcoming foreign‑currency invoices or receipts should be reviewed now.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US‑priced technology components",
+        "category_priority_score": 78,
+        "business_model": "UK distributor buys semiconductors, PCBs, or IoT modules from US manufacturers, sells to UK OEMs in GBP. Supplier invoices are in USD.",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure — USD payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Invoice arrives in USD → UK importer converts GBP to USD → stronger GBP after rate hike means fewer GBP needed per USD → margin improves.",
+        "margin_risk": "Medium — a 1% GBP/USD move on £2 m annual spend ≈ £20k margin swing if unhedged",
+        "payment_timing_risk": "Medium — typical 30‑45 day payment terms create an FX window between order and settlement",
+        "affected_payment_flow": "USD payments to US component suppliers, usually £100k‑£2 m per shipment, quarterly",
+        "website_validation_signals": [
+          "imported from the United States",
+          "US supplier",
+          "electronics components",
+          "distributed in the UK"
+        ],
+        "avoid_segments": [
+          "UK retailers that source domestically",
+          "companies that already hedge 100% of USD exposure"
+        ],
+        "sales_angle": "Your upcoming US component invoices will cost less in GBP after the BoE rate rise.",
+        "exposure_thesis_template": "This company imports US technology components. A stronger GBP after the rate hike reduces the GBP cost of USD invoices.",
+        "micro_categories": [
+          {
+            "name": "UK semiconductor importers",
+            "why": "Pay USD for chips and wafers; a stronger GBP directly cuts purchase cost.",
+            "search_queries": [
+              "\"semiconductor importer\" UK",
+              "\"chip distributor\" United Kingdom",
+              "\"US semiconductor\" UK wholesale"
+            ],
+            "companies_house_terms": [
+              "semiconductor",
+              "chip import",
+              "electronics import"
+            ]
+          },
+          {
+            "name": "UK IoT hardware distributors",
+            "why": "Buy IoT modules from US manufacturers, invoiced in USD, exposing them to GBP/USD moves.",
+            "search_queries": [
+              "\"IoT hardware\" distributor UK",
+              "\"Internet of Things\" importer UK",
+              "\"US IoT\" supplier UK"
+            ],
+            "companies_house_terms": [
+              "IoT",
+              "hardware import",
+              "technology distributor"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from the United States",
+          "US supplier",
+          "electronics components",
+          "distributed in the UK"
+        ]
+      },
+      {
+        "segment_name": "UK SaaS and consulting firms exporting to EU clients",
+        "category_priority_score": 71,
+        "business_model": "UK service provider sells software licences or consulting projects to EU customers, invoices in EUR, receives EUR and converts to GBP.",
+        "exposure_level": "Medium",
+        "exposure_type": "Export revenue conversion — EUR receipts vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "EU client pays EUR → UK firm converts EUR to GBP → a stronger GBP after the rate hike means fewer GBP per EUR received → revenue in GBP falls.",
+        "margin_risk": "Low‑Medium — a 1.5% GBP/EUR move on €5 m annual revenue ≈ £75k reduced GBP income if unhedged",
+        "payment_timing_risk": "Medium — invoicing often 30‑60 days, creating an FX window before conversion",
+        "affected_payment_flow": "EUR receipts from EU customers, typically £200k‑£5 m per contract, monthly to quarterly",
+        "website_validation_signals": [
+          "serving European clients",
+          "EU market",
+          "software licence",
+          "consulting services Europe"
+        ],
+        "avoid_segments": [
+          "UK firms that invoice exclusively in GBP",
+          "companies with 100% hedging policies"
+        ],
+        "sales_angle": "Your EUR‑denominated contracts will convert to fewer pounds after the BoE rate rise.",
+        "exposure_thesis_template": "This company sells SaaS to EU customers in EUR. A stronger GBP after the rate hike reduces the GBP value of EUR receipts.",
+        "micro_categories": [
+          {
+            "name": "UK cloud‑software providers to EU",
+            "why": "Subscription fees are billed in EUR; a stronger GBP cuts the GBP value of each payment.",
+            "search_queries": [
+              "\"cloud software\" UK EU customers",
+              "\"SaaS\" provider United Kingdom Europe",
+              "\"software licence\" Europe UK"
+            ],
+            "companies_house_terms": [
+              "software",
+              "cloud",
+              "SaaS",
+              "European clients"
+            ]
+          },
+          {
+            "name": "UK management consulting firms with EU accounts",
+            "why": "Consulting fees invoiced in EUR expose the firm to GBP/EUR moves on conversion.",
+            "search_queries": [
+              "\"management consulting\" UK Europe",
+              "\"consultancy\" EU clients UK",
+              "\"business advisory\" Europe UK"
+            ],
+            "companies_house_terms": [
+              "consulting",
+              "advisory",
+              "European clients",
+              "management consultancy"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "serving European clients",
+          "EU market",
+          "software licence",
+          "consulting services Europe"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "semiconductor",
+      "chip import",
+      "electronics import",
+      "IoT",
+      "hardware import",
+      "technology distributor",
+      "software",
+      "cloud",
+      "SaaS",
+      "European clients",
+      "consulting",
+      "advisory",
+      "management consultancy"
+    ],
+    "all_search_queries": [
+      "\"semiconductor importer\" UK",
+      "\"chip distributor\" United Kingdom",
+      "\"US semiconductor\" UK wholesale",
+      "\"IoT hardware\" distributor UK",
+      "\"Internet of Things\" importer UK",
+      "\"US IoT\" supplier UK",
+      "\"cloud software\" UK EU customers",
+      "\"SaaS\" provider United Kingdom Europe",
+      "\"software licence\" Europe UK",
+      "\"management consulting\" UK Europe",
+      "\"consultancy\" EU clients UK",
+      "\"business advisory\" Europe UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-11-04T14:24:42.519Z"
+  },
   "36615285c8ca2eef": {
     "id": "36615285c8ca2eef",
     "headline": "US ISM manufacturing PMI for October 55.5 versus 54.5 estimate",
@@ -56269,16 +56480,13 @@
   },
   "623268d8f38a204b": {
     "id": "623268d8f38a204b",
+    "headline": "Recap: New Zealand jobless rate hits 11-year high, kiwi slips as RBNZ hike bets fade",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/recap-new-zealand-jobless-rate-hits-11-year-high-kiwi-slips-as-rbnz-hike-bets-fade/",
-    "headline": "Recap: New Zealand jobless rate hits 11-year high, kiwi slips as RBNZ hike bets fade",
-    "raw_summary": "The steady drift lower in the kiwi since the release suggests traders are pricing out some of the chance of a December hike rather than reacting to a one-off headline. The fall in two-year swaps supports that reading. With the RBA still leaning hawkish, the widening policy gap leaves NZD/AUD vulnerable to further weakness. The election is the next risk: a Labour-led win would bring the prospect of a dual mandate, which markets would likely read as tilting the RBNZ toward easier policy over time. Inflation expectations surveys later this month are the next test of whether the RBNZ’s hawks can s",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
     "detected_at": "2026-11-04T12:47:38.663Z",
+    "status": "context_only",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "The NZ jobless rate surged to an 11‑year high, causing the kiwi to slip as RBNZ hike bets faded. UK businesses that pay NZD for dairy, meat or receive NZD revenue now face a modest cost shift. With invoices due soon, the timing makes the move relevant today.",
     "currency_pairs": [
       "NZD/AUD",
       "NZD/USD"
@@ -56296,29 +56504,33 @@
       "UK education institutions with NZ student tuition"
     ],
     "why_now": "Several NZD‑denominated supplier invoices are due this week, so the recent kiwi weakness will increase GBP costs immediately",
-    "discovery_recommendation": "Context only – limited UK exposure and no clear, sizable segment for a full discovery run",
     "confidence_level": "high",
     "confidence_reason": "The currency move is explicit and the payment‑flow impact, while limited, is clearly described",
+    "discovery_recommendation": "Context only – limited UK exposure and no clear, sizable segment for a full discovery run",
     "what_happened": "New Zealand jobless rate hit an 11‑year high, prompting traders to price out RBNZ rate‑hike expectations and the kiwi slipped against major currencies",
     "what_changed_financially": "NZD weakened versus AUD and USD, with NZD/AUD falling around 1.5% and NZD/USD down about 1.2% on the day",
     "who_pays_more": "UK importers of New Zealand dairy, meat and other NZD‑priced commodities",
     "who_receives_less": "UK exporters receiving NZD revenue (e.g., education providers with NZ student tuition) see a lower GBP value when converting",
-    "margin_risk": "Low‑to‑medium – a 2% NZD move translates to modest cost changes on typical NZD‑denominated purchases",
-    "payment_timing_risk": "Medium – invoices are often settled 30‑60 days after order, exposing to the recent rate move",
     "affected_payment_flow": "GBP→NZD payments to NZ suppliers and NZD→GBP receipts from NZ customers",
     "fx_payment_logic": "UK importers order dairy or meat from New Zealand suppliers who invoice in NZD; the importer must convert GBP to NZD to pay the invoice. Because the kiwi has weakened, more GBP is needed for each NZD, raising the landed cost. Conversely, UK exporters receiving NZD (e.g., tuition fees) convert the receipts back to GBP at a less favorable rate, reducing the GBP amount received.",
-    "sales_angle": "If you have NZD‑denominated supplier invoices coming due, the recent kiwi weakness means you'll need more pounds to settle them.",
+    "margin_risk": "Low‑to‑medium – a 2% NZD move translates to modest cost changes on typical NZD‑denominated purchases",
+    "payment_timing_risk": "Medium – invoices are often settled 30‑60 days after order, exposing to the recent rate move",
     "business_impact_summary": "UK dairy and meat importers that source from New Zealand will see a modest increase in GBP costs on upcoming invoices, squeezing margins. Education providers with NZ student fees will convert those receipts into fewer pounds, slightly reducing revenue. The effect is immediate for invoices due this week.",
+    "sales_angle": "If you have NZD‑denominated supplier invoices coming due, the recent kiwi weakness means you'll need more pounds to settle them.",
+    "overall_sales_angle": "The kiwi’s recent slide means any NZD‑priced invoices you have to pay now cost more in pounds – worth reviewing your rate today.",
+    "summary": "The NZ jobless rate surged to an 11‑year high, causing the kiwi to slip as RBNZ hike bets faded. UK businesses that pay NZD for dairy, meat or receive NZD revenue now face a modest cost shift. With invoices due soon, the timing makes the move relevant today.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "The steady drift lower in the kiwi since the release suggests traders are pricing out some of the chance of a December hike rather than reacting to a one-off headline. The fall in two-year swaps supports that reading. With the RBA still leaning hawkish, the widening policy gap leaves NZD/AUD vulnerable to further weakness. The election is the next risk: a Labour-led win would bring the prospect of a dual mandate, which markets would likely read as tilting the RBNZ toward easier policy over time. Inflation expectations surveys later this month are the next test of whether the RBNZ’s hawks can s",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
     "exposure_types": [
       "NZD supplier payment exposure",
       "NZD revenue conversion exposure"
     ],
-    "overall_sales_angle": "The kiwi’s recent slide means any NZD‑priced invoices you have to pay now cost more in pounds – worth reviewing your rate today.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "623dbae244628c9d": {
@@ -65448,16 +65660,13 @@
   },
   "73127d27be0fd356": {
     "id": "73127d27be0fd356",
+    "headline": "Italy October services PMI 52.0 vs 51.5 expected",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/italy-october-services-pmi-52-0-vs-51-5-expected/",
-    "headline": "Italy October services PMI 52.0 vs 51.5 expected",
-    "raw_summary": "Prior 51.7 Composite PMI 50.8 vs 50.8 expected Prior 51.0 Key findings: Growth in activity back in line with trend, supported by stronger new business inflows Business sentiment strongest since November last year Input cost inflation surges to almost four-year high Comment: Eleanor Dennison, Economist at S&amp;P Global Market Intelligence: \"The Italian service sector maintained its steady path of growth in October, even signalling stronger inflows of new work. The headline reading was back in line with its average trend, having crept higher over the month. \"Granular sub-sector data revealed th",
-    "pre_relevance_score": 8,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-11-04T12:45:21.530Z",
+    "status": "context_only",
     "event_type": "Economic data",
     "event_breadth": "sector_specific",
-    "summary": "Italy's services PMI came in at 52.0, beating expectations and hinting at a healthier euro‑zone services sector. The data could give the euro a modest lift against the pound, meaning UK firms that pay Italian service providers in euros may see a small increase in costs. The effect is limited, but it provides useful context for FX discussions today.",
     "currency_pairs": [
       "GBP/EUR"
     ],
@@ -65474,28 +65683,32 @@
       "UK hospitality firms contracting Italian catering services"
     ],
     "why_now": "Upcoming EUR‑denominated service invoices may be settled at a slightly weaker GBP following the PMI‑driven euro move",
-    "discovery_recommendation": "Context only — the event offers macro background but no strong immediate lead for discovery",
     "confidence_level": "medium",
     "confidence_reason": "The PMI release is factual but its FX impact is indirect and limited",
+    "discovery_recommendation": "Context only — the event offers macro background but no strong immediate lead for discovery",
     "what_happened": "Italy's services PMI rose to 52.0 in October, above the 51.5 forecast",
     "what_changed_financially": "Stronger‑than‑expected Italian services activity could support the euro, nudging GBP/EUR slightly higher",
     "who_pays_more": "UK companies that settle EUR‑denominated Italian service invoices (e.g., travel agencies, fashion designers, hospitality firms)",
     "who_receives_less": "None directly; UK exporters to Italy may see marginal demand shifts",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP payments to Italian service providers invoiced in EUR",
     "fx_payment_logic": "UK firms that contract Italian service providers receive invoices in euros; they must convert pounds to euros to pay. If the euro strengthens after the PMI release, more pounds are needed per euro, raising the cost of those invoices.",
-    "sales_angle": "If you have upcoming payments to Italian service suppliers, the euro has nudged higher after the latest PMI, so your GBP cost may be a bit more than expected.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK travel, fashion and hospitality companies that import Italian services could face a modest rise in GBP costs on their next invoices. The margin impact is low, but the timing of payments means the rate move could affect cash‑flow planning. It’s a good moment to review hedging or timing of those euro payments.",
-    "exposure_types": [
-      "EUR service payment exposure"
-    ],
+    "sales_angle": "If you have upcoming payments to Italian service suppliers, the euro has nudged higher after the latest PMI, so your GBP cost may be a bit more than expected.",
     "overall_sales_angle": "The modest euro strength from Italy's stronger services PMI could increase the cost of your EUR‑denominated service invoices today",
+    "summary": "Italy's services PMI came in at 52.0, beating expectations and hinting at a healthier euro‑zone services sector. The data could give the euro a modest lift against the pound, meaning UK firms that pay Italian service providers in euros may see a small increase in costs. The effect is limited, but it provides useful context for FX discussions today.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "Prior 51.7 Composite PMI 50.8 vs 50.8 expected Prior 51.0 Key findings: Growth in activity back in line with trend, supported by stronger new business inflows Business sentiment strongest since November last year Input cost inflation surges to almost four-year high Comment: Eleanor Dennison, Economist at S&amp;P Global Market Intelligence: \"The Italian service sector maintained its steady path of growth in October, even signalling stronger inflows of new work. The headline reading was back in line with its average trend, having crept higher over the month. \"Granular sub-sector data revealed th",
+    "pre_relevance_score": 8,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
+    "exposure_types": [
+      "EUR service payment exposure"
+    ],
     "ai_model": "openai/gpt-oss-120b"
   },
   "733a6a73f7f2f207": {
@@ -110761,16 +110974,13 @@
   },
   "bacf44b51302e217": {
     "id": "bacf44b51302e217",
+    "headline": "China services PMI slows to 50.8 in October as price cuts meet rising costs",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/china-services-pmi-slows-to-50-8-in-october-as-price-cuts-meet-rising-costs/",
-    "headline": "China services PMI slows to 50.8 in October as price cuts meet rising costs",
-    "raw_summary": "The data adds to the picture of a Chinese economy still growing but struggling with weak pricing power, which helps explain why authorities are leaning on targeted support such as this week’s expanded buyback lending . Falling selling prices alongside rising costs point to margin pressure for listed service companies, which may limit any equity bounce from the support measures. Firms specifically cited oil among rising input costs, a sign that higher energy prices linked to the Middle East conflict are filtering into China’s economy even as companies cannot pass them on. For the Australian dol",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-11-04T12:46:46.595Z",
+    "status": "context_only",
     "event_type": "Macro indicator",
     "event_breadth": "broad_macro",
-    "summary": "China's services PMI slipped to 50.8, showing weaker domestic demand and price cuts while oil costs rise. UK firms dealing with Chinese service providers may see cost pressures or reduced demand, but the link is indirect.",
     "currency_pairs": [],
     "urgency_score": 3,
     "commercial_relevance": 3,
@@ -110784,29 +110994,33 @@
       "UK consultancy exporters to Chinese clients"
     ],
     "why_now": "The PMI dip signals near‑term pressure on Chinese service pricing, affecting upcoming contract negotiations.",
-    "discovery_recommendation": "Context only — the event offers macro background but no immediate, concrete UK B2B FX hook.",
     "confidence_level": "medium",
     "confidence_reason": "Event is macro‑level and does not specify a concrete payment flow, making the FX link tentative.",
+    "discovery_recommendation": "Context only — the event offers macro background but no immediate, concrete UK B2B FX hook.",
     "what_happened": "China's services PMI fell to 50.8 in October, indicating slower growth and price cuts amid rising input costs.",
     "what_changed_financially": "Service sector pricing pressure in China, with oil input costs rising due to Middle East conflict.",
     "who_pays_more": "UK companies that import Chinese services (e.g., IT outsourcing) may face higher CNY costs if they renegotiate contracts.",
     "who_receives_less": "UK exporters of services to China may see reduced demand and lower revenue in GBP.",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP → CNY payments for Chinese services and CNY → GBP receipts from Chinese customers",
     "fx_payment_logic": "UK businesses that contract Chinese service providers pay in CNY; if Chinese firms tighten pricing or demand falls, UK buyers may need to renegotiate rates, potentially affecting the GBP/CNY conversion needed for payments.",
-    "sales_angle": "If you have contracts with Chinese service providers, the latest PMI suggests they may be revisiting pricing, which could impact your GBP costs.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK firms buying Chinese services could face higher CNY costs or renegotiated terms, while exporters to China may see softer demand, but the impact is modest and indirect.",
+    "sales_angle": "If you have contracts with Chinese service providers, the latest PMI suggests they may be revisiting pricing, which could impact your GBP costs.",
+    "overall_sales_angle": "The slowdown in China's services sector could affect your CNY‑denominated contracts, worth a quick check.",
+    "summary": "China's services PMI slipped to 50.8, showing weaker domestic demand and price cuts while oil costs rise. UK firms dealing with Chinese service providers may see cost pressures or reduced demand, but the link is indirect.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "The data adds to the picture of a Chinese economy still growing but struggling with weak pricing power, which helps explain why authorities are leaning on targeted support such as this week’s expanded buyback lending . Falling selling prices alongside rising costs point to margin pressure for listed service companies, which may limit any equity bounce from the support measures. Firms specifically cited oil among rising input costs, a sign that higher energy prices linked to the Middle East conflict are filtering into China’s economy even as companies cannot pass them on. For the Australian dol",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\benergy price|\\bgas price|\\bf",
     "exposure_types": [
       "CNY payment exposure",
       "Chinese service demand exposure"
     ],
-    "overall_sales_angle": "The slowdown in China's services sector could affect your CNY‑denominated contracts, worth a quick check.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "baf6db4b4df9f6b2": {
@@ -131679,16 +131893,13 @@
   },
   "e43ed0f1ebb0b302": {
     "id": "e43ed0f1ebb0b302",
+    "headline": "Eurozone inflation hits 4% for first time since 2023, piling pressure on ECB",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/eurozone-inflation-hits-4-for-first-time-since-2023-piling-pressure-on-ecb/",
-    "headline": "Eurozone inflation hits 4% for first time since 2023, piling pressure on ECB",
-    "raw_summary": "Eurozone October preliminary CPI +4.0% vs +4.0% y/y expected Prior +3.8% Eurozone October preliminary core CPI +2.5% vs +2.5% y/y expected Prior +2.5% Headline annual inflation in the euro area climbs to 4% in October, hitting that mark for the first time since September 2023. Now, that's a doozy for ECB policymakers. The culprit is once again higher energy prices, with energy inflation accelerating to 20.8% in October this year compared to the same month last year. Even on a monthly basis, energy prices were seen pushing up significantly in rising by 1.4%. That being said, there were broad in",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-11-04T12:45:52.194Z",
+    "status": "context_only",
     "event_type": "Inflation data",
     "event_breadth": "broad_macro",
-    "summary": "Eurozone inflation hit 4% in October, reviving expectations of tighter ECB policy. A weaker GBP/EUR could raise the GBP cost of euro‑priced supplier invoices for UK importers. The effect is not immediate but worth watching for upcoming payments.",
     "currency_pairs": [
       "GBP/EUR"
     ],
@@ -131705,28 +131916,32 @@
       "UK construction firms buying European steel"
     ],
     "why_now": "Upcoming euro‑denominated invoices could become more expensive in GBP if the market prices in a weaker pound following the inflation surprise",
-    "discovery_recommendation": "Context only — monitor the rate but no immediate discovery run needed",
     "confidence_level": "medium",
     "confidence_reason": "The data release was expected and did not trigger an immediate FX move, so impact is moderate and indirect",
+    "discovery_recommendation": "Context only — monitor the rate but no immediate discovery run needed",
     "what_happened": "Eurozone headline inflation rose to 4.0% in October, the highest level since September 2023",
     "what_changed_financially": "Energy prices surged 20.8% YoY, lifting overall CPI and increasing the likelihood of ECB rate hikes",
     "who_pays_more": "UK businesses that settle euro‑denominated supplier invoices, such as manufacturers importing EU components, food & beverage importers, and construction firms buying European steel",
     "who_receives_less": "None directly; exporters receiving euros may see a slight upside",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP payments converted to EUR for supplier invoices",
     "fx_payment_logic": "UK importers receive invoices in euros from European suppliers, then convert pounds to euros to settle them. If the pound weakens against the euro because the ECB may raise rates, more pounds are needed per euro, squeezing margins on those purchases.",
-    "sales_angle": "If you have euro‑denominated invoices coming due, the latest inflation data could mean a higher GBP cost than when you placed the order.",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK firms that import raw materials, components or goods from the euro area may see their landed cost rise if the pound weakens after the inflation report. Exporters receiving euros face only a modest benefit. The timing is relevant for any invoices due in the next few weeks.",
-    "exposure_types": [
-      "EUR supplier payment exposure"
-    ],
+    "sales_angle": "If you have euro‑denominated invoices coming due, the latest inflation data could mean a higher GBP cost than when you placed the order.",
     "overall_sales_angle": "The latest euro‑area inflation could push the pound lower, making your upcoming euro invoices more expensive in pounds.",
+    "summary": "Eurozone inflation hit 4% in October, reviving expectations of tighter ECB policy. A weaker GBP/EUR could raise the GBP cost of euro‑priced supplier invoices for UK importers. The effect is not immediate but worth watching for upcoming payments.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "Eurozone October preliminary CPI +4.0% vs +4.0% y/y expected Prior +3.8% Eurozone October preliminary core CPI +2.5% vs +2.5% y/y expected Prior +2.5% Headline annual inflation in the euro area climbs to 4% in October, hitting that mark for the first time since September 2023. Now, that's a doozy for ECB policymakers. The culprit is once again higher energy prices, with energy inflation accelerating to 20.8% in October this year compared to the same month last year. Even on a monthly basis, energy prices were seen pushing up significantly in rising by 1.4%. That being said, there were broad in",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
+    "exposure_types": [
+      "EUR supplier payment exposure"
+    ],
     "ai_model": "openai/gpt-oss-120b"
   },
   "e4536311a87004f4": {
@@ -133177,6 +133392,57 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-09T07:10:32.340Z"
+  },
+  "e62048ae726b7783": {
+    "id": "e62048ae726b7783",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-september-international-trade-balance-105-0b-vs-108-0b-expected/",
+    "headline": "US September international trade balance -105.0B vs -108.0B expected",
+    "raw_summary": "Prior was -$105.6 billion Goods trade balance -135.0B vs -$134.9 billion prelim US-China balance -$21.87 vs -$18.4 prior Exports $321.51 billion vs $315.67 billion prior Imports of capital goods are a good measure of AI spending and that rose to $157.97 billion vs $146.41 billion previously. Expect that to stay high as long as the buildout continues. For background, the US international trade report is published jointly by the Census Bureau and the Bureau of Economic Analysis at 8:30 am ET, about five weeks after the reference month ends. It provides the full picture of US trade, adding servic",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; -3 \\bgold\\b|\\bsilver\\b|\\bprecious",
+    "detected_at": "2026-11-04T14:24:36.297Z",
+    "event_type": "Trade data",
+    "event_breadth": "broad_macro",
+    "summary": "US trade data shows a larger deficit and a jump in capital goods imports, signalling continued USD demand for AI equipment. UK firms that import US‑priced hardware could see higher GBP costs on upcoming payments.",
+    "currency_pairs": [],
+    "urgency_score": 3,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "US capital goods import surge hints at higher USD demand, modest impact on UK firms buying US AI equipment",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK AI hardware importers",
+      "UK semiconductor equipment distributors",
+      "UK manufacturers buying US automation machinery"
+    ],
+    "why_now": "Upcoming USD‑denominated invoices may be settled at current rates after the trade data release",
+    "discovery_recommendation": "Context only — macro backdrop, not a fresh lead",
+    "confidence_level": "medium",
+    "confidence_reason": "Event is macro trade data without direct FX movement; relevance is indirect",
+    "what_happened": "US September trade balance widened to a $105.0 billion deficit, with capital goods imports rising to $157.97 billion",
+    "what_changed_financially": "Higher US demand for capital goods, indicating stronger USD spending on AI equipment",
+    "who_pays_more": "UK importers of US AI and semiconductor equipment",
+    "who_receives_less": "none",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP → USD payments for US‑priced capital equipment",
+    "fx_payment_logic": "UK companies that buy AI or semiconductor equipment from US suppliers receive invoices in USD, convert GBP to USD to pay, and a stronger USD raises the GBP amount needed.",
+    "sales_angle": "If you have USD‑priced AI equipment invoices, the recent US trade data suggests the dollar may stay firm, increasing your conversion cost.",
+    "business_impact_summary": "UK importers of US capital goods may face higher costs on pending invoices, while exporters to the US see no immediate benefit.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "capital goods import cost pressure"
+    ],
+    "overall_sales_angle": "US capital goods import surge could keep the dollar strong, raising the cost of your USD‑denominated purchases.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
   },
   "e67d5e2cc16a7692": {
     "id": "e67d5e2cc16a7692",
@@ -146615,16 +146881,13 @@
   },
   "fd93f3499aadfb2f": {
     "id": "fd93f3499aadfb2f",
+    "headline": "Bank of England set for ‘further interest rate hikes’ as businesses boost jobs",
     "source": "CityAM",
     "source_url": "https://www.cityam.com/bank-of-england-set-for-further-interest-rate-hikes-as-businesses-boost-jobs/",
-    "headline": "Bank of England set for ‘further interest rate hikes’ as businesses boost jobs",
-    "raw_summary": "The Bank of England is likely to raise interest rates several times in the coming months after businesses increased their headcount for the first time in over two years, analysts have predicted. Survey figures released by S&#38;P Global, which are closely monitored by government officials and central bankers, showed stronger activity across services firms. &#160; [...]",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
     "detected_at": "2026-11-04T12:48:27.668Z",
+    "status": "context_only",
     "event_type": "Interest rate expectations",
     "event_breadth": "broad_macro",
-    "summary": "The BoE expects further rate hikes as the labour market strengthens. Higher UK rates could weaken GBP and raise borrowing costs, affecting firms with GBP loans or foreign‑currency revenue. The outlook is relevant for budgeting but does not create an urgent FX transaction need",
     "currency_pairs": [
       "GBP/USD",
       "GBP/EUR"
@@ -146642,29 +146905,33 @@
       "UK importers financing purchases in GBP"
     ],
     "why_now": "If companies have upcoming loan repayments or currency conversions, the anticipated rate hikes could affect their cash‑flow and hedging decisions today",
-    "discovery_recommendation": "Context only — the event provides macro backdrop but no immediate, concrete payment‑flow hook for new leads",
     "confidence_level": "medium",
     "confidence_reason": "The event is a forward‑looking rate expectation, not a surprise decision, so FX impact is indirect",
+    "discovery_recommendation": "Context only — the event provides macro backdrop but no immediate, concrete payment‑flow hook for new leads",
     "what_happened": "The Bank of England signalled it is likely to raise interest rates several times in the coming months as job growth picks up",
     "what_changed_financially": "Expected higher UK rates could pressure GBP against other currencies, especially USD and EUR",
     "who_pays_more": "UK businesses with variable‑rate GBP loans or financing costs",
     "who_receives_less": "UK exporters receiving foreign‑currency revenue may see a weaker GBP reduce the GBP value of future receipts",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP borrowing costs and GBP conversion of foreign revenue",
     "fx_payment_logic": "Businesses that borrow in GBP will pay more interest as rates rise, while exporters converting EUR or USD receipts into GBP may see a weaker pound reduce the GBP amount they receive, creating FX exposure",
-    "sales_angle": "With the BoE likely to hike rates soon, now is a good time to review your loan‑related FX hedging and currency conversion strategies",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK companies with variable‑rate loans will face higher interest costs, and exporters may see reduced GBP value on foreign earnings, so reviewing hedging now can protect margins",
+    "sales_angle": "With the BoE likely to hike rates soon, now is a good time to review your loan‑related FX hedging and currency conversion strategies",
+    "overall_sales_angle": "Anticipated rate hikes could increase your borrowing costs and affect the GBP value of foreign revenue – let’s ensure you’re protected",
+    "summary": "The BoE expects further rate hikes as the labour market strengthens. Higher UK rates could weaken GBP and raise borrowing costs, affecting firms with GBP loans or foreign‑currency revenue. The outlook is relevant for budgeting but does not create an urgent FX transaction need",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "The Bank of England is likely to raise interest rates several times in the coming months after businesses increased their headcount for the first time in over two years, analysts have predicted. Survey figures released by S&#38;P Global, which are closely monitored by government officials and central bankers, showed stronger activity across services firms. &#160; [...]",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
     "exposure_types": [
       "GBP loan interest exposure",
       "GBP foreign‑currency conversion exposure"
     ],
-    "overall_sales_angle": "Anticipated rate hikes could increase your borrowing costs and affect the GBP value of foreign revenue – let’s ensure you’re protected",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "fdd865e9f03edb39": {
