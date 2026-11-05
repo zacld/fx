@@ -1,4 +1,6 @@
 // GET /api/accounts — the finder's latest account list (FD names included),
+// or with ?view=filings the Recent FX filings list (companies whose new
+// accounts show FX: lead-sourcer/sourcer/filings.py),
 // with the companies marked contacted and Zac's notes; POST /api/accounts
 // {company_number, contacted: true, channel} logs a touch (the first marks it
 // contacted), {contacted: false} takes it off the list, {response} /
@@ -17,6 +19,7 @@ export const STORE = "fx-accounts";
 export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
+export const FILINGS_KEY = "filings";       // {made_at, rows, files_done} — the Recent FX filings tab (fx-filings workflow)
 export const NOTES_MAX = 4000;
 const COMPANY_NUMBER = /^[A-Z0-9]{8}$/i;
 const WRONG_PASSWORD_DELAY_MS = 1000;   // slows down guessing
@@ -79,6 +82,12 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     if (touchesContact) await blobs.setJSON(CONTACTED_KEY, marks);
     if (typeof notes === "string") await blobs.setJSON(NOTES_KEY, noted);
     return reply({ contacted: marks, notes: noted }, 200);
+  }
+  if (new URL(req.url).searchParams.get("view") === "filings") {
+    const filings = await blobs.get(FILINGS_KEY, { type: "json" });
+    if (!filings) return reply({ error: "no FX filings scanned yet — they arrive with the next FX filings run" }, 404);
+    const { files_done: _done, ...rest } = filings;
+    return reply(rest, 200);
   }
   const [data, marks, noted] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY].map((k) => blobs.get(k, { type: "json" })));
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);

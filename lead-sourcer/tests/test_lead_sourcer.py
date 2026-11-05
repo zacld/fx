@@ -33,7 +33,7 @@ sys.path.insert(0, ROOT)
 
 import main  # noqa: E402
 import server  # noqa: E402
-from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, fx_notes, group, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
+from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, fx_notes, group, filings, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
 
 # api/ is a Vercel functions folder, not a package — load run.py by path.
 _spec = importlib.util.spec_from_file_location("api_run", os.path.join(ROOT, "api", "run.py"))
@@ -2207,6 +2207,29 @@ class TestHooks(unittest.TestCase):
         self.assertEqual(set(blank.values()), {""})                                       # nothing qualifies: all blank
         self.assertEqual(set(blank), set(hooks.COLUMNS))
 
+    def test_main_currency_from_regions_only_when_its_the_biggest_real_share(self):
+        """FX filings test, 5 Nov: Connected Care (£22k of Europe beside £31.6m UK) and Broadway Malyan (Europe behind
+        £21m from the Middle East and Asia) were labelled EUR."""
+        tiny = {"turnover": 32_842_246, "regions": [{"region": "United Kingdom", "value": 31_600_000},
+                                                    {"region": "Rest of Europe", "value": 22_556}]}
+        self.assertNotEqual(hooks.currency_exposure("CONNECTED CARE LTD", tiny, [], {})["rule"], "geography")
+        behind = {"turnover": 46_989_606, "regions": [{"region": "Middle East and Asia", "value": 21_300_000},
+                                                      {"region": "United Kingdom", "value": 11_400_000},
+                                                      {"region": "Rest of Europe", "value": 7_363_706}]}
+        self.assertNotEqual(hooks.currency_exposure("BROADWAY MALYAN LTD", behind, [], {})["rule"], "geography")
+        real = {"turnover": 50e6, "regions": [{"region": "United Kingdom", "value": 30e6}, {"region": "North America", "value": 20e6}]}
+        self.assertEqual(hooks.currency_exposure("X LTD", real, [], {})["currency"], "USD")
+
+    def test_sensitivity_is_a_currency_move_not_growth(self):
+        growth = ("As a result of the Group's strategic acquisitions programme statutory gross revenue increased "
+                  "significantly by 25% to €157m, and the profit for the year rose.")
+        self.assertEqual(fx_notes.read([growth])["fx_sensitivity"], [])   # Milo Topco
+        real = ("If the US dollar and euro had weakened 10% against sterling with all other variables held constant, "
+                "post-tax losses would have been reduced by £9,086k (2024 - £6,648k).")
+        self.assertEqual([(x["pct"], x["amount"]) for x in fx_notes.read([real])["fx_sensitivity"]], [(10.0, 9_086_000)])
+        moved = "A 5% movement in the sterling exchange rate would change profit before tax by £120,000."
+        self.assertEqual(len(fx_notes.read([moved])["fx_sensitivity"]), 1)
+
     def test_currency_rules_strongest_first(self):
         text = ("Purchases from suppliers in China are denominated in US dollars. The company also pays some US dollar "
                 "freight. Sales are made in sterling. Euro Quality Lambs Limited trades. ")
@@ -2679,3 +2702,132 @@ class TestReviewFixesIncumbent(unittest.TestCase):
                                    facts={}, owners=[], charges=[], today=self.TODAY,
                                    bank={"own_bank": True}, own_bank_name="Barclays")
         self.assertIn("existing Barclays relationship", row["warm_route"])
+
+
+class TestFxFilings(unittest.TestCase):
+    """The Recent FX filings scanner over a bulk accounts zip laid out like Companies House's."""
+
+    def _zip(self, folder, docs):
+        path = os.path.join(folder, "Accounts_Bulk_Data-2026-11-04.zip")
+        with zipfile.ZipFile(path, "w") as zf:
+            for name, body in docs.items():
+                zf.writestr(name, body)
+        return path
+
+    def test_screen_read_and_keep_big_companies_whose_filing_shows_fx(self):
+        named = ixbrl(current="45,000").replace(
+            b"<table>", b'<p><ix:nonNumeric name="bus:EntityCurrentLegalOrRegisteredName" contextRef="FY2024">'
+                        b"ACME &amp; SONS LIMITED</ix:nonNumeric></p><table>")
+        tiny = b"<html><body>Micro-entity accounts. Turnover not shown.</body></html>"
+        small = ixbrl(current="900", prior="800")   # £0.9m tagged: screened out without being read
+        with tempfile.TemporaryDirectory() as d:
+            path = self._zip(d, {"Prod223_0001_01234567_20241231.html": named,
+                                 "Prod223_0002_07654321_20241231.html": tiny,
+                                 "Prod223_0003_SC123456_20241231.html": small,
+                                 "readme.txt": b"not accounts"})
+            filings.stats.update(files=0, read=0, hits=0, seconds=0.0)
+            hits = filings.scan(path, workers=1)
+        self.assertEqual(filings.stats["files"], 3)
+        self.assertEqual(filings.stats["read"], 1)   # only the £45m filing passed the quick screen
+        self.assertEqual(len(hits), 1)
+        row = hits[0]
+        self.assertEqual((row["company_number"], row["company_name"], row["filed"], row["turnover_gbp"]),
+                         ("01234567", "ACME & SONS LIMITED", "2026-11-04", "45000000"))
+        self.assertEqual(row["fx_gain_loss_gbp"], "-420000")
+        self.assertIn("FX loss £420k", row["filed_fx"])
+        self.assertTrue(row["accounts_url"].endswith("/company/01234567/filing-history"))
+        # the floor decides: under it, read but not kept
+        with tempfile.TemporaryDirectory() as d:
+            path = self._zip(d, {"Prod223_0001_01234567_20241231.html": ixbrl()})   # £23.4m
+            self.assertEqual(filings.scan(path, workers=1), [])
+            self.assertEqual(len(filings.scan(path, workers=1, min_turnover=20_000_000)), 1)
+
+    def test_what_counts_as_fx_and_one_row_per_group(self):
+        uk_only = {"turnover": 27e6, "regions": [{"region": "United Kingdom", "value": 27e6}]}
+        self.assertFalse(filings.shows_fx(uk_only, "Doesn't hedge"))                    # ACS Technology
+        self.assertFalse(filings.shows_fx({"turnover": 34e6, "fx_balances": [{"amount": 304_000, "ccy": "GBP", "in": ""}]}, ""))
+        self.assertTrue(filings.shows_fx({"turnover": 34e6, "fx_balances": [{"amount": 304_000, "ccy": "GBP", "in": "USD"}]}, ""))
+        self.assertFalse(filings.shows_fx({"turnover": 32.8e6, "regions": [{"region": "United Kingdom", "value": 32.8e6},
+                                                                          {"region": "Rest of Europe", "value": 22_556}]}, ""))
+        self.assertTrue(filings.shows_fx({"turnover": 46.9e6, "regions": [{"region": "Middle East and Asia", "value": 21.3e6}]}, ""))
+        self.assertTrue(filings.shows_fx({"fx_gain_loss": -958_000}, ""))
+        self.assertTrue(filings.shows_fx({}, "Uses forward contracts"))
+        # Burnley: the club and its holding company file the same year's figures — one row, the group's, naming the other
+        club = {"company_number": "00054222", "company_name": "THE BURNLEY FOOTBALL & ATHLETIC COMPANY LIMITED",
+                "filed": "2026-11-05", "period_end": "2026-07-31", "turnover_gbp": "144500000", "fx_gain_loss_gbp": "-958000",
+                "turnover_basis": "company", "filed_fx_score": 25}
+        holding = {**club, "company_number": "08335231", "company_name": "BURNLEY FC HOLDINGS LIMITED", "turnover_basis": "group"}
+        merged = filings.merge([], [club, holding], today=date(2026, 11, 6))
+        self.assertEqual([(r["company_number"], r.get("also_filed")) for r in merged],
+                         [("08335231", "THE BURNLEY FOOTBALL & ATHLETIC COMPANY LIMITED (00054222)")])
+        # LRS Broadhurst and its subsidiary: turnover a little different, the same FX loss to the pound
+        lrs = {"company_number": "11691121", "company_name": "LRS BROADHURST HOLDINGS LIMITED", "filed": "2026-11-04",
+               "period_end": "2026-03-31", "turnover_gbp": "36200000", "fx_gain_loss_gbp": "-22990",
+               "turnover_basis": "group", "filed_fx_score": 45}
+        spar = {**lrs, "company_number": "00666952", "company_name": "THE LONG RAKE SPAR CO LIMITED",
+                "turnover_gbp": "35900000", "turnover_basis": "company"}
+        other = {**lrs, "company_number": "01111111", "company_name": "OTHER LTD", "fx_gain_loss_gbp": "-500",
+                 "turnover_gbp": "40000000"}   # a different company with a tiny FX line: never joined on it
+        merged = filings.merge([], [spar, lrs, other], today=date(2026, 11, 6))
+        self.assertEqual(sorted((r["company_number"], r.get("also_filed", "")) for r in merged),
+                         [("01111111", ""), ("11691121", "THE LONG RAKE SPAR CO LIMITED (00666952)")])
+
+    def test_size_from_staff_and_debtors_when_no_turnover_is_filed(self):
+        band = filings.size_band({"employees": 85, "trade_debtors": 4_000_000})
+        self.assertEqual((band["low"], band["high"]), (16_000_000, 25_500_000))   # debtors x4–8 ∩ staff x£100–300k
+        self.assertEqual(filings.size_label(band), "likely £16m–£25.5m")
+        self.assertEqual(band["basis"], "£4m owed by customers and 85 staff")
+        apart = filings.size_band({"employees": 10, "trade_debtors": 10_000_000})   # they disagree: the whole span
+        self.assertEqual((apart["low"], apart["high"]), (1_000_000, 80_000_000))
+        self.assertIn("different sizes", apart["basis"])
+        self.assertIsNone(filings.size_band({}))
+        doc = ixbrl().replace(b"</table>", b'<tr><td>Trade debtors</td><td><ix:nonFraction name="core:TradeDebtorsTradeReceivables" '
+                              b'contextRef="BS2024" unitRef="CUR" scale="3">4,200</ix:nonFraction></td></tr><tr><td>Staff</td><td>'
+                              b'<ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" contextRef="FY2024" unitRef="shares" '
+                              b'scale="0">85</ix:nonFraction></td></tr></table>')
+        facts = accounts.extract_facts(doc)
+        self.assertEqual((facts["trade_debtors"], facts["employees"]), (4_200_000, 85))
+        # FRS 102 notes tag trade debtors "due within one year": a maturity, still the whole company's figure
+        within = ixbrl().replace(b"</ix:resources>", b'<xbrli:context id="BS2024-1Y"><xbrli:entity><xbrli:identifier scheme="x">01'
+                                 b'</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="core:MaturitiesOrExpirationPeriodsDimension">'
+                                 b'core:WithinOneYear</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>'
+                                 b'2024-12-31</xbrli:instant></xbrli:period></xbrli:context></ix:resources>').replace(
+            b"</table>", b'<tr><td>Trade debtors</td><td><ix:nonFraction name="core:TradeDebtorsTradeReceivables" contextRef="BS2024-1Y" '
+                         b'unitRef="CUR" scale="3">3,900</ix:nonFraction></td></tr></table>')
+        self.assertEqual(accounts.extract_facts(within)["trade_debtors"], 3_900_000)
+
+    def test_customs_records_decide_for_a_filing_without_fx(self):
+        quiet = {"company_number": "00450581", "company_name": "CASTOLIN EUTECTIC LIMITED", "fx_in_filing": False,
+                 "filed_fx_score": 0, "filed_fx": "", "size_estimate": "likely £16m–£32m"}
+        loud = {"company_number": "01", "company_name": "ACME LIMITED", "fx_in_filing": True, "filed_fx_score": 25,
+                "filed_fx": "FX loss £420k (+25)"}
+        nothing = {"company_number": "02", "company_name": "PLAIN LIMITED", "fx_in_filing": False, "filed_fx_score": 0}
+        trade = {"import_months": {"2026-0%d" % m for m in range(1, 10)}, "export_months": {"2026-01"},
+                 "import_codes": Counter({"83111000": 9}), "export_codes": Counter()}
+        kept, why = filings.finalise([quiet, loud, nothing], {"CASTOLIN EUTECTIC": trade})
+        self.assertEqual([r["company_number"] for r in kept], ["00450581", "01"])
+        self.assertTrue(kept[0]["hmrc_trade"].startswith("HMRC customs records: imports in 9 of the last 12 months, exports in 1"))
+        self.assertEqual(kept[0]["filed_fx_score"], filings.CUSTOMS_POINTS)
+        self.assertEqual(why["dropped: big, but no FX in the filing or customs records"], 1)
+        self.assertEqual(filings.finalise([quiet], None)[0], [])   # no customs lists: a filing without FX isn't kept
+
+    def test_quick_screen(self):
+        self.assertEqual(filings.tagged_turnover(ixbrl(current="45,000")), 45_000_000)   # inside a <span>, £'000
+        self.assertIsNone(filings.tagged_turnover(b"<p>Turnover 45,000</p>"))
+        big_untagged = b"<p>Foreign exchange losses</p>" + b" " * filings.MIN_BYTES_UNTAGGED
+        self.assertTrue(filings.worth_reading(big_untagged))
+        self.assertFalse(filings.worth_reading(b"<p>Foreign exchange losses</p>"))   # too short for full accounts
+        self.assertFalse(filings.worth_reading(b"<p>Nothing about currency</p>" + b" " * filings.MIN_BYTES_UNTAGGED))
+
+    def test_file_labels_and_merge(self):
+        self.assertEqual(filings.filed_label("https://x/Accounts_Bulk_Data-2026-11-04.zip"), "2026-11-04")
+        self.assertEqual(filings.filed_label("https://x/Accounts_Monthly_Data-October2026.zip"), "October 2026")
+        old = {"company_number": "01", "filed": "October 2026", "period_end": "2025-12-31", "filed_fx_score": 25}
+        newer = {"company_number": "01", "filed": "2026-11-04", "period_end": "2026-06-30", "filed_fx_score": 40}
+        other = {"company_number": "02", "filed": "2026-11-03", "period_end": "2026-03-31", "filed_fx_score": 65}
+        stale = {"company_number": "03", "filed": "August 2025", "period_end": "2024-12-31", "filed_fx_score": 90}
+        late = {"company_number": "04", "filed": "2026-09-30", "period_end": "2024-12-31", "filed_fx_score": 20}
+        merged = filings.merge([old, stale], [newer, other, late], today=date(2026, 11, 5))
+        self.assertEqual([(r["company_number"], r["filed"]) for r in merged],
+                         [("01", "2026-11-04"), ("02", "2026-11-03"), ("04", "2026-09-30")])   # filed 400+ days ago: gone
+        self.assertEqual(filings.merge([newer], [old], today=date(2026, 11, 5))[0]["filed"], "2026-11-04")   # older period never replaces

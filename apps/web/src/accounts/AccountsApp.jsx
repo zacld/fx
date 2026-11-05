@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, filedWhen, filingRow, filterFilings, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -170,6 +170,7 @@ function Accounts({ data, password }) {
     return filters.view === "contacted" ? sortFollowUps(matched, contacted) : sortRows(matched, sort);
   }, [rows, filters, sort, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const open = rows.filter((r) => !contacted[r.company_number]);
+  const listedNumbers = useMemo(() => new Set((data.rows || []).map((r) => r.company_number)), [data.rows]);
   const groupCounts = useMemo(() => {
     const base = filterRows(rows, { ...ctx, contact: "" });
     return Object.fromEntries(["", ...CONTACT_GROUPS].map((g) => [g, g ? base.filter((r) => contactGroup(r) === g).length : base.length]));
@@ -239,7 +240,12 @@ function Accounts({ data, password }) {
             Contacted <span className="tab-n">{contactedCount}</span>
             {followUpsDue > 0 && <span className="due-n" title="Follow-ups due today or overdue">{followUpsDue} due</span>}
           </button>
+          <button role="tab" aria-selected={filters.view === "filings"} className={`tab filings-tab${filters.view === "filings" ? " on" : ""}`}
+                  title="Companies of £25m+ whose newly filed accounts show FX" onClick={() => set({ section: "", view: "filings" })}>
+            Recent FX filings
+          </button>
         </div>
+        {filters.view !== "filings" && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -270,8 +276,10 @@ function Accounts({ data, password }) {
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>
           <button className="btn-sm export" onClick={exportCsv} disabled={!visible.length}>Export CSV ({visible.length})</button>
         </div>
+        </>}
       </div>
 
+      {filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} /> : (
       <div className="list">
         {saveError && <div className="save-error" role="alert">{saveError}</div>}
         {visible.slice(0, shown).map((r, i, list) => {
@@ -293,7 +301,87 @@ function Accounts({ data, password }) {
           <button className="btn-sm more" onClick={() => setShown((n) => n + PAGE)}>Show more ({visible.length - shown} left)</button>
         )}
       </div>
+      )}
     </main>
+  );
+}
+
+// The Recent FX filings tab: companies of £25m+ whose accounts, filed online in the last year, show FX — read from
+// Companies House's bulk accounts files each morning (lead-sourcer/sourcer/filings.py). Loaded when first opened.
+function Filings({ password, listed, onOpen }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+  const [strongOnly, setStrongOnly] = useState(false);
+  const [lossOnly, setLossOnly] = useState(false);
+  const [shown, setShown] = useState(PAGE);
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        const res = await fetch(`${API}?view=filings`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" });
+        const body = await res.json().catch(() => ({}));
+        if (!live) return;
+        if (res.ok) setData(body); else setError(body.error || `HTTP ${res.status}`);
+      } catch {
+        if (live) setError("Couldn't reach the site — check your connection.");
+      }
+    })();
+    return () => { live = false; };
+  }, [password]);
+  const rows = useMemo(() => filterFilings(data?.rows || [], { query, strongOnly, lossOnly }), [data, query, strongOnly, lossOnly]);
+  if (error) return <div className="list"><div className="empty">{error}</div></div>;
+  if (!data) return <div className="list"><div className="empty">Loading recent FX filings…</div></div>;
+  const all = data.rows || [];
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <input className="input search" placeholder="Search company, currency, region…" value={query}
+               onChange={(e) => { setQuery(e.target.value); setShown(PAGE); }} aria-label="Search filings" />
+        <label className="check"><input type="checkbox" checked={strongOnly} onChange={(e) => setStrongOnly(e.target.checked)} /> Strong FX proof ({all.filter((r) => r.filed_fx_score >= 50).length})</label>
+        <label className="check"><input type="checkbox" checked={lossOnly} onChange={(e) => setLossOnly(e.target.checked)} /> FX loss ({all.filter((r) => Number(r.fx_gain_loss_gbp) < 0).length})</label>
+        <span className="muted">{rows.length} of {all.length} · scanned {ago(data.made_at)}</span>
+      </div>
+      <p className="filings-note">Companies of £{Math.round((data.min_turnover || 25e6) / 1e6)}m+ turnover whose accounts filed online in the last year
+        show FX, newest filed first. Paper (scanned) filings aren't in Companies House's files, so they're found by the main list instead.</p>
+      {rows.slice(0, shown).map((r) => <FilingCard key={r.company_number} r={r} listed={listed.has(r.company_number)} onOpen={onOpen} />)}
+      {!rows.length && <div className="empty">{all.length ? "No filings match these filters." : "No FX filings found yet."}</div>}
+      {rows.length > shown && <button className="btn-sm more" onClick={() => setShown((n) => n + PAGE)}>Show more ({rows.length - shown} left)</button>}
+    </div>
+  );
+}
+
+function FilingCard({ r, listed, onOpen }) {
+  return (
+    <article className="card">
+      <div className="card-top">
+        <div className="card-name">
+          <span className="new filed">Filed {filedWhen(r.filed)}</span>
+          {listed
+            ? <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
+            : <a className="co" href={r.accounts_url} target="_blank" rel="noreferrer">{r.company_name}</a>}
+          <span className="site">{r.company_number}</span>
+        </div>
+        <div className="figures">
+          {r.turnover_gbp ? <span><b>{money(r.turnover_gbp)}</b> {r.turnover_basis === "group" ? "group " : ""}turnover</span>
+            : r.size_estimate ? <span className="estimate" title={r.size_estimate_basis}>Size <b>{r.size_estimate}</b> <i>estimate</i></span>
+            : <span className="muted">Turnover not stated</span>}
+          {r.period_end && <span className="muted">year to {filedWhen(r.period_end)}</span>}
+        </div>
+      </div>
+      <FxStrip r={filingRow(r)} />
+      {r.size_estimate && !r.turnover_gbp && <div className="filing-note">No turnover filed: size {r.size_estimate_basis}.</div>}
+      {r.hmrc_trade && <div className="filing-note customs">{r.hmrc_trade}</div>}
+      <div className="chips">
+        {listed ? <span className="chip own">On your Accounts list</span> : <span className="chip">Not on your list yet</span>}
+        {r.also_filed && <span className="chip" title="Group companies filing the same figures">Also filed by {r.also_filed}</span>}
+        {r.auditor && <span className="chip">Auditor {r.auditor}</span>}
+        {r.bankers && <span className="chip">Bankers {r.bankers}</span>}
+        <a className="chip" href={r.accounts_url} target="_blank" rel="noreferrer">Filing history ↗</a>
+        {!r.turnover_gbp && <a className="chip" href={turnoverSearch(r.company_name)} target="_blank" rel="noreferrer"
+                                title="Google their turnover: press, the group's accounts, their site (check it's not an estimate)">Search turnover ↗</a>}
+      </div>
+    </article>
   );
 }
 
@@ -749,6 +837,13 @@ select.input option{background:#0F141F}
 .grp{padding:5px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:none;color:rgba(255,255,255,.55);font:600 12px 'Inter',sans-serif;cursor:pointer}
 .grp.on{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.35);color:#7DD3FC}
 .contacted-tab{margin-left:8px}
+.filings-tab{margin-left:4px}
+.filings-bar{margin-bottom:10px}
+.estimate i{font-style:normal;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#FBBF24;margin-left:4px}
+.filing-note{margin-top:8px;font-size:12px;color:rgba(255,255,255,.55)}
+.filing-note.customs{color:#A5B4FC}
+.filings-note{font-size:12px;color:rgba(255,255,255,.45);margin:0 0 12px}
+.new.filed{background:rgba(56,189,248,.12);color:#7DD3FC}
 .fxstrip{margin-top:10px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:baseline;padding:8px 10px;border-radius:9px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.14);font-size:12.5px}
 .fxstrip.full{flex-direction:column;gap:10px;padding:12px 14px}
 .fxscore{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#A5B4FC;padding:2px 7px;border-radius:6px;background:rgba(99,102,241,.16);cursor:help}
