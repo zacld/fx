@@ -304,6 +304,56 @@ def accounts_history(number: str, api_key: str) -> Optional[list[dict]]:
     return None if data is None else data.get("items", [])
 
 
+# --- Mini research: who runs it, who it banks with, who owns it (three Companies House calls per company) -----------
+
+def research(number: str, name: str, api_key: str, today: Optional[date] = None) -> dict:
+    """
+    Directors, the incumbent bank (all-assets debenture holder) and other lenders, the owner (UK or overseas parent,
+    private-equity backing) and the finder's triggers (new owner, new or paid-off charge, facility renewal due, new
+    director) from the register — the same rules as the main list — plus a Google search for the FD. The finance
+    contact hunt (websites, news, search) stays in the main finder.
+    """
+    from sourcer import companies_house, news, triggers
+
+    today = today or date.today()
+    directors = companies_house.get_active_directors(number, api_key)
+    charges = companies_house.get_charges(number, api_key)
+    owners = companies_house.get_owners(number, api_key)
+    bank = incumbent.incumbent_bank(charges)
+    lenders = [c for c in incumbent._outstanding(charges) if not bank or c is not bank][:3]
+    return {
+        "directors": "; ".join(f"{d['name']}" + (f" (appointed {hooks.day(d['appointed_on'])})" if d.get("appointed_on") else "")
+                               for d in directors[:5]),
+        "director_count": len(directors),
+        "incumbent_bank": (f"{bank['bank']}: all-assets debenture since {hooks.day(bank['created_on'])}" if bank else ""),
+        "incumbent_bank_url": bank.get("url", "") if bank else "",
+        "lenders": "; ".join(f"{c['name']}: {incumbent.charge_kind(c)}" + (f", {hooks.day(c['created_on'])}" if c.get("created_on") else "")
+                             for c in lenders),
+        "owner": owner_line(owners),
+        "triggers": " | ".join(triggers.find(owners, charges, directors, today)),
+        "fd_search_url": news.verify_links(name)[0],
+        "research_checked": today.isoformat(),
+    }
+
+
+def owner_line(owners: list[dict]) -> str:
+    """ "Owned by ACME HOLDINGS LIMITED (UK, 01234567)" / "… (Germany) — overseas parent" / "… — private-equity
+    backed" / "Owned by 2 individuals" / ""."""
+    from sourcer import triggers
+
+    current = [o for o in owners if not o.get("ceased_on")]
+    corporate = [o for o in current if o["kind"] != "individual"]
+    if corporate:
+        o = corporate[0]
+        uk = hooks.is_uk(o.get("country", ""))
+        where = ("UK" + (f", {o['registration_number']}" if o.get("registration_number") else "")) if uk else o.get("country", "")
+        pe = triggers.investor_owner(current) == o["name"]
+        return (f"Owned by {o['name']}" + (f" ({where})" if where else "")
+                + (" — overseas parent" if not uk else "") + (" — private-equity backed" if pe else ""))
+    people = [o for o in current if o["kind"] == "individual"]
+    return f"Owned by {len(people)} individual{'s' if len(people) != 1 else ''}" if people else ""
+
+
 def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: float = MIN_TURNOVER) -> Optional[dict]:
     """A row only when the filing itself proves FX (customs records are checked later, by finalise)."""
     row, _ = assess(document, number, made_up, filed, min_turnover)

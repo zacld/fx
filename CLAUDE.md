@@ -246,7 +246,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   else the facilities named), and up to `FX_MENTIONS_MAX` (4) sentences
   mentioning foreign / dollar / euro / currency / hedging / overseas / export /
   import (`fx_mentions`, the business's own words before policy boilerplate,
-  with the total count) — shown on the card.
+  with the total count) — shown on the card. Mini research (`filings.research`,
+  three Companies House calls per listed company, once, `--research-max` a
+  run): directors, the incumbent bank (all-assets debenture holder, linked to
+  the charge) and other lenders, the owner (UK / overseas parent, PE-backed —
+  `owner_line`) and the main list's triggers (`triggers.find`), plus a "Google
+  the FD" link; the finance-contact hunt stays in the main finder.
 - **Accounts page order:** "Hottest" by default — the strongest filed FX
   proof first (headed Strong FX proof (50+) / Some FX proof / No FX in the
   filings yet), each in the finder's rank: the FD is a quick Google, the FX

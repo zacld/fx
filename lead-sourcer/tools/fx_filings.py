@@ -65,7 +65,7 @@ def show(row: dict) -> str:
            f"{' | '.join(facts)[:150]}"
 
 
-DETAIL = [("moved_up", "trigger"), ("bank_debt", "bank debt"), ("size_estimate", "size"), ("size_estimate_basis", "  from"), ("hmrc_trade", "customs"),
+DETAIL = [("incumbent_bank", "bank"), ("owner", "owner"), ("triggers", "triggers"), ("moved_up", "trigger"), ("bank_debt", "bank debt"), ("size_estimate", "size"), ("size_estimate_basis", "  from"), ("hmrc_trade", "customs"),
           ("turnover_check", "turnover check"), ("fx_gain_loss_evidence", "FX gain/loss from"),
           ("fx_today", "how they handle FX"), ("fx_today_evidence", "  from"), ("fx_forwards", "forwards"),
           ("fx_forwards_evidence", "  from"), ("currencies_in_accounts", "currencies"),
@@ -99,6 +99,7 @@ def main() -> None:
     parser.add_argument("--top", type=int, default=40, help="hits shown in the log")
     parser.add_argument("--max-hits", type=int, default=0, help="stop once this many companies are found (a test)")
     parser.add_argument("--detail", action="store_true", help="every fact of every hit, with its quote")
+    parser.add_argument("--research-max", type=int, default=1500, help="companies researched a run (3 calls each)")
     parser.add_argument("--history-max", type=int, default=2500, help="filing histories read a run (moved up flag)")
     parser.add_argument("--hmrc-months", type=int, default=12, help="months of HMRC importer/exporter lists (0: off)")
     parser.add_argument("--redo", action="store_true", help="read files already done again (a test)")
@@ -165,6 +166,21 @@ def main() -> None:
               f"accounts: {moved:,}; {sum(1 for r in rows if not r.get('history_checked')):,} left for the next run")
     elif todo_history:
         print(f"COMPANIES_HOUSE_API_KEY not set: {len(todo_history):,} filing histories not read")
+    # Mini research: directors, incumbent bank and lenders, owner, triggers (three calls each), once per company.
+    todo_research = [r for r in rows if not r.get("research_checked")][: args.research_max]
+    if api_key and todo_research:
+        started = time.time()
+        for r in todo_research:
+            try:
+                r.update(filings.research(r["company_number"], r["company_name"], api_key))
+            except Exception as e:  # noqa: BLE001 — one company's lookup mustn't stop the rest
+                print(f"  research failed for {r['company_number']}: {type(e).__name__}")
+        done_now = [r for r in todo_research if r.get("research_checked")]
+        print(f"Mini research: {len(done_now):,} companies in {time.time() - started:.0f}s; incumbent bank found "
+              f"{sum(1 for r in done_now if r.get('incumbent_bank')):,}; with triggers "
+              f"{sum(1 for r in done_now if r.get('triggers')):,}; overseas parent "
+              f"{sum(1 for r in done_now if 'overseas parent' in r.get('owner', '')):,}; "
+              f"{sum(1 for r in rows if not r.get('research_checked')):,} left for the next run")
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,
            "files_done": sorted(done), "files_scanned": len(todo), "count": len(rows), "rows": rows}
     with open(args.out, "w", encoding="utf-8") as f:

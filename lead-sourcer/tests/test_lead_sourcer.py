@@ -2831,6 +2831,30 @@ class TestFxFilings(unittest.TestCase):
         self.assertTrue(mentions[0].startswith("The company buys most of its stock"))   # the business's own words first
         self.assertTrue(mentions[-1].startswith("Transactions in foreign currencies"))  # policy boilerplate last
 
+    def test_mini_research_from_the_register(self):
+        directors = [{"name": "Jane Smith", "appointed_on": "2026-06-01", "role": "director"},
+                     {"name": "John Doe", "appointed_on": "2015-01-01", "role": "director"}]
+        charges = [{"name": "HSBC UK BANK PLC", "status": "outstanding", "created_on": "2021-03-03",
+                    "classification": "A registered charge", "particulars": "", "floating_all": True,
+                    "url": "https://find-and-update.company-information.service.gov.uk/company/01/charges/x"}]
+        owners = [{"kind": "corporate", "name": "ACME GMBH", "country": "Germany", "notified_on": "2016-04-06",
+                   "ceased_on": "", "registration_number": "HRB 1"}]
+        with mock.patch.object(companies_house, "get_active_directors", return_value=directors), \
+                mock.patch.object(companies_house, "get_charges", return_value=charges), \
+                mock.patch.object(companies_house, "get_owners", return_value=owners):
+            got = filings.research("01234567", "ACME UK LIMITED", "key", today=date(2026, 11, 6))
+        self.assertEqual(got["incumbent_bank"], "HSBC: all-assets debenture since 3 Mar 2021")
+        self.assertTrue(got["incumbent_bank_url"].endswith("/charges/x"))
+        self.assertEqual(got["owner"], "Owned by ACME GMBH (Germany) — overseas parent")
+        self.assertIn("Jane Smith (appointed 1 Jun 2026)", got["directors"])
+        self.assertIn("Jane Smith", got["triggers"])   # a director appointed in the last 12 months
+        self.assertIn("google.com/search", got["fd_search_url"])
+        self.assertEqual(filings.owner_line([{"kind": "individual", "name": "A", "ceased_on": ""},
+                                             {"kind": "individual", "name": "B", "ceased_on": ""}]), "Owned by 2 individuals")
+        self.assertEqual(filings.owner_line([{"kind": "corporate", "name": "PARENT LIMITED", "country": "England",
+                                              "registration_number": "01111111", "ceased_on": ""}]),
+                         "Owned by PARENT LIMITED (UK, 01111111)")
+
     def test_customs_records_decide_for_a_filing_without_fx(self):
         quiet = {"company_number": "00450581", "company_name": "CASTOLIN EUTECTIC LIMITED", "fx_in_filing": False,
                  "filed_fx_score": 0, "filed_fx": "", "size_estimate": "likely £16m–£32m"}

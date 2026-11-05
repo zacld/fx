@@ -395,6 +395,15 @@ function FilingCard({ r, listed, onOpen }) {
       <FxStrip r={filingRow(r)} />
       {r.size_estimate && !r.turnover_gbp && <div className="filing-note">No turnover filed: size {r.size_estimate_basis}.</div>}
       {r.hmrc_trade && <div className="filing-note customs">{r.hmrc_trade}</div>}
+      {(r.incumbent_bank || r.owner || r.directors) && (
+        <div className="filing-research">
+          {r.incumbent_bank && <div><span className="fxl">Bank</span> <Src href={r.incumbent_bank_url}>{r.incumbent_bank}</Src>
+            {r.lenders && <span className="muted"> · also {r.lenders}</span>}</div>}
+          {r.owner && <div><span className="fxl">Owner</span> {r.owner}</div>}
+          {r.directors && <div><span className="fxl">Directors</span> {r.directors}{r.director_count > 5 ? ` +${r.director_count - 5} more` : ""}</div>}
+        </div>
+      )}
+      {r.triggers && <div className="chips">{r.triggers.split(" | ").map((t) => <span className="chip trig" key={t}>{t}</span>)}</div>}
       {r.fx_mentions?.length > 0 && (
         <details className="fx-mentions">
           <summary>What the accounts say about currency and trade abroad ({r.fx_mention_count || r.fx_mentions.length} mention{(r.fx_mention_count || r.fx_mentions.length) === 1 ? "" : "s"})</summary>
@@ -410,6 +419,7 @@ function FilingCard({ r, listed, onOpen }) {
         {r.auditor && <span className="chip">Auditor {r.auditor}</span>}
         {r.bankers && <span className="chip">Bankers {r.bankers}</span>}
         <a className="chip" href={r.accounts_url} target="_blank" rel="noreferrer">Filing history ↗</a>
+        {r.fd_search_url && <a className="chip" href={r.fd_search_url} target="_blank" rel="noreferrer" title="Who's the finance director? A Google search">Google the FD ↗</a>}
         {!r.turnover_gbp && <a className="chip" href={turnoverSearch(r.company_name)} target="_blank" rel="noreferrer"
                                 title="Google their turnover: press, the group's accounts, their site (check it's not an estimate)">Search turnover ↗</a>}
       </div>
@@ -875,6 +885,8 @@ select.input option{background:#0F141F}
 .estimate i{font-style:normal;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#FBBF24;margin-left:4px}
 .filing-note{margin-top:8px;font-size:12px;color:rgba(255,255,255,.55)}
 .filing-note.customs{color:#A5B4FC}
+.filing-research{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.7);display:grid;gap:3px}
+.filing-research .fxl{display:inline-block;min-width:68px}
 .fx-mentions{margin-top:8px;font-size:12px;color:rgba(255,255,255,.6)}
 .fx-mentions summary{cursor:pointer;color:rgba(255,255,255,.5)}
 .fx-mentions ul{margin:6px 0 0;padding-left:18px}

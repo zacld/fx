@@ -286,7 +286,7 @@ export function filterFilings(rows, { query = "", strongOnly = false, lossOnly =
     && (!lossOnly || Number(r.fx_gain_loss_gbp) < 0)
     && (!movedOnly || Boolean(r.moved_up))
     && (!q || [r.company_name, r.company_number, r.currencies_in_accounts, r.fx_forwards, r.fx_today, r.turnover_regions, r.hmrc_trade,
-               r.bank_debt, r.moved_up, ...(r.fx_mentions || [])]
+               r.bank_debt, r.moved_up, r.incumbent_bank, r.owner, r.directors, r.triggers, ...(r.fx_mentions || [])]
       .some((v) => (v || "").toLowerCase().includes(q))));
 }
 
