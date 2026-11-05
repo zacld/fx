@@ -133,6 +133,7 @@ def scan(
     categories: set[str],
     postcodes: Optional[set[str]] = None,
     names: Optional[set[str]] = None,
+    numbers: Optional[set[str]] = None,
 ) -> tuple[list[dict], dict[str, list[dict]], dict[str, list[dict]]]:
     """
     One pass over the bulk file:
@@ -141,6 +142,8 @@ def scan(
       by_name      — every active trading company whose normalised name is in `names`
     Postcodes and names are normalised as in sourcer.matching. The two
     indexes are for matching HMRC traders, which can be any size or sector.
+    `numbers`: companies taken as candidates whatever their SIC code or accounts
+    category (the FX filings scan's strongest finds).
     """
     from sourcer.matching import normalise_name, normalise_postcode
 
@@ -165,7 +168,8 @@ def scan(
             continue
         sics = [code for code in (sic_code(values[i]) for i in sic_cols) if code]
         category = normalise_category(values[col["Accounts.AccountCategory"]])
-        in_frame = bool(sic_codes.intersection(sics)) and category in categories
+        in_frame = (bool(sic_codes.intersection(sics)) and category in categories) or \
+            bool(numbers and values[col["CompanyNumber"]].strip() in numbers)
         postcode = normalise_postcode(values[col["RegAddress.PostCode"]]) if postcodes else ""
         at_postcode = bool(postcodes) and postcode in postcodes
         name_key = normalise_name(values[col["CompanyName"]]) if names else ""
