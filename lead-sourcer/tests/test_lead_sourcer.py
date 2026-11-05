@@ -2787,6 +2787,14 @@ class TestFxFilings(unittest.TestCase):
                               b'scale="0">85</ix:nonFraction></td></tr></table>')
         facts = accounts.extract_facts(doc)
         self.assertEqual((facts["trade_debtors"], facts["employees"]), (4_200_000, 85))
+        # FRS 102 notes tag trade debtors "due within one year": a maturity, still the whole company's figure
+        within = ixbrl().replace(b"</ix:resources>", b'<xbrli:context id="BS2024-1Y"><xbrli:entity><xbrli:identifier scheme="x">01'
+                                 b'</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="core:MaturitiesOrExpirationPeriodsDimension">'
+                                 b'core:WithinOneYear</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>'
+                                 b'2024-12-31</xbrli:instant></xbrli:period></xbrli:context></ix:resources>').replace(
+            b"</table>", b'<tr><td>Trade debtors</td><td><ix:nonFraction name="core:TradeDebtorsTradeReceivables" contextRef="BS2024-1Y" '
+                         b'unitRef="CUR" scale="3">3,900</ix:nonFraction></td></tr></table>')
+        self.assertEqual(accounts.extract_facts(within)["trade_debtors"], 3_900_000)
 
     def test_customs_records_decide_for_a_filing_without_fx(self):
         quiet = {"company_number": "00450581", "company_name": "CASTOLIN EUTECTIC LIMITED", "fx_in_filing": False,

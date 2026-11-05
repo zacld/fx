@@ -280,18 +280,28 @@ def _fact_value(fact: dict) -> Optional[float]:
 _ENTITY_DIMENSIONS = {"GroupCompanyDataDimension", "ConsolidatedGroupCompanyDimension"}
 
 
-def _entity(context: dict) -> Optional[str]:
-    """ "group" / "company" for a whole-entity context ("" when it doesn't say), None for a breakdown."""
+# Debtors are tagged "due within one year" / "after one year" in the notes: a maturity, not a breakdown of the entity.
+_MATURITY_DIMENSIONS = {"MaturitiesOrExpirationPeriodsDimension"}
+
+
+def _entity(context: dict, also: frozenset = frozenset()) -> Optional[str]:
+    """ "group" / "company" for a whole-entity context ("" when it doesn't say), None for a breakdown. `also`:
+    dimensions that don't split the entity for this figure (a debtor's maturity)."""
     if not context["dimensional"]:
         return ""
-    if not context["members"] or any(d not in _ENTITY_DIMENSIONS for d, _ in context["members"]):
+    members = [(d, m) for d, m in context["members"] if d not in also]
+    if not context["members"]:
+        return None
+    if not members:
+        return ""
+    if any(d not in _ENTITY_DIMENSIONS for d, _ in members):
         return None
     member = " ".join(m for _, m in context["members"]).lower()
     return "group" if "consolidat" in member or "group" in member else "company"
 
 
 def _by_period(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool,
-               basis: Optional[dict] = None) -> dict[str, float]:
+               basis: Optional[dict] = None, also: frozenset = frozenset()) -> dict[str, float]:
     """
     {period end: value} of the whole-entity GBP facts for any of `concepts`: the group's (consolidated) figure
     before an undimensioned one before the parent company's own. `basis`, if given, gets {period end: "group" /
@@ -304,7 +314,7 @@ def _by_period(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: boo
         context = scanner.contexts.get(fact["context"])
         if not context or not context["end"]:
             continue  # unknown period
-        entity = _entity(context)
+        entity = _entity(context, also)
         if entity is None:
             continue  # a breakdown (by region, segment…) rather than the total
         measure = scanner.units.get(fact["unit"], fact["unit"])
@@ -322,9 +332,9 @@ def _by_period(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: boo
 
 
 def _latest(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool,
-            basis: Optional[dict] = None) -> Optional[tuple[float, str]]:
+            basis: Optional[dict] = None, also: frozenset = frozenset()) -> Optional[tuple[float, str]]:
     """(value, period end) of the latest whole-entity GBP fact for any of `concepts` (the group's when consolidated)."""
-    values = _by_period(scanner, concepts, allow_negative, basis)
+    values = _by_period(scanner, concepts, allow_negative, basis, also)
     if not values:
         return None
     end = max(values)
@@ -584,7 +594,7 @@ def extract_facts(document: bytes) -> dict:
     cash = _latest(scanner, CASH_CONCEPTS, allow_negative=False)
     debt = _latest(scanner, BORROWING_CONCEPTS, allow_negative=True)
     net = _latest(scanner, NET_ASSETS_CONCEPTS, allow_negative=True)
-    trade_debtors = _latest(scanner, TRADE_DEBTORS_CONCEPTS, allow_negative=False)
+    trade_debtors = _latest(scanner, TRADE_DEBTORS_CONCEPTS, allow_negative=False, also=frozenset(_MATURITY_DIMENSIONS))
     auditor = auditor_from_text(plain)
     tagged_signatory = next((" ".join(f["text"].split()) for f in scanner.facts
                              if f["concept"] in people.SIGNATORY_CONCEPTS and f.get("text", "").strip()), "")
