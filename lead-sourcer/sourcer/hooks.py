@@ -173,6 +173,44 @@ def is_uk(place: str) -> bool:
     return " ".join((place or "").upper().replace(".", "").split()) in _UK_PLACES | {""} or signals.is_uk(place)
 
 
+# Owned from abroad: the FX decision usually sits with the parent's treasury at head office, with the group's bank —
+# the UK finance team may have no say. Such a company ranks this many points lower unless its own records show it
+# runs FX or banking locally (its own forward contracts, a named FX provider or policy, a bank holding its own
+# all-assets debenture). Shown, never hidden. Crown dependencies (Jersey etc.) are usually UK owners' holding
+# companies, so they don't count as abroad.
+ABROAD_RULES = {"points": 25, "not_abroad": {"JERSEY", "GUERNSEY", "ISLE OF MAN", "CHANNEL ISLANDS"}}
+
+
+def overseas_owner(owners: list[dict]) -> Optional[dict]:
+    """The current corporate owner registered outside the UK (and the Crown dependencies), if any."""
+    return next((o for o in owners if o.get("kind") == "corporate" and not o.get("ceased_on")
+                 and (o.get("country") or "").strip() and not is_uk(o["country"])
+                 and " ".join(o["country"].upper().split()) not in ABROAD_RULES["not_abroad"]), None)
+
+
+def local_fx_signs(row: dict) -> str:
+    """What in the company's own records says it runs FX or banking itself: '' when nothing does."""
+    if row.get("fx_forwards"):
+        return "its own forward contracts"
+    if (row.get("fx_today") or "").startswith("Uses"):
+        return (row.get("fx_today") or "").lower()
+    if row.get("incumbent_bank"):
+        return "its own bank facility (" + row["incumbent_bank"].split(":")[0] + ")"
+    return ""
+
+
+def run_from_abroad(parent_name: str, country: str, row: dict) -> str:
+    """
+    "FX probably run from Sweden (CLOETTA AB, the parent) — ask whether the UK team has its own FX budget" for a
+    company owned from abroad with no sign of running FX locally; '' otherwise (UK-owned, or local signs).
+    """
+    if not parent_name or not country or local_fx_signs(row):
+        return ""
+    place = " ".join(w.capitalize() if w.isupper() and len(w) > 3 else w for w in country.split())
+    return (f"FX probably run from {place} ({parent_name}, the parent) — ask whether the UK team has its own "
+            f"FX budget")
+
+
 def region_currency(region: str) -> Optional[str]:
     """Currency for a region or country in a turnover note ("Europe" -> EUR, "North America" -> USD)."""
     found = country_currency(region)

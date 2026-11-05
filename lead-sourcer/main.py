@@ -62,7 +62,8 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Optional, Union
 
 from sourcer import (
-    accounts, banks, bulk, companies_house, currency, excel, fx_notes, group as groups, hmrc, hooks, incumbent, matching,
+    accounts, banks, bulk, companies_house, currency, excel, filings, fx_notes, group as groups, hmrc, hooks, incumbent,
+    matching,
     news, pdf, people, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
 
 CSV_FIELDS = [
@@ -185,6 +186,7 @@ CSV_FIELDS = [
     "group_fx",
     "group_fx_score",
     "group_fx_url",
+    "run_from_abroad",
 ]
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -472,9 +474,10 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
             rows = (json.load(f) or {}).get("rows") or []
     except (OSError, ValueError):
         return {}
-    return {r["company_number"]: float(r.get("filed_fx_score") or 0) + (25 if r.get("moved_up") else 0)
+    # ranked by filed FX proof (less ABROAD_RULES points when the FX is probably run abroad), moved up +25
+    return {r["company_number"]: float(filings.rank_score(r)) + (25 if r.get("moved_up") else 0)
             for r in rows if r.get("company_number")
-            and ((r.get("filed_fx_score") or 0) >= min_score or r.get("moved_up"))}
+            and (filings.rank_score(r) >= min_score or r.get("moved_up"))}
 
 
 def trader_niche(trade: dict) -> dict:
@@ -691,6 +694,9 @@ def company_row(
             filed_score += points
             filed_lines.append(f"group ({group['name']}): {group_cols['group_fx']} (+{points})")
         talking.update(filed_fx_score=str(filed_score), filed_fx=" | ".join(filed_lines), **group_cols)
+        # owned from abroad, no sign of running FX locally: the decision is probably made at head office
+        parent = hooks.overseas_owner(owners)
+        talking["run_from_abroad"] = hooks.run_from_abroad(parent["name"], parent["country"], talking) if parent else ""
     return people.weak_contact_to_clue(new_row(
         **talking,
         section=section_for(company, turnover, band),
@@ -1219,14 +1225,16 @@ def run_pipeline(
     stats["groups"] = add_group_rollup(rows, parents)
     section_order = {label: i for i, label in enumerate(sections(*band))}
     # What the company's own filings prove about its FX (fx_notes.FILED_FX_POINTS) counts on top of the FX evidence;
-    # triggers lift a company a little (10 each, up to 20), a recent FX loss by RECENT_FX_LOSS["lift"];
+    # triggers lift a company a little (10 each, up to 20), a recent FX loss by RECENT_FX_LOSS["lift"]; FX probably
+    # run from an overseas parent lowers it by ABROAD_RULES["points"];
     # when-to-call never does.
     rows.sort(key=lambda r: (
         section_order[r["section"]],
         -(int(r["fx_evidence_score"]) + (int(r["untapped_score"]) if r["untapped_score"] != "" else 0)
           + int(r.get("filed_fx_score") or 0)
           + 10 * min(len(r["triggers"].split(" | ")) if r["triggers"] else 0, 2)
-          + (RECENT_FX_LOSS["lift"] if r.get("recent_fx_loss") else 0)),
+          + (RECENT_FX_LOSS["lift"] if r.get("recent_fx_loss") else 0)
+          - (hooks.ABROAD_RULES["points"] if r.get("run_from_abroad") else 0)),
         -float(r["fx_wallet_high_gbp"] or 0),
         r["company_name"].lower(),
     ))

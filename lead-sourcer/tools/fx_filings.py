@@ -181,6 +181,11 @@ def main() -> None:
               f"{sum(1 for r in done_now if r.get('triggers')):,}; overseas parent "
               f"{sum(1 for r in done_now if 'overseas parent' in r.get('owner', '')):,}; "
               f"{sum(1 for r in rows if not r.get('research_checked')):,} left for the next run")
+    # Owned from abroad with no sign of running FX locally: ranked lower (hooks.ABROAD_RULES), every row, no calls.
+    abroad = filings.mark_abroad(rows)
+    print(f"Owned from abroad, FX probably run there: {abroad:,} of {len(rows):,} (ranked "
+          f"{filings.hooks.ABROAD_RULES['points']} points lower; owned abroad but runs FX locally: "
+          f"{sum(1 for r in rows if filings.owner_abroad(r)[0] and not r['run_from_abroad']):,})")
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,
            "files_done": sorted(done), "files_scanned": len(todo), "count": len(rows), "rows": rows}
     with open(args.out, "w", encoding="utf-8") as f:

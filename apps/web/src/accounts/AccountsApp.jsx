@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -315,6 +315,7 @@ function Filings({ password, listed, onOpen }) {
   const [strongOnly, setStrongOnly] = useState(false);
   const [lossOnly, setLossOnly] = useState(false);
   const [movedOnly, setMovedOnly] = useState(false);
+  const [order, setOrder] = useState("newest");
   const [shown, setShown] = useState(PAGE);
   // The index lists the months filed (a year runs to ~15,000 companies, so each month is fetched on its own).
   const [month, setMonth] = useState("");
@@ -339,8 +340,8 @@ function Filings({ password, listed, onOpen }) {
     return () => { live = false; };
   }, [month, monthRows, get]);
   const all = data?.rows || monthRows[month] || [];   // data.rows: the first, single-item version
-  const rows = useMemo(() => filterFilings(all, { query, strongOnly, lossOnly, movedOnly }),
-                       [all, query, strongOnly, lossOnly, movedOnly]);
+  const rows = useMemo(() => sortFilings(filterFilings(all, { query, strongOnly, lossOnly, movedOnly }), order),
+                       [all, query, strongOnly, lossOnly, movedOnly, order]);
   if (error) return <div className="list"><div className="empty">{error}</div></div>;
   if (!data || (month && !monthRows[month] && !data.rows)) return <div className="list"><div className="empty">Loading recent FX filings…</div></div>;
   return (
@@ -358,6 +359,10 @@ function Filings({ password, listed, onOpen }) {
       <div className="filters filings-bar">
         <input className="input search" placeholder="Search company, currency, region…" value={query}
                onChange={(e) => { setQuery(e.target.value); setShown(PAGE); }} aria-label="Search filings" />
+        <select className="input" value={order} onChange={(e) => { setOrder(e.target.value); setShown(PAGE); }} aria-label="Order">
+          <option value="newest">Newest filed first</option>
+          <option value="strongest">Strongest FX proof first (owned abroad lower)</option>
+        </select>
         <label className="check"><input type="checkbox" checked={strongOnly} onChange={(e) => setStrongOnly(e.target.checked)} /> Strong FX proof ({all.filter((r) => r.filed_fx_score >= 50).length})</label>
         <label className="check"><input type="checkbox" checked={lossOnly} onChange={(e) => setLossOnly(e.target.checked)} /> FX loss ({all.filter((r) => Number(r.fx_gain_loss_gbp) < 0).length})</label>
         <label className="check"><input type="checkbox" checked={movedOnly} onChange={(e) => setMovedOnly(e.target.checked)} /> Moved up from small ({all.filter((r) => r.moved_up).length})</label>
@@ -400,6 +405,7 @@ function FilingCard({ r, listed, onOpen }) {
           {r.incumbent_bank && <div><span className="fxl">Bank</span> <Src href={r.incumbent_bank_url}>{r.incumbent_bank}</Src>
             {r.lenders && <span className="muted"> · also {r.lenders}</span>}</div>}
           {r.owner && <div><span className="fxl">Owner</span> {r.owner}</div>}
+          {r.run_from_abroad && <div className="abroad"><span className="fxl">Decision</span> {r.run_from_abroad}</div>}
           {r.directors && <div><span className="fxl">Directors</span> {r.directors}{r.director_count > 5 ? ` +${r.director_count - 5} more` : ""}</div>}
         </div>
       )}
@@ -624,6 +630,7 @@ function Chips({ r }) {
       {r.facility_ends && <Src className="chip trig" href={r.accounts_url} title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</Src>}
       {r.own_bank_client && <span className="chip own">Existing client</span>}
       {r.pe_backed && <span className="chip warn">PE-backed</span>}
+      {r.run_from_abroad && <span className="chip warn" title={r.run_from_abroad}>Owned abroad: FX may be run there</span>}
       {r.family_run && <span className="chip">Family-run</span>}
       {parts(r.triggers).map((t) => <span key={t} className="chip trig">{t}</span>)}
     </div>

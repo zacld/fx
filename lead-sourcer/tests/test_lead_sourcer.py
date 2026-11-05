@@ -485,6 +485,17 @@ class TestFxFilingsFirst(PipelineTestCase):
         self.assertEqual(main.priority_from_filings(path), {"01": 65.0, "02": 45.0})
         self.assertEqual(main.priority_from_filings(os.path.join(self.tmp.name, "missing.json")), {})
 
+    def test_fx_probably_run_abroad_ranks_lower(self):
+        path = os.path.join(self.tmp.name, "filings.json")
+        abroad = "Owned by CLOETTA AB (Sweden) — overseas parent"
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"rows": [{"company_number": "01", "filed_fx_score": 80, "owner": abroad},
+                                {"company_number": "02", "filed_fx_score": 60, "owner": abroad},
+                                {"company_number": "03", "filed_fx_score": 60, "owner": abroad,
+                                 "fx_forwards": "to purchase US$5.2m"}]}, f)
+        # 02 drops under the bar (60 - 25); 03 runs its own forwards, so it isn't lowered
+        self.assertEqual(main.priority_from_filings(path), {"01": 55.0, "03": 60.0})
+
 
 class TestRegisterCache(PipelineTestCase):
     def test_second_run_reuses_the_lookups(self):
@@ -2727,6 +2738,27 @@ class TestReviewFixesIncumbent(unittest.TestCase):
 
 
 class TestFxFilings(unittest.TestCase):
+    def test_owned_abroad_without_local_fx_is_marked_and_ranked_lower(self):
+        rows = [{"filed_fx_score": 60, "owner": "Owned by CLOETTA AB (Sweden) — overseas parent"},
+                {"filed_fx_score": 60, "owner": "Owned by ACME GMBH (Germany) — overseas parent",
+                 "incumbent_bank": "HSBC UK Bank plc: all-assets debenture since 3 Mar 2021"},
+                {"filed_fx_score": 60, "owner": "Owned by ACME (HOLDINGS) LIMITED (Jersey) — overseas parent"},
+                {"filed_fx_score": 60, "owner": "Owned by ACME HOLDINGS LIMITED (UK, 01234567)"},
+                {"filed_fx_score": 60}]
+        self.assertEqual(filings.mark_abroad(rows), 1)
+        self.assertIn("FX probably run from Sweden (CLOETTA AB, the parent)", rows[0]["run_from_abroad"])
+        self.assertEqual([r["rank_score"] for r in rows], [35, 60, 60, 60, 60])
+        self.assertEqual(filings.owner_abroad(rows[2]), ("", ""))     # Jersey: a UK owner's holding company
+
+    def test_overseas_owner_and_local_fx_signs(self):
+        owners = [{"kind": "individual", "name": "A", "country": "France"},
+                  {"kind": "corporate", "name": "OLD BV", "country": "Netherlands", "ceased_on": "2020-01-01"},
+                  {"kind": "corporate", "name": "BARENTZ BV", "country": "NETHERLANDS"}]
+        self.assertEqual(hooks.overseas_owner(owners)["name"], "BARENTZ BV")
+        self.assertIsNone(hooks.overseas_owner([{"kind": "corporate", "name": "X", "country": "England"}]))
+        self.assertIn("Netherlands", hooks.run_from_abroad("BARENTZ BV", "NETHERLANDS", {}))
+        self.assertEqual(hooks.run_from_abroad("BARENTZ BV", "NETHERLANDS", {"fx_today": "Uses forward contracts"}), "")
+
     """The Recent FX filings scanner over a bulk accounts zip laid out like Companies House's."""
 
     def _zip(self, folder, docs):

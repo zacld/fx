@@ -194,6 +194,18 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   at a forward contract's size or a sensitivity; `OCR_NOTES_BUDGET_SECONDS`
   (1500) a run; not for filed turnover under `OCR_NOTES_MIN_TURNOVER`, £25m);
   pages OCR'd for turnover or the FX line are reused, never read twice.
+- **Owned from abroad** (`hooks.run_from_abroad`, `ABROAD_RULES`): a company whose
+  current corporate owner is registered outside the UK (Jersey / Guernsey / Isle of
+  Man count as UK owners' holding companies) and whose own records show no FX or
+  banking run locally (its own forward contracts, a named FX provider or policy —
+  `fx_today` "Uses …", a bank holding its own all-assets debenture) gets
+  `run_from_abroad` ("FX probably run from Sweden (CLOETTA AB, the parent) — ask
+  whether the UK team has its own FX budget") and ranks 25 points lower: in the
+  finder's order, in "Hottest" (within its FX-proof group; `ABROAD_POINTS` in
+  `format.js`), in the filings list's `rank_score` (`filings.mark_abroad`, every
+  scan, from the mini research's owner line) and so in the finder's priority
+  queue. Shown on the card ("Owned abroad: FX may be run there"), never hidden.
+  The filings tab can sort "Strongest FX proof first" by `rank_score`.
 - **Group accounts** (`sourcer/group.py`): for a company whose PSC register
   names a current UK corporate owner (a Companies House number), the parent's
   latest accounts are read like the company's own — one level further up when

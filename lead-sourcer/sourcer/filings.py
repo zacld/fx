@@ -354,6 +354,37 @@ def owner_line(owners: list[dict]) -> str:
     return f"Owned by {len(people)} individual{'s' if len(people) != 1 else ''}" if people else ""
 
 
+_OWNED_ABROAD = re.compile(r"^Owned by (.+) \(([^()]+)\) — overseas parent")
+
+
+def owner_abroad(row: dict) -> tuple[str, str]:
+    """(parent, country) when the mini research's owner line names a parent registered abroad; ('', '') otherwise."""
+    m = _OWNED_ABROAD.match(row.get("owner") or "")
+    if not m or " ".join(m.group(2).upper().split()) in hooks.ABROAD_RULES["not_abroad"]:
+        return "", ""
+    return m.group(1), m.group(2)
+
+
+def mark_abroad(rows: list[dict]) -> int:
+    """
+    run_from_abroad on each researched row (hooks.run_from_abroad: owned from abroad, no sign of FX run locally) and
+    rank_score — the filed FX proof less ABROAD_RULES["points"] for those — the order the finder takes them in.
+    Rerun every scan (no calls), so a rule change reaches every row. Returns how many are run from abroad.
+    """
+    for r in rows:
+        r["run_from_abroad"] = hooks.run_from_abroad(*owner_abroad(r), r)
+        r["rank_score"] = rank_score(r)
+    return sum(bool(r["run_from_abroad"]) for r in rows)
+
+
+def rank_score(row: dict) -> int:
+    """Filed FX proof, less ABROAD_RULES["points"] when the FX decision is probably made abroad."""
+    abroad = row.get("run_from_abroad")
+    if abroad is None:
+        abroad = hooks.run_from_abroad(*owner_abroad(row), row)
+    return int(row.get("filed_fx_score") or 0) - (hooks.ABROAD_RULES["points"] if abroad else 0)
+
+
 def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: float = MIN_TURNOVER) -> Optional[dict]:
     """A row only when the filing itself proves FX (customs records are checked later, by finalise)."""
     row, _ = assess(document, number, made_up, filed, min_turnover)
