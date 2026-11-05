@@ -17,6 +17,10 @@ on:
         description: 'How many companies to sample from the list'
         required: false
         default: '40'
+      focus:
+        description: 'spread (an even spread of the list) or forwards (uses forward contracts, no size shown)'
+        required: false
+        default: 'forwards'
   push:
     branches: ['main', 'claude/**']
     paths:
@@ -63,7 +67,7 @@ jobs:
             import { writeFileSync } from "node:fs";
             import { openStore } from "./scripts/store.mjs";
             const data = await (await openStore("fx-accounts")).get("latest");
-            const keep = ["company_number", "company_name", "accounts_category", "accounts_format", "section", "turnover_gbp", "size_basis"];
+            const keep = ["company_number", "company_name", "accounts_category", "accounts_format", "section", "turnover_gbp", "size_basis", "fx_today", "fx_forwards"];
             const rows = (data?.rows || []).map((r) => Object.fromEntries(keep.filter((k) => r[k] !== undefined).map((k) => [k, r[k]])));
             writeFileSync("../../lead-sourcer/sample.json", JSON.stringify(rows));
             console.log(`${rows.length} companies on the list`);
@@ -89,8 +93,10 @@ jobs:
         env:
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           NUMBERS: ${{ inputs.numbers }}
-          MAX: ${{ inputs.max || '40' }}
+          MAX: ${{ inputs.max || '60' }}
+          FOCUS: ${{ inputs.focus || 'forwards' }}
           PYTHONUNBUFFERED: "1"
         run: |
           if [ -n "$NUMBERS" ]; then python3 tools/fx_notes_sample.py $NUMBERS
+          elif [ "$FOCUS" = "forwards" ]; then python3 tools/fx_notes_sample.py --accounts sample.json --forwards --max "$MAX"
           else python3 tools/fx_notes_sample.py --accounts sample.json --max "$MAX"; fi

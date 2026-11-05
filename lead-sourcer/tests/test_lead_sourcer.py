@@ -1010,6 +1010,19 @@ class TestCurrency(unittest.TestCase):
         self.assertEqual(currency.pairs(cur, Counter()), ["GBP/EUR", "GBP/USD"])
         self.assertEqual(currency.mix(model, "export", Counter({"84212100": 1})), (Counter(), Counter()))
 
+    def test_dollar_priced_goods_count_as_usd_whatever_the_country(self):
+        model = currency.TradeByCountry()
+        for code, country, value in (("74031100", "DE", 60), ("74031100", "CL", 40),   # copper cathode
+                                     ("22042109", "FR", 100)):                        # wine: EUR from France
+            model.add("import", code, country, value)
+        cur, countries = currency.mix(model, "import", Counter({"74031100": 3, "22042109": 1}))
+        self.assertEqual(currency.describe(cur), "USD 75%, EUR 25%")   # German copper is still a dollar price
+        self.assertEqual(currency.describe(countries), "DE 45%, CL 30%, FR 25%")
+        self.assertEqual(currency.dollar_priced("74031100"), "copper")
+        self.assertEqual(currency.dollar_priced("10019900"), "")   # wheat trades in EUR in Europe: not on the list
+        self.assertEqual(currency.dollar_goods(Counter({"74031100": 3, "22042109": 1, "09011100": 0})), ["copper"])
+        self.assertEqual(currency.dollar_goods(Counter({"74031100": 1, "22042109": 19})), [])   # under 10%: not named
+
     def test_wallet(self):
         w = currency.wallet(40_000_000, None, 12, 4)
         # purchases assumed 70% of £40m = £28m x 40–80%, plus £40m x 10–25% exports
@@ -2214,6 +2227,10 @@ class TestHooks(unittest.TestCase):
         self.assertEqual((exp["currency"], exp["direction"], exp["confidence"], exp["rule"]),
                          ("EUR", hooks.BOTH, hooks.MEDIUM, "customs"))   # customs beat the niche default
         self.assertIn("imports EUR 64%, USD 21% (12 of the last 12 months)", exp["evidence"])
+        self.assertNotIn("counted as USD", exp["evidence"])
+        exp = hooks.currency_exposure("X LTD", {}, [], self.NICHE, {**customs, "dollar_goods": ["copper", "aluminium"]})
+        self.assertIn("; copper, aluminium counted as USD — priced in US dollars wherever they come from)",
+                      exp["evidence"])
         self.assertEqual(hooks.opener([], exp), "Saw from the customs records that you've imported every month and "
                                                 "exported in 1 of the last 12 months, so the pound's moves hit you either "
                                                 "way.")   # each flow's own count; no (estimated) currency named
@@ -2358,6 +2375,47 @@ class TestFxNotes(unittest.TestCase):
         found = fx_notes.read([page])
         self.assertEqual([(f["what"], f["amount"], f["prior"]) for f in found["fx_forwards"]], [("table", 123_000, 45_000)])
         self.assertEqual([(b["in"], b["amount"]) for b in found["fx_balances"]], [("USD", 1_234_000), ("EUR", 567_000)])
+
+    def test_forward_sizes_from_the_forwards_sample(self):
+        """Real lines from companies the list said use forwards but showed no size for (FX notes sample, 5 Nov)."""
+        # BJA Trading: the dates and the rate aren't amounts — the sentence isn't a table run together.
+        bja = fx_notes.read(["Hedging Contracts\nThe company entered into a Barclays Forward Exchange Contract for "
+                             "$250,000 at a rate of 1.338116 for delivery between 29/12/2025 and 16/03/2026. The company "
+                             "entered into a Barclays Forward Exchange Contract for $500,000 at a rate of 1.345271 for "
+                             "delivery between 12/01/2026 and 30/03/2026."])
+        self.assertEqual([(f["what"], f["amount"], f["ccy"]) for f in bja["fx_forwards"]],
+                         [("contracts", 250_000, "USD"), ("contracts", 500_000, "USD")])
+        # … and the bank they buy them from is their FX provider today.
+        named = incumbent.text_evidence("The company entered into a Barclays Forward Exchange Contract for $250,000 at "
+                                        "a rate of 1.338116.")["fx_providers"]
+        self.assertEqual([p["name"] for p in named], ["Barclays (forward contracts)"])
+        self.assertEqual([p["name"] for p in incumbent.text_evidence(
+            "Forward foreign exchange contracts are arranged with HSBC UK Bank plc.")["fx_providers"]],
+                         ["HSBC (forward contracts)"])
+        self.assertEqual(incumbent.text_evidence("The company banks with Barclays. It uses forward contracts to buy "
+                                                 "euros.")["fx_providers"], [])   # the bank isn't named for them
+        # Jeroboams: the creditors row is the contracts' value; the P&L line above it ("Loss on derivative ⏎
+        # forward contracts (1,984)") is not.
+        jeroboams = ("PROFIT AND LOSS ACCOUNT 2025 2024 £ £\nLoss on derivative\nforward contracts 6 (1,984 ) 40,249\n"
+                     "Interest payable and similar expenses 7 (32,961 ) 37,770\n"
+                     "12. CREDITORS: AMOUNTS FALLING DUE WITHIN ONE YEAR 2025 2024 £ £\n"
+                     "Derivative forward contracts 43,393 45,377\nAccruals and deferred income 981,507 1,373,662\n"
+                     "The company uses forward foreign exchange contracts to fix the cost of wine bought in euros.")
+        found = fx_notes.read([jeroboams])["fx_forwards"]
+        self.assertEqual([(f["what"], f["amount"], f["prior"]) for f in found], [("table", 43_393, 45_377)])
+        self.assertEqual(fx_notes._forward_line(found[0]), "forward contracts £43k in the notes' tables (prior year £45k)")
+        self.assertEqual(fx_notes.read(["Freight\nForward contracts 43,393 45,377\n"])["fx_forwards"], [])   # not currency
+        # Community Foods: the hedging reserve is the open currency hedges' value…
+        community = ("The company uses forward foreign exchange contracts to hedge its US dollar purchases.\n"
+                     "Capital and reserves Note 2025 2024\nHedging reserve 20 710,411 (537,081)\n"
+                     "Retained earnings 20 2,828,474 1,007,216\n")
+        found = fx_notes.read([community])["fx_forwards"]
+        self.assertEqual([(f["what"], f["amount"], f["prior"]) for f in found], [("hedge reserve", 710_411, 537_081)])
+        self.assertEqual(fx_notes._forward_line(found[0]),
+                         "hedging reserve £710k (the open currency hedges' value) (prior year £537k)")
+        # … but not when interest rate swaps share it, nor without currency forwards.
+        self.assertEqual(fx_notes.read([community + "The group also holds interest rate swaps.\n"])["fx_forwards"], [])
+        self.assertEqual(fx_notes.read(["Capital and reserves\nHedging reserve 20 710,411 (537,081)\n"])["fx_forwards"], [])
 
     def test_turnover_by_region_from_text(self):
         page = ("Turnover\nAn analysis of turnover by geographical market is given below:\n"
