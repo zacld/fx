@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { handle, markFirstSeen } from "../api/accounts.mjs";
+import { filingsMonth, handle, markFirstSeen } from "../api/accounts.mjs";
 
 const list = { made_at: "2026-10-21T06:00:00+00:00", count: 1, rows: [{ company_name: "A LTD", rank: 1 }] };
 // An in-memory Blobs store: the list under "latest", Zac's contacted marks under "contacted".
@@ -61,6 +61,18 @@ describe("/api/accounts", () => {
     expect(body.files_done).toBeUndefined();                                // bookkeeping stays in the store
     expect(body.contacted).toBeUndefined();
     expect((await handle(view("Bearer nope"), opts)).status).toBe(401);
+    // a year of filings is kept one month per item: the index lists the months, ?month= returns one
+    s.blobs.filings = { made_at: "x", months: [{ month: "2026-09", count: 1 }], files_done: ["a.zip"] };
+    s.blobs["filings/2026-09"] = { month: "2026-09", rows: [{ company_number: "02", company_name: "C LTD" }] };
+    expect((await (await handle(view("Bearer s3cret"), opts)).json()).months).toEqual([{ month: "2026-09", count: 1 }]);
+    const month = (m) => new Request(`https://x/api/accounts?view=filings&month=${m}`, { headers: { authorization: "Bearer s3cret" } });
+    expect((await (await handle(month("2026-09"), opts)).json()).rows[0].company_name).toBe("C LTD");
+    expect((await (await handle(month("2026-08"), opts)).json()).rows).toEqual([]);
+    expect((await handle(month("../latest"), opts)).status).toBe(400);
+  });
+
+  it("files a filing under the month it was filed", () => {
+    expect([filingsMonth("2026-11-04"), filingsMonth("September 2026"), filingsMonth("")]).toEqual(["2026-11", "2026-09", "unknown"]);
   });
 
   it("saves, returns and deletes a company's notes", async () => {

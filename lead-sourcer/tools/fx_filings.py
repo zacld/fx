@@ -166,7 +166,7 @@ def main() -> None:
     elif todo_history:
         print(f"COMPANIES_HOUSE_API_KEY not set: {len(todo_history):,} filing histories not read")
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,
-           "files_done": sorted(done), "count": len(rows), "rows": rows}
+           "files_done": sorted(done), "files_scanned": len(todo), "count": len(rows), "rows": rows}
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f)
     print(f"\n{len(new_rows):,} hits this run; {len(rows):,} companies on the list now")

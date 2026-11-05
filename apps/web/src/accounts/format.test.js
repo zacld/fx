@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askFor, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -235,6 +235,7 @@ describe("recent FX filings", () => {
     expect(fxFacts(row).map(([label]) => label)).toEqual(["Currencies", "FX gain/loss"]);
     expect(filedWhen("2026-11-04")).toBe("4 Nov 2026");
     expect(filedWhen("October 2026")).toBe("October 2026");
+    expect(monthLabel("2026-09")).toBe("Sep 2026");
     expect(chCompanyUrl("11022760")).toBe("https://find-and-update.company-information.service.gov.uk/company/11022760");
     expect([isGroupFiling({ turnover_basis: "group" }), isGroupFiling({ also_filed: "X LTD (01)" }), isGroupFiling({})]).toEqual([true, true, false]);
     expect(turnoverSearch("CASTOLIN EUTECTIC LIMITED")).toBe("https://www.google.com/search?q=%22CASTOLIN%20EUTECTIC%22%20turnover");

@@ -19,7 +19,16 @@ export const STORE = "fx-accounts";
 export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
-export const FILINGS_KEY = "filings";       // {made_at, rows, files_done} — the Recent FX filings tab (fx-filings workflow)
+export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index
+export const filingsMonthKey = (month) => `filings/${month}`;   // {month, rows}: the companies filed that month
+
+// "2026-11" for a day file's "2026-11-04"; "2026-09" for a monthly archive's "September 2026".
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+export function filingsMonth(filed = "") {
+  if (/^\d{4}-\d{2}/.test(filed)) return filed.slice(0, 7);
+  const m = /^([A-Z][a-z]+) (\d{4})$/.exec(filed);
+  return m && MONTHS.includes(m[1]) ? `${m[2]}-${String(MONTHS.indexOf(m[1]) + 1).padStart(2, "0")}` : "unknown";
+}
 export const NOTES_MAX = 4000;
 const COMPANY_NUMBER = /^[A-Z0-9]{8}$/i;
 const WRONG_PASSWORD_DELAY_MS = 1000;   // slows down guessing
@@ -83,11 +92,17 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     if (typeof notes === "string") await blobs.setJSON(NOTES_KEY, noted);
     return reply({ contacted: marks, notes: noted }, 200);
   }
-  if (new URL(req.url).searchParams.get("view") === "filings") {
+  const params = new URL(req.url).searchParams;
+  if (params.get("view") === "filings") {
+    const month = params.get("month") || "";
+    if (month) {
+      if (!/^\d{4}-\d{2}$/.test(month)) return reply({ error: "month is YYYY-MM" }, 400);
+      return reply((await blobs.get(filingsMonthKey(month), { type: "json" })) || { month, rows: [] }, 200);
+    }
     const filings = await blobs.get(FILINGS_KEY, { type: "json" });
     if (!filings) return reply({ error: "no FX filings scanned yet — they arrive with the next FX filings run" }, 404);
     const { files_done: _done, ...rest } = filings;
-    return reply(rest, 200);
+    return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
   const [data, marks, noted] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY].map((k) => blobs.get(k, { type: "json" })));
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);

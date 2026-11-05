@@ -305,3 +305,10 @@ export function chCompanyUrl(number = "") {
 export function isGroupFiling(r) {
   return r.turnover_basis === "group" || Boolean(r.also_filed);
 }
+
+// "Sep 2026" for "2026-09".
+export function monthLabel(month = "") {
+  const m = /^(\d{4})-(\d{2})$/.exec(month);
+  const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return m && +m[2] >= 1 && +m[2] <= 12 ? `${names[+m[2] - 1]} ${m[1]}` : month;
+}
