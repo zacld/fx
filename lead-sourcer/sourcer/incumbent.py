@@ -34,6 +34,16 @@ FX_PROVIDERS = ["Ebury", "Corpay", "Cambridge Global Payments", "Moneycorp", "We
 _PROVIDER_RE = re.compile(r"\b(" + "|".join(re.escape(p) for p in FX_PROVIDERS) + r")\b")
 _PROVIDER_HOLDER_RE = re.compile(_PROVIDER_RE.pattern, re.I)
 
+# Banks named as the counterparty to forward contracts ("a Barclays Forward Exchange Contract for $250,000",
+# "forward contracts with HSBC"): who sells them their FX today. Proper names, matched case-sensitively.
+FX_BANKS = ["HSBC", "Barclays", "Lloyds", "NatWest", "Santander", "Investec", "Bank of Scotland", "Royal Bank of Scotland",
+            "Clydesdale", "Handelsbanken", "Metro Bank", "Coutts", "Allica", "ABN AMRO", "Rabobank", "Deutsche Bank",
+            "Bank of Ireland", "Danske", "Citi", "JPMorgan", "J.P. Morgan", "BNP Paribas", "Société Générale"]
+_BANKS = "|".join(re.escape(b) for b in FX_BANKS)
+_FWD = r"forward\s+(?:foreign\s+)?(?:exchange\s+|currency\s+|fx\s+)?contracts?"
+_BANK_FORWARD_RE = re.compile(rf"\b({_BANKS})(?:\s+(?:Bank|UK|plc|PLC))*\s+(?i:{_FWD})|"
+                              rf"(?i:{_FWD})\s+(?:\w+\s+){{0,3}}?(?:with|through|from|via|arranged\s+with)\s+"
+                              rf"(?:the\s+bank,?\s+)?({_BANKS})\b")
 _FORWARDS_RE = re.compile(r"forward\s+(?:foreign\s+)?(?:exchange|currency|fx)\s+contracts?|forward\s+contracts?|"
                           r"(?:currency|fx|foreign\s+exchange)\s+forwards?|forward\s+(?:purchases?|cover)", re.I)
 _OPTIONS_RE = re.compile(r"(?:currency|fx|foreign\s+exchange)\s+options?", re.I)
@@ -190,6 +200,10 @@ def text_evidence(text: str) -> dict:
     for m in _PROVIDER_RE.finditer(text):
         if not any(p["name"].lower() == m.group(1).lower() for p in providers):
             providers.append({"name": m.group(1), "sentence": hooks._sentence(text, m.start(), m.end())})
+    for m in _BANK_FORWARD_RE.finditer(text):
+        name = f"{m.group(1) or m.group(2)} (forward contracts)"
+        if not any(p["name"] == name for p in providers):
+            providers.append({"name": name, "sentence": hooks._sentence(text, m.start(), m.end())})
     return {"facility_dates": dates[:6], "fx_policy": policy, "fx_providers": providers[:3]}
 
 

@@ -5,7 +5,8 @@ business, read from the document already downloaded (no extra calls, no AI):
   fx_currencies    currencies the accounts tie to the business: "principal exposures are to the US dollar and
                    euro", "purchases are made in euros", "sales invoiced in US dollars" (not every passing mention)
   fx_forwards      forward contracts with their size: "forward contracts to purchase US$5.2m (2023: US$3.1m)",
-                   "fair value of forward contracts £45,000", or a table row in the financial instruments note
+                   "fair value of forward contracts £45,000", a table row in the notes ("Derivative forward
+                   contracts 43,393"), or the hedging reserve (the open hedges' value, when they hedge currency only)
   fx_balances      balances held in foreign currency: "trade debtors include £2.3m denominated in euros", or a
                    currency-profile table ("US dollar 1,234 / Euro 567")
   fx_sensitivity   the effect of a currency move: "a 10% weakening of sterling against the US dollar would have
@@ -153,6 +154,8 @@ _PNL_EFFECT = re.compile(r"taken\s+to\s+the|recognised\s+in\s+(?:the\s+)?(?:prof
                          r"(?:credited|charged)\s+to|(?:fair\s+value\s+)?(?:profit|gain|loss)\s+on\s+(?:the\s+)?"
                          r"(?:forward|foreign|derivative|revaluation)", re.I)
 _NUMBER_TOKEN = re.compile(r"(?<![\w.])\(?[£$€]?\d[\d,]*(?:\.\d+)?\)?(?![\w])")
+# Dates ("29/12/2025"), exchange rates ("at a rate of 1.338116") and years: figures, but not amounts.
+_NOT_AMOUNTS = re.compile(r"\b\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}\b|\b\d+\.\d{3,}\b|\b(?:19|20)\d\d\b")
 _THESE_CONTRACTS = re.compile(r"\b(?:these|the|such|open|outstanding)\s+(?:forward\s+)?contracts?\b|"
                              r"\bcontracts?\s+(?:outstanding|in\s+place|open)\b", re.I)
 
@@ -175,7 +178,7 @@ def _forward_items(sentence: str, page: int, follows_forward: bool = False) -> l
         return []
     if _PNL_EFFECT.search(sentence):
         return []   # "the fair value profit … taken to the statement of comprehensive income": a P&L effect, not a size
-    if len(_NUMBER_TOKEN.findall(sentence)) > 6:
+    if len(_NUMBER_TOKEN.findall(_NOT_AMOUNTS.sub(" ", sentence))) > 6:
         return []   # table rows run together (OCR / layout): their figures belong to other lines
     if _FORWARD_WORDS.search(sentence) and not incumbent._EXPLICIT_FX_FORWARD.search(m.group(0)) and (
             not incumbent._FX_CONTEXT.search(sentence) or incumbent._NON_FX_FORWARD.search(sentence)):
@@ -241,6 +244,7 @@ _MILLIONS = re.compile(r"£\s*['’`]?\s*m\b|£\s*millions?", re.I)
 _CELL = re.compile(r"\(?-?\d{1,3}(?:,\d{3})+(?:\.\d+)?\)?|\(?-?\d+(?:\.\d+)?\)?")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _FORWARD_ROW = re.compile(r"^\s*((?:Forward\s+)?(?:foreign\s+)?(?:exchange|currency)\s+(?:forward\s+)?contracts?|"
+                          r"(?:Derivative\s+)?forward\s+contracts?|"
                           r"Forward\s+(?:foreign\s+)?(?:exchange|currency)\s+contracts?|Currency\s+forwards?|"
                           r"Foreign\s+exchange\s+forwards?|Derivative\s+financial\s+instruments?\s*[-–—(]\s*"
                           r"(?:foreign\s+exchange|currency)[^\n]{0,30}?)\s+(.*)$", re.I | re.M)
@@ -289,24 +293,64 @@ def _row_text(line: str) -> str:
     return " ".join(line.split())[:200]
 
 
+_ROW_GAIN_LOSS = re.compile(r"(?:gains?|loss(?:es)?|profit|movement|charge|credit)(?:\s+on)?(?:\s+derivative)?\s*$",
+                            re.I)
+
+
 def _forward_rows(page: str, number: int) -> list[dict]:
     out = []
     for m in _FORWARD_ROW.finditer(page):
         rest = m.group(2)
         if len(re.findall(r"[A-Za-z]{3,}", rest)) > 2:
             continue   # prose, not a table row
+        before = page[max(0, m.start() - 60):m.start()].rstrip()
+        if _ROW_GAIN_LOSS.search(before.split("\n")[-1]):
+            continue   # "Loss on derivative ⏎ forward contracts (1,984)": the P&L line, not the contracts
+        if not re.match(r"\s*(?:foreign|exchange|currency|forward\s+(?:foreign|exchange|currency))", m.group(1), re.I) \
+                and not re.search(r"forward\s+(?:foreign\s+)?(?:exchange|currency)|currency\s+forwards?", page, re.I):
+            continue   # a bare "forward contracts" row on a page that never ties them to currency
         values = [v for v in _cells(rest) if abs(v) > 0]
         if not values:
             continue
         scale = _scale_near(page, m.start())
         amount = abs(values[0]) * scale
-        if amount < 1_000:
+        if amount < MIN_FORWARD_AMOUNT:
             continue
         out.append({"what": "table", "amount": amount, "ccy": "GBP", "direction": "",
                     "prior": abs(values[1]) * scale if len(values) > 1 else None,
                     "sentence": _row_text(m.group(0)), "page": number})
         break
     return out
+
+
+_HEDGE_RESERVE_ROW = re.compile(r"^\s*((?:Cash\s*flow\s+)?hedg(?:e|ing)\s+reserve)\s+(.*)$", re.I | re.M)
+_INTEREST_HEDGE = re.compile(r"interest\s+rate\s+(?:swaps?|caps?|collars?|hedg|derivatives?)", re.I)
+
+
+def _hedge_reserve_rows(page: str, number: int, document: str) -> list[dict]:
+    """
+    "Hedging reserve 20 710,411 (537,081)": the fair value of the open cash-flow hedges — a size for the forward
+    book when the accounts hedge currency with forwards and nothing else (no interest rate swaps).
+    """
+    if _INTEREST_HEDGE.search(document) or not re.search(
+            r"forward\s+(?:foreign\s+)?(?:exchange|currency)|currency\s+forwards?|foreign\s+exchange\s+contracts?",
+            document, re.I):
+        return []
+    for m in _HEDGE_RESERVE_ROW.finditer(page):
+        rest = m.group(2)
+        if len(re.findall(r"[A-Za-z]{3,}", rest)) > 1:
+            continue
+        values = [v for v in _cells(rest) if abs(v) > 0]
+        if not values:
+            continue
+        scale = _scale_near(page, m.start())
+        amount = abs(values[0]) * scale
+        if amount < MIN_FORWARD_AMOUNT:
+            continue
+        return [{"what": "hedge reserve", "amount": amount, "ccy": "GBP", "direction": "",
+                 "prior": abs(values[1]) * scale if len(values) > 1 else None,
+                 "sentence": _row_text(m.group(0)), "page": number}]
+    return []
 
 
 def _profile_rows(page: str, number: int) -> list[dict]:
@@ -371,9 +415,13 @@ def read(pages: list[str], numbers: Optional[list[int]] = None, table_pages: Opt
                 balances += _balance_items(s, number)
             if len(sensitivity) < 3:
                 sensitivity += _sensitivity_items(s, number)
-    for page, number in zip(table_pages if table_pages is not None else pages, numbers):
+    tables = table_pages if table_pages is not None else pages
+    document = "\n".join(tables)
+    for page, number in zip(tables, numbers):
         if not any(f["what"] == "table" for f in forwards):
             forwards += _forward_rows(page, number)
+        if not any(f["what"] == "hedge reserve" for f in forwards):
+            forwards += _hedge_reserve_rows(page, number, document)
         if len(balances) < 6:
             balances += _profile_rows(page, number)
     for f in forwards:   # a currency they hold forwards in is one they deal in
@@ -429,7 +477,9 @@ def _forward_line(f: dict) -> str:
     if f["what"] == "fair value":
         return f"forward contracts valued at {size}{prior}"
     if f["what"] == "table":
-        return f"forward contracts {size} in the financial instruments note{prior}"
+        return f"forward contracts {size} in the notes' tables{prior}"
+    if f["what"] == "hedge reserve":
+        return f"hedging reserve {size} (the open currency hedges' value){prior}"
     verb = {"buy": "to buy ", "sell": "to sell "}.get(f.get("direction", ""), "of ")
     return f"forward contracts {verb}{size}{prior}"
 

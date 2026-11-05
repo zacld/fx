@@ -411,7 +411,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-05"   # the currency notes (fx_notes) and turnover by region from accounts text
+FACTS_VERSION = "2026-11-06"   # forward sizes: notes rows, hedging reserve, dated contracts; the bank named for forwards
 
 
 # Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.

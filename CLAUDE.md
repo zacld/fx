@@ -156,7 +156,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Incumbent + qualify** (`sourcer/incumbent.py`, `sourcer/qualify.py`): incumbent
   bank (all-assets debenture holder) and every charge's type from the charges
   register already fetched; facility end dates and "how they do FX today"
-  (forwards / options / no hedging / natural hedge / named FX provider) quoted
+  (forwards / options / no hedging / natural hedge / named FX provider, or
+  the bank named for their forwards: "a Barclays Forward Exchange Contract") quoted
   from the accounts; bank facts lead the facts and opener (`HOOK_RULES
   ["order"]`), FX gain/loss as the cross-sell; `fx_estimate` labelled as an
   estimate; `qualified` Yes/Check/Out (`QUALIFY_RULES`; a filter, not a score)
@@ -168,7 +169,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Currency notes** (`sourcer/fx_notes.py`, read from the accounts already
   downloaded — tagged, text, and the pages of scanned filings OCR'd anyway):
   forward contracts with their size (`fx_forwards`: "to purchase US$5.2m
-  (2023: US$3.1m)", fair value, or the financial-instruments table row),
+  (2023: US$3.1m)", fair value, a table row in the notes — "Derivative
+  forward contracts 43,393" — or the hedging reserve when they hedge currency
+  only, no interest rate swaps; dates and rates in a sentence aren't amounts),
   currencies the accounts tie to the business (`currencies_in_accounts`:
   "principal exposures are to the US dollar"), foreign-currency balances
   (`fx_balances`, sentences and currency-profile tables), sensitivity
