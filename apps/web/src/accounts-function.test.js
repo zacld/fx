@@ -47,6 +47,22 @@ describe("/api/accounts", () => {
     expect(s.blobs.latest).toBe(list);                        // the finder's list is never rewritten
   });
 
+  it("returns the Recent FX filings list on ?view=filings, behind the same password", async () => {
+    const s = memory();
+    const filings = { made_at: "2026-11-05T07:00:00+00:00", rows: [{ company_number: "01234567", company_name: "B LTD" }],
+                      files_done: ["Accounts_Bulk_Data-2026-11-04.zip"] };
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const view = (auth) => new Request("https://x/api/accounts?view=filings", { headers: { authorization: auth } });
+    expect((await handle(view("Bearer s3cret"), opts)).status).toBe(404);   // not scanned yet
+    s.blobs.filings = filings;
+    const res = await handle(view("Bearer s3cret"), opts);
+    const body = await res.json();
+    expect(body.rows[0].company_name).toBe("B LTD");
+    expect(body.files_done).toBeUndefined();                                // bookkeeping stays in the store
+    expect(body.contacted).toBeUndefined();
+    expect((await handle(view("Bearer nope"), opts)).status).toBe(401);
+  });
+
   it("saves, returns and deletes a company's notes", async () => {
     const s = memory();
     const opts = { password: "s3cret", store: s, delay: 0 };

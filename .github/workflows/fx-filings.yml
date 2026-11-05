@@ -1,0 +1,74 @@
+name: FX filings
+
+# The Accounts page's "Recent FX filings" tab: Companies House's free bulk accounts files (every set of accounts
+# filed online — lead-sourcer/sourcer/filings.py) scanned for companies of £25m+ whose filing shows FX (an FX
+# gain/loss, forward contracts, currencies, how they handle FX, sales abroad), merged into the list in the site's
+# private store (key "filings"). Daily: the day files not done yet (Tue–Sat, Companies House adds one each
+# morning). By hand: a monthly archive ("next" = the newest not yet done — run it again to go back a month at a time).
+# On a push of the scanner: the latest month, as a test.
+# Public repo: the log holds counts, timings and company names with their public accounts' FX facts — no people,
+# no attachments.
+
+on:
+  schedule:
+    - cron: '23 9 * * 2-6'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'daily, or a monthly archive: next (newest not done), latest, or a name like October2026'
+        required: false
+        default: 'daily'
+  push:
+    branches: ['main', 'claude/**']
+    paths:
+      - .github/workflows/fx-filings.yml
+      - lead-sourcer/tools/fx_filings.py
+      - lead-sourcer/sourcer/filings.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fx-filings
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python packages
+        run: pip install -q -r lead-sourcer/requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: The list so far
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/filings-previous.json
+
+      - name: Scan
+        working-directory: lead-sourcer
+        env:
+          MODE: ${{ github.event_name == 'push' && 'latest' || inputs.mode || 'daily' }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          if [ "$MODE" = "daily" ]; then python3 tools/fx_filings.py --daily --previous filings-previous.json --out filings.json
+          else python3 tools/fx_filings.py --month "$MODE" --previous filings-previous.json --out filings.json; fi
+
+      - name: Save the list
+        run: cd apps/web && node scripts/filings-store.mjs put ../../lead-sourcer/filings.json

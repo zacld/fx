@@ -33,7 +33,7 @@ sys.path.insert(0, ROOT)
 
 import main  # noqa: E402
 import server  # noqa: E402
-from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, fx_notes, group, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
+from sourcer import accounts, banks, bulk, companies_house, confirm, currency, excel, fx_notes, group, filings, hmrc, hooks, incumbent, matching, people, profiles, qualify, register_cache, registries, roles, news, pdf, signals, timing, triggers, website  # noqa: E402
 
 # api/ is a Vercel functions folder, not a package — load run.py by path.
 _spec = importlib.util.spec_from_file_location("api_run", os.path.join(ROOT, "api", "run.py"))
@@ -2679,3 +2679,63 @@ class TestReviewFixesIncumbent(unittest.TestCase):
                                    facts={}, owners=[], charges=[], today=self.TODAY,
                                    bank={"own_bank": True}, own_bank_name="Barclays")
         self.assertIn("existing Barclays relationship", row["warm_route"])
+
+
+class TestFxFilings(unittest.TestCase):
+    """The Recent FX filings scanner over a bulk accounts zip laid out like Companies House's."""
+
+    def _zip(self, folder, docs):
+        path = os.path.join(folder, "Accounts_Bulk_Data-2026-11-04.zip")
+        with zipfile.ZipFile(path, "w") as zf:
+            for name, body in docs.items():
+                zf.writestr(name, body)
+        return path
+
+    def test_screen_read_and_keep_big_companies_whose_filing_shows_fx(self):
+        named = ixbrl(current="45,000").replace(
+            b"<table>", b'<p><ix:nonNumeric name="bus:EntityCurrentLegalOrRegisteredName" contextRef="FY2024">'
+                        b"ACME &amp; SONS LIMITED</ix:nonNumeric></p><table>")
+        tiny = b"<html><body>Micro-entity accounts. Turnover not shown.</body></html>"
+        small = ixbrl(current="900", prior="800")   # £0.9m tagged: screened out without being read
+        with tempfile.TemporaryDirectory() as d:
+            path = self._zip(d, {"Prod223_0001_01234567_20241231.html": named,
+                                 "Prod223_0002_07654321_20241231.html": tiny,
+                                 "Prod223_0003_SC123456_20241231.html": small,
+                                 "readme.txt": b"not accounts"})
+            filings.stats.update(files=0, read=0, hits=0, seconds=0.0)
+            hits = filings.scan(path, workers=1)
+        self.assertEqual(filings.stats["files"], 3)
+        self.assertEqual(filings.stats["read"], 1)   # only the £45m filing passed the quick screen
+        self.assertEqual(len(hits), 1)
+        row = hits[0]
+        self.assertEqual((row["company_number"], row["company_name"], row["filed"], row["turnover_gbp"]),
+                         ("01234567", "ACME & SONS LIMITED", "2026-11-04", "45000000"))
+        self.assertEqual(row["fx_gain_loss_gbp"], "-420000")
+        self.assertIn("FX loss £420k", row["filed_fx"])
+        self.assertTrue(row["accounts_url"].endswith("/company/01234567/filing-history"))
+        # the floor decides: under it, read but not kept
+        with tempfile.TemporaryDirectory() as d:
+            path = self._zip(d, {"Prod223_0001_01234567_20241231.html": ixbrl()})   # £23.4m
+            self.assertEqual(filings.scan(path, workers=1), [])
+            self.assertEqual(len(filings.scan(path, workers=1, min_turnover=20_000_000)), 1)
+
+    def test_quick_screen(self):
+        self.assertEqual(filings.tagged_turnover(ixbrl(current="45,000")), 45_000_000)   # inside a <span>, £'000
+        self.assertIsNone(filings.tagged_turnover(b"<p>Turnover 45,000</p>"))
+        big_untagged = b"<p>Foreign exchange losses</p>" + b" " * filings.MIN_BYTES_UNTAGGED
+        self.assertTrue(filings.worth_reading(big_untagged))
+        self.assertFalse(filings.worth_reading(b"<p>Foreign exchange losses</p>"))   # too short for full accounts
+        self.assertFalse(filings.worth_reading(b"<p>Nothing about currency</p>" + b" " * filings.MIN_BYTES_UNTAGGED))
+
+    def test_file_labels_and_merge(self):
+        self.assertEqual(filings.filed_label("https://x/Accounts_Bulk_Data-2026-11-04.zip"), "2026-11-04")
+        self.assertEqual(filings.filed_label("https://x/Accounts_Monthly_Data-October2026.zip"), "October 2026")
+        old = {"company_number": "01", "filed": "October 2026", "period_end": "2025-12-31", "filed_fx_score": 25}
+        newer = {"company_number": "01", "filed": "2026-11-04", "period_end": "2026-06-30", "filed_fx_score": 40}
+        other = {"company_number": "02", "filed": "2026-11-03", "period_end": "2026-03-31", "filed_fx_score": 65}
+        stale = {"company_number": "03", "filed": "August 2025", "period_end": "2024-12-31", "filed_fx_score": 90}
+        late = {"company_number": "04", "filed": "2026-09-30", "period_end": "2024-12-31", "filed_fx_score": 20}
+        merged = filings.merge([old, stale], [newer, other, late], today=date(2026, 11, 5))
+        self.assertEqual([(r["company_number"], r["filed"]) for r in merged],
+                         [("01", "2026-11-04"), ("02", "2026-11-03"), ("04", "2026-09-30")])   # filed 400+ days ago: gone
+        self.assertEqual(filings.merge([newer], [old], today=date(2026, 11, 5))[0]["filed"], "2026-11-04")   # older period never replaces
