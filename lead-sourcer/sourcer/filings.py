@@ -220,9 +220,15 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
     band = size_band(facts) if turnover is None else None
     big_by_band = bool(band and band["high"] >= min_turnover and band["low"] >= SIZE_RULES["keep_low"])
     if turnover is None and not big_by_band and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER:
+        text = document.decode("utf-8", errors="replace")
+        debtor_tags = sorted({m.split(":")[-1] for m in re.findall(r'name="([^"]+)"', text)
+                              if re.search(r"debtor|receivable", m, re.I)})[:5]
+        example = (f"\t{company_name(text) or number} ({number}): staff {facts.get('employees') or '—'}, trade debtors "
+                   f"{hooks.short(facts['trade_debtors']) if facts.get('trade_debtors') else '—'}"
+                   + (f" → {size_label(band)}" if band else "") + f"; debtor tags: {', '.join(debtor_tags) or 'none'}")
         if not band:
-            return None, "read: no turnover filed, no staff or debtors figures to size it"
-        return None, "read: no turnover filed, too small on staff / debtors"
+            return None, "read: no turnover filed, no staff or debtors figures to size it" + example
+        return None, "read: no turnover filed, too small on staff / debtors" + example
     name = company_name(document.decode("utf-8", errors="replace")) or number
     url = filing_url(number)
     cols = fx_notes.columns(facts, name, url)
@@ -342,7 +348,7 @@ def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers
         for found, why in (pool.map(_read_one, pending) if pool else map(_read_one, pending)):
             why, _, example = why.partition("\t")
             stats["why"][why] += 1
-            if example and len(stats["examples"].setdefault(why, [])) < 12:
+            if example and len(stats["examples"].setdefault(why, [])) < 40:
                 stats["examples"][why].append(example)
             if found:
                 hits.append(found)
