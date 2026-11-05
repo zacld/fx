@@ -156,7 +156,7 @@ export function detailSections(r) {
       ["Former FD", r.former_finance_director], ["Contact evidence", r.finance_contact_evidence], ["Search check", r.search_check],
       ["Lead director", join(r.lead_director, r.lead_director_occupation)], ["Directors", r.all_directors],
       ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by], ["Owners", r.owners],
-      ["Group", r.group_parent], ["Parent's finance contact", r.parent_finance_contact],
+      ["Group", r.group_parent], ["FX decided abroad?", r.run_from_abroad], ["Parent's finance contact", r.parent_finance_contact],
     ]],
     ["Company", [
       ["Accounts", r.size_basis, r.accounts_url], ["Turnover source", r.turnover_source, r.turnover_url],
@@ -198,6 +198,10 @@ const fxLossKey = (r) => {
 export const FX_GROUPS = ["Strong FX proof", "Some FX proof", "No FX in the filings yet"];
 export const fxScore = (r) => Number(r.filed_fx_score) || 0;
 export const fxGroup = (r) => (fxScore(r) >= 50 ? FX_GROUPS[0] : fxScore(r) > 0 ? FX_GROUPS[1] : FX_GROUPS[2]);
+// Owned from abroad with no sign of running FX locally (run_from_abroad): the decision is probably made at head
+// office, so it ranks this much lower within its group — lead-sourcer hooks.ABROAD_RULES["points"].
+export const ABROAD_POINTS = 25;
+const rankedFx = (r) => fxScore(r) - (r.run_from_abroad ? ABROAD_POINTS : 0);
 
 // The FX facts a card leads with, each [label, value, source link, the quote behind it]; empty ones left out.
 // "Currencies" are the ones the accounts tie to the business, else the main currency and where it came from.
@@ -222,9 +226,10 @@ export function fxFacts(r) {
 }
 
 // "Hottest": the strongest FX proof in the company's own filings first; within the same score, the finder's ranking
-// (FX evidence + untapped + triggers + a recent FX loss). Who to ask for is a quick Google: see "Contact confidence".
+// (FX evidence + untapped + triggers + a recent FX loss). FX probably run from an overseas parent: ABROAD_POINTS lower,
+// within its group. Who to ask for is a quick Google: see "Contact confidence".
 export const SORTS = {
-  hot: { label: "Hottest (strongest FX proof)", key: (r) => -fxScore(r) * 1e6 + r.rank },
+  hot: { label: "Hottest (strongest FX proof)", key: (r) => FX_GROUPS.indexOf(fxGroup(r)) * 1e9 - rankedFx(r) * 1e6 + r.rank },
   rank: { label: "Our score", key: (r) => r.rank },
   // Most senior finance role first (CFO/FD, head of finance, controller, manager…); within a role, hottest first.
   role: { label: "Job role (CFO/FD first)", key: (r) => ROLE_GROUPS.indexOf(roleGroup(r)) * 1e7 + SORTS.hot.key(r) },
@@ -241,7 +246,7 @@ export const sortRows = (rows, by = "hot") =>
 export const EXPORT_FIELDS = [
   "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
-  "currency_source", "group_parent_accounts", "group_fx",
+  "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
   "finance_contact", "finance_contact_role",
   "finance_contact_confidence", "finance_contact_clues", "finance_contact_linkedin", "search_check", "no_fd_likely", "former_finance_director", "lead_director", "turnover_gbp", "turnover_basis", "turnover_check",
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",
@@ -288,6 +293,14 @@ export function filterFilings(rows, { query = "", strongOnly = false, lossOnly =
     && (!q || [r.company_name, r.company_number, r.currencies_in_accounts, r.fx_forwards, r.fx_today, r.turnover_regions, r.hmrc_trade,
                r.bank_debt, r.moved_up, r.incumbent_bank, r.owner, r.directors, r.triggers, ...(r.fx_mentions || [])]
       .some((v) => (v || "").toLowerCase().includes(q))));
+}
+
+// The filings tab's order: newest filed (as stored), or strongest first — filed FX proof less ABROAD_POINTS for FX
+// probably run abroad (rank_score from the scan), then newest.
+export function sortFilings(rows, by = "newest") {
+  if (by !== "strongest") return rows;
+  const score = (r) => (r.rank_score ?? rankedFx(r));
+  return [...rows].sort((a, b) => score(b) - score(a) || (b.filed || "").localeCompare(a.filed || ""));
 }
 
 // A Google search for a company's turnover, for one that filed none (filleted accounts): press, the group's
