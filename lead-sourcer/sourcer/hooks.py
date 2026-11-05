@@ -28,6 +28,7 @@ from sourcer import people, profiles, signals, triggers
 
 # Every threshold in one place, to tune against real call outcomes.
 HOOK_RULES = {
+    "region_min_share": 0.10,         # an overseas region names the main currency only at 10%+ of turnover
     "new_finance_officer_days": 90,      # 1. FD/CFO appointed within this many days
     "fx_gain_loss_min_gbp": 50_000,      # 2. FX gain or loss on the latest accounts, at least this (either sign)
     "new_charge_days": 365,              # 3. charge registered within this many days
@@ -434,12 +435,16 @@ def currency_exposure(company_name: str, facts: Optional[dict], owners: list[dic
         return {"currency": fwd["ccy"], "direction": direction, "confidence": HIGH, "rule": "forwards",
                 "evidence": f"\"{fwd['sentence']}\" ({source}{page})"}
 
-    # 1. Turnover by geography: the biggest non-UK region that maps to a currency.
+    # 1. Turnover by geography: the biggest overseas region, when it maps to a currency and is a real share of
+    # sales. A smaller region is never picked over a bigger one that doesn't map ("Rest of the world", "Middle East
+    # and Asia"): £22k of Europe beside £31.6m of UK sales, or Europe behind £21m from the Middle East, isn't a
+    # currency to name — the next rules decide.
     regions = [r for r in f.get("regions") or [] if not is_uk(r["region"]) and r.get("value", 0) > 0]
     regions.sort(key=lambda r: r["value"], reverse=True)
-    for r in regions:
+    whole = f.get("turnover") or sum(r.get("value", 0) for r in f.get("regions") or [])
+    for r in regions[:1]:
         ccy = region_currency(r["region"])
-        if ccy:
+        if ccy and whole and r["value"] >= HOOK_RULES["region_min_share"] * whole:
             total = f.get("turnover")
             of = f" of {exact(total)} total" if total else ""
             how = "tagged figures" if f.get("format") == "ixbrl" else "turnover note"

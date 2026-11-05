@@ -2207,6 +2207,29 @@ class TestHooks(unittest.TestCase):
         self.assertEqual(set(blank.values()), {""})                                       # nothing qualifies: all blank
         self.assertEqual(set(blank), set(hooks.COLUMNS))
 
+    def test_main_currency_from_regions_only_when_its_the_biggest_real_share(self):
+        """FX filings test, 5 Nov: Connected Care (£22k of Europe beside £31.6m UK) and Broadway Malyan (Europe behind
+        £21m from the Middle East and Asia) were labelled EUR."""
+        tiny = {"turnover": 32_842_246, "regions": [{"region": "United Kingdom", "value": 31_600_000},
+                                                    {"region": "Rest of Europe", "value": 22_556}]}
+        self.assertNotEqual(hooks.currency_exposure("CONNECTED CARE LTD", tiny, [], {})["rule"], "geography")
+        behind = {"turnover": 46_989_606, "regions": [{"region": "Middle East and Asia", "value": 21_300_000},
+                                                      {"region": "United Kingdom", "value": 11_400_000},
+                                                      {"region": "Rest of Europe", "value": 7_363_706}]}
+        self.assertNotEqual(hooks.currency_exposure("BROADWAY MALYAN LTD", behind, [], {})["rule"], "geography")
+        real = {"turnover": 50e6, "regions": [{"region": "United Kingdom", "value": 30e6}, {"region": "North America", "value": 20e6}]}
+        self.assertEqual(hooks.currency_exposure("X LTD", real, [], {})["currency"], "USD")
+
+    def test_sensitivity_is_a_currency_move_not_growth(self):
+        growth = ("As a result of the Group's strategic acquisitions programme statutory gross revenue increased "
+                  "significantly by 25% to €157m, and the profit for the year rose.")
+        self.assertEqual(fx_notes.read([growth])["fx_sensitivity"], [])   # Milo Topco
+        real = ("If the US dollar and euro had weakened 10% against sterling with all other variables held constant, "
+                "post-tax losses would have been reduced by £9,086k (2024 - £6,648k).")
+        self.assertEqual([(x["pct"], x["amount"]) for x in fx_notes.read([real])["fx_sensitivity"]], [(10.0, 9_086_000)])
+        moved = "A 5% movement in the sterling exchange rate would change profit before tax by £120,000."
+        self.assertEqual(len(fx_notes.read([moved])["fx_sensitivity"]), 1)
+
     def test_currency_rules_strongest_first(self):
         text = ("Purchases from suppliers in China are denominated in US dollars. The company also pays some US dollar "
                 "freight. Sales are made in sterling. Euro Quality Lambs Limited trades. ")
@@ -2718,6 +2741,25 @@ class TestFxFilings(unittest.TestCase):
             path = self._zip(d, {"Prod223_0001_01234567_20241231.html": ixbrl()})   # £23.4m
             self.assertEqual(filings.scan(path, workers=1), [])
             self.assertEqual(len(filings.scan(path, workers=1, min_turnover=20_000_000)), 1)
+
+    def test_what_counts_as_fx_and_one_row_per_group(self):
+        uk_only = {"turnover": 27e6, "regions": [{"region": "United Kingdom", "value": 27e6}]}
+        self.assertFalse(filings.shows_fx(uk_only, "Doesn't hedge"))                    # ACS Technology
+        self.assertFalse(filings.shows_fx({"turnover": 34e6, "fx_balances": [{"amount": 304_000, "ccy": "GBP", "in": ""}]}, ""))
+        self.assertTrue(filings.shows_fx({"turnover": 34e6, "fx_balances": [{"amount": 304_000, "ccy": "GBP", "in": "USD"}]}, ""))
+        self.assertFalse(filings.shows_fx({"turnover": 32.8e6, "regions": [{"region": "United Kingdom", "value": 32.8e6},
+                                                                          {"region": "Rest of Europe", "value": 22_556}]}, ""))
+        self.assertTrue(filings.shows_fx({"turnover": 46.9e6, "regions": [{"region": "Middle East and Asia", "value": 21.3e6}]}, ""))
+        self.assertTrue(filings.shows_fx({"fx_gain_loss": -958_000}, ""))
+        self.assertTrue(filings.shows_fx({}, "Uses forward contracts"))
+        # Burnley: the club and its holding company file the same year's figures — one row, the group's, naming the other
+        club = {"company_number": "00054222", "company_name": "THE BURNLEY FOOTBALL & ATHLETIC COMPANY LIMITED",
+                "filed": "2026-11-05", "period_end": "2026-07-31", "turnover_gbp": "144500000", "fx_gain_loss_gbp": "-958000",
+                "turnover_basis": "company", "filed_fx_score": 25}
+        holding = {**club, "company_number": "08335231", "company_name": "BURNLEY FC HOLDINGS LIMITED", "turnover_basis": "group"}
+        merged = filings.merge([], [club, holding], today=date(2026, 11, 6))
+        self.assertEqual([(r["company_number"], r.get("also_filed")) for r in merged],
+                         [("08335231", "THE BURNLEY FOOTBALL & ATHLETIC COMPANY LIMITED (00054222)")])
 
     def test_quick_screen(self):
         self.assertEqual(filings.tagged_turnover(ixbrl(current="45,000")), 45_000_000)   # inside a <span>, £'000

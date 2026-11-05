@@ -129,6 +129,23 @@ def filing_url(number: str) -> str:
     return f"https://find-and-update.company-information.service.gov.uk/company/{number}/filing-history"
 
 
+def shows_fx(facts: dict, fx_today: str) -> bool:
+    """
+    Whether the filing proves foreign-currency flows: an FX gain/loss, forwards, how they hedge (not "doesn't
+    hedge" on its own), currencies tied to the business, sensitivity, balances in another currency, or overseas
+    sales of 5%+ of turnover. "We don't hedge" with all-UK sales, or a balance in pounds, isn't.
+    """
+    if facts.get("fx_gain_loss") or facts.get("fx_forwards") or facts.get("fx_sensitivity") or facts.get("fx_currencies"):
+        return True
+    if fx_today and not fx_today.startswith("Doesn't hedge"):
+        return True
+    if any(b.get("in") or b.get("ccy") not in ("GBP", "", None) for b in facts.get("fx_balances") or []):
+        return True
+    whole = facts.get("turnover") or sum(r.get("value", 0) for r in facts.get("regions") or [])
+    abroad = sum(r.get("value", 0) for r in facts.get("regions") or [] if not hooks.is_uk(r.get("region", "")))
+    return bool(whole and abroad >= 0.05 * whole)
+
+
 def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: float = MIN_TURNOVER) -> Optional[dict]:
     """
     Step 2: the filing read like the finder reads accounts; a row when the company is big enough and its filing
@@ -162,9 +179,9 @@ def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: fl
         "accounts_url": url,
         **{k: v for k, v in cols.items() if not k.endswith("_url")},
     }
+    if not shows_fx(facts, today["fx_today"]):
+        return None   # big, but nothing in the filing proves currency flows
     score, lines = fx_notes.filed_proof(row)
-    if not score:
-        return None   # big, but nothing in the filing about currency
     row.update(filed_fx_score=score, filed_fx="; ".join(lines))
     return row
 
@@ -245,7 +262,31 @@ def merge(previous: list[dict], new: list[dict], keep_days: int = 400, today: Op
         old = best.get(number)
         if not old or (row.get("period_end") or "") >= (old.get("period_end") or ""):
             best[number] = row
-    return sorted(best.values(), key=lambda r: (_sort_date(r.get("filed", "")), r.get("filed_fx_score", 0)), reverse=True)
+    return sorted(_one_per_group(list(best.values())),
+                  key=lambda r: (_sort_date(r.get("filed", "")), r.get("filed_fx_score", 0)), reverse=True)
+
+
+def _one_per_group(rows: list[dict]) -> list[dict]:
+    """
+    A group's figures filed by several of its companies (the holding company, a subsidiary, an employee-ownership
+    trustee: the same turnover and FX gain/loss for the same year) as one row: the group's own filing (group
+    figures), the others named in also_filed.
+    """
+    groups: dict[tuple, list[dict]] = {}
+    alone = []
+    for r in rows:
+        if r.get("turnover_gbp") and r.get("fx_gain_loss_gbp"):
+            groups.setdefault((r["turnover_gbp"], r["fx_gain_loss_gbp"], r.get("period_end", "")), []).append(r)
+        else:
+            alone.append(r)
+    for same in groups.values():
+        same.sort(key=lambda r: (r.get("turnover_basis") != "group", -r.get("filed_fx_score", 0), r["company_name"]))
+        keep = dict(same[0])
+        others = [f"{r['company_name']} ({r['company_number']})" for r in same[1:]]
+        if others:
+            keep["also_filed"] = "; ".join(others)
+        alone.append(keep)
+    return alone
 
 
 _MONTHS = {m: i for i, m in enumerate(("January February March April May June July August September October "

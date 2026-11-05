@@ -371,6 +371,7 @@ function FilingCard({ r, listed, onOpen }) {
       <FxStrip r={filingRow(r)} />
       <div className="chips">
         {listed ? <span className="chip own">On your Accounts list</span> : <span className="chip">Not on your list yet</span>}
+        {r.also_filed && <span className="chip" title="Group companies filing the same figures">Also filed by {r.also_filed}</span>}
         {r.auditor && <span className="chip">Auditor {r.auditor}</span>}
         {r.bankers && <span className="chip">Bankers {r.bankers}</span>}
         <a className="chip" href={r.accounts_url} target="_blank" rel="noreferrer">Filing history ↗</a>

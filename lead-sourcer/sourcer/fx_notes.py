@@ -222,10 +222,17 @@ def _balance_items(sentence: str, page: int) -> list[dict]:
     return out
 
 
+_FX_MOVE = re.compile(r"strengthen|weaken|appreciat|depreciat|(?:exchange\s+rates?|sterling|currenc\w*|"
+                      r"pound|dollar|euro)\W+(?:\w+\W+){0,4}?(?:movement|change|increase|decrease|rise|fall|move)|"
+                      r"(?:movement|change|increase|decrease|rise|fall|move)\w*\s+(?:\w+\s+){0,3}?in\s+(?:the\s+)?"
+                      r"(?:exchange\s+rates?|sterling|value\s+of\s+sterling|currenc)", re.I)
+_GROWTH = re.compile(r"\b(?:increased|grew|rose|decreased|fell|up|down)\s+(?:by\s+)?(?:\d{1,3}(?:\.\d+)?\s?%)\s+to\b", re.I)
+
+
 def _sensitivity_items(sentence: str, page: int) -> list[dict]:
     pct = _SENSITIVITY.search(sentence)
-    if not pct or not _MOVE_WORDS.search(sentence) or not _EFFECT_WORDS.search(sentence):
-        return []
+    if not pct or not _FX_MOVE.search(sentence) or _GROWTH.search(sentence) or not _EFFECT_WORDS.search(sentence):
+        return []   # "revenue increased by 25% to €157m" is growth, not a currency move's effect
     codes = _codes(sentence)
     if not codes and not _STERLING.search(sentence):
         return []
