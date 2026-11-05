@@ -179,8 +179,13 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         text = document.decode("utf-8", errors="replace")
         kind = ("filleted (no profit and loss account)" if not re.search(r"\b(?:turnover|revenue)\b", text, re.I)
                 else "turnover shown but not read")
+        rows_text = accounts.ixbrl_table_text(text)
+        lines = [ln for ln in rows_text.split("\n") if re.search(r"\b(?:turnover|revenue)\b", ln, re.I)][:4]
+        tags = sorted({m for m in re.findall(r'name="([^"]+)"', text) if re.search(r"turnover|revenue", m, re.I)})[:4]
         stats_sample = f"{company_name(text) or number} ({number}): {len(document) // 1000}KB, {kind}" + \
-            (f", {facts.get('turnover_check')}" if facts.get("turnover_check") else "")
+            (f", {facts.get('turnover_check')}" if facts.get("turnover_check") else "") + \
+            "".join(f"\n                          line: {ln[:160]}" for ln in lines) + \
+            (f"\n                          tags: {', '.join(tags)}" if tags else "")
         return None, (f"read: turnover not found ({kind}), " + ("no FX gain/loss" if not fx else "FX gain/loss under £100k")
                       + "\t" + stats_sample)
     name = company_name(document.decode("utf-8", errors="replace")) or number
