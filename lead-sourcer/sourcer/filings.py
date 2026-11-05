@@ -298,10 +298,20 @@ def _one_per_group(rows: list[dict]) -> list[dict]:
     out = []
     for same in groups.values():
         same.sort(key=lambda r: (r.get("turnover_basis") != "group", -r.get("filed_fx_score", 0),
-                                 -float(r.get("turnover_gbp") or 0), r["company_name"]))
+                                 -float(r.get("turnover_gbp") or 0), r.get("company_name", "")))
         keep = dict(same[0])
-        others = [f"{r['company_name']} ({r['company_number']})" for r in same[1:]]
+        others = [f"{r.get('company_name', '')} ({r['company_number']})" for r in same[1:]]
         if others:
             keep["also_filed"] = "; ".join(others)
         out.append(keep)
     return out
+
+
+_MONTHS = {m: i for i, m in enumerate(("January February March April May June July August September October "
+                                       "November December").split(), 1)}
+
+
+def _sort_date(filed: str) -> str:
+    """ "2026-11-04" as is; "October 2026" as "2026-10-00", so a month's archive sorts before its days."""
+    m = re.fullmatch(r"([A-Z][a-z]+) (\d{4})", filed or "")
+    return f"{m.group(2)}-{_MONTHS.get(m.group(1), 0):02d}-00" if m else (filed or "")
