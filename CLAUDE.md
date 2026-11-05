@@ -134,7 +134,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   bank FX desk (Zac now works at a bank). Core band £25m–£250m turnover;
   Above (£250m+) and Below are separate sections.
 - **Per company:** likely currencies (customs goods × HMRC trade statistics
-  by country), an FX wallet range (cost of sales/turnover × customs-banded
+  by country; dollar-priced goods — oil, metals, coffee, cocoa, soya, chips,
+  aircraft: `currency.DOLLAR_PRICED` — count as USD whatever the country), an FX wallet range (cost of sales/turnover × customs-banded
   shares), main bank and type (accounts "Bankers" line + charges register),
   own-bank flag (Investec by default in the workflow; `--own-bank` /
   `OWN_BANK`), triggers (new owner / private-equity backing, new or paid-off

@@ -1010,6 +1010,19 @@ class TestCurrency(unittest.TestCase):
         self.assertEqual(currency.pairs(cur, Counter()), ["GBP/EUR", "GBP/USD"])
         self.assertEqual(currency.mix(model, "export", Counter({"84212100": 1})), (Counter(), Counter()))
 
+    def test_dollar_priced_goods_count_as_usd_whatever_the_country(self):
+        model = currency.TradeByCountry()
+        for code, country, value in (("74031100", "DE", 60), ("74031100", "CL", 40),   # copper cathode
+                                     ("22042109", "FR", 100)):                        # wine: EUR from France
+            model.add("import", code, country, value)
+        cur, countries = currency.mix(model, "import", Counter({"74031100": 3, "22042109": 1}))
+        self.assertEqual(currency.describe(cur), "USD 75%, EUR 25%")   # German copper is still a dollar price
+        self.assertEqual(currency.describe(countries), "DE 45%, CL 30%, FR 25%")
+        self.assertEqual(currency.dollar_priced("74031100"), "copper")
+        self.assertEqual(currency.dollar_priced("10019900"), "")   # wheat trades in EUR in Europe: not on the list
+        self.assertEqual(currency.dollar_goods(Counter({"74031100": 3, "22042109": 1, "09011100": 0})), ["copper"])
+        self.assertEqual(currency.dollar_goods(Counter({"74031100": 1, "22042109": 19})), [])   # under 10%: not named
+
     def test_wallet(self):
         w = currency.wallet(40_000_000, None, 12, 4)
         # purchases assumed 70% of £40m = £28m x 40–80%, plus £40m x 10–25% exports
@@ -2214,6 +2227,10 @@ class TestHooks(unittest.TestCase):
         self.assertEqual((exp["currency"], exp["direction"], exp["confidence"], exp["rule"]),
                          ("EUR", hooks.BOTH, hooks.MEDIUM, "customs"))   # customs beat the niche default
         self.assertIn("imports EUR 64%, USD 21% (12 of the last 12 months)", exp["evidence"])
+        self.assertNotIn("counted as USD", exp["evidence"])
+        exp = hooks.currency_exposure("X LTD", {}, [], self.NICHE, {**customs, "dollar_goods": ["copper", "aluminium"]})
+        self.assertIn("; copper, aluminium counted as USD — priced in US dollars wherever they come from)",
+                      exp["evidence"])
         self.assertEqual(hooks.opener([], exp), "Saw from the customs records that you've imported every month and "
                                                 "exported in 1 of the last 12 months, so the pound's moves hit you either "
                                                 "way.")   # each flow's own count; no (estimated) currency named

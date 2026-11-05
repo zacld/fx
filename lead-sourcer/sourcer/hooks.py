@@ -419,7 +419,8 @@ def currency_exposure(company_name: str, facts: Optional[dict], owners: list[dic
           mix estimated from HMRC trade statistics by country) -> Medium
       4. the niche's default currency                  -> Low
     `customs`: {"imports", "exports"} as the row shows them ("EUR 64%, USD 21%"),
-    {"import_months", "export_months"} out of the last 12.
+    {"import_months", "export_months"} out of the last 12, "dollar_goods" (["copper"]: dollar-priced goods
+    counted as USD, currency.DOLLAR_PRICED).
     """
     f = facts or {}
     blank = {"currency": "", "direction": "", "evidence": "", "confidence": "", "rule": ""}
@@ -488,7 +489,9 @@ def currency_exposure(company_name: str, facts: Optional[dict], owners: list[dic
         return {"currency": mix[:3], "direction": BOTH if both else direction, "confidence": MEDIUM, "rule": "customs",
                 "months": months, "months_in": c.get("import_months") or 0, "months_out": c.get("export_months") or 0,
                 "evidence": f"HMRC customs records: {listed} (currency mix estimated from HMRC trade statistics "
-                            f"for the countries those goods come from or go to)"}
+                            f"for the countries those goods come from or go to"
+                            + (f"; {', '.join(c['dollar_goods'])} counted as USD — priced in US dollars wherever "
+                               f"they come from" if c.get("dollar_goods") else "") + ")"}
 
     # 4. The niche's default: its first non-sterling currency pair.
     pair = next((p for p in niche.get("currency_pairs") or [] if "GBP" in p), "")

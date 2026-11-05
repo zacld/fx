@@ -12,6 +12,14 @@ the currency its trade with the UK is usually invoiced in. It's an
 inference from the national pattern for the goods, not the company's own
 invoices, and says so.
 
+Some goods are priced in US dollars wherever they come from: oil and fuels,
+coal, metal ores, exchange-traded metals (LME copper, aluminium, nickel,
+zinc, lead, tin; gold, silver, platinum), the soft commodities traded in
+dollars (coffee, cocoa, sugar, soya, palm oil, cotton, rubber), chips and
+aircraft. A UK company buying copper cathode from Germany still pays a
+dollar price, so those codes count as USD whatever the country
+(DOLLAR_PRICED; grain isn't on it — European wheat and maize trade in EUR).
+
 Trade statistics files are fixed-width, one row per period x code x
 country x port (verified against the published files):
   [0:6] period YYYYMM, [13:21] commodity code, [29:31] country consigned
@@ -40,6 +48,20 @@ _NATIVE = {"US": "USD", "CH": "CHF", "LI": "CHF", "SE": "SEK", "NO": "NOK", "DK"
            "AU": "AUD", "NZ": "NZD", "CA": "CAD", "ZA": "ZAR"}
 # UK itself (returned goods, Northern Ireland), unknown or stores-and-provisions codes.
 _SKIP = {"GB", "XI", "XU", "QU", "QV", "QW", "QX", "QY", "QZ", "QP", "QQ", "QR", "QS", ""}
+
+# Goods priced in US dollars worldwide, by commodity-code prefix (HS chapter / heading): their trade counts as USD
+# whichever country it's with. Kept to goods whose world price is a dollar price.
+DOLLAR_PRICED = {
+    "2701": "coal", "2709": "crude oil", "2710": "fuels and oils", "2711": "gas / LNG",
+    "26": "metal ores",
+    "7106": "silver", "7108": "gold", "7110": "platinum",
+    "7401": "copper", "7402": "copper", "7403": "copper", "7502": "nickel", "7601": "aluminium",
+    "7801": "lead", "7901": "zinc", "8001": "tin",
+    "0901": "coffee", "1801": "cocoa", "1701": "sugar", "1201": "soya beans", "1507": "soya oil",
+    "2304": "soya meal", "1511": "palm oil", "5201": "cotton", "4001": "natural rubber",
+    "8541": "semiconductors", "8542": "chips", "8802": "aircraft", "8803": "aircraft parts",
+    "8411": "jet engines",
+}
 
 # Share of the money going abroad, banded by how many of the last 12 months
 # the company appears in customs records: (min months, low share, high share).
@@ -131,23 +153,39 @@ class TradeByCountry:
         return self._shares[key]
 
 
+def dollar_priced(code: str) -> str:
+    """The goods' name when a commodity code is priced in US dollars worldwide (DOLLAR_PRICED), else ""."""
+    return next((name for prefix, name in DOLLAR_PRICED.items() if code.startswith(prefix)), "")
+
+
+def dollar_goods(codes: Counter, floor: float = 0.10) -> list[str]:
+    """Names of the dollar-priced goods making up at least `floor` of a company's codes (by months), biggest first."""
+    total = sum(codes.values())
+    named: Counter = Counter()
+    for code, months in codes.items():
+        if dollar_priced(code):
+            named[dollar_priced(code)] += months
+    return [n for n, v in sorted(named.items(), key=lambda kv: (-kv[1], kv[0])) if total and v / total >= floor]
+
+
 def mix(model: TradeByCountry, flow: str, codes: Counter) -> tuple[Counter, Counter]:
     """
     (currency -> share, country -> share) for a company's codes. Each code
-    counts by how many months it appeared, split by where the UK trades it.
+    counts by how many months it appeared, split by where the UK trades it;
+    a dollar-priced code's share counts as USD whatever the country.
     """
     countries: Counter = Counter()
+    currencies: Counter = Counter()
     for code, months in codes.items():
+        usd = bool(dollar_priced(code))
         for country, share in model.shares(flow, code):
             countries[country] += months * share
+            currencies["USD" if usd else currency_for(country)] += months * share
     total = sum(countries.values())
     if not total:
         return Counter(), Counter()
-    countries = Counter({c: v / total for c, v in countries.items()})
-    currencies: Counter = Counter()
-    for country, share in countries.items():
-        currencies[currency_for(country)] += share
-    return currencies, countries
+    return (Counter({c: v / total for c, v in currencies.items()}),
+            Counter({c: v / total for c, v in countries.items()}))
 
 
 def describe(shares: Counter, top: int = 3, floor: float = 0.05) -> str:

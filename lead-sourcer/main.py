@@ -632,7 +632,9 @@ def company_row(
     customs = {"imports": currency.describe(imports) if imports else "",
                "exports": currency.describe(exports) if exports else "",
                "import_months": len(trade["import_months"]) if trade else 0,
-               "export_months": len(trade["export_months"]) if trade else 0}
+               "export_months": len(trade["export_months"]) if trade else 0,
+               "dollar_goods": currency.dollar_goods(trade["import_codes"] + trade["export_codes"])
+               if trade and trade_model is not None else []}
     talking = (hooks.columns(company["company_name"], f, officers, charges or [], owners, niche, news_people, today,
                              customs) if checked else {})
     # The incumbent (who holds the security, when the facility is up), how they do FX today, and qualify-out.
@@ -1208,7 +1210,8 @@ def fx_summary(rows: list[dict]) -> list[str]:
         f"turnover by region {count(lambda r: r.get('turnover_regions')):,} | "
         f"foreign-currency balances {count(lambda r: r.get('fx_balances')):,} | "
         f"sensitivity {count(lambda r: r.get('fx_sensitivity')):,} | FX gain/loss {len(fx):,} (£50k+ {big:,})",
-        "  Main currency from: " + ", ".join(f"{k} {v:,}" for k, v in source.most_common()),
+        "  Main currency from: " + ", ".join(f"{k} {v:,}" for k, v in source.most_common())
+        + f" | dollar-priced goods counted as USD {count(lambda r: 'counted as USD' in r.get('currency_evidence', '')):,}",
         f"  Group accounts: {count(lambda r: r.get('group_parent_accounts')):,} with a UK parent's accounts, "
         f"{count(lambda r: r.get('group_fx')):,} of them with the group's FX, "
         f"{count(lambda r: r.get('turnover_basis') == 'group' and r.get('group_parent_accounts')):,} sized by their group "
