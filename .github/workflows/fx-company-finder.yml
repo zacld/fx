@@ -134,6 +134,24 @@ jobs:
           key: search-${{ github.run_id }}
           restore-keys: search-
 
+      # The FX filings scan's list (Recent FX filings tab): its strongest finds — filed FX proof 50+, or moved up from
+      # small accounts — are checked first (main.priority_from_filings). Missing or unreachable: the run goes on without.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: The FX filings list
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/fx-filings.json
+
       - name: Find companies
         working-directory: lead-sourcer
         timeout-minutes: 200
@@ -154,7 +172,9 @@ jobs:
           # slots for companies still in the running (ones already known to be out don't take one); 1,200 fits
           # now that websites and news are cached for a week
           DEFAULT_ENRICH: "1200"
-        run: python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv
+        run: |
+          priority=""; [ -s fx-filings.json ] && priority="--priority-file fx-filings.json"
+          python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv $priority
 
       - name: Save Companies House lookups
         if: always()

@@ -451,6 +451,32 @@ def section_for(company: dict, turnover: Optional[dict], band: tuple[int, int] =
     return core if company["accounts_category"] in CANDIDATE_CATEGORIES else below
 
 
+# Companies the FX filings scan found (sourcer/filings.py) that no niche or customs record brings in.
+FILINGS_NICHE = {
+    "id": "_fx_filings", "name": "FX in their filed accounts", "sic_codes": [], "currency_pairs": [],
+    "exposure_reason": "Their own filed accounts show foreign-currency flows (the FX filings scan).", "call_angle": "",
+}
+# Share of a run's slots the FX filings scan's strongest finds may take before the customs and niche candidates.
+FILINGS_PRIORITY_SHARE = float(os.environ.get("FILINGS_PRIORITY_SHARE", "0.5"))
+FILINGS_PRIORITY_MIN_SCORE = 50
+
+
+def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE) -> dict[str, float]:
+    """
+    {company number: filed FX score} for the FX filings list's strongest finds — filed FX proof of min_score+, or
+    moved up from small accounts this year — from the list as fetched from the store (filings-store.mjs get);
+    {} when the file is missing or unreadable.
+    """
+    try:
+        with open(path, encoding="utf-8") as f:
+            rows = (json.load(f) or {}).get("rows") or []
+    except (OSError, ValueError):
+        return {}
+    return {r["company_number"]: float(r.get("filed_fx_score") or 0) + (25 if r.get("moved_up") else 0)
+            for r in rows if r.get("company_number")
+            and ((r.get("filed_fx_score") or 0) >= min_score or r.get("moved_up"))}
+
+
 def trader_niche(trade: dict) -> dict:
     """A stand-in niche for proven traders outside the niche SIC codes, described by what they trade."""
     goods = hmrc.chapters(trade["import_codes"] + trade["export_codes"])
@@ -798,6 +824,7 @@ def run_pipeline(
     websites: bool = True,
     news_check: bool = True,
     registry_check: bool = True,
+    priority: Optional[dict[str, float]] = None,
 ) -> list[dict]:
     """
     Find the companies and return one row per company (does not write a
@@ -812,6 +839,9 @@ def run_pipeline(
     exporting regularly — including small-accounts family firms whose
     turnover isn't public (only when min_turnover is under the small-company
     limit). Companies with customs evidence are checked first.
+    `priority`: {company number: filed FX score} from the FX filings scan
+    (priority_from_filings) — checked before everything else, up to
+    FILINGS_PRIORITY_SHARE of the run's slots, strongest first.
     """
     if source not in ("bulk", "api"):
         raise ValueError("source must be 'bulk' or 'api'")
@@ -846,7 +876,8 @@ def run_pipeline(
         sics = {str(s) for n in niches for s in n.get("sic_codes", [])}
         candidates, by_postcode, by_name = bulk.scan(
             path, sics, set(CANDIDATE_CATEGORIES),
-            postcodes={pc for _, pc in traders} or None, names={n for n, _ in traders} or None)
+            postcodes={pc for _, pc in traders} or None, names={n for n, _ in traders} or None,
+            numbers=set(priority or {}) or None)
         if traders:
             trade_by_company = matching.match_all(traders, by_postcode, by_name)
             print(f"  HMRC traders matched to companies: {len(trade_by_company):,} "
@@ -873,6 +904,8 @@ def run_pipeline(
             niche = best_niche(company["sic_codes"], matching_niches)
         elif trade:
             niche = trader_niche(trade)
+        elif company["company_number"] in (priority or {}):
+            niche = FILINGS_NICHE
         else:
             continue
         queue.append((niche, company, trade))
@@ -886,6 +919,16 @@ def run_pipeline(
     ))
 
     budget = 0 if not api_key else len(queue) if max_enrich is None else max_enrich
+    if priority:
+        # The FX filings scan's strongest finds first (proven FX in their own accounts), strongest first, up to a
+        # share of the slots; the rest of them wait behind the customs and niche candidates.
+        ranked = sorted((q for q in queue if q[1]["company_number"] in priority),
+                        key=lambda q: -priority[q[1]["company_number"]])
+        quota = int(budget * FILINGS_PRIORITY_SHARE) if budget else len(ranked)
+        first = {id(q) for q in ranked[:quota]}
+        queue = ranked[:quota] + [q for q in queue if id(q) not in first]
+        print(f"  FX filings scan: {len(priority):,} strong finds, {len(ranked):,} active on the register, "
+              f"{min(quota, len(ranked)):,} checked first")
 
     def known_out(company: dict, trade) -> str:
         """
@@ -1317,6 +1360,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-enrich", type=int, metavar="N", help="Check turnover and directors for at most N companies; the rest ship unchecked")
     parser.add_argument("--output", default=DEFAULT_OUTPUT, metavar="FILE", help=f"Output path: .xlsx for an Excel workbook, .csv for CSV (default: {DEFAULT_OUTPUT})")
     parser.add_argument("--niches-file", default=DEFAULT_NICHES_FILE, metavar="FILE")
+    parser.add_argument("--priority-file", metavar="JSON",
+                        help="The FX filings list (filings-store.mjs get): its strongest finds are checked first")
     return parser.parse_args()
 
 
@@ -1344,6 +1389,7 @@ def main() -> None:
             max_enrich=args.max_enrich,
             hmrc_months=max(args.hmrc_months, 0),
             min_trade_months=max(args.min_trade_months, 1),
+            priority=priority_from_filings(args.priority_file) if args.priority_file else None,
         )
     except (ValueError, FileNotFoundError) as e:
         print(f"ERROR: {e}", file=sys.stderr)

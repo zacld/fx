@@ -464,6 +464,28 @@ class TestSlotsGoToCompaniesStillInTheRunning(PipelineTestCase):
             self.assertNotIn("01", looked_up(since))
 
 
+class TestFxFilingsFirst(PipelineTestCase):
+    def test_the_filings_scans_strongest_finds_are_checked_first(self):
+        looked_up = lambda: list(dict.fromkeys(re.search(r"/company/(\w+)", u).group(1)
+                                              for u in self.fake.calls if "/company/" in u))
+        # 09 (software, outside every niche, no customs record) only comes in through the filings scan — and goes first
+        rows = self.run_bulk(news_check=False, max_enrich=2, priority={"09": 80.0})
+        self.assertEqual(looked_up()[0], "09")
+        self.assertIn("09", looked_up())
+        software = next((r for r in rows if r["company_number"] == "09"), None)
+        if software:
+            self.assertEqual(software["fx_niche"], main.FILINGS_NICHE["name"])
+
+    def test_priority_from_the_filings_list(self):
+        path = os.path.join(self.tmp.name, "filings.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"rows": [{"company_number": "01", "filed_fx_score": 65},
+                                {"company_number": "02", "filed_fx_score": 20, "moved_up": "Moved up from small accounts (…)"},
+                                {"company_number": "03", "filed_fx_score": 30}]}, f)
+        self.assertEqual(main.priority_from_filings(path), {"01": 65.0, "02": 45.0})
+        self.assertEqual(main.priority_from_filings(os.path.join(self.tmp.name, "missing.json")), {})
+
+
 class TestRegisterCache(PipelineTestCase):
     def test_second_run_reuses_the_lookups(self):
         with mock.patch.object(register_cache, "CACHE_DIR", os.path.join(self.tmp.name, "register")), \

@@ -251,7 +251,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   run): directors, the incumbent bank (all-assets debenture holder, linked to
   the charge) and other lenders, the owner (UK / overseas parent, PE-backed —
   `owner_line`) and the main list's triggers (`triggers.find`), plus a "Google
-  the FD" link; the finance-contact hunt stays in the main finder.
+  the FD" link; the finance-contact hunt stays in the main finder. The two
+  engines join there: the finder workflow fetches this list and its strongest
+  finds (filed FX proof 50+, or moved up from small accounts —
+  `main.priority_from_filings`, `--priority-file`) are candidates whatever their
+  SIC code and are checked first, up to `FILINGS_PRIORITY_SHARE` (half) of the
+  run's slots, strongest first (niche "FX in their filed accounts" when no niche
+  or customs record brings them in) — full research and contact hunt, then the
+  main Accounts list.
 - **Accounts page order:** "Hottest" by default — the strongest filed FX
   proof first (headed Strong FX proof (50+) / Some FX proof / No FX in the
   filings yet), each in the finder's rank: the FD is a quick Google, the FX
