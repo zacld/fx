@@ -24,6 +24,7 @@ calls (the bulk files need no key).
 from __future__ import annotations
 
 import html
+from collections import Counter
 import os
 import re
 import time
@@ -54,7 +55,8 @@ _FX_WORDS = re.compile(rb"exchange\s+(?:loss|gain|difference)|foreign\s+(?:excha
                        rb"forward\s+(?:foreign\s+)?(?:exchange|currency)|ForeignExchange", re.I)
 _NAME_TAG = re.compile(r"name=\"[^\":]*:EntityCurrentLegalOrRegisteredName\"[^>]*>(.*?)</ix:nonNumeric>", re.I | re.S)
 
-stats = {"files": 0, "screened_in": 0, "read": 0, "hits": 0, "seconds": 0.0, "stopped_early": False}
+stats = {"files": 0, "screened_in": 0, "read": 0, "hits": 0, "seconds": 0.0, "stopped_early": False,
+         "why": Counter()}   # why each filing was dropped (or "kept"), for the run's report
 
 
 # --- The bulk files ---------------------------------------------------------------------------------------------
@@ -110,12 +112,23 @@ def tagged_turnover(document: bytes) -> Optional[float]:
     return best
 
 
-def worth_reading(document: bytes, min_turnover: float = MIN_TURNOVER) -> bool:
-    """Step 1: big enough on its tagged turnover, or — none tagged — full-accounts-sized and mentioning FX."""
+def screen_reason(document: bytes, min_turnover: float = MIN_TURNOVER) -> str:
+    """Step 1: "" when worth reading (big enough on its tagged turnover, or — none tagged — full-accounts-sized and
+    mentioning FX), else why not (counted in stats["why"] for the run's report)."""
     turnover = tagged_turnover(document)
     if turnover is not None:
-        return turnover >= min_turnover
-    return len(document) >= MIN_BYTES_UNTAGGED and bool(_FX_WORDS.search(document))
+        if turnover >= min_turnover:
+            return ""
+        band = "under £1m" if turnover < 1e6 else "£1m–£10m" if turnover < 10e6 else f"£10m–£{min_turnover / 1e6:g}m"
+        fx = " (mentions FX)" if _FX_WORDS.search(document) else ""
+        return f"screen: turnover {band}{fx}"
+    if len(document) < MIN_BYTES_UNTAGGED:
+        return "screen: no turnover shown, short accounts (micro / small / dormant)"
+    return "" if _FX_WORDS.search(document) else "screen: no turnover tagged, no mention of foreign exchange"
+
+
+def worth_reading(document: bytes, min_turnover: float = MIN_TURNOVER) -> bool:
+    return not screen_reason(document, min_turnover)
 
 
 # --- Reading a filing -------------------------------------------------------------------------------------------
@@ -147,6 +160,11 @@ def shows_fx(facts: dict, fx_today: str) -> bool:
 
 
 def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: float = MIN_TURNOVER) -> Optional[dict]:
+    return assess(document, number, made_up, filed, min_turnover)[0]
+
+
+def assess(document: bytes, number: str, made_up: str, filed: str,
+           min_turnover: float = MIN_TURNOVER) -> tuple[Optional[dict], str]:
     """
     Step 2: the filing read like the finder reads accounts; a row when the company is big enough and its filing
     shows FX (a gain or loss, forwards, currencies, how they handle FX, sales abroad, balances, sensitivity), else
@@ -156,9 +174,10 @@ def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: fl
     facts["format"] = "ixbrl"
     turnover, fx = facts.get("turnover"), facts.get("fx_gain_loss")
     if turnover is not None and turnover < min_turnover:
-        return None
+        return None, "read: turnover in the accounts under the floor (a subsidiary's own, or the tag was a segment)"
     if turnover is None and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER:
-        return None
+        return None, ("read: turnover not found, no FX gain/loss" if not fx else
+                      "read: turnover not found, FX gain/loss under £100k")
     name = company_name(document.decode("utf-8", errors="replace")) or number
     url = filing_url(number)
     cols = fx_notes.columns(facts, name, url)
@@ -180,19 +199,19 @@ def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: fl
         **{k: v for k, v in cols.items() if not k.endswith("_url")},
     }
     if not shows_fx(facts, today["fx_today"]):
-        return None   # big, but nothing in the filing proves currency flows
+        return None, "read: big enough, but nothing in the filing proves currency flows"
     score, lines = fx_notes.filed_proof(row)
     row.update(filed_fx_score=score, filed_fx="; ".join(lines))
-    return row
+    return row, "kept"
 
 
-def _read_one(args: tuple) -> Optional[dict]:
+def _read_one(args: tuple) -> tuple[Optional[dict], str]:
     """Step 2 for one screened-in filing — run in worker processes."""
     document, number, made_up, filed, min_turnover = args
     try:
-        return hit(document, number, made_up, filed, min_turnover)
+        return assess(document, number, made_up, filed, min_turnover)
     except Exception:  # noqa: BLE001 — one malformed filing mustn't stop the scan
-        return None
+        return None, "read: couldn't be read (malformed filing)"
 
 
 def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers: int = 0,
@@ -212,7 +231,8 @@ def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers
     workers = workers or max(1, os.cpu_count() or 2)
 
     def flush(pool) -> None:
-        for found in (pool.map(_read_one, pending) if pool else map(_read_one, pending)):
+        for found, why in (pool.map(_read_one, pending) if pool else map(_read_one, pending)):
+            stats["why"][why] += 1
             if found:
                 hits.append(found)
         stats["read"] += len(pending)
@@ -230,7 +250,9 @@ def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers
                     break
                 stats["files"] += 1
                 document = zf.read(info)
-                if not worth_reading(document, min_turnover):
+                why = screen_reason(document, min_turnover)
+                if why:
+                    stats["why"][why] += 1
                     continue
                 d = m.group(2)
                 pending.append((document, m.group(1).upper(), f"{d[:4]}-{d[4:6]}-{d[6:]}", filed, min_turnover))

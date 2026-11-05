@@ -135,6 +135,12 @@ def main() -> None:
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f)
     print(f"\n{len(new_rows):,} hits this run; {len(rows):,} companies on the list now")
+    why = filings.stats["why"]
+    if why:
+        total = sum(why.values())
+        print(f"\nWhere the {total:,} filings went:")
+        for reason, n in sorted(why.items(), key=lambda kv: (not kv[0].startswith("screen"), kv[0] != "kept", -kv[1])):
+            print(f"  {n:>7,}  {n / total:6.1%}  {reason}")
     if new_rows:
         scores = [r["filed_fx_score"] for r in new_rows]
         print(f"  filed FX score 50+: {sum(s >= 50 for s in scores):,} | 1-49: {sum(s < 50 for s in scores):,} | "
