@@ -218,6 +218,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   done); a monthly archive by hand (`next` = newest not done: the year's
   backfill). The newest filing per company, filed within 400 days. Paper
   filings aren't in the files (the main list's OCR covers them). No API calls.
+  Filleted accounts (no profit and loss account: legal for "small" companies,
+  two of turnover ≤ £15m / balance sheet ≤ £7.5m / ≤ 50 staff, so some £25m
+  companies file no turnover) get a size estimate from trade debtors (×4–8)
+  and staff (£100k–£300k a head; `filings.SIZE_RULES`), shown as "Size likely
+  £16m–£26m — estimate" with its basis, never as turnover; kept when the low
+  end is £10m+ and the high end reaches the floor. A big filing with no FX in it
+  is kept only when HMRC's importer/exporter lists (12 months, matched on the
+  registered name) show trade abroad (`hmrc_trade`, +20 to the score). Cards
+  without filed turnover carry a "Search turnover" Google link to check by hand.
+  Group companies filing the same figures are one row ("Also filed by").
 - **Accounts page order:** "Hottest" by default — the strongest filed FX
   proof first (headed Strong FX proof (50+) / Some FX proof / No FX in the
   filings yet), each in the finder's rank: the FD is a quick Google, the FX

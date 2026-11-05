@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, filedWhen, filingRow, filterFilings, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, filedWhen, filingRow, filterFilings, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -364,17 +364,22 @@ function FilingCard({ r, listed, onOpen }) {
         </div>
         <div className="figures">
           {r.turnover_gbp ? <span><b>{money(r.turnover_gbp)}</b> {r.turnover_basis === "group" ? "group " : ""}turnover</span>
+            : r.size_estimate ? <span className="estimate" title={r.size_estimate_basis}>Size <b>{r.size_estimate}</b> <i>estimate</i></span>
             : <span className="muted">Turnover not stated</span>}
           {r.period_end && <span className="muted">year to {filedWhen(r.period_end)}</span>}
         </div>
       </div>
       <FxStrip r={filingRow(r)} />
+      {r.size_estimate && !r.turnover_gbp && <div className="filing-note">No turnover filed: size {r.size_estimate_basis}.</div>}
+      {r.hmrc_trade && <div className="filing-note customs">{r.hmrc_trade}</div>}
       <div className="chips">
         {listed ? <span className="chip own">On your Accounts list</span> : <span className="chip">Not on your list yet</span>}
         {r.also_filed && <span className="chip" title="Group companies filing the same figures">Also filed by {r.also_filed}</span>}
         {r.auditor && <span className="chip">Auditor {r.auditor}</span>}
         {r.bankers && <span className="chip">Bankers {r.bankers}</span>}
         <a className="chip" href={r.accounts_url} target="_blank" rel="noreferrer">Filing history ↗</a>
+        {!r.turnover_gbp && <a className="chip" href={turnoverSearch(r.company_name)} target="_blank" rel="noreferrer"
+                                title="Google their turnover: press, the group's accounts, their site (check it's not an estimate)">Search turnover ↗</a>}
       </div>
     </article>
   );
@@ -834,6 +839,9 @@ select.input option{background:#0F141F}
 .contacted-tab{margin-left:8px}
 .filings-tab{margin-left:4px}
 .filings-bar{margin-bottom:10px}
+.estimate i{font-style:normal;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#FBBF24;margin-left:4px}
+.filing-note{margin-top:8px;font-size:12px;color:rgba(255,255,255,.55)}
+.filing-note.customs{color:#A5B4FC}
 .filings-note{font-size:12px;color:rgba(255,255,255,.45);margin:0 0 12px}
 .new.filed{background:rgba(56,189,248,.12);color:#7DD3FC}
 .fxstrip{margin-top:10px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:baseline;padding:8px 10px;border-radius:9px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.14);font-size:12.5px}

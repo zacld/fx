@@ -159,35 +159,70 @@ def shows_fx(facts: dict, fx_today: str) -> bool:
     return bool(whole and abroad >= 0.05 * whole)
 
 
+# A filing without turnover (filleted: no profit and loss account, legal for "small" companies — two of: turnover
+# up to £15m, balance sheet up to £7.5m, 50 staff — so a £25m company with a light balance sheet can do it): its size
+# is estimated from what it must still file, labelled as an estimate, never shown as turnover.
+SIZE_RULES = {
+    "debtor_multiple": (4.0, 8.0),          # sales ≈ money owed by customers x 4–8 (customers paying in 45–90 days)
+    "per_employee": (100_000, 300_000),     # sales per member of staff, for a trading company
+    "keep_low": 10_000_000,                 # kept only when the estimate's low end is at least this…
+}
+
+
+def size_band(facts: dict) -> Optional[dict]:
+    """
+    {"low", "high", "basis"}: a turnover range from the trade debtors and staff numbers in the filing (where both are
+    given, the range they agree on), or None when the filing gives neither.
+    """
+    debtors, staff = facts.get("trade_debtors"), facts.get("employees")
+    bands, basis = [], []
+    if debtors:
+        lo, hi = SIZE_RULES["debtor_multiple"]
+        bands.append((debtors * lo, debtors * hi))
+        basis.append(f"{hooks.short(debtors)} owed by customers")
+    if staff:
+        lo, hi = SIZE_RULES["per_employee"]
+        bands.append((staff * lo, staff * hi))
+        basis.append(f"{staff:,} staff")
+    if not bands:
+        return None
+    low, high = max(b[0] for b in bands), min(b[1] for b in bands)
+    agree = low <= high
+    if not agree:
+        low, high = min(b[0] for b in bands), max(b[1] for b in bands)
+    return {"low": low, "high": high,
+            "basis": " and ".join(basis) + ("" if agree else " (they point to different sizes)")}
+
+
+def size_label(band: dict) -> str:
+    """ "likely £16m–£26m" """
+    return f"likely {hooks.short(band['low'])}–{hooks.short(band['high'])}"
+
+
 def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: float = MIN_TURNOVER) -> Optional[dict]:
-    return assess(document, number, made_up, filed, min_turnover)[0]
+    """A row only when the filing itself proves FX (customs records are checked later, by finalise)."""
+    row, _ = assess(document, number, made_up, filed, min_turnover)
+    return row if row and row["fx_in_filing"] else None
 
 
 def assess(document: bytes, number: str, made_up: str, filed: str,
            min_turnover: float = MIN_TURNOVER) -> tuple[Optional[dict], str]:
     """
-    Step 2: the filing read like the finder reads accounts; a row when the company is big enough and its filing
-    shows FX (a gain or loss, forwards, currencies, how they handle FX, sales abroad, balances, sensitivity), else
-    None.
+    Step 2: the filing read like the finder reads accounts. (row, why): a row when the company is big enough —
+    filed turnover at the floor, or no turnover filed and a size estimate reaching it — with fx_in_filing saying
+    whether the filing itself proves FX (else customs records decide, in finalise); None and why not otherwise.
     """
     facts = accounts.extract_facts(document)
     facts["format"] = "ixbrl"
     turnover, fx = facts.get("turnover"), facts.get("fx_gain_loss")
     if turnover is not None and turnover < min_turnover:
         return None, "read: turnover in the accounts under the floor (a subsidiary's own, or the tag was a segment)"
-    if turnover is None and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER:
-        text = document.decode("utf-8", errors="replace")
-        kind = ("filleted (no profit and loss account)" if not re.search(r"\b(?:turnover|revenue)\b", text, re.I)
-                else "turnover shown but not read")
-        rows_text = accounts.ixbrl_table_text(text)
-        lines = [ln for ln in rows_text.split("\n") if re.search(r"\b(?:turnover|revenue)\b", ln, re.I)][:4]
-        tags = sorted({m for m in re.findall(r'name="([^"]+)"', text) if re.search(r"turnover|revenue", m, re.I)})[:4]
-        stats_sample = f"{company_name(text) or number} ({number}): {len(document) // 1000}KB, {kind}" + \
-            (f", {facts.get('turnover_check')}" if facts.get("turnover_check") else "") + \
-            "".join(f"\n                          line: {ln[:160]}" for ln in lines) + \
-            (f"\n                          tags: {', '.join(tags)}" if tags else "")
-        return None, (f"read: turnover not found ({kind}), " + ("no FX gain/loss" if not fx else "FX gain/loss under £100k")
-                      + "\t" + stats_sample)
+    band = size_band(facts) if turnover is None else None
+    big_by_band = bool(band and band["high"] >= min_turnover and band["low"] >= SIZE_RULES["keep_low"])
+    if turnover is None and not big_by_band and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER:
+        if not band:
+            return None, "read: no turnover filed, no staff or debtors figures to size it"
+        return None, "read: no turnover filed, too small on staff / debtors"
     name = company_name(document.decode("utf-8", errors="replace")) or number
     url = filing_url(number)
     cols = fx_notes.columns(facts, name, url)
@@ -197,6 +232,10 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         "company_number": number, "company_name": name, "filed": filed, "period_end": facts.get("period_end") or made_up,
         "turnover_gbp": str(round(turnover)) if turnover is not None else "",
         "turnover_basis": facts.get("turnover_basis", ""), "turnover_check": facts.get("turnover_check", ""),
+        "size_estimate": size_label(band) if band else "",
+        "size_estimate_basis": (f"from {band['basis']} — not filed turnover (the accounts are filleted: no profit "
+                                f"and loss account)") if band else "",
+        "size_low_gbp": str(round(band["low"])) if band else "",
         "fx_gain_loss_gbp": str(round(fx)) if fx is not None else "",
         "fx_gain_loss_prior_gbp": str(round(facts["fx_gain_loss_prior"])) if facts.get("fx_gain_loss_prior") is not None else "",
         "fx_gain_loss_evidence": facts.get("fx_gain_loss_evidence", "") if fx is not None else "",
@@ -205,14 +244,73 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         "currency_source": hooks.CURRENCY_SOURCES.get(exposure["rule"], "") if exposure["rule"] != "niche" else "",
         "currency_evidence": exposure["evidence"] if exposure["rule"] not in ("niche", "") else "",
         "auditor": facts.get("auditor", ""), "bankers": ", ".join(facts.get("bankers") or []),
+        "employees": str(facts["employees"]) if facts.get("employees") else "",
         "accounts_url": url,
         **{k: v for k, v in cols.items() if not k.endswith("_url")},
     }
-    if not shows_fx(facts, today["fx_today"]):
-        return None, "read: big enough, but nothing in the filing proves currency flows"
+    row["fx_in_filing"] = shows_fx(facts, today["fx_today"])
     score, lines = fx_notes.filed_proof(row)
     row.update(filed_fx_score=score, filed_fx="; ".join(lines))
-    return row, "kept"
+    if row["fx_in_filing"]:
+        return row, "kept: FX in the filing" + (" (size estimated)" if band else "")
+    return row, "read: big" + (" on staff / debtors" if band else "") + ", no FX in the filing — customs records checked"
+
+
+# --- HMRC customs records: proof of trade abroad for a filing that says nothing about FX --------------------------
+
+CUSTOMS_POINTS = 20
+
+
+def customs_index(traders: dict) -> dict[str, dict]:
+    """HMRC traders (hmrc.build_traders) by normalised name, a name's postcodes merged."""
+    from sourcer.matching import normalise_name
+
+    out: dict[str, dict] = {}
+    for (name, _), t in traders.items():
+        e = out.setdefault(name, {"import_months": set(), "export_months": set(),
+                                  "import_codes": Counter(), "export_codes": Counter()})
+        for k in ("import_months", "export_months"):
+            e[k] |= t[k]
+        for k in ("import_codes", "export_codes"):
+            e[k].update(t[k])
+    return out
+
+
+def customs_line(trade: dict) -> str:
+    """ "imports in 12 of the last 12 months, exports in 3 (goods: wine, machinery)" """
+    from sourcer import hmrc
+
+    parts = [f"{w} in {len(trade[f'{k}_months'])} of the last 12 months"
+             for k, w in (("import", "imports"), ("export", "exports")) if trade[f"{k}_months"]]
+    goods = hmrc.chapters(trade["import_codes"] + trade["export_codes"])
+    return ", ".join(parts) + (f" (goods: {', '.join(goods)})" if goods else "")
+
+
+def finalise(rows: list[dict], customs: Optional[dict[str, dict]]) -> tuple[list[dict], Counter]:
+    """
+    The rows to list: each checked against HMRC's importer / exporter lists (by registered name); kept when the
+    filing or the customs records prove trade in another currency. (rows, why) — why counts each decision.
+    """
+    from sourcer.matching import normalise_name
+
+    kept, why = [], Counter()
+    for row in rows:
+        row = dict(row)   # the caller's rows stay as read: running this twice never counts customs twice
+        trade = (customs or {}).get(normalise_name(row["company_name"]))
+        if trade and (trade["import_months"] or trade["export_months"]):
+            line = customs_line(trade)
+            row["hmrc_trade"] = f"HMRC customs records: {line} (matched on the registered name)"
+            row["filed_fx_score"] = row.get("filed_fx_score", 0) + CUSTOMS_POINTS
+            row["filed_fx"] = "; ".join(x for x in (row.get("filed_fx"), f"HMRC customs: {line} (+{CUSTOMS_POINTS})") if x)
+        if row.get("fx_in_filing"):
+            why["kept: FX in the filing" + (" and customs" if row.get("hmrc_trade") else "")] += 1
+        elif row.get("hmrc_trade"):
+            why["kept: customs records only (no FX in the filing)"] += 1
+        else:
+            why["dropped: big, but no FX in the filing or customs records"] += 1
+            continue
+        kept.append(row)
+    return kept, why
 
 
 def _read_one(args: tuple) -> tuple[Optional[dict], str]:

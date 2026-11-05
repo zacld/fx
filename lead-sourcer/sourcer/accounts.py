@@ -150,8 +150,11 @@ def fetch_document(document_id: str, api_key: str, accept: str, retries: int = 3
 CASH_CONCEPTS = {"CashBankOnHand", "CashBankInHand", "CashAndCashEquivalents", "CashCashEquivalents"}
 BORROWING_CONCEPTS = {"BankBorrowings", "BankBorrowingsOverdrafts", "LoansFromBanks", "BankLoansAndOverdrafts"}
 NET_ASSETS_CONCEPTS = {"NetAssetsLiabilities", "NetAssetsLiabilitiesIncludingPensionAssetLiability"}
+# Size clues that even filleted accounts (no profit and loss account) carry: money owed by customers and staff.
+TRADE_DEBTORS_CONCEPTS = {"TradeDebtorsTradeReceivables", "TradeReceivables", "TradeReceivablesCurrent"}
+EMPLOYEE_CONCEPTS = {"AverageNumberEmployeesDuringPeriod", "AverageNumberOfEmployees"}
 _READ_CONCEPTS = (TURNOVER_CONCEPTS | FX_GAIN_LOSS_CONCEPTS | COST_OF_SALES_CONCEPTS | CASH_CONCEPTS
-                  | BORROWING_CONCEPTS | NET_ASSETS_CONCEPTS)
+                  | BORROWING_CONCEPTS | NET_ASSETS_CONCEPTS | TRADE_DEBTORS_CONCEPTS | EMPLOYEE_CONCEPTS)
 _UK_MEMBERS = ("UNITEDKINGDOM", "ENGLAND", "SCOTLAND", "WALES", "NORTHERNIRELAND", "GREATBRITAIN", "DOMESTIC")
 
 
@@ -326,6 +329,23 @@ def _latest(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool,
         return None
     end = max(values)
     return values[end], end
+
+
+def _headcount(scanner: "_IxbrlScanner") -> Optional[int]:
+    """The latest average number of employees tagged for the whole entity (a count: no currency), or None."""
+    best: dict[str, tuple[int, float]] = {}
+    for fact in scanner.facts:
+        if fact["concept"] not in EMPLOYEE_CONCEPTS:
+            continue
+        context = scanner.contexts.get(fact["context"])
+        entity = _entity(context) if context and context["end"] else None
+        value = _fact_value(fact)
+        if entity is None or value is None or value < 0:
+            continue
+        rank = {"group": 0, "": 1, "company": 2}[entity]
+        if context["end"] not in best or rank < best[context["end"]][0]:
+            best[context["end"]] = (rank, value)
+    return round(best[max(best)][1]) if best else None
 
 
 def _prior(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool, before: str) -> Optional[float]:
@@ -564,6 +584,7 @@ def extract_facts(document: bytes) -> dict:
     cash = _latest(scanner, CASH_CONCEPTS, allow_negative=False)
     debt = _latest(scanner, BORROWING_CONCEPTS, allow_negative=True)
     net = _latest(scanner, NET_ASSETS_CONCEPTS, allow_negative=True)
+    trade_debtors = _latest(scanner, TRADE_DEBTORS_CONCEPTS, allow_negative=False)
     auditor = auditor_from_text(plain)
     tagged_signatory = next((" ".join(f["text"].split()) for f in scanner.facts
                              if f["concept"] in people.SIGNATORY_CONCEPTS and f.get("text", "").strip()), "")
@@ -582,6 +603,8 @@ def extract_facts(document: bytes) -> dict:
         "cash": cash[0] if cash else None,
         "bank_borrowings": abs(debt[0]) if debt else None,
         "net_assets": net[0] if net else None,
+        "trade_debtors": trade_debtors[0] if trade_debtors else None,
+        "employees": _headcount(scanner),
         "auditor": auditor[0] if auditor else "",
         "auditor_tier": auditor[1] if auditor else "",
         "finance_people": people.finance_people(plain),

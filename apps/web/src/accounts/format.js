@@ -284,6 +284,12 @@ export function filterFilings(rows, { query = "", strongOnly = false, lossOnly =
   const q = query.trim().toLowerCase();
   return rows.filter((r) => (!strongOnly || (r.filed_fx_score || 0) >= 50)
     && (!lossOnly || Number(r.fx_gain_loss_gbp) < 0)
-    && (!q || [r.company_name, r.company_number, r.currencies_in_accounts, r.fx_forwards, r.fx_today, r.turnover_regions]
+    && (!q || [r.company_name, r.company_number, r.currencies_in_accounts, r.fx_forwards, r.fx_today, r.turnover_regions, r.hmrc_trade]
       .some((v) => (v || "").toLowerCase().includes(q))));
+}
+
+// A Google search for a company's turnover, for one that filed none (filleted accounts): press, the group's
+// accounts, its own site. Checked by hand — directory sites' figures are estimates.
+export function turnoverSearch(name = "") {
+  return `https://www.google.com/search?q=${encodeURIComponent(`"${name.replace(/\s+(LIMITED|LTD\.?)$/i, "")}" turnover`)}`;
 }

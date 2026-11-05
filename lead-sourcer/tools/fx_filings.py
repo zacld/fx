@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sourcer import filings, hooks  # noqa: E402
+from sourcer import filings, hmrc, hooks  # noqa: E402
 
 CACHE = os.path.join(os.path.expanduser("~"), ".cache", "fx-filings")
 
@@ -54,8 +54,10 @@ def pick(args, done: set[str]) -> list[str]:
 
 
 def show(row: dict) -> str:
-    size = hooks.short(float(row["turnover_gbp"])) if row.get("turnover_gbp") else "turnover not stated"
-    facts = [row.get(k) for k in ("fx_forwards", "fx_today", "currencies_in_accounts", "turnover_regions") if row.get(k)]
+    size = hooks.short(float(row["turnover_gbp"])) if row.get("turnover_gbp") else \
+        (f"est. {row['size_estimate'].replace('likely ', '')}" if row.get("size_estimate") else "turnover not stated")
+    facts = [row.get(k) for k in ("fx_forwards", "fx_today", "currencies_in_accounts", "turnover_regions", "hmrc_trade")
+             if row.get(k)]
     fx = row.get("fx_gain_loss_gbp")
     if fx:
         facts.insert(0, f"FX {'loss' if float(fx) < 0 else 'gain'} {hooks.short(abs(float(fx)))}")
@@ -63,7 +65,8 @@ def show(row: dict) -> str:
            f"{' | '.join(facts)[:150]}"
 
 
-DETAIL = [("turnover_check", "turnover check"), ("fx_gain_loss_evidence", "FX gain/loss from"),
+DETAIL = [("size_estimate", "size"), ("size_estimate_basis", "  from"), ("hmrc_trade", "customs"),
+          ("turnover_check", "turnover check"), ("fx_gain_loss_evidence", "FX gain/loss from"),
           ("fx_today", "how they handle FX"), ("fx_today_evidence", "  from"), ("fx_forwards", "forwards"),
           ("fx_forwards_evidence", "  from"), ("currencies_in_accounts", "currencies"),
           ("currencies_in_accounts_evidence", "  from"), ("turnover_regions", "sales by region"),
@@ -96,6 +99,7 @@ def main() -> None:
     parser.add_argument("--top", type=int, default=40, help="hits shown in the log")
     parser.add_argument("--max-hits", type=int, default=0, help="stop once this many companies are found (a test)")
     parser.add_argument("--detail", action="store_true", help="every fact of every hit, with its quote")
+    parser.add_argument("--hmrc-months", type=int, default=12, help="months of HMRC importer/exporter lists (0: off)")
     parser.add_argument("--redo", action="store_true", help="read files already done again (a test)")
     args = parser.parse_args()
     if not (args.daily or args.month or args.zip):
@@ -117,7 +121,7 @@ def main() -> None:
                             max_hits=max(0, args.max_hits - len(new_rows)) if args.max_hits else 0)
         n = {k: filings.stats[k] - before.get(k, 0) for k in ("files", "read")}
         print(f"{name}: {os.path.getsize(path) / 1e6:,.0f}MB in {got:.0f}s | {n['files']:,} filings, "
-              f"{n['read']:,} read past the quick screen, {len(hits):,} with FX at £{args.min_turnover / 1e6:g}m+ "
+              f"{n['read']:,} read past the quick screen, {len(hits):,} big enough (£{args.min_turnover / 1e6:g}m+, filed or estimated) "
               f"| {time.time() - started - got:.0f}s")
         new_rows += hits
         if filings.stats["stopped_early"]:
@@ -128,6 +132,20 @@ def main() -> None:
             done.add(name)
         if not os.path.exists(url) and path.startswith(CACHE):
             os.remove(path)   # monthly archives are GBs: keep the disk free for the next
+    customs = None
+    if args.hmrc_months and new_rows:
+        try:
+            paths, since = hmrc.download(args.hmrc_months)
+            customs = filings.customs_index(hmrc.build_traders(paths, since))
+            print(f"HMRC importer/exporter lists: {len(customs):,} traders over {args.hmrc_months} months")
+        except Exception as e:  # noqa: BLE001 — customs records are a check, the filings still stand
+            print(f"WARNING: HMRC lists unavailable ({type(e).__name__}: {e}); filings without FX are dropped")
+    found = len(new_rows)
+    new_rows, decided = filings.finalise(new_rows, customs)
+    for reason in [r for r in filings.stats["why"] if r.startswith(("kept:", "read: big"))]:
+        del filings.stats["why"][reason]   # the scan's provisional verdicts: the customs check decides them
+    filings.stats["why"].update(decided)
+    print(f"{found:,} big enough; {len(new_rows):,} with FX in their filing or customs records")
     kept = [r for r in previous.get("rows") or [] if r.get("filed") not in reread]
     rows = filings.merge(kept, new_rows)
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,

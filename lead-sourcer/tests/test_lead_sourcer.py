@@ -2772,6 +2772,37 @@ class TestFxFilings(unittest.TestCase):
         self.assertEqual(sorted((r["company_number"], r.get("also_filed", "")) for r in merged),
                          [("01111111", ""), ("11691121", "THE LONG RAKE SPAR CO LIMITED (00666952)")])
 
+    def test_size_from_staff_and_debtors_when_no_turnover_is_filed(self):
+        band = filings.size_band({"employees": 85, "trade_debtors": 4_000_000})
+        self.assertEqual((band["low"], band["high"]), (16_000_000, 25_500_000))   # debtors x4–8 ∩ staff x£100–300k
+        self.assertEqual(filings.size_label(band), "likely £16m–£25.5m")
+        self.assertEqual(band["basis"], "£4m owed by customers and 85 staff")
+        apart = filings.size_band({"employees": 10, "trade_debtors": 10_000_000})   # they disagree: the whole span
+        self.assertEqual((apart["low"], apart["high"]), (1_000_000, 80_000_000))
+        self.assertIn("different sizes", apart["basis"])
+        self.assertIsNone(filings.size_band({}))
+        doc = ixbrl().replace(b"</table>", b'<tr><td>Trade debtors</td><td><ix:nonFraction name="core:TradeDebtorsTradeReceivables" '
+                              b'contextRef="BS2024" unitRef="CUR" scale="3">4,200</ix:nonFraction></td></tr><tr><td>Staff</td><td>'
+                              b'<ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" contextRef="FY2024" unitRef="shares" '
+                              b'scale="0">85</ix:nonFraction></td></tr></table>')
+        facts = accounts.extract_facts(doc)
+        self.assertEqual((facts["trade_debtors"], facts["employees"]), (4_200_000, 85))
+
+    def test_customs_records_decide_for_a_filing_without_fx(self):
+        quiet = {"company_number": "00450581", "company_name": "CASTOLIN EUTECTIC LIMITED", "fx_in_filing": False,
+                 "filed_fx_score": 0, "filed_fx": "", "size_estimate": "likely £16m–£32m"}
+        loud = {"company_number": "01", "company_name": "ACME LIMITED", "fx_in_filing": True, "filed_fx_score": 25,
+                "filed_fx": "FX loss £420k (+25)"}
+        nothing = {"company_number": "02", "company_name": "PLAIN LIMITED", "fx_in_filing": False, "filed_fx_score": 0}
+        trade = {"import_months": {"2026-0%d" % m for m in range(1, 10)}, "export_months": {"2026-01"},
+                 "import_codes": Counter({"83111000": 9}), "export_codes": Counter()}
+        kept, why = filings.finalise([quiet, loud, nothing], {"CASTOLIN EUTECTIC": trade})
+        self.assertEqual([r["company_number"] for r in kept], ["00450581", "01"])
+        self.assertTrue(kept[0]["hmrc_trade"].startswith("HMRC customs records: imports in 9 of the last 12 months, exports in 1"))
+        self.assertEqual(kept[0]["filed_fx_score"], filings.CUSTOMS_POINTS)
+        self.assertEqual(why["dropped: big, but no FX in the filing or customs records"], 1)
+        self.assertEqual(filings.finalise([quiet], None)[0], [])   # no customs lists: a filing without FX isn't kept
+
     def test_quick_screen(self):
         self.assertEqual(filings.tagged_turnover(ixbrl(current="45,000")), 45_000_000)   # inside a <span>, £'000
         self.assertIsNone(filings.tagged_turnover(b"<p>Turnover 45,000</p>"))

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askFor, filedWhen, filingRow, filterFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { askFor, turnoverSearch, filedWhen, filingRow, filterFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -233,5 +233,7 @@ describe("recent FX filings", () => {
     expect(fxFacts(row).map(([label]) => label)).toEqual(["Currencies", "FX gain/loss"]);
     expect(filedWhen("2026-11-04")).toBe("4 Nov 2026");
     expect(filedWhen("October 2026")).toBe("October 2026");
+    expect(turnoverSearch("CASTOLIN EUTECTIC LIMITED")).toBe("https://www.google.com/search?q=%22CASTOLIN%20EUTECTIC%22%20turnover");
+    expect(filterFilings([{ company_name: "X", hmrc_trade: "imports in 9 of the last 12 months" }], { query: "imports" })).toHaveLength(1);
   });
 });
