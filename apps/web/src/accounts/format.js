@@ -293,3 +293,13 @@ export function filterFilings(rows, { query = "", strongOnly = false, lossOnly =
 export function turnoverSearch(name = "") {
   return `https://www.google.com/search?q=${encodeURIComponent(`"${name.replace(/\s+(LIMITED|LTD\.?)$/i, "")}" turnover`)}`;
 }
+
+// The company's own Companies House page, by number: searching its name can find another (a dissolved namesake).
+export function chCompanyUrl(number = "") {
+  return `https://find-and-update.company-information.service.gov.uk/company/${encodeURIComponent(number)}`;
+}
+
+// A group's filing: consolidated figures, or the same figures filed by several group companies.
+export function isGroupFiling(r) {
+  return r.turnover_basis === "group" || Boolean(r.also_filed);
+}

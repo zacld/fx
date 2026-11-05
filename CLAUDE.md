@@ -227,7 +227,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   is kept only when HMRC's importer/exporter lists (12 months, matched on the
   registered name) show trade abroad (`hmrc_trade`, +20 to the score). Cards
   without filed turnover carry a "Search turnover" Google link to check by hand.
-  Group companies filing the same figures are one row ("Also filed by").
+  Group companies filing the same figures are one row ("Also filed by"), and
+  group filings carry a Group badge. A filing with no turnover that says it's
+  prepared under the small companies regime (`filings.accounts_regime`: small
+  / medium) is left out — small means turnover under £15m; medium (up to £54m)
+  stays, labelled. The company name opens its Companies House page by number
+  (a name search can land on a dissolved namesake). Backfill months are started
+  by pushing `tools/fx_filings_backfill.txt` (the coding agent can't run the
+  workflow by hand).
 - **Accounts page order:** "Hottest" by default — the strongest filed FX
   proof first (headed Strong FX proof (50+) / Some FX proof / No FX in the
   filings yet), each in the finder's rank: the FD is a quick Google, the FX

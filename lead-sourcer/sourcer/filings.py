@@ -199,6 +199,19 @@ def size_label(band: dict) -> str:
     return f"likely {hooks.short(band['low'])}–{hooks.short(band['high'])}"
 
 
+# The size regime the accounts are prepared under, from the statement every set must make.
+_SMALL_REGIME = re.compile(r"small\s+companies\s+regime|section\s*1A\b|applicable\s+to\s+small\s+(?:companies|entities)|"
+                           r"small\s+companies\s+exemption", re.I)
+_MEDIUM_REGIME = re.compile(r"medium[- ]sized\s+compan", re.I)
+
+
+def accounts_regime(text: str) -> str:
+    """ "small" / "medium" / "" (full accounts of a large company, or not stated)."""
+    if _SMALL_REGIME.search(text):
+        return "small"
+    return "medium" if _MEDIUM_REGIME.search(text) else ""
+
+
 def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: float = MIN_TURNOVER) -> Optional[dict]:
     """A row only when the filing itself proves FX (customs records are checked later, by finalise)."""
     row, _ = assess(document, number, made_up, filed, min_turnover)
@@ -217,6 +230,10 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
     turnover, fx = facts.get("turnover"), facts.get("fx_gain_loss")
     if turnover is not None and turnover < min_turnover:
         return None, "read: turnover in the accounts under the floor (a subsidiary's own, or the tag was a segment)"
+    text = document.decode("utf-8", errors="replace")
+    regime = accounts_regime(html.unescape(re.sub(r"<[^>]+>", " ", text)))
+    if regime == "small" and turnover is None:
+        return None, "read: no turnover filed, accounts prepared as a small company"
     band = size_band(facts) if turnover is None else None
     big_by_band = bool(band and band["high"] >= min_turnover and band["low"] >= SIZE_RULES["keep_low"])
     if turnover is None and not big_by_band and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER:
@@ -229,7 +246,7 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         if not band:
             return None, "read: no turnover filed, no staff or debtors figures to size it" + example
         return None, "read: no turnover filed, too small on staff / debtors" + example
-    name = company_name(document.decode("utf-8", errors="replace")) or number
+    name = company_name(text) or number
     url = filing_url(number)
     cols = fx_notes.columns(facts, name, url)
     today = incumbent.columns(facts, [])
@@ -251,6 +268,7 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         "currency_evidence": exposure["evidence"] if exposure["rule"] not in ("niche", "") else "",
         "auditor": facts.get("auditor", ""), "bankers": ", ".join(facts.get("bankers") or []),
         "employees": str(facts["employees"]) if facts.get("employees") else "",
+        "accounts_regime": regime,
         "accounts_url": url,
         **{k: v for k, v in cols.items() if not k.endswith("_url")},
     }

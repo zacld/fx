@@ -2796,6 +2796,19 @@ class TestFxFilings(unittest.TestCase):
                          b'unitRef="CUR" scale="3">3,900</ix:nonFraction></td></tr></table>')
         self.assertEqual(accounts.extract_facts(within)["trade_debtors"], 3_900_000)
 
+    def test_small_company_filings_without_turnover_are_left_out(self):
+        self.assertEqual(filings.accounts_regime("These financial statements have been prepared in accordance with the "
+                                                 "provisions applicable to companies subject to the small companies regime."), "small")
+        self.assertEqual(filings.accounts_regime("prepared under FRS 102 Section 1A"), "small")
+        self.assertEqual(filings.accounts_regime("exemptions available to medium-sized companies"), "medium")
+        self.assertEqual(filings.accounts_regime("Independent auditor's report to the members"), "")
+        filleted = (b'<html><body><ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" contextRef="c" unitRef="u">'
+                    b'400</ix:nonFraction><p>Foreign currency translation</p>'
+                    b'<p>prepared in accordance with the small companies regime</p></body></html>')
+        row, why = filings.assess(filleted, "01234567", "2025-12-31", "2026-11-05")
+        self.assertIsNone(row)
+        self.assertEqual(why, "read: no turnover filed, accounts prepared as a small company")
+
     def test_customs_records_decide_for_a_filing_without_fx(self):
         quiet = {"company_number": "00450581", "company_name": "CASTOLIN EUTECTIC LIMITED", "fx_in_filing": False,
                  "filed_fx_score": 0, "filed_fx": "", "size_estimate": "likely £16m–£32m"}
