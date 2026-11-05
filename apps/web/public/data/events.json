@@ -10666,16 +10666,13 @@
   },
   "139e55ddc688ca83": {
     "id": "139e55ddc688ca83",
+    "headline": "House Democratic leader Jeffries says will pass bill to stop tariffs and to end the Iran War",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/house-democratic-leader-jeffries-says-will-pass-bill-to-stop-tariffs-and-to-end-the-iran-war/",
-    "headline": "House Democratic leader Jeffries says will pass bill to stop tariffs and to end the Iran War",
-    "raw_summary": "House Democratic Leader Hakeem Jeffries says Democrats will pursue legislation to stop President Trump’s tariffs and bring an end to the war with Iran. He also wants to reverse Medicaid cuts and restore the enhanced Affordable Care Act tax credits, placing healthcare costs at the center of his affordability agenda. The proposals target four areas: Tariffs: Reassert congressional authority over trade policy and seek to roll back Trump’s tariffs. Jeffries argues that those duties have increased the cost of everyday goods. Iran: Pursue legislation to end U.S. involvement in the war. He has said D",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-11-05T02:05:53.837Z",
+    "status": "context_only",
     "event_type": "Tariff policy proposal",
     "event_breadth": "tariff",
-    "summary": "Jeffries says Democrats will push a bill to reverse Trump‑era tariffs and end US involvement in Iran. While the move could eventually lower the cost of US‑sourced goods for UK importers, the legislation is not yet passed, so there is no immediate FX impact. Use this as a future‑lookout signal rather than a call‑today trigger.",
     "currency_pairs": [],
     "urgency_score": 3,
     "commercial_relevance": 3,
@@ -10690,28 +10687,32 @@
       "UK retailers importing US consumer goods"
     ],
     "why_now": "The proposal is still in early legislative stages, so there is no imminent payment‑flow impact for UK firms today",
-    "discovery_recommendation": "Context only — keep as background for future outreach when the bill progresses",
     "confidence_level": "low",
     "confidence_reason": "The legislation is only proposed and not yet enacted, making any FX effect uncertain",
+    "discovery_recommendation": "Context only — keep as background for future outreach when the bill progresses",
     "what_happened": "US House Democratic leader Hakeem Jeffries announced plans to introduce legislation to roll back former President Trump’s tariffs and to end US involvement in the Iran war",
     "what_changed_financially": "A possible future removal of US import duties could lower the price of US‑origin goods, but no immediate change to rates or costs",
     "who_pays_more": "No UK business faces higher costs today; UK importers of US goods could see lower costs later",
     "who_receives_less": "None immediate; US exporters may lose tariff revenue but this does not affect UK FX exposure now",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "UK importers paying USD to US suppliers for goods such as agricultural products, technology components or consumer merchandise",
     "fx_payment_logic": "UK companies that buy goods priced in USD from US suppliers normally convert GBP to USD to settle invoices. If US tariffs are removed, the price of those goods may fall, reducing the amount of USD needed and easing any margin pressure, but the effect will only be felt once the legislation is enacted.",
-    "sales_angle": "If you source products from the US, keep an eye on the upcoming tariff roll‑back – it could change your USD import costs later this year.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK importers of US agricultural, tech or consumer goods could benefit from lower US‑origin prices once any tariff reductions take effect, but today there is no direct cost change. Monitoring the legislative progress will help you act when the impact becomes real.",
-    "exposure_types": [
-      "potential US tariff removal exposure"
-    ],
+    "sales_angle": "If you source products from the US, keep an eye on the upcoming tariff roll‑back – it could change your USD import costs later this year.",
     "overall_sales_angle": "Monitor the pending US tariff rollback as it may lower your USD import costs once enacted, but there’s no immediate reason to call today.",
+    "summary": "Jeffries says Democrats will push a bill to reverse Trump‑era tariffs and end US involvement in Iran. While the move could eventually lower the cost of US‑sourced goods for UK importers, the legislation is not yet passed, so there is no immediate FX impact. Use this as a future‑lookout signal rather than a call‑today trigger.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "House Democratic Leader Hakeem Jeffries says Democrats will pursue legislation to stop President Trump’s tariffs and bring an end to the war with Iran. He also wants to reverse Medicaid cuts and restore the enhanced Affordable Care Act tax credits, placing healthcare costs at the center of his affordability agenda. The proposals target four areas: Tariffs: Reassert congressional authority over trade policy and seek to roll back Trump’s tariffs. Jeffries argues that those duties have increased the cost of everyday goods. Iran: Pursue legislation to end U.S. involvement in the war. He has said D",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +3 \\benergy price|\\bgas price|\\bf",
+    "exposure_types": [
+      "potential US tariff removal exposure"
+    ],
     "ai_model": "openai/gpt-oss-120b"
   },
   "13b76cb00bd1a9f0": {
@@ -45266,16 +45267,13 @@
   },
   "4f02ac2c058a0e59": {
     "id": "4f02ac2c058a0e59",
+    "headline": "US final October S&P Global services PMI 56.1 vs 57.9 prelim",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/us-final-october-s-p-global-services-pmi-56-1-vs-57-9-prelim/",
-    "headline": "US final October S&P Global services PMI 56.1 vs 57.9 prelim",
-    "raw_summary": "Prelim was 57.9 Prior was 58.8 Composite PMI 55.9 vs 57.6 prelim Coimposite prior was 58.4 Sentiment regarding future activity fell to its lowest since May Demand was reported to be high Sentiment was overall at its lowest since May This adds negative risk to the ISM services report at the top of the hour.&nbsp; I'm fearful that the Fed is behind the curve on inflation and that it's broadening. Of course, Trump could help to reverse that if he can get out of the Iran war ASAP. Chris Williamson, Chief Business Economist at S&amp;P Global Market Intelligence:&nbsp;“The October PMI surveys mark a",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
     "detected_at": "2026-11-05T02:06:42.930Z",
+    "status": "ready",
     "event_type": "Currency move",
     "event_breadth": "broad_currency",
-    "summary": "US services PMI dropped to 56.1, signalling a slowdown in US service activity. The data puts downward pressure on the USD, which could lift GBP/USD. UK businesses that pay USD for US services or receive USD from US customers should review their FX exposure today.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -45292,51 +45290,40 @@
       "UK manufacturers exporting to the US"
     ],
     "why_now": "Quarterly SaaS renewals and upcoming USD‑priced invoices will be settled at the new, weaker USD rate",
-    "discovery_recommendation": "Limited run — two distinct payment‑flow niches (USD‑paying importers and USD‑receiving exporters) worth targeting",
     "confidence_level": "medium",
     "confidence_reason": "Data release shows clear USD impact but market reaction is mixed, so the FX move is plausible but not certain",
+    "discovery_recommendation": "Limited run — two distinct payment‑flow niches (USD‑paying importers and USD‑receiving exporters) worth targeting",
     "what_happened": "US services PMI fell to 56.1 in October, below the preliminary 57.9 and the prior 58.8 reading",
     "what_changed_financially": "Weaker US services data puts pressure on the USD, potentially strengthening the GBP against the USD",
     "who_pays_more": "UK companies that pay USD‑denominated invoices for US services will need fewer GBP per USD",
     "who_receives_less": "UK exporters earning USD revenue will receive fewer GBP per USD if the USD weakens",
-    "margin_risk": "Medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP payments to USD‑priced US service providers and USD receipts from US customers converted to GBP",
     "fx_payment_logic": "UK firms that subscribe to US‑based SaaS platforms or hire US consultants receive invoices in USD; they must convert GBP to USD to pay, so a weaker USD means fewer GBP are needed per invoice. Conversely, UK exporters invoicing US buyers receive USD payments that they later convert back to GBP, so a weaker USD reduces the GBP they receive per dollar.",
-    "sales_angle": "If you have USD‑denominated SaaS or service invoices coming up, the recent US services slowdown means the GBP is stronger and you can lock in a better rate now.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK companies that buy US software, cloud or consulting services will see lower GBP costs on upcoming invoices, while exporters to the US will get slightly more GBP per dollar on current sales. Both groups face a narrow window before the market digests the data and rates adjust.",
-    "exposure_types": [
-      "USD supplier payment exposure",
-      "USD revenue conversion exposure"
-    ],
+    "sales_angle": "If you have USD‑denominated SaaS or service invoices coming up, the recent US services slowdown means the GBP is stronger and you can lock in a better rate now.",
     "overall_sales_angle": "The US services PMI dip is weakening the USD, so any GBP‑USD transaction today is priced more favourably for UK buyers and less so for UK sellers.",
+    "summary": "US services PMI dropped to 56.1, signalling a slowdown in US service activity. The data puts downward pressure on the USD, which could lift GBP/USD. UK businesses that pay USD for US services or receive USD from US customers should review their FX exposure today.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK importers of US cloud and software services",
-        "category_priority_score": 78,
         "business_model": "UK firms subscribe to US SaaS platforms or buy US‑based software licences, paying invoices in USD while earning revenue in GBP",
         "exposure_level": "High",
         "exposure_type": "Import cost exposure — USD payments vs GBP revenue",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Invoice arrives in USD → UK firm converts GBP to USD → weaker USD means fewer GBP needed per invoice → margin improves if unhedged",
         "margin_risk": "High — a 2% USD move on £200k annual SaaS spend ≈ £4k margin swing",
         "payment_timing_risk": "High — monthly or annual subscription renewals create a tight FX window",
         "affected_payment_flow": "USD payments to US SaaS providers, typically £5k‑£100k per month",
-        "website_validation_signals": [
-          "cloud platform",
-          "software as a service",
-          "US based",
-          "subscription",
-          "licensed software"
-        ],
-        "avoid_segments": [
-          "retail shops without SaaS spend",
-          "pure UK‑only software vendors"
-        ],
-        "sales_angle": "Your upcoming SaaS renewal in USD will cost fewer pounds now thanks to the recent USD weakness.",
-        "exposure_thesis_template": "This company pays USD for US cloud/software services; the GBP/USD move reduces the GBP cost of those invoices.",
+        "ideal_company_profile": "",
+        "category_priority_score": 78,
         "micro_categories": [
           {
             "name": "UK fintech firms using US cloud platforms",
@@ -45368,40 +45355,45 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "cloud platform",
+          "software as a service",
+          "US based",
+          "subscription",
+          "licensed software"
+        ],
         "segment_signals": [
           "cloud platform",
           "software as a service",
           "US based",
           "subscription",
           "licensed software"
-        ]
+        ],
+        "avoid_segments": [
+          "retail shops without SaaS spend",
+          "pure UK‑only software vendors"
+        ],
+        "sales_angle": "Your upcoming SaaS renewal in USD will cost fewer pounds now thanks to the recent USD weakness.",
+        "exposure_thesis_template": "This company pays USD for US cloud/software services; the GBP/USD move reduces the GBP cost of those invoices."
       },
       {
         "segment_name": "UK exporters to the US market",
-        "category_priority_score": 72,
         "business_model": "UK manufacturers or producers sell goods to US customers, invoice in USD and convert receipts to GBP",
         "exposure_level": "High",
         "exposure_type": "Revenue conversion — USD receipts to GBP",
         "likely_currency_pairs": [
           "GBP/USD"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "US customer pays in USD → UK exporter receives USD → converts to GBP → weaker USD means fewer GBP per dollar received",
         "margin_risk": "Medium — a 2% USD move on £500k annual US sales ≈ £10k GBP impact",
         "payment_timing_risk": "Medium — typical 30‑60 day payment terms create an FX window",
         "affected_payment_flow": "USD receipts from US buyers, typically £50k‑£500k per shipment",
-        "website_validation_signals": [
-          "export",
-          "US market",
-          "sold to United States",
-          "American customers",
-          "exported from UK"
-        ],
-        "avoid_segments": [
-          "pure domestic UK sellers",
-          "companies with no US customer base"
-        ],
-        "sales_angle": "Your USD sales to US customers now convert to more pounds per dollar, but the rate could swing back quickly.",
-        "exposure_thesis_template": "This company exports goods to US buyers invoiced in USD; the GBP/USD move changes the GBP value of those receipts.",
+        "ideal_company_profile": "",
+        "category_priority_score": 72,
         "micro_categories": [
           {
             "name": "UK automotive parts exporters to the US",
@@ -45432,13 +45424,28 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "export",
+          "US market",
+          "sold to United States",
+          "American customers",
+          "exported from UK"
+        ],
         "segment_signals": [
           "export",
           "US market",
           "sold to United States",
           "American customers",
           "exported from UK"
-        ]
+        ],
+        "avoid_segments": [
+          "pure domestic UK sellers",
+          "companies with no US customer base"
+        ],
+        "sales_angle": "Your USD sales to US customers now convert to more pounds per dollar, but the rate could swing back quickly.",
+        "exposure_thesis_template": "This company exports goods to US buyers invoiced in USD; the GBP/USD move changes the GBP value of those receipts."
       }
     ],
     "companies_house_terms": [
@@ -45468,8 +45475,13 @@
       "\"UK confectionery\" \"United States\" distributor",
       "\"specialty food\" \"USA\" UK exporter"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "Prelim was 57.9 Prior was 58.8 Composite PMI 55.9 vs 57.6 prelim Coimposite prior was 58.4 Sentiment regarding future activity fell to its lowest since May Demand was reported to be high Sentiment was overall at its lowest since May This adds negative risk to the ISM services report at the top of the hour.&nbsp; I'm fearful that the Fed is behind the curve on inflation and that it's broadening. Of course, Trump could help to reverse that if he can get out of the Iran war ASAP. Chris Williamson, Chief Business Economist at S&amp;P Global Market Intelligence:&nbsp;“The October PMI surveys mark a",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion exposure"
+    ],
     "ai_model": "openai/gpt-oss-120b",
     "web_discovery_done": true,
     "web_discovery_at": "2026-11-05T02:06:49.801Z"
@@ -45720,6 +45732,211 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-06-12T02:41:34.076Z"
+  },
+  "4f808a93c6f48b97": {
+    "id": "4f808a93c6f48b97",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/live/2026/nov/05/bank-of-england-interest-rate-decision-pound-inflation-oil-iran-stock-markets-latest-news-updates",
+    "headline": "Today’s UK interest rate rise unlikely to be the last unless Iran war ends, Bank of England warns – business live",
+    "raw_summary": "UK hit by first interest rate rise in three years, as Bank predicts inflation will approach 5% by middle of 2027 UK government bond prices are also rallying today. This has pushed down the yield, or rate of return, on UK 10-year gilts by 4 basis points (0.04 of a percentage point) to the lowest since August 28, below 5.1%. Continue reading...",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-11-05T12:55:07.848Z",
+    "event_type": "Interest rate hike",
+    "event_breadth": "broad_currency",
+    "summary": "The BoE’s first rate rise in three years is likely to push the pound higher against the dollar and euro. UK businesses that pay suppliers in USD or EUR or receive revenue in those currencies will see their FX cost or conversion value change immediately, making today a key moment to review hedging.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 7,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "Rate hike likely moves GBP/USD and GBP/EUR, directly affecting UK importers paying foreign invoices and exporters receiving foreign currency revenue",
+    "trigger_strength": "strong",
+    "trigger_score": 80,
+    "discovery_mode": "full",
+    "recommended_query_budget": 30,
+    "likely_affected_businesses": [
+      "UK electronics component importers",
+      "UK specialty chemicals manufacturers importing US raw materials",
+      "UK food and beverage importers paying EUR invoices",
+      "UK SaaS firms with US subscription revenue",
+      "UK industrial equipment exporters to EU"
+    ],
+    "why_now": "The rate decision can shift GBP rates today, affecting any invoices or receipts settled in the next few days",
+    "discovery_recommendation": "Full run — clear payment flow, multiple identifiable importer/exporter niches, public websites should show import/export language",
+    "confidence_level": "high",
+    "confidence_reason": "Central bank decision is concrete and market reaction is immediate",
+    "what_happened": "The Bank of England raised its Bank Rate by 25 basis points, its first increase in three years",
+    "what_changed_financially": "The move is expected to strengthen the pound against major currencies, altering GBP/USD and GBP/EUR rates",
+    "who_pays_more": "UK exporters receiving USD or EUR revenue will convert fewer pounds per foreign currency unit",
+    "who_receives_less": "none",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue versus USD/EUR supplier costs or foreign currency receipts",
+    "fx_payment_logic": "UK importers receive invoices in USD or EUR, convert GBP to pay and benefit if the pound strengthens; UK exporters receive USD/EUR payments and must convert back to GBP, receiving fewer pounds when the pound is stronger.",
+    "sales_angle": "If you have upcoming USD or EUR invoices or foreign‑currency revenue, today’s rate move could change your GBP cost or proceeds dramatically.",
+    "business_impact_summary": "Importers of US electronics, chemicals or EU food products will see lower GBP costs on their next foreign‑currency payments, while exporters earning in USD or EUR will receive fewer pounds on conversion. The timing aligns with invoices due this week.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "EUR supplier payment exposure",
+      "USD revenue conversion exposure",
+      "EUR revenue conversion exposure"
+    ],
+    "overall_sales_angle": "The BoE rate rise is moving GBP/USD and GBP/EUR now – any foreign‑currency invoices or receipts in the next few days are immediately impacted.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US electronics components",
+        "category_priority_score": 88,
+        "business_model": "UK distributor buying semiconductors and consumer electronics from US manufacturers, paying USD invoices, selling to UK customers in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure – USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Importer receives USD invoice → converts GBP to USD at current rate → a stronger pound means fewer GBP needed per USD, reducing cost",
+        "margin_risk": "High — 2% GBP/USD move on £1m annual spend ≈ £20k margin impact if unhedged",
+        "payment_timing_risk": "High — 30‑60 day payment terms create an open FX window",
+        "affected_payment_flow": "USD payments to US electronics manufacturers, typically £100k‑£1m per shipment, monthly",
+        "website_validation_signals": [
+          "imported from the United States",
+          "US‑based supplier",
+          "electronics components"
+        ],
+        "avoid_segments": [
+          "retail electronics shops without import operations"
+        ],
+        "sales_angle": "Your next USD component invoice will cost fewer pounds now that the pound has strengthened.",
+        "exposure_thesis_template": "This company imports US electronics components. The GBP/USD move reduces the GBP cost of upcoming USD invoices.",
+        "micro_categories": [
+          {
+            "name": "US semiconductor importers UK",
+            "why": "Pays USD for high‑value chips, margin directly hit by GBP/USD move",
+            "search_queries": [
+              "\"semiconductor importer\" UK",
+              "\"US chip distributor\" UK",
+              "\"imported from United States\" electronics UK"
+            ],
+            "companies_house_terms": [
+              "semiconductor import",
+              "US chips",
+              "electronics import"
+            ]
+          },
+          {
+            "name": "US consumer electronics importers UK",
+            "why": "Buys TVs, smartphones priced in USD, exposure to GBP/USD fluctuations",
+            "search_queries": [
+              "\"consumer electronics importer\" UK",
+              "\"US electronics distributor\" UK",
+              "\"imported from USA\" gadgets UK"
+            ],
+            "companies_house_terms": [
+              "consumer electronics",
+              "US electronics",
+              "gadgets import"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from the United States",
+          "US‑based supplier",
+          "electronics components"
+        ]
+      },
+      {
+        "segment_name": "UK manufacturers importing USD raw materials (specialty chemicals)",
+        "category_priority_score": 84,
+        "business_model": "UK chemical producer sourcing specialty reagents from US suppliers, paying USD invoices, selling finished product in GBP",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure – USD raw material payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Manufacturer receives USD invoice for raw chemicals → converts GBP to USD → stronger pound reduces GBP outlay per USD",
+        "margin_risk": "High — 1.5% GBP/USD move on £2m annual spend ≈ £30k extra margin if unhedged",
+        "payment_timing_risk": "Medium — 45‑90 day terms",
+        "affected_payment_flow": "USD payments to US chemical producers, typically £200k‑£2m per order",
+        "website_validation_signals": [
+          "imported from United States",
+          "specialty chemicals",
+          "US supplier"
+        ],
+        "avoid_segments": [
+          "companies that source domestically"
+        ],
+        "sales_angle": "Your upcoming USD chemical purchase will require fewer pounds after today’s rate rise.",
+        "exposure_thesis_template": "This firm imports specialty chemicals from the US. A stronger pound cuts the GBP cost of those USD invoices.",
+        "micro_categories": [
+          {
+            "name": "US pharmaceutical ingredient importers UK",
+            "why": "Pays USD for active pharmaceutical ingredients, direct GBP/USD exposure",
+            "search_queries": [
+              "\"pharmaceutical ingredient importer\" UK",
+              "\"US API supplier\" UK",
+              "\"imported from USA\" pharma UK"
+            ],
+            "companies_house_terms": [
+              "pharma import",
+              "API import",
+              "US ingredients"
+            ]
+          },
+          {
+            "name": "US industrial chemicals importers UK",
+            "why": "Buys industrial chemicals priced in USD, margin sensitive to GBP/USD",
+            "search_queries": [
+              "\"industrial chemical importer\" UK",
+              "\"US chemical supplier\" UK",
+              "\"imported from United States\" chemicals UK"
+            ],
+            "companies_house_terms": [
+              "industrial chemicals",
+              "US chemicals",
+              "chemical import"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from United States",
+          "specialty chemicals",
+          "US supplier"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "semiconductor import",
+      "US chips",
+      "electronics import",
+      "consumer electronics",
+      "US electronics",
+      "gadgets import",
+      "pharma import",
+      "API import",
+      "US ingredients",
+      "industrial chemicals",
+      "US chemicals",
+      "chemical import"
+    ],
+    "all_search_queries": [
+      "\"semiconductor importer\" UK",
+      "\"US chip distributor\" UK",
+      "\"imported from United States\" electronics UK",
+      "\"consumer electronics importer\" UK",
+      "\"US electronics distributor\" UK",
+      "\"imported from USA\" gadgets UK",
+      "\"pharmaceutical ingredient importer\" UK",
+      "\"US API supplier\" UK",
+      "\"imported from USA\" pharma UK",
+      "\"industrial chemical importer\" UK",
+      "\"US chemical supplier\" UK",
+      "\"imported from United States\" chemicals UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-11-05T12:57:32.501Z"
   },
   "4fc3485f1931518a": {
     "id": "4fc3485f1931518a",
@@ -70963,6 +71180,215 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-11T02:08:53.916Z"
   },
+  "7bf82bbea46d0738": {
+    "id": "7bf82bbea46d0738",
+    "source": "CityAM",
+    "source_url": "https://www.cityam.com/interest-rates-hiked-to-four-per-cent-in-unanimous-vote/",
+    "headline": "Bank of England hikes interest rates to four per cent as inflation set to spike",
+    "raw_summary": "The Bank of England has raised interest rates to four per cent as all policymakers agreed to tighten monetary policy in a bid to stop inflation from spiralling in the next year.&#160; The Bank’s Monetary Policy Committee hiked interest rates for the first time since mid-2023, with policymakers warning another hike could come in upcoming [...]",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-11-05T12:57:03.515Z",
+    "event_type": "Monetary policy decision",
+    "event_breadth": "broad_currency",
+    "summary": "The BoE lifted rates to 4%, a surprise move that is expected to strengthen GBP against USD and EUR while raising borrowing costs for variable‑rate GBP debt. UK firms that pay USD/EUR invoices or carry floating‑rate loans face immediate FX and interest‑rate exposure, making today an ideal time to discuss hedging or rate‑lock solutions.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 8,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "BoE rate hike will likely strengthen GBP, directly affecting UK firms that pay USD/EUR invoices or carry floating‑rate GBP debt.",
+    "trigger_strength": "strong",
+    "trigger_score": 82,
+    "discovery_mode": "full",
+    "recommended_query_budget": 32,
+    "likely_affected_businesses": [
+      "UK electronics component importers",
+      "UK European food & beverage importers",
+      "UK manufacturers exporting to the US"
+    ],
+    "why_now": "The rate hike just occurred, so any pending invoices or floating‑rate loan settlements in the next few days will be priced at the new, higher GBP rates.",
+    "discovery_recommendation": "Full run — clear payment‑flow impact, multiple identifiable importer/exporter niches, and public website evidence of foreign‑currency trading.",
+    "confidence_level": "high",
+    "confidence_reason": "The policy decision is factual and its impact on GBP/USD and GBP/EUR is immediate and measurable.",
+    "what_happened": "The Bank of England raised its Bank Rate to 4%, its first increase since mid‑2023.",
+    "what_changed_financially": "Higher UK rates are expected to push GBP up against major currencies and raise borrowing costs for firms with variable‑rate GBP debt.",
+    "who_pays_more": "UK businesses with floating‑rate GBP loans (e.g., import‑financed firms) will see higher interest expense.",
+    "who_receives_less": "None directly; exporters may actually benefit from a stronger GBP when converting foreign revenue.",
+    "margin_risk": "Medium‑High",
+    "payment_timing_risk": "High",
+    "affected_payment_flow": "GBP→USD/EUR supplier payments and GBP‑denominated loan interest payments",
+    "fx_payment_logic": "UK importers receive invoices in USD or EUR, convert GBP to the foreign currency to settle, and any GBP‑rate move directly changes the GBP amount required. Simultaneously, firms with floating‑rate GBP loans will see higher interest payments after the rate hike.",
+    "sales_angle": "If you have upcoming USD or EUR supplier invoices or a floating‑rate loan, the new 4% rate could change your GBP cost today.",
+    "business_impact_summary": "Electronics importers, European food & drink importers and manufacturers selling to the US will see either lower purchase costs (if GBP strengthens) or higher loan interest. The timing of invoice settlement and loan reset makes the impact immediate.",
+    "exposure_types": [
+      "USD/EUR supplier payment exposure",
+      "GBP floating‑rate loan interest exposure"
+    ],
+    "overall_sales_angle": "The BoE’s 4% rate hike instantly reshapes GBP value and borrowing costs – a perfect moment to review your upcoming foreign‑currency payments or loan exposure.",
+    "target_segments": [
+      {
+        "segment_name": "UK electronics and semiconductor importers (USD)",
+        "category_priority_score": 88,
+        "business_model": "UK wholesaler/distributor buying chips, components and finished electronics from US suppliers, selling to UK manufacturers in GBP. Supplier invoices in USD.",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure – USD invoices vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Importer receives a USD invoice → converts GBP to USD → a stronger GBP after the rate hike means fewer GBP needed per USD, but any floating‑rate GBP loan used to finance the purchase becomes more expensive.",
+        "margin_risk": "High — a 2% GBP/USD move on a £1 m annual spend ≈ £20k margin swing if unhedged.",
+        "payment_timing_risk": "High — typical 30‑60 day payment terms create a window where the rate change matters.",
+        "affected_payment_flow": "USD payments to US manufacturers, usually £100k‑£1 m per shipment, quarterly.",
+        "website_validation_signals": [
+          "imported from the United States",
+          "US‑based supplier",
+          "electronics components",
+          "wholesale distributor"
+        ],
+        "avoid_segments": [
+          "pure UK‑made electronics firms",
+          "retail electronics stores"
+        ],
+        "sales_angle": "Your next USD component invoice will cost fewer pounds after today’s rate hike, but your loan interest may rise.",
+        "exposure_thesis_template": "This company imports electronic components from the US. The BoE rate hike strengthens GBP, reducing the GBP cost of USD invoices while raising floating‑rate loan costs.",
+        "micro_categories": [
+          {
+            "name": "UK semiconductor component importers",
+            "why": "Pay USD to US wafer and chip makers; margin directly tied to GBP/USD moves.",
+            "search_queries": [
+              "\"semiconductor importer\" UK",
+              "\"chip components\" UK importer",
+              "\"US wafer supplier\" UK"
+            ],
+            "companies_house_terms": [
+              "semiconductor import",
+              "chip components",
+              "us wafer"
+            ]
+          },
+          {
+            "name": "UK consumer electronics wholesale distributors",
+            "why": "Buy finished devices priced in USD and sell in GBP; exposure on each shipment.",
+            "search_queries": [
+              "\"consumer electronics distributor\" UK",
+              "\\\"electronics wholesaler\\\" UK \\\"USA\\",
+              "",
+              "\"import electronics\" UK"
+            ],
+            "companies_house_terms": [
+              "electronics distributor",
+              "consumer electronics",
+              "import electronics"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from the United States",
+          "US‑based supplier",
+          "electronics components",
+          "wholesale distributor"
+        ]
+      },
+      {
+        "segment_name": "UK European food & beverage importers (EUR)",
+        "category_priority_score": 84,
+        "business_model": "UK importer sourcing wine, cheese, specialty foods from EU producers, selling to UK hospitality and retail in GBP. Supplier invoices in EUR.",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure – EUR invoices vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/EUR"
+        ],
+        "fx_payment_logic": "Importer receives an EUR invoice → converts GBP to EUR → a stronger GBP after the BoE hike means fewer GBP per EUR, improving margin, but any floating‑rate GBP debt used for the purchase becomes costlier.",
+        "margin_risk": "High — a 3% GBP/EUR move on a £500k annual spend ≈ £15k margin impact.",
+        "payment_timing_risk": "High — 30‑90 day terms common in food trade.",
+        "affected_payment_flow": "EUR payments to EU producers, typically £50k‑£500k per shipment, monthly to quarterly.",
+        "website_validation_signals": [
+          "imported from France",
+          "Italian supplier",
+          "European vineyards",
+          "specialty foods imported"
+        ],
+        "avoid_segments": [
+          "large supermarket chains (they have internal FX desks)",
+          "retail wine shops without import licences"
+        ],
+        "sales_angle": "Your upcoming EUR wine and cheese invoices will now require fewer pounds to settle, but watch your loan interest.",
+        "exposure_thesis_template": "This company imports European food & drink. The BoE rate hike strengthens GBP, lowering the GBP cost of EUR invoices while raising floating‑rate loan costs.",
+        "micro_categories": [
+          {
+            "name": "UK French wine importers",
+            "why": "Pay EUR to French vineyards; margin directly hit by GBP/EUR moves.",
+            "search_queries": [
+              "\"French wine importer\" UK",
+              "\"bordeaux wine distributor\" UK",
+              "\"imported French wine\" UK"
+            ],
+            "companies_house_terms": [
+              "french wine",
+              "bordeaux wines",
+              "wine france"
+            ]
+          },
+          {
+            "name": "UK Italian cheese and deli importers",
+            "why": "EUR‑priced Italian dairy suppliers create a clear GBP/EUR exposure.",
+            "search_queries": [
+              "\"Italian cheese importer\" UK",
+              "\"Italian deli products\" UK",
+              "\"imported Italian food\" UK"
+            ],
+            "companies_house_terms": [
+              "italian cheese",
+              "italian foods",
+              "deli importer"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from France",
+          "Italian supplier",
+          "European vineyards",
+          "specialty foods imported"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "semiconductor import",
+      "chip components",
+      "us wafer",
+      "electronics distributor",
+      "consumer electronics",
+      "import electronics",
+      "french wine",
+      "bordeaux wines",
+      "wine france",
+      "italian cheese",
+      "italian foods",
+      "deli importer"
+    ],
+    "all_search_queries": [
+      "\"semiconductor importer\" UK",
+      "\"chip components\" UK importer",
+      "\"US wafer supplier\" UK",
+      "\"consumer electronics distributor\" UK",
+      "\\\"electronics wholesaler\\\" UK \\\"USA\\",
+      "",
+      "\"import electronics\" UK",
+      "\"French wine importer\" UK",
+      "\"bordeaux wine distributor\" UK",
+      "\"imported French wine\" UK",
+      "\"Italian cheese importer\" UK",
+      "\"Italian deli products\" UK",
+      "\"imported Italian food\" UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-11-05T12:57:35.958Z"
+  },
   "7c09d71c51b24242": {
     "id": "7c09d71c51b24242",
     "headline": "ECB rate hike gives Euro little to work with as Pound holds firm",
@@ -86917,6 +87343,144 @@
     ],
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-02T08:26:39.743Z"
+  },
+  "919e09d7cb6f8c71": {
+    "id": "919e09d7cb6f8c71",
+    "source": "BBC Business",
+    "source_url": "https://www.bbc.co.uk/news/articles/cx4g1q3vlp62o?at_medium=RSS&at_campaign=rss",
+    "headline": "Three ways the interest rate rise could affect you",
+    "raw_summary": "Job, loans and savings are all affected by the rise in interest rates announced by the Bank of England.",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-11-05T12:55:50.577Z",
+    "event_type": "Interest rate decision",
+    "event_breadth": "broad_macro",
+    "summary": "The BoE’s rate hike is expected to push the pound higher against the dollar and euro. UK businesses that pay suppliers in USD or EUR will see lower GBP costs, while exporters earning in those currencies will receive fewer pounds per foreign unit. The timing aligns with many firms’ upcoming invoices and revenue conversions, making today a prime moment to review FX exposure.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 8,
+    "commercial_relevance_reason": "BoE rate hike is likely to strengthen GBP, directly affecting UK importers paying USD/EUR and exporters receiving USD/EUR revenue",
+    "trigger_strength": "strong",
+    "trigger_score": 78,
+    "discovery_mode": "full",
+    "recommended_query_budget": 30,
+    "likely_affected_businesses": [
+      "UK electronics component importers",
+      "UK aerospace parts importers",
+      "UK SaaS firms with US customers",
+      "UK fashion importers from EU"
+    ],
+    "why_now": "Upcoming supplier invoices and recurring USD/EUR revenue conversions will be settled at the new, less favourable rates for importers and exporters",
+    "discovery_recommendation": "Full run — clear payment flow, multiple identifiable importer/exporter niches, public websites should show import/export language",
+    "confidence_level": "high",
+    "confidence_reason": "Central bank decision is concrete and immediately moves GBP rates",
+    "what_happened": "The Bank of England raised its base rate by 25 basis points to 5.25%",
+    "what_changed_financially": "Higher UK rates increase GBP yields, putting upward pressure on GBP against the dollar and euro",
+    "who_pays_more": "UK importers with outstanding USD or EUR supplier invoices",
+    "who_receives_less": "UK exporters receiving USD or EUR revenue",
+    "margin_risk": "High",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs USD/EUR supplier costs and USD/EUR revenue conversion",
+    "fx_payment_logic": "UK importers receive invoices in USD or EUR, convert GBP to the foreign currency to pay suppliers, and a stronger pound after the rate rise means fewer pounds are needed per foreign unit, improving margins. Conversely, UK exporters invoice US or EU customers in USD/EUR and must convert those receipts back to GBP; a stronger pound reduces the GBP amount they receive, compressing revenue.",
+    "sales_angle": "If you have upcoming USD/EUR supplier payments or recurring foreign‑currency revenue, the new BoE rate hike has already shifted the conversion rate – let’s see how it impacts your bottom line today.",
+    "business_impact_summary": "Importers of US‑priced components or EU‑sourced goods will now pay less GBP for the same foreign invoices, easing cost pressure. Exporters earning in USD or EUR will see a reduction in GBP proceeds, potentially eroding margins unless hedged. Both groups face immediate exposure as invoices settle within the next 30‑90 days.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "EUR supplier payment exposure",
+      "USD revenue conversion exposure",
+      "EUR revenue conversion exposure"
+    ],
+    "overall_sales_angle": "The BoE’s rate rise has moved the pound, so any USD/EUR invoices you’re about to settle or convert will be priced differently – let’s lock in a better rate before the market adjusts further.",
+    "target_segments": [
+      {
+        "segment_name": "UK electronics and aerospace component importers (USD)",
+        "category_priority_score": 90,
+        "business_model": "UK manufacturers buying US‑made electronic or aerospace components, paying USD invoices, and selling finished goods in GBP",
+        "exposure_level": "Very High",
+        "exposure_type": "Import cost exposure — USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Importer receives a USD invoice, converts GBP to USD, and a stronger GBP after the rate hike means fewer pounds are required per dollar, improving margin on each purchase",
+        "margin_risk": "Low to Medium",
+        "payment_timing_risk": "Medium",
+        "affected_payment_flow": "USD payments to US suppliers, typically £50k‑£500k per shipment, quarterly",
+        "website_validation_signals": [
+          "imported from the United States",
+          "US supplier",
+          "electronics components",
+          "aerospace parts",
+          "exclusive distributor"
+        ],
+        "avoid_segments": [
+          "retail electronics stores without import operations",
+          "UK‑only manufacturers"
+        ],
+        "sales_angle": "Your upcoming USD component invoices will now cost less GBP after the BoE’s rate rise.",
+        "exposure_thesis_template": "This company imports US‑priced components; the GBP/USD move reduces the GBP needed to settle those invoices.",
+        "micro_categories": [
+          {
+            "name": "US semiconductor importers UK",
+            "why": "Pays USD for chips from US fabs, margin directly hit by GBP/USD move",
+            "search_queries": [
+              "\"semiconductor importer\" UK",
+              "\"US chip supplier\" UK",
+              "\"US electronics components\" UK"
+            ],
+            "companies_house_terms": [
+              "semiconductor import",
+              "US chips",
+              "electronics imports"
+            ]
+          },
+          {
+            "name": "US aerospace parts importers UK",
+            "why": "Pays USD for aerospace components, stronger GBP lowers purchase cost",
+            "search_queries": [
+              "\"aerospace parts importer\" UK",
+              "\"US aerospace supplier\" UK",
+              "\"aircraft component importer\" UK"
+            ],
+            "companies_house_terms": [
+              "aerospace imports",
+              "US aerospace",
+              "aircraft parts"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "imported from the United States",
+          "US supplier",
+          "electronics components",
+          "aerospace parts",
+          "exclusive distributor"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "semiconductor import",
+      "US chips",
+      "electronics imports",
+      "aerospace imports",
+      "US aerospace",
+      "aircraft parts"
+    ],
+    "all_search_queries": [
+      "\"semiconductor importer\" UK",
+      "\"US chip supplier\" UK",
+      "\"US electronics components\" UK",
+      "\"aerospace parts importer\" UK",
+      "\"US aerospace supplier\" UK",
+      "\"aircraft component importer\" UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-11-05T12:57:33.753Z"
   },
   "919e35a34aaeb0dc": {
     "id": "919e35a34aaeb0dc",
@@ -127699,6 +128263,128 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "da199f9d21a2d977": {
+    "id": "da199f9d21a2d977",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-asia-pacific-market-news-gold-rocketed-higher-still/",
+    "headline": "investingLive Asia-Pacific market news: Gold rocketed higher still",
+    "raw_summary": "Bitcoin analysis after the US midterms: Bulls are back, but $82,000 could change everything 168 of 225 Nikkei stocks rise, but AI losses drag the index lower as the Topix rallies China blocks SoftBank’s $5.4 billion ABB robotics deal, FT says, in blow to Son’s AI push Gold jumps as oil slumps on Iran diplomacy hopes, an early test of Citi’s thesis Sidecars and exam days: two Korean market quirks explained as the KOSPI slides 4% Bank of England preview: first hike to 4% expected as energy pushes inflation to 3.5% Berkshire adds $27 million of Sirius XM as investors rotate from AI toward value s",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-11-05T12:57:27.121Z",
+    "event_type": "Central bank expectation",
+    "event_breadth": "broad_currency",
+    "summary": "Analysts expect the BoE to hike rates to 4%, likely strengthening the pound. UK importers with USD/EUR supplier invoices will see lower GBP costs, while exporters receiving USD/EUR will face reduced GBP receipts. With invoices due in the next weeks, the timing makes it a relevant call today",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 5,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "Expected BoE rate hike may strengthen GBP, impacting UK importers paying USD/EUR and exporters receiving USD/EUR",
+    "trigger_strength": "medium",
+    "trigger_score": 52,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK importers of US technology components",
+      "UK manufacturers buying US raw materials",
+      "UK exporters of services to US clients",
+      "UK exporters of goods to EU markets"
+    ],
+    "why_now": "Upcoming invoices priced in USD/EUR will be settled while the market digests the expected rate hike, creating an immediate FX cost/revenue impact",
+    "discovery_recommendation": "Limited run – two distinct payment‑flow niches (importers and exporters) with clear UK business types",
+    "confidence_level": "medium",
+    "confidence_reason": "Event is a forecast, not a surprise decision, but the currency move is concrete and relevant to payment flows",
+    "what_happened": "Analysts expect the Bank of England to raise its policy rate to 4% at its next meeting, the first hike in over a decade",
+    "what_changed_financially": "The anticipated rate increase is likely to push GBP stronger against USD and EUR, altering conversion costs for cross‑border payments",
+    "who_pays_more": "UK businesses that pay USD or EUR invoices – e.g., importers of US electronics, raw materials, or European goods",
+    "who_receives_less": "UK exporters or service firms receiving USD/EUR revenue – a stronger GBP reduces the GBP value of those receipts",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP → USD/EUR for imports; USD/EUR → GBP for export revenue",
+    "fx_payment_logic": "UK importers receive invoices in USD or EUR, convert GBP to those currencies to pay suppliers, and a stronger pound after the rate hike means fewer pounds are needed per foreign currency. Conversely, UK exporters receive payments in USD/EUR and must convert them back to GBP; a stronger pound means each foreign dollar or euro brings fewer pounds, squeezing margins",
+    "sales_angle": "If you have USD or EUR invoices coming due, the expected GBP strength could change your costs today",
+    "business_impact_summary": "Importers of US or European goods will benefit from a stronger pound, reducing the GBP amount needed for upcoming foreign‑currency invoices. Exporters earning in USD/EUR will see their GBP revenue shrink, potentially eroding margins. Both groups need to consider hedging now as the rate move approaches",
+    "exposure_types": [
+      "Import cost exposure (USD/EUR invoices)",
+      "Export revenue conversion exposure (USD/EUR receipts)"
+    ],
+    "overall_sales_angle": "The anticipated BoE rate hike could shift GBP rates enough that your upcoming foreign‑currency invoices or receipts will be priced differently – worth a quick review",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US technology components",
+        "category_priority_score": 78,
+        "business_model": "UK wholesaler/distributor buying semiconductor, smartphone or other tech parts from US suppliers, paying USD invoices, selling finished goods in GBP to UK customers",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure – USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Importer receives USD invoice → converts GBP to USD at spot → a stronger GBP after the rate hike means fewer GBP per USD, lowering cost",
+        "margin_risk": "High — a 2% GBP/USD move on £2 m annual spend ≈ £40k margin gain if unhedged",
+        "payment_timing_risk": "High — typical 30‑60 day payment terms create an open FX window",
+        "affected_payment_flow": "USD payments to US manufacturers, usually £50k‑£500k per shipment, quarterly",
+        "website_validation_signals": [
+          "\"imported from the United States\"",
+          "\"US supplier\"",
+          "\"technology components\"",
+          "\"wholesale\""
+        ],
+        "avoid_segments": [
+          "pure UK domestic electronics distributors without import operations"
+        ],
+        "sales_angle": "Your upcoming US component invoices will cost less in GBP if the pound strengthens after the BoE hike",
+        "exposure_thesis_template": "This company imports US tech components; a stronger GBP reduces the GBP cost of USD invoices.",
+        "micro_categories": [],
+        "segment_signals": [
+          "\"imported from the United States\"",
+          "\"US supplier\"",
+          "\"technology components\"",
+          "\"wholesale\""
+        ]
+      },
+      {
+        "segment_name": "UK exporters of services to US clients",
+        "category_priority_score": 70,
+        "business_model": "UK consulting, legal, or fintech SaaS firms billing US customers in USD and converting receipts to GBP",
+        "exposure_level": "Medium",
+        "exposure_type": "Revenue conversion exposure – USD receipts vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "US client pays USD → UK firm converts USD to GBP → a stronger GBP yields fewer pounds per dollar, reducing revenue",
+        "margin_risk": "Medium — a 2% GBP/USD move on £5 m annual USD revenue ≈ £100k reduced GBP earnings if unhedged",
+        "payment_timing_risk": "Medium — invoices typically net 15‑30 days, creating a short‑term FX window",
+        "affected_payment_flow": "USD receipts from US clients, usually £100k‑£2 m per contract, monthly or quarterly",
+        "website_validation_signals": [
+          "\"US clients\"",
+          "\"billing in USD\"",
+          "\"international consultancy\"",
+          "\"global SaaS\""
+        ],
+        "avoid_segments": [
+          "pure UK‑only service firms"
+        ],
+        "sales_angle": "If you invoice US clients in USD, the expected pound strength could shave off GBP from each payment",
+        "exposure_thesis_template": "This firm provides services to US customers; a stronger GBP reduces the GBP value of USD invoices.",
+        "micro_categories": [],
+        "segment_signals": [
+          "\"US clients\"",
+          "\"billing in USD\"",
+          "\"international consultancy\"",
+          "\"global SaaS\""
+        ]
+      }
+    ],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b",
+    "web_discovery_done": true,
+    "web_discovery_at": "2026-11-05T12:57:35.958Z"
+  },
   "da2c954acef3fabc": {
     "id": "da2c954acef3fabc",
     "headline": "Euro: Bid tone with defined ranges – Societe Generale",
@@ -137601,16 +138287,13 @@
   },
   "ee3d83cfe22201cf": {
     "id": "ee3d83cfe22201cf",
+    "headline": "October US ISM services 54.5 vs 54.8 expected",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/october-us-ism-services-vs-54-8-expected/",
-    "headline": "October US ISM services 54.5 vs 54.8 expected",
-    "raw_summary": "Prior was 54.9 Prices paid 73.0 vs 74.0 prior New orders 55.9 vs 59.8 prior Employment 51.4 vs 50.1 prior Business activity 53.8 vs 56.5 prior This is a step back from September and suggests there is no big acceleration ongoing in the US economy but that services are still strong. Prices paid are extremely elevated but ticked dow. There has been no dollar reaction to the report. For background, the Institute for Supply Management’s Services PMI is one of the most closely watched monthly gauges of the US economy. It’s released at 10 am ET on the third business day of the month, two days after i",
-    "pre_relevance_score": 7,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
     "detected_at": "2026-11-05T02:05:26.816Z",
+    "status": "context_only",
     "event_type": "Economic data",
     "event_breadth": "broad_macro",
-    "summary": "The US services PMI fell marginally to 54.5, indicating a modest slowdown but no significant dollar move. For UK businesses, the data does not create an immediate FX exposure or margin pressure.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
@@ -137621,26 +138304,30 @@
     "recommended_query_budget": 0,
     "likely_affected_businesses": [],
     "why_now": "No immediate FX impact, so no time‑sensitive reason to call UK firms today",
-    "discovery_recommendation": "Context only — the event is macro background without a direct UK payment‑flow hook",
     "confidence_level": "high",
     "confidence_reason": "The report shows a modest PMI dip with no observable dollar reaction, so there is no concrete FX hook",
+    "discovery_recommendation": "Context only — the event is macro background without a direct UK payment‑flow hook",
     "what_happened": "US ISM Services PMI slipped to 54.5 in October, missing the 54.8 forecast",
     "what_changed_financially": "A slight slowdown in US services activity, but prices paid remain high; the dollar did not react",
     "who_pays_more": "none",
     "who_receives_less": "none",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "none",
     "fx_payment_logic": "There is no direct FX transaction triggered by this PMI release for UK companies; the dollar remained stable and payment flows are unchanged.",
-    "sales_angle": "N/A – the report does not generate a compelling FX conversation point for UK firms today",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "No specific UK business types are affected; the PMI change is too small and did not move the dollar, so margin or cash‑flow impacts are negligible.",
-    "exposure_types": [],
+    "sales_angle": "N/A – the report does not generate a compelling FX conversation point for UK firms today",
     "overall_sales_angle": "No actionable FX angle from this US services PMI release",
+    "summary": "The US services PMI fell marginally to 54.5, indicating a modest slowdown but no significant dollar move. For UK businesses, the data does not create an immediate FX exposure or margin pressure.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "Prior was 54.9 Prices paid 73.0 vs 74.0 prior New orders 55.9 vs 59.8 prior Employment 51.4 vs 50.1 prior Business activity 53.8 vs 56.5 prior This is a step back from September and suggests there is no big acceleration ongoing in the US economy but that services are still strong. Prices paid are extremely elevated but ticked dow. There has been no dollar reaction to the report. For background, the Institute for Supply Management’s Services PMI is one of the most closely watched monthly gauges of the US economy. It’s released at 10 am ET on the third business day of the month, two days after i",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b",
+    "exposure_types": [],
     "ai_model": "openai/gpt-oss-120b"
   },
   "ee81f81144212e46": {
@@ -145433,6 +146120,58 @@
     "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio",
     "exposure_types": [],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "fae42cabc4e0fd71": {
+    "id": "fae42cabc4e0fd71",
+    "source": "CityAM",
+    "source_url": "https://www.cityam.com/why-the-bank-of-englands-united-interest-rate-hike-signals-more-to-come/",
+    "headline": "Why the Bank of England’s united interest rate hike signals more to come",
+    "raw_summary": "Comments from members of the Bank of England&#8217;s rate-setting committee suggest more interest rate hikes are on the way, writes Mauricio Alencar. ‘Stands to ready to act’ was the Bank of England’s mantra for most of this year as it waited for higher energy prices to trickle through the UK economy. After today, the Monetary Policy [...]",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-11-05T12:56:30.656Z",
+    "event_type": "Central bank commentary",
+    "event_breadth": "broad_macro",
+    "summary": "BoE officials signaled more rate hikes are coming, which could gradually strengthen the pound. This may affect UK firms that pay or receive foreign currency, but the impact is indirect and not urgent.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 3,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "BoE hints at further hikes, could gradually strengthen GBP affecting importers and exporters but impact is indirect",
+    "trigger_strength": "weak",
+    "trigger_score": 28,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of EU goods",
+      "UK exporters to US market"
+    ],
+    "why_now": "If the market prices in expected rate hikes, upcoming foreign‑currency invoices could be impacted soon.",
+    "discovery_recommendation": "Context only — no immediate payment‑flow hook, keep as background for future outreach",
+    "confidence_level": "medium",
+    "confidence_reason": "Commentary, not a policy decision, so impact is uncertain",
+    "what_happened": "Members of the Bank of England’s Monetary Policy Committee said more rate hikes are likely in the coming months.",
+    "what_changed_financially": "Potential future increase in UK interest rates, which could support GBP strength against other currencies.",
+    "who_pays_more": "UK importers paying in foreign currencies (e.g., EUR, USD) may face higher costs if GBP strengthens.",
+    "who_receives_less": "UK exporters receiving foreign‑currency revenue may see reduced GBP value if GBP strengthens.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP revenue vs foreign‑currency supplier payments or foreign‑currency revenue conversion",
+    "fx_payment_logic": "UK companies that have EUR or USD invoices convert GBP to those currencies; a stronger GBP means they need fewer pounds per euro or dollar, reducing cost, while exporters converting foreign receipts to GBP get fewer pounds per unit.",
+    "sales_angle": "If you have upcoming foreign‑currency invoices, the market expects the pound to firm, which could change your conversion cost soon.",
+    "business_impact_summary": "Importers may see modest savings on EUR/USD payments, while exporters could see a slight reduction in GBP value of foreign revenue. The effect is gradual, so monitor rates.",
+    "exposure_types": [
+      "GBP strength impact on foreign‑currency payments"
+    ],
+    "overall_sales_angle": "Upcoming BoE rate‑hike signals may shift GBP rates, worth reviewing your FX strategy.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
   },
   "fae7e284fa7797c5": {
     "id": "fae7e284fa7797c5",
