@@ -314,6 +314,7 @@ function Filings({ password, listed, onOpen }) {
   const [query, setQuery] = useState("");
   const [strongOnly, setStrongOnly] = useState(false);
   const [lossOnly, setLossOnly] = useState(false);
+  const [movedOnly, setMovedOnly] = useState(false);
   const [shown, setShown] = useState(PAGE);
   useEffect(() => {
     let live = true;
@@ -329,7 +330,8 @@ function Filings({ password, listed, onOpen }) {
     })();
     return () => { live = false; };
   }, [password]);
-  const rows = useMemo(() => filterFilings(data?.rows || [], { query, strongOnly, lossOnly }), [data, query, strongOnly, lossOnly]);
+  const rows = useMemo(() => filterFilings(data?.rows || [], { query, strongOnly, lossOnly, movedOnly }),
+                       [data, query, strongOnly, lossOnly, movedOnly]);
   if (error) return <div className="list"><div className="empty">{error}</div></div>;
   if (!data) return <div className="list"><div className="empty">Loading recent FX filings…</div></div>;
   const all = data.rows || [];
@@ -340,6 +342,7 @@ function Filings({ password, listed, onOpen }) {
                onChange={(e) => { setQuery(e.target.value); setShown(PAGE); }} aria-label="Search filings" />
         <label className="check"><input type="checkbox" checked={strongOnly} onChange={(e) => setStrongOnly(e.target.checked)} /> Strong FX proof ({all.filter((r) => r.filed_fx_score >= 50).length})</label>
         <label className="check"><input type="checkbox" checked={lossOnly} onChange={(e) => setLossOnly(e.target.checked)} /> FX loss ({all.filter((r) => Number(r.fx_gain_loss_gbp) < 0).length})</label>
+        <label className="check"><input type="checkbox" checked={movedOnly} onChange={(e) => setMovedOnly(e.target.checked)} /> Moved up from small ({all.filter((r) => r.moved_up).length})</label>
         <span className="muted">{rows.length} of {all.length} · scanned {ago(data.made_at)}</span>
       </div>
       <p className="filings-note">Companies of £{Math.round((data.min_turnover || 25e6) / 1e6)}m+ turnover whose accounts filed online in the last year
@@ -374,8 +377,16 @@ function FilingCard({ r, listed, onOpen }) {
       <FxStrip r={filingRow(r)} />
       {r.size_estimate && !r.turnover_gbp && <div className="filing-note">No turnover filed: size {r.size_estimate_basis}.</div>}
       {r.hmrc_trade && <div className="filing-note customs">{r.hmrc_trade}</div>}
+      {r.fx_mentions?.length > 0 && (
+        <details className="fx-mentions">
+          <summary>What the accounts say about currency and trade abroad ({r.fx_mention_count || r.fx_mentions.length} mention{(r.fx_mention_count || r.fx_mentions.length) === 1 ? "" : "s"})</summary>
+          <ul>{r.fx_mentions.map((m) => <li key={m}>“{m}”</li>)}</ul>
+        </details>
+      )}
       <div className="chips">
         {listed ? <span className="chip own">On your Accounts list</span> : <span className="chip">Not on your list yet</span>}
+        {r.moved_up && <span className="chip trig" title="From the company's filing history on Companies House">{r.moved_up}</span>}
+        {r.bank_debt && <span className="chip" title="From the filed accounts">{r.bank_debt}</span>}
         {isGroupFiling(r) && <span className="chip">Group of companies{r.turnover_basis === "group" ? " — consolidated figures" : ""}{r.also_filed ? `; also filed by ${r.also_filed}` : ""}</span>}
         {r.accounts_regime && <span className="chip" title="The size regime the accounts were prepared under">Filed as {r.accounts_regime === "small" ? "a small company" : "medium-sized"}</span>}
         {r.auditor && <span className="chip">Auditor {r.auditor}</span>}
@@ -845,6 +856,10 @@ select.input option{background:#0F141F}
 .estimate i{font-style:normal;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#FBBF24;margin-left:4px}
 .filing-note{margin-top:8px;font-size:12px;color:rgba(255,255,255,.55)}
 .filing-note.customs{color:#A5B4FC}
+.fx-mentions{margin-top:8px;font-size:12px;color:rgba(255,255,255,.6)}
+.fx-mentions summary{cursor:pointer;color:rgba(255,255,255,.5)}
+.fx-mentions ul{margin:6px 0 0;padding-left:18px}
+.fx-mentions li{margin:3px 0;line-height:1.45}
 .filings-note{font-size:12px;color:rgba(255,255,255,.45);margin:0 0 12px}
 .new.group{background:rgba(165,180,252,.14);color:#A5B4FC}
 .new.filed{background:rgba(56,189,248,.12);color:#7DD3FC}

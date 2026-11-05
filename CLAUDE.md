@@ -235,6 +235,13 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (a name search can land on a dissolved namesake). Backfill months are started
   by pushing `tools/fx_filings_backfill.txt` (the coding agent can't run the
   workflow by hand).
+  Each row also keeps: "Moved up from small accounts" (`filings.moved_up`, from
+  the company's Companies House filing history — one call per listed company,
+  once, `--history-max` a run), bank borrowing (`bank_debt`: the tagged figure,
+  else the facilities named), and up to `FX_MENTIONS_MAX` (4) sentences
+  mentioning foreign / dollar / euro / currency / hedging / overseas / export /
+  import (`fx_mentions`, the business's own words before policy boilerplate,
+  with the total count) — shown on the card.
 - **Accounts page order:** "Hottest" by default — the strongest filed FX
   proof first (headed Strong FX proof (50+) / Some FX proof / No FX in the
   filings yet), each in the finder's rank: the FD is a quick Google, the FX
