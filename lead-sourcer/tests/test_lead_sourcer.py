@@ -457,6 +457,11 @@ class TestSlotsGoToCompaniesStillInTheRunning(PipelineTestCase):
             # next run: 01 is known to be out (no calls, no slot), 05 comes from the cache, and the freed slot
             # goes to the next candidate in line
             self.assertEqual(looked_up(since), ["02"])
+            # a reader upgrade (FACTS_VERSION) doesn't put 01 back in line: it's still out, its slot still free
+            since = len(self.fake.calls)
+            with mock.patch.object(accounts, "FACTS_VERSION", "a-newer-reader"):
+                self.run_bulk(news_check=False, max_enrich=2, min_turnover=25_000_000)
+            self.assertNotIn("01", looked_up(since))
 
 
 class TestRegisterCache(PipelineTestCase):
