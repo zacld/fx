@@ -67,6 +67,7 @@ jobs:
         working-directory: lead-sourcer
         env:
           MODE: ${{ github.event_name == 'push' && 'test' || inputs.mode || 'daily' }}
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           PYTHONUNBUFFERED: "1"
         run: |
           # a push naming a month in tools/fx_filings_backfill.txt scans that month (the backfill)

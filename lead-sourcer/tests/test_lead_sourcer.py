@@ -2809,6 +2809,28 @@ class TestFxFilings(unittest.TestCase):
         self.assertIsNone(row)
         self.assertEqual(why, "read: no turnover filed, accounts prepared as a small company")
 
+    def test_moved_up_bank_debt_and_fx_mentions(self):
+        aa = lambda kind, made: {"type": "AA", "description": f"accounts-with-accounts-type-{kind}",
+                                 "description_values": {"made_up_date": made}}
+        history = [aa("medium", "2025-12-31"), aa("small", "2024-12-31"), aa("small", "2023-12-31")]   # BJA Trading
+        self.assertEqual(filings.moved_up(history), "Moved up from small accounts (31 Dec 2024: small → 31 Dec 2025: medium-sized)")
+        self.assertEqual(filings.moved_up([aa("full", "2025-12-31"), aa("full", "2024-12-31"), aa("small", "2023-12-31")]),
+                         "Moved up from small accounts (31 Dec 2023: small → 31 Dec 2025: full)")
+        self.assertEqual(filings.moved_up([aa("full", "2025-12-31"), aa("full", "2024-12-31")]), "")
+        self.assertEqual(filings.moved_up([aa("small", "2025-12-31"), aa("medium", "2024-12-31")]), "")   # moved down
+        self.assertEqual(filings.moved_up([{"type": "CS01", "description": "confirmation-statement"}]), "")
+        self.assertEqual(filings.bank_debt({"bank_borrowings": 3_200_000}, ""), "Bank loans and overdrafts £3.2m (tagged in the accounts)")
+        self.assertEqual(filings.bank_debt({}, "The group has a Revolving Credit Facility of £10m and bank loans secured on property."),
+                         "Mentions revolving credit facility, bank loans")
+        self.assertEqual(filings.bank_debt({}, "No borrowings."), "")
+        text = ("Transactions in foreign currencies are translated at the rate ruling at the date of the transaction. "
+                "The company buys most of its stock from suppliers in China, paid in US dollars. "
+                "Turnover rose 12%. Sales to overseas customers grew strongly.")
+        mentions, n = filings.fx_mentions(text)
+        self.assertEqual(n, 3)
+        self.assertTrue(mentions[0].startswith("The company buys most of its stock"))   # the business's own words first
+        self.assertTrue(mentions[-1].startswith("Transactions in foreign currencies"))  # policy boilerplate last
+
     def test_customs_records_decide_for_a_filing_without_fx(self):
         quiet = {"company_number": "00450581", "company_name": "CASTOLIN EUTECTIC LIMITED", "fx_in_filing": False,
                  "filed_fx_score": 0, "filed_fx": "", "size_estimate": "likely £16m–£32m"}

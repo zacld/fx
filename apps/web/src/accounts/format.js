@@ -280,11 +280,13 @@ export function filedWhen(filed = "") {
 }
 
 // The tab's filters: search (company name or number, and the FX facts' text), strong proof only, FX loss only.
-export function filterFilings(rows, { query = "", strongOnly = false, lossOnly = false } = {}) {
+export function filterFilings(rows, { query = "", strongOnly = false, lossOnly = false, movedOnly = false } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) => (!strongOnly || (r.filed_fx_score || 0) >= 50)
     && (!lossOnly || Number(r.fx_gain_loss_gbp) < 0)
-    && (!q || [r.company_name, r.company_number, r.currencies_in_accounts, r.fx_forwards, r.fx_today, r.turnover_regions, r.hmrc_trade]
+    && (!movedOnly || Boolean(r.moved_up))
+    && (!q || [r.company_name, r.company_number, r.currencies_in_accounts, r.fx_forwards, r.fx_today, r.turnover_regions, r.hmrc_trade,
+               r.bank_debt, r.moved_up, ...(r.fx_mentions || [])]
       .some((v) => (v || "").toLowerCase().includes(q))));
 }
 

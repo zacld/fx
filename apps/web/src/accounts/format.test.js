@@ -225,6 +225,8 @@ describe("recent FX filings", () => {
     expect(filterFilings(rows, { strongOnly: true })).toHaveLength(1);
     expect(filterFilings(rows, { lossOnly: true })[0].company_name).toBe("ACME LTD");
     expect(filterFilings(rows)).toHaveLength(2);
+    expect(filterFilings([{ moved_up: "Moved up from small accounts (…)" }, {}], { movedOnly: true })).toHaveLength(1);
+    expect(filterFilings([{ fx_mentions: ["Purchases are paid in US dollars."] }], { query: "dollars" })).toHaveLength(1);
   });
   it("links each fact to the filing and says when it was filed", () => {
     const row = filingRow(rows[0]);

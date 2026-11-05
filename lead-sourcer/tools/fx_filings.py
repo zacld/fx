@@ -65,7 +65,7 @@ def show(row: dict) -> str:
            f"{' | '.join(facts)[:150]}"
 
 
-DETAIL = [("size_estimate", "size"), ("size_estimate_basis", "  from"), ("hmrc_trade", "customs"),
+DETAIL = [("moved_up", "trigger"), ("bank_debt", "bank debt"), ("size_estimate", "size"), ("size_estimate_basis", "  from"), ("hmrc_trade", "customs"),
           ("turnover_check", "turnover check"), ("fx_gain_loss_evidence", "FX gain/loss from"),
           ("fx_today", "how they handle FX"), ("fx_today_evidence", "  from"), ("fx_forwards", "forwards"),
           ("fx_forwards_evidence", "  from"), ("currencies_in_accounts", "currencies"),
@@ -99,6 +99,7 @@ def main() -> None:
     parser.add_argument("--top", type=int, default=40, help="hits shown in the log")
     parser.add_argument("--max-hits", type=int, default=0, help="stop once this many companies are found (a test)")
     parser.add_argument("--detail", action="store_true", help="every fact of every hit, with its quote")
+    parser.add_argument("--history-max", type=int, default=2500, help="filing histories read a run (moved up flag)")
     parser.add_argument("--hmrc-months", type=int, default=12, help="months of HMRC importer/exporter lists (0: off)")
     parser.add_argument("--redo", action="store_true", help="read files already done again (a test)")
     args = parser.parse_args()
@@ -148,6 +149,22 @@ def main() -> None:
     print(f"{found:,} big enough; {len(new_rows):,} with FX in their filing or customs records")
     kept = [r for r in previous.get("rows") or [] if r.get("filed") not in reread]
     rows = filings.merge(kept, new_rows)
+    # Moved up from small accounts: each listed company's filing history, once (kept on the row), capped a run.
+    api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "")
+    todo_history = [r for r in rows if not r.get("history_checked")][: args.history_max]
+    if api_key and todo_history:
+        started, moved = time.time(), 0
+        for r in todo_history:
+            items = filings.accounts_history(r["company_number"], api_key)
+            if items is None:
+                continue   # the call failed: try again next run
+            r["moved_up"] = filings.moved_up(items)
+            r["history_checked"] = datetime.now(timezone.utc).date().isoformat()
+            moved += bool(r["moved_up"])
+        print(f"Filing histories read: {len(todo_history):,} in {time.time() - started:.0f}s; moved up from small "
+              f"accounts: {moved:,}; {sum(1 for r in rows if not r.get('history_checked')):,} left for the next run")
+    elif todo_history:
+        print(f"COMPANIES_HOUSE_API_KEY not set: {len(todo_history):,} filing histories not read")
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,
            "files_done": sorted(done), "count": len(rows), "rows": rows}
     with open(args.out, "w", encoding="utf-8") as f:

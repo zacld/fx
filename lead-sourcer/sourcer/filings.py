@@ -212,6 +212,87 @@ def accounts_regime(text: str) -> str:
     return "medium" if _MEDIUM_REGIME.search(text) else ""
 
 
+# --- Notes kept from the filing: bank borrowing, every line about currency ---------------------------------------
+
+_BANK_DEBT = re.compile(r"bank\s+loans?|bank\s+overdrafts?|revolving\s+credit\s+facilit\w+|\bRCF\b|term\s+loans?|"
+                        r"invoice\s+(?:discounting|finance)\s+facilit\w+|asset\s+(?:based\s+)?(?:lending|finance)\s+facilit\w+|"
+                        r"bank\s+borrowings?|loan\s+facilit\w+", re.I)
+_FX_WORDS_TEXT = re.compile(r"\bforeign\b|\bdollars?\b|\beuros?\b|\b(?:USD|EUR|CNY|RMB|JPY|CHF|AUD|CAD|SEK|NOK|DKK|PLN)\b|"
+                            r"[$€¥]\s?\d|exchange\s+rates?|\bcurrenc\w+|\bhedg\w+|forward\s+contracts?|\boverseas\b|"
+                            r"\bexport\w*|\bimport\w*|\bsterling\b", re.I)
+# Accounting-policy boilerplate every company with a foreign invoice prints: kept last.
+_FX_POLICY = re.compile(r"translated|retranslated|functional\s+currency|presentation\s+currency|closing\s+rate|"
+                        r"rate\s+(?:of\s+exchange\s+)?ruling|spot\s+rate|monetary\s+(?:assets|items)", re.I)
+FX_MENTIONS_MAX = 4
+
+
+def bank_debt(facts: dict, plain: str) -> str:
+    """ "Bank loans and overdrafts £3.2m (tagged)" / "mentions a revolving credit facility, a term loan" / ""."""
+    if facts.get("bank_borrowings"):
+        return f"Bank loans and overdrafts {hooks.short(facts['bank_borrowings'])} (tagged in the accounts)"
+    found = list(dict.fromkeys(m.group(0).lower() for m in _BANK_DEBT.finditer(plain)))[:3]
+    return ("Mentions " + ", ".join(found)) if found else ""
+
+
+def fx_mentions(plain: str, limit: int = FX_MENTIONS_MAX) -> tuple[list[str], int]:
+    """
+    (the sentences mentioning currency, foreign trade or hedging — the business's own first, accounting-policy
+    boilerplate last — each trimmed; how many sentences mention it in all).
+    """
+    sentences = re.split(r"(?<=[.!?])\s+(?=[A-Z(])", " ".join(plain.split()))
+    hits = [x for x in sentences if _FX_WORDS_TEXT.search(x) and 20 <= len(x) <= 1200]
+    hits = list(dict.fromkeys(hits))
+    ranked = sorted(hits, key=lambda x: bool(_FX_POLICY.search(x)))
+    return [hooks._sentence(x, 0, 0, limit=220) for x in ranked[:limit]], len(hits)
+
+
+# --- Moved up from small accounts (Companies House filing history: one call per company kept) -----------------
+
+_SMALL_TYPES = ("small", "micro-entity", "total-exemption", "unaudited-abridged", "abridged", "dormant")
+_BIG_TYPES = ("medium", "full", "group")
+
+
+def _accounts_type(description: str) -> str:
+    """ "small" / "medium" / "full" (full or group) / "" from a filing-history description."""
+    d = (description or "").lower()
+    if not d.startswith("accounts-with-accounts-type-"):
+        return ""
+    kind = d.replace("accounts-with-accounts-type-", "")
+    if kind.startswith(_SMALL_TYPES):
+        return "small"
+    if kind.startswith("medium"):
+        return "medium"
+    return "full" if kind.startswith(("full", "group")) else ""
+
+
+def moved_up(items: list[dict]) -> str:
+    """
+    "Moved up from small accounts (31 Dec 2024: small → 31 Dec 2025: medium-sized)" when the latest annual accounts
+    are medium or full and one of the two before was small, else "". `items`: filing-history items, newest first.
+    """
+    accounts = [(i.get("description_values", {}).get("made_up_date", "") or i.get("date", ""),
+                 _accounts_type(i.get("description", ""))) for i in items if i.get("type") == "AA"]
+    accounts = [(d, t) for d, t in accounts if t]
+    if len(accounts) < 2 or accounts[0][1] not in ("medium", "full"):
+        return ""
+    before = next(((d, t) for d, t in accounts[1:3] if t == "small"), None)
+    if not before:
+        return ""
+    words = {"medium": "medium-sized", "full": "full", "small": "small"}
+    return (f"Moved up from small accounts ({hooks.day(before[0]) or before[0]}: small → "
+            f"{hooks.day(accounts[0][0]) or accounts[0][0]}: {words[accounts[0][1]]})")
+
+
+def accounts_history(number: str, api_key: str) -> Optional[list[dict]]:
+    """The company's accounts filings (newest first) from Companies House, or None when the call fails."""
+    from sourcer import companies_house
+
+    companies_house._throttle()
+    data = companies_house._get(accounts.CH_FILING_HISTORY.format(number=number),
+                                {"category": "accounts", "items_per_page": 10}, api_key)
+    return None if data is None else data.get("items", [])
+
+
 def hit(document: bytes, number: str, made_up: str, filed: str, min_turnover: float = MIN_TURNOVER) -> Optional[dict]:
     """A row only when the filing itself proves FX (customs records are checked later, by finalise)."""
     row, _ = assess(document, number, made_up, filed, min_turnover)
@@ -231,7 +312,8 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
     if turnover is not None and turnover < min_turnover:
         return None, "read: turnover in the accounts under the floor (a subsidiary's own, or the tag was a segment)"
     text = document.decode("utf-8", errors="replace")
-    regime = accounts_regime(html.unescape(re.sub(r"<[^>]+>", " ", text)))
+    plain_text = html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<ix:header\b.*?</ix:header>", " ", text, flags=re.S)))
+    regime = accounts_regime(plain_text)
     if regime == "small" and turnover is None:
         return None, "read: no turnover filed, accounts prepared as a small company"
     band = size_band(facts) if turnover is None else None
@@ -269,9 +351,12 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         "auditor": facts.get("auditor", ""), "bankers": ", ".join(facts.get("bankers") or []),
         "employees": str(facts["employees"]) if facts.get("employees") else "",
         "accounts_regime": regime,
+        "bank_debt": bank_debt(facts, plain_text),
         "accounts_url": url,
         **{k: v for k, v in cols.items() if not k.endswith("_url")},
     }
+    mentions, mention_count = fx_mentions(plain_text)
+    row.update(fx_mentions=mentions, fx_mention_count=mention_count)
     row["fx_in_filing"] = shows_fx(facts, today["fx_today"])
     score, lines = fx_notes.filed_proof(row)
     row.update(filed_fx_score=score, filed_fx="; ".join(lines))
