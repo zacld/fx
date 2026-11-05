@@ -2760,6 +2760,17 @@ class TestFxFilings(unittest.TestCase):
         merged = filings.merge([], [club, holding], today=date(2026, 11, 6))
         self.assertEqual([(r["company_number"], r.get("also_filed")) for r in merged],
                          [("08335231", "THE BURNLEY FOOTBALL & ATHLETIC COMPANY LIMITED (00054222)")])
+        # LRS Broadhurst and its subsidiary: turnover a little different, the same FX loss to the pound
+        lrs = {"company_number": "11691121", "company_name": "LRS BROADHURST HOLDINGS LIMITED", "filed": "2026-11-04",
+               "period_end": "2026-03-31", "turnover_gbp": "36200000", "fx_gain_loss_gbp": "-22990",
+               "turnover_basis": "group", "filed_fx_score": 45}
+        spar = {**lrs, "company_number": "00666952", "company_name": "THE LONG RAKE SPAR CO LIMITED",
+                "turnover_gbp": "35900000", "turnover_basis": "company"}
+        other = {**lrs, "company_number": "01111111", "company_name": "OTHER LTD", "fx_gain_loss_gbp": "-500",
+                 "turnover_gbp": "40000000"}   # a different company with a tiny FX line: never joined on it
+        merged = filings.merge([], [spar, lrs, other], today=date(2026, 11, 6))
+        self.assertEqual(sorted((r["company_number"], r.get("also_filed", "")) for r in merged),
+                         [("01111111", ""), ("11691121", "THE LONG RAKE SPAR CO LIMITED (00666952)")])
 
     def test_quick_screen(self):
         self.assertEqual(filings.tagged_turnover(ixbrl(current="45,000")), 45_000_000)   # inside a <span>, £'000

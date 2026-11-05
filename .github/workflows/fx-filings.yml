@@ -68,7 +68,7 @@ jobs:
           MODE: ${{ github.event_name == 'push' && 'test' || inputs.mode || 'daily' }}
           PYTHONUNBUFFERED: "1"
         run: |
-          if [ "$MODE" = "test" ]; then python3 tools/fx_filings.py --daily --max-files 1 --max-hits 20 --detail --previous filings-previous.json --out filings.json
+          if [ "$MODE" = "test" ]; then python3 tools/fx_filings.py --daily --redo --max-files 1 --max-hits 20 --detail --previous filings-previous.json --out filings.json
           elif [ "$MODE" = "daily" ]; then python3 tools/fx_filings.py --daily --previous filings-previous.json --out filings.json
           else python3 tools/fx_filings.py --month "$MODE" --previous filings-previous.json --out filings.json; fi
 

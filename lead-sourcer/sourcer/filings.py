@@ -269,31 +269,39 @@ def merge(previous: list[dict], new: list[dict], keep_days: int = 400, today: Op
 def _one_per_group(rows: list[dict]) -> list[dict]:
     """
     A group's figures filed by several of its companies (the holding company, a subsidiary, an employee-ownership
-    trustee: the same turnover and FX gain/loss for the same year) as one row: the group's own filing (group
-    figures), the others named in also_filed.
+    trustee) as one row: same year end and the same turnover, or the same FX gain/loss to the pound (LRS Broadhurst
+    and The Long Rake Spar: £36.2m v £35.9m turnover, both a £22,990 FX loss). The group's own filing (group
+    figures) is kept, the others named in also_filed.
     """
-    groups: dict[tuple, list[dict]] = {}
-    alone = []
-    for r in rows:
-        if r.get("turnover_gbp") and r.get("fx_gain_loss_gbp"):
-            groups.setdefault((r["turnover_gbp"], r["fx_gain_loss_gbp"], r.get("period_end", "")), []).append(r)
-        else:
-            alone.append(r)
+    parent = list(range(len(rows)))
+
+    def root(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    seen: dict[tuple, int] = {}
+    for i, r in enumerate(rows):
+        end = r.get("period_end", "")
+        keys = [("turnover", r.get("turnover_gbp"), end)] if r.get("turnover_gbp") else []
+        if r.get("fx_gain_loss_gbp") and abs(float(r["fx_gain_loss_gbp"])) >= 1_000:
+            keys.append(("fx", r["fx_gain_loss_gbp"], end))
+        for key in keys:
+            if key in seen:
+                parent[root(i)] = root(seen[key])
+            else:
+                seen[key] = i
+    groups: dict[int, list[dict]] = {}
+    for i, r in enumerate(rows):
+        groups.setdefault(root(i), []).append(r)
+    out = []
     for same in groups.values():
-        same.sort(key=lambda r: (r.get("turnover_basis") != "group", -r.get("filed_fx_score", 0), r["company_name"]))
+        same.sort(key=lambda r: (r.get("turnover_basis") != "group", -r.get("filed_fx_score", 0),
+                                 -float(r.get("turnover_gbp") or 0), r["company_name"]))
         keep = dict(same[0])
         others = [f"{r['company_name']} ({r['company_number']})" for r in same[1:]]
         if others:
             keep["also_filed"] = "; ".join(others)
-        alone.append(keep)
-    return alone
-
-
-_MONTHS = {m: i for i, m in enumerate(("January February March April May June July August September October "
-                                       "November December").split(), 1)}
-
-
-def _sort_date(filed: str) -> str:
-    """ "2026-11-04" as is; "October 2026" as "2026-10-00", so a month's archive sorts before its days."""
-    m = re.fullmatch(r"([A-Z][a-z]+) (\d{4})", filed or "")
-    return f"{m.group(2)}-{_MONTHS.get(m.group(1), 0):02d}-00" if m else (filed or "")
+        out.append(keep)
+    return out

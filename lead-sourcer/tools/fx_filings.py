@@ -42,7 +42,7 @@ def pick(args, done: set[str]) -> list[str]:
     if args.zip:
         return list(args.zip)
     if args.daily:
-        files = [u for u in filings.list_files("daily") if u.rsplit("/", 1)[-1] not in done]
+        files = [u for u in filings.list_files("daily") if args.redo or u.rsplit("/", 1)[-1] not in done]
         return sorted(files, reverse=True)[: args.max_files]   # newest first
     # newest first, whatever order the page lists them in
     monthly = sorted(filings.list_files("monthly"), key=lambda u: filings._sort_date(filings.filed_label(u)), reverse=True)
@@ -96,6 +96,7 @@ def main() -> None:
     parser.add_argument("--top", type=int, default=40, help="hits shown in the log")
     parser.add_argument("--max-hits", type=int, default=0, help="stop once this many companies are found (a test)")
     parser.add_argument("--detail", action="store_true", help="every fact of every hit, with its quote")
+    parser.add_argument("--redo", action="store_true", help="read files already done again (a test)")
     args = parser.parse_args()
     if not (args.daily or args.month or args.zip):
         parser.error("say --daily, --month or --zip")
