@@ -106,6 +106,7 @@ def main() -> None:
     todo = pick(args, done)
     print(f"{len(todo)} file(s) to scan; {len(done)} done before; {len(previous.get('rows') or [])} companies listed")
     new_rows: list[dict] = []
+    reread: set[str] = set()   # files read in full again: their earlier rows give way to this reading
     for url in todo:
         name = url.rsplit("/", 1)[-1]
         started = time.time()
@@ -122,10 +123,13 @@ def main() -> None:
         if filings.stats["stopped_early"]:
             print(f"  stopped early: {name} isn't marked done, so the next run reads all of it")
         else:
+            if name in done:
+                reread.add(filings.filed_label(name))
             done.add(name)
         if not os.path.exists(url) and path.startswith(CACHE):
             os.remove(path)   # monthly archives are GBs: keep the disk free for the next
-    rows = filings.merge(previous.get("rows") or [], new_rows)
+    kept = [r for r in previous.get("rows") or [] if r.get("filed") not in reread]
+    rows = filings.merge(kept, new_rows)
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,
            "files_done": sorted(done), "count": len(rows), "rows": rows}
     with open(args.out, "w", encoding="utf-8") as f:
