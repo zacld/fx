@@ -141,6 +141,8 @@ def main() -> None:
         print(f"\nWhere the {total:,} filings went:")
         for reason, n in sorted(why.items(), key=lambda kv: (not kv[0].startswith("screen"), kv[0] != "kept", -kv[1])):
             print(f"  {n:>7,}  {n / total:6.1%}  {reason}")
+            for example in filings.stats["examples"].get(reason, []):
+                print(f"                     e.g. {example}")
     if new_rows:
         scores = [r["filed_fx_score"] for r in new_rows]
         print(f"  filed FX score 50+: {sum(s >= 50 for s in scores):,} | 1-49: {sum(s < 50 for s in scores):,} | "

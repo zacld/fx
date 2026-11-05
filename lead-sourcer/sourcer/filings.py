@@ -56,7 +56,7 @@ _FX_WORDS = re.compile(rb"exchange\s+(?:loss|gain|difference)|foreign\s+(?:excha
 _NAME_TAG = re.compile(r"name=\"[^\":]*:EntityCurrentLegalOrRegisteredName\"[^>]*>(.*?)</ix:nonNumeric>", re.I | re.S)
 
 stats = {"files": 0, "screened_in": 0, "read": 0, "hits": 0, "seconds": 0.0, "stopped_early": False,
-         "why": Counter()}   # why each filing was dropped (or "kept"), for the run's report
+         "why": Counter(), "examples": {}}   # why each filing was dropped (or "kept"), for the run's report
 
 
 # --- The bulk files ---------------------------------------------------------------------------------------------
@@ -176,8 +176,13 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
     if turnover is not None and turnover < min_turnover:
         return None, "read: turnover in the accounts under the floor (a subsidiary's own, or the tag was a segment)"
     if turnover is None and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER:
-        return None, ("read: turnover not found, no FX gain/loss" if not fx else
-                      "read: turnover not found, FX gain/loss under £100k")
+        text = document.decode("utf-8", errors="replace")
+        kind = ("filleted (no profit and loss account)" if not re.search(r"\b(?:turnover|revenue)\b", text, re.I)
+                else "turnover shown but not read")
+        stats_sample = f"{company_name(text) or number} ({number}): {len(document) // 1000}KB, {kind}" + \
+            (f", {facts.get('turnover_check')}" if facts.get("turnover_check") else "")
+        return None, (f"read: turnover not found ({kind}), " + ("no FX gain/loss" if not fx else "FX gain/loss under £100k")
+                      + "\t" + stats_sample)
     name = company_name(document.decode("utf-8", errors="replace")) or number
     url = filing_url(number)
     cols = fx_notes.columns(facts, name, url)
@@ -232,7 +237,10 @@ def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers
 
     def flush(pool) -> None:
         for found, why in (pool.map(_read_one, pending) if pool else map(_read_one, pending)):
+            why, _, example = why.partition("\t")
             stats["why"][why] += 1
+            if example and len(stats["examples"].setdefault(why, [])) < 12:
+                stats["examples"][why].append(example)
             if found:
                 hits.append(found)
         stats["read"] += len(pending)
