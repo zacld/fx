@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askFor, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { askFor, filedWhen, filingRow, filterFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -209,5 +209,29 @@ describe("accounts helpers", () => {
   it("exports CSV with quoting", () => {
     const csv = toCsv([rows[2]], ["company_name", "call_angle"]);
     expect(csv).toBe('company_name,call_angle\nQUATRA UK LTD,"Say ""hi"", then"');
+  });
+});
+
+
+describe("recent FX filings", () => {
+  const rows = [
+    { company_number: "01234567", company_name: "ACME LTD", filed: "2026-11-04", filed_fx_score: 65, fx_gain_loss_gbp: "-420000",
+      currencies_in_accounts: "USD (buys)", accounts_url: "https://ch/company/01234567/filing-history", currency: "USD" },
+    { company_number: "SC123456", company_name: "GLEN FOODS LTD", filed: "October 2026", filed_fx_score: 20, fx_gain_loss_gbp: "15000" },
+  ];
+  it("filters by search, strong proof and FX loss", () => {
+    expect(filterFilings(rows, { query: "usd" }).map((r) => r.company_number)).toEqual(["01234567"]);
+    expect(filterFilings(rows, { query: "sc1234" }).map((r) => r.company_name)).toEqual(["GLEN FOODS LTD"]);
+    expect(filterFilings(rows, { strongOnly: true })).toHaveLength(1);
+    expect(filterFilings(rows, { lossOnly: true })[0].company_name).toBe("ACME LTD");
+    expect(filterFilings(rows)).toHaveLength(2);
+  });
+  it("links each fact to the filing and says when it was filed", () => {
+    const row = filingRow(rows[0]);
+    expect(row.fx_gain_loss_url).toBe(rows[0].accounts_url);
+    expect(row.main_currency).toBe("USD");
+    expect(fxFacts(row).map(([label]) => label)).toEqual(["Currencies", "FX gain/loss"]);
+    expect(filedWhen("2026-11-04")).toBe("4 Nov 2026");
+    expect(filedWhen("October 2026")).toBe("October 2026");
   });
 });

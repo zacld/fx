@@ -206,6 +206,18 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   forwards, currencies, how it handles FX, FX gain/loss, regions;
   `group_fx_url`), and half the group's filed-FX proof counts towards its own
   `filed_fx_score`.
+- **Recent FX filings** (`sourcer/filings.py`, `tools/fx_filings.py`, workflow
+  "FX filings"; the Accounts page's tab of that name, GET `/api/accounts?view=filings`,
+  store key `filings`): Companies House's free bulk accounts files (every set
+  of accounts filed online: a zip each morning, monthly archives of the past)
+  scanned for companies of `FILINGS_MIN_TURNOVER` (£25m)+ whose filing shows FX.
+  A cheap screen on each filing's raw text (tagged turnover over the floor, or
+  — none tagged — full-accounts-sized and mentioning foreign exchange), then
+  the survivors read like the finder's accounts (`accounts.extract_facts`) and
+  kept when their filed FX proof scores. Daily Tue–Sat (the day files not yet
+  done); a monthly archive by hand (`next` = newest not done: the year's
+  backfill). The newest filing per company, filed within 400 days. Paper
+  filings aren't in the files (the main list's OCR covers them). No API calls.
 - **Accounts page order:** "Hottest" by default — the strongest filed FX
   proof first (headed Strong FX proof (50+) / Some FX proof / No FX in the
   filings yet), each in the finder's rank: the FD is a quick Google, the FX

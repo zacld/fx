@@ -264,3 +264,26 @@ export function toCsv(rows, fields = EXPORT_FIELDS) {
   };
   return [fields.join(","), ...rows.map((r) => fields.map((f) => cell(r[f])).join(","))].join("\n");
 }
+
+// --- Recent FX filings (lead-sourcer/sourcer/filings.py) --------------------------------------------------------
+
+// A scanned filing as a row the FX strip can show: every fact links to the company's filing history.
+export function filingRow(r) {
+  return { ...r, fx_gain_loss_url: r.accounts_url, fx_today_url: r.accounts_url, main_currency: r.currency || "" };
+}
+
+// "4 Nov 2026" for a day file's date; "October 2026" (a month's archive) as it is.
+export function filedWhen(filed = "") {
+  return /^\d{4}-\d{2}-\d{2}$/.test(filed)
+    ? new Date(`${filed}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+    : filed;
+}
+
+// The tab's filters: search (company name or number, and the FX facts' text), strong proof only, FX loss only.
+export function filterFilings(rows, { query = "", strongOnly = false, lossOnly = false } = {}) {
+  const q = query.trim().toLowerCase();
+  return rows.filter((r) => (!strongOnly || (r.filed_fx_score || 0) >= 50)
+    && (!lossOnly || Number(r.fx_gain_loss_gbp) < 0)
+    && (!q || [r.company_name, r.company_number, r.currencies_in_accounts, r.fx_forwards, r.fx_today, r.turnover_regions]
+      .some((v) => (v || "").toLowerCase().includes(q))));
+}
