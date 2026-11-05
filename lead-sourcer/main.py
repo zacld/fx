@@ -885,34 +885,40 @@ def run_pipeline(
 
     budget = 0 if not api_key else len(queue) if max_enrich is None else max_enrich
 
-    def known_out(company: dict, trade) -> bool:
+    def known_out(company: dict, trade) -> str:
         """
-        Already read (cache) and out: filed turnover under the floor, or a subsidiary nothing confirms (no filed
-        turnover, no customs record, and its group's accounts — read since — don't put it in the band).
+        "under_min" / "unconfirmed" when already read (cache) and out: filed turnover under the floor, or a
+        subsidiary nothing confirms (no filed turnover, no customs record, and its group's accounts — read since —
+        don't put it in the band); "" otherwise.
         """
         if not turnover_check:
-            return False
+            return ""
         entry = register_cache.load(company["company_number"], company.get("accounts_made_up_to", ""), days=float("inf"))
-        if not entry or not accounts.facts_reusable(entry):
-            return False
+        # Read under older reader rules counts too: a reader upgrade (FACTS_VERSION) mustn't put every company the
+        # cache knows is out back in line for a slot — on 5 Nov that pushed 234 listed companies off the page.
+        if not entry or (entry.get("facts") or {}).get("turnover_check") == accounts.TURNOVER_NOT_READ_YET:
+            return ""
         value = (entry.get("facts") or {}).get("turnover")
         if value is not None:
-            return value < min_turnover
+            return "under_min" if value < min_turnover else ""
         if "group" not in entry:
-            return False   # cached before parents were read: check it once more
+            return ""   # cached before parents were read: check it once more
         group = entry["group"] or {}
-        return (company["accounts_category"] not in LIKELY_CATEGORIES and not trade
-                and not (group.get("turnover") or 0) >= min_turnover)
+        out = (company["accounts_category"] not in LIKELY_CATEGORIES and not trade
+               and not (group.get("turnover") or 0) >= min_turnover)
+        return "unconfirmed" if out else ""
 
     # The `budget` slots go to companies still in the running: ones the cache already shows are out are still listed
     # in the stats (read from the cache, no calls) but don't take a slot, so the next candidates in line get checked.
     checked_positions: set[int] = set()
     skipped_out = 0
+    out_positions: dict[int, str] = {}   # known to be out: counted from the cache, nothing read again
     for position, (_niche, company, trade) in enumerate(queue):
         if len(checked_positions) - skipped_out >= budget:
             break
         checked_positions.add(position)
-        if known_out(company, trade):
+        if reason := known_out(company, trade):
+            out_positions[position] = reason
             skipped_out += 1
     print(f"  Candidates: {len(queue):,} ({sum(1 for q in queue if q[2]):,} with customs evidence) | "
           f"checking {len(checked_positions) - skipped_out:,}"
@@ -934,6 +940,8 @@ def run_pipeline(
     def gather(item: tuple) -> tuple:
         """Accounts + register lookups for one company: (skip reason or "", details)."""
         position, (niche, company, trade) = item
+        if position in out_positions:
+            return out_positions[position], None
         checked = position in checked_positions
         if checked and deadline and time.monotonic() > deadline:
             return "time_budget", None
