@@ -234,7 +234,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   stays, labelled. The company name opens its Companies House page by number
   (a name search can land on a dissolved namesake). Backfill months are started
   by pushing `tools/fx_filings_backfill.txt` (the coding agent can't run the
-  workflow by hand).
+  workflow by hand); "next 11" chains: each month saved starts the next
+  (`workflow_dispatch`, `chain` input) until none is left. A year runs to
+  ~15,000 companies, past a store item's 25MB, so the rows are kept one month
+  per item (`filings/2026-09`, by month filed) under the `filings` index
+  (`apps/web/scripts/filings-store.mjs`); the tab picks a month
+  (`?view=filings&month=2026-09`).
   Each row also keeps: "Moved up from small accounts" (`filings.moved_up`, from
   the company's Companies House filing history — one call per listed company,
   once, `--history-max` a run), bank borrowing (`bank_debt`: the tagged figure,

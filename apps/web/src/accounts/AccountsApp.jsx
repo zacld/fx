@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, filedWhen, filingRow, filterFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -316,27 +316,45 @@ function Filings({ password, listed, onOpen }) {
   const [lossOnly, setLossOnly] = useState(false);
   const [movedOnly, setMovedOnly] = useState(false);
   const [shown, setShown] = useState(PAGE);
+  // The index lists the months filed (a year runs to ~15,000 companies, so each month is fetched on its own).
+  const [month, setMonth] = useState("");
+  const [monthRows, setMonthRows] = useState({});
+  const get = useCallback(async (query) => {
+    const res = await fetch(`${API}?view=filings${query}`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+    return body;
+  }, [password]);
   useEffect(() => {
     let live = true;
-    (async () => {
-      try {
-        const res = await fetch(`${API}?view=filings`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" });
-        const body = await res.json().catch(() => ({}));
-        if (!live) return;
-        if (res.ok) setData(body); else setError(body.error || `HTTP ${res.status}`);
-      } catch {
-        if (live) setError("Couldn't reach the site — check your connection.");
-      }
-    })();
+    get("").then((body) => { if (live) { setData(body); setMonth(body.months?.[0]?.month || ""); } })
+      .catch((e) => { if (live) setError(e.message === "Failed to fetch" ? "Couldn't reach the site — check your connection." : e.message); });
     return () => { live = false; };
-  }, [password]);
-  const rows = useMemo(() => filterFilings(data?.rows || [], { query, strongOnly, lossOnly, movedOnly }),
-                       [data, query, strongOnly, lossOnly, movedOnly]);
+  }, [get]);
+  useEffect(() => {
+    if (!month || monthRows[month]) return;
+    let live = true;
+    get(`&month=${month}`).then((body) => { if (live) setMonthRows((m) => ({ ...m, [month]: body.rows || [] })); })
+      .catch((e) => { if (live) setError(e.message); });
+    return () => { live = false; };
+  }, [month, monthRows, get]);
+  const all = data?.rows || monthRows[month] || [];   // data.rows: the first, single-item version
+  const rows = useMemo(() => filterFilings(all, { query, strongOnly, lossOnly, movedOnly }),
+                       [all, query, strongOnly, lossOnly, movedOnly]);
   if (error) return <div className="list"><div className="empty">{error}</div></div>;
-  if (!data) return <div className="list"><div className="empty">Loading recent FX filings…</div></div>;
-  const all = data.rows || [];
+  if (!data || (month && !monthRows[month] && !data.rows)) return <div className="list"><div className="empty">Loading recent FX filings…</div></div>;
   return (
     <div className="list">
+      {data.months?.length > 0 && (
+        <div className="tabs filings-months" role="tablist" aria-label="Month filed">
+          {data.months.map(({ month: m, count }) => (
+            <button key={m} role="tab" aria-selected={m === month} className={`tab${m === month ? " on" : ""}`}
+                    onClick={() => { setMonth(m); setShown(PAGE); }}>
+              {monthLabel(m)} <span className="tab-n">{count}</span>
+            </button>
+          ))}
+        </div>
+      )}
       <div className="filters filings-bar">
         <input className="input search" placeholder="Search company, currency, region…" value={query}
                onChange={(e) => { setQuery(e.target.value); setShown(PAGE); }} aria-label="Search filings" />
@@ -346,7 +364,7 @@ function Filings({ password, listed, onOpen }) {
         <span className="muted">{rows.length} of {all.length} · scanned {ago(data.made_at)}</span>
       </div>
       <p className="filings-note">Companies of £{Math.round((data.min_turnover || 25e6) / 1e6)}m+ turnover whose accounts filed online in the last year
-        show FX, newest filed first. Paper (scanned) filings aren't in Companies House's files, so they're found by the main list instead.</p>
+        show FX, by the month they filed{data.count ? ` (${data.count.toLocaleString()} in all)` : ""}. Paper (scanned) filings aren't in Companies House's files, so they're found by the main list instead.</p>
       {rows.slice(0, shown).map((r) => <FilingCard key={r.company_number} r={r} listed={listed.has(r.company_number)} onOpen={onOpen} />)}
       {!rows.length && <div className="empty">{all.length ? "No filings match these filters." : "No FX filings found yet."}</div>}
       {rows.length > shown && <button className="btn-sm more" onClick={() => setShown((n) => n + PAGE)}>Show more ({rows.length - shown} left)</button>}
@@ -853,6 +871,7 @@ select.input option{background:#0F141F}
 .contacted-tab{margin-left:8px}
 .filings-tab{margin-left:4px}
 .filings-bar{margin-bottom:10px}
+.filings-months{margin-bottom:10px}
 .estimate i{font-style:normal;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#FBBF24;margin-left:4px}
 .filing-note{margin-top:8px;font-size:12px;color:rgba(255,255,255,.55)}
 .filing-note.customs{color:#A5B4FC}

@@ -19,6 +19,10 @@ on:
         description: 'daily, or a monthly archive: next (newest not done), latest, or a name like October2026'
         required: false
         default: 'daily'
+      chain:
+        description: 'after a monthly archive, start this many more (next, next, …)'
+        required: false
+        default: '0'
   push:
     branches: ['main', 'claude/**']
     paths:
@@ -29,6 +33,7 @@ on:
 
 permissions:
   contents: read
+  actions: write   # a backfill month starts the next (workflow_dispatch)
 
 concurrency:
   group: fx-filings
@@ -67,18 +72,35 @@ jobs:
         working-directory: lead-sourcer
         env:
           MODE: ${{ github.event_name == 'push' && 'test' || inputs.mode || 'daily' }}
+          CHAIN: ${{ inputs.chain || '0' }}
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           PYTHONUNBUFFERED: "1"
         run: |
-          # a push naming a month in tools/fx_filings_backfill.txt scans that month (the backfill)
+          # a push naming a month in tools/fx_filings_backfill.txt scans that month (the backfill), and a number after
+          # it chains that many more months ("next 11": the newest month not done, then the 11 before it)
           if [ "$MODE" = "test" ]; then
-            month=$(grep -v '^#' tools/fx_filings_backfill.txt 2>/dev/null | tr -d '[:space:]' | head -c 40)
-            [ -n "$month" ] && MODE="$month"
+            line=$(grep -v '^#' tools/fx_filings_backfill.txt 2>/dev/null | head -1)
+            month=$(echo "$line" | awk '{print $1}' | head -c 40); more=$(echo "$line" | awk '{print $2}')
+            [ -n "$month" ] && MODE="$month" && CHAIN="${more:-0}"
           fi
-          echo "mode: $MODE"
+          echo "mode: $MODE, months to chain after this one: $CHAIN"
+          echo "MODE=$MODE" >> "$GITHUB_ENV"; echo "CHAIN=$CHAIN" >> "$GITHUB_ENV"
           if [ "$MODE" = "test" ]; then python3 tools/fx_filings.py --daily --redo --max-files 1 --max-hits 20 --detail --previous filings-previous.json --out filings.json
           elif [ "$MODE" = "daily" ]; then python3 tools/fx_filings.py --daily --previous filings-previous.json --out filings.json
           else python3 tools/fx_filings.py --month "$MODE" --previous filings-previous.json --out filings.json; fi
 
       - name: Save the list
         run: cd apps/web && node scripts/filings-store.mjs put ../../lead-sourcer/filings.json
+
+      # The year's backfill: a month done starts the next ("next"), CHAIN times, until no month is left.
+      - name: Start the next month
+        if: env.MODE != 'daily' && env.MODE != 'test' && env.CHAIN != '0' && env.CHAIN != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scanned=$(python3 -c "import json;print(json.load(open('lead-sourcer/filings.json')).get('files_scanned', 1))")
+          if [ "$scanned" = "0" ]; then echo "no month left: backfill done"; exit 0; fi
+          curl -sS -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/fx-filings.yml/dispatches" \
+            -d "{\"ref\":\"${{ github.ref_name }}\",\"inputs\":{\"mode\":\"next\",\"chain\":\"$((CHAIN - 1))\"}}"
+          echo "started the next month ($((CHAIN - 1)) more to chain after it)"
