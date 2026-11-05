@@ -34,6 +34,7 @@ import main as finder  # noqa: E402
 
 LOOKS_LIKE = re.compile(r"forward\s+(?:foreign\s+)?(?:exchange|currency)?\s*contract|currency\s+risk|denominated\s+in|"
                         r"sensitivity|geographical|by\s+destination|currency\s+profile", re.I)
+FORWARD = re.compile(r"forward|hedg", re.I)
 DIGITS = re.compile(r"\d[\d,]{2,}|\d+(?:\.\d+)?\s?(?:m|million)\b|\d+\s?%", re.I)
 
 
@@ -57,7 +58,21 @@ def document_text(number: str, api_key: str) -> str:
     return text if how == "pdf" else ""
 
 
-def sample(number: str, label: str, api_key: str, stats: Counter) -> None:
+def forward_lines(text: str, limit: int = 8) -> list[str]:
+    """Each line naming forward contracts / hedging, with the two after it (a table's figures), deduplicated."""
+    lines = [ln for ln in text.split("\n") if ln.strip()]
+    out, seen = [], set()
+    for i, line in enumerate(lines):
+        if FORWARD.search(line) and not re.search(r"forward[- ]looking|carried forward|brought forward|going forward",
+                                                     line, re.I):
+            chunk = " ⏎ ".join(short(x, 140) for x in lines[i:i + 3])
+            if chunk[:60] not in seen:
+                seen.add(chunk[:60])
+                out.append(chunk)
+    return out[:limit]
+
+
+def sample(number: str, label: str, api_key: str, stats: Counter, forwards: bool = False) -> None:
     print(f"\n=== {number} {label}")
     facts = accounts.facts_from_latest_accounts(number, api_key)
     if not facts:
@@ -87,20 +102,30 @@ def sample(number: str, label: str, api_key: str, stats: Counter) -> None:
     stats["main currency from " + (hooks.CURRENCY_SOURCES.get(exposure["rule"]) or "none")] += 1
     print(f"  main currency: {exposure['currency'] or '—'} ({hooks.CURRENCY_SOURCES.get(exposure['rule'], 'none')})")
     stats["filed FX score 50+" if score >= 50 else "filed FX score 1-49" if score else "filed FX score 0"] += 1
-    owners = [o for o in companies_house.get_owners(number, api_key) if not o.get("ceased_on")]
-    parent = group.parent_accounts(owners, api_key, facts.get("turnover"))
+    owners = [] if forwards else [o for o in companies_house.get_owners(number, api_key) if not o.get("ceased_on")]
+    parent = group.parent_accounts(owners, api_key, facts.get("turnover")) if owners else None
     if parent:
         cols = finder.group_columns(parent)
         stats["with a UK parent's accounts"] += 1
         stats["with the group's FX"] += bool(cols["group_fx"])
         print(f"  group: {cols['group_parent_accounts']} | {cols['group_fx'] or 'no FX facts'}"
               f" (group FX score {cols['group_fx_score'] or 0})")
-    elif group.uk_parent(owners):
+    elif owners and group.uk_parent(owners):
         stats["UK parent without turnover"] += 1
         print(f"  group: UK parent {group.uk_parent(owners)[1]} files no turnover")
     if facts.get("format") == "scanned pdf":
+        stats["forwards: scanned (notes OCR'd by the finder; not shown)" if forwards else "scanned"] += 1
         return
     text = document_text(number, api_key)
+    if forwards:
+        if facts.get("fx_forwards"):
+            stats["forwards: size read now"] += 1
+            return
+        found = forward_lines(text)
+        stats["forwards: lines naming forwards, no size read" if found else "forwards: no forward lines in the text"] += 1
+        for line in found:
+            print(f"  fwd: {line}")
+        return
     read = " ".join(" ".join(str(x.get("sentence", "")) for x in facts.get(k) or [])
                     for k in ("fx_forwards", "fx_balances", "fx_sensitivity", "fx_currencies"))
     missed = []
@@ -118,6 +143,8 @@ def main() -> None:
     parser.add_argument("numbers", nargs="*")
     parser.add_argument("--accounts", help="accounts.json-style rows: an even spread through the list is sampled")
     parser.add_argument("--max", type=int, default=40)
+    parser.add_argument("--forwards", action="store_true",
+                        help="only rows that use forward contracts but show no size; print the forward lines")
     args = parser.parse_args()
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "")
     if not api_key:
@@ -126,12 +153,15 @@ def main() -> None:
     if args.accounts:
         with open(args.accounts, encoding="utf-8") as f:
             rows = [r for r in json.load(f) if r.get("turnover_gbp")]
+        if args.forwards:
+            rows = [r for r in rows if re.search(r"forward", r.get("fx_today", ""), re.I) and not r.get("fx_forwards")]
+            print(f"{len(rows)} companies use forward contracts with no size shown")
         step = max(1, len(rows) // max(1, args.max))
         picks += [(r["company_number"], r.get("company_name", "")) for r in rows[::step]][: args.max]
     stats: Counter = Counter()
     for number, label in picks:
         try:
-            sample(number, label, api_key, stats)
+            sample(number, label, api_key, stats, args.forwards)
         except Exception as e:  # noqa: BLE001 — one bad filing shouldn't stop the sample
             print(f"  failed: {type(e).__name__}: {e}")
             stats["failed"] += 1
