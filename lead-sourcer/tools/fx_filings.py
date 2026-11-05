@@ -43,7 +43,7 @@ def pick(args, done: set[str]) -> list[str]:
         return list(args.zip)
     if args.daily:
         files = [u for u in filings.list_files("daily") if u.rsplit("/", 1)[-1] not in done]
-        return sorted(files)[: args.max_files]
+        return sorted(files, reverse=True)[: args.max_files]   # newest first
     # newest first, whatever order the page lists them in
     monthly = sorted(filings.list_files("monthly"), key=lambda u: filings._sort_date(filings.filed_label(u)), reverse=True)
     if args.month == "latest":
@@ -63,6 +63,26 @@ def show(row: dict) -> str:
            f"{' | '.join(facts)[:150]}"
 
 
+DETAIL = [("turnover_check", "turnover check"), ("fx_gain_loss_evidence", "FX gain/loss from"),
+          ("fx_today", "how they handle FX"), ("fx_today_evidence", "  from"), ("fx_forwards", "forwards"),
+          ("fx_forwards_evidence", "  from"), ("currencies_in_accounts", "currencies"),
+          ("currencies_in_accounts_evidence", "  from"), ("turnover_regions", "sales by region"),
+          ("fx_balances", "balances"), ("fx_sensitivity", "sensitivity"), ("currency", "main currency"),
+          ("currency_evidence", "  from"), ("filed_fx", "scored")]
+
+
+def detail(row: dict) -> str:
+    """Every fact of a hit with its quote, for checking the reader by eye (public accounts; no people)."""
+    lines = [f"        filed {row['filed']}, year to {row['period_end']}, {row.get('turnover_basis') or 'company'} figures"
+             + (f", FX {row['fx_gain_loss_gbp']} (prior {row.get('fx_gain_loss_prior_gbp') or 'n/a'})"
+                if row.get("fx_gain_loss_gbp") else "")]
+    for key, label in DETAIL:
+        if row.get(key):
+            text = " ".join(str(row[key]).split())
+            lines.append(f"        {label}: {text[:260]}{'…' if len(text) > 260 else ''}")
+    return "\n".join(lines)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--daily", action="store_true", help="daily files not done yet")
@@ -74,6 +94,8 @@ def main() -> None:
     parser.add_argument("--min-turnover", type=float, default=filings.MIN_TURNOVER)
     parser.add_argument("--limit", type=int, default=0, help="stop after this many filings a file (testing)")
     parser.add_argument("--top", type=int, default=40, help="hits shown in the log")
+    parser.add_argument("--max-hits", type=int, default=0, help="stop once this many companies are found (a test)")
+    parser.add_argument("--detail", action="store_true", help="every fact of every hit, with its quote")
     args = parser.parse_args()
     if not (args.daily or args.month or args.zip):
         parser.error("say --daily, --month or --zip")
@@ -89,13 +111,17 @@ def main() -> None:
         path = url if os.path.exists(url) else filings.download(url, CACHE)
         got = time.time() - started
         before = dict(filings.stats)
-        hits = filings.scan(path, filings.filed_label(name), args.min_turnover, limit=args.limit)
+        hits = filings.scan(path, filings.filed_label(name), args.min_turnover, limit=args.limit,
+                            max_hits=max(0, args.max_hits - len(new_rows)) if args.max_hits else 0)
         n = {k: filings.stats[k] - before.get(k, 0) for k in ("files", "read")}
         print(f"{name}: {os.path.getsize(path) / 1e6:,.0f}MB in {got:.0f}s | {n['files']:,} filings, "
               f"{n['read']:,} read past the quick screen, {len(hits):,} with FX at £{args.min_turnover / 1e6:g}m+ "
               f"| {time.time() - started - got:.0f}s")
         new_rows += hits
-        done.add(name)
+        if filings.stats["stopped_early"]:
+            print(f"  stopped early: {name} isn't marked done, so the next run reads all of it")
+        else:
+            done.add(name)
         if not os.path.exists(url) and path.startswith(CACHE):
             os.remove(path)   # monthly archives are GBs: keep the disk free for the next
     rows = filings.merge(previous.get("rows") or [], new_rows)
@@ -115,6 +141,8 @@ def main() -> None:
         print(f"\nStrongest {min(args.top, len(new_rows))} (score, company, number, turnover, FX facts):")
         for row in sorted(new_rows, key=lambda r: -r["filed_fx_score"])[: args.top]:
             print(show(row))
+            if args.detail:
+                print(detail(row))
 
 
 if __name__ == "__main__":

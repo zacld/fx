@@ -5,7 +5,8 @@ name: FX filings
 # gain/loss, forward contracts, currencies, how they handle FX, sales abroad), merged into the list in the site's
 # private store (key "filings"). Daily: the day files not done yet (Tue–Sat, Companies House adds one each
 # morning). By hand: a monthly archive ("next" = the newest not yet done — run it again to go back a month at a time).
-# On a push of the scanner: the latest month, as a test.
+# On a push of the scanner: a test — the newest day file, stopping at 20 companies, every fact printed with its
+# quote to check by eye (the file isn't marked done, so the daily run still reads all of it).
 # Public repo: the log holds counts, timings and company names with their public accounts' FX facts — no people,
 # no attachments.
 
@@ -30,7 +31,7 @@ permissions:
 
 concurrency:
   group: fx-filings
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'push' }}   # a new test replaces one still running
 
 jobs:
   scan:
@@ -64,10 +65,11 @@ jobs:
       - name: Scan
         working-directory: lead-sourcer
         env:
-          MODE: ${{ github.event_name == 'push' && 'latest' || inputs.mode || 'daily' }}
+          MODE: ${{ github.event_name == 'push' && 'test' || inputs.mode || 'daily' }}
           PYTHONUNBUFFERED: "1"
         run: |
-          if [ "$MODE" = "daily" ]; then python3 tools/fx_filings.py --daily --previous filings-previous.json --out filings.json
+          if [ "$MODE" = "test" ]; then python3 tools/fx_filings.py --daily --max-files 1 --max-hits 20 --detail --previous filings-previous.json --out filings.json
+          elif [ "$MODE" = "daily" ]; then python3 tools/fx_filings.py --daily --previous filings-previous.json --out filings.json
           else python3 tools/fx_filings.py --month "$MODE" --previous filings-previous.json --out filings.json; fi
 
       - name: Save the list

@@ -54,7 +54,7 @@ _FX_WORDS = re.compile(rb"exchange\s+(?:loss|gain|difference)|foreign\s+(?:excha
                        rb"forward\s+(?:foreign\s+)?(?:exchange|currency)|ForeignExchange", re.I)
 _NAME_TAG = re.compile(r"name=\"[^\":]*:EntityCurrentLegalOrRegisteredName\"[^>]*>(.*?)</ix:nonNumeric>", re.I | re.S)
 
-stats = {"files": 0, "screened_in": 0, "read": 0, "hits": 0, "seconds": 0.0}
+stats = {"files": 0, "screened_in": 0, "read": 0, "hits": 0, "seconds": 0.0, "stopped_early": False}
 
 
 # --- The bulk files ---------------------------------------------------------------------------------------------
@@ -179,13 +179,15 @@ def _read_one(args: tuple) -> Optional[dict]:
 
 
 def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers: int = 0,
-         only: Optional[Iterable[str]] = None, limit: int = 0, batch: int = 64) -> list[dict]:
+         only: Optional[Iterable[str]] = None, limit: int = 0, batch: int = 64, max_hits: int = 0) -> list[dict]:
     """
     Every accounts document in a bulk zip screened (here, cheaply) and the survivors read (in `workers` processes,
     `batch` at a time, so a 4GB archive never sits in memory); the hits, strongest filed-FX proof first.
-    `only`: company numbers to look at (tests / samples); `limit`: stop after this many documents (0: all).
+    `only`: company numbers to look at (tests / samples); `limit`: stop after this many documents (0: all);
+    `max_hits`: stop once this many companies are found (a test run; stats["stopped_early"] says so).
     """
     started = time.time()
+    stats["stopped_early"] = False
     filed = filed or filed_label(path)
     wanted = {n.upper() for n in only} if only else None
     hits: list[dict] = []
@@ -206,7 +208,8 @@ def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers
                 m = _MEMBER.search(info.filename)
                 if not m or (wanted and m.group(1).upper() not in wanted):
                     continue
-                if limit and stats["files"] >= limit:
+                if (limit and stats["files"] >= limit) or (max_hits and len(hits) >= max_hits):
+                    stats["stopped_early"] = True
                     break
                 stats["files"] += 1
                 document = zf.read(info)
@@ -214,7 +217,7 @@ def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers
                     continue
                 d = m.group(2)
                 pending.append((document, m.group(1).upper(), f"{d[:4]}-{d[4:6]}-{d[6:]}", filed, min_turnover))
-                if len(pending) >= batch:
+                if len(pending) >= (min(batch, workers) if max_hits else batch):
                     flush(pool)
             flush(pool)
     finally:
@@ -224,7 +227,7 @@ def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers
     stats["hits"] += len(hits)
     stats["seconds"] += time.time() - started
     hits.sort(key=lambda r: (-r["filed_fx_score"], -float(r["turnover_gbp"] or 0)))
-    return hits
+    return hits[:max_hits] if max_hits else hits
 
 
 def merge(previous: list[dict], new: list[dict], keep_days: int = 400, today: Optional[date] = None) -> list[dict]:
