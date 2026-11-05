@@ -41,13 +41,16 @@ def short_name(name: str) -> str:
 
 def search(company: str, app_id: str, app_key: str) -> tuple[list[dict], str]:
     params = {"app_id": app_id, "app_key": app_key, "results_per_page": 20, "what_or": FINANCE_WORDS,
-              "company": company, "max_days_old": 120, "content-type": "application/json"}
+              "what_phrase": company, "max_days_old": 120, "content-type": "application/json"}
+    # not "company": that filter only takes Adzuna's own employer names and answers 400 for any other (first run:
+    # 44 of 50). The name as a phrase finds adverts mentioning it; the employer check below keeps the company's own.
     req = urllib.request.Request(f"{API}?{urllib.parse.urlencode(params)}", headers={"Accept": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             return json.load(resp).get("results") or [], ""
     except urllib.error.HTTPError as e:
-        return [], f"HTTP {e.code}"
+        body = e.read()[:200].decode("utf-8", "replace").replace(app_key, "…").replace(app_id, "…")
+        return [], f"HTTP {e.code} {' '.join(body.split())[:120]}".strip()
     except (urllib.error.URLError, TimeoutError, ValueError) as e:
         return [], type(e).__name__
 
@@ -73,8 +76,9 @@ def main() -> None:
         if error:
             errors.append(error)
             print(f"  {name[:40]:<40} {error}")
-            if error in ("HTTP 401", "HTTP 403", "HTTP 429"):
-                print("  stopping: key refused or limit reached")
+            if error[:8] in ("HTTP 401", "HTTP 403", "HTTP 429") or (error.startswith("HTTP 400") and calls >= 3
+                                                                    and len(errors) == calls):
+                print("  stopping: requests refused (key, limit or a bad search)")
                 break
             time.sleep(PAUSE_SECONDS)
             continue
