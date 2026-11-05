@@ -25,6 +25,7 @@ on:
       - .github/workflows/fx-filings.yml
       - lead-sourcer/tools/fx_filings.py
       - lead-sourcer/sourcer/filings.py
+      - lead-sourcer/tools/fx_filings_backfill.txt
 
 permissions:
   contents: read
@@ -68,6 +69,12 @@ jobs:
           MODE: ${{ github.event_name == 'push' && 'test' || inputs.mode || 'daily' }}
           PYTHONUNBUFFERED: "1"
         run: |
+          # a push naming a month in tools/fx_filings_backfill.txt scans that month (the backfill)
+          if [ "$MODE" = "test" ]; then
+            month=$(grep -v '^#' tools/fx_filings_backfill.txt 2>/dev/null | tr -d '[:space:]' | head -c 40)
+            [ -n "$month" ] && MODE="$month"
+          fi
+          echo "mode: $MODE"
           if [ "$MODE" = "test" ]; then python3 tools/fx_filings.py --daily --redo --max-files 1 --max-hits 20 --detail --previous filings-previous.json --out filings.json
           elif [ "$MODE" = "daily" ]; then python3 tools/fx_filings.py --daily --previous filings-previous.json --out filings.json
           else python3 tools/fx_filings.py --month "$MODE" --previous filings-previous.json --out filings.json; fi

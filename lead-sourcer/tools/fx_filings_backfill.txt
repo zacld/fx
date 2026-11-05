@@ -1,0 +1,4 @@
+# FX filings backfill: a push of this file scans the monthly archive named on the first line that isn't a comment
+# ("next" = the newest month not done yet; or a name like October2026), merged into the Recent FX filings list.
+# Empty (comments only): a push of the scanner runs the 20-company test instead.
+September2026

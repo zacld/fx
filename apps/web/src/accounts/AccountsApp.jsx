@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, filedWhen, filingRow, filterFilings, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, filedWhen, filingRow, filterFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -359,8 +359,10 @@ function FilingCard({ r, listed, onOpen }) {
           <span className="new filed">Filed {filedWhen(r.filed)}</span>
           {listed
             ? <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
-            : <a className="co" href={r.accounts_url} target="_blank" rel="noreferrer">{r.company_name}</a>}
-          <span className="site">{r.company_number}</span>
+            : <a className="co" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer"
+                 title="Open on Companies House (by company number)">{r.company_name}</a>}
+          {isGroupFiling(r) && <span className="new group" title={r.also_filed ? `Also filed by ${r.also_filed}` : "Consolidated group accounts"}>Group</span>}
+          <a className="site" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer">{r.company_number}</a>
         </div>
         <div className="figures">
           {r.turnover_gbp ? <span><b>{money(r.turnover_gbp)}</b> {r.turnover_basis === "group" ? "group " : ""}turnover</span>
@@ -374,7 +376,8 @@ function FilingCard({ r, listed, onOpen }) {
       {r.hmrc_trade && <div className="filing-note customs">{r.hmrc_trade}</div>}
       <div className="chips">
         {listed ? <span className="chip own">On your Accounts list</span> : <span className="chip">Not on your list yet</span>}
-        {r.also_filed && <span className="chip" title="Group companies filing the same figures">Also filed by {r.also_filed}</span>}
+        {isGroupFiling(r) && <span className="chip">Group of companies{r.turnover_basis === "group" ? " — consolidated figures" : ""}{r.also_filed ? `; also filed by ${r.also_filed}` : ""}</span>}
+        {r.accounts_regime && <span className="chip" title="The size regime the accounts were prepared under">Filed as {r.accounts_regime === "small" ? "a small company" : "medium-sized"}</span>}
         {r.auditor && <span className="chip">Auditor {r.auditor}</span>}
         {r.bankers && <span className="chip">Bankers {r.bankers}</span>}
         <a className="chip" href={r.accounts_url} target="_blank" rel="noreferrer">Filing history ↗</a>
@@ -843,6 +846,7 @@ select.input option{background:#0F141F}
 .filing-note{margin-top:8px;font-size:12px;color:rgba(255,255,255,.55)}
 .filing-note.customs{color:#A5B4FC}
 .filings-note{font-size:12px;color:rgba(255,255,255,.45);margin:0 0 12px}
+.new.group{background:rgba(165,180,252,.14);color:#A5B4FC}
 .new.filed{background:rgba(56,189,248,.12);color:#7DD3FC}
 .fxstrip{margin-top:10px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:baseline;padding:8px 10px;border-radius:9px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.14);font-size:12.5px}
 .fxstrip.full{flex-direction:column;gap:10px;padding:12px 14px}
