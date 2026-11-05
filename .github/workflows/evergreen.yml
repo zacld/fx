@@ -13,9 +13,8 @@ name: FX Evergreen Discovery
 #
 # Required secrets: same as discovery.yml (GROQ not needed — no AI calls here).
 
+# Paused (Nov 2026) with the event engine's discovery (see discovery.yml): runs by hand only.
 on:
-  schedule:
-    - cron: '0 2 * * 0'   # 2am Sunday UTC — before the working week, plenty of time
   workflow_dispatch:
     inputs:
       force:

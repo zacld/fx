@@ -27,11 +27,13 @@ name: FX Discovery
 # BRAVE_MAX_QUERIES_PER_RUN (default 60) caps how much of the free tier's
 # 2000/month one run can burn through on its own.
 
+# Paused (Nov 2026): the Accounts list (lead-sourcer) now finds the £25m+ companies a bank FX desk calls, so the
+# event engine's website-led small-company discovery no longer earns its run time. The scheduled run keeps only the
+# market events (import → analyse → export: the one AI call), which the /moves page shows as "why it moved". The full
+# pipeline still runs by hand: Run workflow with "full" ticked.
 on:
   schedule:
-    # Two runs a weekday (was five): the GitHub Actions allowance is 2,000 minutes a month across every workflow.
-    - cron: '0 22 * * 1-5'   # 10pm UTC — overnight run
-    - cron: '0 5 * * 1-5'    # 5am UTC  — final push, list ready by 6am BST
+    - cron: '0 5 * * 1-5'    # 5am UTC weekdays — the day's market events, before the /moves page is read
   push:   # a change to this workflow runs it straight away (free on the public repo), so changes are tested at once
     branches: [main]
     paths:
@@ -41,6 +43,11 @@ on:
     # scheduled defaults below. Useful when you want Brain 1 to see a wider /
     # narrower mix of real events than the daily run would catch.
     inputs:
+      full:
+        description: "Run the full discovery pipeline (companies + contacts), not just the market events"
+        type: boolean
+        required: false
+        default: false
       min_relevance:
         description: "DISCOVERY_MIN_RELEVANCE override (default 4 — lower = broader real-event audit)"
         required: false
@@ -81,6 +88,7 @@ jobs:
       # The leads (director names, phones, emails) live in the site's private store behind the Accounts
       # password, not in git. A run without them would overwrite the store with only today's finds, so it stops.
       - name: Fetch the leads from the private store
+        if: inputs.full
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -149,7 +157,9 @@ jobs:
           # One deadline for the whole step (its limit is 60 min): the slow stages stop early enough
           # that score / dedup / export always finish inside it.
           export FX_PIPELINE_DEADLINE=$(( $(date +%s) + 55 * 60 ))
-          npm run pipeline
+          if [ "${{ inputs.full }}" = "true" ]; then npm run pipeline
+          else echo "market events only (the full pipeline: Run workflow with full ticked)"
+               npm run db:import && npm run analyse && npm run db:export; fi
 
       # CH accounts (size band, employees, accounts type), call readiness (READY / REVIEW / HOLD) and the
       # QA audit now run inside `npm run pipeline` (TypeScript stages enrich-ch-accounts, call-readiness,
@@ -159,6 +169,7 @@ jobs:
         run: npm run sync-web-data
 
       - name: Save the leads to the private store
+        if: inputs.full
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

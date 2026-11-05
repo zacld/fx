@@ -6,7 +6,10 @@ name: FX filings
 # private store (key "filings"). Daily: the day files not done yet (Tue–Sat, Companies House adds one each
 # morning). By hand: a monthly archive ("next" = the newest not yet done — run it again to go back a month at a time).
 # On a push of the scanner: a test — the newest day file, stopping at 20 companies, every fact printed with its
-# quote to check by eye (the file isn't marked done, so the daily run still reads all of it).
+# quote to check by eye, and nothing saved (it runs alongside a scan, so it must not write the list). A push that
+# changes tools/fx_filings_backfill.txt starts that backfill instead, as a by-hand run (workflow_dispatch).
+# Test runs have their own concurrency group: a push never cancels a daily or backfill scan (Nov 2026: merges kept
+# cancelling an hour of the backfill); scans queue one behind another.
 # Public repo: the log holds counts, timings and company names with their public accounts' FX facts — no people,
 # no attachments.
 
@@ -36,8 +39,8 @@ permissions:
   actions: write   # a backfill month starts the next (workflow_dispatch)
 
 concurrency:
-  group: fx-filings
-  cancel-in-progress: ${{ github.event_name == 'push' }}   # a new test replaces one still running
+  group: fx-filings${{ github.event_name == 'push' && '-test' || '' }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}   # a new test replaces a test still running; scans queue
 
 jobs:
   scan:
@@ -50,25 +53,53 @@ jobs:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2   # a push run checks whether the backfill file changed
+
+      # A push that changes the backfill file starts that month (and its chain) as a by-hand run, in the scans'
+      # concurrency group, and this run stops there; any other push is a test.
+      - name: Start a backfill
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          git fetch -q --depth=1 origin "$BEFORE" 2>/dev/null || true
+          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then echo "no earlier commit to compare: a test run"; exit 0; fi
+          if git diff --quiet "$BEFORE" HEAD -- lead-sourcer/tools/fx_filings_backfill.txt 2>/dev/null; then
+            echo "backfill file unchanged: a test run"; exit 0; fi
+          line=$(grep -v '^#' lead-sourcer/tools/fx_filings_backfill.txt 2>/dev/null | grep -v '^\s*$' | head -1)
+          month=$(echo "$line" | awk '{print $1}' | head -c 40); more=$(echo "$line" | awk '{print $2}')
+          if [ -z "$month" ]; then echo "backfill file has no month: a test run"; exit 0; fi
+          curl -sS -f -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/fx-filings.yml/dispatches" \
+            -d "{\"ref\":\"${{ github.ref_name }}\",\"inputs\":{\"mode\":\"$month\",\"chain\":\"${more:-0}\"}}"
+          echo "started the backfill: $month, then ${more:-0} more"
+          echo "BACKFILL_STARTED=1" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
+        if: env.BACKFILL_STARTED != '1'
         with:
           python-version: '3.12'
 
       - name: Install Python packages
+        if: env.BACKFILL_STARTED != '1'
         run: pip install -q -r lead-sourcer/requirements.txt
 
       - uses: actions/setup-node@v4
+        if: env.BACKFILL_STARTED != '1'
         with:
           node-version: 22
           cache: npm
 
       - name: The list so far
+        if: env.BACKFILL_STARTED != '1'
         run: |
           npm ci --workspace apps/web --no-audit --no-fund > /dev/null
           cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/filings-previous.json
 
       - name: Scan
+        if: env.BACKFILL_STARTED != '1'
         working-directory: lead-sourcer
         env:
           MODE: ${{ github.event_name == 'push' && 'test' || inputs.mode || 'daily' }}
@@ -76,13 +107,6 @@ jobs:
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           PYTHONUNBUFFERED: "1"
         run: |
-          # a push naming a month in tools/fx_filings_backfill.txt scans that month (the backfill), and a number after
-          # it chains that many more months ("next 11": the newest month not done, then the 11 before it)
-          if [ "$MODE" = "test" ]; then
-            line=$(grep -v '^#' tools/fx_filings_backfill.txt 2>/dev/null | head -1)
-            month=$(echo "$line" | awk '{print $1}' | head -c 40); more=$(echo "$line" | awk '{print $2}')
-            [ -n "$month" ] && MODE="$month" && CHAIN="${more:-0}"
-          fi
           echo "mode: $MODE, months to chain after this one: $CHAIN"
           echo "MODE=$MODE" >> "$GITHUB_ENV"; echo "CHAIN=$CHAIN" >> "$GITHUB_ENV"
           if [ "$MODE" = "test" ]; then python3 tools/fx_filings.py --daily --redo --max-files 1 --max-hits 20 --detail --previous filings-previous.json --out filings.json
@@ -90,6 +114,7 @@ jobs:
           else python3 tools/fx_filings.py --month "$MODE" --previous filings-previous.json --out filings.json; fi
 
       - name: Save the list
+        if: env.MODE != 'test' && env.BACKFILL_STARTED != '1'
         run: cd apps/web && node scripts/filings-store.mjs put ../../lead-sourcer/filings.json
 
       # The year's backfill: a month done starts the next ("next"), CHAIN times, until no month is left.
