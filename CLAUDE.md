@@ -25,7 +25,10 @@ through Cloudflare's API with `apps/web/scripts/store.mjs`). Deployed by
 `deploy-pages.yml` with secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
 `ACCOUNTS_PASSWORD`; it creates the KV store and project the first time and copies
 the private data over from Netlify once (never overwriting what's newer). Run it with `npm run pipeline` (or one stage at a time);
-the daily production run is `.github/workflows/discovery.yml`. See `ARCHITECTURE_V2.md`.
+the production run is `.github/workflows/discovery.yml` — **paused Nov 2026** (the Accounts list below
+now finds the companies a bank FX desk calls): the weekday schedule only refreshes the market events
+(import → analyse → export, the one AI call) for the `/moves` page's "why it moved"; the full pipeline
+runs by hand (Run workflow, "full" ticked), and `evergreen.yml` by hand only. See `ARCHITECTURE_V2.md`.
 
 The original Python pipeline (`scripts/*.py`) was ported 1:1 — **same Brain 1/2
 prompt, same scoring gates, same signal lists** (verified: `import → score → dedup`
@@ -245,9 +248,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   / medium) is left out — small means turnover under £15m; medium (up to £54m)
   stays, labelled. The company name opens its Companies House page by number
   (a name search can land on a dissolved namesake). Backfill months are started
-  by pushing `tools/fx_filings_backfill.txt` (the coding agent can't run the
-  workflow by hand); "next 11" chains: each month saved starts the next
-  (`workflow_dispatch`, `chain` input) until none is left. A year runs to
+  by pushing a change to `tools/fx_filings_backfill.txt` (the coding agent can't run the
+  workflow by hand): the push run starts it as a by-hand run and stops; "next 11" chains:
+  each month saved starts the next (`workflow_dispatch`, `chain` input) until none is
+  left. Any other push of the scanner is a test (20 companies, printed, never saved) in
+  its own concurrency group, so it never cancels a daily or backfill scan; scans queue. A year runs to
   ~15,000 companies, past a store item's 25MB, so the rows are kept one month
   per item (`filings/2026-09`, by month filed) under the `filings` index
   (`apps/web/scripts/filings-store.mjs`); the tab picks a month
