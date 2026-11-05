@@ -103,13 +103,24 @@ def tagged_turnover(document: bytes) -> Optional[float]:
     """The largest turnover figure tagged in the document (its scale applied), or None when none is tagged."""
     best = None
     for attrs, number in _TURNOVER_TAG.findall(document):
-        digits = re.sub(rb"[^\d.]", b"", number)
-        if not digits or digits == b".":
-            continue
-        scale = _SCALE.search(attrs)
-        value = float(digits) * 10 ** int(scale.group(1) if scale else 0)
-        best = value if best is None else max(best, value)
+        value = _tag_number(attrs, number)
+        if value is not None:
+            best = value if best is None else max(best, value)
     return best
+
+
+def _tag_number(attrs: bytes, number: bytes) -> Optional[float]:
+    """A tagged figure as displayed — "45,123", or "1.157.778" / "1.234,5" where the format says the comma is the
+    decimal (or dots group the thousands) — times 10^scale; None when unreadable."""
+    text = number.decode("ascii", errors="ignore").strip().replace(" ", "")
+    comma_decimal = b"commadecimal" in attrs.lower() or text.count(".") > 1 or re.fullmatch(r"[\d.]*,\d{1,2}", text)
+    text = text.replace(".", "").replace(",", ".") if comma_decimal else text.replace(",", "")
+    try:
+        value = float(re.sub(r"[^\d.]", "", text))
+        scale = _SCALE.search(attrs)
+        return value * 10 ** int(scale.group(1) if scale else 0)
+    except ValueError:
+        return None
 
 
 def screen_reason(document: bytes, min_turnover: float = MIN_TURNOVER) -> str:
@@ -470,7 +481,10 @@ def scan(path: str, filed: str = "", min_turnover: float = MIN_TURNOVER, workers
                     break
                 stats["files"] += 1
                 document = zf.read(info)
-                why = screen_reason(document, min_turnover)
+                try:
+                    why = screen_reason(document, min_turnover)
+                except Exception:  # noqa: BLE001 — one odd filing mustn't stop a month of them
+                    why = "screen: couldn't be read"
                 if why:
                     stats["why"][why] += 1
                     continue

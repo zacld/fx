@@ -2849,6 +2849,11 @@ class TestFxFilings(unittest.TestCase):
     def test_quick_screen(self):
         self.assertEqual(filings.tagged_turnover(ixbrl(current="45,000")), 45_000_000)   # inside a <span>, £'000
         self.assertIsNone(filings.tagged_turnover(b"<p>Turnover 45,000</p>"))
+        # The September 2026 archive: a filing showing turnover the continental way stopped the whole month
+        euro = b'<ix:nonFraction name="core:TurnoverRevenue" contextRef="c" unitRef="u" format="ixt:numcommadecimal">1.157.778</ix:nonFraction>'
+        self.assertEqual(filings.tagged_turnover(euro), 1_157_778)
+        self.assertEqual(filings.tagged_turnover(b'<ix:nonFraction name="core:TurnoverRevenue" scale="3">1.234,5</ix:nonFraction>'), 1_234_500)
+        self.assertIsNone(filings.tagged_turnover(b'<ix:nonFraction name="core:TurnoverRevenue">..</ix:nonFraction>'))
         big_untagged = b"<p>Foreign exchange losses</p>" + b" " * filings.MIN_BYTES_UNTAGGED
         self.assertTrue(filings.worth_reading(big_untagged))
         self.assertFalse(filings.worth_reading(b"<p>Foreign exchange losses</p>"))   # too short for full accounts
