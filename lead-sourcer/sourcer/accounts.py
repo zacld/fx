@@ -600,6 +600,8 @@ def check_fx(facts: dict) -> dict:
                   f"likely another figure tagged as FX; check the accounts")
     if reason:
         facts.update(fx_gain_loss=None, fx_gain_loss_prior=None, fx_gain_loss_evidence="", fx_gain_loss_check=reason)
+    elif fx and prior and max(abs(fx), abs(prior)) / max(min(abs(fx), abs(prior)), 1) > 1_000:
+        facts["fx_gain_loss_prior"] = None   # "Foreign exchange losses 699,158 5": a stray cell, not last year's
     return facts
 
 

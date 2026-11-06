@@ -6,3 +6,4 @@
 2026-11-06T00:35 diag numbers=02587124,12644570,11438467,15928578,02965452,06633850,SC119586
 2026-11-06T00:40 full audit after headcount, note-number, totals, unscaled-FX fixes
 2026-11-06T00:50 full audit, 400 filings (150 never seen by the fixes)
+2026-11-06T01:07 final audit, 400 filings

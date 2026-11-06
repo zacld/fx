@@ -279,3 +279,7 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
         from sourcer import turnover_text
         figures = turnover_text._figures(" 3 37,679,617 1,619,583 39,299,200 32,434,093 3,742,042 36,176,135", False)
         self.assertEqual(turnover_text._pick(figures, [2025, 2024]), (39_299_200.0, 36_176_135.0))
+
+    def test_last_years_fx_1000x_apart_is_dropped(self):
+        facts = accounts.check_fx({"fx_gain_loss": -699_158.0, "fx_gain_loss_prior": -5.0, "turnover": 60_000_000})
+        self.assertEqual((facts["fx_gain_loss"], facts["fx_gain_loss_prior"]), (-699_158.0, None))

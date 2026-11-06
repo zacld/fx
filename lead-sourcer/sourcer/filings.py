@@ -395,6 +395,9 @@ def tidy(rows: list[dict]) -> int:
             r.update(fx_gain_loss_gbp="", fx_gain_loss_prior_gbp="",
                      fx_gain_loss_check=f"FX figure read as {hooks.short(fx)} at a company with {hooks.short(turnover)} "
                                         f"turnover: probably in £'000; check the accounts ({r.get('fx_gain_loss_evidence', '')})")
+        prior = float(r["fx_gain_loss_prior_gbp"]) if r.get("fx_gain_loss_prior_gbp") else None
+        if fx and prior and max(abs(fx), abs(prior)) / max(min(abs(fx), abs(prior)), 1) > 1_000:
+            r["fx_gain_loss_prior_gbp"] = ""
         why = fx_notes.forward_evidence_doubtful(r.get("fx_forwards_evidence", "")) if r.get("fx_forwards") else ""
         if why:
             r.update(fx_forwards="", fx_forwards_check=f"{why}: {r.get('fx_forwards_evidence', '')}")
