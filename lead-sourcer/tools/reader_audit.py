@@ -8,7 +8,7 @@ Recent FX filings list is read again from Companies House (its latest accounts, 
     turnover, no turnover over £5bn without the staff, turnover per head between £5k and £20m, this year's
     turnover within 20x of last year's, cost of sales under twice turnover, forward contracts under 20x turnover
     and within 50x of last year's, an FX figure within 1,000x of last year's, regions adding to no more than
-    turnover (+15%).
+    turnover (+5%).
 
     python3 tools/reader_audit.py filings.json [--sample 250]
 
@@ -79,7 +79,7 @@ def broken_rules(f: dict, cols: dict) -> list[str]:
     if t and cost and cost > 2 * t:
         out.append(f"cost of sales {short(cost)} over twice turnover {short(t)}")
     regions = sum(r.get("value", 0) for r in f.get("regions") or [] if r.get("value"))
-    if t and regions > 1.15 * t:
+    if t and regions > accounts.REGIONS_MAX_SHARE * t:
         out.append(f"regions add to {short(regions)}, over turnover {short(t)}")
     for what, limit, label in (("fx_sensitivity", 0.5, "half"), ("fx_balances", 3.0, "3x")):
         for size, _ in forward_sizes(cols.get(what, "")):

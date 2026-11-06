@@ -546,6 +546,7 @@ def _in_thousands(scanner) -> bool:
 MAX_PLAUSIBLE_TURNOVER = 5_000_000_000
 # Turnover per member of staff above this: the headcount is a holding company's own (Brooklyn Travel: £247m, 6 staff)
 MAX_TURNOVER_PER_HEAD = 20_000_000
+REGIONS_MAX_SHARE = 1.05   # regions adding to more than turnover +5% mix two tables (Industrial Chemicals: UK £177.4m of £177.3m, then the rest)
 
 # Full, group and medium-sized accounts are for companies well past this; a turnover under it read from one is a
 # misread (a £'000 table taken as £, a wrong cell) or a holding company's own few charges — never a size to use.
@@ -599,7 +600,7 @@ def check_fx(facts: dict) -> dict:
         reason = (f"last year's FX figure {_gbp_short(prior)} is {abs(prior) / turnover:.0%} of turnover: "
                   f"likely another figure tagged as FX; check the accounts")
     regions = sum(r.get("value") or 0 for r in facts.get("regions") or [])
-    if turnover and regions > 1.15 * turnover:   # regions adding to more than turnover: years or columns mixed
+    if turnover and regions > REGIONS_MAX_SHARE * turnover:   # regions adding to more than turnover: mixed
         facts.update(regions=[], overseas_share=None)
     if turnover and facts.get("fx_sensitivity"):   # a currency move's effect bigger than half of turnover: a misread
         facts["fx_sensitivity"] = [s for s in facts["fx_sensitivity"] if (s.get("amount") or 0) <= 0.5 * turnover]

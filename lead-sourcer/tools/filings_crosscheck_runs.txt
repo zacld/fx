@@ -17,3 +17,4 @@
 2026-11-06T02:53 regression audit 400 after region rule
 2026-11-06T03:21 cross-check after forward recheck keeps sound sentences
 2026-11-06T03:40 diag numbers=SC018343
+2026-11-06T04:19 fresh audit after regions +5% rule seed=23
