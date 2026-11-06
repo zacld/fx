@@ -229,8 +229,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   "FX filings"; the Accounts page's tab of that name, GET `/api/accounts?view=filings`,
   store key `filings`): Companies House's free bulk accounts files (every set
   of accounts filed online: a zip each morning, monthly archives of the past)
-  scanned for companies of `FILINGS_MIN_TURNOVER` (£20m)+ whose filing shows FX (months scanned before
-  7 Nov 2026 used £25m).
+  scanned for companies of `FILINGS_MIN_TURNOVER` (£20m)+ whose filing shows FX (the year was read
+  again at £20m from 7 Nov 2026 — `rescan` in `tools/fx_filings_backfill.txt`: day files after the newest archive,
+  then each archive newest first, chained; a company read again keeps its research, `fx_filings.LOOKED_UP`).
   A cheap screen on each filing's raw text (tagged turnover over the floor, or
   — none tagged — full-accounts-sized and mentioning foreign exchange), then
   the survivors read like the finder's accounts (`accounts.extract_facts`) and

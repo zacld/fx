@@ -3021,3 +3021,28 @@ class TestFxFilings(unittest.TestCase):
         self.assertEqual([(r["company_number"], r["filed"]) for r in merged],
                          [("01", "2026-11-04"), ("02", "2026-11-03"), ("04", "2026-09-30")])   # filed 400+ days ago: gone
         self.assertEqual(filings.merge([newer], [old], today=date(2026, 11, 5))[0]["filed"], "2026-11-04")   # older period never replaces
+
+
+class TestFilingsRescan(unittest.TestCase):
+    """Nov 2026: the floor moved £25m -> £20m, so every file is read again once ("rescan" in the FX filings workflow)."""
+
+    BASE = "https://download.companieshouse.gov.uk/"
+    MONTHLY = [BASE + "Accounts_Monthly_Data-August2026.zip", BASE + "Accounts_Monthly_Data-September2026.zip"]
+    DAILY = [BASE + "Accounts_Bulk_Data-2026-09-30.zip", BASE + "Accounts_Bulk_Data-2026-10-01.zip",
+             BASE + "Accounts_Bulk_Data-2026-11-04.zip"]
+
+    def pick(self, rescanned, max_files=25):
+        from tools import fx_filings
+        with mock.patch.object(fx_filings.filings, "list_files",
+                               side_effect=lambda kind: self.MONTHLY if kind == "monthly" else self.DAILY):
+            return [u.rsplit("/", 1)[-1] for u in fx_filings.pick_rescan(max_files, set(rescanned))]
+
+    def test_day_files_after_the_newest_archive_first_then_months_newest_first_then_nothing(self):
+        # September's day files are in September's archive: only the days after it are read on their own
+        self.assertEqual(self.pick([]), ["Accounts_Bulk_Data-2026-11-04.zip", "Accounts_Bulk_Data-2026-10-01.zip"])
+        self.assertEqual(self.pick([], max_files=1), ["Accounts_Bulk_Data-2026-11-04.zip"])
+        days = ["Accounts_Bulk_Data-2026-11-04.zip", "Accounts_Bulk_Data-2026-10-01.zip"]
+        self.assertEqual(self.pick(days), ["Accounts_Monthly_Data-September2026.zip"])
+        self.assertEqual(self.pick(days + ["Accounts_Monthly_Data-September2026.zip"]),
+                         ["Accounts_Monthly_Data-August2026.zip"])
+        self.assertEqual(self.pick(days + [u.rsplit("/", 1)[-1] for u in self.MONTHLY]), [])   # the chain stops
