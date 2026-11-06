@@ -157,7 +157,7 @@ def main() -> None:
         cols = fx_notes.columns(f, r.get("company_name", ""), "")
         if wanted:
             print(f"{r.get('company_name')} ({r['company_number']}): staff {f.get('employees')}, turnover "
-                  f"{short(f.get('turnover'))} (prior {short(f.get('turnover_prior'))}) from {f.get('turnover_source', '')[:200]}")
+                  f"{short(f.get('turnover'))} (prior {short(f.get('turnover_prior'))}) from {f.get('turnover_source', '')[:700]}")
             scanner = accounts._IxbrlScanner()
             try:
                 scanner.feed(doc.decode("utf-8", errors="replace"))
