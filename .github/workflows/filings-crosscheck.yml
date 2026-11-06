@@ -1,0 +1,62 @@
+name: FX filings cross-check
+
+# Read-only checks on the Recent FX filings list (lead-sourcer/tools/filings_crosscheck.py): figures to doubt, group
+# repeats, and each company against the main Accounts list's own reading — plus a few doubtful FX figures re-read
+# from Companies House (two calls each). Saves nothing. Runs when the tool, this file or the stamp file changes
+# (lead-sourcer/tools/filings_crosscheck_runs.txt: a line added starts a new check). Public repo: the log holds
+# company names, numbers and public accounts figures only.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main', 'claude/**']
+    paths:
+      - .github/workflows/filings-crosscheck.yml
+      - lead-sourcer/tools/filings_crosscheck.py
+      - lead-sourcer/tools/filings_crosscheck_runs.txt
+
+permissions:
+  contents: read
+
+concurrency:
+  group: filings-crosscheck
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python packages
+        run: pip install -q -r lead-sourcer/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Both lists (read only)
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web
+          node scripts/filings-store.mjs get ../../lead-sourcer/filings-now.json
+          node --input-type=module -e '
+            import { writeFile } from "node:fs/promises";
+            import { KEY, STORE } from "./api/accounts.mjs";
+            import { openStore } from "./scripts/store.mjs";
+            const data = (await (await openStore(STORE)).get(KEY)) || {};
+            await writeFile("../../lead-sourcer/accounts-now.json", JSON.stringify(data));
+            console.log(`main Accounts list: ${(data.rows || []).length} companies, made ${data.made_at || "?"}`);'
+      - name: Cross-check
+        working-directory: lead-sourcer
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          PYTHONUNBUFFERED: "1"
+        run: python3 tools/filings_crosscheck.py filings-now.json accounts-now.json --recheck 8

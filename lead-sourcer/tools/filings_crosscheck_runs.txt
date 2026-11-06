@@ -1,0 +1,2 @@
+# A line added here starts a new FX filings cross-check (workflow "FX filings cross-check").
+2026-11-06T00:09 check after June
