@@ -364,7 +364,7 @@ def tidy(rows: list[dict]) -> int:
     changed = 0
     for r in rows:
         before = (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"), r.get("employees"))
-        before_sens = r.get("fx_sensitivity")
+        before_sens = (r.get("fx_sensitivity"), r.get("turnover_regions"))
         turnover = float(r["turnover_gbp"]) if r.get("turnover_gbp") else None
         staff = int(r["employees"]) if str(r.get("employees") or "").isdigit() else 0
         if turnover and turnover > accounts.MAX_PLAUSIBLE_TURNOVER and staff < 1_000:
@@ -401,6 +401,10 @@ def tidy(rows: list[dict]) -> int:
             size = float(sens.group(1).replace(",", "")) * {"k": 1e3, "m": 1e6, "bn": 1e9}.get(sens.group(2) or "", 1)
             if size > 0.5 * turnover:
                 r["fx_sensitivity"] = ""   # a currency move's effect over half of turnover: a misread (a growth line)
+        parts = re.findall(r"£\s?([\d,.]+)\s*(k|m|bn)?\b", r.get("turnover_regions") or "")
+        if turnover and parts and sum(float(a.replace(",", "")) * {"k": 1e3, "m": 1e6, "bn": 1e9}.get(u, 1)
+                                      for a, u in parts) > 1.15 * turnover:
+            r["turnover_regions"] = ""   # regions adding to more than turnover: years or columns mixed
         prior = float(r["fx_gain_loss_prior_gbp"]) if r.get("fx_gain_loss_prior_gbp") else None
         if fx and prior and max(abs(fx), abs(prior)) / max(min(abs(fx), abs(prior)), 1) > 1_000:
             r["fx_gain_loss_prior_gbp"] = ""
@@ -409,7 +413,7 @@ def tidy(rows: list[dict]) -> int:
             new, why = recheck
             r.update(fx_forwards=new, fx_forwards_check="" if new else f"{why}: {r.get('fx_forwards_evidence', '')}")
         if (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"), r.get("employees"),
-                r.get("fx_sensitivity")) != before + (before_sens,):
+                r.get("fx_sensitivity"), r.get("turnover_regions")) != before + before_sens:
             changed += 1
             score, lines = fx_notes.filed_proof(r)
             if r.get("hmrc_trade"):

@@ -67,6 +67,11 @@ def sanity(row: dict) -> list[str]:
         if size > 0.5 * t:
             row["fx_sensitivity"] = ""
             done.append("sensitivity over half of turnover")
+    parts = re.findall(r"£\s?([\d,.]+)\s*(k|m|bn)?\b", row.get("turnover_regions") or "")
+    if t and parts and sum(float(a.replace(",", "")) * {"k": 1e3, "m": 1e6, "bn": 1e9}.get(u, 1)
+                           for a, u in parts) > 1.15 * t:
+        row.update(turnover_regions="", overseas_turnover_share="")
+        done.append("regions over turnover")
     for key in ("fact_1", "fact_2", "opener"):   # growth built on a misread last year (a note number read as turnover)
         m = _GREW.search(row.get(key) or "")
         if m and int((m.group(1) or m.group(2)).replace(",", "")) > 500:

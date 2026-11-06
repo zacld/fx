@@ -311,3 +311,8 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
         self.assertTrue(fx_notes.forward_evidence_doubtful('"Foreign exchange forward contract 35 - 64,856 53,872"'))
         kept = fx_notes._forward_rows("£'000\nForward foreign exchange contracts 21 1,250 980\n", 1)   # note, two years
         self.assertEqual(kept[0]["amount"], 1_250_000)
+
+    def test_regions_adding_to_more_than_turnover_are_dropped(self):
+        facts = accounts.check_fx({"turnover": 36_946_000, "overseas_share": 0.4,
+                                   "regions": [{"region": "UK", "value": 30_000_000}, {"region": "EU", "value": 12_800_000}]})
+        self.assertEqual((facts["regions"], facts["overseas_share"]), ([], None))

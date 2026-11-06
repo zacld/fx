@@ -2750,6 +2750,8 @@ class TestUploadSenseChecks(unittest.TestCase):
         big = {"turnover_gbp": "40000000000", "fx_wallet_high_gbp": "9000000000"}
         self.assertEqual(to_accounts_json.sanity(big), ["turnover over £5bn"])
         self.assertEqual(big["fx_wallet_high_gbp"], "")
+        regions = {"turnover_gbp": "36946000", "turnover_regions": "United Kingdom £30m · Europe £12.8m"}
+        self.assertEqual(to_accounts_json.sanity(regions), ["regions over turnover"])
         sens = {"turnover_gbp": "32900000", "fx_sensitivity": "12% move in sterling against USD: £35.1m on profit — growth"}
         self.assertEqual(to_accounts_json.sanity(sens), ["sensitivity over half of turnover"])
         fine = {"turnover_gbp": "50000000", "fx_gain_loss_gbp": "-250000", "employees": "300",

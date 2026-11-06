@@ -14,3 +14,4 @@
 2026-11-06T02:31 diag numbers=16023084,11976847,13606212
 2026-11-06T02:33 regression audit 400 after four-column forward rule
 2026-11-06T02:49 diag numbers=SC018343,03879072,16365169,01194446,08954173
+2026-11-06T02:53 regression audit 400 after region rule
