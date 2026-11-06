@@ -223,6 +223,25 @@ def main() -> None:
             for m, why in in_top[:10]:
                 print(f"      {(m.get('company_name') or '?')[:44]} ({m.get('company_number')}): {why}")
 
+    # what the sanity rules (filings.tidy) would change on the stored rows — a dry run on a copy
+    import copy
+    trial = copy.deepcopy(rows)
+    changed = filings.tidy(trial)
+    kinds = Counter()
+    examples = defaultdict(list)
+    for old, new in zip(rows, trial):
+        for field, label in (("fx_gain_loss_gbp", "FX figure to a check"), ("turnover_gbp", "turnover to a check"),
+                             ("fx_forwards", "forward size to a check")):
+            if old.get(field) and not new.get(field):
+                kinds[label] += 1
+                examples[label].append(f"{who(old)}: {str(old.get(field))[:70]}")
+    dropped = sum((old.get("filed_fx_score") or 0) >= 50 > (new.get("filed_fx_score") or 0) for old, new in zip(rows, trial))
+    print(f"\n6. Sanity rules, dry run (filings.tidy): {changed:,} companies would change — "
+          + ", ".join(f"{k} {n:,}" for k, n in kinds.items()) + f"; {dropped:,} would drop below strong FX proof (50)")
+    for label, found in examples.items():
+        for line in found[:4]:
+            print(f"    {label}: {line}")
+
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
     tiny = [r for kind, found in doubts.items() if kind.startswith("FX gain/loss under") for r, _ in found]
     big = [r for kind, found in doubts.items() if kind.startswith("FX gain/loss over") for r, _ in found]

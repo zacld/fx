@@ -181,6 +181,8 @@ def main() -> None:
               f"{sum(1 for r in done_now if r.get('triggers')):,}; overseas parent "
               f"{sum(1 for r in done_now if 'overseas parent' in r.get('owner', '')):,}; "
               f"{sum(1 for r in rows if not r.get('research_checked')):,} left for the next run")
+    # Today's sanity rules on every row (no calls): implausible FX / turnover figures and forward sizes to a check.
+    print(f"Figures moved to a check by today's rules: {filings.tidy(rows):,} companies")
     # Owned from abroad with no sign of running FX locally: ranked lower (hooks.ABROAD_RULES), every row, no calls.
     abroad = filings.mark_abroad(rows)
     print(f"Owned from abroad, FX probably run there: {abroad:,} of {len(rows):,} (ranked "

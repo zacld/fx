@@ -1,3 +1,4 @@
 # A line added here starts a new FX filings cross-check (workflow "FX filings cross-check").
 2026-11-06T00:09 check after June
 2026-11-06T00:13 all 12 months in; main list checks + turnover re-reads
+2026-11-06T00:18 sanity rules dry run

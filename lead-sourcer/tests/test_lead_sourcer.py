@@ -2738,6 +2738,25 @@ class TestReviewFixesIncumbent(unittest.TestCase):
 
 
 class TestFxFilings(unittest.TestCase):
+    def test_implausible_figures_on_the_list_move_to_a_check(self):
+        rows = [{"company_name": "LISTER", "turnover_gbp": "89700000", "fx_gain_loss_gbp": "-597",
+                 "fx_gain_loss_evidence": "tagged in the accounts", "filed_fx_score": 10, "fx_in_filing": True},
+                {"company_name": "ELAND", "turnover_gbp": "317766100000000000", "employees": "40", "filed_fx_score": 20},
+                {"company_name": "SCHAEFFLER", "turnover_gbp": "163400000", "filed_fx_score": 105,
+                 "fx_forwards": "Forward contracts £464k in the notes' tables (prior year £59.4m)",
+                 "fx_forwards_evidence": '"Foreign exchange forward contract 49 464 59,476 48,690" (filed accounts)',
+                 "hmrc_trade": "HMRC customs records: imports in 12 of the last 12 months (matched on the registered name)"},
+                {"company_name": "FINE", "turnover_gbp": "50000000", "fx_gain_loss_gbp": "-250000", "filed_fx_score": 25,
+                 "fx_forwards": "Forward contracts of €1m", "fx_forwards_evidence": '"forward contracts of €1m to buy euros"'}]
+        self.assertEqual(filings.tidy(rows), 3)
+        self.assertEqual(rows[0]["fx_gain_loss_gbp"], "")
+        self.assertIn("probably in £'000", rows[0]["fx_gain_loss_check"])
+        self.assertEqual(rows[1]["turnover_gbp"], "")
+        self.assertIn("too big to be right", rows[1]["turnover_check"])
+        self.assertEqual(rows[2]["fx_forwards"], "")
+        self.assertIn("HMRC customs: imports in 12 of the last 12 months (+20)", rows[2]["filed_fx"])
+        self.assertEqual((rows[3]["fx_gain_loss_gbp"], rows[3]["filed_fx_score"]), ("-250000", 25))   # untouched
+
     def test_owned_abroad_without_local_fx_is_marked_and_ranked_lower(self):
         rows = [{"filed_fx_score": 60, "owner": "Owned by CLOETTA AB (Sweden) — overseas parent"},
                 {"filed_fx_score": 60, "owner": "Owned by ACME GMBH (Germany) — overseas parent",

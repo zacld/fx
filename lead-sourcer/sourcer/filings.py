@@ -354,6 +354,41 @@ def owner_line(owners: list[dict]) -> str:
     return f"Owned by {len(people)} individual{'s' if len(people) != 1 else ''}" if people else ""
 
 
+def tidy(rows: list[dict]) -> int:
+    """
+    Today's sanity rules on rows already on the list (no reading again): an FX gain/loss under £1,000 at a £10m+
+    company, a turnover over £5bn without the staff for it, and forward sizes the reader no longer takes
+    (accounts.check_fx / check_turnover, fx_notes.forward_evidence_doubtful) move to a check; the filed FX proof is
+    scored again (customs points kept). Returns how many rows changed.
+    """
+    changed = 0
+    for r in rows:
+        before = (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"))
+        turnover = float(r["turnover_gbp"]) if r.get("turnover_gbp") else None
+        staff = int(r["employees"]) if str(r.get("employees") or "").isdigit() else 0
+        if turnover and turnover > accounts.MAX_PLAUSIBLE_TURNOVER and staff < 1_000:
+            r.update(turnover_gbp="", turnover_check=f"turnover read as {hooks.short(turnover)}: too big to be right "
+                                                     f"(cells run together, or a £'000 figure read as £m?); check the accounts")
+            turnover = None
+        fx = float(r["fx_gain_loss_gbp"]) if r.get("fx_gain_loss_gbp") else None
+        if fx and abs(fx) < accounts.FX_MIN_PLAUSIBLE and turnover and turnover >= accounts.FX_MIN_PLAUSIBLE_TURNOVER:
+            r.update(fx_gain_loss_gbp="", fx_gain_loss_prior_gbp="",
+                     fx_gain_loss_check=f"FX figure read as {hooks.short(fx)} at a company with {hooks.short(turnover)} "
+                                        f"turnover: probably in £'000; check the accounts ({r.get('fx_gain_loss_evidence', '')})")
+        why = fx_notes.forward_evidence_doubtful(r.get("fx_forwards_evidence", "")) if r.get("fx_forwards") else ""
+        if why:
+            r.update(fx_forwards="", fx_forwards_check=f"{why}: {r.get('fx_forwards_evidence', '')}")
+        if (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards")) != before:
+            changed += 1
+            score, lines = fx_notes.filed_proof(r)
+            if r.get("hmrc_trade"):
+                score += CUSTOMS_POINTS
+                line = r["hmrc_trade"].removeprefix("HMRC customs records: ").split(" (matched")[0]
+                lines.append(f"HMRC customs: {line} (+{CUSTOMS_POINTS})")
+            r.update(filed_fx_score=score, filed_fx="; ".join(lines))
+    return changed
+
+
 _OWNED_ABROAD = re.compile(r"^Owned by (.+) \(([^()]+)\) — overseas parent")
 
 

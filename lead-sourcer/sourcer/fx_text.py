@@ -129,6 +129,7 @@ def read(text: str, scale_text: Optional[str] = None, ocr: bool = False) -> Opti
         if _NOT_PL.search(label) or _NOT_PL.search(before[-40:].split("\n")[-1]):
             continue
         multiplier, currency = _scale(scale_text if scale_text is not None else before)
+        headed = _HEADING.search(scale_text if scale_text is not None else before) is not None
         current = _value(first, millions=multiplier == 1_000_000)
         if current is None:
             continue
@@ -160,6 +161,7 @@ def read(text: str, scale_text: Optional[str] = None, ocr: bool = False) -> Opti
             "label": label,
             "line": line,
             "check": check,
+            "headed": headed,   # a £ / £'000 / £m heading set the scale (False: pounds assumed)
         }
     return None
 

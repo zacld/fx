@@ -151,7 +151,7 @@ def _negated(sentence: str, start: int) -> bool:
 # Contracts or a fair value under this are too small to open a call on (and usually a misread).
 MIN_FORWARD_AMOUNT = 5_000
 _PNL_EFFECT = re.compile(r"taken\s+to\s+the|recognised\s+in\s+(?:the\s+)?(?:profit|statement|income)|"
-                         r"(?:credited|charged)\s+to|(?:fair\s+value\s+)?(?:profit|gain|loss)\s+on\s+(?:the\s+)?"
+                         r"(?:credited|charged)\s+to|(?:fair\s+value\s+)?(?:profits?|gains?|loss(?:es)?)\s+on\s+(?:the\s+|a\s+)?"
                          r"(?:forward|foreign|derivative|revaluation)", re.I)
 _NUMBER_TOKEN = re.compile(r"(?<![\w.])\(?[£$€]?\d[\d,]*(?:\.\d+)?\)?(?![\w])")
 # Dates ("29/12/2025"), exchange rates ("at a rate of 1.338116") and years: figures, but not amounts.
@@ -304,12 +304,36 @@ _ROW_GAIN_LOSS = re.compile(r"(?:gains?|loss(?:es)?|profit|movement|charge|credi
                             re.I)
 
 
+def forward_evidence_doubtful(evidence: str) -> str:
+    """
+    Why a forward size kept from an earlier reading isn't one by today's rules ('' when it still stands): a table
+    row with more columns than this year and last, a gains/losses row, or a sentence about a gain or loss on the
+    contracts. For rows already on a list (filings.tidy), without reading the accounts again.
+    """
+    quoted = re.search(r'"([^"]+)"', evidence or "")
+    text = quoted.group(1) if quoted else ""
+    if not text:
+        return ""
+    if _PNL_EFFECT.search(text):
+        return "a gain or loss on the contracts, not their size"
+    row = _FORWARD_ROW.match(text)
+    if row:
+        rest = row.group(2)
+        if re.match(r"\s*\(?\s*(?:gains?|loss(?:es)?|profits?)\b", rest, re.I):
+            return "the gains/losses line, not the contracts"
+        if len([v for v in _cells(rest) if abs(v) > 0]) > 2:
+            return "a table row with more columns than this year and last: which is the size is unclear"
+    return ""
+
+
 def _forward_rows(page: str, number: int) -> list[dict]:
     out = []
     for m in _FORWARD_ROW.finditer(page):
         rest = m.group(2)
         if len(re.findall(r"[A-Za-z]{3,}", rest)) > 2:
             continue   # prose, not a table row
+        if re.match(r"\s*\(?\s*(?:gains?|loss(?:es)?|profits?)\b", rest, re.I):
+            continue   # "Forward currency contracts losses/(gains) 7,127": the P&L line, not the contracts
         before = page[max(0, m.start() - 60):m.start()].rstrip()
         if _ROW_GAIN_LOSS.search(before.split("\n")[-1]):
             continue   # "Loss on derivative ⏎ forward contracts (1,984)": the P&L line, not the contracts
@@ -317,8 +341,8 @@ def _forward_rows(page: str, number: int) -> list[dict]:
                 and not re.search(r"forward\s+(?:foreign\s+)?(?:exchange|currency)|currency\s+forwards?", page, re.I):
             continue   # a bare "forward contracts" row on a page that never ties them to currency
         values = [v for v in _cells(rest) if abs(v) > 0]
-        if not values:
-            continue
+        if not values or len(values) > 2:
+            continue   # more than this year and last ("49 464 59,476 48,690": assets, liabilities, notionals): unclear
         scale = _scale_near(page, m.start())
         amount = abs(values[0]) * scale
         if amount < MIN_FORWARD_AMOUNT:

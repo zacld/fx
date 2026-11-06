@@ -441,7 +441,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-06"   # forward sizes: notes rows, hedging reserve, dated contracts; the bank named for forwards
+FACTS_VERSION = "2026-11-06b"   # FX under £1,000 at a £10m+ company a check; £'000 text FX lines; turnover over £5bn a check
 
 
 # Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.
@@ -468,6 +468,10 @@ def facts_reusable(entry: dict) -> bool:
 # different figure tagged or read as FX (Wanis: purchases in foreign currency,
 # £113m on £156m turnover). It goes to fx_gain_loss_check, never into a fact.
 FX_MAX_SHARE_OF_TURNOVER = 0.20
+# An FX gain/loss under £1,000 at a £10m+ company is almost always a £'000 figure read (or tagged) as pounds: 113
+# tagged and 163 read from text in the first year's FX filings scan (Lister Wilder "597", Greanco "(21)").
+FX_MIN_PLAUSIBLE = 1_000
+FX_MIN_PLAUSIBLE_TURNOVER = 10_000_000
 
 
 def _gbp_short(value: float) -> str:
@@ -502,18 +506,37 @@ def _screen_fx_tags(scanner: "_IxbrlScanner") -> str:
     return why
 
 
-def _fx_from_text(facts: dict, text: str, how: str, ocr: bool = False) -> bool:
-    """Fill the FX fields from an FX line in accounts text; True when a line was found (a figure or a check)."""
+def _fx_from_text(facts: dict, text: str, how: str, ocr: bool = False, thousands: bool = False) -> bool:
+    """
+    Fill the FX fields from an FX line in accounts text; True when a line was found (a figure or a check).
+    `thousands`: the document's tagged figures are in £'000, so a line with no £ / £'000 heading near it is too
+    (Greanco's "Foreign exchange differences (21) 7" in a £385m company is £21k, not £21).
+    """
     found = fx_text.read(text, ocr=ocr)
     if not found:
         return False
     if found["check"]:
         facts["fx_gain_loss_check"] = found["check"]
         return True
-    facts.update(fx_gain_loss=found["value"], fx_gain_loss_prior=found["prior"],
-                 fx_gain_loss_evidence=f'{how}: "{found["line"]}"')
+    times = 1_000 if thousands and not found.get("headed", True) else 1
+    facts.update(fx_gain_loss=found["value"] * times if found["value"] is not None else None,
+                 fx_gain_loss_prior=found["prior"] * times if found["prior"] is not None else None,
+                 fx_gain_loss_evidence=f'{how}: "{found["line"]}"'
+                 + (" (in £'000, as the accounts' tagged figures are)" if times > 1 else ""))
     return True
 
+
+def _in_thousands(scanner) -> bool:
+    """Most of the document's tagged money figures carry scale 3: the accounts are presented in £'000."""
+    scales = [str(f.get("scale") or "0") for f in scanner.facts
+              if f.get("unit") and not re.search(r"pure|shares?|employee|number|percent", f["unit"], re.I)
+              and f.get("concept") not in EMPLOYEE_CONCEPTS]
+    return len(scales) >= 5 and scales.count("3") / len(scales) >= 0.6
+
+
+# Above this a turnover read from the text (or tagged by a company with under 1,000 staff) is a misread — a £'000
+# figure taken as £m, cells run together (Eland Electrical read as £317,766bn) — never a size to use.
+MAX_PLAUSIBLE_TURNOVER = 5_000_000_000
 
 # Full, group and medium-sized accounts are for companies well past this; a turnover under it read from one is a
 # misread (a £'000 table taken as £, a wrong cell) or a holding company's own few charges — never a size to use.
@@ -528,6 +551,12 @@ def check_turnover(facts: dict) -> dict:
     """
     turnover, kind = facts.get("turnover"), facts.get("accounts_type", "")
     if turnover is None:
+        return facts
+    staff = facts.get("employees") or 0
+    if turnover > MAX_PLAUSIBLE_TURNOVER and ("tagged" not in (facts.get("turnover_source") or "") or 0 < staff < 1_000):
+        facts.update(turnover=None, turnover_prior=None, turnover_check=(
+            f"turnover read as {hooks.short(turnover)}: too big to be right (cells run together, or a £'000 figure "
+            f"read as £m?); check the accounts"))
         return facts
     if turnover <= 0 or (turnover < MIN_PLAUSIBLE_TURNOVER and kind in _FULL_ACCOUNTS):
         where = f"{kind} accounts" if kind else "the accounts"
@@ -548,7 +577,10 @@ def check_fx(facts: dict) -> dict:
     facts.setdefault("fx_gain_loss_evidence", "")
     fx, prior, turnover = facts.get("fx_gain_loss"), facts.get("fx_gain_loss_prior"), facts.get("turnover")
     reason = ""
-    if fx is not None and turnover and abs(fx) > FX_MAX_SHARE_OF_TURNOVER * turnover:
+    if fx is not None and fx != 0 and abs(fx) < FX_MIN_PLAUSIBLE and turnover and turnover >= FX_MIN_PLAUSIBLE_TURNOVER:
+        reason = (f"FX figure read as {_gbp_short(fx)} at a company with {_gbp_short(turnover)} turnover: probably in "
+                  f"£'000 (or tagged without its scale); check the accounts")
+    elif fx is not None and turnover and abs(fx) > FX_MAX_SHARE_OF_TURNOVER * turnover:
         reason = (f"FX figure {_gbp_short(fx)} is {abs(fx) / turnover:.0%} of turnover: too big for an exchange "
                   f"gain/loss, likely another figure tagged as FX; check the accounts")
     elif prior is not None and turnover and abs(prior) > FX_MAX_SHARE_OF_TURNOVER * turnover:
@@ -652,9 +684,9 @@ def extract_facts(document: bytes) -> dict:
         facts["regions"] = regions_from_pages([rows_text], facts["turnover"], numbers=[0])[0]
         if facts["overseas_share"] is None:
             facts["overseas_share"] = overseas_share_from(facts["regions"], facts["turnover"])
-    if not fx and not _fx_from_text(facts, plain, "accounts text") and fx_tag_problem:
+    if not fx and not _fx_from_text(facts, plain, "accounts text", thousands=_in_thousands(scanner)) and fx_tag_problem:
         facts["fx_gain_loss_check"] = fx_tag_problem
-    return check_fx(facts)
+    return check_fx(check_turnover(facts))
 
 
 _HIDDEN_RE = re.compile(r"<ix:header\b.*?</ix:header>|<(script|style)\b.*?</\1>", re.I | re.S)
