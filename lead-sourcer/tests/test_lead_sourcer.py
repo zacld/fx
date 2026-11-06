@@ -2747,6 +2747,13 @@ class TestFxFilings(unittest.TestCase):
         pounds = accounts.extract_facts(re.sub(rb'scale="3"', b'scale="0"', ixbrl(scale="3")))
         self.assertEqual(pounds["fx_gain_loss"], -420)   # £ accounts, £23k turnover: nothing to borrow, small firm
 
+    def test_a_headcount_is_the_figure_shown_whatever_its_scale(self):
+        for scale in ("-2", "0", "3"):
+            doc = ixbrl().replace(b"</table>", (
+                '<tr><td>Employees</td><td><ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" '
+                f'contextRef="FY2024" unitRef="shares" scale="{scale}">104</ix:nonFraction></td></tr></table>').encode(), 1)
+            self.assertEqual(accounts.extract_facts(doc)["employees"], 104, scale)
+
     def test_implausible_figures_on_the_list_move_to_a_check(self):
         rows = [{"company_name": "LISTER", "turnover_gbp": "89700000", "fx_gain_loss_gbp": "-597",
                  "fx_gain_loss_evidence": "tagged in the accounts", "filed_fx_score": 10, "fx_in_filing": True},
@@ -2757,7 +2764,12 @@ class TestFxFilings(unittest.TestCase):
                  "hmrc_trade": "HMRC customs records: imports in 12 of the last 12 months (matched on the registered name)"},
                 {"company_name": "FINE", "turnover_gbp": "50000000", "fx_gain_loss_gbp": "-250000", "filed_fx_score": 25,
                  "fx_forwards": "Forward contracts of €1m", "fx_forwards_evidence": '"forward contracts of €1m to buy euros"'}]
-        self.assertEqual(filings.tidy(rows), 3)
+        rows.append({"company_name": "MANTON", "employees": "1072000", "size_estimate": "Size likely £107bn–£322bn",
+                     "size_estimate_basis": "from 1,072,000 staff — not filed turnover", "filed_fx_score": 30})
+        rows.append({"company_name": "EXOL", "employees": "1", "turnover_gbp": "89400000", "filed_fx_score": 30})
+        self.assertEqual(filings.tidy(rows), 5)
+        self.assertEqual((rows[4]["employees"], rows[4]["size_estimate"]), ("1072", "likely £107.2m–£321.6m"))
+        self.assertEqual(rows[5]["employees"], "")
         self.assertEqual(rows[0]["fx_gain_loss_gbp"], "")
         self.assertIn("probably in £'000", rows[0]["fx_gain_loss_check"])
         self.assertEqual(rows[1]["turnover_gbp"], "")

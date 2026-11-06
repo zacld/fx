@@ -363,13 +363,31 @@ def tidy(rows: list[dict]) -> int:
     """
     changed = 0
     for r in rows:
-        before = (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"))
+        before = (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"), r.get("employees"))
         turnover = float(r["turnover_gbp"]) if r.get("turnover_gbp") else None
         staff = int(r["employees"]) if str(r.get("employees") or "").isdigit() else 0
         if turnover and turnover > accounts.MAX_PLAUSIBLE_TURNOVER and staff < 1_000:
             r.update(turnover_gbp="", turnover_check=f"turnover read as {hooks.short(turnover)}: too big to be right "
                                                      f"(cells run together, or a £'000 figure read as £m?); check the accounts")
             turnover = None
+        # headcounts tagged with a wrong scale (accounts._headcount): 1,072 read as 1,072,000 is put back; 104 read as
+        # 1 can't be, so it's cleared; a size estimate built on either is worked out again from what's left
+        if str(r.get("employees") or "").isdigit():
+            n = int(r["employees"])
+            fixed = n // 1000 if n >= 20_000 and n % 1000 == 0 else None if n <= 2 else n
+            if fixed != n:
+                r["employees"] = str(fixed) if fixed else ""
+                if r.get("size_estimate") and "staff" in (r.get("size_estimate_basis") or ""):
+                    debtors = re.search(r"£([\d.]+)(k|m|bn) owed by customers", r["size_estimate_basis"])
+                    band = size_band({"trade_debtors": float(debtors.group(1)) * {"k": 1e3, "m": 1e6, "bn": 1e9}[debtors.group(2)]
+                                      if debtors else None, "employees": fixed})
+                    if band:
+                        r.update(size_estimate=size_label(band), size_low_gbp=str(round(band["low"])),
+                                 size_estimate_basis=f"from {band['basis']} — not filed turnover (the accounts are "
+                                                     f"filleted: no profit and loss account)")
+                    else:
+                        r.update(size_estimate="", size_low_gbp="", size_estimate_basis="size not estimated: the staff "
+                                                                                         "figure was tagged wrongly")
         fx = float(r["fx_gain_loss_gbp"]) if r.get("fx_gain_loss_gbp") else None
         if fx and abs(fx) < accounts.FX_MIN_PLAUSIBLE and turnover and turnover >= accounts.FX_MIN_PLAUSIBLE_TURNOVER:
             r.update(fx_gain_loss_gbp="", fx_gain_loss_prior_gbp="",
@@ -378,7 +396,7 @@ def tidy(rows: list[dict]) -> int:
         why = fx_notes.forward_evidence_doubtful(r.get("fx_forwards_evidence", "")) if r.get("fx_forwards") else ""
         if why:
             r.update(fx_forwards="", fx_forwards_check=f"{why}: {r.get('fx_forwards_evidence', '')}")
-        if (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards")) != before:
+        if (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"), r.get("employees")) != before:
             changed += 1
             score, lines = fx_notes.filed_proof(r)
             if r.get("hmrc_trade"):

@@ -274,3 +274,8 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
         self.assertEqual((facts["turnover"], facts["turnover_prior"]), (384_700_000, None))
         kept = accounts.check_turnover({"turnover": 50_000_000, "turnover_prior": 40_000_000})
         self.assertEqual(kept["turnover_prior"], 40_000_000)
+
+    def test_a_continuing_discontinued_total_row_takes_the_totals(self):
+        from sourcer import turnover_text
+        figures = turnover_text._figures(" 3 37,679,617 1,619,583 39,299,200 32,434,093 3,742,042 36,176,135", False)
+        self.assertEqual(turnover_text._pick(figures, [2025, 2024]), (39_299_200.0, 36_176_135.0))

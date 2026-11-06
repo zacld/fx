@@ -342,14 +342,18 @@ def _latest(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool,
 
 
 def _headcount(scanner: "_IxbrlScanner") -> Optional[int]:
-    """The latest average number of employees tagged for the whole entity (a count: no currency), or None."""
+    """
+    The latest average number of employees tagged for the whole entity (a count: no currency), or None. The figure
+    as shown, never scaled: filers tag headcounts with scale -2 or 3 by mistake (Exol's 104 read as 1, Manton Wood's
+    1,072 as 1,072,000 — a third of the companies in the reader audit).
+    """
     best: dict[str, tuple[int, float]] = {}
     for fact in scanner.facts:
         if fact["concept"] not in EMPLOYEE_CONCEPTS:
             continue
         context = scanner.contexts.get(fact["context"])
         entity = _entity(context) if context and context["end"] else None
-        value = _fact_value(fact)
+        value = _fact_value({**fact, "scale": "0"})
         if entity is None or value is None or value < 0:
             continue
         rank = {"group": 0, "": 1, "company": 2}[entity]
@@ -441,7 +445,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-06c"   # FX under £1,000: £'000 when the accounts are, else a check; turnover over £5bn / priors 20x apart; forward rows
+FACTS_VERSION = "2026-11-06d"   # + headcounts as shown (never scaled); continuing/discontinued/total rows
 
 
 # Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.
