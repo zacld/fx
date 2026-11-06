@@ -518,7 +518,10 @@ def _fx_from_text(facts: dict, text: str, how: str, ocr: bool = False, thousands
     if found["check"]:
         facts["fx_gain_loss_check"] = found["check"]
         return True
-    times = 1_000 if thousands and not found.get("headed", True) else 1
+    # only a figure under 1,000: there a £ reading is implausible for these companies (check_fx), while a bigger one
+    # could be either (45,000 is £45k in a £ table, £45m in a £'000 one) and is left as written
+    times = 1_000 if (thousands and not found.get("headed", True) and found["value"] is not None
+                      and abs(found["value"]) < FX_MIN_PLAUSIBLE) else 1
     facts.update(fx_gain_loss=found["value"] * times if found["value"] is not None else None,
                  fx_gain_loss_prior=found["prior"] * times if found["prior"] is not None else None,
                  fx_gain_loss_evidence=f'{how}: "{found["line"]}"'

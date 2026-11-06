@@ -235,6 +235,9 @@ class TestFirstYearScanFindings(unittest.TestCase):
         headed: dict = {}
         accounts._fx_from_text(headed, "£ £\n" + text, "accounts text", thousands=True)   # its own £ heading wins
         self.assertEqual(headed["fx_gain_loss"], 21.0)
+        big: dict = {}   # 45,000 could be £45k or £45m: left as written
+        accounts._fx_from_text(big, text.replace("(21) 7", "(45,000) 7"), "accounts text", thousands=True)
+        self.assertEqual(big["fx_gain_loss"], 45_000.0)
 
     def test_turnover_over_5bn_without_the_staff_is_a_check(self):
         facts = accounts.check_turnover({"turnover": 40.4e9, "turnover_source": "the profit and loss account"})
