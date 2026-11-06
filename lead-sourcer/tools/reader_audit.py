@@ -94,7 +94,7 @@ def broken_rules(f: dict, cols: dict) -> list[str]:
     return out
 
 
-def sample(rows: list[dict], n: int) -> list[dict]:
+def sample(rows: list[dict], n: int, seed: int = 7) -> list[dict]:
     """The rows the cross-check doubted first, then the strongest, then a fixed random draw."""
     doubted = []
     for r in rows:
@@ -104,6 +104,10 @@ def sample(rows: list[dict], n: int) -> list[dict]:
             doubted.append(r)
     strongest = sorted(rows, key=lambda r: -(r.get("filed_fx_score") or 0))[:60]
     rest = [r for r in rows if r not in doubted and r not in strongest]
+    if seed != 7:   # a fresh draw: none of the doubted or strongest the fixes were made against
+        rest = [r for r in rows if r not in doubted and r not in strongest]
+        random.Random(seed).shuffle(rest)
+        return rest[:n]
     random.Random(7).shuffle(rest)
     picked, seen = [], set()
     for r in doubted[:70] + strongest + rest:
@@ -117,6 +121,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("filings")
     parser.add_argument("--sample", type=int, default=250)
+    parser.add_argument("--seed", type=int, default=7, help="another number: a fresh random draw of --sample filings")
     parser.add_argument("--numbers", default="", help="comma-separated company numbers: read these, with the tags behind them")
     args = parser.parse_args()
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
@@ -125,7 +130,7 @@ def main() -> None:
     rows = (json.load(open(args.filings, encoding="utf-8")) or {}).get("rows") or []
     wanted = [n.strip() for n in args.numbers.split(",") if n.strip()]
     picked = ([next((r for r in rows if r["company_number"] == n), {"company_number": n, "company_name": n}) for n in wanted]
-              if wanted else sample(rows, args.sample))
+              if wanted else sample(rows, args.sample, args.seed))
     print(f"Reader audit: {len(picked)} of the list's {len(rows):,} companies read again with today's readers\n")
     tally, broken, changes = Counter(), [], []
     for r in picked:
