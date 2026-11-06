@@ -366,8 +366,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Contact routes and email drafts:** in scope until Cognism arrives
   (mid-November 2026). Generic company emails only (Priority 12), and
   rule-based drafts (Priority 1: no per-lead AI calls).
-- **Email generator** (`apps/web/src/accounts/email.js`; "Email draft" on each card, the
-  company page and the filings cards, and the `email_draft` CSV column): Investec's master
+- **Email generator** (`apps/web/src/accounts/email.js`; the Accounts page's "Email generator"
+  tab: the cards stay as they are, and "Email generator →" at the foot of each card — accounts,
+  filings and the company page — takes the company there, newest first, its draft in an editable
+  box with Copy / Reset / Remove, kept in that browser; also the `email_draft` CSV column): Investec's master
   cold email, filled from the company's filings. Only the first two paragraphs change —
   first name (a presented finance contact, never a Guess or an initial), the company's
   name shortened naturally, regions abroad from the turnover note (else places from the

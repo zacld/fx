@@ -8,6 +8,7 @@ import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, tou
 const API = "/api/accounts";
 const PW_KEY = "fx-accounts-password";
 const PAGE = 50;
+const EMAILS_KEY = "fx-email-generator";   // this browser's Email generator tab (company rows + edits)
 
 const remembered = () => { try { return sessionStorage.getItem(PW_KEY) || ""; } catch { return ""; } };
 const remember = (pw) => { try { pw ? sessionStorage.setItem(PW_KEY, pw) : sessionStorage.removeItem(PW_KEY); } catch { /* private mode */ } };
@@ -122,6 +123,21 @@ function Accounts({ data, password }) {
     window.history.pushState({ fromList: true }, "", companyPath(number));
     setPageNo(number);
   }, []);
+  // The Email generator tab's companies (newest first, with any edits to their draft): kept in this browser only.
+  const [emails, setEmails] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(EMAILS_KEY) || "[]"); } catch { return []; }
+  });
+  useEffect(() => { try { localStorage.setItem(EMAILS_KEY, JSON.stringify(emails)); } catch { /* storage off */ } }, [emails]);
+  const toEmail = useCallback((row) => {
+    setEmails((list) => [{ number: row.company_number, row, text: null, at: new Date().toISOString() },
+                         ...list.filter((x) => x.number !== row.company_number)].slice(0, 50));
+    if (numberFromPath(window.location.pathname)) { window.history.pushState(null, "", "/accounts"); setPageNo(""); }
+    setListScroll(0);
+    setFilters((f) => ({ ...f, section: "", view: "email" }));
+    window.scrollTo(0, 0);
+  }, []);
+  const editEmail = useCallback((number, text) => setEmails((list) => list.map((x) => (x.number === number ? { ...x, text } : x))), []);
+  const removeEmail = useCallback((number) => setEmails((list) => list.filter((x) => x.number !== number)), []);
   const backToList = useCallback(() => {
     if (window.history.state?.fromList) window.history.back();
     else { window.history.pushState(null, "", "/accounts"); setPageNo(""); }
@@ -210,7 +226,7 @@ function Accounts({ data, password }) {
     const r = rows.find((x) => x.company_number === pageNo);
     return (
       <CompanyPage r={r} number={pageNo} madeAt={data.made_at} mark={contacted[pageNo]} onContact={contact}
-                   note={notes[pageNo]} onSaveNote={(text) => saveNote(pageNo, text)} onBack={backToList} saveError={saveError} />
+                   note={notes[pageNo]} onSaveNote={(text) => saveNote(pageNo, text)} onBack={backToList} saveError={saveError} onEmail={toEmail} />
     );
   }
 
@@ -245,8 +261,12 @@ function Accounts({ data, password }) {
                   title="Companies of £20m+ whose newly filed accounts show FX" onClick={() => set({ section: "", view: "filings" })}>
             Recent FX filings
           </button>
+          <button role="tab" aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
+                  title="The Investec email for each company you send here" onClick={() => set({ section: "", view: "email" })}>
+            Email generator <span className="tab-n">{emails.length}</span>
+          </button>
         </div>
-        {filters.view !== "filings" && <>
+        {filters.view !== "filings" && filters.view !== "email" && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -280,7 +300,8 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} /> : (
+      {filters.view === "email" ? <EmailGenerator items={emails} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
+       : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
       <div className="list">
         {saveError && <div className="save-error" role="alert">{saveError}</div>}
         {visible.slice(0, shown).map((r, i, list) => {
@@ -293,7 +314,7 @@ function Accounts({ data, password }) {
                 : groupOf === roleGroup ? <h2 className="group-h">{group} <span>{roleCounts[group]}</span></h2>
                 : <h2 className="group-h">{group} <span>{list.filter((x) => groupOf(x) === group).length}</span></h2>)}
               <Account r={r} isNew={isNew(r, data.made_at)} mark={contacted[r.company_number]} onContact={contact}
-                       note={notes[r.company_number]} onSaveNote={(text) => saveNote(r.company_number, text)} onOpen={openCompany} />
+                       note={notes[r.company_number]} onSaveNote={(text) => saveNote(r.company_number, text)} onOpen={openCompany} onEmail={toEmail} />
             </Fragment>
           );
         })}
@@ -309,7 +330,7 @@ function Accounts({ data, password }) {
 
 // The Recent FX filings tab: companies of £20m+ whose accounts, filed online in the last year, show FX — read from
 // Companies House's bulk accounts files each morning (lead-sourcer/sourcer/filings.py). Loaded when first opened.
-function Filings({ password, listed, onOpen }) {
+function Filings({ password, listed, onOpen, onEmail }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -371,14 +392,14 @@ function Filings({ password, listed, onOpen }) {
       </div>
       <p className="filings-note">Companies of £{Math.round((data.min_turnover || 20e6) / 1e6)}m+ turnover whose accounts filed online in the last year
         show FX, by the month they filed{data.count ? ` (${data.count.toLocaleString()} in all)` : ""}. Paper (scanned) filings aren't in Companies House's files, so they're found by the main list instead.</p>
-      {rows.slice(0, shown).map((r) => <FilingCard key={r.company_number} r={r} listed={listed.has(r.company_number)} onOpen={onOpen} />)}
+      {rows.slice(0, shown).map((r) => <FilingCard key={r.company_number} r={r} listed={listed.has(r.company_number)} onOpen={onOpen} onEmail={onEmail} />)}
       {!rows.length && <div className="empty">{all.length ? "No filings match these filters." : "No FX filings found yet."}</div>}
       {rows.length > shown && <button className="btn-sm more" onClick={() => setShown((n) => n + PAGE)}>Show more ({rows.length - shown} left)</button>}
     </div>
   );
 }
 
-function FilingCard({ r, listed, onOpen }) {
+function FilingCard({ r, listed, onOpen, onEmail }) {
   return (
     <article className="card">
       <div className="card-top">
@@ -430,7 +451,7 @@ function FilingCard({ r, listed, onOpen }) {
         {!r.turnover_gbp && <a className="chip" href={turnoverSearch(r.company_name)} target="_blank" rel="noreferrer"
                                 title="Google their turnover: press, the group's accounts, their site (check it's not an estimate)">Search turnover ↗</a>}
       </div>
-      <EmailDraft r={filingRow(r)} />
+      <div className="card-foot"><EmailButton r={filingRow(r)} onEmail={onEmail} /></div>
     </article>
   );
 }
@@ -639,29 +660,52 @@ function Chips({ r }) {
   );
 }
 
-// When to call, the two strongest facts (each linked to its record), the currency line and the opener.
-// The Investec master cold email, filled in from the company's filings (email.js): copy it, check the gaps, send it
-// yourself. Nothing is sent from here.
-function EmailDraft({ r, open: startOpen = false }) {
-  const [open, setOpen] = useState(startOpen);
+// A button at the foot of a card: takes the company to the Email generator tab.
+function EmailButton({ r, onEmail }) {
+  return <button className="more-btn email-go" onClick={() => onEmail(r)} title="Draft the Investec email for this company in the Email generator tab">Email generator →</button>;
+}
+
+// The Email generator tab: each company taken there, newest first, with the Investec master cold email filled in from
+// its filings (email.js) in an editable box — copy it, fill the gaps, send it yourself. Nothing is sent from here.
+function EmailGenerator({ items, onChange, onRemove, onOpen }) {
+  if (!items.length) {
+    return <div className="list"><div className="empty">No companies here yet — press “Email generator →” at the bottom of a company’s card.</div></div>;
+  }
+  return <div className="list">{items.map((it) => <EmailItem key={it.number} it={it} onChange={onChange} onRemove={onRemove} onOpen={onOpen} />)}</div>;
+}
+
+function EmailItem({ it, onChange, onRemove, onOpen }) {
+  const draft = useMemo(() => emailDraft(it.row), [it.row]);
+  const text = it.text ?? draft.text;
   const [copied, setCopied] = useState(false);
-  const draft = useMemo(() => emailDraft(r), [r]);
   const copy = async () => {
-    try { await navigator.clipboard.writeText(draft.text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
+    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
   };
-  if (!open) return <button className="more-btn" onClick={() => setOpen(true)}>Email draft</button>;
+  const r = it.row;
   return (
-    <div className="email">
-      <div className="notes-h"><span>Email draft · Investec template</span>
-        <span><button className="btn-sm" onClick={copy}>{copied ? "Copied" : "Copy"}</button>
-          {!startOpen && <button className="more-btn" onClick={() => setOpen(false)}>Hide</button>}</span></div>
-      <pre className="email-text">{draft.text}</pre>
+    <article className="card email-card">
+      <div className="card-top">
+        <div className="card-name">
+          {r.company_number && r.rank
+            ? <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
+            : <a className="co" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer">{r.company_name}</a>}
+          {r.finance_contact && <span className="muted">{r.finance_contact}{r.finance_contact_role ? ` · ${r.finance_contact_role}` : ""}</span>}
+        </div>
+        <div className="email-btns">
+          <button className="btn-sm contacted" onClick={copy}>{copied ? "Copied" : "Copy email"}</button>
+          {it.text != null && it.text !== draft.text && <button className="btn-sm" onClick={() => onChange(it.number, null)} title="Back to the generated draft">Reset</button>}
+          <button className="btn-sm" onClick={() => onRemove(it.number)}>Remove</button>
+        </div>
+      </div>
+      <textarea className="input email-edit" rows={16} value={text} aria-label={`Email to ${r.company_name}`}
+                onChange={(e) => onChange(it.number, e.target.value)} />
       {draft.gaps.length > 0 && <div className="email-gaps">Fill in: {draft.gaps.join(" · ")}</div>}
       {draft.basis.length > 0 && <div className="email-basis">From: {draft.basis.join(" · ")}</div>}
-    </div>
+    </article>
   );
 }
 
+// When to call, the two strongest facts (each linked to its record), the currency line and the opener.
 function CallPrep({ r }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
@@ -692,7 +736,7 @@ const Details = ({ rows }) => (
   </dl>
 );
 
-function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen }) {
+function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen, onEmail }) {
   const [open, setOpen] = useState(false);
   return (
     <article className="card">
@@ -721,10 +765,10 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen })
       <Chips r={r} />
       <CallPrep r={r} />
       <Notes note={note} onSave={onSaveNote} />
-      <EmailDraft r={r} />
       <div className="card-foot">
         <button className="more-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Less" : "More detail"}</button>
         {r.company_number && <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>Open company page →</a>}
+        <EmailButton r={r} onEmail={onEmail} />
       </div>
       {open && <Details rows={detailSections(r).flatMap(([, rows]) => rows)} />}
     </article>
@@ -733,7 +777,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen })
 
 // One company: everything the finder knows, each fact linked to the filing or charge it came from, with notes and
 // the Contacted button.
-function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onBack, saveError }) {
+function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onBack, saveError, onEmail }) {
   useEffect(() => { document.title = r ? `${r.company_name} · Accounts` : "Accounts"; return () => { document.title = "Accounts"; }; }, [r]);
   if (!r) {
     return (
@@ -820,10 +864,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
         <CallPrep r={r} />
       </section>
 
-      <section className="panel">
-        <h2 className="panel-h">Email</h2>
-        <EmailDraft r={r} open />
-      </section>
+      <div className="card-foot"><EmailButton r={r} onEmail={onEmail} /></div>
 
       {detailSections(r).map(([title, rows]) => (
         <section className="panel" key={title}>
@@ -996,9 +1037,9 @@ a.co:hover{color:#34D399}
 .save-error{padding:10px 12px;border-radius:8px;background:rgba(248,113,113,.1);color:#FCA5A5;font-size:13px}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}
-.email{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.16)}
-.email .notes-h .btn-sm{margin-right:8px}
-.email-text{margin:8px 0 0;white-space:pre-wrap;font:13px/1.55 inherit;font-family:inherit;color:rgba(255,255,255,.82)}
+.email-go{color:#a5b4fc}
+.email-btns{display:flex;gap:8px;flex-wrap:wrap}
+.email-edit{width:100%;box-sizing:border-box;margin-top:10px;padding:12px;font:14px/1.55 inherit;font-family:inherit;resize:vertical;white-space:pre-wrap}
 .email-gaps{margin-top:8px;font-size:12px;color:#fbbf24}
 .email-basis{margin-top:4px;font-size:11px;color:rgba(255,255,255,.45)}
 .angle{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);font-size:13px;color:rgba(255,255,255,.75);display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
