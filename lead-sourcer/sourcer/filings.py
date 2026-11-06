@@ -375,6 +375,8 @@ def tidy(rows: list[dict]) -> int:
         if str(r.get("employees") or "").isdigit():
             n = int(r["employees"])
             fixed = n // 1000 if n >= 20_000 and n % 1000 == 0 else None if n <= 2 else n
+            if fixed and r.get("turnover_gbp") and float(r["turnover_gbp"]) / fixed > accounts.MAX_TURNOVER_PER_HEAD:
+                fixed = None   # a holding company's own staff beside the group's turnover
             if fixed != n:
                 r["employees"] = str(fixed) if fixed else ""
                 if r.get("size_estimate") and "staff" in (r.get("size_estimate_basis") or ""):

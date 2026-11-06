@@ -81,6 +81,11 @@ def broken_rules(f: dict, cols: dict) -> list[str]:
     regions = sum(r.get("value", 0) for r in f.get("regions") or [] if r.get("value"))
     if t and regions > 1.15 * t:
         out.append(f"regions add to {short(regions)}, over turnover {short(t)}")
+    for what, limit, label in (("fx_sensitivity", 0.5, "half"), ("fx_balances", 3.0, "3x")):
+        for size, _ in forward_sizes(cols.get(what, "")):
+            if t and size > limit * t:
+                out.append(f"{what.replace('fx_', '')} {short(size)} over {label} turnover {short(t)}: "
+                           f"{cols.get(what, '')[:90]}")
     for size, prior in forward_sizes(cols.get("fx_forwards", "")):
         if t and size > 20 * t:
             out.append(f"forward contracts {short(size)} over 20x turnover {short(t)}")

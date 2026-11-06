@@ -544,6 +544,8 @@ def _in_thousands(scanner) -> bool:
 # Above this a turnover read from the text (or tagged by a company with under 1,000 staff) is a misread — a £'000
 # figure taken as £m, cells run together (Eland Electrical read as £317,766bn) — never a size to use.
 MAX_PLAUSIBLE_TURNOVER = 5_000_000_000
+# Turnover per member of staff above this: the headcount is a holding company's own (Brooklyn Travel: £247m, 6 staff)
+MAX_TURNOVER_PER_HEAD = 20_000_000
 
 # Full, group and medium-sized accounts are for companies well past this; a turnover under it read from one is a
 # misread (a £'000 table taken as £, a wrong cell) or a holding company's own few charges — never a size to use.
@@ -706,7 +708,10 @@ def extract_facts(document: bytes) -> dict:
             facts["overseas_share"] = overseas_share_from(facts["regions"], facts["turnover"])
     if not fx and not _fx_from_text(facts, plain, "accounts text", thousands=_in_thousands(scanner)) and fx_tag_problem:
         facts["fx_gain_loss_check"] = fx_tag_problem
-    return check_fx(check_turnover(facts))
+    facts = check_fx(check_turnover(facts))
+    if facts.get("employees") and facts.get("turnover") and facts["turnover"] / facts["employees"] > MAX_TURNOVER_PER_HEAD:
+        facts["employees"] = None   # the holding company's own few staff beside the group's turnover, not the business's
+    return facts
 
 
 _HIDDEN_RE = re.compile(r"<ix:header\b.*?</ix:header>|<(script|style)\b.*?</\1>", re.I | re.S)

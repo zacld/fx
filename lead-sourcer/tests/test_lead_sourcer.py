@@ -2753,6 +2753,10 @@ class TestFxFilings(unittest.TestCase):
                 '<tr><td>Employees</td><td><ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" '
                 f'contextRef="FY2024" unitRef="shares" scale="{scale}">104</ix:nonFraction></td></tr></table>').encode(), 1)
             self.assertEqual(accounts.extract_facts(doc)["employees"], 104, scale)
+        holding = ixbrl(current="247,200", scale="3").replace(b"</table>", (
+            '<tr><td>Employees</td><td><ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" '
+            'contextRef="FY2024" unitRef="shares" scale="0">6</ix:nonFraction></td></tr></table>').encode(), 1)
+        self.assertIsNone(accounts.extract_facts(holding)["employees"])   # £247m and 6 staff: the parent's own
 
     def test_implausible_figures_on_the_list_move_to_a_check(self):
         rows = [{"company_name": "LISTER", "turnover_gbp": "89700000", "fx_gain_loss_gbp": "-597",
