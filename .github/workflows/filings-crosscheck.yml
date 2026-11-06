@@ -66,4 +66,4 @@ jobs:
         env:
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           PYTHONUNBUFFERED: "1"
-        run: python3 tools/reader_audit.py filings-now.json --sample 250
+        run: python3 tools/reader_audit.py filings-now.json --sample 250 $(grep -o "numbers=[0-9A-Z,]*" tools/filings_crosscheck_runs.txt | tail -1 | sed "s/numbers=/--numbers /")

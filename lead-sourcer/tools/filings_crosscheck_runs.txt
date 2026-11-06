@@ -3,3 +3,4 @@
 2026-11-06T00:13 all 12 months in; main list checks + turnover re-reads
 2026-11-06T00:18 sanity rules dry run
 2026-11-06T00:22 reader audit on 250 filings
+2026-11-06T00:35 diag numbers=02587124,12644570,11438467,15928578,02965452,06633850,SC119586

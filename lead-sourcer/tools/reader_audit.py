@@ -112,12 +112,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("filings")
     parser.add_argument("--sample", type=int, default=250)
+    parser.add_argument("--numbers", default="", help="comma-separated company numbers: read these, with the tags behind them")
     args = parser.parse_args()
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
     if not api_key:
         sys.exit("COMPANIES_HOUSE_API_KEY not set")
     rows = (json.load(open(args.filings, encoding="utf-8")) or {}).get("rows") or []
-    picked = sample(rows, args.sample)
+    wanted = [n.strip() for n in args.numbers.split(",") if n.strip()]
+    picked = ([next((r for r in rows if r["company_number"] == n), {"company_number": n, "company_name": n}) for n in wanted]
+              if wanted else sample(rows, args.sample))
     print(f"Reader audit: {len(picked)} of the list's {len(rows):,} companies read again with today's readers\n")
     tally, broken, changes = Counter(), [], []
     for r in picked:
@@ -134,6 +137,21 @@ def main() -> None:
             tally["reader crashed"] += 1
             continue
         f["format"] = "ixbrl"
+        if wanted:
+            print(f"{r.get('company_name')} ({r['company_number']}): staff {f.get('employees')}, turnover "
+                  f"{short(f.get('turnover'))} (prior {short(f.get('turnover_prior'))}) from {f.get('turnover_source', '')[:200]}")
+            scanner = accounts._IxbrlScanner()
+            try:
+                scanner.feed(doc.decode("utf-8", errors="replace"))
+            except Exception:  # noqa: BLE001
+                pass
+            for fact in scanner.facts:
+                if fact["concept"] in accounts.EMPLOYEE_CONCEPTS:
+                    c = scanner.contexts.get(fact["context"]) or {}
+                    print(f"    {fact['concept']} shown {fact.get('text', '').strip()!r} scale {fact.get('scale')} "
+                          f"format {fact.get('format')} end {c.get('end')} members {c.get('members')} "
+                          f"row …{fact.get('before', '')[-80:]!r}")
+            print(f"    employee-like concepts: {sorted(x for x in scanner.concepts if 'mploy' in x)[:8]}")
         cols = fx_notes.columns(f, r.get("company_name", ""), "")
         tally["read"] += 1
         made_up = ((filing.get("description_values") or {}).get("made_up_date") or "")
