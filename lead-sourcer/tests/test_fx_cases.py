@@ -255,7 +255,8 @@ class TestFirstYearScanFindings(unittest.TestCase):
         sentence = ("Fair value gains and losses on foreign exchange contracts The group made a loss of £327,499 "
                     "(2024 - gain of £2,494) in the year on a foreign exchange contract.")
         self.assertEqual(fx_notes._forward_items(sentence, 1), [])
-        self.assertTrue(fx_notes.forward_evidence_doubtful(f'"{sentence}" (filed accounts)'))
+        self.assertEqual(fx_notes.forward_recheck("Forward contracts valued at £327k (prior year £2k)",
+                                                  f'"{sentence}" (filed accounts)')[0], "")
         good = fx_notes._forward_rows("£'000\nForward foreign exchange contracts 1,250 980\n", 1)
         self.assertEqual(good[0]["amount"], 1_250_000)
 
@@ -291,3 +292,15 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
         self.assertEqual(fx_notes._sensitivity_items(s, 1), [])
         facts = accounts.check_fx({"turnover": 32_900_000, "fx_sensitivity": [{"amount": 35_100_000}, {"amount": 450_000}]})
         self.assertEqual(facts["fx_sensitivity"], [{"amount": 450_000}])
+
+    def test_a_gain_beside_the_fair_value_goes_the_fair_value_stays(self):
+        from sourcer import fx_notes
+        s = ("The fair value of forward foreign exchange contracts is measured using quoted forward exchange rates. "
+             "The fair value is an asset of £125,120 (2024 - liability of £372,996) and the change in value included "
+             "in profit or loss is a gain of £498,116 (2024 - loss of £372,996).")
+        items = fx_notes._forward_items(s, 1)
+        self.assertEqual([(i["amount"], i["prior"]) for i in items], [(125_120.0, 372_996.0)])
+        stored = "Forward contracts valued at £125k (prior year £372k); forward contracts valued at £498k (prior year £372k)"
+        new, _ = fx_notes.forward_recheck(stored, f'"{s}" (filed accounts)')
+        self.assertEqual(new, "Forward contracts valued at £125k (prior year £372k)")
+        self.assertIsNone(fx_notes.forward_recheck(new, f'"{s}" (filed accounts)'))   # stands now

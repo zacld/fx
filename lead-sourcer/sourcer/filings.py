@@ -404,9 +404,10 @@ def tidy(rows: list[dict]) -> int:
         prior = float(r["fx_gain_loss_prior_gbp"]) if r.get("fx_gain_loss_prior_gbp") else None
         if fx and prior and max(abs(fx), abs(prior)) / max(min(abs(fx), abs(prior)), 1) > 1_000:
             r["fx_gain_loss_prior_gbp"] = ""
-        why = fx_notes.forward_evidence_doubtful(r.get("fx_forwards_evidence", "")) if r.get("fx_forwards") else ""
-        if why:
-            r.update(fx_forwards="", fx_forwards_check=f"{why}: {r.get('fx_forwards_evidence', '')}")
+        recheck = fx_notes.forward_recheck(r.get("fx_forwards") or "", r.get("fx_forwards_evidence") or "")
+        if recheck:
+            new, why = recheck
+            r.update(fx_forwards=new, fx_forwards_check="" if new else f"{why}: {r.get('fx_forwards_evidence', '')}")
         if (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"), r.get("employees"),
                 r.get("fx_sensitivity")) != before + (before_sens,):
             changed += 1
