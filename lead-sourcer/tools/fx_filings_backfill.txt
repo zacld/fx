@@ -1,5 +1,6 @@
 # FX filings backfill: a push of this file scans the monthly archive named on the first line that isn't a comment
 # ("next" = the newest month not done yet; or a name like October2026), merged into the Recent FX filings list;
 # a number after it chains that many more months, each started when the one before is saved ("next 11").
-# Empty (comments only): a push of the scanner runs the 20-company test instead.
-next 11
+# "daily": one daily scan, saved — e.g. to apply new sanity rules (filings.tidy) to the stored list straight away.
+# Only a change to this file starts anything; any other push of the scanner runs the 20-company test (never saved).
+daily

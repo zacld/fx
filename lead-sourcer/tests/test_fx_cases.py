@@ -11,7 +11,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sourcer import accounts, fx_text, pdf  # noqa: E402
+from sourcer import accounts, fx_notes, fx_text, pdf  # noqa: E402
 
 CHARGING = "4 Operating profit 2025 2024 £ £ Operating profit for the year is stated after charging/(crediting): "
 
@@ -214,3 +214,72 @@ class TestFxInPdfText(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFirstYearScanFindings(unittest.TestCase):
+    """From the cross-check of the first year's FX filings scan (Nov 2026)."""
+
+    def test_an_fx_figure_under_1000_at_a_10m_company_is_a_check(self):
+        facts = accounts.check_fx({"fx_gain_loss": -597.0, "fx_gain_loss_prior": -10.0, "turnover": 89_700_000})
+        self.assertIsNone(facts["fx_gain_loss"])
+        self.assertIn("probably in £'000", facts["fx_gain_loss_check"])
+        kept = accounts.check_fx({"fx_gain_loss": -597.0, "turnover": 4_000_000})   # a small firm's £597 can be real
+        self.assertEqual(kept["fx_gain_loss"], -597.0)
+
+    def test_a_text_fx_line_without_a_heading_takes_the_documents_thousands(self):
+        text = "Operating profit is stated after charging/(crediting):\nForeign exchange differences (21) 7\n"
+        facts: dict = {}
+        self.assertTrue(accounts._fx_from_text(facts, text, "accounts text", thousands=True))
+        self.assertEqual((facts["fx_gain_loss"], facts["fx_gain_loss_prior"]), (21_000.0, -7_000.0))
+        self.assertIn("in £'000", facts["fx_gain_loss_evidence"])
+        headed: dict = {}
+        accounts._fx_from_text(headed, "£ £\n" + text, "accounts text", thousands=True)   # its own £ heading wins
+        self.assertEqual(headed["fx_gain_loss"], 21.0)
+        big: dict = {}   # 45,000 could be £45k or £45m: left as written
+        accounts._fx_from_text(big, text.replace("(21) 7", "(45,000) 7"), "accounts text", thousands=True)
+        self.assertEqual(big["fx_gain_loss"], 45_000.0)
+
+    def test_turnover_over_5bn_without_the_staff_is_a_check(self):
+        facts = accounts.check_turnover({"turnover": 40.4e9, "turnover_source": "the profit and loss account"})
+        self.assertIsNone(facts["turnover"])
+        self.assertIn("too big to be right", facts["turnover_check"])
+        big = accounts.check_turnover({"turnover": 6e9, "turnover_source": "tagged in the accounts (iXBRL)",
+                                       "employees": 20_000})
+        self.assertEqual(big["turnover"], 6e9)
+
+    def test_forward_rows_and_sentences_that_are_not_sizes(self):
+        page = "Financial instruments £'000\nForeign exchange forward contract 49 464 59,476 48,690\n"
+        self.assertEqual(fx_notes._forward_rows(page, 1), [])
+        page = "£\nForward foreign currency contracts losses/(gains) - 7,127 6.\n"
+        self.assertEqual(fx_notes._forward_rows(page, 1), [])
+        sentence = ("Fair value gains and losses on foreign exchange contracts The group made a loss of £327,499 "
+                    "(2024 - gain of £2,494) in the year on a foreign exchange contract.")
+        self.assertEqual(fx_notes._forward_items(sentence, 1), [])
+        self.assertTrue(fx_notes.forward_evidence_doubtful(f'"{sentence}" (filed accounts)'))
+        good = fx_notes._forward_rows("£'000\nForward foreign exchange contracts 1,250 980\n", 1)
+        self.assertEqual(good[0]["amount"], 1_250_000)
+
+
+class TestFirstYearScanFindingsAudit(unittest.TestCase):
+    """From the reader audit of 250 filings (Nov 2026)."""
+
+    def test_a_first_years_turnover_row_keeps_its_note_number_out(self):
+        from sourcer import turnover_text
+        self.assertEqual(turnover_text._figures(" 3 384,712,050", False), [(384712050.0, False)])
+        self.assertEqual(turnover_text._figures(" 3 45,123 41,000", False), [(45123.0, False), (41000.0, False)])
+        self.assertEqual(len(turnover_text._figures(" 12 15", False)), 2)   # two small figures: not a note pattern
+
+    def test_last_years_turnover_20x_apart_is_dropped(self):
+        facts = accounts.check_turnover({"turnover": 384_700_000, "turnover_prior": 3.0})
+        self.assertEqual((facts["turnover"], facts["turnover_prior"]), (384_700_000, None))
+        kept = accounts.check_turnover({"turnover": 50_000_000, "turnover_prior": 40_000_000})
+        self.assertEqual(kept["turnover_prior"], 40_000_000)
+
+    def test_a_continuing_discontinued_total_row_takes_the_totals(self):
+        from sourcer import turnover_text
+        figures = turnover_text._figures(" 3 37,679,617 1,619,583 39,299,200 32,434,093 3,742,042 36,176,135", False)
+        self.assertEqual(turnover_text._pick(figures, [2025, 2024]), (39_299_200.0, 36_176_135.0))
+
+    def test_last_years_fx_1000x_apart_is_dropped(self):
+        facts = accounts.check_fx({"fx_gain_loss": -699_158.0, "fx_gain_loss_prior": -5.0, "turnover": 60_000_000})
+        self.assertEqual((facts["fx_gain_loss"], facts["fx_gain_loss_prior"]), (-699_158.0, None))

@@ -69,6 +69,9 @@ def _figures(rest: str, millions: bool) -> list[tuple[float, bool]]:
     # and followed by at least two figures (this year and last).
     if len(out) >= 3 and re.fullmatch(r"\d{1,2}(?:\.\d)?", tokens[0].strip()):
         out = out[1:]
+    # ... or before a first year's only figure: "TURNOVER 3 384,712,050" (Greanco: no comparative column)
+    elif len(out) == 2 and re.fullmatch(r"\d{1,2}(?:\.\d)?", tokens[0].strip()) and out[1][0] >= 1_000 * max(out[0][0], 1):
+        out = out[1:]
     return out
 
 
@@ -87,10 +90,24 @@ def _columns(page: str, before: int) -> tuple[list[int], bool]:
     return [], bool(re.search(r"^\s*group\s+(?:group\s+)?company", near, re.I | re.M))
 
 
+def _totals(figures: list[tuple[float, bool]]) -> Optional[tuple[float, float]]:
+    """
+    A row laid out continuing / discontinued (or acquisitions) / total for each year — "Turnover 37,679,617
+    1,619,583 39,299,200 32,434,093 3,742,042 36,176,135" (Bath Priory) — as (this year's total, last year's).
+    """
+    v = [f[0] for f in figures]
+    if len(v) == 6 and all(abs(v[i] + v[i + 1] - v[i + 2]) <= 0.005 * v[i + 2] + 2 for i in (0, 3)):
+        return v[2], v[5]
+    return None
+
+
 def _pick(figures: list[tuple[float, bool]], years: list[int]) -> tuple[Optional[float], Optional[float]]:
     """(this year, last year) from a row's figures and its column years (first column of each year: the group's)."""
     if not figures:
         return None, None
+    totals = _totals(figures)
+    if totals:
+        return totals
     if len(years) >= 2 and len(figures) >= len(years):
         latest = max(years)
         earlier = [y for y in years if y < latest]

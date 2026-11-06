@@ -2738,6 +2738,50 @@ class TestReviewFixesIncumbent(unittest.TestCase):
 
 
 class TestFxFilings(unittest.TestCase):
+    def test_an_unscaled_fx_tag_in_thousands_accounts_is_scaled_like_the_rest(self):
+        doc = re.sub(rb'(GainLossDueToForeignExchange[^>]*?)scale="3"', rb'\1scale="0"', ixbrl(scale="3"))
+        facts = accounts.extract_facts(doc)
+        self.assertEqual(facts["turnover"], 23_412_000)
+        self.assertEqual((facts["fx_gain_loss"], facts["fx_gain_loss_prior"]), (-420_000, -90_000))
+        self.assertIn("the tag carried no scale", facts["fx_gain_loss_evidence"])
+        pounds = accounts.extract_facts(re.sub(rb'scale="3"', b'scale="0"', ixbrl(scale="3")))
+        self.assertEqual(pounds["fx_gain_loss"], -420)   # £ accounts, £23k turnover: nothing to borrow, small firm
+
+    def test_a_headcount_is_the_figure_shown_whatever_its_scale(self):
+        for scale in ("-2", "0", "3"):
+            doc = ixbrl().replace(b"</table>", (
+                '<tr><td>Employees</td><td><ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" '
+                f'contextRef="FY2024" unitRef="shares" scale="{scale}">104</ix:nonFraction></td></tr></table>').encode(), 1)
+            self.assertEqual(accounts.extract_facts(doc)["employees"], 104, scale)
+        holding = ixbrl(current="247,200", scale="3").replace(b"</table>", (
+            '<tr><td>Employees</td><td><ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" '
+            'contextRef="FY2024" unitRef="shares" scale="0">6</ix:nonFraction></td></tr></table>').encode(), 1)
+        self.assertIsNone(accounts.extract_facts(holding)["employees"])   # £247m and 6 staff: the parent's own
+
+    def test_implausible_figures_on_the_list_move_to_a_check(self):
+        rows = [{"company_name": "LISTER", "turnover_gbp": "89700000", "fx_gain_loss_gbp": "-597",
+                 "fx_gain_loss_evidence": "tagged in the accounts", "filed_fx_score": 10, "fx_in_filing": True},
+                {"company_name": "ELAND", "turnover_gbp": "317766100000000000", "employees": "40", "filed_fx_score": 20},
+                {"company_name": "SCHAEFFLER", "turnover_gbp": "163400000", "filed_fx_score": 105,
+                 "fx_forwards": "Forward contracts £464k in the notes' tables (prior year £59.4m)",
+                 "fx_forwards_evidence": '"Foreign exchange forward contract 49 464 59,476 48,690" (filed accounts)',
+                 "hmrc_trade": "HMRC customs records: imports in 12 of the last 12 months (matched on the registered name)"},
+                {"company_name": "FINE", "turnover_gbp": "50000000", "fx_gain_loss_gbp": "-250000", "filed_fx_score": 25,
+                 "fx_forwards": "Forward contracts of €1m", "fx_forwards_evidence": '"forward contracts of €1m to buy euros"'}]
+        rows.append({"company_name": "MANTON", "employees": "1072000", "size_estimate": "Size likely £107bn–£322bn",
+                     "size_estimate_basis": "from 1,072,000 staff — not filed turnover", "filed_fx_score": 30})
+        rows.append({"company_name": "EXOL", "employees": "1", "turnover_gbp": "89400000", "filed_fx_score": 30})
+        self.assertEqual(filings.tidy(rows), 5)
+        self.assertEqual((rows[4]["employees"], rows[4]["size_estimate"]), ("1072", "likely £107.2m–£321.6m"))
+        self.assertEqual(rows[5]["employees"], "")
+        self.assertEqual(rows[0]["fx_gain_loss_gbp"], "")
+        self.assertIn("probably in £'000", rows[0]["fx_gain_loss_check"])
+        self.assertEqual(rows[1]["turnover_gbp"], "")
+        self.assertIn("too big to be right", rows[1]["turnover_check"])
+        self.assertEqual(rows[2]["fx_forwards"], "")
+        self.assertIn("HMRC customs: imports in 12 of the last 12 months (+20)", rows[2]["filed_fx"])
+        self.assertEqual((rows[3]["fx_gain_loss_gbp"], rows[3]["filed_fx_score"]), ("-250000", 25))   # untouched
+
     def test_owned_abroad_without_local_fx_is_marked_and_ranked_lower(self):
         rows = [{"filed_fx_score": 60, "owner": "Owned by CLOETTA AB (Sweden) — overseas parent"},
                 {"filed_fx_score": 60, "owner": "Owned by ACME GMBH (Germany) — overseas parent",

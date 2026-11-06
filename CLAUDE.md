@@ -257,6 +257,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   per item (`filings/2026-09`, by month filed) under the `filings` index
   (`apps/web/scripts/filings-store.mjs`); the tab picks a month
   (`?view=filings&month=2026-09`).
+  Sanity rules (Nov 2026, from the first year's cross-check — `tools/filings_crosscheck.py`, workflow "FX
+  filings cross-check", read-only: figures to doubt, group repeats, each company against the main list's own
+  reading, a few doubtful figures re-read from Companies House): an FX gain/loss under £1,000 at a £10m+ company
+  (`accounts.FX_MIN_PLAUSIBLE`: a £'000 figure read or tagged as pounds — 276 of the year's rows) and a turnover
+  over £5bn read from text or without 1,000 staff (`MAX_PLAUSIBLE_TURNOVER`) go to a check, never a fact; an FX
+  line read from the text of accounts whose tagged figures are in £'000 takes that scale when no heading is near
+  it; a forward-contract row with more columns than this year and last, a gains/losses row, or a gain/loss on the
+  contracts isn't a size. `filings.tidy` applies these to the rows already listed on every scan.
   Each row also keeps: "Moved up from small accounts" (`filings.moved_up`, from
   the company's Companies House filing history — one call per listed company,
   once, `--history-max` a run), bank borrowing (`bank_debt`: the tagged figure,
