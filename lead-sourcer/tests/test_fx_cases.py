@@ -255,7 +255,8 @@ class TestFirstYearScanFindings(unittest.TestCase):
         sentence = ("Fair value gains and losses on foreign exchange contracts The group made a loss of £327,499 "
                     "(2024 - gain of £2,494) in the year on a foreign exchange contract.")
         self.assertEqual(fx_notes._forward_items(sentence, 1), [])
-        self.assertTrue(fx_notes.forward_evidence_doubtful(f'"{sentence}" (filed accounts)'))
+        self.assertEqual(fx_notes.forward_recheck("Forward contracts valued at £327k (prior year £2k)",
+                                                  f'"{sentence}" (filed accounts)')[0], "")
         good = fx_notes._forward_rows("£'000\nForward foreign exchange contracts 1,250 980\n", 1)
         self.assertEqual(good[0]["amount"], 1_250_000)
 
@@ -283,3 +284,45 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
     def test_last_years_fx_1000x_apart_is_dropped(self):
         facts = accounts.check_fx({"fx_gain_loss": -699_158.0, "fx_gain_loss_prior": -5.0, "turnover": 60_000_000})
         self.assertEqual((facts["fx_gain_loss"], facts["fx_gain_loss_prior"]), (-699_158.0, None))
+
+    def test_a_growth_sentence_is_not_a_sensitivity(self):
+        from sourcer import fx_notes
+        s = ("The result was a growth in ACV of 12% with a 12% move in sterling against the USD, adding £35.1m "
+             "to profit.")
+        self.assertEqual(fx_notes._sensitivity_items(s, 1), [])
+        facts = accounts.check_fx({"turnover": 32_900_000, "fx_sensitivity": [{"amount": 35_100_000}, {"amount": 450_000}]})
+        self.assertEqual(facts["fx_sensitivity"], [{"amount": 450_000}])
+
+    def test_a_gain_beside_the_fair_value_goes_the_fair_value_stays(self):
+        from sourcer import fx_notes
+        s = ("The fair value of forward foreign exchange contracts is measured using quoted forward exchange rates. "
+             "The fair value is an asset of £125,120 (2024 - liability of £372,996) and the change in value included "
+             "in profit or loss is a gain of £498,116 (2024 - loss of £372,996).")
+        items = fx_notes._forward_items(s, 1)
+        self.assertEqual([(i["amount"], i["prior"]) for i in items], [(125_120.0, 372_996.0)])
+        stored = "Forward contracts valued at £125k (prior year £372k); forward contracts valued at £498k (prior year £372k)"
+        new, _ = fx_notes.forward_recheck(stored, f'"{s}" (filed accounts)')
+        self.assertEqual(new, "Forward contracts valued at £125k (prior year £372k)")
+        self.assertIsNone(fx_notes.forward_recheck(new, f'"{s}" (filed accounts)'))   # stands now
+
+    def test_a_doubtful_row_goes_alone_the_sentence_beside_it_stays(self):
+        """S.A.V. United Kingdom: the committed total stays when a four-column table row beside it goes."""
+        from sourcer import fx_notes
+        ev = ('"The total value of outstanding foreign exchange forward contracts that the company had committed to '
+              'at the year end was £1,146,173 (2024: £2,927,783)" (filed accounts); "Forward contracts 11,234 - 4,500 -" '
+              '(filed accounts)')
+        new, _ = fx_notes.forward_recheck("Forward contracts of £1.1m (prior year £2.9m); forward contracts £11k", ev)
+        self.assertEqual(new, "Forward contracts of £1.1m (prior year £2.9m)")
+        self.assertEqual(fx_notes.forward_recheck("Forward contracts £11k", '"Forward contracts 11,234 - 4,500 -"')[0], "")
+
+    def test_a_four_column_forward_row_is_not_a_size(self):
+        from sourcer import fx_notes
+        self.assertEqual(fx_notes._forward_rows("£'000\nForeign exchange forward contract 35 - 64,856 53,872\n", 1), [])
+        self.assertTrue(fx_notes.forward_evidence_doubtful('"Foreign exchange forward contract 35 - 64,856 53,872"'))
+        kept = fx_notes._forward_rows("£'000\nForward foreign exchange contracts 21 1,250 980\n", 1)   # note, two years
+        self.assertEqual(kept[0]["amount"], 1_250_000)
+
+    def test_regions_adding_to_more_than_turnover_are_dropped(self):
+        facts = accounts.check_fx({"turnover": 36_946_000, "overseas_share": 0.4,
+                                   "regions": [{"region": "UK", "value": 30_000_000}, {"region": "EU", "value": 12_800_000}]})
+        self.assertEqual((facts["regions"], facts["overseas_share"]), ([], None))

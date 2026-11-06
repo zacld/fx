@@ -128,6 +128,7 @@ _FORWARD_WORDS = re.compile(
     r"(?:fx|foreign\s+exchange|currency)\s+derivatives?", re.I)
 _FAIR_VALUE_BEFORE = re.compile(r"fair\s+value|liabilit|\basset|carrying|valued\s+at|mark[- ]to[- ]market", re.I)
 _GAIN_LOSS_BEFORE = re.compile(r"\b(?:gains?|loss(?:es)?|charged?|credit(?:ed)?)\b|recognised\s+in", re.I)
+_GAIN_LOSS_OF = re.compile(r"(?:gains?|loss(?:es)?|profits?|credit|charge)\s+of\s*\(?\s*$", re.I)
 _GAIN_LOSS_AFTER = re.compile(r"^\s*(?:\([^)]*\)\s*)?(?:gains?|loss(?:es)?)\b", re.I)
 _BUY = re.compile(r"purchas|\bbuy|\bbought", re.I)
 _SELL = re.compile(r"\bsell|\bsales?\b|\bsold\b", re.I)
@@ -151,7 +152,7 @@ def _negated(sentence: str, start: int) -> bool:
 # Contracts or a fair value under this are too small to open a call on (and usually a misread).
 MIN_FORWARD_AMOUNT = 5_000
 _PNL_EFFECT = re.compile(r"taken\s+to\s+the|recognised\s+in\s+(?:the\s+)?(?:profit|statement|income)|"
-                         r"(?:credited|charged)\s+to|(?:fair\s+value\s+)?(?:profits?|gains?|loss(?:es)?)\s+on\s+(?:the\s+|a\s+)?"
+                         r"(?:credited|charged)\s+to|(?:fair\s+value\s+)?(?:profit|gain|loss)\s+on\s+(?:the\s+)?"
                          r"(?:forward|foreign|derivative|revaluation)", re.I)
 _NUMBER_TOKEN = re.compile(r"(?<![\w.])\(?[£$€]?\d[\d,]*(?:\.\d+)?\)?(?![\w])")
 # Dates ("29/12/2025"), exchange rates ("at a rate of 1.338116") and years: figures, but not amounts.
@@ -190,6 +191,11 @@ def _forward_items(sentence: str, page: int, follows_forward: bool = False) -> l
         if a["end"] < m.start() - 100:
             continue   # well before the contracts are named: another fact run into the sentence
         before = sentence[max(0, a["start"] - 120):a["start"]]
+        clause = re.split(r"\band\b|[;,]|\.\s", sentence[max(0, a["start"] - 200):a["start"]])[-1]
+        if (_GAIN_LOSS_OF.search(sentence[max(0, a["start"] - 30):a["start"]]) and not re.search(r"fair\s+value", clause, re.I)
+                and not (a["prior"] or _in_brackets_about_another_year(sentence, a["start"]))):
+            continue   # "... and the change in value ... is a gain of £498,116": what they made, not their value
+                       # ("the fair value of the contracts ... was a gain of £530,752" is their value: kept)
         if (_GAIN_LOSS_BEFORE.search(before) and not _FAIR_VALUE_BEFORE.search(before)) or \
                 _GAIN_LOSS_AFTER.search(sentence[a["end"]:a["end"] + 30]):
             continue   # a gain or loss on the contracts ("a loss of £120,000 on …", "£120,000 loss"), not their size
@@ -226,7 +232,8 @@ _FX_MOVE = re.compile(r"strengthen|weaken|appreciat|depreciat|(?:exchange\s+rate
                       r"pound|dollar|euro)\W+(?:\w+\W+){0,4}?(?:movement|change|increase|decrease|rise|fall|move)|"
                       r"(?:movement|change|increase|decrease|rise|fall|move)\w*\s+(?:\w+\s+){0,3}?in\s+(?:the\s+)?"
                       r"(?:exchange\s+rates?|sterling|value\s+of\s+sterling|currenc)", re.I)
-_GROWTH = re.compile(r"\b(?:increased|grew|rose|decreased|fell|up|down)\s+(?:by\s+)?(?:\d{1,3}(?:\.\d+)?\s?%)\s+to\b", re.I)
+_GROWTH = re.compile(r"\b(?:increased|grew|rose|decreased|fell|up|down)\s+(?:by\s+)?(?:\d{1,3}(?:\.\d+)?\s?%)\s+to\b|"
+                     r"\bgrowth\b", re.I)   # "The result was a growth in ACV of 12%" (FundApps): not a currency move
 
 
 def _sensitivity_items(sentence: str, page: int) -> list[dict]:
@@ -304,6 +311,46 @@ _ROW_GAIN_LOSS = re.compile(r"(?:gains?|loss(?:es)?|profit|movement|charge|credi
                             re.I)
 
 
+_COLUMN = re.compile(r"\(?-?\d[\d,]*(?:\.\d+)?\)?|(?<!\S)[-–—](?!\S)")
+
+
+def _row_columns(rest: str) -> int:
+    """How many columns a table row has, dashes ("nil") included."""
+    return len(_COLUMN.findall(re.sub(r"\(?\bnotes?\s*\d+\)?", " ", rest, flags=re.I)))
+
+
+def forward_recheck(line: str, evidence: str) -> Optional[tuple[str, str]]:
+    """
+    (today's line, why) when today's rules read a stored forward size's evidence differently — a table row that
+    isn't a size, or a sentence whose "gain of £498,116" sat beside the fair value (A D Burs: the £125k fair value
+    stays, the gain goes) — or None when the stored line stands. For rows already listed (filings.tidy).
+    """
+    quoted = re.findall(r'"([^"]+)"', evidence or "")
+    if not quoted:
+        return None
+    rows = [q for q in quoted if _FORWARD_ROW.match(q)]
+    bad_rows = [(q, forward_evidence_doubtful(f'"{q}"')) for q in rows]
+    bad_rows = [(q, why) for q, why in bad_rows if why]
+    sentences = [q for q in quoted if q not in rows]
+    gain_loss = any(re.search(r"(?:gains?|loss(?:es)?|profits?)\s+of\b", q, re.I) for q in sentences)
+    if not bad_rows and not gain_loss:
+        return None
+    if bad_rows and not sentences:
+        return "", bad_rows[0][1]
+    # a doubtful row goes on its own: a sound sentence beside it stays (S.A.V.: "outstanding … forward contracts …
+    # was £1,146,173 (2024: £2,927,783)" kept, the table row "£11k" dropped)
+    items: list[dict] = []
+    for q in sentences:
+        items += _forward_items(q.lstrip("…"), 0, follows_forward=True)
+    for q in rows:
+        if q not in dict(bad_rows):
+            items += _forward_rows(q, 0)
+    new = "; ".join(dict.fromkeys(_forward_line(x) for x in items[:2]))
+    new = new[:1].upper() + new[1:]
+    why = bad_rows[0][1] if bad_rows else "a gain or loss on the contracts, not their size"
+    return None if new == line else (new, why)
+
+
 def forward_evidence_doubtful(evidence: str) -> str:
     """
     Why a forward size kept from an earlier reading isn't one by today's rules ('' when it still stands): a table
@@ -321,7 +368,7 @@ def forward_evidence_doubtful(evidence: str) -> str:
         rest = row.group(2)
         if re.match(r"\s*\(?\s*(?:gains?|loss(?:es)?|profits?)\b", rest, re.I):
             return "the gains/losses line, not the contracts"
-        if len([v for v in _cells(rest) if abs(v) > 0]) > 2:
+        if len([v for v in _cells(rest) if abs(v) > 0]) > 2 or _row_columns(rest) > 3:
             return "a table row with more columns than this year and last: which is the size is unclear"
     return ""
 
@@ -341,8 +388,9 @@ def _forward_rows(page: str, number: int) -> list[dict]:
                 and not re.search(r"forward\s+(?:foreign\s+)?(?:exchange|currency)|currency\s+forwards?", page, re.I):
             continue   # a bare "forward contracts" row on a page that never ties them to currency
         values = [v for v in _cells(rest) if abs(v) > 0]
-        if not values or len(values) > 2:
-            continue   # more than this year and last ("49 464 59,476 48,690": assets, liabilities, notionals): unclear
+        if not values or len(values) > 2 or _row_columns(rest) > 3:
+            continue   # more columns than a note, this year and last ("49 464 59,476 48,690", "35 - 64,856 53,872":
+                       # assets, liabilities, notionals): which is the size is unclear
         scale = _scale_near(page, m.start())
         amount = abs(values[0]) * scale
         if amount < MIN_FORWARD_AMOUNT:

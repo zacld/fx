@@ -7,3 +7,12 @@
 2026-11-06T00:40 full audit after headcount, note-number, totals, unscaled-FX fixes
 2026-11-06T00:50 full audit, 400 filings (150 never seen by the fixes)
 2026-11-06T01:07 final audit, 400 filings
+2026-11-06T01:40 after tidy, spot numbers=01966449,15928578,02587124,11438467,02965452,15924463,12644570
+2026-11-06T01:56 independent audit seed=2026 (sample 400 flag; fresh draw)
+2026-11-06T02:07 diag numbers=03059307,07380035
+2026-11-06T02:10 regression audit, 400 filings, after per-figure gain guard
+2026-11-06T02:31 diag numbers=16023084,11976847,13606212
+2026-11-06T02:33 regression audit 400 after four-column forward rule
+2026-11-06T02:49 diag numbers=SC018343,03879072,16365169,01194446,08954173
+2026-11-06T02:53 regression audit 400 after region rule
+2026-11-06T03:21 cross-check after forward recheck keeps sound sentences

@@ -86,15 +86,22 @@ def broken_rules(f: dict, cols: dict) -> list[str]:
             if t and size > limit * t:
                 out.append(f"{what.replace('fx_', '')} {short(size)} over {label} turnover {short(t)}: "
                            f"{cols.get(what, '')[:90]}")
-    for size, prior in forward_sizes(cols.get("fx_forwards", "")):
+    for part in (cols.get("fx_forwards") or "").split(";"):
+        sizes = forward_sizes(part)
+        if not sizes:
+            continue
+        size, prior = sizes[0]
         if t and size > 20 * t:
             out.append(f"forward contracts {short(size)} over 20x turnover {short(t)}")
+        # a fair value or hedging reserve swings with the rate (High Street TV: £8k to £599k); amounts contracted don't
+        if "valued at" in part or "reserve" in part:
+            continue
         if prior and min(size, prior) > 0 and max(size, prior) / min(size, prior) >= 50:
             out.append(f"forward contracts {short(size)} v last year {short(prior)}: 50x apart")
     return out
 
 
-def sample(rows: list[dict], n: int) -> list[dict]:
+def sample(rows: list[dict], n: int, seed: int = 7) -> list[dict]:
     """The rows the cross-check doubted first, then the strongest, then a fixed random draw."""
     doubted = []
     for r in rows:
@@ -104,6 +111,10 @@ def sample(rows: list[dict], n: int) -> list[dict]:
             doubted.append(r)
     strongest = sorted(rows, key=lambda r: -(r.get("filed_fx_score") or 0))[:60]
     rest = [r for r in rows if r not in doubted and r not in strongest]
+    if seed != 7:   # a fresh draw: none of the doubted or strongest the fixes were made against
+        rest = [r for r in rows if r not in doubted and r not in strongest]
+        random.Random(seed).shuffle(rest)
+        return rest[:n]
     random.Random(7).shuffle(rest)
     picked, seen = [], set()
     for r in doubted[:70] + strongest + rest:
@@ -117,6 +128,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("filings")
     parser.add_argument("--sample", type=int, default=250)
+    parser.add_argument("--seed", type=int, default=7, help="another number: a fresh random draw of --sample filings")
     parser.add_argument("--numbers", default="", help="comma-separated company numbers: read these, with the tags behind them")
     args = parser.parse_args()
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
@@ -125,7 +137,7 @@ def main() -> None:
     rows = (json.load(open(args.filings, encoding="utf-8")) or {}).get("rows") or []
     wanted = [n.strip() for n in args.numbers.split(",") if n.strip()]
     picked = ([next((r for r in rows if r["company_number"] == n), {"company_number": n, "company_name": n}) for n in wanted]
-              if wanted else sample(rows, args.sample))
+              if wanted else sample(rows, args.sample, args.seed))
     print(f"Reader audit: {len(picked)} of the list's {len(rows):,} companies read again with today's readers\n")
     tally, broken, changes = Counter(), [], []
     for r in picked:
@@ -142,6 +154,7 @@ def main() -> None:
             tally["reader crashed"] += 1
             continue
         f["format"] = "ixbrl"
+        cols = fx_notes.columns(f, r.get("company_name", ""), "")
         if wanted:
             print(f"{r.get('company_name')} ({r['company_number']}): staff {f.get('employees')}, turnover "
                   f"{short(f.get('turnover'))} (prior {short(f.get('turnover_prior'))}) from {f.get('turnover_source', '')[:200]}")
@@ -157,7 +170,9 @@ def main() -> None:
                           f"format {fact.get('format')} end {c.get('end')} members {c.get('members')} "
                           f"row …{fact.get('before', '')[-80:]!r}")
             print(f"    employee-like concepts: {sorted(x for x in scanner.concepts if 'mploy' in x)[:8]}")
-        cols = fx_notes.columns(f, r.get("company_name", ""), "")
+            print(f"    list's forwards: {r.get('fx_forwards')} — {r.get('fx_forwards_evidence', '')[:300]}")
+            print(f"    today's forwards: {cols.get('fx_forwards')} — {cols.get('fx_forwards_evidence', '')[:300]}")
+            print(f"    today's sensitivity: {cols.get('fx_sensitivity', '')[:400]}")
         tally["read"] += 1
         made_up = ((filing.get("description_values") or {}).get("made_up_date") or "")
         if r.get("period_end") and made_up and made_up != r["period_end"]:

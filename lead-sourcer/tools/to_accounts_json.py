@@ -61,6 +61,17 @@ def sanity(row: dict) -> list[str]:
         row.update(fx_gain_loss_gbp="", fx_gain_loss_prior_gbp="", recent_fx_loss="",
                    fx_gain_loss_check=f"FX figure £{fx:,.0f} is over 20% of turnover: likely another figure; check the accounts")
         done.append("FX over 20% of turnover")
+    sens = re.search(r"[£$€]\s?([\d,.]+)\s*(k|m|bn)?\b", (row.get("fx_sensitivity") or "").split(" — ")[0])
+    if sens and t:
+        size = float(sens.group(1).replace(",", "")) * {"k": 1e3, "m": 1e6, "bn": 1e9}.get(sens.group(2) or "", 1)
+        if size > 0.5 * t:
+            row["fx_sensitivity"] = ""
+            done.append("sensitivity over half of turnover")
+    parts = re.findall(r"£\s?([\d,.]+)\s*(k|m|bn)?\b", row.get("turnover_regions") or "")
+    if t and parts and sum(float(a.replace(",", "")) * {"k": 1e3, "m": 1e6, "bn": 1e9}.get(u, 1)
+                           for a, u in parts) > 1.15 * t:
+        row.update(turnover_regions="", overseas_turnover_share="")
+        done.append("regions over turnover")
     for key in ("fact_1", "fact_2", "opener"):   # growth built on a misread last year (a note number read as turnover)
         m = _GREW.search(row.get(key) or "")
         if m and int((m.group(1) or m.group(2)).replace(",", "")) > 500:
