@@ -7,3 +7,4 @@
 2026-11-06T00:40 full audit after headcount, note-number, totals, unscaled-FX fixes
 2026-11-06T00:50 full audit, 400 filings (150 never seen by the fixes)
 2026-11-06T01:07 final audit, 400 filings
+2026-11-06T01:40 after tidy, spot numbers=01966449,15928578,02587124,11438467,02965452,15924463,12644570
