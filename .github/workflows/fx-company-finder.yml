@@ -48,6 +48,7 @@ on:
     # Sun–Thu 19:43 UTC, the evening before each working day: GitHub starts free scheduled runs hours late (a 05:17
     # schedule started 11:30–13:30), so an evening start still has the list ready before the morning.
     - cron: '43 19 * * 0-4'
+  # (6 Nov 2026: changed to run the finder once with the audited readers and the upload's sense checks.)
   # A change to this workflow runs it straight away (free on the public repo; the Claude GitHub app can't
   # start runs by hand). Same companies as a scheduled run, so a run that finishes updates the page.
   push:

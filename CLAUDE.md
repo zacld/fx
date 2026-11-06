@@ -264,7 +264,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   over £5bn read from text or without 1,000 staff (`MAX_PLAUSIBLE_TURNOVER`) go to a check, never a fact; an FX
   line read from the text of accounts whose tagged figures are in £'000 takes that scale when no heading is near
   it; a forward-contract row with more columns than this year and last, a gains/losses row, or a gain/loss on the
-  contracts isn't a size. `filings.tidy` applies these to the rows already listed on every scan.
+  contracts isn't a size. `filings.tidy` applies these to the rows already listed on every scan, and
+  `tools/to_accounts_json.py` (`sanity`) applies them to the main Accounts list as the last step before upload
+  (whatever reader or cached reading produced a row; a growth fact over 500% goes too). Headcounts are read as
+  shown, never scaled (filers tag them with scale -2 or 3); one over £20m of turnover a head is a holding
+  company's own. `tools/reader_audit.py` (in the cross-check workflow) re-reads ~400 real filings with the
+  current readers and holds them to hard rules — the bar for a reader change is a clean run.
   Each row also keeps: "Moved up from small accounts" (`filings.moved_up`, from
   the company's Companies House filing history — one call per listed company,
   once, `--history-max` a run), bank borrowing (`bank_debt`: the tagged figure,
