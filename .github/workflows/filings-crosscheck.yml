@@ -14,6 +14,7 @@ on:
       - .github/workflows/filings-crosscheck.yml
       - lead-sourcer/tools/filings_crosscheck.py
       - lead-sourcer/tools/filings_crosscheck_runs.txt
+      - lead-sourcer/tools/reader_audit.py
 
 permissions:
   contents: read
@@ -25,7 +26,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -60,3 +61,9 @@ jobs:
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           PYTHONUNBUFFERED: "1"
         run: python3 tools/filings_crosscheck.py filings-now.json accounts-now.json --recheck 8
+      - name: Reader audit (today's readers on ~250 real filings, read again)
+        working-directory: lead-sourcer
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          PYTHONUNBUFFERED: "1"
+        run: python3 tools/reader_audit.py filings-now.json --sample 250
