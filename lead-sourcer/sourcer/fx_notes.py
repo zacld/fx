@@ -329,19 +329,26 @@ def forward_recheck(line: str, evidence: str) -> Optional[tuple[str, str]]:
     if not quoted:
         return None
     rows = [q for q in quoted if _FORWARD_ROW.match(q)]
-    for q in rows:
-        why = forward_evidence_doubtful(f'"{q}"')
-        if why:
-            return "", why
+    bad_rows = [(q, forward_evidence_doubtful(f'"{q}"')) for q in rows]
+    bad_rows = [(q, why) for q, why in bad_rows if why]
     sentences = [q for q in quoted if q not in rows]
-    if not sentences or not any(re.search(r"(?:gains?|loss(?:es)?|profits?)\s+of\b", q, re.I) for q in sentences):
+    gain_loss = any(re.search(r"(?:gains?|loss(?:es)?|profits?)\s+of\b", q, re.I) for q in sentences)
+    if not bad_rows and not gain_loss:
         return None
+    if bad_rows and not sentences:
+        return "", bad_rows[0][1]
+    # a doubtful row goes on its own: a sound sentence beside it stays (S.A.V.: "outstanding … forward contracts …
+    # was £1,146,173 (2024: £2,927,783)" kept, the table row "£11k" dropped)
     items: list[dict] = []
     for q in sentences:
         items += _forward_items(q.lstrip("…"), 0, follows_forward=True)
+    for q in rows:
+        if q not in dict(bad_rows):
+            items += _forward_rows(q, 0)
     new = "; ".join(dict.fromkeys(_forward_line(x) for x in items[:2]))
     new = new[:1].upper() + new[1:]
-    return None if new == line else (new, "a gain or loss on the contracts, not their size")
+    why = bad_rows[0][1] if bad_rows else "a gain or loss on the contracts, not their size"
+    return None if new == line else (new, why)
 
 
 def forward_evidence_doubtful(evidence: str) -> str:

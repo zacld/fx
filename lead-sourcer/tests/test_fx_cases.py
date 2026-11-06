@@ -305,6 +305,16 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
         self.assertEqual(new, "Forward contracts valued at £125k (prior year £372k)")
         self.assertIsNone(fx_notes.forward_recheck(new, f'"{s}" (filed accounts)'))   # stands now
 
+    def test_a_doubtful_row_goes_alone_the_sentence_beside_it_stays(self):
+        """S.A.V. United Kingdom: the committed total stays when a four-column table row beside it goes."""
+        from sourcer import fx_notes
+        ev = ('"The total value of outstanding foreign exchange forward contracts that the company had committed to '
+              'at the year end was £1,146,173 (2024: £2,927,783)" (filed accounts); "Forward contracts 11,234 - 4,500 -" '
+              '(filed accounts)')
+        new, _ = fx_notes.forward_recheck("Forward contracts of £1.1m (prior year £2.9m); forward contracts £11k", ev)
+        self.assertEqual(new, "Forward contracts of £1.1m (prior year £2.9m)")
+        self.assertEqual(fx_notes.forward_recheck("Forward contracts £11k", '"Forward contracts 11,234 - 4,500 -"')[0], "")
+
     def test_a_four_column_forward_row_is_not_a_size(self):
         from sourcer import fx_notes
         self.assertEqual(fx_notes._forward_rows("£'000\nForeign exchange forward contract 35 - 64,856 53,872\n", 1), [])
