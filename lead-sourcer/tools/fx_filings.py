@@ -38,9 +38,16 @@ def load(path: str) -> dict:
     return {}
 
 
-def pick(args, done: set[str]) -> list[str]:
+# What's looked up per company after the scan (Companies House calls), carried over when its filing is read again.
+LOOKED_UP = ("directors", "director_count", "incumbent_bank", "incumbent_bank_url", "lenders", "owner", "triggers",
+             "fd_search_url", "research_checked", "moved_up", "history_checked")
+
+
+def pick(args, done: set[str], rescanned: set[str] = frozenset()) -> list[str]:
     if args.zip:
         return list(args.zip)
+    if args.month == "rescan":
+        return pick_rescan(args.max_files, rescanned)
     if args.daily:
         files = [u for u in filings.list_files("daily") if args.redo or u.rsplit("/", 1)[-1] not in done]
         return sorted(files, reverse=True)[: args.max_files]   # newest first
@@ -51,6 +58,21 @@ def pick(args, done: set[str]) -> list[str]:
     if args.month == "next":
         return [u for u in monthly if u.rsplit("/", 1)[-1] not in done][:1]
     return [u for u in monthly if args.month.lower() in u.lower()][:1]
+
+
+def pick_rescan(max_files: int, rescanned: set[str]) -> list[str]:
+    """
+    The next files to read again at today's floor (Nov 2026: £25m -> £20m): the day files newer than the newest
+    monthly archive first (up to max_files), then the monthly archives one a run, newest first — each file once
+    (files_rescanned). Nothing left: [] (the chain stops).
+    """
+    monthly = sorted(filings.list_files("monthly"), key=lambda u: filings._sort_date(filings.filed_label(u)), reverse=True)
+    newest_month = filings._sort_date(filings.filed_label(monthly[0]))[:7] if monthly else ""
+    daily = [u for u in filings.list_files("daily") if filings._sort_date(filings.filed_label(u))[:7] > newest_month]
+    pending = sorted((u for u in daily if u.rsplit("/", 1)[-1] not in rescanned), reverse=True)
+    if pending:
+        return pending[:max_files]
+    return [u for u in monthly if u.rsplit("/", 1)[-1] not in rescanned][:1]
 
 
 def show(row: dict) -> str:
@@ -89,7 +111,8 @@ def detail(row: dict) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--daily", action="store_true", help="daily files not done yet")
-    parser.add_argument("--month", default="", help="monthly archive: latest, next, or e.g. October2026")
+    parser.add_argument("--month", default="", help="monthly archive: latest, next, or e.g. October2026; rescan: the "
+                                                    "next file not yet read again at today's floor")
     parser.add_argument("--zip", nargs="*", help="local or remote zip files instead")
     parser.add_argument("--max-files", type=int, default=12, help="most daily files a run")
     parser.add_argument("--previous", default="", help="the list so far (rows + files_done), merged into")
@@ -109,7 +132,8 @@ def main() -> None:
 
     previous = load(args.previous)
     done = set(previous.get("files_done") or [])
-    todo = pick(args, done)
+    rescanned = set(previous.get("files_rescanned") or [])
+    todo = pick(args, done, rescanned)
     print(f"{len(todo)} file(s) to scan; {len(done)} done before; {len(previous.get('rows') or [])} companies listed")
     new_rows: list[dict] = []
     reread: set[str] = set()   # files read in full again: their earlier rows give way to this reading
@@ -132,6 +156,8 @@ def main() -> None:
             if name in done:
                 reread.add(filings.filed_label(name))
             done.add(name)
+            if args.month == "rescan":
+                rescanned.add(name)
         if not os.path.exists(url) and path.startswith(CACHE):
             os.remove(path)   # monthly archives are GBs: keep the disk free for the next
     customs = None
@@ -149,6 +175,13 @@ def main() -> None:
     filings.stats["why"].update(decided)
     print(f"{found:,} big enough; {len(new_rows):,} with FX in their filing or customs records")
     kept = [r for r in previous.get("rows") or [] if r.get("filed") not in reread]
+    # a company read again keeps what was looked up for it before (research, filing history), so no calls repeat
+    earlier = {r["company_number"]: r for r in previous.get("rows") or [] if r.get("company_number")}
+    for r in new_rows:
+        old = earlier.get(r.get("company_number")) or {}
+        for k in LOOKED_UP:
+            if k in old and k not in r:
+                r[k] = old[k]
     rows = filings.merge(kept, new_rows)
     # Moved up from small accounts: each listed company's filing history, once (kept on the row), capped a run.
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "")
@@ -189,7 +222,7 @@ def main() -> None:
           f"{filings.hooks.ABROAD_RULES['points']} points lower; owned abroad but runs FX locally: "
           f"{sum(1 for r in rows if filings.owner_abroad(r)[0] and not r['run_from_abroad']):,})")
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,
-           "files_done": sorted(done), "files_scanned": len(todo), "count": len(rows), "rows": rows}
+           "files_done": sorted(done), "files_rescanned": sorted(rescanned), "files_scanned": len(todo), "count": len(rows), "rows": rows}
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f)
     print(f"\n{len(new_rows):,} hits this run; {len(rows):,} companies on the list now")
