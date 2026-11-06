@@ -30,7 +30,7 @@ from collections import Counter, defaultdict
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from sourcer import accounts  # noqa: E402
+from sourcer import accounts, filings  # noqa: E402
 
 _AMOUNT = re.compile(r"(?:US\$|\$|€|£|EUR|USD|GBP)\s?([\d,.]+)\s*(m|bn|k)?", re.I)
 _UNITS = {"k": 1e3, "m": 1e6, "bn": 1e9}
@@ -129,10 +129,11 @@ def against_main_list(rows: list[dict], main: list[dict]) -> dict:
 _TAG = re.compile(r"<ix:nonFraction\b([^>]*)>(.*?)</ix:nonFraction>", re.S | re.I)
 _ATTR = re.compile(r'([\w:-]+)="([^"]*)"')
 _FX_NAME = re.compile(r"exchange|foreign|currenc", re.I)
+_TURNOVER_NAME = re.compile(r"turnover|revenue", re.I)
 
 
-def recheck(r: dict, api_key: str) -> list[str]:
-    """Every FX-looking tag in the company's latest filed accounts: name, displayed figure, scale, sign, context."""
+def recheck(r: dict, api_key: str, names: re.Pattern = _FX_NAME) -> list[str]:
+    """Every tag named like `names` in the company's latest filed accounts: name, figure shown, scale, sign, context."""
     filing = accounts.latest_accounts_filing(r["company_number"], api_key)
     meta = ((filing or {}).get("links") or {}).get("document_metadata") or ""
     doc_id = meta.rstrip("/").split("/")[-1] if meta else ""
@@ -144,7 +145,7 @@ def recheck(r: dict, api_key: str) -> list[str]:
     for attrs_text, shown in _TAG.findall(text):
         attrs = dict(_ATTR.findall(attrs_text))
         name = attrs.get("name", "")
-        if not _FX_NAME.search(name):
+        if not names.search(name):
             continue
         shown = " ".join(html.unescape(re.sub(r"<[^>]+>", "", shown)).split())
         lines.append(f"  {name.split(':')[-1][:60]:<60} shown {shown:>12} scale {attrs.get('scale', '0'):>2}"
@@ -152,7 +153,7 @@ def recheck(r: dict, api_key: str) -> list[str]:
                      f" context {attrs.get('contextRef', '')[:30]}")
         if len(lines) >= 8:
             break
-    return lines or ["  (no FX-named tags: the figure came from the notes' text)"]
+    return lines or ["  (no such tags: the figure came from the accounts' text)"]
 
 
 def main() -> None:
@@ -171,8 +172,9 @@ def main() -> None:
     print("1. By month filed")
     months = defaultdict(list)
     for r in rows:
-        months[(r.get("filed") or "")[:7]].append(r)
-    for month in sorted(months, reverse=True):
+        filed = r.get("filed") or ""
+        months[filed[:7] if re.match(r"\d{4}-\d{2}", filed) else filed].append(r)
+    for month in sorted(months, key=filings._sort_date, reverse=True):
         ms = months[month]
         print(f"  {month}: {len(ms):>5,} companies | strong FX proof (50+) {sum((r.get('filed_fx_score') or 0) >= 50 for r in ms):>4,}"
               f" | owned abroad, FX probably run there {sum(bool(r.get('run_from_abroad')) for r in ms):>3,}"
@@ -181,7 +183,8 @@ def main() -> None:
     print("\n2. Figures to doubt")
     doubts = doubtful_figures(rows)
     for kind, found in doubts.items():
-        print(f"  {kind}: {len(found)}")
+        tagged = sum("tagged" in why for _, why in found)
+        print(f"  {kind}: {len(found)}" + (f" ({tagged} tagged, {len(found) - tagged} from the text)" if kind.startswith("FX gain/loss under") else ""))
         for r, why in found[:8]:
             print(f"    {who(r)}: {why}")
     if not doubts:
@@ -209,16 +212,35 @@ def main() -> None:
         for r, why in c["fx_apart"][:8]:
             print(f"    {who(r)}: {why}")
 
+        # the main list's own doubtful figures — what an export of its top companies would carry
+        main_doubts = doubtful_figures(main_rows)
+        hottest = sorted(main_rows, key=lambda m: (-int(_num(m.get("filed_fx_score")) or 0), _num(m.get("rank")) or 0))[:100]
+        top = {m.get("company_number") for m in hottest}
+        print(f"\n  The main list's own figures to doubt (top 100 by Hottest in brackets):")
+        for kind, found in main_doubts.items():
+            in_top = [(m, why) for m, why in found if m.get("company_number") in top]
+            print(f"    {kind}: {len(found)} ({len(in_top)})")
+            for m, why in in_top[:10]:
+                print(f"      {(m.get('company_name') or '?')[:44]} ({m.get('company_number')}): {why}")
+
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
-    to_check = [r for kind, found in doubts.items() if kind.startswith("FX") for r, _ in found][: args.recheck]
-    if to_check and api_key:
-        print(f"\n5. Re-read from Companies House: {len(to_check)} doubtful FX figures")
-        for r in to_check:
+    tiny = [r for kind, found in doubts.items() if kind.startswith("FX gain/loss under") for r, _ in found]
+    big = [r for kind, found in doubts.items() if kind.startswith("FX gain/loss over") for r, _ in found]
+    fx_check = ([r for r in tiny if "tagged" in (r.get("fx_gain_loss_evidence") or "")][:3]
+                + [r for r in tiny if "tagged" not in (r.get("fx_gain_loss_evidence") or "")][:3] + big[:2])[: args.recheck]
+    turnover_check = [r for kind, found in doubts.items() if kind.startswith("turnover over") for r, _ in found][: args.recheck]
+    if (fx_check or turnover_check) and api_key:
+        print(f"\n5. Re-read from Companies House: {len(fx_check)} doubtful FX figures, {len(turnover_check)} turnovers")
+        for r in fx_check:
             print(f"  {who(r)} — list says FX {money(_num(r.get('fx_gain_loss_gbp')))}, turnover "
                   f"{money(_num(r.get('turnover_gbp')))}")
             for line in recheck(r, api_key):
                 print(line)
-    elif to_check:
+        for r in turnover_check:
+            print(f"  {who(r)} — list says turnover {money(_num(r.get('turnover_gbp')))}")
+            for line in recheck(r, api_key, _TURNOVER_NAME):
+                print(line)
+    elif fx_check or turnover_check:
         print("\n5. COMPANIES_HOUSE_API_KEY not set: nothing re-read")
 
 
