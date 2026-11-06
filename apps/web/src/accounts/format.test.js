@@ -228,13 +228,13 @@ describe("recent FX filings", () => {
     expect(filterFilings([{ moved_up: "Moved up from small accounts (…)" }, {}], { movedOnly: true })).toHaveLength(1);
     expect(filterFilings([{ fx_mentions: ["Purchases are paid in US dollars."] }], { query: "dollars" })).toHaveLength(1);
   });
-  it("puts FX probably run abroad lower when sorting strongest first", () => {
-    const list = [{ company_number: "a", filed: "2026-10-01", filed_fx_score: 70, run_from_abroad: "FX probably run from Sweden (…)" },
+  it("puts owned-abroad companies (no local FX) a little lower when sorting strongest first", () => {
+    const list = [{ company_number: "a", filed: "2026-10-01", filed_fx_score: 65, run_from_abroad: "Owned from Sweden (…) — pitch the UK team" },
       { company_number: "b", filed: "2026-09-01", filed_fx_score: 60, run_from_abroad: "" },
       { company_number: "c", filed: "2026-10-02", rank_score: 30, filed_fx_score: 55 }];
     expect(sortFilings(list).map((r) => r.company_number)).toEqual(["a", "b", "c"]);   // newest: as stored
     expect(sortFilings(list, "strongest").map((r) => r.company_number)).toEqual(["b", "a", "c"]);
-    const hot = [{ rank: 1, filed_fx_score: "70", run_from_abroad: "FX probably run from Sweden" },
+    const hot = [{ rank: 1, filed_fx_score: "62", run_from_abroad: "Owned from Sweden — pitch the UK team" },
       { rank: 2, filed_fx_score: "55" }, { rank: 3, filed_fx_score: "20" }];
     expect(sortRows(hot, "hot").map((r) => r.rank)).toEqual([2, 1, 3]);   // lower, but still in its Strong group
   });

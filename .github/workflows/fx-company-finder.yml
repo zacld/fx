@@ -4,7 +4,7 @@ name: FX company finder
 # names, emails or phones, and attach no files that hold them. Keys stay in secrets.
 
 # Finds UK companies with foreign-currency flows for a bank FX desk — core
-# band £25m–£250m turnover — using lead-sourcer/:
+# band £20m–£300m turnover — using lead-sourcer/:
 #   1. Loads 12 months of HMRC customs records (who imports/exports what),
 #      HMRC trade statistics (where the UK trades each good, in £) and the
 #      free monthly Companies House bulk file, and matches them.

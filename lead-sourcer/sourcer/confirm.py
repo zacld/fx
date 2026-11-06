@@ -40,7 +40,7 @@ NEW_FIELDS = ["search_check", "finance_contact_linkedin", "no_fd_likely"]
 # Owner-managed firms this size often have no FD: the MD decides on FX, a controller or manager makes the payments.
 NO_FD_MAX_TURNOVER = 50_000_000
 # Companies whose filed turnover is at least this (the core band's floor) are searched before those without a figure.
-SEARCH_MIN_TURNOVER = 25_000_000
+SEARCH_MIN_TURNOVER = 20_000_000
 
 
 def fields_with_confirmation(fields: list[str]) -> list[str]:

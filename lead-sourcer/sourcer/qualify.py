@@ -19,7 +19,10 @@ from typing import Optional
 from sourcer import hooks
 
 QUALIFY_RULES = {
-    "out_foreign_parent": True,        # owned by a company registered abroad: FX likely run by group treasury there
+    # owned by a company registered abroad (Nov 2026, the desk's steer: "they don't need to be UK-owned, but we should be
+    # pitching the UK team — lots of overseas-owned companies have FX in the UK, some deal with it overseas"): a Check,
+    # not Out, unless its own accounts show FX handled locally — then Yes
+    "check_foreign_parent": True,
     "out_no_fx_evidence": True,        # nothing but the niche default: no customs records, no FX in the accounts
     "check_sophisticated": True,       # hedges with forwards and a Big Four auditor: a treasury that's hard to win
     "check_net_liabilities": True,     # net liabilities on the balance sheet: check before calling
@@ -41,10 +44,10 @@ def assess(owners: list[dict], facts: Optional[dict], exposure: dict, fx_today: 
     rules = QUALIFY_RULES
     outs, checks, warm = [], [], []
 
-    parent = next((o for o in owners if o.get("kind") == "corporate" and not o.get("ceased_on")
-                   and o.get("country") and not hooks.is_uk(o["country"])), None)
-    if rules["out_foreign_parent"] and parent:
-        outs.append(f"owned by {parent['name']} ({parent['country']}): FX likely run by group treasury abroad")
+    parent = hooks.overseas_owner(owners)
+    if rules["check_foreign_parent"] and parent and not (fx_today or "").startswith("Uses"):
+        checks.append(f"owned by {parent['name']} ({parent['country']}): pitch the UK team; ask whether FX is run here "
+                      f"or by the parent")
     if rules["out_no_fx_evidence"] and exposure.get("confidence") in ("", hooks.LOW) and not customs_months \
             and f.get("fx_gain_loss") is None and not fx_today:
         outs.append("no FX evidence beyond the niche (no customs records, nothing in the accounts)")

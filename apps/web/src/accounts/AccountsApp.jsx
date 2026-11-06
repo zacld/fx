@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { emailDraft } from "./email.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -199,7 +200,7 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const blob = new Blob([toCsv(visible.map((r) => ({ ...r, notes: notes[r.company_number]?.text || "" })))], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([toCsv(visible.map((r) => ({ ...r, notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text })))], { type: "text/csv;charset=utf-8" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `fx-accounts-${new Date().toISOString().slice(0, 10)}.csv` });
     a.click();
     URL.revokeObjectURL(a.href);
@@ -241,7 +242,7 @@ function Accounts({ data, password }) {
             {followUpsDue > 0 && <span className="due-n" title="Follow-ups due today or overdue">{followUpsDue} due</span>}
           </button>
           <button role="tab" aria-selected={filters.view === "filings"} className={`tab filings-tab${filters.view === "filings" ? " on" : ""}`}
-                  title="Companies of £25m+ whose newly filed accounts show FX" onClick={() => set({ section: "", view: "filings" })}>
+                  title="Companies of £20m+ whose newly filed accounts show FX" onClick={() => set({ section: "", view: "filings" })}>
             Recent FX filings
           </button>
         </div>
@@ -306,7 +307,7 @@ function Accounts({ data, password }) {
   );
 }
 
-// The Recent FX filings tab: companies of £25m+ whose accounts, filed online in the last year, show FX — read from
+// The Recent FX filings tab: companies of £20m+ whose accounts, filed online in the last year, show FX — read from
 // Companies House's bulk accounts files each morning (lead-sourcer/sourcer/filings.py). Loaded when first opened.
 function Filings({ password, listed, onOpen }) {
   const [data, setData] = useState(null);
@@ -368,7 +369,7 @@ function Filings({ password, listed, onOpen }) {
         <label className="check"><input type="checkbox" checked={movedOnly} onChange={(e) => setMovedOnly(e.target.checked)} /> Moved up from small ({all.filter((r) => r.moved_up).length})</label>
         <span className="muted">{rows.length} of {all.length} · scanned {ago(data.made_at)}</span>
       </div>
-      <p className="filings-note">Companies of £{Math.round((data.min_turnover || 25e6) / 1e6)}m+ turnover whose accounts filed online in the last year
+      <p className="filings-note">Companies of £{Math.round((data.min_turnover || 20e6) / 1e6)}m+ turnover whose accounts filed online in the last year
         show FX, by the month they filed{data.count ? ` (${data.count.toLocaleString()} in all)` : ""}. Paper (scanned) filings aren't in Companies House's files, so they're found by the main list instead.</p>
       {rows.slice(0, shown).map((r) => <FilingCard key={r.company_number} r={r} listed={listed.has(r.company_number)} onOpen={onOpen} />)}
       {!rows.length && <div className="empty">{all.length ? "No filings match these filters." : "No FX filings found yet."}</div>}
@@ -405,7 +406,7 @@ function FilingCard({ r, listed, onOpen }) {
           {r.incumbent_bank && <div><span className="fxl">Bank</span> <Src href={r.incumbent_bank_url}>{r.incumbent_bank}</Src>
             {r.lenders && <span className="muted"> · also {r.lenders}</span>}</div>}
           {r.owner && <div><span className="fxl">Owner</span> {r.owner}</div>}
-          {r.run_from_abroad && <div className="abroad"><span className="fxl">Decision</span> {r.run_from_abroad}</div>}
+          {r.run_from_abroad && <div className="abroad"><span className="fxl">Owned abroad</span> {r.run_from_abroad}</div>}
           {r.directors && <div><span className="fxl">Directors</span> {r.directors}{r.director_count > 5 ? ` +${r.director_count - 5} more` : ""}</div>}
         </div>
       )}
@@ -429,6 +430,7 @@ function FilingCard({ r, listed, onOpen }) {
         {!r.turnover_gbp && <a className="chip" href={turnoverSearch(r.company_name)} target="_blank" rel="noreferrer"
                                 title="Google their turnover: press, the group's accounts, their site (check it's not an estimate)">Search turnover ↗</a>}
       </div>
+      <EmailDraft r={filingRow(r)} />
     </article>
   );
 }
@@ -630,7 +632,7 @@ function Chips({ r }) {
       {r.facility_ends && <Src className="chip trig" href={r.accounts_url} title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</Src>}
       {r.own_bank_client && <span className="chip own">Existing client</span>}
       {r.pe_backed && <span className="chip warn">PE-backed</span>}
-      {r.run_from_abroad && <span className="chip warn" title={r.run_from_abroad}>Owned abroad: FX may be run there</span>}
+      {r.run_from_abroad && <span className="chip warn" title={r.run_from_abroad}>Owned abroad: pitch the UK team</span>}
       {r.family_run && <span className="chip">Family-run</span>}
       {parts(r.triggers).map((t) => <span key={t} className="chip trig">{t}</span>)}
     </div>
@@ -638,6 +640,28 @@ function Chips({ r }) {
 }
 
 // When to call, the two strongest facts (each linked to its record), the currency line and the opener.
+// The Investec master cold email, filled in from the company's filings (email.js): copy it, check the gaps, send it
+// yourself. Nothing is sent from here.
+function EmailDraft({ r, open: startOpen = false }) {
+  const [open, setOpen] = useState(startOpen);
+  const [copied, setCopied] = useState(false);
+  const draft = useMemo(() => emailDraft(r), [r]);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(draft.text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
+  };
+  if (!open) return <button className="more-btn" onClick={() => setOpen(true)}>Email draft</button>;
+  return (
+    <div className="email">
+      <div className="notes-h"><span>Email draft · Investec template</span>
+        <span><button className="btn-sm" onClick={copy}>{copied ? "Copied" : "Copy"}</button>
+          {!startOpen && <button className="more-btn" onClick={() => setOpen(false)}>Hide</button>}</span></div>
+      <pre className="email-text">{draft.text}</pre>
+      {draft.gaps.length > 0 && <div className="email-gaps">Fill in: {draft.gaps.join(" · ")}</div>}
+      {draft.basis.length > 0 && <div className="email-basis">From: {draft.basis.join(" · ")}</div>}
+    </div>
+  );
+}
+
 function CallPrep({ r }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
@@ -697,6 +721,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen })
       <Chips r={r} />
       <CallPrep r={r} />
       <Notes note={note} onSave={onSaveNote} />
+      <EmailDraft r={r} />
       <div className="card-foot">
         <button className="more-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Less" : "More detail"}</button>
         {r.company_number && <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>Open company page →</a>}
@@ -793,6 +818,11 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
         <h2 className="panel-h">Why call</h2>
         <Chips r={r} />
         <CallPrep r={r} />
+      </section>
+
+      <section className="panel">
+        <h2 className="panel-h">Email</h2>
+        <EmailDraft r={r} open />
       </section>
 
       {detailSections(r).map(([title, rows]) => (
@@ -966,6 +996,11 @@ a.co:hover{color:#34D399}
 .save-error{padding:10px 12px;border-radius:8px;background:rgba(248,113,113,.1);color:#FCA5A5;font-size:13px}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}
+.email{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.16)}
+.email .notes-h .btn-sm{margin-right:8px}
+.email-text{margin:8px 0 0;white-space:pre-wrap;font:13px/1.55 inherit;font-family:inherit;color:rgba(255,255,255,.82)}
+.email-gaps{margin-top:8px;font-size:12px;color:#fbbf24}
+.email-basis{margin-top:4px;font-size:11px;color:rgba(255,255,255,.45)}
 .angle{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);font-size:13px;color:rgba(255,255,255,.75);display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
 .more-btn{margin-top:10px;background:none;border:none;color:rgba(255,255,255,.4);font:600 12px 'Inter',sans-serif;cursor:pointer;padding:0}
 .more-btn:hover{color:#fff}
