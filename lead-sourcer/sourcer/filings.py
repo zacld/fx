@@ -403,7 +403,7 @@ def tidy(rows: list[dict]) -> int:
                 r["fx_sensitivity"] = ""   # a currency move's effect over half of turnover: a misread (a growth line)
         parts = re.findall(r"£\s?([\d,.]+)\s*(k|m|bn)?\b", r.get("turnover_regions") or "")
         if turnover and parts and sum(float(a.replace(",", "")) * {"k": 1e3, "m": 1e6, "bn": 1e9}.get(u, 1)
-                                      for a, u in parts) > 1.15 * turnover:
+                                      for a, u in parts) > accounts.REGIONS_MAX_SHARE * turnover:
             r["turnover_regions"] = ""   # regions adding to more than turnover: years or columns mixed
         prior = float(r["fx_gain_loss_prior_gbp"]) if r.get("fx_gain_loss_prior_gbp") else None
         if fx and prior and max(abs(fx), abs(prior)) / max(min(abs(fx), abs(prior)), 1) > 1_000:

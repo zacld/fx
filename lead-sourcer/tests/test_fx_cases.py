@@ -326,3 +326,18 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
         facts = accounts.check_fx({"turnover": 36_946_000, "overseas_share": 0.4,
                                    "regions": [{"region": "UK", "value": 30_000_000}, {"region": "EU", "value": 12_800_000}]})
         self.assertEqual((facts["regions"], facts["overseas_share"]), ([], None))
+
+    def test_one_region_as_big_as_turnover_plus_others_is_two_tables_mixed(self):
+        """Industrial Chemicals: 'United Kingdom £177.4m · Rest of World £8.9m · European Union £2m' on £177.3m."""
+        from sourcer import filings
+        rows = [{"company_number": "01248371", "turnover_gbp": "177300000", "turnover_regions":
+                 "United Kingdom £177.4m · Rest of World £8.9m · European Union £2m",
+                 "fx_forwards": "", "fx_forwards_evidence": ""},
+                {"company_number": "02775102", "turnover_gbp": "71100000", "turnover_regions":
+                 "United Kingdom £69.9m · Other Countries Regions £1.1m", "fx_forwards": "", "fx_forwards_evidence": ""}]
+        filings.tidy(rows)
+        self.assertEqual(rows[0]["turnover_regions"], "")
+        self.assertEqual(rows[1]["turnover_regions"], "United Kingdom £69.9m · Other Countries Regions £1.1m")
+        facts = accounts.check_fx({"turnover": 177_300_000, "regions": [
+            {"region": "UK", "value": 177_400_000}, {"region": "RoW", "value": 8_900_000}]})
+        self.assertEqual(facts["regions"], [])

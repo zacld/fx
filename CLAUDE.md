@@ -267,7 +267,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   contracts isn't a size. `filings.tidy` applies these to the rows already listed on every scan, and
   `tools/to_accounts_json.py` (`sanity`) applies them to the main Accounts list as the last step before upload
   (whatever reader or cached reading produced a row; a growth fact over 500%, a sensitivity over half of turnover
-  and regions adding to more than turnover (+15%) go too). Headcounts are read as
+  and regions adding to more than turnover (+5%: two tables mixed) go too). Headcounts are read as
   shown, never scaled (filers tag them with scale -2 or 3); one over £20m of turnover a head is a holding
   company's own. `tools/reader_audit.py` (in the cross-check workflow) re-reads ~400 real filings with the
   current readers and holds them to hard rules — the bar for a reader change is a clean run.
