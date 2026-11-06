@@ -441,7 +441,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-06b"   # FX under £1,000 at a £10m+ company a check; £'000 text FX lines; turnover over £5bn a check
+FACTS_VERSION = "2026-11-06c"   # FX under £1,000: £'000 when the accounts are, else a check; turnover over £5bn / priors 20x apart; forward rows
 
 
 # Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.
@@ -561,6 +561,9 @@ def check_turnover(facts: dict) -> dict:
             f"turnover read as {hooks.short(turnover)}: too big to be right (cells run together, or a £'000 figure "
             f"read as £m?); check the accounts"))
         return facts
+    prior = facts.get("turnover_prior")
+    if prior and not 1 / 20 <= turnover / prior <= 20:
+        facts["turnover_prior"] = None   # over 20x apart: a note number or another cell read as last year's — no growth
     if turnover <= 0 or (turnover < MIN_PLAUSIBLE_TURNOVER and kind in _FULL_ACCOUNTS):
         where = f"{kind} accounts" if kind else "the accounts"
         facts.update(turnover=None, turnover_prior=None, turnover_check=(
@@ -665,6 +668,16 @@ def extract_facts(document: bytes) -> dict:
         "fx_gain_loss_evidence": "tagged in the accounts" if fx else "",
         "fx_gain_loss_check": "",
     }
+    # An FX tag under £1,000 with no scale, in accounts whose tagged figures are in £'000: the filer left the scale
+    # off this one tag (Lister Wilder's "597" in a £'000 statement is £597k) — scaled like the rest, and said so.
+    if fx and facts["fx_gain_loss"] and abs(facts["fx_gain_loss"]) < FX_MIN_PLAUSIBLE and _in_thousands(scanner) and any(
+            f["concept"] in FX_GAIN_LOSS_CONCEPTS and str(f.get("scale") or "0") == "0"
+            and (scanner.contexts.get(f["context"]) or {}).get("end") == fx[1] for f in scanner.facts):
+        prior = facts["fx_gain_loss_prior"]
+        facts.update(fx_gain_loss=facts["fx_gain_loss"] * 1_000,
+                     fx_gain_loss_prior=prior * 1_000 if prior is not None and abs(prior) < FX_MIN_PLAUSIBLE else prior,
+                     fx_gain_loss_evidence="tagged in the accounts (in £'000 like the rest of the accounts; the tag "
+                                           "carried no scale)")
     rows_text = ixbrl_table_text(text)
     # the currency notes, from the document laid out as paragraphs and table rows (no page numbers in iXBRL)
     facts.update(fx_notes.read([rows_text], numbers=[0]))

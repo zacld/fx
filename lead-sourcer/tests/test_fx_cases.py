@@ -258,3 +258,19 @@ class TestFirstYearScanFindings(unittest.TestCase):
         self.assertTrue(fx_notes.forward_evidence_doubtful(f'"{sentence}" (filed accounts)'))
         good = fx_notes._forward_rows("£'000\nForward foreign exchange contracts 1,250 980\n", 1)
         self.assertEqual(good[0]["amount"], 1_250_000)
+
+
+class TestFirstYearScanFindingsAudit(unittest.TestCase):
+    """From the reader audit of 250 filings (Nov 2026)."""
+
+    def test_a_first_years_turnover_row_keeps_its_note_number_out(self):
+        from sourcer import turnover_text
+        self.assertEqual(turnover_text._figures(" 3 384,712,050", False), [(384712050.0, False)])
+        self.assertEqual(turnover_text._figures(" 3 45,123 41,000", False), [(45123.0, False), (41000.0, False)])
+        self.assertEqual(len(turnover_text._figures(" 12 15", False)), 2)   # two small figures: not a note pattern
+
+    def test_last_years_turnover_20x_apart_is_dropped(self):
+        facts = accounts.check_turnover({"turnover": 384_700_000, "turnover_prior": 3.0})
+        self.assertEqual((facts["turnover"], facts["turnover_prior"]), (384_700_000, None))
+        kept = accounts.check_turnover({"turnover": 50_000_000, "turnover_prior": 40_000_000})
+        self.assertEqual(kept["turnover_prior"], 40_000_000)

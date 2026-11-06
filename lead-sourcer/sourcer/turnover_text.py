@@ -69,6 +69,9 @@ def _figures(rest: str, millions: bool) -> list[tuple[float, bool]]:
     # and followed by at least two figures (this year and last).
     if len(out) >= 3 and re.fullmatch(r"\d{1,2}(?:\.\d)?", tokens[0].strip()):
         out = out[1:]
+    # ... or before a first year's only figure: "TURNOVER 3 384,712,050" (Greanco: no comparative column)
+    elif len(out) == 2 and re.fullmatch(r"\d{1,2}(?:\.\d)?", tokens[0].strip()) and out[1][0] >= 1_000 * max(out[0][0], 1):
+        out = out[1:]
     return out
 
 
