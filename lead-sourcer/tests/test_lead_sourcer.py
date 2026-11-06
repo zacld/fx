@@ -2737,6 +2737,24 @@ class TestReviewFixesIncumbent(unittest.TestCase):
         self.assertIn("existing Barclays relationship", row["warm_route"])
 
 
+class TestUploadSenseChecks(unittest.TestCase):
+    def test_the_last_gate_clears_implausible_figures_and_lines_built_on_them(self):
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+        import to_accounts_json
+        row = {"turnover_gbp": "89700000", "fx_gain_loss_gbp": "-597", "employees": "1",
+               "fact_1": "Saw turnover grew 12000% to £38.5m", "fact_2": "FX gain £20k", "opener": "Hi"}
+        self.assertEqual(to_accounts_json.sanity(row),
+                         ["FX under £1,000", "fact_1: growth over 500%", "holding company's staff"])
+        self.assertEqual((row["fx_gain_loss_gbp"], row["fact_1"], row["fact_2"], row["employees"]),
+                         ("", "", "FX gain £20k", ""))
+        big = {"turnover_gbp": "40000000000", "fx_wallet_high_gbp": "9000000000"}
+        self.assertEqual(to_accounts_json.sanity(big), ["turnover over £5bn"])
+        self.assertEqual(big["fx_wallet_high_gbp"], "")
+        fine = {"turnover_gbp": "50000000", "fx_gain_loss_gbp": "-250000", "employees": "300",
+                "fact_1": "Saw turnover grew 25% to £50m"}
+        self.assertEqual(to_accounts_json.sanity(fine), [])
+
+
 class TestFxFilings(unittest.TestCase):
     def test_an_unscaled_fx_tag_in_thousands_accounts_is_scaled_like_the_rest(self):
         doc = re.sub(rb'(GainLossDueToForeignExchange[^>]*?)scale="3"', rb'\1scale="0"', ixbrl(scale="3"))
