@@ -364,6 +364,7 @@ def tidy(rows: list[dict]) -> int:
     changed = 0
     for r in rows:
         before = (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"), r.get("employees"))
+        before_sens = r.get("fx_sensitivity")
         turnover = float(r["turnover_gbp"]) if r.get("turnover_gbp") else None
         staff = int(r["employees"]) if str(r.get("employees") or "").isdigit() else 0
         if turnover and turnover > accounts.MAX_PLAUSIBLE_TURNOVER and staff < 1_000:
@@ -395,13 +396,19 @@ def tidy(rows: list[dict]) -> int:
             r.update(fx_gain_loss_gbp="", fx_gain_loss_prior_gbp="",
                      fx_gain_loss_check=f"FX figure read as {hooks.short(fx)} at a company with {hooks.short(turnover)} "
                                         f"turnover: probably in £'000; check the accounts ({r.get('fx_gain_loss_evidence', '')})")
+        sens = re.search(r"[£$€]\s?([\d,.]+)\s*(k|m|bn)?\b", (r.get("fx_sensitivity") or "").split(" — ")[0])
+        if sens and turnover:
+            size = float(sens.group(1).replace(",", "")) * {"k": 1e3, "m": 1e6, "bn": 1e9}.get(sens.group(2) or "", 1)
+            if size > 0.5 * turnover:
+                r["fx_sensitivity"] = ""   # a currency move's effect over half of turnover: a misread (a growth line)
         prior = float(r["fx_gain_loss_prior_gbp"]) if r.get("fx_gain_loss_prior_gbp") else None
         if fx and prior and max(abs(fx), abs(prior)) / max(min(abs(fx), abs(prior)), 1) > 1_000:
             r["fx_gain_loss_prior_gbp"] = ""
         why = fx_notes.forward_evidence_doubtful(r.get("fx_forwards_evidence", "")) if r.get("fx_forwards") else ""
         if why:
             r.update(fx_forwards="", fx_forwards_check=f"{why}: {r.get('fx_forwards_evidence', '')}")
-        if (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"), r.get("employees")) != before:
+        if (r.get("fx_gain_loss_gbp"), r.get("turnover_gbp"), r.get("fx_forwards"), r.get("employees"),
+                r.get("fx_sensitivity")) != before + (before_sens,):
             changed += 1
             score, lines = fx_notes.filed_proof(r)
             if r.get("hmrc_trade"):

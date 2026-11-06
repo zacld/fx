@@ -147,6 +147,7 @@ def main() -> None:
             tally["reader crashed"] += 1
             continue
         f["format"] = "ixbrl"
+        cols = fx_notes.columns(f, r.get("company_name", ""), "")
         if wanted:
             print(f"{r.get('company_name')} ({r['company_number']}): staff {f.get('employees')}, turnover "
                   f"{short(f.get('turnover'))} (prior {short(f.get('turnover_prior'))}) from {f.get('turnover_source', '')[:200]}")
@@ -162,7 +163,9 @@ def main() -> None:
                           f"format {fact.get('format')} end {c.get('end')} members {c.get('members')} "
                           f"row …{fact.get('before', '')[-80:]!r}")
             print(f"    employee-like concepts: {sorted(x for x in scanner.concepts if 'mploy' in x)[:8]}")
-        cols = fx_notes.columns(f, r.get("company_name", ""), "")
+            print(f"    list's forwards: {r.get('fx_forwards')} — {r.get('fx_forwards_evidence', '')[:300]}")
+            print(f"    today's forwards: {cols.get('fx_forwards')} — {cols.get('fx_forwards_evidence', '')[:300]}")
+            print(f"    today's sensitivity: {cols.get('fx_sensitivity', '')[:400]}")
         tally["read"] += 1
         made_up = ((filing.get("description_values") or {}).get("made_up_date") or "")
         if r.get("period_end") and made_up and made_up != r["period_end"]:

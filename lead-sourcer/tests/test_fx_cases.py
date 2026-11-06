@@ -283,3 +283,11 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
     def test_last_years_fx_1000x_apart_is_dropped(self):
         facts = accounts.check_fx({"fx_gain_loss": -699_158.0, "fx_gain_loss_prior": -5.0, "turnover": 60_000_000})
         self.assertEqual((facts["fx_gain_loss"], facts["fx_gain_loss_prior"]), (-699_158.0, None))
+
+    def test_a_growth_sentence_is_not_a_sensitivity(self):
+        from sourcer import fx_notes
+        s = ("The result was a growth in ACV of 12% with a 12% move in sterling against the USD, adding £35.1m "
+             "to profit.")
+        self.assertEqual(fx_notes._sensitivity_items(s, 1), [])
+        facts = accounts.check_fx({"turnover": 32_900_000, "fx_sensitivity": [{"amount": 35_100_000}, {"amount": 450_000}]})
+        self.assertEqual(facts["fx_sensitivity"], [{"amount": 450_000}])

@@ -226,7 +226,8 @@ _FX_MOVE = re.compile(r"strengthen|weaken|appreciat|depreciat|(?:exchange\s+rate
                       r"pound|dollar|euro)\W+(?:\w+\W+){0,4}?(?:movement|change|increase|decrease|rise|fall|move)|"
                       r"(?:movement|change|increase|decrease|rise|fall|move)\w*\s+(?:\w+\s+){0,3}?in\s+(?:the\s+)?"
                       r"(?:exchange\s+rates?|sterling|value\s+of\s+sterling|currenc)", re.I)
-_GROWTH = re.compile(r"\b(?:increased|grew|rose|decreased|fell|up|down)\s+(?:by\s+)?(?:\d{1,3}(?:\.\d+)?\s?%)\s+to\b", re.I)
+_GROWTH = re.compile(r"\b(?:increased|grew|rose|decreased|fell|up|down)\s+(?:by\s+)?(?:\d{1,3}(?:\.\d+)?\s?%)\s+to\b|"
+                     r"\bgrowth\b", re.I)   # "The result was a growth in ACV of 12%" (FundApps): not a currency move
 
 
 def _sensitivity_items(sentence: str, page: int) -> list[dict]:

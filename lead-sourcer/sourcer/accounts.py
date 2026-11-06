@@ -598,6 +598,8 @@ def check_fx(facts: dict) -> dict:
     elif prior is not None and turnover and abs(prior) > FX_MAX_SHARE_OF_TURNOVER * turnover:
         reason = (f"last year's FX figure {_gbp_short(prior)} is {abs(prior) / turnover:.0%} of turnover: "
                   f"likely another figure tagged as FX; check the accounts")
+    if turnover and facts.get("fx_sensitivity"):   # a currency move's effect bigger than half of turnover: a misread
+        facts["fx_sensitivity"] = [s for s in facts["fx_sensitivity"] if (s.get("amount") or 0) <= 0.5 * turnover]
     if reason:
         facts.update(fx_gain_loss=None, fx_gain_loss_prior=None, fx_gain_loss_evidence="", fx_gain_loss_check=reason)
     elif fx and prior and max(abs(fx), abs(prior)) / max(min(abs(fx), abs(prior)), 1) > 1_000:
