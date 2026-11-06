@@ -449,7 +449,7 @@ FACTS_VERSION = "2026-11-06d"   # + headcounts as shown (never scaled); continui
 
 
 # Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.
-OCR_NOTES_MIN_TURNOVER = float(os.environ.get("OCR_NOTES_MIN_TURNOVER", "25000000"))
+OCR_NOTES_MIN_TURNOVER = float(os.environ.get("OCR_NOTES_MIN_TURNOVER", "20000000"))
 
 # A scanned filing whose profit and loss page wasn't searched because the run's OCR time ran out.
 TURNOVER_NOT_READ_YET = "turnover not read yet: this run's OCR time for scanned accounts was used up"

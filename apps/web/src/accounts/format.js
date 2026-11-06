@@ -156,7 +156,7 @@ export function detailSections(r) {
       ["Former FD", r.former_finance_director], ["Contact evidence", r.finance_contact_evidence], ["Search check", r.search_check],
       ["Lead director", join(r.lead_director, r.lead_director_occupation)], ["Directors", r.all_directors],
       ["Company secretary", r.company_secretary], ["Signed accounts", r.accounts_signed_by], ["Owners", r.owners],
-      ["Group", r.group_parent], ["FX decided abroad?", r.run_from_abroad], ["Parent's finance contact", r.parent_finance_contact],
+      ["Group", r.group_parent], ["Owned abroad", r.run_from_abroad], ["Parent's finance contact", r.parent_finance_contact],
     ]],
     ["Company", [
       ["Accounts", r.size_basis, r.accounts_url], ["Turnover source", r.turnover_source, r.turnover_url],
@@ -198,9 +198,9 @@ const fxLossKey = (r) => {
 export const FX_GROUPS = ["Strong FX proof", "Some FX proof", "No FX in the filings yet"];
 export const fxScore = (r) => Number(r.filed_fx_score) || 0;
 export const fxGroup = (r) => (fxScore(r) >= 50 ? FX_GROUPS[0] : fxScore(r) > 0 ? FX_GROUPS[1] : FX_GROUPS[2]);
-// Owned from abroad with no sign of running FX locally (run_from_abroad): the decision is probably made at head
-// office, so it ranks this much lower within its group — lead-sourcer hooks.ABROAD_RULES["points"].
-export const ABROAD_POINTS = 25;
+// Owned from abroad with no sign of running FX locally (run_from_abroad): pitch the UK team, but the decision may sit
+// at head office, so it ranks this much lower within its group — lead-sourcer hooks.ABROAD_RULES["points"].
+export const ABROAD_POINTS = 10;
 const rankedFx = (r) => fxScore(r) - (r.run_from_abroad ? ABROAD_POINTS : 0);
 
 // The FX facts a card leads with, each [label, value, source link, the quote behind it]; empty ones left out.
@@ -252,7 +252,7 @@ export const EXPORT_FIELDS = [
   "fx_wallet_low_gbp", "fx_wallet_high_gbp", "currency_pairs", "import_currencies", "export_currencies",
   "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_check", "recent_fx_loss", "accounts_filed_on", "first_seen",
   "main_bank", "bank_type", "fact_1", "fact_2", "main_currency", "currency_direction",
-  "currency_evidence", "currency_confidence", "opener", "fx_estimate", "incumbent_bank", "facility_ends",
+  "currency_evidence", "currency_confidence", "opener", "email_draft", "fx_estimate", "incumbent_bank", "facility_ends",
   "facility_ends_evidence", "fx_today", "fx_today_evidence", "lenders", "triggers", "when_to_call", "fx_niche", "call_angle",
   "website", "generic_emails", "notes", "accounts_url", "fx_gain_loss_url", "incumbent_bank_url",
   "companies_house_url",

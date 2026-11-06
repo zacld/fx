@@ -1,7 +1,7 @@
 name: FX filings
 
 # The Accounts page's "Recent FX filings" tab: Companies House's free bulk accounts files (every set of accounts
-# filed online — lead-sourcer/sourcer/filings.py) scanned for companies of £25m+ whose filing shows FX (an FX
+# filed online — lead-sourcer/sourcer/filings.py) scanned for companies of £20m+ whose filing shows FX (an FX
 # gain/loss, forward contracts, currencies, how they handle FX, sales abroad), merged into the list in the site's
 # private store (key "filings"). Daily: the day files not done yet (Tue–Sat, Companies House adds one each
 # morning). By hand: a monthly archive ("next" = the newest not yet done — run it again to go back a month at a time).

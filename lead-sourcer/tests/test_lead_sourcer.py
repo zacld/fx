@@ -493,8 +493,8 @@ class TestFxFilingsFirst(PipelineTestCase):
                                 {"company_number": "02", "filed_fx_score": 60, "owner": abroad},
                                 {"company_number": "03", "filed_fx_score": 60, "owner": abroad,
                                  "fx_forwards": "to purchase US$5.2m"}]}, f)
-        # 02 drops under the bar (60 - 25); 03 runs its own forwards, so it isn't lowered
-        self.assertEqual(main.priority_from_filings(path), {"01": 55.0, "03": 60.0})
+        # each owned from abroad is 10 lower (02 still clears the bar at 50); 03 runs its own forwards, so it isn't
+        self.assertEqual(main.priority_from_filings(path), {"01": 70.0, "02": 50.0, "03": 60.0})
 
 
 class TestRegisterCache(PipelineTestCase):
@@ -667,7 +667,7 @@ class TestPipeline(PipelineTestCase):
         rows = {r["company_number"]: r for r in self.run_bulk()}
         self.assertEqual(sorted(rows), ["01", "02", "04", "05", "06"])
         wine = rows["01"]
-        self.assertEqual(wine["section"], main.SECTION_BELOW)  # £23.4m filed, under the £25m core band
+        self.assertEqual(wine["section"], main.SECTION_CORE)  # £23.4m filed: in the £20m–£300m core band
         self.assertEqual((wine["main_bank"], wine["bank_type"]), ("Barclays", "high-street"))  # "Bankers" line in the accounts
         self.assertEqual(wine["cost_of_sales_gbp"], "17000000")
         self.assertEqual(wine["fx_wallet_basis"], "no customs records")
@@ -715,9 +715,10 @@ class TestPipeline(PipelineTestCase):
         self.assertEqual(rows["02"]["section"], main.SECTION_BELOW)  # filed £8.0m: over the £2m floor
         self.assertEqual(rows["04"]["section"], main.SECTION_CORE)   # large ("full") accounts, turnover not filed
         self.assertNotIn("02", {r["company_number"] for r in self.run_bulk(min_turnover=10_000_000)})
-        # Default floor is the band's lower end (£25m): only the unconfirmed medium/large ones stay.
+        # Default floor is the band's lower end (£20m): the £23.4m filer and the unconfirmed medium/large ones stay.
         self.assertEqual(sorted(r["company_number"] for r in self.run_bulk(min_turnover=main.DEFAULT_MIN_TURNOVER)),
-                         ["04", "05"])
+                         ["01", "04", "05"])
+        self.assertEqual(sorted(r["company_number"] for r in self.run_bulk(min_turnover=25_000_000)), ["04", "05"])
         banded = {r["company_number"]: r["section"] for r in self.run_bulk(band_min=5_000_000, band_max=20_000_000)}
         self.assertEqual((banded["01"], banded["02"]), ("Above (£20m+)", "Core (£5m–£20m)"))
         with self.assertRaises(ValueError):
@@ -1482,7 +1483,7 @@ class TestReviewFixes(unittest.TestCase):
             got = qualify.assess(parent, {}, {"confidence": "High"}, "", 6, False, "", "")
             self.assertNotEqual(got["qualified"], "Out", country)
         abroad = [{"kind": "corporate", "name": "ACME GMBH", "country": "Germany"}]
-        self.assertEqual(qualify.assess(abroad, {}, {"confidence": "High"}, "", 6, False, "", "")["qualified"], "Out")
+        self.assertEqual(qualify.assess(abroad, {}, {"confidence": "High"}, "", 6, False, "", "")["qualified"], "Check")
         self.assertFalse(signals.is_uk("New South Wales, Australia"))
 
     def test_fx_provider_charge_in_capitals(self):
@@ -1573,7 +1574,7 @@ class TestRequestOptions(unittest.TestCase):
                                           "min_turnover": 20_000_000, "turnover_check": False, "max_enrich": 50})
         self.assertEqual(opts, {"niche_ids": ["european-wine-importers", "spirits-importers"], "max_per_sic": 5,
                                 "min_turnover": 20_000_000, "turnover_check": False, "max_enrich": 50})
-        self.assertEqual(main.options_from_request({})["min_turnover"], 25_000_000)
+        self.assertEqual(main.options_from_request({})["min_turnover"], 20_000_000)
         self.assertEqual(main.options_from_request({"own_bank": " Barclays "})["own_bank"], "Barclays")
 
     def test_invalid(self):
@@ -2125,7 +2126,7 @@ class TestHttpFrontEnds(unittest.TestCase):
                     break
                 time.sleep(0.05)
             self.assertEqual(_request(base + "/status")[1]["status"], "done")
-            run.assert_called_once_with(niche_ids=["european-wine-importers"], max_per_sic=None, min_turnover=25_000_000,
+            run.assert_called_once_with(niche_ids=["european-wine-importers"], max_per_sic=None, min_turnover=20_000_000,
                                         turnover_check=True, max_enrich=None, source="api")
             status, csv_bytes = _request(base + "/leads.csv")
             self.assertEqual(status, 200)
@@ -2146,7 +2147,7 @@ class TestHttpFrontEnds(unittest.TestCase):
             status, _ = _request(base + "/api/run", {"niches": ["spirits-importers"]})
             self.assertEqual(status, 200)
             run.assert_called_once_with(niche_ids=["spirits-importers"], max_per_sic=api_run.SERVERLESS_DEFAULT_MAX_PER_SIC,
-                                        min_turnover=25_000_000, turnover_check=True, max_enrich=None, source="api")
+                                        min_turnover=20_000_000, turnover_check=True, max_enrich=None, source="api")
 
 
 if __name__ == "__main__":
@@ -2617,7 +2618,11 @@ class TestQualify(unittest.TestCase):
         german = [{"kind": "corporate", "name": "Acme GmbH", "country": "Germany", "ceased_on": ""}]
         q = qualify.assess(german, {}, {"confidence": "High"}, "", 12, False, "", "")
         self.assertEqual((q["qualified"], q["qualify_reason"]),
-                         ("Out", "owned by Acme GmbH (Germany): FX likely run by group treasury abroad"))
+                         ("Check", "owned by Acme GmbH (Germany): pitch the UK team; ask whether FX is run here or by "
+                                   "the parent"))
+        # its own accounts show FX handled locally: the UK team is the buyer
+        self.assertEqual(qualify.assess(german, {}, {"confidence": "High"}, "Uses forward contracts", 12, False, "", "")
+                         ["qualified"], "Yes")
         q = qualify.assess([], {}, {"confidence": "Low"}, "", 0, False, "", "")
         self.assertEqual(q["qualified"], "Out")                                   # niche default only
         self.assertEqual(qualify.assess([], {}, {"confidence": "Low"}, "", 6, False, "", "")["qualified"], "Yes")  # customs
@@ -2630,7 +2635,7 @@ class TestQualify(unittest.TestCase):
             q = qualify.assess([], {"auditor": "Shaw Gibbs"}, {"confidence": "High"}, "", 12, True, "Investec", "Lmuk Bidco Limited")
         self.assertEqual(q["warm_route"], "existing Investec relationship (charge or bankers line); private-equity backed "
                                           "(Lmuk Bidco Limited): route in through the sponsor; auditor Shaw Gibbs is an introducer")
-        with mock.patch.dict(qualify.QUALIFY_RULES, {"out_foreign_parent": False}):
+        with mock.patch.dict(qualify.QUALIFY_RULES, {"check_foreign_parent": False}):
             self.assertEqual(qualify.assess(german, {}, {"confidence": "High"}, "", 12, False, "", "")["qualified"], "Yes")
 
 
@@ -2813,8 +2818,8 @@ class TestFxFilings(unittest.TestCase):
                 {"filed_fx_score": 60, "owner": "Owned by ACME HOLDINGS LIMITED (UK, 01234567)"},
                 {"filed_fx_score": 60}]
         self.assertEqual(filings.mark_abroad(rows), 1)
-        self.assertIn("FX probably run from Sweden (CLOETTA AB, the parent)", rows[0]["run_from_abroad"])
-        self.assertEqual([r["rank_score"] for r in rows], [35, 60, 60, 60, 60])
+        self.assertIn("Owned from Sweden (CLOETTA AB) — pitch the UK team", rows[0]["run_from_abroad"])
+        self.assertEqual([r["rank_score"] for r in rows], [50, 60, 60, 60, 60])
         self.assertEqual(filings.owner_abroad(rows[2]), ("", ""))     # Jersey: a UK owner's holding company
 
     def test_overseas_owner_and_local_fx_signs(self):
@@ -2860,8 +2865,8 @@ class TestFxFilings(unittest.TestCase):
         # the floor decides: under it, read but not kept
         with tempfile.TemporaryDirectory() as d:
             path = self._zip(d, {"Prod223_0001_01234567_20241231.html": ixbrl()})   # £23.4m
-            self.assertEqual(filings.scan(path, workers=1), [])
-            self.assertEqual(len(filings.scan(path, workers=1, min_turnover=20_000_000)), 1)
+            self.assertEqual(filings.scan(path, workers=1, min_turnover=25_000_000), [])
+            self.assertEqual(len(filings.scan(path, workers=1)), 1)   # the £20m default floor
 
     def test_what_counts_as_fx_and_one_row_per_group(self):
         uk_only = {"turnover": 27e6, "regions": [{"region": "United Kingdom", "value": 27e6}]}

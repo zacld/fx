@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 main.py — FX lead sourcer: UK companies with foreign-currency flows, sized
-for a bank FX desk (core band £25m–£250m turnover).
+for a bank FX desk (core band £20m–£300m turnover).
 
 For each company: the evidence that it pays or is paid in foreign currency,
 which currencies most likely, roughly how much a year, who it banks with,
@@ -194,8 +194,8 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_OUTPUT = "fx_companies.xlsx"
 DEFAULT_NICHES_FILE = os.path.join(_HERE, "config", "fx_niches.json")
 # The target band: mid-market and lower-corporate clients for a bank's FX desk.
-DEFAULT_BAND_MIN = 25_000_000
-DEFAULT_BAND_MAX = 250_000_000
+DEFAULT_BAND_MIN = 20_000_000   # the desk's sweet spot, Nov 2026: £20m–£300m
+DEFAULT_BAND_MAX = 300_000_000
 DEFAULT_MIN_TURNOVER = DEFAULT_BAND_MIN    # floor: filed turnover under this is dropped
 SMALL_COMPANY_MAX_TURNOVER = 15_000_000    # small-company accounts limit (from April 2025)
 DEFAULT_HMRC_MONTHS = 12
@@ -213,7 +213,7 @@ CH_WORKERS = int(os.environ.get("CH_WORKERS", "4"))  # companies checked at once
 # only when filed turnover confirms it. Everything else — small, micro,
 # dormant, abridged — is under the size or files no figures to tell.
 # Listed in checking order: large ("full") first — mostly inside the
-# £25m–£250m band — then medium (up to £54m), then group parents.
+# £20m–£300m band — then medium (up to £54m), then group parents.
 LIKELY_CATEGORIES = ("full", "medium", "group")
 CONFIRM_CATEGORIES = ("audit-exemption-subsidiary",)
 CANDIDATE_CATEGORIES = LIKELY_CATEGORIES + CONFIRM_CATEGORIES

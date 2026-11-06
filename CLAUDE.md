@@ -112,7 +112,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   used within their free/paid allowances in turn — Search1API, Tavily, Exa,
   Serper (secrets `*_API_KEY`, monthly caps `*_MONTHLY`, ≤
   `SEARCH_MAX_PER_RUN` searches a run — companies whose filed turnover passes
-  the size test (≥ £25m, `SEARCH_MIN_TURNOVER`) first: size established, then
+  the size test (≥ £20m, `SEARCH_MIN_TURNOVER`) first: size established, then
   the contact confirmed — and within that neediest first (nobody →
   Likely → a Confirmed controller or manager); a finance director already
   Confirmed by a finance title isn't searched — 150 on weekday mornings while Serper's
@@ -134,8 +134,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   browser automation or bot-detection workarounds. Generated Google/LinkedIn
   search links remain for checking by hand.
 - **Target:** UK companies with proven foreign-currency flows, sized for a
-  bank FX desk (Zac now works at a bank). Core band £25m–£250m turnover;
-  Above (£250m+) and Below are separate sections.
+  bank FX desk (Zac now works at Investec). Core band £20m–£300m turnover (the desk's
+  sweet spot, Nov 2026); Above (£300m+) and Below are separate sections. Overseas-owned
+  companies are in scope — pitch the UK team (see Owned from abroad).
 - **Per company:** likely currencies (customs goods × HMRC trade statistics
   by country; dollar-priced goods — oil, metals, coffee, cocoa, soya, chips,
   aircraft: `currency.DOLLAR_PRICED` — count as USD whatever the country), an FX wallet range (cost of sales/turnover × customs-banded
@@ -195,19 +196,22 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the currency notes (`pdf.notes_pages_order`: 62–97% through, then the
   strategic report 12–40%; ≤ `OCR_NOTES_MAX_PAGES` (8) a filing, stopping
   at a forward contract's size or a sensitivity; `OCR_NOTES_BUDGET_SECONDS`
-  (1500) a run; not for filed turnover under `OCR_NOTES_MIN_TURNOVER`, £25m);
+  (1500) a run; not for filed turnover under `OCR_NOTES_MIN_TURNOVER`, £20m);
   pages OCR'd for turnover or the FX line are reused, never read twice.
 - **Owned from abroad** (`hooks.run_from_abroad`, `ABROAD_RULES`): a company whose
   current corporate owner is registered outside the UK (Jersey / Guernsey / Isle of
   Man count as UK owners' holding companies) and whose own records show no FX or
   banking run locally (its own forward contracts, a named FX provider or policy —
   `fx_today` "Uses …", a bank holding its own all-assets debenture) gets
-  `run_from_abroad` ("FX probably run from Sweden (CLOETTA AB, the parent) — ask
-  whether the UK team has its own FX budget") and ranks 25 points lower: in the
+  `run_from_abroad` ("Owned from Sweden (CLOETTA AB) — pitch the UK team; ask whether FX
+  is run in the UK or by the parent") and ranks 10 points lower (the desk's steer, Nov 2026:
+  "they don't need to be UK-owned, but we should be pitching the UK team — lots of overseas-owned
+  companies have FX in the UK, some deal with it overseas"): in the
   finder's order, in "Hottest" (within its FX-proof group; `ABROAD_POINTS` in
   `format.js`), in the filings list's `rank_score` (`filings.mark_abroad`, every
   scan, from the mini research's owner line) and so in the finder's priority
-  queue. Shown on the card ("Owned abroad: FX may be run there"), never hidden.
+  queue. Shown on the card ("Owned abroad: pitch the UK team"), never hidden. `qualify` makes such a
+  company a Check (not Out) unless its accounts show FX handled locally — then Yes.
   The filings tab can sort "Strongest FX proof first" by `rank_score`.
 - **Group accounts** (`sourcer/group.py`): for a company whose PSC register
   names a current UK corporate owner (a Companies House number), the parent's
@@ -225,7 +229,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   "FX filings"; the Accounts page's tab of that name, GET `/api/accounts?view=filings`,
   store key `filings`): Companies House's free bulk accounts files (every set
   of accounts filed online: a zip each morning, monthly archives of the past)
-  scanned for companies of `FILINGS_MIN_TURNOVER` (£25m)+ whose filing shows FX.
+  scanned for companies of `FILINGS_MIN_TURNOVER` (£20m)+ whose filing shows FX (months scanned before
+  7 Nov 2026 used £25m).
   A cheap screen on each filing's raw text (tagged turnover over the floor, or
   — none tagged — full-accounts-sized and mentioning foreign exchange), then
   the survivors read like the finder's accounts (`accounts.extract_facts`) and
@@ -361,6 +366,18 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Contact routes and email drafts:** in scope until Cognism arrives
   (mid-November 2026). Generic company emails only (Priority 12), and
   rule-based drafts (Priority 1: no per-lead AI calls).
+- **Email generator** (`apps/web/src/accounts/email.js`; "Email draft" on each card, the
+  company page and the filings cards, and the `email_draft` CSV column): Investec's master
+  cold email, filled from the company's filings. Only the first two paragraphs change —
+  first name (a presented finance contact, never a Guess or an initial), the company's
+  name shortened naturally, regions abroad from the turnover note (else places from the
+  currencies in the accounts), the currency pair (main currency unless only the niche's
+  default, forwards, currencies in the accounts, regions), and the opening of the second
+  paragraph (paying overseas suppliers / sales from overseas / trading activity). The
+  Investec paragraph, the Tuesday-or-Thursday ask and the sign-off never change. Golden
+  rule: researched, not invasive — forwards, lenders, borrowings and FX gains guide the
+  hook but are never quoted back; what the filings can't support stays a [placeholder]
+  ("Fill in: …"), and the draft says where each filled part came from. Nothing is sent.
 - **Running it:** the GitHub workflow `fx-company-finder.yml` fills the
   dashboard's password-protected Accounts page (no run attachments: the
   repo is public)

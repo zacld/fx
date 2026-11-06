@@ -173,12 +173,13 @@ def is_uk(place: str) -> bool:
     return " ".join((place or "").upper().replace(".", "").split()) in _UK_PLACES | {""} or signals.is_uk(place)
 
 
-# Owned from abroad: the FX decision usually sits with the parent's treasury at head office, with the group's bank —
-# the UK finance team may have no say. Such a company ranks this many points lower unless its own records show it
+# Owned from abroad: the FX decision may sit with the parent's treasury at head office — or with the UK team (the
+# desk's steer, Nov 2026: "they don't need to be UK-owned, but we should be pitching the UK team"). Such a company
+# ranks a little lower unless its own records show it
 # runs FX or banking locally (its own forward contracts, a named FX provider or policy, a bank holding its own
 # all-assets debenture). Shown, never hidden. Crown dependencies (Jersey etc.) are usually UK owners' holding
 # companies, so they don't count as abroad.
-ABROAD_RULES = {"points": 25, "not_abroad": {"JERSEY", "GUERNSEY", "ISLE OF MAN", "CHANNEL ISLANDS"}}
+ABROAD_RULES = {"points": 10, "not_abroad": {"JERSEY", "GUERNSEY", "ISLE OF MAN", "CHANNEL ISLANDS"}}
 
 
 def overseas_owner(owners: list[dict]) -> Optional[dict]:
@@ -201,14 +202,14 @@ def local_fx_signs(row: dict) -> str:
 
 def run_from_abroad(parent_name: str, country: str, row: dict) -> str:
     """
-    "FX probably run from Sweden (CLOETTA AB, the parent) — ask whether the UK team has its own FX budget" for a
+    "Owned from Sweden (CLOETTA AB) — pitch the UK team; ask whether FX is run in the UK or by the parent" for a
     company owned from abroad with no sign of running FX locally; '' otherwise (UK-owned, or local signs).
     """
     if not parent_name or not country or local_fx_signs(row):
         return ""
     place = " ".join(w.capitalize() if w.isupper() and len(w) > 3 else w for w in country.split())
-    return (f"FX probably run from {place} ({parent_name}, the parent) — ask whether the UK team has its own "
-            f"FX budget")
+    return (f"Owned from {place} ({parent_name}) — pitch the UK team; ask whether FX is run in the UK or by the "
+            f"parent")
 
 
 def region_currency(region: str) -> Optional[str]:

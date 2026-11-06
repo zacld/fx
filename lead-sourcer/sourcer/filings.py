@@ -39,7 +39,7 @@ from sourcer import accounts, fx_notes, hooks, incumbent
 DOWNLOADS = "https://download.companieshouse.gov.uk/"
 LIST_PAGES = {"daily": DOWNLOADS + "en_accountsdata.html", "monthly": DOWNLOADS + "en_monthlyaccountsdata.html"}
 USER_AGENT = "fx-lead-sourcer/1.0 (+https://github.com/zacld/fx)"
-MIN_TURNOVER = int(os.environ.get("FILINGS_MIN_TURNOVER", "25000000"))
+MIN_TURNOVER = int(os.environ.get("FILINGS_MIN_TURNOVER", "20000000"))
 # Turnover not stated (filleted / untagged): an FX gain or loss this big still marks a company worth a look.
 MIN_FX_WITHOUT_TURNOVER = 100_000
 # Full accounts run to hundreds of KB; a micro-entity's are tens. Untagged turnover is only looked for above this.
