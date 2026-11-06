@@ -12,3 +12,4 @@
 2026-11-06T02:07 diag numbers=03059307,07380035
 2026-11-06T02:10 regression audit, 400 filings, after per-figure gain guard
 2026-11-06T02:31 diag numbers=16023084,11976847,13606212
+2026-11-06T02:33 regression audit 400 after four-column forward rule

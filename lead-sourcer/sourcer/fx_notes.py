@@ -311,6 +311,14 @@ _ROW_GAIN_LOSS = re.compile(r"(?:gains?|loss(?:es)?|profit|movement|charge|credi
                             re.I)
 
 
+_COLUMN = re.compile(r"\(?-?\d[\d,]*(?:\.\d+)?\)?|(?<!\S)[-–—](?!\S)")
+
+
+def _row_columns(rest: str) -> int:
+    """How many columns a table row has, dashes ("nil") included."""
+    return len(_COLUMN.findall(re.sub(r"\(?\bnotes?\s*\d+\)?", " ", rest, flags=re.I)))
+
+
 def forward_recheck(line: str, evidence: str) -> Optional[tuple[str, str]]:
     """
     (today's line, why) when today's rules read a stored forward size's evidence differently — a table row that
@@ -353,7 +361,7 @@ def forward_evidence_doubtful(evidence: str) -> str:
         rest = row.group(2)
         if re.match(r"\s*\(?\s*(?:gains?|loss(?:es)?|profits?)\b", rest, re.I):
             return "the gains/losses line, not the contracts"
-        if len([v for v in _cells(rest) if abs(v) > 0]) > 2:
+        if len([v for v in _cells(rest) if abs(v) > 0]) > 2 or _row_columns(rest) > 3:
             return "a table row with more columns than this year and last: which is the size is unclear"
     return ""
 
@@ -373,8 +381,9 @@ def _forward_rows(page: str, number: int) -> list[dict]:
                 and not re.search(r"forward\s+(?:foreign\s+)?(?:exchange|currency)|currency\s+forwards?", page, re.I):
             continue   # a bare "forward contracts" row on a page that never ties them to currency
         values = [v for v in _cells(rest) if abs(v) > 0]
-        if not values or len(values) > 2:
-            continue   # more than this year and last ("49 464 59,476 48,690": assets, liabilities, notionals): unclear
+        if not values or len(values) > 2 or _row_columns(rest) > 3:
+            continue   # more columns than a note, this year and last ("49 464 59,476 48,690", "35 - 64,856 53,872":
+                       # assets, liabilities, notionals): which is the size is unclear
         scale = _scale_near(page, m.start())
         amount = abs(values[0]) * scale
         if amount < MIN_FORWARD_AMOUNT:

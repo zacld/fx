@@ -304,3 +304,10 @@ class TestFirstYearScanFindingsAudit(unittest.TestCase):
         new, _ = fx_notes.forward_recheck(stored, f'"{s}" (filed accounts)')
         self.assertEqual(new, "Forward contracts valued at £125k (prior year £372k)")
         self.assertIsNone(fx_notes.forward_recheck(new, f'"{s}" (filed accounts)'))   # stands now
+
+    def test_a_four_column_forward_row_is_not_a_size(self):
+        from sourcer import fx_notes
+        self.assertEqual(fx_notes._forward_rows("£'000\nForeign exchange forward contract 35 - 64,856 53,872\n", 1), [])
+        self.assertTrue(fx_notes.forward_evidence_doubtful('"Foreign exchange forward contract 35 - 64,856 53,872"'))
+        kept = fx_notes._forward_rows("£'000\nForward foreign exchange contracts 21 1,250 980\n", 1)   # note, two years
+        self.assertEqual(kept[0]["amount"], 1_250_000)
