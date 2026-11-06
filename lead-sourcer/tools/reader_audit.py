@@ -86,9 +86,16 @@ def broken_rules(f: dict, cols: dict) -> list[str]:
             if t and size > limit * t:
                 out.append(f"{what.replace('fx_', '')} {short(size)} over {label} turnover {short(t)}: "
                            f"{cols.get(what, '')[:90]}")
-    for size, prior in forward_sizes(cols.get("fx_forwards", "")):
+    for part in (cols.get("fx_forwards") or "").split(";"):
+        sizes = forward_sizes(part)
+        if not sizes:
+            continue
+        size, prior = sizes[0]
         if t and size > 20 * t:
             out.append(f"forward contracts {short(size)} over 20x turnover {short(t)}")
+        # a fair value or hedging reserve swings with the rate (High Street TV: £8k to £599k); amounts contracted don't
+        if "valued at" in part or "reserve" in part:
+            continue
         if prior and min(size, prior) > 0 and max(size, prior) / min(size, prior) >= 50:
             out.append(f"forward contracts {short(size)} v last year {short(prior)}: 50x apart")
     return out
