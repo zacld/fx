@@ -1,6 +1,7 @@
 // GET /api/accounts — the finder's latest account list (FD names included),
 // or with ?view=filings the Recent FX filings list (companies whose new
-// accounts show FX: lead-sourcer/sourcer/filings.py),
+// accounts show FX: lead-sourcer/sourcer/filings.py), or with ?view=losses
+// that list's companies whose latest accounts show an FX loss,
 // with the companies marked contacted and Zac's notes; POST /api/accounts
 // {company_number, contacted: true, channel} logs a touch (the first marks it
 // contacted), {contacted: false} takes it off the list, {response} /
@@ -21,6 +22,21 @@ export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, re
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index
 export const filingsMonthKey = (month) => `filings/${month}`;   // {month, rows}: the companies filed that month
+export const LOSSES_KEY = "filings/losses";   // {made_at, count, rows}: every listed filing with an FX loss (the FX losses tab)
+
+// The fields the FX losses tab shows for a filing (kept small: one store item for the whole year's losses).
+const LOSS_FIELDS = ["company_number", "company_name", "filed", "period_end", "turnover_gbp", "turnover_basis", "size_estimate",
+  "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_evidence", "accounts_url", "fx_forwards", "fx_today",
+  "currency", "currency_source", "currencies_in_accounts", "turnover_regions", "owner", "run_from_abroad", "incumbent_bank",
+  "incumbent_bank_url", "lenders", "fd_search_url", "directors", "triggers", "hmrc_trade", "filed_fx_score", "moved_up",
+  "also_filed"];
+
+// Every filing in the Recent FX filings list whose latest accounts show an FX loss, biggest first.
+export function filingsLosses(rows = []) {
+  return rows.filter((r) => Number(r.fx_gain_loss_gbp) < 0)
+    .map((r) => Object.fromEntries(LOSS_FIELDS.filter((k) => r[k] !== undefined && r[k] !== "").map((k) => [k, r[k]])))
+    .sort((a, b) => Number(a.fx_gain_loss_gbp) - Number(b.fx_gain_loss_gbp));
+}
 
 // "2026-11" for a day file's "2026-11-04"; "2026-09" for a monthly archive's "September 2026".
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -93,6 +109,9 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     return reply({ contacted: marks, notes: noted }, 200);
   }
   const params = new URL(req.url).searchParams;
+  if (params.get("view") === "losses") {
+    return reply((await blobs.get(LOSSES_KEY, { type: "json" })) || { rows: [] }, 200);
+  }
   if (params.get("view") === "filings") {
     const month = params.get("month") || "";
     if (month) {
@@ -101,7 +120,7 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     }
     const filings = await blobs.get(FILINGS_KEY, { type: "json" });
     if (!filings) return reply({ error: "no FX filings scanned yet — they arrive with the next FX filings run" }, 404);
-    const { files_done: _done, ...rest } = filings;
+    const { files_done: _done, files_rescanned: _rescanned, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
   const [data, marks, noted] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY].map((k) => blobs.get(k, { type: "json" })));

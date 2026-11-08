@@ -292,7 +292,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   engines join there: the finder workflow fetches this list and its strongest
   finds (filed FX proof 50+, or moved up from small accounts —
   `main.priority_from_filings`, `--priority-file`) are candidates whatever their
-  SIC code and are checked first, up to `FILINGS_PRIORITY_SHARE` (half) of the
+  SIC code — and any with an FX loss of `FX_LOSS_PRIORITY` (£100k)+, 20 points higher — and are checked first, up to `FILINGS_PRIORITY_SHARE` (half) of the
   run's slots, strongest first (niche "FX in their filed accounts" when no niche
   or customs record brings them in) — full research and contact hunt, then the
   main Accounts list.
@@ -367,6 +367,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Contact routes and email drafts:** in scope until Cognism arrives
   (mid-November 2026). Generic company emails only (Priority 12), and
   rule-based drafts (Priority 1: no per-lead AI calls).
+- **FX losses tab** (Accounts page; `lossRows` / `filterLosses` / `sortLosses` in `format.js`): every company whose
+  latest accounts show an FX loss — the main list's (finance contact, company page) and the Recent FX filings list's
+  not on it yet (`filings/losses`, written by `filings-store.mjs put` with `filingsLosses`, GET
+  `/api/accounts?view=losses`) — biggest first; filters for size (£50k+ by default), filed in the last 6 months, no
+  hedging named in the accounts, worse than last year; sorts by loss, share of turnover, newest, growth. Each loss links
+  to its accounts; figures the sense checks cleared never appear; contacted companies stay in the Contacted tab.
 - **Email generator** (`apps/web/src/accounts/email.js`; the Accounts page's "Email generator"
   tab: the cards stay as they are, and "Email generator →" at the foot of each card — accounts,
   filings and the company page — takes the company there, newest first, its draft in an editable
@@ -393,8 +399,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   of each run). The 1,200 slots a run (`DEFAULT_ENRICH`) go to companies still in
   the running: ones the cache already shows are out (filed turnover under the
   floor, an unconfirmed subsidiary) don't take one, so the next candidates in line
-  get checked. Scheduled Sun–Thu 19:43 UTC (GitHub starts free scheduled runs
-  hours late), so the list is ready by the morning. `tests/test_lead_sourcer.py`
+  get checked. Scheduled every evening, 19:43 UTC (GitHub starts free scheduled runs
+  hours late), so the list is ready by the morning (nightly from 8 Nov 2026). `tests/test_lead_sourcer.py`
   `TestEndToEnd` runs the workflow's whole chain (list → CSV → contact search →
   Accounts page file) on every PR.
 

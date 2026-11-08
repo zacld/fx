@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filingsMonth, handle, markFirstSeen } from "../api/accounts.mjs";
+import { filingsLosses, filingsMonth, handle, markFirstSeen } from "../api/accounts.mjs";
 
 const list = { made_at: "2026-10-21T06:00:00+00:00", count: 1, rows: [{ company_name: "A LTD", rank: 1 }] };
 // An in-memory Blobs store: the list under "latest", Zac's contacted marks under "contacted".
@@ -69,6 +69,24 @@ describe("/api/accounts", () => {
     expect((await (await handle(month("2026-09"), opts)).json()).rows[0].company_name).toBe("C LTD");
     expect((await (await handle(month("2026-08"), opts)).json()).rows).toEqual([]);
     expect((await handle(month("../latest"), opts)).status).toBe(400);
+  });
+
+  it("returns the year's FX losses on ?view=losses, biggest first and trimmed to what the tab shows", async () => {
+    const s = memory();
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const view = (auth) => new Request("https://x/api/accounts?view=losses", { headers: { authorization: auth } });
+    expect((await (await handle(view("Bearer s3cret"), opts)).json()).rows).toEqual([]);   // none saved yet
+    const losses = filingsLosses([
+      { company_number: "01", company_name: "A LTD", fx_gain_loss_gbp: "-20000", fx_mentions: ["long text"], filed: "2026-10-01" },
+      { company_number: "02", company_name: "B LTD", fx_gain_loss_gbp: "35000" },
+      { company_number: "03", company_name: "C LTD", fx_gain_loss_gbp: "-900000", fx_forwards: "" },
+    ]);
+    expect(losses.map((r) => r.company_number)).toEqual(["03", "01"]);
+    expect(losses[1].fx_mentions).toBeUndefined();
+    expect("fx_forwards" in losses[0]).toBe(false);   // empty fields left out
+    s.blobs["filings/losses"] = { made_at: "x", count: 2, rows: losses };
+    expect((await (await handle(view("Bearer s3cret"), opts)).json()).count).toBe(2);
+    expect((await handle(view("Bearer nope"), opts)).status).toBe(401);
   });
 
   it("files a filing under the month it was filed", () => {

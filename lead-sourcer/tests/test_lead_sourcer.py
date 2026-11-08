@@ -483,6 +483,10 @@ class TestFxFilingsFirst(PipelineTestCase):
                                 {"company_number": "02", "filed_fx_score": 20, "moved_up": "Moved up from small accounts (…)"},
                                 {"company_number": "03", "filed_fx_score": 30}]}, f)
         self.assertEqual(main.priority_from_filings(path), {"01": 65.0, "02": 45.0})
+        with open(path, "w", encoding="utf-8") as f:   # a £100k+ FX loss comes in whatever its score, 20 higher
+            json.dump({"rows": [{"company_number": "04", "filed_fx_score": 25, "fx_gain_loss_gbp": "-250000"},
+                                {"company_number": "05", "filed_fx_score": 25, "fx_gain_loss_gbp": "-40000"}]}, f)
+        self.assertEqual(main.priority_from_filings(path), {"04": 45.0})
         self.assertEqual(main.priority_from_filings(os.path.join(self.tmp.name, "missing.json")), {})
 
     def test_fx_probably_run_abroad_ranks_lower(self):

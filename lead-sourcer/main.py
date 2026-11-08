@@ -461,6 +461,7 @@ FILINGS_NICHE = {
 # Share of a run's slots the FX filings scan's strongest finds may take before the customs and niche candidates.
 FILINGS_PRIORITY_SHARE = float(os.environ.get("FILINGS_PRIORITY_SHARE", "0.5"))
 FILINGS_PRIORITY_MIN_SCORE = 50
+FX_LOSS_PRIORITY = 100_000   # an FX loss this big in the filings list: checked first in the finder, whatever its score
 
 
 def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE) -> dict[str, float]:
@@ -474,10 +475,17 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
             rows = (json.load(f) or {}).get("rows") or []
     except (OSError, ValueError):
         return {}
-    # ranked by filed FX proof (less ABROAD_RULES points when the FX is probably run abroad), moved up +25
+    # ranked by filed FX proof (less ABROAD_RULES points when the FX is probably run abroad), moved up +25, an FX loss
+    # of FX_LOSS_PRIORITY+ +20 — such a loss brings a company in whatever its score (the desk calls FX losses first)
+    def big_loss(r: dict) -> bool:
+        try:
+            return float(r.get("fx_gain_loss_gbp") or 0) <= -FX_LOSS_PRIORITY
+        except ValueError:
+            return False
     return {r["company_number"]: float(filings.rank_score(r)) + (25 if r.get("moved_up") else 0)
+            + (20 if big_loss(r) else 0)
             for r in rows if r.get("company_number")
-            and (filings.rank_score(r) >= min_score or r.get("moved_up"))}
+            and (filings.rank_score(r) >= min_score or r.get("moved_up") or big_loss(r))}
 
 
 def trader_niche(trade: dict) -> dict:

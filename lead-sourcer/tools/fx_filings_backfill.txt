@@ -4,6 +4,7 @@
 # "rescan": the next file not yet read again at today's floor (Nov 2026: £25m -> £20m) — day files newer than the
 # newest monthly archive, then each archive, newest first; "rescan 20" chains until none is left.
 # "daily": one daily scan, saved — e.g. to apply new sanity rules (filings.tidy) to the stored list straight away
-# (6 Nov 2026: the sensitivity, region and forward-contract rules; again for regions over turnover +5%).
+# (6 Nov 2026: the sensitivity, region and forward-contract rules; again for regions over turnover +5%; 8 Nov: to
+# write the FX losses tab's list, filings/losses).
 # Only a change to this file starts anything; any other push of the scanner runs the 20-company test (never saved).
-rescan 20
+daily

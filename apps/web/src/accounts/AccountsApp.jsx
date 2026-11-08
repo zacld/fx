@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { emailDraft } from "./email.js";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
@@ -261,12 +261,16 @@ function Accounts({ data, password }) {
                   title="Companies of £20m+ whose newly filed accounts show FX" onClick={() => set({ section: "", view: "filings" })}>
             Recent FX filings
           </button>
+          <button role="tab" aria-selected={filters.view === "losses"} className={`tab losses-tab${filters.view === "losses" ? " on" : ""}`}
+                  title="Companies whose latest accounts show a loss on currency" onClick={() => set({ section: "", view: "losses" })}>
+            FX losses
+          </button>
           <button role="tab" aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
                   title="The Investec email for each company you send here" onClick={() => set({ section: "", view: "email" })}>
             Email generator <span className="tab-n">{emails.length}</span>
           </button>
         </div>
-        {filters.view !== "filings" && filters.view !== "email" && <>
+        {!["filings", "email", "losses"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -300,7 +304,8 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "email" ? <EmailGenerator items={emails} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
+      {filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onOpen={openCompany} onEmail={toEmail} />
+       : filters.view === "email" ? <EmailGenerator items={emails} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
       <div className="list">
         {saveError && <div className="save-error" role="alert">{saveError}</div>}
@@ -657,6 +662,97 @@ function Chips({ r }) {
       {r.family_run && <span className="chip">Family-run</span>}
       {parts(r.triggers).map((t) => <span key={t} className="chip trig">{t}</span>)}
     </div>
+  );
+}
+
+// The FX losses tab: every company whose latest accounts show a loss on currency — the main list's (with its finance
+// contact) and the Recent FX filings list's not on it yet — biggest first, each linked to the accounts it came from.
+const LOSS_MINS = [[0, "Any size"], [25000, "£25k+"], [50000, "£50k+"], [100000, "£100k+"], [250000, "£250k+"], [1000000, "£1m+"]];
+function FxLosses({ password, listRows, contacted, onOpen, onEmail }) {
+  const [filingLosses, setFilingLosses] = useState(null);
+  const [error, setError] = useState("");
+  const [min, setMin] = useState(50000);
+  const [query, setQuery] = useState("");
+  const [recent, setRecent] = useState(false);
+  const [unhedged, setUnhedged] = useState(false);
+  const [grew, setGrew] = useState(false);
+  const [order, setOrder] = useState("biggest");
+  const [shown, setShown] = useState(PAGE);
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}?view=losses`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then(async (res) => { const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`); return body; })
+      .then((body) => { if (live) setFilingLosses(body.rows || []); })
+      .catch((e) => { if (live) { setError(e.message === "Failed to fetch" ? "Couldn't reach the site — check your connection." : e.message); setFilingLosses([]); } });
+    return () => { live = false; };
+  }, [password]);
+  const all = useMemo(() => lossRows(listRows.filter((r) => !contacted[r.company_number]), filingLosses || []), [listRows, contacted, filingLosses]);
+  const rows = useMemo(() => sortLosses(filterLosses(all, { min, query, recentDays: recent ? 183 : 0, unhedged, grew }), order),
+                       [all, min, query, recent, unhedged, grew, order]);
+  const reset = (fn) => (v) => { fn(v); setShown(PAGE); };
+  if (filingLosses === null) return <div className="list"><div className="empty">Loading FX losses…</div></div>;
+  return (
+    <div className="list">
+      {error && <div className="save-error" role="alert">Recent FX filings' losses couldn't load ({error}); showing your Accounts list's only.</div>}
+      <div className="filters filings-bar">
+        <input className="input search" placeholder="Search company, contact, currency, bank…" value={query}
+               onChange={(e) => reset(setQuery)(e.target.value)} aria-label="Search FX losses" />
+        <select className="input" value={min} onChange={(e) => reset(setMin)(Number(e.target.value))} aria-label="Loss at least">
+          {LOSS_MINS.map(([v, label]) => <option key={v} value={v}>Loss {label}</option>)}
+        </select>
+        <select className="input" value={order} onChange={(e) => reset(setOrder)(e.target.value)} aria-label="Order">
+          {Object.entries(LOSS_SORTS).map(([k, { label }]) => <option key={k} value={k}>Sort: {label}</option>)}
+        </select>
+        <label className="check"><input type="checkbox" checked={recent} onChange={(e) => reset(setRecent)(e.target.checked)} /> Filed in the last 6 months</label>
+        <label className="check" title="No forward contracts, options or FX provider named in their accounts"><input type="checkbox" checked={unhedged} onChange={(e) => reset(setUnhedged)(e.target.checked)} /> No hedging named</label>
+        <label className="check"><input type="checkbox" checked={grew} onChange={(e) => reset(setGrew)(e.target.checked)} /> Worse than last year</label>
+        <span className="muted">{rows.length.toLocaleString()} of {all.length.toLocaleString()} with an FX loss</span>
+      </div>
+      <p className="filings-note">Companies whose latest filed accounts show a loss on currency (exchange differences), from your Accounts list and the
+        Recent FX filings scan. Each figure links to the accounts it came from; figures that failed the sense checks are left out. Companies you've
+        marked contacted are in the Contacted tab.</p>
+      {rows.slice(0, shown).map((r) => <LossCard key={r.company_number} r={r} onOpen={onOpen} onEmail={onEmail} />)}
+      {!rows.length && <div className="empty">No FX losses match these filters.</div>}
+      {rows.length > shown && <button className="btn-sm more" onClick={() => setShown((n) => n + PAGE)}>Show more ({rows.length - shown} left)</button>}
+    </div>
+  );
+}
+
+function LossCard({ r, onOpen, onEmail }) {
+  const priorLine = r.prior === null ? "" : `last year ${r.prior < 0 ? "a loss of " + money(-r.prior) : r.prior > 0 ? "a gain of " + money(r.prior) : "nil"}`;
+  return (
+    <article className="card loss-card">
+      <div className="card-top">
+        <div className="card-name">
+          {r.onList
+            ? <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
+            : <a className="co" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer" title="Open on Companies House">{r.company_name}</a>}
+          {r.onList ? <span className="chip own">On your Accounts list</span> : <span className="chip">From Recent FX filings</span>}
+          {lossGrew(r) && <span className="chip warn">Worse than last year</span>}
+        </div>
+        <div className="loss-fig">
+          <Src href={r.fx_gain_loss_url || r.accounts_url} title={r.fx_gain_loss_evidence || "Open the accounts"}><b>−{money(r.loss)}</b> FX loss</Src>
+          <span className="muted">{[r.share !== null && `${(r.share * 100).toFixed(1)}% of ${money(r.turnover_gbp)} turnover`, priorLine].filter(Boolean).join(" · ")}</span>
+        </div>
+      </div>
+      <div className="loss-facts">
+        <span><span className="fxl">Filed</span> {r.accounts_filed_on ? filedWhen(r.accounts_filed_on.slice(0, 10)) : r.filed ? filedWhen(r.filed) : "—"}</span>
+        <span><span className="fxl">Hedging</span> {r.fx_forwards || r.fx_today || <em>none named in the accounts</em>}</span>
+        {(r.main_currency || r.currencies_in_accounts) && <span><span className="fxl">Currency</span> {r.currencies_in_accounts || r.main_currency}</span>}
+        {r.turnover_regions && <span><span className="fxl">Sales</span> {r.turnover_regions}</span>}
+        {r.incumbent_bank && <span><span className="fxl">Bank</span> {r.incumbent_bank.split(":")[0]}</span>}
+      </div>
+      <div className="loss-facts">
+        {r.finance_contact
+          ? <span><span className="fxl">Finance</span> {r.finance_contact}{r.finance_contact_role ? ` · ${r.finance_contact_role}` : ""}{r.finance_contact_confidence ? ` (${r.finance_contact_confidence})` : ""}</span>
+          : <span><span className="fxl">Finance</span> <em>no one confirmed</em>{(r.fd_search_url || r.company_name) && <> · <a href={r.fd_search_url || googleFd(r)} target="_blank" rel="noreferrer">Google the FD ↗</a></>}</span>}
+        {r.run_from_abroad && <span className="muted">{r.run_from_abroad}</span>}
+      </div>
+      <div className="card-foot">
+        {r.onList && <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>Open company page →</a>}
+        <EmailButton r={r} onEmail={onEmail} />
+      </div>
+    </article>
   );
 }
 
@@ -1038,6 +1134,10 @@ a.co:hover{color:#34D399}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}
 .email-go{color:#a5b4fc}
+.loss-fig{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;text-align:right}
+.loss-fig b{color:#f87171;font-size:16px}
+.loss-facts{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:13px;color:rgba(255,255,255,.75)}
+.loss-facts em{color:rgba(255,255,255,.45)}
 .email-btns{display:flex;gap:8px;flex-wrap:wrap}
 .email-edit{width:100%;box-sizing:border-box;margin-top:10px;padding:12px;font:14px/1.55 inherit;font-family:inherit;resize:vertical;white-space:pre-wrap}
 .email-gaps{margin-top:8px;font-size:12px;color:#fbbf24}
