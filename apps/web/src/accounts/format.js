@@ -360,7 +360,14 @@ export function lossRows(listRows = [], filingLosses = []) {
 // The loss grew on last year's: a loss now bigger than last year's loss, or a loss after last year's gain.
 export const lossGrew = (r) => r.prior !== null && (r.prior >= 0 || r.loss > -r.prior);
 
-export function filterLosses(rows, { min = 0, query = "", recentDays = 0, unhedged = false, grew = false, today = new Date() } = {}) {
+// The desk's sweet spot (Nov 2026): turnover £20m–£300m, filed or the group's. A size estimate alone doesn't count.
+export const CORE_BAND = [20_000_000, 300_000_000];
+export const inCoreBand = (r) => {
+  const t = Number(r.turnover_gbp) || 0;
+  return t >= CORE_BAND[0] && t <= CORE_BAND[1];
+};
+
+export function filterLosses(rows, { min = 0, query = "", recentDays = 0, unhedged = false, grew = false, band = false, today = new Date() } = {}) {
   const q = query.trim().toLowerCase();
   const since = recentDays ? new Date(today.getTime() - recentDays * 864e5).toISOString().slice(0, 10) : "";
   return rows.filter((r) => r.loss >= min
@@ -368,7 +375,8 @@ export function filterLosses(rows, { min = 0, query = "", recentDays = 0, unhedg
       r.turnover_regions, r.incumbent_bank, r.fx_niche].some((v) => String(v || "").toLowerCase().includes(q)))
     && (!since || (r.filedOn && r.filedOn >= since))
     && (!unhedged || !hedgingNamed(r))
-    && (!grew || lossGrew(r)));
+    && (!grew || lossGrew(r))
+    && (!band || inCoreBand(r)));
 }
 
 export const LOSS_SORTS = {

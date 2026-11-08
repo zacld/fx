@@ -381,7 +381,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   with each company's email draft; `lossRows` / `filterLosses` / `sortLosses` in `format.js`): every company whose
   latest accounts show an FX loss — the main list's (finance contact, company page) and the Recent FX filings list's
   not on it yet (`filings/losses`, written by `filings-store.mjs put` with `filingsLosses`, GET
-  `/api/accounts?view=losses`) — biggest first; filters for size (£50k+ by default), filed in the last 6 months, no
+  `/api/accounts?view=losses`) — biggest first; filters for size (£50k+ by default), a £20m–£300m button (filed or group turnover in the core band; a size estimate alone doesn't count — `inCoreBand`), filed in the last 6 months, no
   hedging named in the accounts, worse than last year; sorts by loss, share of turnover, newest, growth. Each loss links
   to its accounts; figures the sense checks cleared never appear; contacted companies stay in the Contacted tab.
 - **Email generator** (`apps/web/src/accounts/email.js`; the Accounts page's "Email generator"

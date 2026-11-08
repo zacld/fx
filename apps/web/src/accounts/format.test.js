@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -276,6 +276,9 @@ describe("FX losses", () => {
     expect(filterLosses(rows, { unhedged: true }).map((r) => r.company_number)).toEqual(["01", "04"]);
     expect(filterLosses(rows, { grew: true }).map((r) => r.company_number)).toEqual(["01", "03"]);   // 150k > 40k; a loss after a gain
     expect(filterLosses(rows, { query: "jane" }).map((r) => r.company_number)).toEqual(["01"]);
+    expect(filterLosses(rows, { band: true }).map((r) => r.company_number)).toEqual(["01", "03"]);   // 04: no turnover
+    expect([inCoreBand({ turnover_gbp: "20000000" }), inCoreBand({ turnover_gbp: "300000001" }), inCoreBand({ size_low_gbp: "25000000" })])
+      .toEqual([true, false, false]);
     expect(sortLosses(rows).map((r) => r.company_number)).toEqual(["03", "01", "04"]);
     expect(sortLosses(rows, "share").map((r) => r.company_number)).toEqual(["03", "01", "04"]);
     expect(sortLosses(rows, "newest").map((r) => r.company_number)).toEqual(["04", "01", "03"]);
