@@ -325,3 +325,57 @@ export function monthLabel(month = "") {
   const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return m && +m[2] >= 1 && +m[2] <= 12 ? `${names[+m[2] - 1]} ${m[1]}` : month;
 }
+
+// --- FX losses (the FX losses tab) ---------------------------------------------------------------------------------
+
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+  "November", "December"];
+// "2026-11-04" for a filing's date: the main list's accounts_filed_on, a day file's date, or the 1st of a month's archive.
+export function filedIso(r) {
+  const f = r.accounts_filed_on || r.filed || "";
+  if (/^\d{4}-\d{2}-\d{2}/.test(f)) return f.slice(0, 10);
+  const m = /^([A-Z][a-z]+) (\d{4})$/.exec(f);
+  return m && MONTH_NAMES.includes(m[1]) ? `${m[2]}-${String(MONTH_NAMES.indexOf(m[1]) + 1).padStart(2, "0")}-01` : "";
+}
+
+// Hedging named in the company's own accounts: its forward contracts, or "Uses …" (forwards, options, a provider).
+export const hedgingNamed = (r) => Boolean(r.fx_forwards) || /^Uses\b/.test(r.fx_today || "");
+
+// Every company with an FX loss in its latest accounts: the main list's (full research, finance contact) first, then
+// the Recent FX filings list's companies not on it yet. Each with loss (positive £), prior (last year's figure, signed),
+// share (of turnover) and onList.
+export function lossRows(listRows = [], filingLosses = []) {
+  const shape = (r, onList) => {
+    const loss = -Number(r.fx_gain_loss_gbp);
+    const turnover = Number(r.turnover_gbp) || 0;
+    const prior = r.fx_gain_loss_prior_gbp === undefined || r.fx_gain_loss_prior_gbp === "" ? null : Number(r.fx_gain_loss_prior_gbp);
+    return { ...r, loss, prior, share: turnover ? loss / turnover : null, onList, filedOn: filedIso(r) };
+  };
+  const listed = listRows.filter((r) => Number(r.fx_gain_loss_gbp) < 0);
+  const numbers = new Set(listRows.map((r) => r.company_number));
+  return [...listed.map((r) => shape(r, true)),
+    ...filingLosses.filter((r) => !numbers.has(r.company_number) && Number(r.fx_gain_loss_gbp) < 0).map((r) => shape(filingRow(r), false))];
+}
+
+// The loss grew on last year's: a loss now bigger than last year's loss, or a loss after last year's gain.
+export const lossGrew = (r) => r.prior !== null && (r.prior >= 0 || r.loss > -r.prior);
+
+export function filterLosses(rows, { min = 0, query = "", recentDays = 0, unhedged = false, grew = false, today = new Date() } = {}) {
+  const q = query.trim().toLowerCase();
+  const since = recentDays ? new Date(today.getTime() - recentDays * 864e5).toISOString().slice(0, 10) : "";
+  return rows.filter((r) => r.loss >= min
+    && (!q || [r.company_name, r.company_number, r.finance_contact, r.currency, r.main_currency, r.currencies_in_accounts,
+      r.turnover_regions, r.incumbent_bank, r.fx_niche].some((v) => String(v || "").toLowerCase().includes(q)))
+    && (!since || (r.filedOn && r.filedOn >= since))
+    && (!unhedged || !hedgingNamed(r))
+    && (!grew || lossGrew(r)));
+}
+
+export const LOSS_SORTS = {
+  biggest: { label: "Biggest loss", key: (r) => -r.loss },
+  share: { label: "Biggest share of turnover", key: (r) => -(r.share ?? -1) },
+  newest: { label: "Newest filed", key: (r) => -Number((r.filedOn || "0").replace(/-/g, "")) },
+  grew: { label: "Grew most on last year", key: (r) => (r.prior === null ? 1e15 : -(r.loss + r.prior)) },
+};
+export const sortLosses = (rows, by = "biggest") =>
+  [...rows].sort((a, b) => LOSS_SORTS[by].key(a) - LOSS_SORTS[by].key(b) || (a.onList === b.onList ? 0 : a.onList ? -1 : 1));

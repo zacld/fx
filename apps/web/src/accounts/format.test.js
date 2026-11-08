@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -250,5 +250,36 @@ describe("recent FX filings", () => {
     expect([isGroupFiling({ turnover_basis: "group" }), isGroupFiling({ also_filed: "X LTD (01)" }), isGroupFiling({})]).toEqual([true, true, false]);
     expect(turnoverSearch("CASTOLIN EUTECTIC LIMITED")).toBe("https://www.google.com/search?q=%22CASTOLIN%20EUTECTIC%22%20turnover");
     expect(filterFilings([{ company_name: "X", hmrc_trade: "imports in 9 of the last 12 months" }], { query: "imports" })).toHaveLength(1);
+  });
+});
+
+describe("FX losses", () => {
+  const list = [
+    { company_number: "01", company_name: "LISTED LTD", fx_gain_loss_gbp: "-150000", fx_gain_loss_prior_gbp: "-40000", turnover_gbp: "30000000", accounts_filed_on: "2026-10-01", finance_contact: "Jane Smith" },
+    { company_number: "02", company_name: "GAIN LTD", fx_gain_loss_gbp: "90000" },
+  ];
+  const filings = [
+    { company_number: "01", company_name: "LISTED LTD", fx_gain_loss_gbp: "-150000", filed: "2026-10-01" },
+    { company_number: "03", company_name: "NEW FIND LTD", fx_gain_loss_gbp: "-1200000", fx_gain_loss_prior_gbp: "50000", turnover_gbp: "60000000", filed: "September 2026", fx_forwards: "Forward contracts to buy US$2m" },
+    { company_number: "04", company_name: "SMALL LOSS LTD", fx_gain_loss_gbp: "-8000", filed: "2026-11-04" },
+  ];
+  it("merges both lists, the main list's row first, gains left out", () => {
+    const rows = lossRows(list, filings);
+    expect(rows.map((r) => [r.company_number, r.onList])).toEqual([["01", true], ["03", false], ["04", false]]);
+    expect(rows[0]).toMatchObject({ loss: 150000, prior: -40000, share: 0.005, filedOn: "2026-10-01" });
+    expect(rows[1].filedOn).toBe("2026-09-01");
+  });
+  it("filters by size, recency, hedging and growth, and sorts", () => {
+    const rows = lossRows(list, filings);
+    expect(filterLosses(rows, { min: 50000 }).map((r) => r.company_number)).toEqual(["01", "03"]);
+    expect(filterLosses(rows, { recentDays: 40, today: new Date("2026-11-08") }).map((r) => r.company_number)).toEqual(["01", "04"]);
+    expect(filterLosses(rows, { unhedged: true }).map((r) => r.company_number)).toEqual(["01", "04"]);
+    expect(filterLosses(rows, { grew: true }).map((r) => r.company_number)).toEqual(["01", "03"]);   // 150k > 40k; a loss after a gain
+    expect(filterLosses(rows, { query: "jane" }).map((r) => r.company_number)).toEqual(["01"]);
+    expect(sortLosses(rows).map((r) => r.company_number)).toEqual(["03", "01", "04"]);
+    expect(sortLosses(rows, "share").map((r) => r.company_number)).toEqual(["03", "01", "04"]);
+    expect(sortLosses(rows, "newest").map((r) => r.company_number)).toEqual(["04", "01", "03"]);
+    expect(hedgingNamed({ fx_today: "Uses forward contracts" })).toBe(true);
+    expect(lossGrew({ loss: 10, prior: null })).toBe(false);
   });
 });

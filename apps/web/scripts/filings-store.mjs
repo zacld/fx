@@ -3,10 +3,10 @@
 // past a store item's 25MB, so the rows are kept one month per item ("filings/2026-09": the month they were filed)
 // under an index ("filings": made_at, files_done, months with their counts):
 //   node scripts/filings-store.mjs get filings.json   — every month's rows put back together ({} when none yet)
-//   node scripts/filings-store.mjs put filings.json   — split by month and saved, then the index
+//   node scripts/filings-store.mjs put filings.json   — split by month and saved, the FX losses (filings/losses), then the index
 // Store settings: scripts/store.mjs. Counts only in the log (the repo is public).
 import { readFile, writeFile } from "node:fs/promises";
-import { FILINGS_KEY, STORE, filingsMonth, filingsMonthKey } from "../api/accounts.mjs";
+import { FILINGS_KEY, LOSSES_KEY, STORE, filingsLosses, filingsMonth, filingsMonthKey } from "../api/accounts.mjs";
 import { openStore } from "./store.mjs";
 
 const [command, path] = process.argv.slice(2);
@@ -35,7 +35,9 @@ if (command === "get") {
     if (!byMonth.has(month)) await store.set(filingsMonthKey(month), { month, rows: [] });   // no delete: emptied
   }
   const months = [...byMonth].map(([month, rows]) => ({ month, count: rows.length })).sort((a, b) => b.month.localeCompare(a.month));
+  const losses = filingsLosses(data.rows || []);
+  await store.set(LOSSES_KEY, { made_at: data.made_at, count: losses.length, rows: losses });
   const { rows: _rows, ...rest } = data;
   await store.set(FILINGS_KEY, { ...rest, count: (data.rows || []).length, months });
-  console.log(`saved ${(data.rows || []).length} companies over ${months.length} months, ${(data.files_done || []).length} files done to ${store.where}`);
+  console.log(`saved ${(data.rows || []).length} companies over ${months.length} months (${losses.length} with an FX loss), ${(data.files_done || []).length} files done to ${store.where}`);
 }
