@@ -17,6 +17,7 @@ company names and what their public accounts say about FX — no people.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import os
 import sys
@@ -37,6 +38,10 @@ def load(path: str) -> dict:
         return data if isinstance(data, dict) else {}
     return {}
 
+
+# Files read again in the current rescan round (a new round, a new field: every file once more). Round 2, 8 Nov
+# 2026: no-turnover filings with FX kept for a group check, and 24 months of HMRC records.
+RESCAN_FIELD = "files_rescanned_r2"
 
 # What's looked up per company after the scan (Companies House calls), carried over when its filing is read again.
 LOOKED_UP = ("directors", "director_count", "incumbent_bank", "incumbent_bank_url", "lenders", "owner", "triggers",
@@ -124,7 +129,8 @@ def main() -> None:
     parser.add_argument("--detail", action="store_true", help="every fact of every hit, with its quote")
     parser.add_argument("--research-max", type=int, default=1500, help="companies researched a run (3 calls each)")
     parser.add_argument("--history-max", type=int, default=2500, help="filing histories read a run (moved up flag)")
-    parser.add_argument("--hmrc-months", type=int, default=12, help="months of HMRC importer/exporter lists (0: off)")
+    parser.add_argument("--hmrc-months", type=int, default=filings.CUSTOMS_MONTHS,
+                        help="months of HMRC importer/exporter lists (0: off)")
     parser.add_argument("--redo", action="store_true", help="read files already done again (a test)")
     parser.add_argument("--chain-left", type=int, default=-1,
                         help="a chained backfill/rescan: links still to run after this one (kept in the list, so a "
@@ -136,7 +142,7 @@ def main() -> None:
 
     previous = load(args.previous)
     done = set(previous.get("files_done") or [])
-    rescanned = set(previous.get("files_rescanned") or [])
+    rescanned = set(previous.get(RESCAN_FIELD) or [])
     todo = pick(args, done, rescanned)
     print(f"{len(todo)} file(s) to scan; {len(done)} done before; {len(previous.get('rows') or [])} companies listed")
     new_rows: list[dict] = []
@@ -173,7 +179,7 @@ def main() -> None:
         except Exception as e:  # noqa: BLE001 — customs records are a check, the filings still stand
             print(f"WARNING: HMRC lists unavailable ({type(e).__name__}: {e}); filings without FX are dropped")
     found = len(new_rows)
-    new_rows, decided = filings.finalise(new_rows, customs)
+    new_rows, decided = filings.finalise(new_rows, customs, args.hmrc_months)
     for reason in [r for r in filings.stats["why"] if r.startswith(("kept:", "read: big"))]:
         del filings.stats["why"][reason]   # the scan's provisional verdicts: the customs check decides them
     filings.stats["why"].update(decided)
@@ -204,12 +210,14 @@ def main() -> None:
     elif todo_history:
         print(f"COMPANIES_HOUSE_API_KEY not set: {len(todo_history):,} filing histories not read")
     # Mini research: directors, incumbent bank and lenders, owner, triggers (three calls each), once per company.
-    todo_research = [r for r in rows if not r.get("research_checked")][: args.research_max]
+    # rows waiting for a group check first: they can't be listed (or dropped) until it's done
+    todo_research = sorted((r for r in rows if not r.get("research_checked")),
+                           key=lambda r: r.get("group_check") != filings.GROUP_PENDING)[: args.research_max]
     if api_key and todo_research:
         started = time.time()
         for r in todo_research:
             try:
-                r.update(filings.research(r["company_number"], r["company_name"], api_key))
+                r.update(filings.research(r["company_number"], r["company_name"], api_key, row=r))
             except Exception as e:  # noqa: BLE001 — one company's lookup mustn't stop the rest
                 print(f"  research failed for {r['company_number']}: {type(e).__name__}")
         done_now = [r for r in todo_research if r.get("research_checked")]
@@ -218,6 +226,14 @@ def main() -> None:
               f"{sum(1 for r in done_now if r.get('triggers')):,}; overseas parent "
               f"{sum(1 for r in done_now if 'overseas parent' in r.get('owner', '')):,}; "
               f"{sum(1 for r in rows if not r.get('research_checked')):,} left for the next run")
+    # Companies filing no turnover whose group check found no UK parent, or a group under the floor: not listed.
+    checked_out = [r for r in rows if r.get("group_check") not in (None, "", "in band", filings.GROUP_PENDING)]
+    if checked_out or any(r.get("group_check") for r in rows):
+        print(f"Group checks (no turnover filed, FX in the filing): in the band {sum(r.get('group_check') == 'in band' for r in rows):,}, "
+              f"waiting {sum(r.get('group_check') == filings.GROUP_PENDING for r in rows):,}, dropped {len(checked_out):,} "
+              f"({', '.join(f'{k} {v}' for k, v in Counter(r['group_check'].split(' (')[0] for r in checked_out).most_common())})")
+        gone = {id(r) for r in checked_out}
+        rows = [r for r in rows if id(r) not in gone]
     # Today's sanity rules on every row (no calls): implausible FX / turnover figures and forward sizes to a check.
     print(f"Figures moved to a check by today's rules: {filings.tidy(rows):,} companies")
     # Owned from abroad with no sign of running FX locally: ranked lower (hooks.ABROAD_RULES), every row, no calls.
@@ -231,7 +247,7 @@ def main() -> None:
         chain_left = 0   # nothing left to read: the chain is done
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,
            "chain_left": chain_left, "chain_mode": chain_mode,
-           "files_done": sorted(done), "files_rescanned": sorted(rescanned), "files_scanned": len(todo), "count": len(rows), "rows": rows}
+           "files_done": sorted(done), RESCAN_FIELD: sorted(rescanned), "files_scanned": len(todo), "count": len(rows), "rows": rows}
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f)
     print(f"\n{len(new_rows):,} hits this run; {len(rows):,} companies on the list now")

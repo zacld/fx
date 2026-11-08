@@ -7,6 +7,16 @@
   },
   "niches": [
     {
+      "id": "fx-proven-sectors",
+      "name": "Sectors where filed accounts often prove FX",
+      "sic_codes": ["10390", "20130", "47910", "38320", "47710", "20590", "46510", "29320", "46180", "47990", "28990", "46760", "32500", "25990", "47190", "33200", "32990", "46130", "58290", "25110", "59111", "71122", "27900", "49410", "71129", "52103", "59113"],
+      "currency_pairs": ["GBP/USD", "GBP/EUR"],
+      "exposure_reason": "Measured, not assumed (tools/sector_hits.py, 8 Nov 2026): in each of these sectors 3–12% of the companies filing full, medium or group accounts show strong FX proof in their own filings (forward contracts, FX losses, currencies, sales abroad) — online retail, clothing, chemicals, machinery, metal products, vehicle parts, medical instruments, recycling, road freight and warehousing, film and TV production among them. Each company's own filings and customs records then say which currency and which way.",
+      "call_angle": "Your own accounts show money moving across currencies — I'd be interested to hear how you're approaching that.",
+      "size_fit": "£20m-£300m",
+      "measured": "tools/sector_hits.py on the FX filings list (6,623 companies, 2,156 strong finds) and Companies House's bulk file, 8 Nov 2026: 10+ strong finds and 3.4%+ of the sector's full / medium / group-accounts companies"
+    },
+    {
       "id": "european-charcuterie-importers",
       "name": "European Charcuterie Importers",
       "sic_codes": ["46320", "46390"],

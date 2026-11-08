@@ -1,0 +1,55 @@
+name: Sector hits
+
+# Which sectors (SIC codes) the FX filings scan's proven companies sit in, against each sector's full / medium /
+# group-accounts companies (lead-sourcer/tools/sector_hits.py): the sectors with the most proven FX per company that
+# the finder's niches don't cover yet. Read-only, saves nothing; runs when the tool or this file changes. The log holds
+# sector codes, names and counts only (public repo).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main', 'claude/**']
+    paths:
+      - .github/workflows/sector-hits.yml
+      - lead-sourcer/tools/sector_hits.py
+
+permissions:
+  contents: read
+
+jobs:
+  sectors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Month
+        id: month
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+      # The finder's monthly copy of Companies House's bulk file (~470MB), when there is one; else downloaded.
+      - name: Restore the Companies House bulk file
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip
+          key: ch-bulk-v2-${{ steps.month.outputs.month }}
+          restore-keys: ch-bulk-v2-
+      - name: The FX filings list
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/fx-filings.json
+      - name: Sector hits
+        working-directory: lead-sourcer
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          zip=$(ls -t ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip 2>/dev/null | head -1 || true)
+          python3 tools/sector_hits.py --filings fx-filings.json ${zip:+--bulk "$zip"}

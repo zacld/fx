@@ -2117,7 +2117,7 @@ class TestHttpFrontEnds(unittest.TestCase):
              mock.patch.object(main, "run_pipeline", return_value=[row]) as run:
             status, body = _request(base + "/niches")
             self.assertEqual(status, 200)
-            self.assertEqual(len(body["niches"]), 73)
+            self.assertEqual(len(body["niches"]), 74)
 
             status, body = _request(base + "/run", {"niches": ["no-such-niche"]})
             self.assertEqual(status, 400)
@@ -2141,7 +2141,7 @@ class TestHttpFrontEnds(unittest.TestCase):
         with mock.patch.object(main, "run_pipeline", return_value=[]) as run:
             status, body = _request(base + "/api/run")
             self.assertEqual(status, 200)
-            self.assertEqual(len(body["niches"]), 73)
+            self.assertEqual(len(body["niches"]), 74)
 
             status, body = _request(base + "/api/run", {"min_turnover": 20_000_000})
             self.assertEqual(status, 400)
@@ -2938,6 +2938,14 @@ class TestFxFilings(unittest.TestCase):
         row, why = filings.assess(filleted, "01234567", "2025-12-31", "2026-11-05")
         self.assertIsNone(row)
         self.assertEqual(why, "read: no turnover filed, accounts prepared as a small company")
+        # not filed as small, no turnover, too small on its own staff — FX in the filing: kept for a group check
+        sub = (b'<html><body><ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" contextRef="c" unitRef="u">'
+               b'20</ix:nonFraction><p>The principal exposures are to the US dollar and the euro; the company buys '
+               b'its stock from suppliers in Germany.</p></body></html>')
+        row, why = filings.assess(sub, "07654321", "2025-12-31", "2026-11-05")
+        self.assertEqual((row["group_check"], why), (filings.GROUP_PENDING, "kept for a group check: no turnover filed, FX in the filing"))
+        plain = b'<html><body><ix:nonFraction name="core:AverageNumberEmployeesDuringPeriod" contextRef="c" unitRef="u">20</ix:nonFraction></body></html>'
+        self.assertIsNone(filings.assess(plain, "07654321", "2025-12-31", "2026-11-05")[0])
 
     def test_moved_up_bank_debt_and_fx_mentions(self):
         aa = lambda kind, made: {"type": "AA", "description": f"accounts-with-accounts-type-{kind}",
@@ -2995,7 +3003,7 @@ class TestFxFilings(unittest.TestCase):
                  "import_codes": Counter({"83111000": 9}), "export_codes": Counter()}
         kept, why = filings.finalise([quiet, loud, nothing], {"CASTOLIN EUTECTIC": trade})
         self.assertEqual([r["company_number"] for r in kept], ["00450581", "01"])
-        self.assertTrue(kept[0]["hmrc_trade"].startswith("HMRC customs records: imports in 9 of the last 12 months, exports in 1"))
+        self.assertTrue(kept[0]["hmrc_trade"].startswith("HMRC customs records: imports in 9 of the last 24 months, exports in 1"))
         self.assertEqual(kept[0]["filed_fx_score"], filings.CUSTOMS_POINTS)
         self.assertEqual(why["dropped: big, but no FX in the filing or customs records"], 1)
         self.assertEqual(filings.finalise([quiet], None)[0], [])   # no customs lists: a filing without FX isn't kept
@@ -3050,3 +3058,24 @@ class TestFilingsRescan(unittest.TestCase):
         self.assertEqual(self.pick(days + ["Accounts_Monthly_Data-September2026.zip"]),
                          ["Accounts_Monthly_Data-August2026.zip"])
         self.assertEqual(self.pick(days + [u.rsplit("/", 1)[-1] for u in self.MONTHLY]), [])   # the chain stops
+
+
+class TestFilingsGroupCheck(unittest.TestCase):
+    """A filing with FX but no turnover, too small on its own figures, is sized by its UK parent's accounts."""
+
+    OWNERS = [{"kind": "corporate", "name": "ACME HOLDINGS LIMITED", "registration_number": "01234567",
+               "country": "England", "ceased_on": ""}]
+
+    def test_in_band_group_sizes_the_row_and_the_rest_say_why(self):
+        from sourcer import filings, group
+        row = {"company_number": "07654321", "group_check": filings.GROUP_PENDING}
+        found = {"number": "01234567", "name": "ACME HOLDINGS LIMITED", "turnover": 48_000_000, "facts": {}, "hops": 1}
+        with mock.patch.object(group, "parent_accounts", return_value=found):
+            got = filings.group_check(row, self.OWNERS, "key")
+        self.assertEqual((got["group_check"], got["turnover_gbp"], got["turnover_basis"]), ("in band", "48000000", "group"))
+        self.assertIn("ACME HOLDINGS LIMITED (01234567)", got["size_estimate_basis"])
+        with mock.patch.object(group, "parent_accounts", return_value={**found, "turnover": 9_000_000}):
+            self.assertTrue(filings.group_check(row, self.OWNERS, "key")["group_check"].startswith("group under the floor"))
+        self.assertEqual(filings.group_check(row, [], "key"), {"group_check": "no UK parent"})
+        with mock.patch.object(group, "parent_accounts", return_value=None), mock.patch.dict(group.stats, {"skipped": 3}):
+            self.assertEqual(filings.group_check(row, self.OWNERS, "key")["group_check"], filings.GROUP_PENDING)

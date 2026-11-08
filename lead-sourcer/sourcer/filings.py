@@ -306,7 +306,7 @@ def accounts_history(number: str, api_key: str) -> Optional[list[dict]]:
 
 # --- Mini research: who runs it, who it banks with, who owns it (three Companies House calls per company) -----------
 
-def research(number: str, name: str, api_key: str, today: Optional[date] = None) -> dict:
+def research(number: str, name: str, api_key: str, today: Optional[date] = None, row: Optional[dict] = None) -> dict:
     """
     Directors, the incumbent bank (all-assets debenture holder) and other lenders, the owner (UK or overseas parent,
     private-equity backing) and the finder's triggers (new owner, new or paid-off charge, facility renewal due, new
@@ -321,7 +321,9 @@ def research(number: str, name: str, api_key: str, today: Optional[date] = None)
     owners = companies_house.get_owners(number, api_key)
     bank = incumbent.incumbent_bank(charges)
     lenders = [c for c in incumbent._outstanding(charges) if not bank or c is not bank][:3]
+    sized = group_check(row, owners, api_key) if row and row.get("group_check") == GROUP_PENDING else {}
     return {
+        **sized,
         "directors": "; ".join(f"{d['name']}" + (f" (appointed {hooks.day(d['appointed_on'])})" if d.get("appointed_on") else "")
                                for d in directors[:5]),
         "director_count": len(directors),
@@ -332,8 +334,37 @@ def research(number: str, name: str, api_key: str, today: Optional[date] = None)
         "owner": owner_line(owners),
         "triggers": " | ".join(triggers.find(owners, charges, directors, today)),
         "fd_search_url": news.verify_links(name)[0],
-        "research_checked": today.isoformat(),
+        # a group check left waiting (this run's parent reads used up) keeps the row in line for the next run
+        "research_checked": "" if sized.get("group_check") == GROUP_PENDING else today.isoformat(),
     }
+
+
+# --- Group check: a company filing no turnover, sized by its UK parent's accounts ------------------------------------
+
+GROUP_PENDING = "pending"
+
+
+def group_check(row: dict, owners: list[dict], api_key: str, min_turnover: float = MIN_TURNOVER) -> dict:
+    """
+    The fields a row waiting for a group check (assess: no turnover filed, FX in the filing) takes from its nearest
+    UK parent's accounts (group.parent_accounts: two Companies House calls a parent, cached): in the band → sized
+    as the group, turnover_basis "group"; otherwise group_check says why it goes ("no UK parent" / "group under the
+    floor" / "parent's accounts not read this run" — that one is tried again next run).
+    """
+    from sourcer import group
+
+    if not group.uk_parent(owners):
+        return {"group_check": "no UK parent"}
+    found = group.parent_accounts(owners, api_key)
+    if found is None:
+        return {"group_check": "no group turnover filed" if group.stats["skipped"] == 0 else GROUP_PENDING}
+    if found["turnover"] < min_turnover:
+        return {"group_check": f"group under the floor ({hooks.short(found['turnover'])}, {group.label(found)})"}
+    return {"group_check": "in band", "turnover_gbp": str(round(found["turnover"])), "turnover_basis": "group",
+            "turnover_check": "", "size_estimate": "", "size_low_gbp": "",
+            "size_estimate_basis": f"the group's turnover: {group.label(found)}'s latest accounts — this company files "
+                                   f"no turnover of its own",
+            "group_parent": group.label(found)}
 
 
 def owner_line(owners: list[dict]) -> str:
@@ -480,7 +511,12 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         return None, "read: no turnover filed, accounts prepared as a small company"
     band = size_band(facts) if turnover is None else None
     big_by_band = bool(band and band["high"] >= min_turnover and band["low"] >= SIZE_RULES["keep_low"])
-    if turnover is None and not big_by_band and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER:
+    # No turnover filed and too small (or nothing to size it) on its own figures — but a subsidiary's own accounts
+    # say little of its group: one whose filing shows FX waits for a group check (its UK parent's accounts, read
+    # with the mini research — group_check), the rest go.
+    group_pending = turnover is None and not big_by_band and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER \
+        and shows_fx(facts, incumbent.columns(facts, [])["fx_today"])
+    if turnover is None and not big_by_band and abs(fx or 0) < MIN_FX_WITHOUT_TURNOVER and not group_pending:
         text = document.decode("utf-8", errors="replace")
         debtor_tags = sorted({m.split(":")[-1] for m in re.findall(r'name="([^"]+)"', text)
                               if re.search(r"debtor|receivable", m, re.I)})[:5]
@@ -522,6 +558,9 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
     row["fx_in_filing"] = shows_fx(facts, today["fx_today"])
     score, lines = fx_notes.filed_proof(row)
     row.update(filed_fx_score=score, filed_fx="; ".join(lines))
+    if group_pending:
+        row["group_check"] = GROUP_PENDING
+        return row, "kept for a group check: no turnover filed, FX in the filing"
     if row["fx_in_filing"]:
         return row, "kept: FX in the filing" + (" (size estimated)" if band else "")
     return row, "read: big" + (" on staff / debtors" if band else "") + ", no FX in the filing — customs records checked"
@@ -547,17 +586,20 @@ def customs_index(traders: dict) -> dict[str, dict]:
     return out
 
 
-def customs_line(trade: dict) -> str:
-    """ "imports in 12 of the last 12 months, exports in 3 (goods: wine, machinery)" """
+CUSTOMS_MONTHS = 24   # Nov 2026: 12 -> 24, so occasional importers and exporters (twice a year) are found too
+
+
+def customs_line(trade: dict, months: int = CUSTOMS_MONTHS) -> str:
+    """ "imports in 12 of the last 24 months, exports in 3 (goods: wine, machinery)" """
     from sourcer import hmrc
 
-    parts = [f"{w} in {len(trade[f'{k}_months'])} of the last 12 months"
+    parts = [f"{w} in {len(trade[f'{k}_months'])} of the last {months} months"
              for k, w in (("import", "imports"), ("export", "exports")) if trade[f"{k}_months"]]
     goods = hmrc.chapters(trade["import_codes"] + trade["export_codes"])
     return ", ".join(parts) + (f" (goods: {', '.join(goods)})" if goods else "")
 
 
-def finalise(rows: list[dict], customs: Optional[dict[str, dict]]) -> tuple[list[dict], Counter]:
+def finalise(rows: list[dict], customs: Optional[dict[str, dict]], months: int = CUSTOMS_MONTHS) -> tuple[list[dict], Counter]:
     """
     The rows to list: each checked against HMRC's importer / exporter lists (by registered name); kept when the
     filing or the customs records prove trade in another currency. (rows, why) — why counts each decision.
@@ -569,7 +611,7 @@ def finalise(rows: list[dict], customs: Optional[dict[str, dict]]) -> tuple[list
         row = dict(row)   # the caller's rows stay as read: running this twice never counts customs twice
         trade = (customs or {}).get(normalise_name(row["company_name"]))
         if trade and (trade["import_months"] or trade["export_months"]):
-            line = customs_line(trade)
+            line = customs_line(trade, months)
             row["hmrc_trade"] = f"HMRC customs records: {line} (matched on the registered name)"
             row["filed_fx_score"] = row.get("filed_fx_score", 0) + CUSTOMS_POINTS
             row["filed_fx"] = "; ".join(x for x in (row.get("filed_fx"), f"HMRC customs: {line} (+{CUSTOMS_POINTS})") if x)

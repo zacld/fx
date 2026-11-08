@@ -231,7 +231,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   of accounts filed online: a zip each morning, monthly archives of the past)
   scanned for companies of `FILINGS_MIN_TURNOVER` (£20m)+ whose filing shows FX (the year was read
   again at £20m from 7 Nov 2026 — `rescan` in `tools/fx_filings_backfill.txt`: day files after the newest archive,
-  then each archive newest first, chained; a company read again keeps its research, `fx_filings.LOOKED_UP`).
+  then each archive newest first, chained; a company read again keeps its research, `fx_filings.LOOKED_UP`; each
+  round tracks its files under its own field, `fx_filings.RESCAN_FIELD` — round 2, 8 Nov: group checks and 24 months
+  of HMRC records).
   A cheap screen on each filing's raw text (tagged turnover over the floor, or
   — none tagged — full-accounts-sized and mentioning foreign exchange), then
   the survivors read like the finder's accounts (`accounts.extract_facts`) and
@@ -244,8 +246,13 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   companies file no turnover) get a size estimate from trade debtors (×4–8)
   and staff (£100k–£300k a head; `filings.SIZE_RULES`), shown as "Size likely
   £16m–£26m — estimate" with its basis, never as turnover; kept when the low
-  end is £10m+ and the high end reaches the floor. A big filing with no FX in it
-  is kept only when HMRC's importer/exporter lists (12 months, matched on the
+  end is £10m+ and the high end reaches the floor. One too small on its own figures (or with nothing to size it)
+  whose filing shows FX waits for a group check (`group_check` "pending", `filings.group_check`, run with the mini
+  research: its nearest UK parent's latest accounts, `group.parent_accounts`): the group in the band → listed, sized
+  as the group (`turnover_basis` group, `group_parent`, "Files no turnover — sized by its group"); no UK parent or a
+  group under the floor → dropped; parent reads used up → tried next run. A big filing with no FX in it
+  is kept only when HMRC's importer/exporter lists (24 months from 8 Nov 2026, `filings.CUSTOMS_MONTHS` — the main
+  finder keeps 12, its wallet bands count months out of 12; matched on the
   registered name) show trade abroad (`hmrc_trade`, +20 to the score). Cards
   without filed turnover carry a "Search turnover" Google link to check by hand.
   Group companies filing the same figures are one row ("Also filed by"), and
@@ -359,7 +366,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      workflow "Turnover sample"). Cached accounts without turnover are read
      again, `FINDER_REREAD_MAX` (300) a run.
   3. Companies House owners, charges and directors.
-  4. The FX niches (`lead-sourcer/config/fx_niches.json`).
+  4. The FX niches (`lead-sourcer/config/fx_niches.json`). Which sectors to add is measured, not guessed:
+     `tools/sector_hits.py` (workflow "Sector hits", read-only) counts the FX filings scan's strong finds per SIC
+     code against each sector's full / medium / group-accounts companies and lists the best-hitting sectors the
+     niches don't cover.
 - **Scores:** every score and estimate lists its evidence or basis. Weights
   and wallet bands get recalibrated against real outcomes, so log them.
 - **Not public, not scraped:** credit-reference data (Creditsafe etc.) only
@@ -407,7 +417,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   are cached 7 days (`sourcer/register_cache.py`, `REGISTER_CACHE_DAYS`; sooner
   when newer accounts are filed) to keep within the GitHub Actions minutes; its
   website and news lookups likewise (`LOOKUP_CACHE_DAYS`, 7 — they took ~20 min
-  of each run). The 1,200 slots a run (`DEFAULT_ENRICH`) go to companies still in
+  of each run). The 2,000 slots a run (`DEFAULT_ENRICH`; 1,200 until 8 Nov 2026 — a run checked those in ~12 of its
+  140 minutes, so scanned paper accounts and the filings backlog were waiting on slots, not OCR time) go to companies still in
   the running: ones the cache already shows are out (filed turnover under the
   floor, an unconfirmed subsidiary) don't take one, so the next candidates in line
   get checked. Scheduled every evening, 19:43 UTC (GitHub starts free scheduled runs
