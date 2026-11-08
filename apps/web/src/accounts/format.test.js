@@ -250,6 +250,8 @@ describe("recent FX filings", () => {
     expect([isGroupFiling({ turnover_basis: "group" }), isGroupFiling({ also_filed: "X LTD (01)" }), isGroupFiling({})]).toEqual([true, true, false]);
     expect(turnoverSearch("CASTOLIN EUTECTIC LIMITED")).toBe("https://www.google.com/search?q=%22CASTOLIN%20EUTECTIC%22%20turnover");
     expect(filterFilings([{ company_name: "X", hmrc_trade: "imports in 9 of the last 12 months" }], { query: "imports" })).toHaveLength(1);
+    expect(filterFilings([{ company_number: "A", turnover_gbp: "45000000" }, { company_number: "B", turnover_gbp: "450000000" },
+      { company_number: "C", size_low_gbp: "21000000" }], { band: true }).map((r) => r.company_number)).toEqual(["A"]);
   });
 });
 

@@ -373,6 +373,7 @@ function Filings({ password, listed, onOpen, onEmail }) {
   const [strongOnly, setStrongOnly] = useState(false);
   const [lossOnly, setLossOnly] = useState(false);
   const [movedOnly, setMovedOnly] = useState(false);
+  const [band, setBand] = useState(false);
   const [order, setOrder] = useState("newest");
   const [shown, setShown] = useState(PAGE);
   // The index lists the months filed (a year runs to ~15,000 companies, so each month is fetched on its own).
@@ -398,8 +399,8 @@ function Filings({ password, listed, onOpen, onEmail }) {
     return () => { live = false; };
   }, [month, monthRows, get]);
   const all = data?.rows || monthRows[month] || [];   // data.rows: the first, single-item version
-  const rows = useMemo(() => sortFilings(filterFilings(all, { query, strongOnly, lossOnly, movedOnly }), order),
-                       [all, query, strongOnly, lossOnly, movedOnly, order]);
+  const rows = useMemo(() => sortFilings(filterFilings(all, { query, strongOnly, lossOnly, movedOnly, band }), order),
+                       [all, query, strongOnly, lossOnly, movedOnly, band, order]);
   if (error) return <div className="list"><div className="empty">{error}</div></div>;
   if (!data || (month && !monthRows[month] && !data.rows)) return <div className="list"><div className="empty">Loading recent FX filings…</div></div>;
   return (
@@ -421,6 +422,9 @@ function Filings({ password, listed, onOpen, onEmail }) {
           <option value="newest">Newest filed first</option>
           <option value="strongest">Strongest FX proof first (owned abroad lower)</option>
         </select>
+        <button className={`btn-sm${band ? " on" : ""}`} aria-pressed={band} onClick={() => { setBand(!band); setShown(PAGE); }}
+                title="Only companies whose filed (or group) turnover is £20m–£300m — the desk's sweet spot">
+          £20m–£300m only</button>
         <label className="check"><input type="checkbox" checked={strongOnly} onChange={(e) => setStrongOnly(e.target.checked)} /> Strong FX proof ({all.filter((r) => r.filed_fx_score >= 50).length})</label>
         <label className="check"><input type="checkbox" checked={lossOnly} onChange={(e) => setLossOnly(e.target.checked)} /> FX loss ({all.filter((r) => Number(r.fx_gain_loss_gbp) < 0).length})</label>
         <label className="check"><input type="checkbox" checked={movedOnly} onChange={(e) => setMovedOnly(e.target.checked)} /> Moved up from small ({all.filter((r) => r.moved_up).length})</label>

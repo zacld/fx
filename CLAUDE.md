@@ -212,7 +212,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   scan, from the mini research's owner line) and so in the finder's priority
   queue. Shown on the card ("Owned abroad: pitch the UK team"), never hidden. `qualify` makes such a
   company a Check (not Out) unless its accounts show FX handled locally — then Yes.
-  The filings tab can sort "Strongest FX proof first" by `rank_score`.
+  The filings tab can sort "Strongest FX proof first" by `rank_score`. Both the filings and FX losses tabs have a £20m–£300m button (`inCoreBand`: filed or group turnover in the core band).
 - **Group accounts** (`sourcer/group.py`): for a company whose PSC register
   names a current UK corporate owner (a Companies House number), the parent's
   latest accounts are read like the company's own — one level further up when
