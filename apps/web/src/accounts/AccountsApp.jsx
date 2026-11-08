@@ -710,6 +710,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
   const [recent, setRecent] = useState(false);
   const [unhedged, setUnhedged] = useState(false);
   const [grew, setGrew] = useState(false);
+  const [band, setBand] = useState(false);
   const [order, setOrder] = useState("biggest");
   const [shown, setShown] = useState(PAGE);
   useEffect(() => {
@@ -721,8 +722,8 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
     return () => { live = false; };
   }, [password]);
   const all = useMemo(() => lossRows(listRows.filter((r) => !contacted[r.company_number]), filingLosses || []), [listRows, contacted, filingLosses]);
-  const rows = useMemo(() => sortLosses(filterLosses(all, { min, query, recentDays: recent ? 183 : 0, unhedged, grew }), order),
-                       [all, min, query, recent, unhedged, grew, order]);
+  const rows = useMemo(() => sortLosses(filterLosses(all, { min, query, recentDays: recent ? 183 : 0, unhedged, grew, band }), order),
+                       [all, min, query, recent, unhedged, grew, band, order]);
   const reset = (fn) => (v) => { fn(v); setShown(PAGE); };
   if (filingLosses === null) return <div className="list"><div className="empty">Loading FX losses…</div></div>;
   return (
@@ -731,6 +732,9 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
       <div className="filters filings-bar">
         <input className="input search" placeholder="Search company, contact, currency, bank…" value={query}
                onChange={(e) => reset(setQuery)(e.target.value)} aria-label="Search FX losses" />
+        <button className={`btn-sm${band ? " on" : ""}`} aria-pressed={band} onClick={() => reset(setBand)(!band)}
+                title="Only companies whose filed (or group) turnover is £20m–£300m — the desk's sweet spot">
+          £20m–£300m only</button>
         <select className="input" value={min} onChange={(e) => reset(setMin)(Number(e.target.value))} aria-label="Loss at least">
           {LOSS_MINS.map(([v, label]) => <option key={v} value={v}>Loss {label}</option>)}
         </select>
