@@ -160,7 +160,7 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     }
     const filings = await blobs.get(FILINGS_KEY, { type: "json" });
     if (!filings) return reply({ error: "no FX filings scanned yet — they arrive with the next FX filings run" }, 404);
-    const { files_done: _done, files_rescanned: _rescanned, ...rest } = filings;
+    const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
   const [data, marks, noted, status, emails] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY]

@@ -478,7 +478,10 @@ function FilingCard({ r, listed, onOpen, onEmail }) {
         {listed ? <span className="chip own">On your Accounts list</span> : <span className="chip">Not on your list yet</span>}
         {r.moved_up && <span className="chip trig" title="From the company's filing history on Companies House">{r.moved_up}</span>}
         {r.bank_debt && <span className="chip" title="From the filed accounts">{r.bank_debt}</span>}
-        {isGroupFiling(r) && <span className="chip">Group of companies{r.turnover_basis === "group" ? " — consolidated figures" : ""}{r.also_filed ? `; also filed by ${r.also_filed}` : ""}</span>}
+        {r.group_parent
+          ? <span className="chip" title={r.size_estimate_basis || ""}>Files no turnover — sized by its group, {r.group_parent}</span>
+          : isGroupFiling(r) && <span className="chip">Group of companies{r.turnover_basis === "group" ? " — consolidated figures" : ""}{r.also_filed ? `; also filed by ${r.also_filed}` : ""}</span>}
+        {r.group_check === "pending" && <span className="chip warn" title="No turnover filed; its UK parent's accounts are read on the next scan">No turnover filed — checking its group</span>}
         {r.accounts_regime && <span className="chip" title="The size regime the accounts were prepared under">Filed as {r.accounts_regime === "small" ? "a small company" : "medium-sized"}</span>}
         {r.auditor && <span className="chip">Auditor {r.auditor}</span>}
         {r.bankers && <span className="chip">Bankers {r.bankers}</span>}
