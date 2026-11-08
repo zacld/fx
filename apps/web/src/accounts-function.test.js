@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filingsLosses, filingsMonth, handle, markFirstSeen } from "../api/accounts.mjs";
+import { applyEmail, filingsLosses, filingsMonth, handle, markFirstSeen, recordStatus } from "../api/accounts.mjs";
 
 const list = { made_at: "2026-10-21T06:00:00+00:00", count: 1, rows: [{ company_name: "A LTD", rank: 1 }] };
 // An in-memory Blobs store: the list under "latest", Zac's contacted marks under "contacted".
@@ -87,6 +87,34 @@ describe("/api/accounts", () => {
     s.blobs["filings/losses"] = { made_at: "x", count: 2, rows: losses };
     expect((await (await handle(view("Bearer s3cret"), opts)).json()).count).toBe(2);
     expect((await handle(view("Bearer nope"), opts)).status).toBe(401);
+  });
+
+  it("keeps the Email generator's companies on the site: add, edit, reset, remove", async () => {
+    const s = memory();
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const row = { company_number: "01234567", company_name: "A LTD", fx_mentions: ["not kept"], finance_contact: "Jane Smith" };
+    let res = await handle(post({ company_number: "01234567", email: { row } }), opts);
+    expect(res.status).toBe(200);
+    expect(s.blobs.emails["01234567"]).toMatchObject({ row: { company_name: "A LTD", finance_contact: "Jane Smith" }, text: null });
+    expect(s.blobs.emails["01234567"].row.fx_mentions).toBeUndefined();
+    await handle(post({ company_number: "01234567", email: { text: "Hi Jane" } }), opts);
+    expect(s.blobs.emails["01234567"]).toMatchObject({ text: "Hi Jane", row: { company_name: "A LTD" } });
+    await handle(post({ company_number: "01234567", email: { text: null } }), opts);
+    expect(s.blobs.emails["01234567"].text).toBe(null);
+    expect((await handle(post({ company_number: "01234567", email: { text: 5 } }), opts)).status).toBe(400);
+    expect((await handle(post({ company_number: "bad", email: null }), opts)).status).toBe(400);
+    await handle(post({ company_number: "01234567", email: null }), opts);
+    expect(s.blobs.emails).toEqual({});
+    expect((await handle(post({ company_number: "01234567", email: null }, "Bearer nope"), opts)).status).toBe(401);
+    const many = Array.from({ length: 105 }, (_, i) => i).reduce((e, i) =>
+      applyEmail(e, String(i).padStart(8, "0"), { row: { company_name: `C${i}` } }, `2026-11-08T00:${String(i % 60).padStart(2, "0")}:${String(Math.floor(i / 60)).padStart(2, "0")}Z`), {});
+    expect(Object.keys(many)).toHaveLength(100);
+  });
+
+  it("records each workflow's last outcome and when it last worked", () => {
+    let st = recordStatus({}, "finder", { at: "2026-11-08T20:00:00Z", state: "ok" });
+    st = recordStatus(st, "finder", { at: "2026-11-09T20:00:00Z", state: "failed", run: "https://github.com/x" });
+    expect(st.jobs.finder).toEqual({ at: "2026-11-09T20:00:00Z", state: "failed", run: "https://github.com/x", last_ok: "2026-11-08T20:00:00Z" });
   });
 
   it("files a filing under the month it was filed", () => {

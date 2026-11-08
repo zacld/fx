@@ -84,3 +84,29 @@ describe("perMinuteRetryAfter", () => {
     expect(perMinuteRetryAfter("rate limit")).toBe(null);
   });
 });
+
+describe("analyseViaGroq — JSON mode rejected (json_validate_failed)", () => {
+  beforeEach(() => { _resetGroqModelMemoForTests(); });
+  const rejected = (generation: string) => JSON.stringify({ error: { message: "Failed to generate JSON.", type: "invalid_request_error",
+    code: "json_validate_failed", failed_generation: generation } });
+
+  it("uses the model's own answer when it parses, with no second request", async () => {
+    const { impl, calls } = fakeFetch({ "llama-3.3-70b-versatile": { status: 400, body: rejected('Here you go:\n```json\n{"ok": true}\n```') } });
+    expect(await analyseViaGroq("h", "s", { apiKey: "k", fetchImpl: impl })).toEqual({ ok: true });
+    expect(calls).toHaveLength(1);
+  });
+
+  it("asks once more without JSON mode when the answer can't be used", async () => {
+    let n = 0;
+    const bodies: string[] = [];
+    const impl = (async (_url: string, init?: RequestInit) => {
+      bodies.push(String(init?.body));
+      n += 1;
+      const r = n === 1 ? { status: 400, body: rejected("{ broken") } : { status: 200, body: okBody({ ok: "plain" }) };
+      return { ok: r.status === 200, status: r.status, text: async () => r.body, json: async () => JSON.parse(r.body) } as unknown as Response;
+    }) as unknown as typeof fetch;
+    expect(await analyseViaGroq("h", "s", { apiKey: "k", fetchImpl: impl })).toEqual({ ok: "plain" });
+    expect(bodies).toHaveLength(2);
+    expect(JSON.parse(bodies[1] ?? "{}").response_format).toBeUndefined();
+  });
+});

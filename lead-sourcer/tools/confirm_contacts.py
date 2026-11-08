@@ -22,6 +22,7 @@ import argparse
 import csv
 import os
 import sys
+import json
 import time
 import urllib.parse
 
@@ -101,6 +102,8 @@ def main() -> None:
     for key, value in sorted(stats.items()):
         print(f"  {key}: {value:,}")
     print(f"  searches answered this month, by provider: {profiles.usage()}")
+    with open("search_allowance.json", "w", encoding="utf-8") as f:   # the Accounts page's freshness strip
+        json.dump({"search": profiles.allowance(), "search_month": time.strftime("%Y-%m", time.gmtime())}, f)
     for name, why in profiles.left_out().items():
         print(f"  search API {name} left out this run: {why}")
     print(f"Output: {args.output}")

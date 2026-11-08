@@ -130,6 +130,7 @@ def main() -> None:
     parser.add_argument("--sample", type=int, default=250)
     parser.add_argument("--seed", type=int, default=7, help="another number: a fresh random draw of --sample filings")
     parser.add_argument("--numbers", default="", help="comma-separated company numbers: read these, with the tags behind them")
+    parser.add_argument("--strict", action="store_true", help="exit 1 when any rule is broken (the weekly audit)")
     args = parser.parse_args()
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
     if not api_key:
@@ -208,6 +209,11 @@ def main() -> None:
         print(f"  {r['company_name'][:44]} ({r['company_number']}):")
         for rule in rules:
             print(f"      {rule}")
+    with open("audit_result.json", "w", encoding="utf-8") as f:   # the Accounts page's freshness strip
+        json.dump({"note": f"{len(broken)} of {tally['read']} filings broke a rule" if broken else
+                   f"clean: {tally['read']} filings read again"}, f)
+    if args.strict and broken:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

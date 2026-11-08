@@ -379,3 +379,36 @@ export const LOSS_SORTS = {
 };
 export const sortLosses = (rows, by = "biggest") =>
   [...rows].sort((a, b) => LOSS_SORTS[by].key(a) - LOSS_SORTS[by].key(b) || (a.onList === b.onList ? 0 : a.onList ? -1 : 1));
+
+// --- Freshness strip (each data workflow's last outcome: scripts/status.mjs) -----------------------------------------
+
+// How often each runs, and so how old its last good run may be before the strip shows it stale.
+export const STATUS_JOBS = [
+  ["finder", "Accounts list", 30],          // every evening
+  ["filings", "FX filings", 80],            // Tue–Sat mornings (a weekend gap)
+  ["market", "Market moves", 80],           // weekdays, twice
+  ["audit", "Accuracy audit", 8 * 24],      // weekly
+];
+const ago = (hours) => (hours < 1 ? "under an hour ago" : hours < 48 ? `${Math.round(hours)}h ago` : `${Math.round(hours / 24)} days ago`);
+
+// [{job, label, level: ok | stale | failed | unknown, text, run, note}] for the strip, oldest-news first never hidden.
+export function statusLines(status, now = new Date()) {
+  const jobs = (status && status.jobs) || {};
+  return STATUS_JOBS.map(([job, label, maxHours]) => {
+    const j = jobs[job];
+    if (!j) return { job, label, level: "unknown", text: "no run recorded yet" };
+    const lastOk = j.last_ok ? (now - new Date(j.last_ok)) / 36e5 : null;
+    const level = j.state === "failed" ? "failed" : lastOk === null || lastOk > maxHours ? "stale" : j.state === "partial" ? "stale" : "ok";
+    const text = j.state === "failed" ? `last run failed ${ago((now - new Date(j.at)) / 36e5)}${lastOk !== null ? ` · last good ${ago(lastOk)}` : ""}`
+      : j.state === "partial" ? `ran out of time ${ago((now - new Date(j.at)) / 36e5)} — carries on next run`
+      : `updated ${ago(lastOk ?? 0)}`;
+    return { job, label, level, text, run: j.run || "", note: j.note || "" };
+  });
+}
+
+// "Searches left this month: Tavily 812 of 1,000 · Serper 1,240 of 2,500" from the finder's last run.
+export function searchAllowance(status) {
+  const s = status?.jobs?.finder?.search;
+  if (!Array.isArray(s) || !s.length) return "";
+  return s.map((p) => `${p.name[0].toUpperCase()}${p.name.slice(1)} ${p.cap ? `${Math.max(0, p.cap - p.used).toLocaleString()} of ${p.cap.toLocaleString()}` : `${p.used.toLocaleString()} used (no cap)`}`).join(" · ");
+}

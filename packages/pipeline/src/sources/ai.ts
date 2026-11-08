@@ -469,14 +469,15 @@ const _isRateLimited = (status: number, body: string) => status === 429 || /quot
 
 async function groqChatCompletion(
   model: string, apiKey: string, headline: string, summary: string,
-  fetchImpl: typeof fetch, timeoutMs: number,
+  fetchImpl: typeof fetch, timeoutMs: number, jsonMode = true,
 ): Promise<{ ok: true; text: string } | { ok: false; status: number; body: string; retryAfter: string | null }> {
   let res: Response;
   try {
     res = await fetchImpl("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, temperature: 0.5, response_format: { type: "json_object" }, messages: [{ role: "user", content: formatPrompt(headline, summary) }] }),
+      body: JSON.stringify({ model, temperature: jsonMode ? 0.5 : 0.2, ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
+        messages: [{ role: "user", content: formatPrompt(headline, summary) }] }),
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (e) {
@@ -515,6 +516,16 @@ export async function analyseViaGroq(headline: string, summary: string, opts: Ai
         console.warn(`analyseViaGroq: configured model "${configuredModel}" unavailable — using fallback "${model}". Update GROQ_MODEL once you've picked a current one.`);
       }
       return extractJson(result.text);
+    }
+    // JSON mode rejected the model's answer (Nov 2026: "json_validate_failed" on most events). Groq sends back what
+    // the model wrote: use it when it parses; otherwise ask once more without JSON mode and parse leniently.
+    if (result.status === 400 && /json_validate_failed/.test(result.body)) {
+      let generated = "";
+      try { generated = (JSON.parse(result.body) as { error?: { failed_generation?: string } }).error?.failed_generation ?? ""; } catch { /* not JSON */ }
+      try { resolvedGroqModel = model; return extractJson(generated); } catch { /* unusable: retry below */ }
+      const retry = await groqChatCompletion(model, apiKey, headline, summary, fetchImpl, timeoutMs, false);
+      if (retry.ok && retry.text) return extractJson(retry.text);
+      throw new Error(`Groq: JSON mode failed and the plain retry did not answer (${retry.ok ? "empty" : retry.status})`);
     }
     if (_isRateLimited(result.status, result.body)) {
       throw new RateLimitError(`Groq ${result.status}: ${result.body.slice(0, 200)}`, perMinuteRetryAfter(result.body, result.retryAfter));

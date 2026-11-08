@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -281,5 +281,23 @@ describe("FX losses", () => {
     expect(sortLosses(rows, "newest").map((r) => r.company_number)).toEqual(["04", "01", "03"]);
     expect(hedgingNamed({ fx_today: "Uses forward contracts" })).toBe(true);
     expect(lossGrew({ loss: 10, prior: null })).toBe(false);
+  });
+});
+
+describe("freshness strip", () => {
+  const now = new Date("2026-11-09T08:00:00Z");
+  it("shows each feed ok, stale, failed or not yet run", () => {
+    const status = { jobs: {
+      finder: { at: "2026-11-08T21:00:00Z", state: "ok", last_ok: "2026-11-08T21:00:00Z",
+                search: [{ name: "tavily", used: 188, cap: 1000 }, { name: "serper", used: 40, cap: 0 }] },
+      filings: { at: "2026-11-07T10:00:00Z", state: "failed", last_ok: "2026-11-06T10:00:00Z", run: "https://github.com/r" },
+      market: { at: "2026-11-01T06:00:00Z", state: "ok", last_ok: "2026-11-01T06:00:00Z" },
+    } };
+    const lines = statusLines(status, now);
+    expect(lines.map((l) => [l.job, l.level])).toEqual([["finder", "ok"], ["filings", "failed"], ["market", "stale"], ["audit", "unknown"]]);
+    expect(lines[0].text).toBe("updated 11h ago");
+    expect(lines[1].text).toBe("last run failed 46h ago · last good 3 days ago");
+    expect(searchAllowance(status)).toBe("Tavily 812 of 1,000 · Serper 40 used (no cap)");
+    expect(searchAllowance({})).toBe("");
   });
 });

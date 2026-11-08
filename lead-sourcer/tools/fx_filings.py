@@ -126,6 +126,10 @@ def main() -> None:
     parser.add_argument("--history-max", type=int, default=2500, help="filing histories read a run (moved up flag)")
     parser.add_argument("--hmrc-months", type=int, default=12, help="months of HMRC importer/exporter lists (0: off)")
     parser.add_argument("--redo", action="store_true", help="read files already done again (a test)")
+    parser.add_argument("--chain-left", type=int, default=-1,
+                        help="a chained backfill/rescan: links still to run after this one (kept in the list, so a "
+                             "link dropped from GitHub's queue is restarted by the next daily scan)")
+    parser.add_argument("--chain-mode", default="", help="the chained runs' mode (next, rescan)")
     args = parser.parse_args()
     if not (args.daily or args.month or args.zip):
         parser.error("say --daily, --month or --zip")
@@ -221,7 +225,12 @@ def main() -> None:
     print(f"Owned from abroad, FX probably run there: {abroad:,} of {len(rows):,} (ranked "
           f"{filings.hooks.ABROAD_RULES['points']} points lower; owned abroad but runs FX locally: "
           f"{sum(1 for r in rows if filings.owner_abroad(r)[0] and not r['run_from_abroad']):,})")
+    chain_left = args.chain_left if args.chain_left >= 0 else int(previous.get("chain_left") or 0)
+    chain_mode = args.chain_mode or previous.get("chain_mode") or ""
+    if args.chain_left >= 0 and not todo:
+        chain_left = 0   # nothing left to read: the chain is done
     out = {"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "min_turnover": args.min_turnover,
+           "chain_left": chain_left, "chain_mode": chain_mode,
            "files_done": sorted(done), "files_rescanned": sorted(rescanned), "files_scanned": len(todo), "count": len(rows), "rows": rows}
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f)

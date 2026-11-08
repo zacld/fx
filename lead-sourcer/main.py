@@ -459,7 +459,7 @@ FILINGS_NICHE = {
     "exposure_reason": "Their own filed accounts show foreign-currency flows (the FX filings scan).", "call_angle": "",
 }
 # Share of a run's slots the FX filings scan's strongest finds may take before the customs and niche candidates.
-FILINGS_PRIORITY_SHARE = float(os.environ.get("FILINGS_PRIORITY_SHARE", "0.5"))
+FILINGS_PRIORITY_SHARE = float(os.environ.get("FILINGS_PRIORITY_SHARE", "0.7"))   # Nov 2026: 0.5 -> 0.7, to work through the filings backlog
 FILINGS_PRIORITY_MIN_SCORE = 50
 FX_LOSS_PRIORITY = 100_000   # an FX loss this big in the filings list: checked first in the finder, whatever its score
 
