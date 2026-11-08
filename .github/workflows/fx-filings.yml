@@ -111,10 +111,12 @@ jobs:
           echo "MODE=$MODE" >> "$GITHUB_ENV"; echo "CHAIN=$CHAIN" >> "$GITHUB_ENV"
           if [ "$MODE" = "test" ]; then python3 tools/fx_filings.py --daily --redo --max-files 1 --max-hits 20 --detail --previous filings-previous.json --out filings.json
           elif [ "$MODE" = "daily" ]; then python3 tools/fx_filings.py --daily --previous filings-previous.json --out filings.json
-          elif [ "$MODE" = "rescan" ]; then python3 tools/fx_filings.py --month rescan --max-files 25 --previous filings-previous.json --out filings.json
+          elif [ "$MODE" = "rescan" ]; then python3 tools/fx_filings.py --month rescan --max-files 25 --chain-left "$CHAIN" --chain-mode rescan --previous filings-previous.json --out filings.json
+          elif [ "$CHAIN" != "0" ]; then python3 tools/fx_filings.py --month "$MODE" --chain-left "$CHAIN" --chain-mode next --previous filings-previous.json --out filings.json
           else python3 tools/fx_filings.py --month "$MODE" --previous filings-previous.json --out filings.json; fi
 
       - name: Save the list
+        id: save
         if: env.MODE != 'test' && env.BACKFILL_STARTED != '1'
         run: cd apps/web && node scripts/filings-store.mjs put ../../lead-sourcer/filings.json
 
@@ -131,3 +133,24 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/fx-filings.yml/dispatches" \
             -d "{\"ref\":\"${{ github.ref_name }}\",\"inputs\":{\"mode\":\"$([ "$MODE" = rescan ] && echo rescan || echo next)\",\"chain\":\"$((CHAIN - 1))\"}}"
           echo "started the next month ($((CHAIN - 1)) more to chain after it)"
+
+      # A chained backfill/rescan link dropped from GitHub's queue (a newer run waiting in the same group replaces the
+      # one waiting before it — the daily scan can bump a chain link): the next daily scan starts the chain again.
+      - name: Restart an interrupted chain
+        if: env.MODE == 'daily' && steps.save.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          read left mode < <(python3 -c "import json;d=json.load(open('lead-sourcer/filings.json'));print(int(d.get('chain_left') or 0), d.get('chain_mode') or 'next')")
+          if [ "$left" -gt 0 ]; then
+            curl -sS -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/fx-filings.yml/dispatches" \
+              -d "{\"ref\":\"${{ github.ref_name }}\",\"inputs\":{\"mode\":\"$mode\",\"chain\":\"$((left - 1))\"}}"
+            echo "restarted the $mode chain ($((left - 1)) more after it)"
+          fi
+
+      - name: Record the outcome (Accounts page freshness strip)
+        if: always() && github.event_name != 'push' && env.MODE != 'test'
+        run: |
+          state=failed; [ "${{ steps.save.outcome }}" = success ] && state=ok
+          cd apps/web && node scripts/status.mjs filings $state "${MODE:-daily}"

@@ -154,6 +154,13 @@ def _count(name: str) -> None:
         json.dump(counts, f)
 
 
+def allowance() -> list[dict]:
+    """[{name, used, cap}] this month for each provider with a key (cap 0: no cap) — shown on the Accounts page."""
+    counts = usage()
+    return [{"name": name, "used": counts.get(name, 0), "cap": int(os.environ.get(cap_var, default_cap))}
+            for name, var, cap_var, default_cap, *_ in PROVIDERS if os.environ.get(var, "").strip()]
+
+
 def fetch_any(query: str, _key: str = "") -> Optional[str]:
     """
     The first provider with a key and allowance left this month answers;

@@ -292,7 +292,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   engines join there: the finder workflow fetches this list and its strongest
   finds (filed FX proof 50+, or moved up from small accounts —
   `main.priority_from_filings`, `--priority-file`) are candidates whatever their
-  SIC code — and any with an FX loss of `FX_LOSS_PRIORITY` (£100k)+, 20 points higher — and are checked first, up to `FILINGS_PRIORITY_SHARE` (half) of the
+  SIC code — and any with an FX loss of `FX_LOSS_PRIORITY` (£100k)+, 20 points higher — and are checked first, up to `FILINGS_PRIORITY_SHARE` (70%) of the
   run's slots, strongest first (niche "FX in their filed accounts" when no niche
   or customs record brings them in) — full research and contact hunt, then the
   main Accounts list.
@@ -367,7 +367,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Contact routes and email drafts:** in scope until Cognism arrives
   (mid-November 2026). Generic company emails only (Priority 12), and
   rule-based drafts (Priority 1: no per-lead AI calls).
-- **FX losses tab** (Accounts page; `lossRows` / `filterLosses` / `sortLosses` in `format.js`): every company whose
+- **FX losses tab** (Accounts page; the "Recent FX loss" figure at the top opens it; Contacted button and CSV export
+  with each company's email draft; `lossRows` / `filterLosses` / `sortLosses` in `format.js`): every company whose
   latest accounts show an FX loss — the main list's (finance contact, company page) and the Recent FX filings list's
   not on it yet (`filings/losses`, written by `filings-store.mjs put` with `filingsLosses`, GET
   `/api/accounts?view=losses`) — biggest first; filters for size (£50k+ by default), filed in the last 6 months, no
@@ -386,7 +387,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Investec paragraph, the Tuesday-or-Thursday ask and the sign-off never change. Golden
   rule: researched, not invasive — forwards, lenders, borrowings and FX gains guide the
   hook but are never quoted back; what the filings can't support stays a [placeholder]
-  ("Fill in: …"), and the draft says where each filled part came from. Nothing is sent.
+  ("Fill in: …"), and the draft says where each filled part came from. Nothing is sent. The tab's companies and
+  edits are kept on the site (store key `emails`, POST `{company_number, email: {row} | {text} | null}`, at most
+  `EMAILS_MAX`), so they follow Zac across devices; drafts from before (this browser's storage) moved over once.
+- **Freshness strip** (top of the Accounts page; `statusLines` / `searchAllowance` in `format.js`): each data
+  workflow's last outcome — Accounts list (finder), FX filings, Market moves, Accuracy audit — ok, stale (older than
+  its cadence: 30h / 80h / 80h / 8 days) or failed with a link to the run, and the contact searches left this month.
+  Each workflow's last step records it (`apps/web/scripts/status.mjs`, store key `status`, `recordStatus`); a run
+  that dies part-way shows red here instead of passing unnoticed. The accuracy audit runs weekly on its own (Sunday,
+  "FX filings cross-check": a fresh 200-filing draw, `reader_audit.py --strict` fails the run on any broken rule).
+  A chained backfill or rescan keeps `chain_left` in the filings list, so a link dropped from GitHub's queue (a newer
+  waiting run replaces an older one) is restarted by the next daily scan.
 - **Running it:** the GitHub workflow `fx-company-finder.yml` fills the
   dashboard's password-protected Accounts page (no run attachments: the
   repo is public)

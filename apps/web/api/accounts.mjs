@@ -22,6 +22,26 @@ export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, re
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index
 export const filingsMonthKey = (month) => `filings/${month}`;   // {month, rows}: the companies filed that month
+export const STATUS_KEY = "status";   // {jobs: {finder|filings|market|audit: {at, state, run, note, …}}} — each workflow's last outcome
+export const EMAILS_KEY = "emails";   // {company_number: {row, text, at}} — the Email generator tab's companies (Zac's)
+export const EMAILS_MAX = 100;
+export const EMAIL_TEXT_MAX = 8000;
+// What the Email generator needs of a company (src/accounts/email.js) and shows beside its draft.
+export const EMAIL_ROW_FIELDS = ["company_number", "company_name", "rank", "finance_contact", "finance_contact_role",
+  "finance_contact_confidence", "no_fd_likely", "turnover_regions", "main_currency", "currency_source", "currency_direction",
+  "fx_forwards", "currencies_in_accounts"];
+
+// The Email generator's companies after one change: {row} adds or refreshes a company (newest first, at most
+// EMAILS_MAX), {text} saves an edit (null: back to the generated draft), null removes it.
+export function applyEmail(emails, number, change, at) {
+  const out = { ...(emails || {}) };
+  if (change === null) { delete out[number]; return out; }
+  const prev = out[number] || {};
+  const row = change.row ? Object.fromEntries(EMAIL_ROW_FIELDS.filter((k) => change.row[k] !== undefined).map((k) => [k, change.row[k]])) : prev.row;
+  out[number] = { row, text: "text" in change ? change.text : change.row ? null : prev.text ?? null, at: change.row ? at : prev.at || at };
+  const keep = Object.entries(out).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at))).slice(0, EMAILS_MAX);
+  return Object.fromEntries(keep);
+}
 export const LOSSES_KEY = "filings/losses";   // {made_at, count, rows}: every listed filing with an FX loss (the FX losses tab)
 
 // The fields the FX losses tab shows for a filing (kept small: one store item for the whole year's losses).
@@ -30,6 +50,14 @@ const LOSS_FIELDS = ["company_number", "company_name", "filed", "period_end", "t
   "currency", "currency_source", "currencies_in_accounts", "turnover_regions", "owner", "run_from_abroad", "incumbent_bank",
   "incumbent_bank_url", "lenders", "fd_search_url", "directors", "triggers", "hmrc_trade", "filed_fx_score", "moved_up",
   "also_filed"];
+
+// A workflow's outcome into the status record the Accounts page's freshness strip reads (scripts/status.mjs).
+export function recordStatus(status, job, entry) {
+  const jobs = { ...((status && status.jobs) || {}) };
+  jobs[job] = { ...(jobs[job] || {}), ...entry };
+  if (entry.state === "ok") jobs[job].last_ok = entry.at;
+  return { ...(status || {}), jobs };
+}
 
 // Every filing in the Recent FX filings list whose latest accounts show an FX loss, biggest first.
 export function filingsLosses(rows = []) {
@@ -91,6 +119,18 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
   if (req.method === "POST") {
     const body = await req.json().catch(() => ({}));
     const { company_number: number, notes } = body;
+    if ("email" in body) {
+      const e = body.email;
+      if (!COMPANY_NUMBER.test(number || "") || (e !== null && (typeof e !== "object" || (!e.row && !("text" in e))))) {
+        return reply({ error: "send {company_number, email: {row} | {text} | null}" }, 400);
+      }
+      if (e && "text" in e && e.text !== null && (typeof e.text !== "string" || e.text.length > EMAIL_TEXT_MAX)) {
+        return reply({ error: `an email's text is a string of at most ${EMAIL_TEXT_MAX} characters` }, 400);
+      }
+      const emails = applyEmail((await blobs.get(EMAILS_KEY, { type: "json" })) || {}, number, e, new Date().toISOString());
+      await blobs.setJSON(EMAILS_KEY, emails);
+      return reply({ emails }, 200);
+    }
     const change = Object.fromEntries(["contacted", "channel", "response", "follow_up_at", "company_name"]
       .filter((k) => body[k] !== undefined).map((k) => [k, body[k]]));
     const touchesContact = "contacted" in change || "response" in change || "follow_up_at" in change;
@@ -123,7 +163,8 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     const { files_done: _done, files_rescanned: _rescanned, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
-  const [data, marks, noted] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY].map((k) => blobs.get(k, { type: "json" })));
+  const [data, marks, noted, status, emails] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY]
+    .map((k) => blobs.get(k, { type: "json" })));
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);
-  return reply({ ...data, contacted: marks || {}, notes: noted || {} }, 200);
+  return reply({ ...data, contacted: marks || {}, notes: noted || {}, status: status || {}, emails: emails || {} }, 200);
 }

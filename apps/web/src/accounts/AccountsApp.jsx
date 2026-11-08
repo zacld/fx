@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { emailDraft } from "./email.js";
+import { applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -8,7 +9,7 @@ import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, tou
 const API = "/api/accounts";
 const PW_KEY = "fx-accounts-password";
 const PAGE = 50;
-const EMAILS_KEY = "fx-email-generator";   // this browser's Email generator tab (company rows + edits)
+const EMAILS_KEY = "fx-email-generator";   // where the Email generator tab kept its companies before they moved to the site
 
 const remembered = () => { try { return sessionStorage.getItem(PW_KEY) || ""; } catch { return ""; } };
 const remember = (pw) => { try { pw ? sessionStorage.setItem(PW_KEY, pw) : sessionStorage.removeItem(PW_KEY); } catch { /* private mode */ } };
@@ -123,21 +124,6 @@ function Accounts({ data, password }) {
     window.history.pushState({ fromList: true }, "", companyPath(number));
     setPageNo(number);
   }, []);
-  // The Email generator tab's companies (newest first, with any edits to their draft): kept in this browser only.
-  const [emails, setEmails] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(EMAILS_KEY) || "[]"); } catch { return []; }
-  });
-  useEffect(() => { try { localStorage.setItem(EMAILS_KEY, JSON.stringify(emails)); } catch { /* storage off */ } }, [emails]);
-  const toEmail = useCallback((row) => {
-    setEmails((list) => [{ number: row.company_number, row, text: null, at: new Date().toISOString() },
-                         ...list.filter((x) => x.number !== row.company_number)].slice(0, 50));
-    if (numberFromPath(window.location.pathname)) { window.history.pushState(null, "", "/accounts"); setPageNo(""); }
-    setListScroll(0);
-    setFilters((f) => ({ ...f, section: "", view: "email" }));
-    window.scrollTo(0, 0);
-  }, []);
-  const editEmail = useCallback((number, text) => setEmails((list) => list.map((x) => (x.number === number ? { ...x, text } : x))), []);
-  const removeEmail = useCallback((number) => setEmails((list) => list.filter((x) => x.number !== number)), []);
   const backToList = useCallback(() => {
     if (window.history.state?.fromList) window.history.back();
     else { window.history.pushState(null, "", "/accounts"); setPageNo(""); }
@@ -154,6 +140,7 @@ function Accounts({ data, password }) {
       if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
       if (body.contacted) setContacted(body.contacted);
       if (body.notes) setNotes(body.notes);
+      if (body.emails) setEmails(body.emails);
     });
     queue.current = run;
     return run;
@@ -172,6 +159,48 @@ function Accounts({ data, password }) {
   }, [contacted, save]);
 
   // Saves a company's notes; true when saved (the editor then closes), false with the reason shown when not.
+  // The Email generator tab's companies: kept on the site (any device), newest first; an edit is saved when its box
+  // loses focus. Drafts kept in this browser before they moved to the site are moved over once.
+  const [emails, setEmails] = useState(data.emails || {});
+  const emailItems = useMemo(() => Object.entries(emails).map(([number, e]) => ({ number, ...e }))
+    .sort((a, b) => String(b.at).localeCompare(String(a.at))), [emails]);
+  const saveEmail = useCallback(async (number, email) => {
+    setSaveError("");
+    try { await save(number, { email }); return true; } catch (e) {
+      setSaveError(`Couldn't save the email (${e.message}) — try again.`);
+      return false;
+    }
+  }, [save]);
+  const toEmail = useCallback((row) => {
+    setEmails((e) => applyEmail(e, row.company_number, { row }, new Date().toISOString()));
+    saveEmail(row.company_number, { row });
+    if (numberFromPath(window.location.pathname)) { window.history.pushState(null, "", "/accounts"); setPageNo(""); }
+    setListScroll(0);
+    setFilters((f) => ({ ...f, section: "", view: "email" }));
+    window.scrollTo(0, 0);
+  }, [saveEmail]);
+  const editEmail = useCallback((number, text) => {
+    setEmails((e) => applyEmail(e, number, { text }, new Date().toISOString()));
+    return saveEmail(number, { text });
+  }, [saveEmail]);
+  const removeEmail = useCallback((number) => {
+    setEmails((e) => applyEmail(e, number, null));
+    return saveEmail(number, null);
+  }, [saveEmail]);
+  useEffect(() => {
+    let old = [];
+    try { old = JSON.parse(localStorage.getItem(EMAILS_KEY) || "[]"); } catch { return; }
+    if (!Array.isArray(old) || !old.length) return;
+    (async () => {
+      for (const it of [...old].reverse()) {
+        if (!it?.number || !it.row || (data.emails || {})[it.number]) continue;
+        await save(it.number, { email: { row: it.row } }).catch(() => {});
+        if (it.text) await save(it.number, { email: { text: it.text } }).catch(() => {});
+      }
+      try { localStorage.removeItem(EMAILS_KEY); } catch { /* storage off */ }
+    })();
+  }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+
   const saveNote = useCallback(async (number, text) => {
     setSaveError("");
     try { await save(number, { notes: text }); return true; } catch (e) {
@@ -202,7 +231,7 @@ function Accounts({ data, password }) {
     { n: open.length, l: "Accounts", s: "Not yet contacted", c: "#6366F1" },
     { n: open.filter((r) => fxScore(r) >= 50).length, l: "Strong FX proof", s: "Forwards, FX loss, regions… in their filings", c: "#A5B4FC" },
     { n: open.filter((r) => contactGroup(r) === "Confirmed").length, l: "Confirmed contact", s: "Verified or confirmed", c: "#10B981" },
-    { n: open.filter((r) => r.recent_fx_loss).length, l: "Recent FX loss", s: "Accounts filed in the last 6 months", c: "#F87171" },
+    { n: open.filter((r) => r.recent_fx_loss).length, l: "Recent FX loss", s: "Accounts filed in the last 6 months", c: "#F87171", view: "losses" },
     { n: open.filter((r) => isNew(r, data.made_at)).length, l: "New", s: "Added by the latest scan", c: "#38BDF8" },
     { n: followUpsDue, l: "Follow-ups due", s: `Today or overdue · ${contactedCount} contacted`, c: followUpsDue ? "#F87171" : "#A5B4FC" },
     { n: open.filter((r) => r.triggers).length, l: "With triggers", s: "New owner, charges, directors", c: "#F59E0B" },
@@ -232,13 +261,15 @@ function Accounts({ data, password }) {
 
   return (
     <main>
+      <StatusStrip status={data.status} />
       <div className="stats">
-        {stats.map(({ n, l, s, c }) => (
-          <div className="stat" key={l}>
-            <div className="stat-n" style={{ color: c }}>{n}</div>
-            <div><span className="stat-l">{l}</span><span className="stat-s">{s}</span></div>
-          </div>
-        ))}
+        {stats.map(({ n, l, s, c, view }) => {
+          const inner = <><div className="stat-n" style={{ color: c }}>{n}</div>
+            <div><span className="stat-l">{l}</span><span className="stat-s">{s}</span></div></>;
+          return view
+            ? <button className="stat stat-go" key={l} onClick={() => set({ section: "", view })} title="Open the FX losses tab">{inner}</button>
+            : <div className="stat" key={l}>{inner}</div>;
+        })}
       </div>
 
       <div className="controls">
@@ -267,7 +298,7 @@ function Accounts({ data, password }) {
           </button>
           <button role="tab" aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
                   title="The Investec email for each company you send here" onClick={() => set({ section: "", view: "email" })}>
-            Email generator <span className="tab-n">{emails.length}</span>
+            Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
         {!["filings", "email", "losses"].includes(filters.view) && <>
@@ -304,8 +335,8 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onOpen={openCompany} onEmail={toEmail} />
-       : filters.view === "email" ? <EmailGenerator items={emails} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
+      {filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
+       : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
       <div className="list">
         {saveError && <div className="save-error" role="alert">{saveError}</div>}
@@ -668,7 +699,7 @@ function Chips({ r }) {
 // The FX losses tab: every company whose latest accounts show a loss on currency — the main list's (with its finance
 // contact) and the Recent FX filings list's not on it yet — biggest first, each linked to the accounts it came from.
 const LOSS_MINS = [[0, "Any size"], [25000, "£25k+"], [50000, "£50k+"], [100000, "£100k+"], [250000, "£250k+"], [1000000, "£1m+"]];
-function FxLosses({ password, listRows, contacted, onOpen, onEmail }) {
+function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail }) {
   const [filingLosses, setFilingLosses] = useState(null);
   const [error, setError] = useState("");
   const [min, setMin] = useState(50000);
@@ -707,18 +738,39 @@ function FxLosses({ password, listRows, contacted, onOpen, onEmail }) {
         <label className="check" title="No forward contracts, options or FX provider named in their accounts"><input type="checkbox" checked={unhedged} onChange={(e) => reset(setUnhedged)(e.target.checked)} /> No hedging named</label>
         <label className="check"><input type="checkbox" checked={grew} onChange={(e) => reset(setGrew)(e.target.checked)} /> Worse than last year</label>
         <span className="muted">{rows.length.toLocaleString()} of {all.length.toLocaleString()} with an FX loss</span>
+        <button className="btn-sm export" onClick={() => exportLosses(rows)} disabled={!rows.length}>Export CSV ({rows.length})</button>
       </div>
       <p className="filings-note">Companies whose latest filed accounts show a loss on currency (exchange differences), from your Accounts list and the
         Recent FX filings scan. Each figure links to the accounts it came from; figures that failed the sense checks are left out. Companies you've
         marked contacted are in the Contacted tab.</p>
-      {rows.slice(0, shown).map((r) => <LossCard key={r.company_number} r={r} onOpen={onOpen} onEmail={onEmail} />)}
+      {rows.slice(0, shown).map((r) => <LossCard key={r.company_number} r={r} onOpen={onOpen} onEmail={onEmail} onContact={onContact} />)}
       {!rows.length && <div className="empty">No FX losses match these filters.</div>}
       {rows.length > shown && <button className="btn-sm more" onClick={() => setShown((n) => n + PAGE)}>Show more ({rows.length - shown} left)</button>}
     </div>
   );
 }
 
-function LossCard({ r, onOpen, onEmail }) {
+// The FX losses shown, for a spreadsheet: the loss and its context, the finance contact, and the email draft.
+const LOSS_EXPORT = ["company_name", "company_number", "on_list", "fx_loss_gbp", "fx_prior_gbp", "share_of_turnover", "turnover_gbp",
+  "filed", "hedging", "currency", "turnover_regions", "incumbent_bank", "finance_contact", "finance_contact_role",
+  "finance_contact_confidence", "accounts_url", "email_draft"];
+function exportLosses(rows) {
+  const out = rows.map((r) => ({
+    company_name: r.company_name, company_number: r.company_number, on_list: r.onList ? "yes" : "",
+    fx_loss_gbp: Math.round(r.loss), fx_prior_gbp: r.prior ?? "", share_of_turnover: r.share !== null ? `${(r.share * 100).toFixed(1)}%` : "",
+    turnover_gbp: r.turnover_gbp || "", filed: r.filedOn, hedging: r.fx_forwards || r.fx_today || "none named in the accounts",
+    currency: r.currencies_in_accounts || r.main_currency || "", turnover_regions: r.turnover_regions || "",
+    incumbent_bank: (r.incumbent_bank || "").split(":")[0], finance_contact: r.finance_contact || "",
+    finance_contact_role: r.finance_contact_role || "", finance_contact_confidence: r.finance_contact_confidence || "",
+    accounts_url: r.fx_gain_loss_url || r.accounts_url || "", email_draft: emailDraft(r).text,
+  }));
+  const blob = new Blob([toCsv(out, LOSS_EXPORT)], { type: "text/csv;charset=utf-8" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `fx-losses-${new Date().toISOString().slice(0, 10)}.csv` });
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function LossCard({ r, onOpen, onEmail, onContact }) {
   const priorLine = r.prior === null ? "" : `last year ${r.prior < 0 ? "a loss of " + money(-r.prior) : r.prior > 0 ? "a gain of " + money(r.prior) : "nil"}`;
   return (
     <article className="card loss-card">
@@ -732,7 +784,8 @@ function LossCard({ r, onOpen, onEmail }) {
         </div>
         <div className="loss-fig">
           <Src href={r.fx_gain_loss_url || r.accounts_url} title={r.fx_gain_loss_evidence || "Open the accounts"}><b>−{money(r.loss)}</b> FX loss</Src>
-          <span className="muted">{[r.share !== null && `${(r.share * 100).toFixed(1)}% of ${money(r.turnover_gbp)} turnover`, priorLine].filter(Boolean).join(" · ")}</span>
+          <span className="muted">{[r.share !== null ? `${(r.share * 100).toFixed(1)}% of ${money(r.turnover_gbp)} turnover` : r.size_estimate,
+            priorLine].filter(Boolean).join(" · ")}</span>
         </div>
       </div>
       <div className="loss-facts">
@@ -751,8 +804,27 @@ function LossCard({ r, onOpen, onEmail }) {
       <div className="card-foot">
         {r.onList && <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>Open company page →</a>}
         <EmailButton r={r} onEmail={onEmail} />
+        {r.onList && <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>}
       </div>
     </article>
+  );
+}
+
+// Each data feed's last run — ok, stale (older than it should be) or failed, linked to the run's log — and the
+// contact searches left this month: a broken run shows here instead of passing unnoticed.
+function StatusStrip({ status }) {
+  const lines = statusLines(status);
+  if (lines.every((l) => l.level === "unknown")) return null;
+  const searches = searchAllowance(status);
+  return (
+    <div className="status-strip">
+      {lines.map((l) => (
+        <span key={l.job} className={`st st-${l.level}`} title={l.note || ""}>
+          <span className="st-dot" />{l.label}: {l.run && l.level !== "ok" ? <a href={l.run} target="_blank" rel="noreferrer">{l.text}</a> : l.text}
+        </span>
+      ))}
+      {searches && <span className="st st-info" title="Web searches used to confirm finance contacts">Searches left this month: {searches}</span>}
+    </div>
   );
 }
 
@@ -771,30 +843,33 @@ function EmailGenerator({ items, onChange, onRemove, onOpen }) {
 }
 
 function EmailItem({ it, onChange, onRemove, onOpen }) {
-  const draft = useMemo(() => emailDraft(it.row), [it.row]);
-  const text = it.text ?? draft.text;
+  const draft = useMemo(() => emailDraft(it.row || {}), [it.row]);
+  const saved = it.text ?? draft.text;
+  const [text, setText] = useState(saved);
+  useEffect(() => { setText(saved); }, [saved]);
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
   };
-  const r = it.row;
+  const keep = () => { if (text !== saved) onChange(it.number, text === draft.text ? null : text); };
+  const r = it.row || {};
   return (
     <article className="card email-card">
       <div className="card-top">
         <div className="card-name">
           {r.company_number && r.rank
             ? <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
-            : <a className="co" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer">{r.company_name}</a>}
+            : <a className="co" href={chCompanyUrl(r.company_number || it.number)} target="_blank" rel="noreferrer">{r.company_name}</a>}
           {r.finance_contact && <span className="muted">{r.finance_contact}{r.finance_contact_role ? ` · ${r.finance_contact_role}` : ""}</span>}
         </div>
         <div className="email-btns">
           <button className="btn-sm contacted" onClick={copy}>{copied ? "Copied" : "Copy email"}</button>
-          {it.text != null && it.text !== draft.text && <button className="btn-sm" onClick={() => onChange(it.number, null)} title="Back to the generated draft">Reset</button>}
+          {text !== draft.text && <button className="btn-sm" onClick={() => { setText(draft.text); onChange(it.number, null); }} title="Back to the generated draft">Reset</button>}
           <button className="btn-sm" onClick={() => onRemove(it.number)}>Remove</button>
         </div>
       </div>
       <textarea className="input email-edit" rows={16} value={text} aria-label={`Email to ${r.company_name}`}
-                onChange={(e) => onChange(it.number, e.target.value)} />
+                onChange={(e) => setText(e.target.value)} onBlur={keep} />
       {draft.gaps.length > 0 && <div className="email-gaps">Fill in: {draft.gaps.join(" · ")}</div>}
       {draft.basis.length > 0 && <div className="email-basis">From: {draft.basis.join(" · ")}</div>}
     </article>
@@ -1134,6 +1209,18 @@ a.co:hover{color:#34D399}
 .when{margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)}
 .fact{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75);padding-left:10px;border-left:2px solid rgba(251,191,36,.6)}
 .email-go{color:#a5b4fc}
+.status-strip{display:flex;flex-wrap:wrap;gap:6px 18px;padding:8px 40px;font-size:12px;color:rgba(255,255,255,.6);border-bottom:1px solid rgba(255,255,255,.06)}
+.status-strip a{color:inherit;text-decoration:underline}
+.st{display:inline-flex;align-items:center;gap:6px}
+.st-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3)}
+.st-ok .st-dot{background:#10B981}
+.st-stale{color:#fbbf24}.st-stale .st-dot{background:#fbbf24}
+.st-failed{color:#f87171;font-weight:600}.st-failed .st-dot{background:#f87171}
+.st-info{color:rgba(255,255,255,.45)}
+.stat-go{cursor:pointer;text-align:left;font:inherit;color:inherit;background:none;border:0}
+.stat-go:hover{background:rgba(255,255,255,.03)}
+.loss-contacted{margin-left:auto}
+@media (max-width:640px){.status-strip{padding:8px 16px}}
 .loss-fig{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;text-align:right}
 .loss-fig b{color:#f87171;font-size:16px}
 .loss-facts{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:13px;color:rgba(255,255,255,.75)}
