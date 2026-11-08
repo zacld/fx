@@ -243,8 +243,16 @@ export const SORTS = {
 export const sortRows = (rows, by = "hot") =>
   [...rows].sort((a, b) => SORTS[by].key(a) - SORTS[by].key(b) || a.rank - b.rank);
 
+// One cell to copy: "ACME LIMITED – Jane Smith, Finance Director" for a presented finance contact (never a Guess),
+// else who to ask for: "ACME LIMITED – ask for the Finance Director" (the MD where there's probably no FD).
+export function companyAndFd(r) {
+  const who = presentedContact(r) ? [r.finance_contact, r.finance_contact_role].filter(Boolean).join(", ")
+    : askFor(r).replace(/^Ask/, "ask");
+  return `${r.company_name || ""} – ${who}`;
+}
+
 export const EXPORT_FIELDS = [
-  "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
+  "company_and_fd", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
   "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
   "finance_contact", "finance_contact_role",
@@ -380,6 +388,41 @@ export function filterLosses(rows, { min = 0, query = "", recentDays = 0, unhedg
     && (!band || inCoreBand(r)));
 }
 
+// --- Call today: the day's shortlist across the Accounts list and the Recent FX filings list -------------------------
+
+// £20m–£300m, strong FX proof in the filings (50+), not qualified Out, and a reason to ring now: an FX loss of £50k+ in
+// accounts filed in the last 6 months, or a trigger (new owner, new or paid-off charge, facility renewal, new
+// directors). Companies with a confirmed finance contact first, then likely, then "ask for the FD"; within each,
+// strongest FX proof (owned abroad lower) plus 30 for the loss and 15 for a trigger. Rule-based, every pick says why.
+export const CALL_TODAY_MAX = 25;
+export const CALL_RULES = { minScore: 50, minLoss: 50000, recentDays: 183, lossPoints: 30, triggerPoints: 15 };
+export function callToday(listRows = [], filingRows = [], { today = new Date(), max = CALL_TODAY_MAX, rules = CALL_RULES } = {}) {
+  const since = new Date(today.getTime() - rules.recentDays * 864e5).toISOString().slice(0, 10);
+  const numbers = new Set(listRows.map((r) => r.company_number));
+  const pick = (r, onList) => {
+    if (!inCoreBand(r) || fxScore(r) < rules.minScore || r.qualified === "Out") return null;
+    const loss = -Number(r.fx_gain_loss_gbp) || 0;
+    const filedOn = filedIso(r);
+    const recentLoss = onList ? Boolean(r.recent_fx_loss) : loss >= rules.minLoss && Boolean(filedOn) && filedOn >= since;
+    const trigger = parts(r.triggers)[0] || "";
+    if (!recentLoss && !trigger) return null;
+    const fx = r.fx_forwards || r.fx_today || r.currencies_in_accounts || r.turnover_regions || "";
+    const why = [
+      recentLoss && `FX loss of ${money(loss)} in accounts filed ${filedWhen(filedOn)}`,
+      trigger,
+      `Filed FX proof ${fxScore(r)}${fx ? `: ${fx}` : ""}`,
+      r.run_from_abroad && "Owned abroad: pitch the UK team",
+    ].filter(Boolean);
+    const score = rankedFx(r) + (recentLoss ? rules.lossPoints : 0) + (trigger ? rules.triggerPoints : 0);
+    return { ...(onList ? r : filingRow(r)), onList, loss, filedOn, why, score, group: CONTACT_GROUPS.indexOf(contactGroup(r)) };
+  };
+  return [...listRows.map((r) => pick(r, true)),
+    ...filingRows.filter((r) => !numbers.has(r.company_number)).map((r) => pick(r, false))]
+    .filter(Boolean)
+    .sort((a, b) => a.group - b.group || b.score - a.score || a.company_name.localeCompare(b.company_name))
+    .slice(0, max);
+}
+
 export const LOSS_SORTS = {
   biggest: { label: "Biggest loss", key: (r) => -r.loss },
   share: { label: "Biggest share of turnover", key: (r) => -(r.share ?? -1) },
@@ -411,8 +454,26 @@ export function statusLines(status, now = new Date()) {
     const text = j.state === "failed" ? `last run failed ${ago((now - new Date(j.at)) / 36e5)}${lastOk !== null ? ` · last good ${ago(lastOk)}` : ""}`
       : j.state === "partial" ? `ran out of time ${ago((now - new Date(j.at)) / 36e5)} — carries on next run`
       : `updated ${ago(lastOk ?? 0)}`;
+    const blocked = searchBlocked(j);
+    if (blocked) {
+      const detail = j.search_problems.map((p) => `${p.name}: ${p.why}`).join("\n");
+      return { job, label, level: level === "failed" ? "failed" : "stale", text: `${text} · ${blocked}`, run: j.run || "", note: [j.note, detail].filter(Boolean).join("\n") };
+    }
     return { job, label, level, text, run: j.run || "", note: j.note || "" };
   });
+}
+
+// "contact searches blocked (1,296 waiting): Search1api key rejected · Serper out of credits · Tavily allowance used"
+// when the finder's last run had sized companies waiting and no search provider able to answer (confirm_contacts.py
+// search_problems): the strip turns amber instead of reading "ok".
+export function searchBlocked(job) {
+  const problems = Array.isArray(job?.search_problems) ? job.search_problems : [];
+  if (!problems.length) return "";
+  const reason = (why = "") => (/\b40[13]\b|unauthori[sz]ed|invalid/i.test(why) ? "key rejected"
+    : /\b402\b|credit/i.test(why) ? "out of credits" : /allowance/i.test(why) ? "month's allowance used" : "failing");
+  const name = (n = "") => `${n[0].toUpperCase()}${n.slice(1)}`;
+  const waiting = Number(job.search_waiting) || 0;
+  return `contact searches blocked${waiting ? ` (${waiting.toLocaleString()} waiting)` : ""}: ${problems.map((p) => `${name(p.name)} ${reason(p.why)}`).join(" · ")}`;
 }
 
 // "Searches left this month: Tavily 812 of 1,000 · Serper 1,240 of 2,500" from the finder's last run.

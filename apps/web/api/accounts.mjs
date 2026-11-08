@@ -66,6 +66,21 @@ export function filingsLosses(rows = []) {
     .sort((a, b) => Number(a.fx_gain_loss_gbp) - Number(b.fx_gain_loss_gbp));
 }
 
+export const CALLS_KEY = "filings/calls";   // {made_at, count, rows}: the Call today tab's candidates from the filings list
+export const CALLS_MAX = 1500;
+// The Recent FX filings list's candidates for the Call today tab (format.js callToday picks the day's 25): turnover
+// £20m–£300m (filed or the group's), strong filed FX proof (50+), and an FX loss or a trigger; strongest first.
+export function filingsCalls(rows = []) {
+  return rows.filter((r) => {
+    const turnover = Number(r.turnover_gbp) || 0;
+    return turnover >= 20_000_000 && turnover <= 300_000_000 && (Number(r.filed_fx_score) || 0) >= 50
+      && (Number(r.fx_gain_loss_gbp) < 0 || Boolean(r.triggers));
+  })
+    .sort((a, b) => (Number(b.rank_score ?? b.filed_fx_score) || 0) - (Number(a.rank_score ?? a.filed_fx_score) || 0))
+    .slice(0, CALLS_MAX)
+    .map((r) => Object.fromEntries([...LOSS_FIELDS, "rank_score", "currency_source"].filter((k) => r[k] !== undefined && r[k] !== "").map((k) => [k, r[k]])));
+}
+
 // "2026-11" for a day file's "2026-11-04"; "2026-09" for a monthly archive's "September 2026".
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export function filingsMonth(filed = "") {
@@ -151,6 +166,9 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
   const params = new URL(req.url).searchParams;
   if (params.get("view") === "losses") {
     return reply((await blobs.get(LOSSES_KEY, { type: "json" })) || { rows: [] }, 200);
+  }
+  if (params.get("view") === "calls") {
+    return reply((await blobs.get(CALLS_KEY, { type: "json" })) || { rows: [] }, 200);
   }
   if (params.get("view") === "filings") {
     const month = params.get("month") || "";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyEmail, filingsLosses, filingsMonth, handle, markFirstSeen, recordStatus } from "../api/accounts.mjs";
+import { applyEmail, filingsCalls, filingsLosses, filingsMonth, handle, markFirstSeen, recordStatus } from "../api/accounts.mjs";
 
 const list = { made_at: "2026-10-21T06:00:00+00:00", count: 1, rows: [{ company_name: "A LTD", rank: 1 }] };
 // An in-memory Blobs store: the list under "latest", Zac's contacted marks under "contacted".
@@ -87,6 +87,22 @@ describe("/api/accounts", () => {
     s.blobs["filings/losses"] = { made_at: "x", count: 2, rows: losses };
     expect((await (await handle(view("Bearer s3cret"), opts)).json()).count).toBe(2);
     expect((await handle(view("Bearer nope"), opts)).status).toBe(401);
+  });
+
+  it("keeps the filings list's Call today candidates and serves them", async () => {
+    const s = memory();
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const calls = filingsCalls([
+      { company_number: "01", turnover_gbp: "30000000", filed_fx_score: 60, rank_score: 60, fx_gain_loss_gbp: "-1000" },
+      { company_number: "02", turnover_gbp: "30000000", filed_fx_score: 90, rank_score: 90, triggers: "new charge (2026-08)" },
+      { company_number: "03", turnover_gbp: "30000000", filed_fx_score: 90, fx_gain_loss_gbp: "5000" },          // no loss, no trigger
+      { company_number: "04", turnover_gbp: "500000000", filed_fx_score: 90, triggers: "x" },                      // above the band
+      { company_number: "05", turnover_gbp: "30000000", filed_fx_score: 40, triggers: "x" },                       // weak proof
+    ]);
+    expect(calls.map((r) => r.company_number)).toEqual(["02", "01"]);
+    s.blobs["filings/calls"] = { made_at: "x", count: 2, rows: calls };
+    const res = await handle(new Request("https://x/api/accounts?view=calls", { headers: { authorization: "Bearer s3cret" } }), opts);
+    expect((await res.json()).count).toBe(2);
   });
 
   it("keeps the Email generator's companies on the site: add, edit, reset, remove", async () => {

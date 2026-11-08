@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -304,5 +304,47 @@ describe("freshness strip", () => {
     expect(lines[1].text).toBe("last run failed 46h ago · last good 3 days ago");
     expect(searchAllowance(status)).toBe("Tavily 812 of 1,000 · Serper 40 used (no cap)");
     expect(searchAllowance({})).toBe("");
+  });
+  it("turns the finder amber when contact searches are blocked, saying why", () => {
+    const finder = { at: "2026-11-08T21:00:00Z", state: "ok", last_ok: "2026-11-08T21:00:00Z", search_waiting: 1296, search_problems: [
+      { name: "search1api", why: "HTTP 401 (Unauthorized: Invalid bearer credential)" },
+      { name: "tavily", why: "monthly allowance of 1,000 used" },
+      { name: "serper", why: "3 temporary failures in a row (last: HTTP 400 (Not enough credits))" }] };
+    const [line] = statusLines({ jobs: { finder } }, now);
+    expect(line.level).toBe("stale");
+    expect(line.text).toBe("updated 11h ago · contact searches blocked (1,296 waiting): Search1api key rejected · Tavily month's allowance used · Serper out of credits");
+    expect(line.note).toContain("search1api: HTTP 401");
+    expect(searchBlocked({ search_problems: [] })).toBe("");
+  });
+});
+
+describe("Call today", () => {
+  const today = new Date("2026-11-09");
+  const list = [
+    { company_number: "L1", company_name: "LOSS LTD", turnover_gbp: "40000000", filed_fx_score: 70, recent_fx_loss: "£200,000 FX loss, accounts filed 2026-10-01",
+      fx_gain_loss_gbp: "-200000", accounts_filed_on: "2026-10-01", finance_contact: "Jane Smith", finance_contact_role: "Finance Director", finance_contact_confidence: "Verified" },
+    { company_number: "L2", company_name: "TRIGGER LTD", turnover_gbp: "90000000", filed_fx_score: 120, triggers: "new owner Acme Bidco Limited (2026-03) | new charge (2026-08)" },
+    { company_number: "L3", company_name: "BIG LTD", turnover_gbp: "400000000", filed_fx_score: 120, triggers: "new charge (2026-08)" },
+    { company_number: "L4", company_name: "WEAK LTD", turnover_gbp: "40000000", filed_fx_score: 30, recent_fx_loss: "x" },
+    { company_number: "L5", company_name: "QUIET LTD", turnover_gbp: "40000000", filed_fx_score: 90 },
+    { company_number: "L6", company_name: "OUT LTD", turnover_gbp: "40000000", filed_fx_score: 90, triggers: "t", qualified: "Out" },
+  ];
+  const filings = [
+    { company_number: "F1", company_name: "FILED LTD", turnover_gbp: "30000000", filed_fx_score: 100, fx_gain_loss_gbp: "-80000", filed: "2026-09-15" },
+    { company_number: "F2", company_name: "OLD LOSS LTD", turnover_gbp: "30000000", filed_fx_score: 100, fx_gain_loss_gbp: "-80000", filed: "January 2026" },
+    { company_number: "L1", company_name: "LOSS LTD", turnover_gbp: "40000000", filed_fx_score: 70, fx_gain_loss_gbp: "-200000", filed: "2026-10-01" },
+  ];
+  it("keeps £20m–£300m, strong FX proof, a recent loss or trigger; confirmed contacts first; says why", () => {
+    const rows = callToday(list, filings, { today });
+    expect(rows.map((r) => r.company_number)).toEqual(["L1", "L2", "F1"]);   // L1 has a Verified FD; then by score
+    expect(rows[0].why[0]).toBe("FX loss of £200k in accounts filed 1 Oct 2026");
+    expect(rows[1].why[0]).toBe("new owner Acme Bidco Limited (2026-03)");
+    expect(rows[2].onList).toBe(false);
+    expect(callToday(list, filings, { today, max: 1 })).toHaveLength(1);
+  });
+  it("gives one copy-ready cell: company and finance director, or who to ask for", () => {
+    expect(companyAndFd(list[0])).toBe("LOSS LTD – Jane Smith, Finance Director");
+    expect(companyAndFd({ company_name: "X LTD" })).toBe("X LTD – ask for the Finance Director");
+    expect(companyAndFd({ company_name: "Y LTD", no_fd_likely: "yes", finance_contact: "A B", finance_contact_confidence: "Guess" })).toBe("Y LTD – ask for the Managing Director");
   });
 });
