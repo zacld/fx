@@ -103,7 +103,13 @@ def main() -> None:
         print(f"  {key}: {value:,}")
     print(f"  searches answered this month, by provider: {profiles.usage()}")
     with open("search_allowance.json", "w", encoding="utf-8") as f:   # the Accounts page's freshness strip
-        json.dump({"search": profiles.allowance(), "search_month": time.strftime("%Y-%m", time.gmtime())}, f)
+        # Contact searches blocked (every provider's key rejected, out of credits or allowance used) while sized
+        # companies still wait: the strip turns amber and says why, instead of the run reading "ok".
+        problems = profiles.search_problems()
+        waiting = int(stats.get("to check: filed turnover passes", 0)) - int(stats.get("checked: filed turnover passes", 0))
+        json.dump({"search": profiles.allowance(), "search_month": time.strftime("%Y-%m", time.gmtime()),
+                   "search_problems": problems if problems and waiting > 0 else [],
+                   "search_waiting": max(0, waiting)}, f)
     for name, why in profiles.left_out().items():
         print(f"  search API {name} left out this run: {why}")
     print(f"Output: {args.output}")

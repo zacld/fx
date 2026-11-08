@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { emailDraft } from "./email.js";
 import { applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
@@ -245,7 +245,7 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const blob = new Blob([toCsv(visible.map((r) => ({ ...r, notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text })))], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([toCsv(visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text })))], { type: "text/csv;charset=utf-8" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `fx-accounts-${new Date().toISOString().slice(0, 10)}.csv` });
     a.click();
     URL.revokeObjectURL(a.href);
@@ -274,6 +274,11 @@ function Accounts({ data, password }) {
 
       <div className="controls">
         <div className="tabs" role="tablist">
+          <button role="tab" aria-selected={filters.view === "calls"} className={`tab calls-tab${filters.view === "calls" ? " on" : ""}`}
+                  title={`Today's ${CALL_TODAY_MAX}: £20m–£300m, strong FX proof, a recent FX loss or a trigger — confirmed contacts first`}
+                  onClick={() => set({ section: "", view: "calls" })}>
+            Call today
+          </button>
           {["", ...(data.sections || [])].map((s) => {
             const on = !filters.view && filters.section === s;
             return (
@@ -301,7 +306,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -335,7 +340,8 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
+      {filters.view === "calls" ? <CallToday password={password} listRows={open} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
+       : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
       <div className="list">
@@ -762,12 +768,12 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
 }
 
 // The FX losses shown, for a spreadsheet: the loss and its context, the finance contact, and the email draft.
-const LOSS_EXPORT = ["company_name", "company_number", "on_list", "fx_loss_gbp", "fx_prior_gbp", "share_of_turnover", "turnover_gbp",
+const LOSS_EXPORT = ["company_and_fd", "company_name", "company_number", "on_list", "fx_loss_gbp", "fx_prior_gbp", "share_of_turnover", "turnover_gbp",
   "filed", "hedging", "currency", "turnover_regions", "incumbent_bank", "finance_contact", "finance_contact_role",
   "finance_contact_confidence", "accounts_url", "email_draft"];
 function exportLosses(rows) {
   const out = rows.map((r) => ({
-    company_name: r.company_name, company_number: r.company_number, on_list: r.onList ? "yes" : "",
+    company_and_fd: companyAndFd(r), company_name: r.company_name, company_number: r.company_number, on_list: r.onList ? "yes" : "",
     fx_loss_gbp: Math.round(r.loss), fx_prior_gbp: r.prior ?? "", share_of_turnover: r.share !== null ? `${(r.share * 100).toFixed(1)}%` : "",
     turnover_gbp: r.turnover_gbp || "", filed: r.filedOn, hedging: r.fx_forwards || r.fx_today || "none named in the accounts",
     currency: r.currencies_in_accounts || r.main_currency || "", turnover_regions: r.turnover_regions || "",
@@ -777,6 +783,87 @@ function exportLosses(rows) {
   }));
   const blob = new Blob([toCsv(out, LOSS_EXPORT)], { type: "text/csv;charset=utf-8" });
   const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `fx-losses-${new Date().toISOString().slice(0, 10)}.csv` });
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// The Call today tab: the day's shortlist (format.js callToday) across your Accounts list and the Recent FX filings
+// list — each pick says why today, who to ask for, and links to its accounts. Contacted companies drop off.
+function CallToday({ password, listRows, contacted, onContact, onOpen, onEmail }) {
+  const [filingRows, setFilingRows] = useState(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}?view=calls`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then(async (res) => { const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`); return body; })
+      .then((body) => { if (live) setFilingRows(body.rows || []); })
+      .catch((e) => { if (live) { setError(e.message === "Failed to fetch" ? "Couldn't reach the site — check your connection." : e.message); setFilingRows([]); } });
+    return () => { live = false; };
+  }, [password]);
+  const rows = useMemo(() => callToday(listRows, (filingRows || []).filter((r) => !contacted[r.company_number])),
+                       [listRows, filingRows, contacted]);
+  if (filingRows === null) return <div className="list"><div className="empty">Picking today's calls…</div></div>;
+  return (
+    <div className="list">
+      {error && <div className="save-error" role="alert">The Recent FX filings list couldn't load ({error}); today's picks are from your Accounts list only.</div>}
+      <div className="filters filings-bar">
+        <span className="muted">Today's {rows.length}: turnover £20m–£300m, filed FX proof {CALL_RULES.minScore}+, and an FX loss of
+          £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Confirmed finance contacts first. Mark one Contacted and the next moves up.</span>
+        <button className="btn-sm export" onClick={() => exportCalls(rows)} disabled={!rows.length}>Export CSV ({rows.length})</button>
+      </div>
+      {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} />)}
+      {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or Recent FX filings tabs.</div>}
+    </div>
+  );
+}
+
+function CallCard({ r, n, onOpen, onEmail, onContact }) {
+  const open = (e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } };
+  return (
+    <article className="card loss-card">
+      <div className="card-top">
+        <div className="card-name">
+          <span className="call-n">{n}</span>
+          {r.onList
+            ? <a className="co" href={companyPath(r.company_number)} onClick={open}>{r.company_name}</a>
+            : <a className="co" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer" title="Open on Companies House">{r.company_name}</a>}
+          {r.onList ? <span className="chip own">On your Accounts list</span> : <span className="chip">From Recent FX filings</span>}
+        </div>
+        <div className="loss-fig"><b className="call-turnover">{money(r.turnover_gbp)}</b><span className="muted">turnover{r.turnover_basis === "group" ? " (group)" : ""}</span></div>
+      </div>
+      <ul className="call-why">
+        {r.why.map((w) => <li key={w}>{w}</li>)}
+      </ul>
+      <div className="loss-facts">
+        {presentedContact(r)
+          ? <span><span className="fxl">Ask for</span> {r.finance_contact}{r.finance_contact_role ? ` · ${r.finance_contact_role}` : ""}{r.finance_contact_confidence ? ` (${r.finance_contact_confidence})` : ""}</span>
+          : <span><span className="fxl">Ask for</span> {askFor(r).replace(/^Ask for /, "")} <em>— no one confirmed</em> · <a href={r.fd_search_url || googleFd(r)} target="_blank" rel="noreferrer">Google the FD ↗</a></span>}
+        {r.incumbent_bank && <span><span className="fxl">Bank</span> {r.incumbent_bank.split(":")[0]}</span>}
+        <span><Src href={r.fx_gain_loss_url || r.accounts_url} title="Open the accounts">Accounts ↗</Src></span>
+      </div>
+      <div className="card-foot">
+        {r.onList && <a className="more-btn" href={companyPath(r.company_number)} onClick={open}>Open company page →</a>}
+        <EmailButton r={r} onEmail={onEmail} />
+        {r.onList && <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>}
+      </div>
+    </article>
+  );
+}
+
+// Today's list for a spreadsheet: the copy-ready company + finance contact first, then why, who and where.
+const CALL_EXPORT = ["company_and_fd", "rank", "company_name", "company_number", "on_list", "why_today", "turnover_gbp", "filed_fx_score",
+  "finance_contact", "finance_contact_role", "finance_contact_confidence", "incumbent_bank", "accounts_url", "companies_house_url", "email_draft"];
+function exportCalls(rows) {
+  const out = rows.map((r, i) => ({
+    company_and_fd: companyAndFd(r), rank: i + 1, company_name: r.company_name, company_number: r.company_number,
+    on_list: r.onList ? "yes" : "", why_today: r.why.join(" | "), turnover_gbp: r.turnover_gbp || "", filed_fx_score: r.filed_fx_score || "",
+    finance_contact: presentedContact(r) ? r.finance_contact : "", finance_contact_role: presentedContact(r) ? r.finance_contact_role || "" : "",
+    finance_contact_confidence: presentedContact(r) ? r.finance_contact_confidence || "" : "",
+    incumbent_bank: (r.incumbent_bank || "").split(":")[0], accounts_url: r.fx_gain_loss_url || r.accounts_url || "",
+    companies_house_url: chCompanyUrl(r.company_number), email_draft: emailDraft(r).text,
+  }));
+  const blob = new Blob([toCsv(out, CALL_EXPORT)], { type: "text/csv;charset=utf-8" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `call-today-${new Date().toISOString().slice(0, 10)}.csv` });
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -1236,6 +1323,11 @@ a.co:hover{color:#34D399}
 .loss-fig b{color:#f87171;font-size:16px}
 .loss-facts{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:13px;color:rgba(255,255,255,.75)}
 .loss-facts em{color:rgba(255,255,255,.45)}
+.calls-tab{border-color:rgba(245,158,11,.35);color:#FBBF24}
+.calls-tab.on{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.45);color:#FBBF24}
+.call-n{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:12px;background:rgba(245,158,11,.15);color:#FBBF24;font:700 12px 'Inter',sans-serif;margin-right:8px}
+.call-turnover{color:#e5e7eb !important}
+.call-why{margin:8px 0 0;padding-left:18px;font-size:13px;color:rgba(255,255,255,.85);line-height:1.5}
 .email-btns{display:flex;gap:8px;flex-wrap:wrap}
 .email-edit{width:100%;box-sizing:border-box;margin-top:10px;padding:12px;font:14px/1.55 inherit;font-family:inherit;resize:vertical;white-space:pre-wrap}
 .email-gaps{margin-top:8px;font-size:12px;color:#fbbf24}

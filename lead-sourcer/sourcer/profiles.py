@@ -229,6 +229,26 @@ def left_out() -> dict:
     return dict(_why)
 
 
+def search_problems() -> list[dict]:
+    """
+    [{name, why}] for each provider with a key that can't search now: dropped this run (a rejected key, no credits,
+    repeated failures) or its monthly allowance used. Empty when at least one could still search — then nothing is
+    blocked, a used-up allowance is just the next provider's turn.
+    """
+    problems, usable = [], False
+    for name, var, cap_var, default_cap, *_ in PROVIDERS:
+        if not os.environ.get(var, "").strip():
+            continue
+        cap = int(os.environ.get(cap_var, default_cap))
+        if name in _why:
+            problems.append({"name": name, "why": _why[name]})
+        elif cap and usage().get(name, 0) >= cap:
+            problems.append({"name": name, "why": f"monthly allowance of {cap:,} used"})
+        else:
+            usable = True
+    return [] if usable else problems
+
+
 def check_providers(query: str = "Companies House") -> dict:
     """
     {provider: "ok (N results)" or why not} — one search each with every

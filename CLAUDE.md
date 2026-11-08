@@ -377,6 +377,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Contact routes and email drafts:** in scope until Cognism arrives
   (mid-November 2026). Generic company emails only (Priority 12), and
   rule-based drafts (Priority 1: no per-lead AI calls).
+- **Call today tab** (Accounts page, first tab; `callToday` / `CALL_RULES` in `format.js`): the day's 25 across the
+  Accounts list and the Recent FX filings list (its candidates precomputed at save as `filings/calls`, `filingsCalls`
+  in `api/accounts.mjs`, GET `/api/accounts?view=calls`): turnover £20m–£300m (filed or group), filed FX proof 50+, not
+  qualified Out, and an FX loss of £50k+ in accounts filed in the last 6 months or a trigger; confirmed finance
+  contacts first, then likely, then "ask for the FD", each by FX proof (owned abroad lower) + 30 for the loss + 15 for
+  a trigger. Every pick lists why; Contacted drops it and the next moves up; CSV export. Every CSV export (Accounts,
+  FX losses, Call today) starts with `company_and_fd` (`companyAndFd`): "ACME LIMITED – Jane Smith, Finance
+  Director", or "ACME LIMITED – ask for the Finance Director" — one cell to copy.
 - **FX losses tab** (Accounts page; the "Recent FX loss" figure at the top opens it; Contacted button and CSV export
   with each company's email draft; `lossRows` / `filterLosses` / `sortLosses` in `format.js`): every company whose
   latest accounts show an FX loss — the main list's (finance contact, company page) and the Recent FX filings list's
@@ -404,7 +412,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   workflow's last outcome — Accounts list (finder), FX filings, Market moves, Accuracy audit — ok, stale (older than
   its cadence: 30h / 80h / 80h / 8 days) or failed with a link to the run, and the contact searches left this month.
   Each workflow's last step records it (`apps/web/scripts/status.mjs`, store key `status`, `recordStatus`); a run
-  that dies part-way shows red here instead of passing unnoticed. The accuracy audit runs weekly on its own (Sunday,
+  that dies part-way shows red here instead of passing unnoticed. When the finder's contact searches are blocked — every search
+  provider with a key rejected (401/403), out of credits or its month's allowance used — while sized companies still
+  wait, the finder line turns amber and says why ("contact searches blocked (1,296 waiting): Search1api key rejected ·
+  Serper out of credits"; `profiles.search_problems` → `search_allowance.json` → `searchBlocked` in `format.js`). The accuracy audit runs weekly on its own (Sunday,
   "FX filings cross-check": a fresh 200-filing draw, `reader_audit.py --strict` fails the run on any broken rule).
   A chained backfill or rescan keeps `chain_left` in the filings list, so a link dropped from GitHub's queue (a newer
   waiting run replaces an older one) is restarted by the next daily scan.

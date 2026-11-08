@@ -1884,6 +1884,17 @@ class TestConfirmation(unittest.TestCase):
                                  "google.serper.dev"])
         self.assertEqual(profiles.usage(), {"tavily": 1, "serper": 1})  # only answered searches count
 
+    def test_search_problems_only_when_no_provider_can_search(self):
+        # The Accounts page's strip turns amber only when every provider with a key is stuck: a rejected key, no
+        # credits or the month's allowance used. While one can still search, nothing is blocked.
+        env = {"SEARCH1API_KEY": "a", "TAVILY_API_KEY": "b", "TAVILY_MONTHLY": "1"}
+        with mock.patch.dict(os.environ, env), mock.patch.object(profiles, "_failed", {"search1api"}), \
+                mock.patch.object(profiles, "_why", {"search1api": "HTTP 401 (Unauthorized)"}):
+            self.assertEqual(profiles.search_problems(), [])
+            profiles._count("tavily")
+            self.assertEqual(profiles.search_problems(), [{"name": "search1api", "why": "HTTP 401 (Unauthorized)"},
+                                                          {"name": "tavily", "why": "monthly allowance of 1 used"}])
+
     def test_flaky_provider_still_fills_the_daily_budget(self):
         rnd = random.Random(3)
 
