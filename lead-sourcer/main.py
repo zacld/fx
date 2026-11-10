@@ -187,6 +187,12 @@ CSV_FIELDS = [
     "group_fx_score",
     "group_fx_url",
     "run_from_abroad",
+    "reporting_currency",
+    "reporting_currency_evidence",
+    "subsidiaries_abroad",
+    "subsidiaries_abroad_evidence",
+    "fx_borrowings",
+    "fx_borrowings_evidence",
 ]
 
 _HERE = os.path.dirname(os.path.abspath(__file__))

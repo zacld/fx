@@ -362,6 +362,10 @@ describe("Call today", () => {
       "Latest accounts filed 1 Jun 2025 — look for newer ones",
       "2 group companies on your list — one call for the group"]);
     expect(reasonsNotToProgress({ turnover_gbp: "40000000" }).filter((x) => x.serious).map((x) => x.text)).toEqual(["No FX in its filed accounts"]);
+    const usd = { turnover_foreign_gbp: "60000000", reporting_currency: "Accounts kept in dollars (turnover US$77m)", filed_fx_score: 35 };
+    expect(inCoreBand(usd)).toBe(true);
+    expect(reasonsNotToProgress(usd).map((x) => x.text)).toEqual(["Turnover filed in another currency — the £ size is an estimate at a rough rate"]);
+    expect(leadChecklist(usd)[1].detail).toBe("≈£60.0m (filed in dollars)");
     const held = { ...list[1], company_number: "L9", turnover_check: "x", qualified: "Out" };
     expect(callToday([held], [], { today })).toEqual([]);
   });
