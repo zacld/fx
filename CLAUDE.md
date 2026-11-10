@@ -444,6 +444,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   discovery (`discoveries`, filed FX score 60) that the finder checks first (`DISCOVERIES_FILE`, merged into
   `priority_from_filings`). Hot alerts go to Telegram as found and the last 24 hours as a morning summary, when
   `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` are set (Zac's own chat; nothing to prospects). Counts only in the log.
+- **Look** (Nov 2026: "clean dark theme, Google-Sheet professional vibe, finances Zint-style"): neutral dark greys,
+  gridlines, flat panels, tabular figures (the theme block at the end of `CSS` in `AccountsApp.jsx`). The Accounts list
+  defaults to a **Sheet** — a dense sortable grid (`SHEET_COLUMNS` in `format.js`: company, turnover, growth, FX proof,
+  FX gain/loss, currencies, how they do FX, finance contact, grade, bank, trigger; sticky header and company column,
+  row numbers) — with a Cards toggle (remembered in the browser). The company page leads with **finance charts**
+  (`FinanceCharts`: size on a £1m–£1bn log scale with the £20m–£300m band shaded, turnover this year v last, sales by
+  region, FX gain/loss this year v last on the diverging blue/red pair, balance sheet) — plain SVG, every bar labelled
+  and titled; colours validated for the dark surface (dataviz skill).
 - **Freshness strip** (top of the Accounts page; `statusLines` / `searchAllowance` in `format.js`): each data
   workflow's last outcome — Accounts list (finder), FX filings, Market moves, Accuracy audit — ok, stale (older than
   its cadence: 30h / 80h / 80h / 8 days) or failed with a link to the run, and the contact searches left this month.

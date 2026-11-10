@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { applyEmail } from "../../api/accounts.mjs";
@@ -106,6 +106,9 @@ function Accounts({ data, password }) {
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false });
   const [sort, setSort] = useState("hot");
+  // Sheet (a dense, sortable grid) or Cards; remembered in this browser
+  const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
+  const pickLayout = (v) => { setLayout(v); try { localStorage.setItem("fx-layout", v); } catch { /* storage off */ } };
   const [shown, setShown] = useState(PAGE);
   const [notes, setNotes] = useState(data.notes || {});
   const [checks, setChecks] = useState(data.checks || {});
@@ -354,6 +357,11 @@ function Accounts({ data, password }) {
           <label className="check"><input type="checkbox" checked={filters.fdOnly} onChange={(e) => set({ fdOnly: e.target.checked })} /> FD named</label>
           <label className="check"><input type="checkbox" checked={filters.triggersOnly} onChange={(e) => set({ triggersOnly: e.target.checked })} /> Triggers</label>
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>
+          <div className="seg" role="group" aria-label="Layout">
+            {[["sheet", "Sheet"], ["cards", "Cards"]].map(([v, label]) => (
+              <button key={v} aria-pressed={layout === v} className={layout === v ? "on" : ""} onClick={() => pickLayout(v)}>{label}</button>
+            ))}
+          </div>
           <button className="btn-sm export" onClick={exportCsv} disabled={!visible.length}>Export Excel ({visible.length})</button>
           <button className="btn-sm" onClick={() => downloadCognism(visible, "accounts")} disabled={!visible.length}
                   title="Company, domain, postcode and the finance contact's first / last name — the columns Cognism matches on">Export for Cognism</button>
@@ -369,7 +377,10 @@ function Accounts({ data, password }) {
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
       <div className="list">
         {saveError && <div className="save-error" role="alert">{saveError}</div>}
-        {visible.slice(0, shown).map((r, i, list) => {
+        {layout === "sheet" && visible.length > 0 && (
+          <SheetView rows={visible.slice(0, shown)} onOpen={openCompany} contacted={contacted} />
+        )}
+        {layout !== "sheet" && visible.slice(0, shown).map((r, i, list) => {
           const group = groupOf ? groupOf(r) : "";
           const heading = groupOf && (i === 0 || groupOf(list[i - 1]) !== group);
           return (
@@ -810,6 +821,128 @@ function exportLosses(rows) {
                 `fx-losses-${new Date().toISOString().slice(0, 10)}.xlsx`, "FX losses");
 }
 
+// The list as a sheet: a dense grid, sticky header and company column, row numbers, click a header to sort (again
+// to reverse), click a company to open its page. The same rows and filters as the cards.
+function SheetView({ rows, onOpen, contacted }) {
+  const [by, setBy] = useState("");
+  const [desc, setDesc] = useState(false);
+  const sorted = useMemo(() => {
+    if (!by) return rows;
+    const col = SHEET_COLUMNS.find(([k]) => k === by);
+    const key = col[3];
+    const out = [...rows].sort((a, b) => { const x = key(a), y = key(b); return x < y ? -1 : x > y ? 1 : 0; });
+    return desc ? out.reverse() : out;
+  }, [rows, by, desc]);
+  const sortBy = (k) => { if (by === k) setDesc(!desc); else { setBy(k); setDesc(false); } };
+  const open = (n) => (e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
+  return (
+    <div className="sheet-wrap">
+      <table className="sheet">
+        <thead>
+          <tr>
+            <th className="rownum" aria-label="Row" />
+            {SHEET_COLUMNS.map(([k, header, , , num]) => (
+              <th key={k} className={`${num ? "num" : ""}${k === "company" ? " sticky-col" : ""}`} aria-sort={by === k ? (desc ? "descending" : "ascending") : "none"}>
+                <button onClick={() => sortBy(k)}>{header}{by === k ? (desc ? " ▾" : " ▴") : ""}</button>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((r, i) => (
+            <tr key={r.company_number || i} className={contacted[r.company_number] ? "done" : ""}>
+              <td className="rownum">{i + 1}</td>
+              {SHEET_COLUMNS.map(([k, , value, , num]) => {
+                const v = value(r);
+                return k === "company"
+                  ? <td key={k} className="sticky-col"><a href={companyPath(r.company_number)} onClick={open(r.company_number)}>{v}</a></td>
+                  : <td key={k} className={`${num ? "num" : ""}${k === "fxloss" && Number(r.fx_gain_loss_gbp) < 0 ? " neg" : ""}${k === "fxloss" && Number(r.fx_gain_loss_gbp) > 0 ? " pos" : ""}`}
+                        title={typeof v === "string" && v.length > 28 ? v : undefined}>{v}</td>;
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Zint-style figures on the company page: where its size sits against the desk's band, turnover this year v last,
+// sales by region, the FX gain/loss this year v last, and the balance sheet. Plain SVG; every bar labelled and
+// titled (hover) — one series each, so no legend; gains and losses on the diverging pair (blue / red).
+const fmtShort = (n) => money(n);
+function SizeBar({ r }) {
+  const value = Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0;
+  const x = sizePosition(value);
+  const [lo, hi] = [sizePosition(20e6), sizePosition(300e6)];
+  const ticks = [1e6, 1e7, 1e8, 1e9];
+  return (
+    <figure className="viz">
+      <figcaption>Company size <span>turnover on a £1m–£1bn scale · shaded: the desk's £20m–£300m band</span></figcaption>
+      <svg viewBox="0 0 400 54" className="viz-svg" role="img" aria-label={`Turnover ${money(value)} against the £20m–£300m band`}>
+        <rect x="0" y="18" width="400" height="10" rx="5" className="track" />
+        <rect x={lo * 400} y="18" width={(hi - lo) * 400} height="10" className="band"><title>£20m–£300m: the desk's sweet spot</title></rect>
+        {ticks.map((t) => <text key={t} x={sizePosition(t) * 400} y="46" className="tick" textAnchor={t === 1e6 ? "start" : t === 1e9 ? "end" : "middle"}>{money(t).replace(".0", "")}</text>)}
+        {x !== null && <g><circle cx={x * 400} cy="23" r="7" className="marker"><title>{`${money(value)}${r.turnover_gbp ? "" : " (estimate)"}`}</title></circle>
+          <text x={Math.min(Math.max(x * 400, 30), 370)} y="11" className="lbl" textAnchor="middle">{money(value)}{r.turnover_gbp ? "" : " est."}</text></g>}
+      </svg>
+    </figure>
+  );
+}
+
+function Bars({ title, note, items, diverging = false }) {
+  // items: [{label, value}] — horizontal bars from a shared zero
+  const shown = items.filter((i) => Number.isFinite(i.value) && i.value !== 0);
+  if (!shown.length) return null;
+  const max = Math.max(...shown.map((i) => Math.abs(i.value)));
+  const hasNeg = diverging && shown.some((i) => i.value < 0);
+  const zero = hasNeg ? 240 : 110;   // gains and losses: a label column, then bars either side of zero
+  const span = hasNeg ? 115 : 250;
+  const rowH = 26;
+  return (
+    <figure className="viz">
+      <figcaption>{title}{note && <span>{note}</span>}</figcaption>
+      <svg viewBox={`0 0 400 ${shown.length * rowH + 6}`} className="viz-svg" role="img" aria-label={title}>
+        {hasNeg && <line x1={zero} x2={zero} y1="0" y2={shown.length * rowH + 6} className="axis" />}
+        {shown.map((i, n) => {
+          const w = Math.max(2, (Math.abs(i.value) / max) * span);
+          const y = n * rowH + 4;
+          const neg = i.value < 0;
+          const x = neg ? zero - w : zero;
+          return (
+            <g key={i.label}>
+              <text x={hasNeg ? 4 : zero - 8} y={y + 13} className="cat" textAnchor={hasNeg ? "start" : "end"}>{i.label}</text>
+              <rect x={x} y={y + 2} width={w} height="16" rx="4" className={diverging ? (neg ? "neg" : "pos") : "bar"}><title>{`${i.label}: ${neg ? "−" : ""}${fmtShort(Math.abs(i.value))}`}</title></rect>
+              {/* a loss's figure sits just right of zero, clear of the labels */}
+              <text x={neg ? zero + 6 : x + w + 6} y={y + 14} className="val" textAnchor="start">{neg ? "−" : ""}{fmtShort(Math.abs(i.value))}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </figure>
+  );
+}
+
+function FinanceCharts({ r }) {
+  const years = turnoverYears(r);
+  const regions = regionBars(r).slice(0, 6);
+  const fx = Number(r.fx_gain_loss_gbp);
+  const fxPrior = Number(r.fx_gain_loss_prior_gbp);
+  const balance = [["Cash", Number(r.cash_gbp)], ["Bank borrowings", Number(r.bank_borrowings_gbp)], ["Net assets", Number(r.net_assets_gbp)]]
+    .map(([label, value]) => ({ label, value }));
+  return (
+    <section className="panel viz-grid">
+      <SizeBar r={r} />
+      <Bars title="Turnover" note={years.growth !== null ? `${years.growth > 0 ? "+" : ""}${years.growth}% on last year` : "this year"}
+            items={[{ label: "Last year", value: years.prior }, { label: "This year", value: years.now }]} />
+      <Bars title="Sales by region" note="from the turnover note" items={regions.map((x) => ({ label: x.region, value: x.value }))} />
+      <Bars title="FX gain / loss" note="blue gain · red loss" diverging
+            items={[{ label: "Last year", value: Number.isFinite(fxPrior) ? fxPrior : 0 }, { label: "This year", value: Number.isFinite(fx) ? fx : 0 }]} />
+      <Bars title="Balance sheet" note="latest accounts" items={balance} diverging />
+    </section>
+  );
+}
+
 // The Alerts tab: what changed at the companies on your lists (tools/ch_alerts.py, every 3 hours from Companies
 // House's streaming feeds) — hot ones first — and new leads found by a charge to an FX provider or for trade finance.
 const ALERT_FILTERS = [["", "All"], ["hot", "Hot"], ["new_fd", "New FD"], ["charges", "Charges"], ["owners", "Owners"], ["directors", "Directors"]];
@@ -1219,6 +1352,8 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
         </section>
       )}
 
+      <FinanceCharts r={r} />
+
       <section className="panel">
         <h2 className="panel-h">Lead checklist</h2>
         <LeadCheck r={r} checks={checks} onCrm={onCrm} />
@@ -1485,4 +1620,67 @@ a.chip.src:hover{filter:brightness(1.25)}
 .empty{padding:40px;text-align:center;color:rgba(255,255,255,.35)}
 .more{align-self:center}
 @media(max-width:700px){.tb,.stats,.controls,.list,.page{padding-left:16px;padding-right:16px}.tb-logo{font-size:0;gap:0}.tb-mark{font-size:12px}.tb-r{gap:6px}.tb .btn-sm{padding:6px 9px}.tb-tag,.tb-time{display:none}.links{margin-left:0}.export{margin-left:0}}
+
+/* ---- Theme (Nov 2026): clean, dark, spreadsheet-like — neutral greys, gridlines, flat panels, tabular figures ---- */
+:root{--bg:#18191b;--surface:#1f2023;--surface-2:#26282b;--head:#232427;--line:#34363a;--line-soft:#2a2c2f;
+  --text:#e8eaed;--text-2:#bdc1c6;--muted:#9aa0a6;--accent:#8ab4f8;--series:#3987e5;--gain:#3987e5;--loss:#e66767;
+  --good:#81c995;--warn:#fdd663}
+body{background:var(--bg);color:var(--text);font-feature-settings:"tnum" 1}
+.tb{background:rgba(24,25,27,.96);border-bottom:1px solid var(--line);backdrop-filter:none}
+.stats{background:var(--surface);border-bottom:1px solid var(--line)}
+.stat{border-right:1px solid var(--line-soft)}
+.card,.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:none}
+.card:hover{border-color:#44474c}
+.tab{border-radius:4px;border-color:var(--line);color:var(--text-2)}
+.tab.on{background:#2d3a4d;border-color:#41546f;color:#d2e3fc}
+.chip{border-radius:4px;background:var(--surface-2);color:var(--text-2)}
+.input,select.input{background:var(--surface);border-color:var(--line);border-radius:4px;color:var(--text)}
+.btn-sm{border-radius:4px;background:var(--surface-2);border-color:var(--line);color:var(--text-2)}
+.btn-sm:hover{background:#303236;color:var(--text)}
+.grp{border-radius:4px}
+a{color:var(--accent)}
+.muted{color:var(--muted)}
+.list{max-width:1480px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button{background:none;border:0;padding:6px 12px;color:var(--text-2);font:600 12px 'Inter',sans-serif;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:#2d3a4d;color:#d2e3fc}
+/* the sheet */
+.sheet-wrap{overflow:auto;max-height:calc(100vh - 220px);border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.sheet{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px}
+.sheet th,.sheet td{border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:6px 10px;text-align:left;
+  white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.sheet thead th{position:sticky;top:0;z-index:2;background:var(--head);border-bottom:1px solid var(--line);font-weight:600;color:var(--text-2)}
+.sheet thead th button{all:unset;cursor:pointer;display:block;width:100%}
+.sheet thead th button:hover{color:var(--text)}
+.sheet .num{text-align:right;font-variant-numeric:tabular-nums}
+.sheet .rownum{position:sticky;left:0;z-index:1;width:38px;min-width:38px;text-align:center;color:var(--muted);background:var(--head);font-size:11px}
+.sheet thead .rownum{z-index:3}
+.sheet .sticky-col{position:sticky;left:38px;z-index:1;background:var(--surface);font-weight:600;max-width:300px}
+.sheet thead .sticky-col{background:var(--head);z-index:3}
+.sheet tbody tr:hover td{background:#25272a}
+.sheet tbody tr:hover .sticky-col{background:#25272a}
+.sheet tr.done td{opacity:.55}
+.sheet tr.hot td{background:rgba(253,214,99,.06)}
+.sheet td.neg{color:var(--loss)}
+.sheet td.pos{color:var(--good)}
+.sheet a{color:var(--text);text-decoration:none}
+.sheet a:hover{color:var(--accent);text-decoration:underline}
+/* finance charts */
+.viz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px 28px}
+.viz{margin:0}
+.viz figcaption{font:600 13px 'Inter',sans-serif;color:var(--text);margin-bottom:6px}
+.viz figcaption span{font-weight:400;color:var(--muted);margin-left:8px;font-size:12px}
+.viz-svg{width:100%;height:auto;overflow:visible}
+.viz-svg .track{fill:var(--surface-2)}
+.viz-svg .band{fill:rgba(57,135,229,.28)}
+.viz-svg .marker{fill:var(--series);stroke:var(--surface);stroke-width:2}
+.viz-svg .bar,.viz-svg .pos{fill:var(--gain)}
+.viz-svg .neg{fill:var(--loss)}
+.viz-svg .axis{stroke:#5f6368;stroke-width:1}
+.viz-svg text{fill:var(--text-2);font:12px 'Inter',sans-serif}
+.viz-svg .val{fill:var(--text);font-variant-numeric:tabular-nums}
+.viz-svg .lbl{fill:var(--text);font-weight:600}
+.viz-svg .tick{fill:var(--muted);font-size:11px}
+@media(max-width:700px){.sheet-wrap{max-height:none}.viz-grid{grid-template-columns:1fr}}
 `;
