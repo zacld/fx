@@ -401,6 +401,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Contact routes and email drafts:** in scope until Cognism arrives
   (mid-November 2026). Generic company emails only (Priority 12), and
   rule-based drafts (Priority 1: no per-lead AI calls).
+- **Lead score** (Zac's steer, 10 Nov 2026: "recent, FX loss, nice industry, new FD, has subsidiaries — extra points";
+  `leadScore` / `LEAD_POINTS` / `leadLine` / `withLeadScores` in `format.js`): points, each with its reason — strong
+  filed FX proof 20 (some 8), FX loss £50k+ 20 (£250k+ 30) and +10 when those accounts were filed in the last 6 months,
+  accounts filed in the last 90 days 10, new on the list 5, the company's niche by its measured tier (15 / 8 / 3,
+  `nicheTiers` from `niches/stats`), a new finance director 20 (an Alerts `new_fd` / `news_fd` in the last 120 days or
+  a trigger naming one), another change 10 (owner, charges), expanding abroad in the news 8, hiring for treasury / FX 5,
+  subsidiaries abroad 10, £20m–£300m 10, no hedging named 5, owned abroad −10. GET `/api/accounts?view=signals` gives
+  the page the niche tiers and each company's recent alerts. The Accounts list sorts by it by default ("Lead score"),
+  the Sheet has a Score column, cards and Call today show the breakdown, the company page a "Why it ranks" panel, and
+  the exports carry `lead_score` / `lead_reasons`. Call today orders its picks by it. The weights are logged here to be
+  recalibrated against what Sales takes.
 - **Call today tab** (Accounts page, first tab; `callToday` / `CALL_RULES` in `format.js`): the day's 25 across the
   Accounts list and the Recent FX filings list (its candidates precomputed at save as `filings/calls`, `filingsCalls`
   in `api/accounts.mjs`, GET `/api/accounts?view=calls`): turnover £20m–£300m (filed or group), filed FX proof 50+, not

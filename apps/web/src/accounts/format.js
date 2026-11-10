@@ -232,6 +232,7 @@ export function fxFacts(r) {
 // (FX evidence + untapped + triggers + a recent FX loss). FX probably run from an overseas parent: ABROAD_POINTS lower,
 // within its group. Who to ask for is a quick Google: see "Contact confidence".
 export const SORTS = {
+  lead: { label: "Lead score (best first)", key: (r) => -(r.lead_score || 0) * 1e6 + r.rank },
   hot: { label: "Hottest (strongest FX proof)", key: (r) => FX_GROUPS.indexOf(fxGroup(r)) * 1e9 - rankedFx(r) * 1e6 + r.rank },
   rank: { label: "Our score", key: (r) => r.rank },
   // Most senior finance role first (CFO/FD, head of finance, controller, manager…); within a role, hottest first.
@@ -288,7 +289,7 @@ export function cognismRow(r) {
 export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
 
 export const EXPORT_FIELDS = [
-  "company_and_fd", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
+  "company_and_fd", "lead_score", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
   "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
   "finance_contact", "finance_contact_role",
@@ -433,7 +434,7 @@ export function filterLosses(rows, { min = 0, query = "", recentDays = 0, unhedg
 // strongest FX proof (owned abroad lower) plus 30 for the loss and 15 for a trigger. Rule-based, every pick says why.
 export const CALL_TODAY_MAX = 25;
 export const CALL_RULES = { minScore: 50, minLoss: 50000, recentDays: 183, lossPoints: 30, triggerPoints: 15 };
-export function callToday(listRows = [], filingRows = [], { today = new Date(), max = CALL_TODAY_MAX, rules = CALL_RULES } = {}) {
+export function callToday(listRows = [], filingRows = [], { today = new Date(), max = CALL_TODAY_MAX, rules = CALL_RULES, lead = {} } = {}) {
   const since = new Date(today.getTime() - rules.recentDays * 864e5).toISOString().slice(0, 10);
   const numbers = new Set(listRows.map((r) => r.company_number));
   const pick = (r, onList) => {
@@ -451,13 +452,15 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
       `Filed FX proof ${fxScore(r)}${fx ? `: ${fx}` : ""}`,
       r.run_from_abroad && "Owned abroad: pitch the UK team",
     ].filter(Boolean);
-    const score = rankedFx(r) + (recentLoss ? rules.lossPoints : 0) + (trigger ? rules.triggerPoints : 0);
-    return { ...(onList ? r : filingRow(r)), onList, loss, filedOn, why, score, group: CONTACT_GROUPS.indexOf(contactGroup(r)) };
+    const row = onList ? r : filingRow(r);
+    const lead_ = leadScore(row, { ...lead, today });   // the order: the lead score (LEAD_POINTS), its reasons shown
+    return { ...row, onList, loss, filedOn, why, score: lead_.score, lead_score: lead_.score, lead_parts: lead_.parts,
+             group: CONTACT_GROUPS.indexOf(contactGroup(r)) };
   };
   return [...listRows.map((r) => pick(r, true)),
     ...filingRows.filter((r) => !numbers.has(r.company_number)).map((r) => pick(r, false))]
     .filter(Boolean)
-    .sort((a, b) => a.group - b.group || b.score - a.score || a.company_name.localeCompare(b.company_name))
+    .sort((a, b) => b.score - a.score || a.group - b.group || a.company_name.localeCompare(b.company_name))
     .slice(0, max);
 }
 
@@ -619,6 +622,7 @@ export const sizePosition = (gbp) => (gbp > 0 ? Math.min(1, Math.max(0, Math.log
 // The sheet view's columns: [key, header, value(r), sort key(r), number?]
 export const SHEET_COLUMNS = [
   ["company", "Company", (r) => r.company_name, (r) => r.company_name || ""],
+  ["lead", "Score", (r) => (r.lead_score !== undefined ? String(r.lead_score) : ""), (r) => -(r.lead_score || 0), true],
   ["turnover", "Turnover", (r) => (r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""),
    (r) => -(Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0), true],
   ["growth", "Growth", (r) => r.turnover_growth || "", (r) => -(parseFloat(r.turnover_growth) || -1e9), true],
@@ -633,3 +637,71 @@ export const SHEET_COLUMNS = [
   ["bank", "Bank", (r) => (r.incumbent_bank || r.main_bank || "").split(":")[0], (r) => (r.incumbent_bank || r.main_bank || "~").toLowerCase()],
   ["trigger", "Trigger", (r) => parts(r.triggers)[0] || r.recent_fx_loss || "", (r) => (r.triggers || r.recent_fx_loss ? 0 : 1)],
 ];
+
+// --- Lead score: which companies rank first (Zac's steer, 10 Nov 2026) ------------------------------------------------
+// Points, each with its reason, so the order explains itself and the weights can be recalibrated against what Sales
+// takes: an FX loss (bigger and more recent, more), proof of FX in the filings, a measured good niche, a new finance
+// director, other changes (owner, charges, hiring for treasury, expanding abroad), subsidiaries abroad, accounts just
+// filed, new on the list, in the £20m–£300m band, nobody hedging named (probably on the bank's rate). Owned abroad
+// with FX probably run by the parent: fewer. `niches`: {niche name: {tier}} (tools/niche_hits.py, nicheTiers);
+// `signals`: {company number: [{kind, at, title}]} (the Alerts job).
+export const LEAD_POINTS = {
+  strongFx: 20, someFx: 8, band: 10,
+  loss: 20, bigLoss: 30, lossMin: 50000, bigLossMin: 250000, recentLoss: 10, recentDays: 183,
+  justFiled: 10, justFiledDays: 90, newOnList: 5,
+  nicheByTier: [0, 3, 8, 15],
+  newFd: 20, newFdDays: 120, trigger: 10, abroadNews: 8, hiring: 5, signalDays: 120,
+  subsidiaries: 10, open: 5, ownedAbroad: -10,
+};
+const NEW_FD = /\bnew (?:finance director|FD|CFO|chief financial officer)|\b(?:finance director|CFO|chief financial officer)\b[^.;]*\b(?:appointed|joined)/i;
+
+// {niche name: {tier, hit_rate, open_share}} from the measured niches; tiers as the finder's (sourcer/niches.py TIERS).
+export function nicheTiers(stats = {}) {
+  const tierOf = (s) => (s.verdict === "few" ? 1 : s.score >= 8 ? 3 : s.score >= 4 ? 2 : s.score >= 1.5 ? 1 : 0);
+  return Object.fromEntries(Object.values(stats).filter((s) => s?.name).map((s) => [s.name, { ...s, tier: tierOf(s) }]));
+}
+
+export function leadScore(r, { today = new Date(), niches = {}, signals = {}, madeAt = "", rules = LEAD_POINTS } = {}) {
+  const out = [];
+  const add = (points, why) => { if (points) out.push([why, points]); };
+  const day = (n) => new Date(today.getTime() - n * 864e5).toISOString().slice(0, 10);
+  const fx = fxScore(r);
+  add(fx >= 50 ? rules.strongFx : fx > 0 ? rules.someFx : 0, fx >= 50 ? `Strong FX proof in its filings (${fx})` : `Some FX proof (${fx})`);
+  const loss = -Number(r.fx_gain_loss_gbp) || 0;
+  const filedOn = filedIso(r);
+  if (loss >= rules.lossMin) {
+    add(loss >= rules.bigLossMin ? rules.bigLoss : rules.loss, `FX loss of ${money(loss)}`);
+    if (filedOn && filedOn >= day(rules.recentDays)) add(rules.recentLoss, `… in accounts filed ${filedWhen(filedOn)}`);
+  }
+  if (filedOn && filedOn >= day(rules.justFiledDays) && !(loss >= rules.lossMin)) add(rules.justFiled, `Accounts just filed (${filedWhen(filedOn)})`);
+  if (madeAt && r.first_seen === madeAt) add(rules.newOnList, "New on the list");
+  const niche = niches[r.fx_niche];
+  if (niche) add(rules.nicheByTier[niche.tier] || 0, `Niche: ${r.fx_niche} (${niche.hit_rate}% of its companies prove FX)`);
+  const recent = (signals[r.company_number] || []).filter((s) => String(s.at || "").slice(0, 10) >= day(rules.signalDays));
+  const fdSignal = recent.find((s) => /^(new|news)_fd$/.test(s.kind));
+  const triggers = parts(r.triggers);
+  const fdTrigger = [...triggers, r.fact_1, r.fact_2].find((t) => t && NEW_FD.test(t));
+  if (fdSignal || fdTrigger) add(rules.newFd, fdSignal ? `New finance director (${fdSignal.title})` : `New finance director: ${fdTrigger}`);
+  const other = triggers.find((t) => !NEW_FD.test(t)) ||
+    recent.find((s) => /^(new_owner|new_owner_pe|new_charge|charge_paid|fx_charge)$/.test(s.kind))?.title;
+  add(other ? rules.trigger : 0, `Change: ${other}`);
+  const abroad = recent.find((s) => s.kind === "news_abroad");
+  add(abroad ? rules.abroadNews : 0, `In the news: ${abroad?.title || ""}`);
+  const hiring = recent.find((s) => s.kind === "hiring");
+  add(hiring ? rules.hiring : 0, `${hiring?.title || ""}`);
+  add(r.subsidiaries_abroad ? rules.subsidiaries : 0, `Subsidiaries abroad: ${r.subsidiaries_abroad}`);
+  add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
+  add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
+  add(r.run_from_abroad ? rules.ownedAbroad : 0, "Owned abroad: FX may be run by the parent");
+  return { score: out.reduce((n, [, p]) => n + p, 0), parts: out };
+}
+
+// "Lead score 85: FX loss of £320k +30 · … " — the breakdown in one line.
+export const leadLine = (s) => `Lead score ${s.score}: ${s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ")}`;
+
+// Rows with lead_score / lead_parts / lead_reasons attached (sorted by SORTS.lead; lead_reasons for the exports).
+export const withLeadScores = (rows, ctx) => rows.map((r) => {
+  if (r.dropped) return r;
+  const s = leadScore(r, ctx);
+  return { ...r, lead_score: s.score, lead_parts: s.parts, lead_reasons: s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ") };
+});

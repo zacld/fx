@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -334,12 +334,14 @@ describe("Call today", () => {
     { company_number: "F2", company_name: "OLD LOSS LTD", turnover_gbp: "30000000", filed_fx_score: 100, fx_gain_loss_gbp: "-80000", filed: "January 2026" },
     { company_number: "L1", company_name: "LOSS LTD", turnover_gbp: "40000000", filed_fx_score: 70, fx_gain_loss_gbp: "-200000", filed: "2026-10-01" },
   ];
-  it("keeps £20m–£300m, strong FX proof, a recent loss or trigger; confirmed contacts first; says why", () => {
+  it("keeps £20m–£300m, strong FX proof, a recent loss or trigger; highest lead score first; says why", () => {
     const rows = callToday(list, filings, { today });
-    expect(rows.map((r) => r.company_number)).toEqual(["L1", "L2", "F1"]);   // L1 has a Verified FD; then by score
+    expect(rows.map((r) => r.company_number)).toEqual(["L1", "F1", "L2"]);   // by lead score (FX losses score most)
+    expect(rows[0].lead_score).toBeGreaterThanOrEqual(rows[1].lead_score);
+    expect(rows[1].lead_score).toBeGreaterThanOrEqual(rows[2].lead_score);
     expect(rows[0].why[0]).toBe("FX loss of £200k in accounts filed 1 Oct 2026");
-    expect(rows[1].why[0]).toBe("new owner Acme Bidco Limited (2026-03)");
-    expect(rows[2].onList).toBe(false);
+    expect(rows[2].why[0]).toBe("new owner Acme Bidco Limited (2026-03)");
+    expect(rows[1].onList).toBe(false);
     expect(callToday(list, filings, { today, max: 1 })).toHaveLength(1);
   });
   it("fills the lead checklist from the records; CRM checked is a manual tick", () => {
@@ -397,5 +399,40 @@ describe("finance charts", () => {
     expect(turnoverYears({ turnover_gbp: "46000000" }).prior).toBe(0);
     expect([sizePosition(1e6), sizePosition(1e9), sizePosition(5e10), sizePosition(0)]).toEqual([0, 1, 1, null]);
     expect(sizePosition(31.6227766e6)).toBeCloseTo(0.5, 3);
+  });
+});
+
+describe("Lead score", () => {
+  const today = new Date("2026-11-10T12:00:00Z");
+  const niches = nicheTiers({ a: { name: "Nut, seed & dried fruit importers", score: 22.8, hit_rate: 34.8, verdict: "keep" },
+                              b: { name: "Slow niche", score: 1.0, hit_rate: 1.0, verdict: "keep" } });
+  it("adds points for an FX loss, a recent filing, the niche, a new FD, subsidiaries and the band, and says why", () => {
+    const r = { company_number: "N1", filed_fx_score: 60, fx_gain_loss_gbp: "-320000", accounts_filed_on: "2026-10-01",
+      fx_niche: "Nut, seed & dried fruit importers", subsidiaries_abroad: "Spain (EUR)", turnover_gbp: "45000000", fx_today: "Doesn't hedge" };
+    const signals = { N1: [{ kind: "news_fd", at: "2026-11-01T07:00:00", title: "In the news: new finance director" }] };
+    const s = leadScore(r, { today, niches, signals });
+    expect(Object.fromEntries(s.parts.map(([why, p]) => [why.split(" (")[0].split(":")[0], p]))).toEqual({
+      "Strong FX proof in its filings": 20, "FX loss of £320k": 30, "… in accounts filed 1 Oct 2026": 10, "Niche": 15,
+      "New finance director": 20, "Subsidiaries abroad": 10, "Turnover £20m–£300m": 10, "No hedging named — probably on the bank's rate": 5 });
+    expect(s.score).toBe(120);
+    expect(leadLine(s)).toMatch(/^Lead score 120: Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
+  });
+  it("counts a new FD from the triggers, other changes once, and owned abroad lower", () => {
+    const r = { company_number: "N2", filed_fx_score: 20, triggers: "New finance director appointed 2026-10-12 | new charge to HSBC (2026-09)",
+      run_from_abroad: "Owned from Sweden (X AB) — pitch the UK team", fx_niche: "Slow niche", accounts_filed_on: "2026-09-20" };
+    const s = leadScore(r, { today, niches });
+    const why = s.parts.map(([w]) => w);
+    expect(why).toContain("New finance director: New finance director appointed 2026-10-12");
+    expect(why).toContain("Change: new charge to HSBC (2026-09)");
+    expect(why).toContain(`Accounts just filed (${filedWhen("2026-09-20")})`);
+    expect(s.parts.find(([w]) => w.startsWith("Owned abroad"))[1]).toBe(-10);
+    expect(s.parts.some(([w]) => w.startsWith("Niche"))).toBe(false);   // a poorly measured niche adds nothing
+  });
+  it("ignores alerts older than the window and sorts the list by score", () => {
+    const old = { N3: [{ kind: "new_fd", at: "2026-01-01T00:00:00", title: "x" }] };
+    expect(leadScore({ company_number: "N3" }, { today, signals: old }).score).toBe(0);
+    const rows = withLeadScores([{ company_number: "A", rank: 1 }, { company_number: "B", rank: 2, filed_fx_score: 55 }], { today });
+    expect(sortRows(rows, "lead").map((r) => r.company_number)).toEqual(["B", "A"]);
+    expect(rows[1].lead_reasons).toBe("Strong FX proof in its filings (55) +20; No hedging named — probably on the bank's rate +5");
   });
 });

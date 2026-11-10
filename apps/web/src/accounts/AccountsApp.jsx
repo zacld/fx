@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { leadLine, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { applyEmail } from "../../api/accounts.mjs";
@@ -94,7 +94,7 @@ function Accounts({ data, password }) {
   const [contacted, setContacted] = useState(data.contacted || {});
   // Companies contacted but no longer in the latest scan stay on the Contacted tab (their follow-ups still matter),
   // shown with what the marks remember.
-  const rows = useMemo(() => {
+  const baseRows = useMemo(() => {
     const listed = data.rows || [];
     const known = new Set(listed.map((r) => r.company_number));
     const dropped = Object.entries(contacted).filter(([n]) => !known.has(n)).map(([n, mark]) => ({
@@ -103,9 +103,20 @@ function Accounts({ data, password }) {
     }));
     return [...listed, ...dropped];
   }, [data.rows, contacted]);
+  // The lead score's inputs: each measured niche's tier and each company's recent alerts (?view=signals).
+  const [signals, setSignals] = useState({ niches: {}, signals: {} });
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}?view=signals`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) setSignals(body); }).catch(() => {});
+    return () => { live = false; };
+  }, [password]);
+  const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, madeAt: data.made_at }),
+                          [signals, data.made_at]);
+  const rows = useMemo(() => withLeadScores(baseRows, leadCtx), [baseRows, leadCtx]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false });
-  const [sort, setSort] = useState("hot");
+  const [sort, setSort] = useState("lead");
   // Sheet (a dense, sortable grid) or Cards; remembered in this browser
   const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
   const pickLayout = (v) => { setLayout(v); try { localStorage.setItem("fx-layout", v); } catch { /* storage off */ } };
@@ -370,7 +381,7 @@ function Accounts({ data, password }) {
       </div>
 
       {filters.view === "alerts" ? <Alerts password={password} listed={listedNumbers} onOpen={openCompany} />
-       : filters.view === "calls" ? <CallToday password={password} listRows={open} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
+       : filters.view === "calls" ? <CallToday password={password} listRows={open} lead={leadCtx} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
                                              checks={checks} onCrm={setCrm} />
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
@@ -1010,7 +1021,7 @@ function Alerts({ password, listed, onOpen }) {
 
 // The Call today tab: the day's shortlist (format.js callToday) across your Accounts list and the Recent FX filings
 // list — each pick says why today, who to ask for, and links to its accounts. Contacted companies drop off.
-function CallToday({ password, listRows, contacted, onContact, onOpen, onEmail, checks, onCrm }) {
+function CallToday({ password, listRows, lead, contacted, onContact, onOpen, onEmail, checks, onCrm }) {
   const [filingRows, setFilingRows] = useState(null);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -1021,20 +1032,32 @@ function CallToday({ password, listRows, contacted, onContact, onOpen, onEmail, 
       .catch((e) => { if (live) { setError(e.message === "Failed to fetch" ? "Couldn't reach the site — check your connection." : e.message); setFilingRows([]); } });
     return () => { live = false; };
   }, [password]);
-  const rows = useMemo(() => callToday(listRows, (filingRows || []).filter((r) => !contacted[r.company_number])),
-                       [listRows, filingRows, contacted]);
+  const rows = useMemo(() => callToday(listRows, (filingRows || []).filter((r) => !contacted[r.company_number]), { lead }),
+                       [listRows, filingRows, contacted, lead]);
   if (filingRows === null) return <div className="list"><div className="empty">Picking today's calls…</div></div>;
   return (
     <div className="list">
       {error && <div className="save-error" role="alert">The Recent FX filings list couldn't load ({error}); today's picks are from your Accounts list only.</div>}
       <div className="filters filings-bar">
         <span className="muted">Today's {rows.length}: turnover £20m–£300m, filed FX proof {CALL_RULES.minScore}+, and an FX loss of
-          £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Confirmed finance contacts first. Mark one Contacted and the next moves up.</span>
+          £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Highest lead score first. Mark one Contacted and the next moves up.</span>
         <button className="btn-sm export" onClick={() => exportCalls(rows, checks)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "call-today")} disabled={!rows.length}>Export for Cognism</button>
       </div>
       {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} checks={checks} onCrm={onCrm} />)}
       {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or Recent FX filings tabs.</div>}
+    </div>
+  );
+}
+
+// The lead score as a chip with its reasons on one line (format.js leadScore: LEAD_POINTS).
+function LeadScore({ r }) {
+  if (r.lead_score === undefined) return null;
+  const line = leadLine({ score: r.lead_score, parts: r.lead_parts || [] });
+  return (
+    <div className="lead-line" title={line}>
+      <span className="chip lead-chip">Score {r.lead_score}</span>
+      <span className="muted">{(r.lead_parts || []).map(([why, p]) => `${why.replace(/ \(.*\)$/, "")} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ")}</span>
     </div>
   );
 }
@@ -1053,6 +1076,7 @@ function CallCard({ r, n, onOpen, onEmail, onContact, checks, onCrm }) {
         </div>
         <div className="loss-fig"><b className="call-turnover">{r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""}</b><span className="muted">turnover{r.turnover_basis === "group" ? " (group)" : ""}</span></div>
       </div>
+      <LeadScore r={r} />
       <ul className="call-why">
         {r.why.map((w) => <li key={w}>{w}</li>)}
       </ul>
@@ -1291,6 +1315,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen, o
         </div>
       </div>
       <FxStrip r={r} />
+      <LeadScore r={r} />
       <ContactLine r={r} />
       {mark && <FollowUpPanel r={r} mark={mark} onContact={onContact} />}
       <Chips r={r} />
@@ -1374,6 +1399,15 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
             </div>
           ))}
         </div>
+      )}
+
+      {r.lead_parts?.length > 0 && (
+        <section className="panel">
+          <h2 className="panel-h">Why it ranks: lead score {r.lead_score}</h2>
+          <ul className="lead-parts">
+            {r.lead_parts.map(([why, p]) => <li key={why}><span className={`lead-p${p < 0 ? " neg" : ""}`}>{p > 0 ? "+" : "−"}{Math.abs(p)}</span> {why}</li>)}
+          </ul>
+        </section>
       )}
 
       {fxFacts(r).length > 0 && (
@@ -1688,4 +1722,10 @@ a{color:var(--accent)}
 .viz-svg .lbl{fill:var(--text);font-weight:600}
 .viz-svg .tick{fill:var(--muted);font-size:11px}
 @media(max-width:700px){.sheet-wrap{max-height:none}.viz-grid{grid-template-columns:1fr}}
+.lead-line{display:flex;gap:8px;align-items:baseline;margin:6px 0;font-size:12px;line-height:1.5;min-width:0}
+.lead-line .muted{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.chip.lead-chip{background:rgba(138,180,248,.16);color:var(--accent);font-weight:600;flex:none;font-variant-numeric:tabular-nums}
+.lead-parts{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}
+.lead-p{display:inline-block;min-width:38px;font-weight:600;color:var(--gain);font-variant-numeric:tabular-nums}
+.lead-p.neg{color:var(--loss)}
 `;

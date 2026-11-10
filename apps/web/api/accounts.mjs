@@ -69,6 +69,16 @@ export function filingsLosses(rows = []) {
 
 export const ALERTS_KEY = "alerts";          // {made_at, count, items}: tools/ch_alerts.py — new FD, charges, owners…
 export const DISCOVERIES_KEY = "discoveries";   // {made_at, rows}: companies found by a charge to an FX provider / trade finance
+// {company number: [{kind, at, title}]} from the alerts, newest first — what the lead score reads.
+export function signalsByCompany(items = []) {
+  const out = {};
+  for (const a of items) {
+    if (!a?.company_number) continue;
+    (out[a.company_number] ||= []).push({ kind: a.kind, at: a.at, title: a.title });
+  }
+  for (const list of Object.values(out)) list.sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  return out;
+}
 export const NICHES_KEY = "niches/stats";   // {made_at, niches: {id: measured numbers}, headings}: tools/niche_hits.py
 export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
 export const CALLS_KEY = "filings/calls";   // {made_at, count, rows}: the Call today tab's candidates from the filings list
@@ -185,6 +195,12 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
   if (params.get("view") === "alerts") {
     const [alerts, found] = await Promise.all([ALERTS_KEY, DISCOVERIES_KEY].map((k) => blobs.get(k, { type: "json" })));
     return reply({ ...(alerts || { items: [] }), discoveries: found?.rows || [] }, 200);
+  }
+  // For the lead score: each measured niche's numbers (niche_hits) and each company's recent alerts (kind, date, title).
+  if (params.get("view") === "signals") {
+    const [niches, alerts] = await Promise.all([NICHES_KEY, ALERTS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [],
+                   signals: signalsByCompany(alerts?.items || []) }, 200);
   }
   if (params.get("view") === "calls") {
     return reply((await blobs.get(CALLS_KEY, { type: "json" })) || { rows: [] }, 200);
