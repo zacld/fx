@@ -252,7 +252,7 @@ export function companyAndFd(r) {
 }
 
 export const EXPORT_FIELDS = [
-  "company_and_fd", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
+  "company_and_fd", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
   "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
   "finance_contact", "finance_contact_role",
@@ -401,6 +401,7 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
   const numbers = new Set(listRows.map((r) => r.company_number));
   const pick = (r, onList) => {
     if (!inCoreBand(r) || fxScore(r) < rules.minScore || r.qualified === "Out") return null;
+    if (reasonsNotToProgress(r, { today }).some((x) => x.serious)) return null;
     const loss = -Number(r.fx_gain_loss_gbp) || 0;
     const filedOn = filedIso(r);
     const recentLoss = onList ? Boolean(r.recent_fx_loss) : loss >= rules.minLoss && Boolean(filedOn) && filedOn >= since;
@@ -421,6 +422,67 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
     .filter(Boolean)
     .sort((a, b) => a.group - b.group || b.score - a.score || a.company_name.localeCompare(b.company_name))
     .slice(0, max);
+}
+
+// --- Lead checklist and reasons not to progress (the team's onboarding steer, Nov 2026) ------------------------------
+// Before a lead goes to Sales: who owns it, is it in the band, does it trade abroad, has something changed, does it
+// need FX, is there a reason to call — and every reason it would NOT be an opportunity. Filled from the company's own
+// records; "CRM checked" is Zac's own tick (the bank's CRM stays out of this system). States: yes / no / check / warn.
+const sizeLine = (r) => `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}`;
+const firstOwner = (r) => r.owner || (r.owners ? `Owned by ${String(r.owners).split(";")[0].trim()}` : "");
+export function leadChecklist(r, checks = {}) {
+  const t = Number(r.turnover_gbp) || 0;
+  const abroad = [r.turnover_regions && `Sales by region: ${r.turnover_regions}`, r.overseas_turnover_share && `${r.overseas_turnover_share} of sales overseas`,
+    (Number(r.hmrc_import_months) || Number(r.hmrc_export_months)) && `HMRC: imports in ${r.hmrc_import_months || 0}, exports in ${r.hmrc_export_months || 0} months`,
+    r.hmrc_trade && `HMRC: ${r.hmrc_trade}`, r.currencies_in_accounts && `Currencies: ${r.currencies_in_accounts}`, r.trade_countries && `Trades with ${r.trade_countries}`]
+    .filter(Boolean);
+  const growth = parseFloat(r.turnover_growth) >= 20 ? `Turnover ${r.turnover_growth} on last year` : "";
+  const change = [parts(r.triggers)[0], growth].filter(Boolean);   // ownership, charges, directors, growth — an FX loss is a reason, not a change
+  const reason = [r.recent_fx_loss, parts(r.triggers)[0], r.fact_1].filter(Boolean)[0]
+    || (Number(r.fx_gain_loss_gbp) < 0 ? `FX loss of ${money(-Number(r.fx_gain_loss_gbp))} in its latest accounts` : "");
+  const crm = checks[r.company_number]?.crm;
+  return [
+    { key: "owner", label: "Ownership",
+      ...(r.run_from_abroad ? { state: "warn", detail: r.run_from_abroad }
+        : firstOwner(r) ? { state: "yes", detail: `${firstOwner(r)}${r.pe_backed ? " — private-equity backed" : ""}` }
+        : { state: "check", detail: "Owners not read — check the PSC register on Companies House" }) },
+    { key: "band", label: "Turnover £20m–£300m",
+      ...(inCoreBand(r) ? { state: "yes", detail: sizeLine(r) }
+        : t ? { state: "no", detail: `${sizeLine(r)} — ${t > CORE_BAND[1] ? "above" : "below"} the band` }
+        : { state: "check", detail: r.size_estimate ? `${r.size_estimate} (estimate)` : "No turnover filed" }) },
+    { key: "abroad", label: "International activity", ...(abroad.length ? { state: "yes", detail: abroad[0] } : { state: "check", detail: "None in the records — ask" }) },
+    { key: "change", label: "Business change / trigger", ...(change.length ? { state: "yes", detail: change[0] } : { state: "no", detail: "No recent change found — find one before calling" }) },
+    { key: "fx", label: "Likely FX need",
+      ...(fxScore(r) >= 50 ? { state: "yes", detail: `Filed FX proof ${fxScore(r)}${r.fx_forwards || r.fx_today ? `: ${r.fx_forwards || r.fx_today}` : ""}` }
+        : fxScore(r) > 0 ? { state: "warn", detail: `Some FX proof (${fxScore(r)})` } : { state: "no", detail: "No FX in its filed accounts" }) },
+    { key: "reason", label: "Reason to contact", ...(reason ? { state: "yes", detail: reason } : { state: "no", detail: "No specific reason yet" }) },
+    { key: "crm", label: "CRM checked (ownership, duplicates, past activity)", manual: true,
+      ...(crm ? { state: "yes", detail: `Ticked ${filedWhen(crm.slice(0, 10))}` } : { state: "check", detail: "Not yet — check the CRM before contact" }) },
+  ];
+}
+// "✓ Ownership · ✓ Turnover £20m–£300m · ? International activity …" for a spreadsheet cell.
+export const checklistLine = (items) => items.map((i) => `${{ yes: "✓", no: "✗", check: "?", warn: "!" }[i.state]} ${i.label.split(" (")[0]}`).join(" · ");
+
+// Every reason this would NOT be an opportunity, from the records. Serious ones keep a company off Call today.
+export function reasonsNotToProgress(r, { today = new Date() } = {}) {
+  const out = [];
+  const add = (text, serious = false) => out.push({ text, serious });
+  const t = Number(r.turnover_gbp) || 0;
+  if (r.qualified === "Out") add(`Qualified out${r.qualify_reason ? `: ${r.qualify_reason}` : ""}`, true);
+  if (t > CORE_BAND[1]) add(`Turnover ${money(t)} — above £300m (check the desk's upper limit)`, true);
+  else if (t && t < CORE_BAND[0]) add(`Turnover ${money(t)} — below £20m`, true);
+  else if (!t) add(r.size_estimate ? `No turnover filed — size is an estimate (${r.size_estimate})` : "No turnover filed — size unknown");
+  else if (r.turnover_basis === "group") add(`Sized by its group${r.group_parent ? ` (${r.group_parent})` : ""} — its own size is unknown`);
+  if (!fxScore(r)) add("No FX in its filed accounts", true);
+  if (r.run_from_abroad) add(`${r.run_from_abroad.split(" — ")[0]} — FX may be run by the parent`);
+  if (r.own_bank_client) add("Already banks with Investec — check the CRM owner before contact");
+  if (/^Uses an FX provider/.test(r.fx_today || "")) add(`${r.fx_today.replace(/^Uses/, "Already uses")} — a competitive pitch`);
+  if (r.turnover_check) add(`Turnover sent to check: ${r.turnover_check}`);
+  if (r.fx_gain_loss_check) add(`FX figure sent to check: ${r.fx_gain_loss_check}`);
+  const filed = filedIso(r);
+  if (filed && (today - new Date(filed)) / 864e5 > 400) add(`Latest accounts filed ${filedWhen(filed)} — look for newer ones`);
+  if (Number(r.group_companies_in_list) > 1) add(`${r.group_companies_in_list} group companies on your list — one call for the group`);
+  return out;
 }
 
 export const LOSS_SORTS = {

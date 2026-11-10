@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
 import { emailDraft } from "./email.js";
 import { applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
@@ -107,6 +107,7 @@ function Accounts({ data, password }) {
   const [sort, setSort] = useState("hot");
   const [shown, setShown] = useState(PAGE);
   const [notes, setNotes] = useState(data.notes || {});
+  const [checks, setChecks] = useState(data.checks || {});
   const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
 
@@ -140,6 +141,7 @@ function Accounts({ data, password }) {
       if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
       if (body.contacted) setContacted(body.contacted);
       if (body.notes) setNotes(body.notes);
+      if (body.checks) setChecks(body.checks);
       if (body.emails) setEmails(body.emails);
     });
     queue.current = run;
@@ -201,6 +203,17 @@ function Accounts({ data, password }) {
     })();
   }, []);   // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The lead checklist's "CRM checked" tick: shown at once, undone if the save fails.
+  const setCrm = useCallback(async (number, value) => {
+    setSaveError("");
+    const before = checks;
+    setChecks((c) => { const next = { ...c }; if (value) next[number] = { crm: new Date().toISOString() }; else delete next[number]; return next; });
+    try { await save(number, { crm_checked: value }); } catch (e) {
+      setChecks(before);
+      setSaveError(`Couldn't save the CRM tick (${e.message}).`);
+    }
+  }, [save, checks]);
+
   const saveNote = useCallback(async (number, text) => {
     setSaveError("");
     try { await save(number, { notes: text }); return true; } catch (e) {
@@ -245,7 +258,8 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const blob = new Blob([toCsv(visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text })))], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([toCsv(visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
+      reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text })))], { type: "text/csv;charset=utf-8" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `fx-accounts-${new Date().toISOString().slice(0, 10)}.csv` });
     a.click();
     URL.revokeObjectURL(a.href);
@@ -255,7 +269,8 @@ function Accounts({ data, password }) {
     const r = rows.find((x) => x.company_number === pageNo);
     return (
       <CompanyPage r={r} number={pageNo} madeAt={data.made_at} mark={contacted[pageNo]} onContact={contact}
-                   note={notes[pageNo]} onSaveNote={(text) => saveNote(pageNo, text)} onBack={backToList} saveError={saveError} onEmail={toEmail} />
+                   note={notes[pageNo]} onSaveNote={(text) => saveNote(pageNo, text)} onBack={backToList} saveError={saveError} onEmail={toEmail}
+                   checks={checks} onCrm={setCrm} />
     );
   }
 
@@ -340,7 +355,8 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "calls" ? <CallToday password={password} listRows={open} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
+      {filters.view === "calls" ? <CallToday password={password} listRows={open} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
+                                             checks={checks} onCrm={setCrm} />
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
@@ -768,12 +784,13 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
 }
 
 // The FX losses shown, for a spreadsheet: the loss and its context, the finance contact, and the email draft.
-const LOSS_EXPORT = ["company_and_fd", "company_name", "company_number", "on_list", "fx_loss_gbp", "fx_prior_gbp", "share_of_turnover", "turnover_gbp",
+const LOSS_EXPORT = ["company_and_fd", "reasons_not_to_progress", "company_name", "company_number", "on_list", "fx_loss_gbp", "fx_prior_gbp", "share_of_turnover", "turnover_gbp",
   "filed", "hedging", "currency", "turnover_regions", "incumbent_bank", "finance_contact", "finance_contact_role",
   "finance_contact_confidence", "accounts_url", "email_draft"];
 function exportLosses(rows) {
   const out = rows.map((r) => ({
-    company_and_fd: companyAndFd(r), company_name: r.company_name, company_number: r.company_number, on_list: r.onList ? "yes" : "",
+    company_and_fd: companyAndFd(r), reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "),
+    company_name: r.company_name, company_number: r.company_number, on_list: r.onList ? "yes" : "",
     fx_loss_gbp: Math.round(r.loss), fx_prior_gbp: r.prior ?? "", share_of_turnover: r.share !== null ? `${(r.share * 100).toFixed(1)}%` : "",
     turnover_gbp: r.turnover_gbp || "", filed: r.filedOn, hedging: r.fx_forwards || r.fx_today || "none named in the accounts",
     currency: r.currencies_in_accounts || r.main_currency || "", turnover_regions: r.turnover_regions || "",
@@ -789,7 +806,7 @@ function exportLosses(rows) {
 
 // The Call today tab: the day's shortlist (format.js callToday) across your Accounts list and the Recent FX filings
 // list — each pick says why today, who to ask for, and links to its accounts. Contacted companies drop off.
-function CallToday({ password, listRows, contacted, onContact, onOpen, onEmail }) {
+function CallToday({ password, listRows, contacted, onContact, onOpen, onEmail, checks, onCrm }) {
   const [filingRows, setFilingRows] = useState(null);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -809,15 +826,15 @@ function CallToday({ password, listRows, contacted, onContact, onOpen, onEmail }
       <div className="filters filings-bar">
         <span className="muted">Today's {rows.length}: turnover £20m–£300m, filed FX proof {CALL_RULES.minScore}+, and an FX loss of
           £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Confirmed finance contacts first. Mark one Contacted and the next moves up.</span>
-        <button className="btn-sm export" onClick={() => exportCalls(rows)} disabled={!rows.length}>Export CSV ({rows.length})</button>
+        <button className="btn-sm export" onClick={() => exportCalls(rows, checks)} disabled={!rows.length}>Export CSV ({rows.length})</button>
       </div>
-      {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} />)}
+      {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} checks={checks} onCrm={onCrm} />)}
       {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or Recent FX filings tabs.</div>}
     </div>
   );
 }
 
-function CallCard({ r, n, onOpen, onEmail, onContact }) {
+function CallCard({ r, n, onOpen, onEmail, onContact, checks, onCrm }) {
   const open = (e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } };
   return (
     <article className="card loss-card">
@@ -834,6 +851,7 @@ function CallCard({ r, n, onOpen, onEmail, onContact }) {
       <ul className="call-why">
         {r.why.map((w) => <li key={w}>{w}</li>)}
       </ul>
+      <LeadCheck r={r} checks={checks} onCrm={onCrm} compact />
       <div className="loss-facts">
         {presentedContact(r)
           ? <span><span className="fxl">Ask for</span> {r.finance_contact}{r.finance_contact_role ? ` · ${r.finance_contact_role}` : ""}{r.finance_contact_confidence ? ` (${r.finance_contact_confidence})` : ""}</span>
@@ -850,12 +868,43 @@ function CallCard({ r, n, onOpen, onEmail, onContact }) {
   );
 }
 
+// The lead checklist and every reason not to progress (format.js leadChecklist / reasonsNotToProgress). "CRM checked"
+// is Zac's own tick after checking the bank's CRM; nothing from the CRM is kept here. Compact on Call today cards.
+const CHECK_MARK = { yes: "✓", no: "✗", check: "?", warn: "!" };
+function LeadCheck({ r, checks = {}, onCrm, compact = false }) {
+  const items = leadChecklist(r, checks);
+  const reasons = reasonsNotToProgress(r);
+  const crm = Boolean(checks[r.company_number]?.crm);
+  return (
+    <div className={`lead-check${compact ? " compact" : ""}`}>
+      <ul className="lc-items">
+        {items.map((i) => (
+          <li key={i.key} className={`lc lc-${i.state}`} title={i.detail}>
+            <span className="lc-mark">{CHECK_MARK[i.state]}</span>
+            {i.manual && onCrm
+              ? <label className="lc-crm"><input type="checkbox" checked={crm} onChange={(e) => onCrm(r.company_number, e.target.checked)} /> {i.label}</label>
+              : <span className="lc-l">{i.label}</span>}
+            {!compact && <span className="lc-d">{i.detail}</span>}
+          </li>
+        ))}
+      </ul>
+      <div className="lc-not">
+        <span className="fxl">Reasons not to progress</span>
+        {reasons.length
+          ? <ul>{reasons.map((x) => <li key={x.text} className={x.serious ? "serious" : ""}>{x.text}</li>)}</ul>
+          : <span className="muted"> none found in the records — still check the CRM and ask the questions</span>}
+      </div>
+    </div>
+  );
+}
+
 // Today's list for a spreadsheet: the copy-ready company + finance contact first, then why, who and where.
-const CALL_EXPORT = ["company_and_fd", "rank", "company_name", "company_number", "on_list", "why_today", "turnover_gbp", "filed_fx_score",
+const CALL_EXPORT = ["company_and_fd", "lead_checklist", "reasons_not_to_progress", "rank", "company_name", "company_number", "on_list", "why_today", "turnover_gbp", "filed_fx_score",
   "finance_contact", "finance_contact_role", "finance_contact_confidence", "incumbent_bank", "accounts_url", "companies_house_url", "email_draft"];
-function exportCalls(rows) {
+function exportCalls(rows, checks) {
   const out = rows.map((r, i) => ({
-    company_and_fd: companyAndFd(r), rank: i + 1, company_name: r.company_name, company_number: r.company_number,
+    company_and_fd: companyAndFd(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
+    reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), rank: i + 1, company_name: r.company_name, company_number: r.company_number,
     on_list: r.onList ? "yes" : "", why_today: r.why.join(" | "), turnover_gbp: r.turnover_gbp || "", filed_fx_score: r.filed_fx_score || "",
     finance_contact: presentedContact(r) ? r.finance_contact : "", finance_contact_role: presentedContact(r) ? r.finance_contact_role || "" : "",
     finance_contact_confidence: presentedContact(r) ? r.finance_contact_confidence || "" : "",
@@ -1046,7 +1095,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen, o
 
 // One company: everything the finder knows, each fact linked to the filing or charge it came from, with notes and
 // the Contacted button.
-function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onBack, saveError, onEmail }) {
+function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onBack, saveError, onEmail, checks, onCrm }) {
   useEffect(() => { document.title = r ? `${r.company_name} · Accounts` : "Accounts"; return () => { document.title = "Accounts"; }; }, [r]);
   if (!r) {
     return (
@@ -1094,6 +1143,11 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
           <FollowUpPanel r={r} mark={mark} onContact={onContact} />
         </section>
       )}
+
+      <section className="panel">
+        <h2 className="panel-h">Lead checklist</h2>
+        <LeadCheck r={r} checks={checks} onCrm={onCrm} />
+      </section>
 
       {figures.length > 0 && (
         <div className="pg-figs">
@@ -1327,6 +1381,17 @@ a.co:hover{color:#34D399}
 .calls-tab.on{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.45);color:#FBBF24}
 .call-n{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:12px;background:rgba(245,158,11,.15);color:#FBBF24;font:700 12px 'Inter',sans-serif;margin-right:8px}
 .call-turnover{color:#e5e7eb !important}
+.lead-check{margin-top:10px;font-size:13px}
+.lc-items{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.lead-check.compact .lc-items{display:flex;flex-wrap:wrap;gap:6px}
+.lc{display:flex;gap:8px;align-items:baseline;color:rgba(255,255,255,.8)}
+.lead-check.compact .lc{padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:12px}
+.lc-mark{font-weight:700;width:12px;text-align:center}
+.lc-yes .lc-mark{color:#34D399}.lc-no .lc-mark{color:#F87171}.lc-check .lc-mark{color:#A5B4FC}.lc-warn .lc-mark{color:#FBBF24}
+.lc-l{white-space:nowrap}.lc-d{color:rgba(255,255,255,.55)}
+.lc-crm{display:inline-flex;gap:5px;align-items:center;cursor:pointer;white-space:nowrap}
+.lc-not{margin-top:8px}.lc-not ul{margin:4px 0 0;padding-left:18px}.lc-not li{color:rgba(255,255,255,.7)}
+.lc-not li.serious{color:#F87171}
 .call-why{margin:8px 0 0;padding-left:18px;font-size:13px;color:rgba(255,255,255,.85);line-height:1.5}
 .email-btns{display:flex;gap:8px;flex-wrap:wrap}
 .email-edit{width:100%;box-sizing:border-box;margin-top:10px;padding:12px;font:14px/1.55 inherit;font-family:inherit;resize:vertical;white-space:pre-wrap}

@@ -385,6 +385,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   a trigger. Every pick lists why; Contacted drops it and the next moves up; CSV export. Every CSV export (Accounts,
   FX losses, Call today) starts with `company_and_fd` (`companyAndFd`): "ACME LIMITED – Jane Smith, Finance
   Director", or "ACME LIMITED – ask for the Finance Director" — one cell to copy.
+- **Lead checklist + reasons not to progress** (the team's onboarding steer, Nov 2026: quality before volume, protect
+  the reputation with Sales, "look at every reason this would not be an opportunity"; `leadChecklist` /
+  `reasonsNotToProgress` / `checklistLine` in `format.js`, shown on Call today cards and the company page, columns
+  `lead_checklist` and `reasons_not_to_progress` in the exports): ownership, turnover £20m–£300m, international
+  activity, business change / trigger, likely FX need, reason to contact — ✓ / ✗ / ? / ! from the records — and "CRM
+  checked", Zac's own tick (store key `checks`, POST `{company_number, crm_checked}`; a date only — nothing from the
+  bank's CRM is kept here). Reasons not to progress: qualified Out, outside the band, no FX in the filings (serious:
+  held off Call today); no turnover filed / sized by its group, owned abroad, already banks with Investec, a named FX
+  provider, a figure sent to check, accounts filed 400+ days ago, other group companies on the list (shown).
 - **FX losses tab** (Accounts page; the "Recent FX loss" figure at the top opens it; Contacted button and CSV export
   with each company's email draft; `lossRows` / `filterLosses` / `sortLosses` in `format.js`): every company whose
   latest accounts show an FX loss — the main list's (finance contact, company page) and the Recent FX filings list's

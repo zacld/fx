@@ -19,6 +19,7 @@ import { applyContact, invalidChange } from "../src/accounts/followups.js";
 export const STORE = "fx-accounts";
 export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
+export const CHECKS_KEY = "checks";         // {company_number: {crm: iso}} — the lead checklist's "CRM checked" tick
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index
 export const filingsMonthKey = (month) => `filings/${month}`;   // {month, rows}: the companies filed that month
@@ -146,6 +147,16 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
       await blobs.setJSON(EMAILS_KEY, emails);
       return reply({ emails }, 200);
     }
+    if ("crm_checked" in body) {   // the lead checklist's own tick: Zac checked the bank's CRM (kept here as a date only)
+      if (!COMPANY_NUMBER.test(number || "") || typeof body.crm_checked !== "boolean") {
+        return reply({ error: "send {company_number, crm_checked: true | false}" }, 400);
+      }
+      const checks = (await blobs.get(CHECKS_KEY, { type: "json" })) || {};
+      if (body.crm_checked) checks[number] = { ...(checks[number] || {}), crm: new Date().toISOString() };
+      else delete checks[number];
+      await blobs.setJSON(CHECKS_KEY, checks);
+      return reply({ checks }, 200);
+    }
     const change = Object.fromEntries(["contacted", "channel", "response", "follow_up_at", "company_name"]
       .filter((k) => body[k] !== undefined).map((k) => [k, body[k]]));
     const touchesContact = "contacted" in change || "response" in change || "follow_up_at" in change;
@@ -181,8 +192,8 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
-  const [data, marks, noted, status, emails] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY]
+  const [data, marks, noted, status, emails, checks] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY, CHECKS_KEY]
     .map((k) => blobs.get(k, { type: "json" })));
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);
-  return reply({ ...data, contacted: marks || {}, notes: noted || {}, status: status || {}, emails: emails || {} }, 200);
+  return reply({ ...data, contacted: marks || {}, notes: noted || {}, status: status || {}, emails: emails || {}, checks: checks || {} }, 200);
 }

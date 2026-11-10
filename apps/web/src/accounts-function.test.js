@@ -89,6 +89,20 @@ describe("/api/accounts", () => {
     expect((await handle(view("Bearer nope"), opts)).status).toBe(401);
   });
 
+  it("keeps the lead checklist's CRM tick (a date only) and returns it with the list", async () => {
+    const s = memory();
+    s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }] };
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const post = (body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer s3cret" }, body: JSON.stringify(body) }), opts);
+    expect((await post({ company_number: "01234567", crm_checked: "yes" })).status).toBe(400);
+    const ticked = await (await post({ company_number: "01234567", crm_checked: true })).json();
+    expect(Object.keys(ticked.checks)).toEqual(["01234567"]);
+    expect(ticked.checks["01234567"].crm).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    const got = await (await handle(new Request("https://x/api/accounts", { headers: { authorization: "Bearer s3cret" } }), opts)).json();
+    expect(Object.keys(got.checks)).toEqual(["01234567"]);
+    expect((await (await post({ company_number: "01234567", crm_checked: false })).json()).checks).toEqual({});
+  });
+
   it("keeps the filings list's Call today candidates and serves them", async () => {
     const s = memory();
     const opts = { password: "s3cret", store: s, delay: 0 };
