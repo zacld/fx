@@ -2143,7 +2143,7 @@ class TestHttpFrontEnds(unittest.TestCase):
              mock.patch.object(main, "run_pipeline", return_value=[row]) as run:
             status, body = _request(base + "/niches")
             self.assertEqual(status, 200)
-            self.assertEqual(len(body["niches"]), 116)
+            self.assertEqual(len(body["niches"]), 128)
 
             status, body = _request(base + "/run", {"niches": ["no-such-niche"]})
             self.assertEqual(status, 400)
@@ -2167,7 +2167,7 @@ class TestHttpFrontEnds(unittest.TestCase):
         with mock.patch.object(main, "run_pipeline", return_value=[]) as run:
             status, body = _request(base + "/api/run")
             self.assertEqual(status, 200)
-            self.assertEqual(len(body["niches"]), 116)
+            self.assertEqual(len(body["niches"]), 128)
 
             status, body = _request(base + "/api/run", {"min_turnover": 20_000_000})
             self.assertEqual(status, 400)
