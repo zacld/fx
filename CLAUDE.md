@@ -381,7 +381,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      workflow "Turnover sample"). Cached accounts without turnover are read
      again, `FINDER_REREAD_MAX` (300) a run.
   3. Companies House owners, charges and directors.
-  4. The FX niches (`lead-sourcer/config/fx_niches.json`). Which sectors to add is measured, not guessed:
+  4. The FX niches (`lead-sourcer/config/fx_niches.json`) — **sector niches** (SIC codes, self-chosen) and, from 10 Nov
+     2026, **goods niches** (`hmrc_codes`: customs headings a company's HMRC importer/exporter records show it trading —
+     cut flowers, bloodstock, seafood, nuts, timber, stone, fasteners, bikes, rugs, hair… `flow` import / both; a goods
+     niche wins over a sector niche, `sourcer/niches.py` `goods_niche`: 3+ code-months and 10%+ of its declared codes).
+     Every niche is **measured weekly** (`tools/niche_hits.py`, workflow "Niche hits", store key `niches/stats`): of its
+     full / medium / group-accounts companies, the share with strong FX proof in their filings (hit rate) and, of those,
+     the share naming no forwards or FX provider (open); score = hit rate × (0.5 + 0.5 × open share). The finder
+     (`NICHE_STATS_FILE`) checks niches in score tiers (3 best … 0; unmeasured 1) and skips niches measured as poor
+     (verdict "drop": 40+ companies, under 1% hit rate). The run also lists every customs heading by score, flagging
+     ones no goods niche covers yet — where new niches come from. Which sectors to add is measured, not guessed:
      `tools/sector_hits.py` (workflow "Sector hits", read-only) counts the FX filings scan's strong finds per SIC
      code against each sector's full / medium / group-accounts companies and lists the best-hitting sectors the
      niches don't cover.

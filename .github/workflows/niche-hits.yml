@@ -1,0 +1,77 @@
+name: Niche hits
+
+# How good each niche is, measured (lead-sourcer/tools/niche_hits.py): for every niche — sector niches and goods niches
+# (what HMRC's customs lists show companies importing) — and every customs heading, how many full / medium / group
+# accounts companies are in it, how many show strong FX proof in their own filings, and how many of those name no
+# forwards or FX provider (still open). Saved to the site's private store (key niches/stats): the finder checks the
+# best niches first and skips poor ones. Weekly, and when the tool or the niches change (a measurement, so those runs
+# save too). The log holds counts, niche names and customs headings only (public repo).
+
+on:
+  schedule:
+    - cron: '23 4 * * 0'     # Sunday morning, before the evening finder run
+  workflow_dispatch:
+  push:
+    branches: ['main', 'claude/**']
+    paths:
+      - .github/workflows/niche-hits.yml
+      - lead-sourcer/tools/niche_hits.py
+      - lead-sourcer/sourcer/niches.py
+      - lead-sourcer/config/fx_niches.json
+
+concurrency:
+  group: niche-hits
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  niches:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Month
+        id: month
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+      # The finder's monthly copies of Companies House's bulk file and HMRC's trader files, when there are some.
+      - name: Restore the Companies House bulk file
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip
+          key: ch-bulk-v2-${{ steps.month.outputs.month }}
+          restore-keys: ch-bulk-v2-
+      - name: Restore the HMRC trader files
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/hmrc
+          key: hmrc-v2-${{ steps.month.outputs.month }}
+          restore-keys: |
+            hmrc-v2-
+            hmrc-traders-
+      - name: The FX filings list
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/fx-filings.json
+      - name: Measure the niches
+        working-directory: lead-sourcer
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          zip=$(ls -t ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip 2>/dev/null | head -1 || true)
+          python3 tools/niche_hits.py --filings fx-filings.json --out niche_stats.json ${zip:+--bulk "$zip"}
+      - name: Save
+        run: cd apps/web && node scripts/alerts-store.mjs put niches ../../lead-sourcer/niche_stats.json

@@ -63,7 +63,7 @@ from typing import Optional, Union
 
 from sourcer import (
     accounts, banks, bulk, companies_house, currency, excel, filings, fx_notes, group as groups, hmrc, hooks, incumbent,
-    matching,
+    matching, niches as niche_rules,
     news, pdf, people, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
 
 CSV_FIELDS = [
@@ -924,12 +924,21 @@ def run_pipeline(
                     known.add(number)
 
     niche_position = {n["id"]: i for i, n in enumerate(niches)}
+    # Measured niches (tools/niche_hits.py, NICHE_STATS_FILE): checked in score order, poor ones skipped.
+    niche_stats = niche_rules.load_stats(os.environ.get("NICHE_STATS_FILE", ""))
+    goods = [n for n in niches if n.get("hmrc_codes")]
     queue = []
+    skipped_niches: Counter = Counter()
     for company in candidates:
         trade = trade_by_company.get(company["company_number"])
         matching_niches = [n for n in niches if set(map(str, n.get("sic_codes", []))) & set(company["sic_codes"])]
-        if matching_niches:
-            niche = best_niche(company["sic_codes"], matching_niches)
+        # What its customs records show it trading beats the sector it chose for itself.
+        niche = niche_rules.goods_niche(trade, goods) or (best_niche(company["sic_codes"], matching_niches) if matching_niches else None)
+        if niche and niche_rules.dropped(niche["id"], niche_stats):
+            skipped_niches[niche["id"]] += 1
+            niche = None
+        if niche:
+            pass   # a goods or sector niche
         elif trade:
             niche = trader_niche(trade)
         elif company["company_number"] in (priority or {}):
@@ -937,9 +946,15 @@ def run_pipeline(
         else:
             continue
         queue.append((niche, company, trade))
-    # Proven traders first (most months of customs records), then niche order and sweet-spot
-    # accounts category, so a capped run spends its API budget where the evidence is.
+    if niche_stats:
+        tiers = Counter(niche_rules.tier(q[0]["id"], niche_stats) for q in queue)
+        print(f"  Niches measured {len(niche_stats)}: candidates by tier (3 best) "
+              + ", ".join(f"{t}: {tiers[t]:,}" for t in (3, 2, 1, 0))
+              + f"; {sum(skipped_niches.values()):,} candidates in {len(skipped_niches)} poor niches skipped")
+    # Best-measured niches first, then proven traders (most months of customs records), then niche order and
+    # sweet-spot accounts category, so a capped run spends its API budget where the evidence is.
     queue.sort(key=lambda q: (
+        -niche_rules.tier(q[0]["id"], niche_stats),
         -(len(q[2]["import_months"] | q[2]["export_months"]) if q[2] else 0),
         niche_position.get(q[0]["id"], len(niches)),
         _CATEGORY_ORDER.get(q[1]["accounts_category"], 99),
