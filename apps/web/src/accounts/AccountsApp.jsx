@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cognismCsv, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, toCsv, wallet } from "./format.js";
+import { COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
@@ -258,11 +259,9 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const blob = new Blob([toCsv(visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
-      reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text })))], { type: "text/csv;charset=utf-8" });
-    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `fx-accounts-${new Date().toISOString().slice(0, 10)}.csv` });
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
+      reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text }));
+    downloadSheet(out, columnsFor(EXPORT_FIELDS, { company_and_fd: "Company – Finance Director" }, NUMBER_FIELDS), `fx-accounts-${new Date().toISOString().slice(0, 10)}.xlsx`, "Accounts");
   };
 
   if (pageNo) {
@@ -350,7 +349,7 @@ function Accounts({ data, password }) {
           <label className="check"><input type="checkbox" checked={filters.fdOnly} onChange={(e) => set({ fdOnly: e.target.checked })} /> FD named</label>
           <label className="check"><input type="checkbox" checked={filters.triggersOnly} onChange={(e) => set({ triggersOnly: e.target.checked })} /> Triggers</label>
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>
-          <button className="btn-sm export" onClick={exportCsv} disabled={!visible.length}>Export CSV ({visible.length})</button>
+          <button className="btn-sm export" onClick={exportCsv} disabled={!visible.length}>Export Excel ({visible.length})</button>
           <button className="btn-sm" onClick={() => downloadCognism(visible, "accounts")} disabled={!visible.length}
                   title="Company, domain, postcode and the finance contact's first / last name — the columns Cognism matches on">Export for Cognism</button>
         </div>
@@ -773,7 +772,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
         <label className="check" title="No forward contracts, options or FX provider named in their accounts"><input type="checkbox" checked={unhedged} onChange={(e) => reset(setUnhedged)(e.target.checked)} /> No hedging named</label>
         <label className="check"><input type="checkbox" checked={grew} onChange={(e) => reset(setGrew)(e.target.checked)} /> Worse than last year</label>
         <span className="muted">{rows.length.toLocaleString()} of {all.length.toLocaleString()} with an FX loss</span>
-        <button className="btn-sm export" onClick={() => exportLosses(rows)} disabled={!rows.length}>Export CSV ({rows.length})</button>
+        <button className="btn-sm export" onClick={() => exportLosses(rows)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "fx-losses")} disabled={!rows.length}>Export for Cognism</button>
       </div>
       <p className="filings-note">Companies whose latest filed accounts show a loss on currency (exchange differences), from your Accounts list and the
@@ -801,10 +800,8 @@ function exportLosses(rows) {
     finance_contact_role: r.finance_contact_role || "", finance_contact_confidence: r.finance_contact_confidence || "",
     accounts_url: r.fx_gain_loss_url || r.accounts_url || "", email_draft: emailDraft(r).text,
   }));
-  const blob = new Blob([toCsv(out, LOSS_EXPORT)], { type: "text/csv;charset=utf-8" });
-  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `fx-losses-${new Date().toISOString().slice(0, 10)}.csv` });
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadSheet(out, columnsFor(LOSS_EXPORT, { company_and_fd: "Company – Finance Director", fx_loss_gbp: "FX loss (£)", fx_prior_gbp: "Prior year (£)", turnover_gbp: "Turnover (£)" }, NUMBER_FIELDS),
+                `fx-losses-${new Date().toISOString().slice(0, 10)}.xlsx`, "FX losses");
 }
 
 // The Call today tab: the day's shortlist (format.js callToday) across your Accounts list and the Recent FX filings
@@ -829,7 +826,7 @@ function CallToday({ password, listRows, contacted, onContact, onOpen, onEmail, 
       <div className="filters filings-bar">
         <span className="muted">Today's {rows.length}: turnover £20m–£300m, filed FX proof {CALL_RULES.minScore}+, and an FX loss of
           £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Confirmed finance contacts first. Mark one Contacted and the next moves up.</span>
-        <button className="btn-sm export" onClick={() => exportCalls(rows, checks)} disabled={!rows.length}>Export CSV ({rows.length})</button>
+        <button className="btn-sm export" onClick={() => exportCalls(rows, checks)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "call-today")} disabled={!rows.length}>Export for Cognism</button>
       </div>
       {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} checks={checks} onCrm={onCrm} />)}
@@ -872,14 +869,15 @@ function CallCard({ r, n, onOpen, onEmail, onContact, checks, onCrm }) {
   );
 }
 
-// A clean CSV for Cognism's upload (format.js cognismRow): company, domain, postcode, the named finance contact split
+// A clean spreadsheet for Cognism's upload (format.js cognismRow): company, domain, postcode, the named finance contact split
 // into first / last name, or the role to find. Enrich it in Cognism; nothing comes back here.
 function downloadCognism(rows, name) {
-  const blob = new Blob([cognismCsv(rows)], { type: "text/csv;charset=utf-8" });
-  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `${name}-cognism-${new Date().toISOString().slice(0, 10)}.csv` });
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadSheet(rows.map(cognismRow), COGNISM_COLUMNS, `${name}-cognism-${new Date().toISOString().slice(0, 10)}.xlsx`, "Cognism");
 }
+
+// Figures written as numbers in the spreadsheets (sortable, summable); everything else as text.
+const NUMBER_FIELDS = ["rank", "filed_fx_score", "turnover_gbp", "fx_wallet_low_gbp", "fx_wallet_high_gbp", "fx_gain_loss_gbp",
+  "fx_gain_loss_prior_gbp", "fx_loss_gbp", "fx_prior_gbp"];
 
 // The lead checklist and every reason not to progress (format.js leadChecklist / reasonsNotToProgress). "CRM checked"
 // is Zac's own tick after checking the bank's CRM; nothing from the CRM is kept here. Compact on Call today cards.
@@ -924,10 +922,8 @@ function exportCalls(rows, checks) {
     incumbent_bank: (r.incumbent_bank || "").split(":")[0], accounts_url: r.fx_gain_loss_url || r.accounts_url || "",
     companies_house_url: chCompanyUrl(r.company_number), email_draft: emailDraft(r).text,
   }));
-  const blob = new Blob([toCsv(out, CALL_EXPORT)], { type: "text/csv;charset=utf-8" });
-  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `call-today-${new Date().toISOString().slice(0, 10)}.csv` });
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadSheet(out, columnsFor(CALL_EXPORT, { company_and_fd: "Company – Finance Director", turnover_gbp: "Turnover (£)" }, NUMBER_FIELDS),
+                `call-today-${new Date().toISOString().slice(0, 10)}.xlsx`, "Call today");
 }
 
 function LossCard({ r, onOpen, onEmail, onContact }) {
