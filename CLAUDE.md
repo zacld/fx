@@ -433,6 +433,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   ("Fill in: …"), and the draft says where each filled part came from. Nothing is sent. The tab's companies and
   edits are kept on the site (store key `emails`, POST `{company_number, email: {row} | {text} | null}`, at most
   `EMAILS_MAX`), so they follow Zac across devices; drafts from before (this browser's storage) moved over once.
+- **Alerts** (`tools/ch_alerts.py`, workflow "Alerts" every 3 hours + a morning digest; the Accounts page's Alerts tab,
+  GET `/api/accounts?view=alerts`, store keys `alerts`, `discoveries`, `ch/stream`; `apps/web/scripts/alerts-store.mjs`):
+  Companies House's streaming feeds (officers, charges, owners — secret `CH_STREAM_KEY`, a "Streaming API" key from the
+  developer hub, not the REST key) read from the last timepoint for the Accounts + FX filings lists' companies: new
+  director (confirmed as the new finance director when Google News names them with a finance title in the last 150
+  days — `confirm_fd`; Companies House no longer shows occupations), director left, new charge (refinancing), charge
+  paid off, new corporate owner (private-equity backed: hot), and a charge in favour of an FX provider or for trade
+  finance / foreign exchange (`FX_PROVIDERS`, `FX_PURPOSE`; hot) — for any company: one not on the lists becomes a
+  discovery (`discoveries`, filed FX score 60) that the finder checks first (`DISCOVERIES_FILE`, merged into
+  `priority_from_filings`). Hot alerts go to Telegram as found and the last 24 hours as a morning summary, when
+  `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` are set (Zac's own chat; nothing to prospects). Counts only in the log.
 - **Freshness strip** (top of the Accounts page; `statusLines` / `searchAllowance` in `format.js`): each data
   workflow's last outcome — Accounts list (finder), FX filings, Market moves, Accuracy audit — ok, stale (older than
   its cadence: 30h / 80h / 80h / 8 days) or failed with a link to the run, and the contact searches left this month.

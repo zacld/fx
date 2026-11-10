@@ -154,11 +154,14 @@ jobs:
         run: |
           npm ci --workspace apps/web --no-audit --no-fund > /dev/null
           cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/fx-filings.json
+          # companies the alerts job found holding a charge to an FX provider / for trade finance (ch-alerts.yml)
+          node scripts/alerts-store.mjs get discoveries ../../lead-sourcer/discoveries.json || true
 
       - name: Find companies
         working-directory: lead-sourcer
         timeout-minutes: 200
         env:
+          DISCOVERIES_FILE: discoveries.json
           # Stops starting new companies after this (the rest wait for the next run, their lookups cached),
           # leaving time for the contact search, the cache save and the upload inside the job's 240 minutes.
           FINDER_BUDGET_MIN: "140"

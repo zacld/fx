@@ -476,10 +476,18 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
     moved up from small accounts this year — from the list as fetched from the store (filings-store.mjs get);
     {} when the file is missing or unreadable.
     """
-    try:
-        with open(path, encoding="utf-8") as f:
-            rows = (json.load(f) or {}).get("rows") or []
-    except (OSError, ValueError):
+    rows = []
+    # the FX filings list, plus the companies the alerts job found holding a charge to an FX provider or for trade
+    # finance (tools/ch_alerts.py: discoveries, DISCOVERIES_FILE) — checked like the filings list's strong finds
+    for p in [path, os.environ.get("DISCOVERIES_FILE", "")]:
+        if not p:
+            continue
+        try:
+            with open(p, encoding="utf-8") as f:
+                rows += (json.load(f) or {}).get("rows") or []
+        except (OSError, ValueError):
+            continue
+    if not rows:
         return {}
     # ranked by filed FX proof (less ABROAD_RULES points when the FX is probably run abroad), moved up +25, an FX loss
     # of FX_LOSS_PRIORITY+ +20 — such a loss brings a company in whatever its score (the desk calls FX losses first)

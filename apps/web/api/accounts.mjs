@@ -67,6 +67,9 @@ export function filingsLosses(rows = []) {
     .sort((a, b) => Number(a.fx_gain_loss_gbp) - Number(b.fx_gain_loss_gbp));
 }
 
+export const ALERTS_KEY = "alerts";          // {made_at, count, items}: tools/ch_alerts.py — new FD, charges, owners…
+export const DISCOVERIES_KEY = "discoveries";   // {made_at, rows}: companies found by a charge to an FX provider / trade finance
+export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
 export const CALLS_KEY = "filings/calls";   // {made_at, count, rows}: the Call today tab's candidates from the filings list
 export const CALLS_MAX = 1500;
 // The Recent FX filings list's candidates for the Call today tab (format.js callToday picks the day's 25): turnover
@@ -177,6 +180,10 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
   const params = new URL(req.url).searchParams;
   if (params.get("view") === "losses") {
     return reply((await blobs.get(LOSSES_KEY, { type: "json" })) || { rows: [] }, 200);
+  }
+  if (params.get("view") === "alerts") {
+    const [alerts, found] = await Promise.all([ALERTS_KEY, DISCOVERIES_KEY].map((k) => blobs.get(k, { type: "json" })));
+    return reply({ ...(alerts || { items: [] }), discoveries: found?.rows || [] }, 200);
   }
   if (params.get("view") === "calls") {
     return reply((await blobs.get(CALLS_KEY, { type: "json" })) || { rows: [] }, 200);

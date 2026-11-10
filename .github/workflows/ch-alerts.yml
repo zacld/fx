@@ -1,0 +1,84 @@
+# Alerts: Companies House's streaming feeds (officers, charges, owners) read every few hours for the companies on the
+# Accounts and FX filings lists — new finance director (confirmed in the news), directors leaving, new or paid-off
+# charges, new owners — plus new leads from charges to FX providers / for trade finance (any company). Saved to the
+# site's private store (the Accounts page's Alerts tab); hot ones to Telegram when its secrets are set, and a summary
+# each morning. Secrets: CH_STREAM_KEY (Companies House developer hub: a "Streaming API" key, not the REST key),
+# COMPANIES_HOUSE_API_KEY (names of discovered companies), TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID (optional).
+# Public repo: the log holds counts only.
+name: Alerts
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'   # every 3 hours
+    - cron: '41 6 * * *'     # the morning digest (UTC; ~7am UK in winter, ~8am in summer)
+  workflow_dispatch:
+  push:
+    branches: ['main', 'claude/**']
+    paths:
+      - .github/workflows/ch-alerts.yml
+      - lead-sourcer/tools/ch_alerts.py
+
+concurrency:
+  group: ch-alerts-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: The lists and the last run's state
+        id: state
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web
+          node scripts/alerts-store.mjs tracked ../../lead-sourcer/tracked.json
+          for k in stream alerts discoveries; do node scripts/alerts-store.mjs get $k ../../lead-sourcer/$k.json; done
+      - name: Read the streams
+        if: github.event.schedule != '41 6 * * *'
+        working-directory: lead-sourcer
+        env:
+          CH_STREAM_KEY: ${{ secrets.CH_STREAM_KEY }}
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PYTHONUNBUFFERED: '1'
+        run: |
+          seconds=240; [ "${{ github.event_name }}" = "push" ] && seconds=30
+          python3 tools/ch_alerts.py --tracked tracked.json --state stream.json --alerts alerts.json \
+            --discoveries discoveries.json --seconds $seconds --telegram
+      - name: Save
+        if: github.event.schedule != '41 6 * * *' && github.event_name != 'push'
+        id: save
+        run: |
+          cd apps/web
+          for k in stream alerts discoveries; do node scripts/alerts-store.mjs put $k ../../lead-sourcer/$k.json; done
+      - name: Morning digest
+        if: github.event.schedule == '41 6 * * *'
+        working-directory: lead-sourcer
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 tools/ch_alerts.py --alerts alerts.json --digest
+      - name: Record the outcome (Accounts page freshness strip)
+        if: always() && github.event_name != 'push' && github.event.schedule != '41 6 * * *'
+        run: |
+          state=failed; [ "${{ steps.save.outcome }}" = success ] && state=ok
+          [ -f lead-sourcer/alerts_partial.txt ] && state=partial
+          cd apps/web && node scripts/status.mjs alerts $state "$( [ -f ../../lead-sourcer/alerts_partial.txt ] && echo 'no stream key' )"
