@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -341,6 +341,29 @@ describe("Call today", () => {
     expect(rows[1].why[0]).toBe("new owner Acme Bidco Limited (2026-03)");
     expect(rows[2].onList).toBe(false);
     expect(callToday(list, filings, { today, max: 1 })).toHaveLength(1);
+  });
+  it("fills the lead checklist from the records; CRM checked is a manual tick", () => {
+    const items = leadChecklist(list[1], { L2: { crm: "2026-11-10T09:00:00Z" } });
+    expect(items.map((i) => [i.key, i.state])).toEqual([["owner", "check"], ["band", "yes"], ["abroad", "check"], ["change", "yes"],
+      ["fx", "yes"], ["reason", "yes"], ["crm", "yes"]]);
+    expect(items[3].detail).toBe("new owner Acme Bidco Limited (2026-03)");
+    const abroad = leadChecklist({ company_number: "X", run_from_abroad: "Owned from Sweden (CLOETTA AB) — pitch the UK team", turnover_gbp: "400000000",
+      turnover_regions: "UK £5m · Europe £3m" });
+    expect(abroad.map((i) => i.state)).toEqual(["warn", "no", "yes", "no", "no", "no", "check"]);
+    expect(checklistLine(abroad)).toBe("! Ownership · ✗ Turnover £20m–£300m · ✓ International activity · ✗ Business change / trigger · ✗ Likely FX need · ✗ Reason to contact · ? CRM checked");
+  });
+  it("lists every reason not to progress; serious ones keep a company off Call today", () => {
+    const r = { turnover_gbp: "40000000", filed_fx_score: 60, own_bank_client: "yes", fx_today: "Uses an FX provider: Ebury",
+      accounts_filed_on: "2025-06-01", group_companies_in_list: "2", run_from_abroad: "Owned from Sweden (CLOETTA AB) — pitch the UK team" };
+    expect(reasonsNotToProgress(r, { today }).map((x) => x.text)).toEqual([
+      "Owned from Sweden (CLOETTA AB) — FX may be run by the parent",
+      "Already banks with Investec — check the CRM owner before contact",
+      "Already uses an FX provider: Ebury — a competitive pitch",
+      "Latest accounts filed 1 Jun 2025 — look for newer ones",
+      "2 group companies on your list — one call for the group"]);
+    expect(reasonsNotToProgress({ turnover_gbp: "40000000" }).filter((x) => x.serious).map((x) => x.text)).toEqual(["No FX in its filed accounts"]);
+    const held = { ...list[1], company_number: "L9", turnover_check: "x", qualified: "Out" };
+    expect(callToday([held], [], { today })).toEqual([]);
   });
   it("gives one copy-ready cell: company and finance director, or who to ask for", () => {
     expect(companyAndFd(list[0])).toBe("LOSS LTD – Jane Smith, Finance Director");
