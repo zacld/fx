@@ -17,6 +17,7 @@ from __future__ import annotations
 import html
 import os
 import re
+from collections import Counter
 import time
 import urllib.error
 import urllib.request
@@ -301,7 +302,7 @@ def _entity(context: dict, also: frozenset = frozenset()) -> Optional[str]:
 
 
 def _by_period(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool,
-               basis: Optional[dict] = None, also: frozenset = frozenset()) -> dict[str, float]:
+               basis: Optional[dict] = None, also: frozenset = frozenset(), currency: str = "GBP") -> dict[str, float]:
     """
     {period end: value} of the whole-entity GBP facts for any of `concepts`: the group's (consolidated) figure
     before an undimensioned one before the parent company's own. `basis`, if given, gets {period end: "group" /
@@ -318,7 +319,7 @@ def _by_period(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: boo
         if entity is None:
             continue  # a breakdown (by region, segment…) rather than the total
         measure = scanner.units.get(fact["unit"], fact["unit"])
-        if not measure.upper().endswith("GBP"):
+        if not measure.upper().endswith(currency):
             continue
         value = _fact_value(fact)
         if value is None or (value < 0 and not allow_negative):
@@ -332,13 +333,34 @@ def _by_period(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: boo
 
 
 def _latest(scanner: "_IxbrlScanner", concepts: set[str], allow_negative: bool,
-            basis: Optional[dict] = None, also: frozenset = frozenset()) -> Optional[tuple[float, str]]:
-    """(value, period end) of the latest whole-entity GBP fact for any of `concepts` (the group's when consolidated)."""
-    values = _by_period(scanner, concepts, allow_negative, basis, also)
+            basis: Optional[dict] = None, also: frozenset = frozenset(), currency: str = "GBP") -> Optional[tuple[float, str]]:
+    """(value, period end) of the latest whole-entity fact (GBP unless `currency`) for any of `concepts` (the group's
+    when consolidated)."""
+    values = _by_period(scanner, concepts, allow_negative, basis, also, currency)
     if not values:
         return None
     end = max(values)
     return values[end], end
+
+
+def reporting_currency(scanner: "_IxbrlScanner") -> str:
+    """The currency most of the money figures read are tagged in, when it isn't pounds (a UK company keeping its
+    accounts in dollars or euros), else ""."""
+    counts: Counter = Counter()
+    for fact in scanner.facts:
+        m = re.search(r"iso4217:([A-Z]{3})", scanner.units.get(fact["unit"], fact["unit"]) or "", re.I)
+        if m:
+            counts[m.group(1).upper()] += 1
+    if not counts:
+        return ""
+    code, n = counts.most_common(1)[0]
+    return code if code != "GBP" and n >= 0.6 * sum(counts.values()) else ""
+
+
+# Rough pounds per unit, only to test a foreign-currency filer's size against the band (shown as an estimate, with
+# the rate; the accounts' own figure is kept as filed). Refresh now and then; a 10% swing doesn't change the band test.
+APPROX_GBP_PER = {"USD": 0.78, "EUR": 0.85, "CHF": 0.90, "JPY": 0.0052, "SEK": 0.073, "NOK": 0.071, "DKK": 0.114,
+                  "CAD": 0.56, "AUD": 0.51, "CNY": 0.11, "HKD": 0.10, "SGD": 0.59, "PLN": 0.20, "INR": 0.0092}
 
 
 def _headcount(scanner: "_IxbrlScanner") -> Optional[int]:
@@ -445,7 +467,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-06d"   # + headcounts as shown (never scaled); continuing/discontinued/total rows
+FACTS_VERSION = "2026-11-10a"   # + accounts kept in another currency, subsidiaries abroad, foreign-currency borrowings
 
 
 # Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.
@@ -638,6 +660,8 @@ def extract_facts(document: bytes) -> dict:
         pass
     turnover_basis: dict = {}
     turnover = _latest(scanner, TURNOVER_CONCEPTS, allow_negative=False, basis=turnover_basis)
+    own_ccy = reporting_currency(scanner)
+    foreign = _latest(scanner, TURNOVER_CONCEPTS, allow_negative=False, currency=own_ccy) if own_ccy and not turnover else None
     fx_tag_problem = _screen_fx_tags(scanner)
     fx = _latest(scanner, FX_GAIN_LOSS_CONCEPTS, allow_negative=True)
     cost = _latest(scanner, COST_OF_SALES_CONCEPTS, allow_negative=True)  # some filings tag it as a negative
@@ -681,6 +705,9 @@ def extract_facts(document: bytes) -> dict:
         **incumbent.text_evidence(plain),
         "fx_gain_loss_evidence": "tagged in the accounts" if fx else "",
         "fx_gain_loss_check": "",
+        "reporting_currency": own_ccy,
+        "turnover_foreign": foreign[0] if foreign else None,
+        "turnover_foreign_gbp": round(foreign[0] * APPROX_GBP_PER[own_ccy]) if foreign and own_ccy in APPROX_GBP_PER else None,
     }
     # An FX tag under £1,000 with no scale, in accounts whose tagged figures are in £'000: the filer left the scale
     # off this one tag (Lister Wilder's "597" in a £'000 statement is £597k) — scaled like the rest, and said so.

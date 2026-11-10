@@ -220,6 +220,9 @@ export function fxFacts(r) {
     ["Sales by region", r.turnover_regions, r.turnover_regions_url || r.accounts_url, ""],
     ["Currency sensitivity", before(r.fx_sensitivity), r.fx_notes_url || r.accounts_url, after(r.fx_sensitivity)],
     ["Foreign-currency balances", r.fx_balances, r.fx_notes_url || r.accounts_url, ""],
+    ["Runs in another currency", r.reporting_currency, r.accounts_url, r.reporting_currency_evidence],
+    ["Subsidiaries abroad", r.subsidiaries_abroad, r.accounts_url, r.subsidiaries_abroad_evidence],
+    ["Foreign-currency borrowing", r.fx_borrowings, r.accounts_url, r.fx_borrowings_evidence],
     // the UK parent's consolidated accounts: the group's treasury often holds the FX
     ["Group", r.group_fx, r.group_fx_url, r.group_parent_accounts],
   ].filter(([, v]) => v);
@@ -405,7 +408,8 @@ export const lossGrew = (r) => r.prior !== null && (r.prior >= 0 || r.loss > -r.
 // The desk's sweet spot (Nov 2026): turnover £20m–£300m, filed or the group's. A size estimate alone doesn't count.
 export const CORE_BAND = [20_000_000, 300_000_000];
 export const inCoreBand = (r) => {
-  const t = Number(r.turnover_gbp) || 0;
+  // filed turnover in pounds, else (accounts kept in another currency) its filed turnover at a rough rate
+  const t = Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0;
   return t >= CORE_BAND[0] && t <= CORE_BAND[1];
 };
 
@@ -461,7 +465,8 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
 // Before a lead goes to Sales: who owns it, is it in the band, does it trade abroad, has something changed, does it
 // need FX, is there a reason to call — and every reason it would NOT be an opportunity. Filled from the company's own
 // records; "CRM checked" is Zac's own tick (the bank's CRM stays out of this system). States: yes / no / check / warn.
-const sizeLine = (r) => `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}`;
+const sizeLine = (r) => (r.turnover_gbp ? `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}`
+  : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)} (filed in ${r.reporting_currency?.match(/in (\w+)/)?.[1] || "another currency"})` : "");
 const firstOwner = (r) => r.owner || (r.owners ? `Owned by ${String(r.owners).split(";")[0].trim()}` : "");
 export function leadChecklist(r, checks = {}) {
   const t = Number(r.turnover_gbp) || 0;
@@ -504,6 +509,7 @@ export function reasonsNotToProgress(r, { today = new Date() } = {}) {
   if (r.qualified === "Out") add(`Qualified out${r.qualify_reason ? `: ${r.qualify_reason}` : ""}`, true);
   if (t > CORE_BAND[1]) add(`Turnover ${money(t)} — above £300m (check the desk's upper limit)`, true);
   else if (t && t < CORE_BAND[0]) add(`Turnover ${money(t)} — below £20m`, true);
+  else if (!t && r.turnover_foreign_gbp) add("Turnover filed in another currency — the £ size is an estimate at a rough rate");
   else if (!t) add(r.size_estimate ? `No turnover filed — size is an estimate (${r.size_estimate})` : "No turnover filed — size unknown");
   else if (r.turnover_basis === "group") add(`Sized by its group${r.group_parent ? ` (${r.group_parent})` : ""} — its own size is unknown`);
   if (!fxScore(r)) add("No FX in its filed accounts", true);

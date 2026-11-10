@@ -161,6 +161,8 @@ def shows_fx(facts: dict, fx_today: str) -> bool:
     """
     if facts.get("fx_gain_loss") or facts.get("fx_forwards") or facts.get("fx_sensitivity") or facts.get("fx_currencies"):
         return True
+    if facts.get("reporting_currency") or facts.get("fx_own_currency") or facts.get("fx_subsidiaries") or facts.get("fx_borrowings"):
+        return True
     if fx_today and not fx_today.startswith("Doesn't hedge"):
         return True
     if any(b.get("in") or b.get("ccy") not in ("GBP", "", None) for b in facts.get("fx_balances") or []):
@@ -203,6 +205,18 @@ def size_band(facts: dict) -> Optional[dict]:
         low, high = min(b[0] for b in bands), max(b[1] for b in bands)
     return {"low": low, "high": high,
             "basis": " and ".join(basis) + ("" if agree else " (they point to different sizes)")}
+
+
+def foreign_band(facts: dict) -> Optional[dict]:
+    """A UK company keeping its accounts in another currency: its filed turnover (in that currency) at a rough rate,
+    as a ±10% band — an estimate, the filed figure kept as filed."""
+    gbp, ccy, amount = facts.get("turnover_foreign_gbp"), facts.get("reporting_currency"), facts.get("turnover_foreign")
+    if not gbp or not ccy or not amount:
+        return None
+    rate = accounts.APPROX_GBP_PER.get(ccy)
+    return {"low": gbp * 0.9, "high": gbp * 1.1,
+            "basis": f"its filed turnover of {fx_notes.money(amount, ccy)} (accounts kept in {ccy}) at about "
+                     f"£{rate:g} per {ccy}"}
 
 
 def size_label(band: dict) -> str:
@@ -509,7 +523,7 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
     regime = accounts_regime(plain_text)
     if regime == "small" and turnover is None:
         return None, "read: no turnover filed, accounts prepared as a small company"
-    band = size_band(facts) if turnover is None else None
+    band = (foreign_band(facts) or size_band(facts)) if turnover is None else None
     big_by_band = bool(band and band["high"] >= min_turnover and band["low"] >= SIZE_RULES["keep_low"])
     # No turnover filed and too small (or nothing to size it) on its own figures — but a subsidiary's own accounts
     # say little of its group: one whose filing shows FX waits for a group check (its UK parent's accounts, read
@@ -536,8 +550,10 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         "turnover_gbp": str(round(turnover)) if turnover is not None else "",
         "turnover_basis": facts.get("turnover_basis", ""), "turnover_check": facts.get("turnover_check", ""),
         "size_estimate": size_label(band) if band else "",
-        "size_estimate_basis": (f"from {band['basis']} — not filed turnover (the accounts are filleted: no profit "
-                                f"and loss account)") if band else "",
+        "size_estimate_basis": ((f"from {band['basis']} — not filed turnover in pounds" if facts.get("turnover_foreign_gbp")
+                                 else f"from {band['basis']} — not filed turnover (the accounts are filleted: no profit "
+                                      f"and loss account)")) if band else "",
+        "turnover_foreign_gbp": str(facts["turnover_foreign_gbp"]) if facts.get("turnover_foreign_gbp") and turnover is None else "",
         "size_low_gbp": str(round(band["low"])) if band else "",
         "fx_gain_loss_gbp": str(round(fx)) if fx is not None else "",
         "fx_gain_loss_prior_gbp": str(round(facts["fx_gain_loss_prior"])) if facts.get("fx_gain_loss_prior") is not None else "",

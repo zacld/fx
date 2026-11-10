@@ -847,7 +847,7 @@ function CallCard({ r, n, onOpen, onEmail, onContact, checks, onCrm }) {
             : <a className="co" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer" title="Open on Companies House">{r.company_name}</a>}
           {r.onList ? <span className="chip own">On your Accounts list</span> : <span className="chip">From Recent FX filings</span>}
         </div>
-        <div className="loss-fig"><b className="call-turnover">{money(r.turnover_gbp)}</b><span className="muted">turnover{r.turnover_basis === "group" ? " (group)" : ""}</span></div>
+        <div className="loss-fig"><b className="call-turnover">{r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""}</b><span className="muted">turnover{r.turnover_basis === "group" ? " (group)" : ""}</span></div>
       </div>
       <ul className="call-why">
         {r.why.map((w) => <li key={w}>{w}</li>)}

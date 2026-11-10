@@ -8,4 +8,5 @@
 # (6 Nov 2026: the sensitivity, region and forward-contract rules; again for regions over turnover +5%; 8 Nov: to
 # write the FX losses tab's list, filings/losses; again to write the Call today tab's candidates, filings/calls).
 # Only a change to this file starts anything; any other push of the scanner runs the 20-company test (never saved).
-daily
+# Round 3 (10 Nov 2026): accounts kept in another currency, subsidiaries abroad, foreign-currency borrowings.
+rescan 20

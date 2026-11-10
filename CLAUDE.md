@@ -185,7 +185,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Each keeps its sentence and page (`fx_notes_url`, `turnover_regions_url`);
   amounts stay in the accounts' own currency, never converted. Not: gains or
   losses on the contracts, accounting-policy definitions, freight/commodity
-  forwards, the translation policy. **Filed FX proof** (`filed_fx_score`,
+  forwards, the translation policy. **Discovery signals** (Nov 2026, `fx_notes.read`, every format): accounts kept
+  in another currency — tagged figures mostly in USD/EUR (`accounts.reporting_currency`) or "functional / presentation
+  currency is the US dollar" (`reporting_currency`: UK wages, rent and tax paid in pounds out of foreign income; its
+  filed turnover kept as filed, `turnover_foreign`, and sized at a rough rate, `APPROX_GBP_PER` →
+  `turnover_foreign_gbp`, a ±10% band in the filings scan, `filings.foreign_band`, and counted by `inCoreBand`);
+  subsidiaries incorporated abroad from the subsidiaries note's rows and sentences, never the parent's country
+  (`subsidiaries_abroad`); borrowings in another currency (`fx_borrowings`). Points in `FILED_FX_POINTS`: own
+  currency 35, subsidiaries abroad 20, FX borrowings 20. `FACTS_VERSION` 2026-11-10a: cached accounts are read again
+  gradually (`FINDER_REREAD_MAX`).
+  **Filed FX proof** (`filed_fx_score`,
   `filed_fx`; weights in `FILED_FX_POINTS`): what the company's own filings
   prove — forwards with a size 40, FX provider 30, sensitivity 25, FX
   gain/loss £50k+ 25 (smaller 10), how they handle FX 20, regions 20,
@@ -233,7 +242,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   again at £20m from 7 Nov 2026 — `rescan` in `tools/fx_filings_backfill.txt`: day files after the newest archive,
   then each archive newest first, chained; a company read again keeps its research, `fx_filings.LOOKED_UP`; each
   round tracks its files under its own field, `fx_filings.RESCAN_FIELD` — round 2, 8 Nov: group checks and 24 months
-  of HMRC records).
+  of HMRC records; round 3, 10 Nov: the discovery signals below).
   A cheap screen on each filing's raw text (tagged turnover over the floor, or
   — none tagged — full-accounts-sized and mentioning foreign exchange), then
   the survivors read like the finder's accounts (`accounts.extract_facts`) and

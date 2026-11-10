@@ -573,6 +573,21 @@ class TestIxbrlTurnover(unittest.TestCase):
         self.assertIsNone(accounts.extract_turnover(ixbrl(measure="iso4217:EUR")))
         self.assertIsNone(accounts.extract_turnover(b"<html><body>PDF-style accounts, nothing tagged</body></html>"))
 
+    def test_accounts_kept_in_another_currency(self):
+        # A UK company keeping its accounts in dollars: turnover isn't taken as pounds, the dollar figure is kept as
+        # filed with a rough pounds estimate for the band test, and it scores as FX proof.
+        facts = accounts.extract_facts(ixbrl(measure="iso4217:USD"))
+        self.assertIsNone(facts["turnover"])
+        self.assertEqual(facts["reporting_currency"], "USD")
+        self.assertEqual(facts["turnover_foreign"], 23_412_000.0)
+        self.assertEqual(facts["turnover_foreign_gbp"], round(23_412_000 * accounts.APPROX_GBP_PER["USD"]))
+        self.assertEqual(accounts.extract_facts(ixbrl())["reporting_currency"], "")
+        cols = fx_notes.columns(facts, "ACME LIMITED")
+        self.assertEqual(cols["reporting_currency"], "Accounts kept in dollars (turnover US$23.4m)")
+        band = filings.foreign_band(facts)
+        self.assertEqual(round(band["low"]), round(facts["turnover_foreign_gbp"] * 0.9))
+        self.assertIn("at about £0.78 per USD", band["basis"])
+
     def test_fetch_follows_redirect_without_sending_credentials_to_s3(self):
         seen = {}
 
@@ -2363,6 +2378,32 @@ class TestHooks(unittest.TestCase):
 
 
 class TestFxNotes(unittest.TestCase):
+    def test_discovery_signals_in_the_notes(self):
+        pages = ["""The functional and presentation currency of the company is the US dollar.
+The group has a US$20m term loan with its bank. The ultimate parent company is incorporated in Germany.
+Subsidiary undertakings
+Name                      Country of incorporation   Holding
+Acme Trading GmbH         Germany                    100% Ordinary
+Acme Inc.                 United States              100% Ordinary
+Acme (Shanghai) Co., Ltd  China                      100% Ordinary
+Acme Services Limited     England                    100% Ordinary
+The company also has a subsidiary incorporated in the Netherlands."""]
+        out = fx_notes.read(pages)
+        self.assertEqual(out["fx_own_currency"][0]["code"], "USD")
+        self.assertEqual([(x["country"], x["code"]) for x in out["fx_subsidiaries"]],
+                         [("Germany", "EUR"), ("United States", "USD"), ("China", "CNY"), ("Netherlands", "EUR")])
+        self.assertEqual((out["fx_borrowings"][0]["amount"], out["fx_borrowings"][0]["ccy"]), (20_000_000, "USD"))
+        cols = fx_notes.columns(out, "ACME LIMITED")
+        self.assertEqual(cols["reporting_currency"], "Accounts kept in dollars")
+        self.assertEqual(cols["subsidiaries_abroad"], "Germany (EUR), United States (USD), China (CNY), Netherlands (EUR)")
+        self.assertEqual(cols["fx_borrowings"], "Borrowings of US$20m")
+        score, lines = fx_notes.filed_proof(cols)
+        self.assertEqual(score, 35 + 20 + 20)
+        # pounds sterling isn't another currency; a parent abroad isn't a subsidiary abroad
+        quiet = fx_notes.read(["The functional and presentation currency is pounds sterling. The ultimate parent "
+                               "undertaking is incorporated in the United States."])
+        self.assertEqual((quiet["fx_own_currency"], quiet["fx_subsidiaries"]), ([], []))
+
     """What the accounts' currency notes say: forwards with their size, currencies, balances, sensitivity."""
     NOTE = ("Foreign currency risk\nThe company's principal foreign currency exposures are to the US dollar and the "
             "euro, as purchases from overseas suppliers are invoiced in US dollars. At 31 December 2024 the company had "

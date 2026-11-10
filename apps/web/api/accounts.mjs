@@ -50,7 +50,7 @@ const LOSS_FIELDS = ["company_number", "company_name", "filed", "period_end", "t
   "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_gain_loss_evidence", "accounts_url", "fx_forwards", "fx_today",
   "currency", "currency_source", "currencies_in_accounts", "turnover_regions", "owner", "run_from_abroad", "incumbent_bank",
   "incumbent_bank_url", "lenders", "fd_search_url", "directors", "triggers", "hmrc_trade", "filed_fx_score", "moved_up",
-  "also_filed"];
+  "also_filed", "reporting_currency", "subsidiaries_abroad", "fx_borrowings", "turnover_foreign_gbp", "size_estimate_basis"];
 
 // A workflow's outcome into the status record the Accounts page's freshness strip reads (scripts/status.mjs).
 export function recordStatus(status, job, entry) {
@@ -73,7 +73,7 @@ export const CALLS_MAX = 1500;
 // £20m–£300m (filed or the group's), strong filed FX proof (50+), and an FX loss or a trigger; strongest first.
 export function filingsCalls(rows = []) {
   return rows.filter((r) => {
-    const turnover = Number(r.turnover_gbp) || 0;
+    const turnover = Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0;
     return turnover >= 20_000_000 && turnover <= 300_000_000 && (Number(r.filed_fx_score) || 0) >= 50
       && (Number(r.fx_gain_loss_gbp) < 0 || Boolean(r.triggers));
   })
@@ -189,7 +189,7 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     }
     const filings = await blobs.get(FILINGS_KEY, { type: "json" });
     if (!filings) return reply({ error: "no FX filings scanned yet — they arrive with the next FX filings run" }, 404);
-    const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, ...rest } = filings;
+    const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, files_rescanned_r3: _r3, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
   const [data, marks, noted, status, emails, checks] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY, CHECKS_KEY]

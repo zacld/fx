@@ -41,7 +41,7 @@ def load(path: str) -> dict:
 
 # Files read again in the current rescan round (a new round, a new field: every file once more). Round 2, 8 Nov
 # 2026: no-turnover filings with FX kept for a group check, and 24 months of HMRC records.
-RESCAN_FIELD = "files_rescanned_r2"
+RESCAN_FIELD = "files_rescanned_r3"
 
 # What's looked up per company after the scan (Companies House calls), carried over when its filing is read again.
 LOOKED_UP = ("directors", "director_count", "incumbent_bank", "incumbent_bank_url", "lenders", "owner", "triggers",

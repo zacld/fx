@@ -461,6 +461,109 @@ _STRONG = re.compile(r"principal|exposure|exposed|mainly|primarily|predominantly
                      r"(?:made|priced|invoiced)?\s*in", re.I)
 
 
+# --- Discovery signals (Nov 2026): accounts kept in another currency, subsidiaries abroad, foreign-currency loans ----
+
+# "The functional and presentation currency of the company is the US dollar": a UK company run in another currency
+# pays its UK wages, rent and tax in pounds out of foreign-currency income — it converts every month. Pounds sterling
+# (the usual statement) doesn't count.
+_OWN_CURRENCY = re.compile(
+    r"(?:functional|presentation|presentational|reporting)\s+(?:and\s+(?:functional|presentation|presentational)\s+)?"
+    r"currenc(?:y|ies)\s+(?:of\s+the\s+(?:company|group|entity)\s+)?(?:is|are|has\s+been)\s+(?:the\s+)?"
+    r"(U\.?S\.?\s+dollars?|United\s+States\s+dollars?|US\$|USD|euros?|EUR|Swiss\s+francs?|CHF|Japanese\s+yen|JPY|"
+    r"Swedish\s+kron(?:a|or)|SEK|Norwegian\s+kron(?:e|er)|NOK|Danish\s+kron(?:e|er)|DKK|Canadian\s+dollars?|CAD|"
+    r"Australian\s+dollars?|AUD|Chinese\s+renminbi|renminbi|RMB|CNY|Hong\s+Kong\s+dollars?|HKD|Singapore\s+dollars?|SGD)",
+    re.I)
+_OWN_CODES = [(r"U\.?S|United\s+States|USD|^\$|US\$", "USD"), (r"euro|EUR", "EUR"), (r"Swiss|CHF", "CHF"), (r"yen|JPY", "JPY"),
+              (r"Swedish|SEK", "SEK"), (r"Norwegian|NOK", "NOK"), (r"Danish|DKK", "DKK"), (r"Canadian|CAD", "CAD"),
+              (r"Australian|AUD", "AUD"), (r"renminbi|RMB|CNY", "CNY"), (r"Hong\s+Kong|HKD", "HKD"),
+              (r"Singapore|SGD", "SGD")]
+
+
+def _own_currency_items(sentence: str, page: int) -> list[dict]:
+    m = _OWN_CURRENCY.search(sentence)
+    if not m:
+        return []
+    word = m.group(1)
+    code = next((c for pattern, c in _OWN_CODES if re.search(pattern, word, re.I)), "")
+    kind = "functional" if re.search(r"functional", m.group(0), re.I) and not re.search(r"presentation", m.group(0), re.I) \
+        else "presentation"
+    return [{"code": code, "kind": kind, "sentence": hooks._sentence(sentence, m.start(), m.end(), limit=320),
+             "page": page}] if code else []
+
+
+# Subsidiaries abroad: a UK parent funding and trading with foreign subsidiaries moves money across currencies. From
+# the subsidiaries note (its table rows: "Acme GmbH  Germany  100%  Ordinary") and sentences ("a subsidiary
+# incorporated in the Netherlands") — never the parent's or ultimate controlling party's country.
+_SUBS_HEAD = re.compile(r"subsidiar(?:y|ies)|group\s+undertakings|investments?\s+in\s+(?:group|subsidiar)", re.I)
+_NOT_SUBS = re.compile(r"ultimate|parent\s+(?:company|undertaking|entity)|controlling\s+party|immediate\s+parent|"
+                       r"holding\s+company\s+(?:is|of)|branch(?:es)?\b|associate|joint\s+venture", re.I)
+_ENTITY_SUFFIX = re.compile(r"\b(?:GmbH|S\.A\.S?\.?|SAS|S\.r\.l\.?|S\.R\.L\.?|SRL|S\.p\.A\.?|B\.V\.?|BV|N\.V\.?|NV|"
+                            r"Inc\.?|LLC|L\.L\.C\.|Corp(?:oration)?\b|Pty\b|Ltda|A/S|ApS|Oy\b|AG\b|Sp\.?\s?z\s?o\.?\s?o\.?|"
+                            r"s\.r\.o\.|Kft|SARL|S\.L\.U?|SLU|K\.K\.|Pte\b|Sdn\.?\s+Bhd|Co\.,?\s+Ltd|Private\s+Limited|"
+                            r"GmbH\s*&\s*Co\.?\s*KG|Limitada|S\.A\.)", re.I)
+_SUB_ROW_HINT = re.compile(r"\d{1,3}(?:\.\d+)?\s?%|\bordinary\b|incorporated|registered|country\s+of", re.I)
+_SKIP_COUNTRIES = {"US", "PRC", "AMERICA", "KOREA", "UAE", "DUBAI"}   # ambiguous as words, or covered by a longer name
+_COUNTRY_NAMES = sorted((c for c in hooks.COUNTRY_CURRENCY if c not in _SKIP_COUNTRIES), key=len, reverse=True)
+_COUNTRY_RE = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(c) for c in _COUNTRY_NAMES) + r")(?![A-Za-z])", re.I)
+_INCORPORATED_IN = re.compile(r"(?:incorporated|registered|based|operating|located|domiciled)\s+in\s+(?:the\s+)?$", re.I)
+
+
+def _country_item(match: "re.Match", line: str, page: int) -> dict:
+    name = " ".join(match.group(1).split())
+    code = hooks.COUNTRY_CURRENCY.get(name.upper(), "")
+    name = re.sub(r"^the\s+", "", name, flags=re.I)
+    return {"code": code, "country": name.title() if name.upper() != name or len(name) > 4 else name,
+            "sentence": hooks._sentence(line, match.start(), match.end(), limit=240), "page": page}
+
+
+def subsidiaries_abroad(page: str, number: int) -> list[dict]:
+    """Countries (with their currency) where the accounts place a subsidiary, first seen first."""
+    found: list[dict] = []
+    lines = page.split("\n")
+    window = 0
+    for line in lines:
+        if _SUBS_HEAD.search(line) and not _NOT_SUBS.search(line):
+            window = 40
+            for s in sentences(line):   # "a subsidiary incorporated in Germany" in a sentence of its own
+                for m in _COUNTRY_RE.finditer(s):
+                    if _INCORPORATED_IN.search(s[:m.start()][-40:]) and not _NOT_SUBS.search(s):
+                        found.append(_country_item(m, s, number))
+        elif window:
+            window -= 1
+            if _NOT_SUBS.search(line) or not (_ENTITY_SUFFIX.search(line) or _SUB_ROW_HINT.search(line)):
+                continue
+            for m in _COUNTRY_RE.finditer(line):
+                found.append(_country_item(m, line, number))
+    out, seen = [], set()
+    for item in found:
+        key = item["country"].upper()
+        if item["code"] and key not in seen:
+            seen.add(key)
+            out.append(item)
+    return out[:8]
+
+
+# Borrowings in another currency ("a US$20m term loan", "€15m revolving credit facility", "loans denominated in euros").
+_LOAN_WORDS = re.compile(r"term\s+loans?|revolving\s+(?:credit\s+)?facilit|\bRCF\b|loan\s+notes?|bank\s+loans?|borrowings?|"
+                         r"credit\s+facilit|overdraft", re.I)
+
+
+def _borrowing_items(sentence: str, page: int) -> list[dict]:
+    if not _LOAN_WORDS.search(sentence) or _TRANSLATION_POLICY.search(sentence):
+        return []
+    codes = _codes(sentence)
+    for a in amounts(sentence):
+        if a["prior"] or a["amount"] < 100_000:
+            continue
+        if a["ccy"] != "GBP":
+            return [{"amount": a["amount"], "ccy": a["ccy"],
+                     "sentence": hooks._sentence(sentence, a["start"], a["end"], limit=320), "page": page}]
+    foreign = [c for c in codes if c != "GBP"]
+    if foreign and re.search(r"denominated\s+in|drawn\s+in|held\s+in|repayable\s+in", sentence, re.I):
+        return [{"amount": 0, "ccy": foreign[0], "sentence": hooks._sentence(sentence, 0, 0, limit=320), "page": page}]
+    return []
+
+
 def read(pages: list[str], numbers: Optional[list[int]] = None, table_pages: Optional[list[str]] = None) -> dict:
     """
     The fx_* facts from an accounts document's text, one string per page; `numbers` the pages' numbers (default
@@ -472,9 +575,15 @@ def read(pages: list[str], numbers: Optional[list[int]] = None, table_pages: Opt
     forwards: list[dict] = []
     balances: list[dict] = []
     sensitivity: list[dict] = []
+    own: list[dict] = []
+    loans: list[dict] = []
     for page, number in zip(pages, numbers):
         follows_forward = False
         for s in sentences(page):
+            if not own:
+                own += _own_currency_items(s, number)
+            if len(loans) < 2:
+                loans += _borrowing_items(s, number)
             codes = _codes(s)
             if codes and _TIED.search(s) and not _TRANSLATION_POLICY.search(s):
                 buys, sells = hooks._direction(s)
@@ -496,7 +605,11 @@ def read(pages: list[str], numbers: Optional[list[int]] = None, table_pages: Opt
                 sensitivity += _sensitivity_items(s, number)
     tables = table_pages if table_pages is not None else pages
     document = "\n".join(tables)
+    abroad: list[dict] = []
     for page, number in zip(tables, numbers):
+        if len(abroad) < 8:
+            seen = {a["country"].upper() for a in abroad}
+            abroad += [a for a in subsidiaries_abroad(page, number) if a["country"].upper() not in seen]
         if not any(f["what"] == "table" for f in forwards):
             forwards += _forward_rows(page, number)
         if not any(f["what"] == "hedge reserve" for f in forwards):
@@ -510,10 +623,12 @@ def read(pages: list[str], numbers: Optional[list[int]] = None, table_pages: Opt
     for c in ranked:
         c.pop("strength", None)
     return {"fx_currencies": ranked[:6], "fx_forwards": forwards[:4], "fx_balances": balances[:6],
-            "fx_sensitivity": sensitivity[:3]}
+            "fx_sensitivity": sensitivity[:3], "fx_own_currency": own[:1], "fx_subsidiaries": abroad[:8],
+            "fx_borrowings": loans[:2]}
 
 
-EMPTY = {"fx_currencies": [], "fx_forwards": [], "fx_balances": [], "fx_sensitivity": []}
+EMPTY = {"fx_currencies": [], "fx_forwards": [], "fx_balances": [], "fx_sensitivity": [], "fx_own_currency": [],
+         "fx_subsidiaries": [], "fx_borrowings": []}
 
 
 def merge(facts: dict, more: dict) -> dict:
@@ -529,7 +644,8 @@ def merge(facts: dict, more: dict) -> dict:
 
 COLUMNS = ["filed_fx_score", "filed_fx", "currencies_in_accounts", "currencies_in_accounts_evidence",
            "fx_forwards", "fx_forwards_evidence", "fx_balances", "fx_sensitivity", "turnover_regions",
-           "fx_notes_url", "turnover_regions_url"]
+           "fx_notes_url", "turnover_regions_url", "reporting_currency", "reporting_currency_evidence",
+           "subsidiaries_abroad", "subsidiaries_abroad_evidence", "fx_borrowings", "fx_borrowings_evidence"]
 
 # How much each fact in the company's own filings proves about its FX business (the Accounts page's "Hottest"
 # order, and part of the finder's ranking). Tune against real call outcomes; every row lists what it scored.
@@ -543,6 +659,9 @@ FILED_FX_POINTS = {
     "regions": 20,            # turnover by region with a non-UK region
     "currencies": 15,         # currencies tied to the business in the accounts
     "balances": 15,           # balances held in foreign currency
+    "own_currency": 35,       # accounts kept in another currency: UK costs paid in pounds from foreign income (Nov 2026)
+    "subsidiaries_abroad": 20,  # subsidiaries incorporated abroad: intra-group funding and trade across currencies
+    "fx_borrowings": 20,      # borrowings in another currency
 }
 
 
@@ -610,6 +729,26 @@ def columns(facts: Optional[dict], company_name: str, accounts_url: str = "") ->
     if regions:
         out["turnover_regions"] = " · ".join(f"{r['region']} {hooks.short(r['value'])}" for r in regions[:6])
         out["turnover_regions_url"] = _page_url(accounts_url, f.get("regions_page") or 0, fmt)
+    own = (f.get("fx_own_currency") or [None])[0]
+    code = f.get("reporting_currency") or (own or {}).get("code") or ""
+    if code and code != "GBP":
+        name = hooks.CURRENCY_NAMES.get(code, code)
+        kind = (own or {}).get("kind", "presentation") if not f.get("reporting_currency") else "presentation"
+        size = f" (turnover {money(f['turnover_foreign'], code)})" if f.get("turnover_foreign") else ""
+        out["reporting_currency"] = (f"Accounts kept in {name}s{size}" if kind == "presentation"
+                                     else f"Runs in {name}s (its functional currency)")
+        out["reporting_currency_evidence"] = (f"\"{own['sentence']}\" ({_where(own['page'], source)})" if own
+                                              else f"figures tagged in {code} ({source})")
+    subs = f.get("fx_subsidiaries") or []
+    if subs:
+        out["subsidiaries_abroad"] = ", ".join(f"{x['country']} ({x['code']})" for x in subs[:6])
+        out["subsidiaries_abroad_evidence"] = f"\"{subs[0]['sentence']}\" ({_where(subs[0]['page'], source)})"
+    loans = f.get("fx_borrowings") or []
+    if loans:
+        x = loans[0]
+        out["fx_borrowings"] = (f"Borrowings of {money(x['amount'], x['ccy'])}" if x["amount"]
+                                else f"Borrowings in {hooks.CURRENCY_NAMES.get(x['ccy'], x['ccy'])}s")
+        out["fx_borrowings_evidence"] = f"\"{x['sentence']}\" ({_where(x['page'], source)})"
     first = next((x for x in forwards + balances + [sens] + [c for c in kept] if x), None)
     if first:
         out["fx_notes_url"] = _page_url(accounts_url, first.get("page") or 0, fmt)
@@ -653,4 +792,10 @@ def filed_proof(row: dict) -> tuple[int, list[str]]:
         add("currencies", f"currencies in the accounts: {row['currencies_in_accounts']}")
     if row.get("fx_balances"):
         add("balances", "foreign-currency balances")
+    if row.get("reporting_currency"):
+        add("own_currency", row["reporting_currency"])
+    if row.get("subsidiaries_abroad"):
+        add("subsidiaries_abroad", f"subsidiaries abroad: {row['subsidiaries_abroad']}")
+    if row.get("fx_borrowings"):
+        add("fx_borrowings", row["fx_borrowings"])
     return sum(int(re.search(r"\(\+(\d+)\)$", line).group(1)) for line in lines), lines
