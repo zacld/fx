@@ -103,6 +103,18 @@ describe("/api/accounts", () => {
     expect((await (await post({ company_number: "01234567", crm_checked: false })).json()).checks).toEqual({});
   });
 
+  it("serves the alerts and the leads they found", async () => {
+    const s = memory();
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const view = (auth) => handle(new Request("https://x/api/accounts?view=alerts", { headers: { authorization: auth } }), opts);
+    expect(await (await view("Bearer s3cret")).json()).toEqual({ items: [], discoveries: [] });
+    s.blobs.alerts = { made_at: "x", count: 1, items: [{ id: "a", kind: "new_fd", hot: true }] };
+    s.blobs.discoveries = { rows: [{ company_number: "09999999" }] };
+    const body = await (await view("Bearer s3cret")).json();
+    expect([body.count, body.items[0].kind, body.discoveries.length]).toEqual([1, "new_fd", 1]);
+    expect((await view("Bearer nope")).status).toBe(401);
+  });
+
   it("keeps the filings list's Call today candidates and serves them", async () => {
     const s = memory();
     const opts = { password: "s3cret", store: s, delay: 0 };

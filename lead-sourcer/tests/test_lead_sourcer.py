@@ -24,7 +24,7 @@ import urllib.error
 import urllib.request
 import zipfile
 import xml.etree.ElementTree as ET
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from http.server import HTTPServer
 from unittest import mock
 
@@ -3131,3 +3131,87 @@ class TestFilingsGroupCheck(unittest.TestCase):
         self.assertEqual(filings.group_check(row, [], "key"), {"group_check": "no UK parent"})
         with mock.patch.object(group, "parent_accounts", return_value=None), mock.patch.dict(group.stats, {"skipped": 3}):
             self.assertEqual(filings.group_check(row, self.OWNERS, "key")["group_check"], filings.GROUP_PENDING)
+
+
+class TestChAlerts(unittest.TestCase):
+    """tools/ch_alerts.py: Companies House stream events -> alerts (no network)."""
+
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("ch_alerts", os.path.join(os.path.dirname(__file__), "..", "tools", "ch_alerts.py"))
+        cls.m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.m)
+
+    TODAY = date(2026, 11, 10)
+    TRACKED = {"01234567": "ACME TRADING LIMITED"}
+
+    def ev(self, kind, uri, data):
+        return {"resource_kind": kind, "resource_uri": uri, "resource_id": uri.rsplit("/", 1)[-1], "data": data,
+                "event": {"timepoint": 5, "published_at": "2026-11-10T09:00:00"}}
+
+    def test_officers_charges_and_owners(self):
+        c = self.m.classify
+        new_dir = c(self.ev("company-officers", "/company/01234567/appointments/abc",
+                            {"name": "SMITH, Jane", "officer_role": "director", "appointed_on": "2026-11-03"}), self.TRACKED, self.TODAY)
+        self.assertEqual((new_dir["kind"], new_dir["person"], new_dir["company_name"]), ("new_director", "Jane Smith", "ACME TRADING LIMITED"))
+        left = c(self.ev("company-officers", "/company/01234567/appointments/x",
+                         {"name": "JONES, Bob", "officer_role": "director", "appointed_on": "2019-01-01", "resigned_on": "2026-11-01"}),
+                 self.TRACKED, self.TODAY)
+        self.assertEqual(left["kind"], "director_left")
+        old = c(self.ev("company-officers", "/company/01234567/appointments/y",
+                        {"name": "OLD, Al", "officer_role": "director", "appointed_on": "2015-01-01"}), self.TRACKED, self.TODAY)
+        self.assertIsNone(old)   # an address change on a long-standing director isn't news
+        untracked = c(self.ev("company-officers", "/company/99999999/appointments/z",
+                              {"name": "X, Y", "officer_role": "director", "appointed_on": "2026-11-03"}), self.TRACKED, self.TODAY)
+        self.assertIsNone(untracked)
+        fx = c(self.ev("company-charges", "/company/99999999/charges/c1",
+                       {"persons_entitled": [{"name": "Ebury Partners UK Limited"}], "delivered_on": "2026-11-08", "status": "outstanding"}),
+               self.TRACKED, self.TODAY)
+        self.assertEqual((fx["kind"], fx["tracked"], fx["hot"]), ("fx_charge", False, True))   # any company: a discovery
+        tf = c(self.ev("company-charges", "/company/01234567/charges/c2",
+                       {"persons_entitled": [{"name": "HSBC UK Bank PLC"}], "delivered_on": "2026-11-08", "status": "outstanding",
+                        "particulars": {"description": "Security for trade finance and letters of credit"}}), self.TRACKED, self.TODAY)
+        self.assertEqual(tf["kind"], "fx_charge")
+        bank = c(self.ev("company-charges", "/company/01234567/charges/c3",
+                         {"persons_entitled": [{"name": "Lloyds Bank PLC"}], "delivered_on": "2026-11-08", "status": "outstanding"}),
+                 self.TRACKED, self.TODAY)
+        self.assertEqual((bank["kind"], bank["detail"]), ("new_charge", "in favour of Lloyds Bank PLC"))
+        paid = c(self.ev("company-charges", "/company/01234567/charges/c4",
+                         {"persons_entitled": [{"name": "Barclays Bank PLC"}], "status": "fully-satisfied", "satisfied_on": "2026-11-05",
+                          "delivered_on": "2018-01-01"}), self.TRACKED, self.TODAY)
+        self.assertEqual(paid["kind"], "charge_paid")
+        pe = c(self.ev("company-psc", "/company/01234567/persons-with-significant-control/corporate-entity/p1",
+                       {"kind": "corporate-entity-person-with-significant-control", "name": "ACME BIDCO LIMITED",
+                        "notified_on": "2026-10-20", "identification": {"country_registered": "England"}}), self.TRACKED, self.TODAY)
+        self.assertEqual((pe["kind"], pe["hot"]), ("new_owner_pe", True))
+
+    def test_news_confirms_a_new_finance_director(self):
+        alert = {"kind": "new_director", "company_name": "ACME TRADING LIMITED", "person": "Jane Smith", "detail": "Jane Smith",
+                 "hot": False, "title": "New director"}
+        rss = ("<rss><channel><item><title>Acme Trading appoints Jane Smith as Finance Director - Insider Media</title>"
+               "<pubDate>Mon, 02 Nov 2026 09:00:00 GMT</pubDate><source>Insider Media</source></item></channel></rss>")
+        out = self.m.confirm_fd(alert, fetcher=lambda url: rss, today=self.TODAY)
+        self.assertEqual((out["kind"], out["hot"]), ("new_fd", True))
+        self.assertIn("Finance Director", out["detail"])
+        none = self.m.confirm_fd(alert, fetcher=lambda url: "<rss><channel></channel></rss>", today=self.TODAY)
+        self.assertEqual(none["kind"], "new_director")
+
+    def test_stream_reading_stops_when_caught_up_and_digest(self):
+        now = datetime.now(timezone.utc)
+        lines = [b"\n", json.dumps({"resource_kind": "company-charges", "resource_uri": "/company/01234567/charges/a",
+                                    "event": {"timepoint": 7, "published_at": (now - timedelta(hours=1)).isoformat()}}).encode() + b"\n",
+                 json.dumps({"resource_kind": "company-charges", "resource_uri": "/company/01234567/charges/b",
+                             "event": {"timepoint": 8, "published_at": now.isoformat()}}).encode() + b"\n",
+                 b"never read\n"]
+
+        class Resp(io.BytesIO):
+            pass
+        events, last, why = self.m.read_stream("/charges", "key", 3, 30, opener=lambda req, timeout: Resp(b"".join(lines)))
+        self.assertEqual((len(events), last, why), (2, 8, "caught up"))
+        items = [{"at": now.isoformat()[:19], "title": "Charge to an FX provider", "company_number": "01", "company_name": "A LTD",
+                  "detail": "x", "url": "u", "hot": True},
+                 {"at": now.isoformat()[:19], "title": "New director", "company_number": "02", "hot": False, "url": "u"}]
+        text = self.m.digest(items, now + timedelta(minutes=1))
+        self.assertIn("1 hot, 1 other", text)
+        self.assertIn("1 × new director", text)
+        self.assertEqual(self.m.digest([], now), "")

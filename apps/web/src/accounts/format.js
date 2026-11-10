@@ -541,6 +541,7 @@ export const STATUS_JOBS = [
   ["filings", "FX filings", 80],            // Tue–Sat mornings (a weekend gap)
   ["market", "Market moves", 80],           // weekdays, twice
   ["audit", "Accuracy audit", 8 * 24],      // weekly
+  ["alerts", "Alerts", 8],                  // every 3 hours
 ];
 const ago = (hours) => (hours < 1 ? "under an hour ago" : hours < 48 ? `${Math.round(hours)}h ago` : `${Math.round(hours / 24)} days ago`);
 
@@ -553,6 +554,7 @@ export function statusLines(status, now = new Date()) {
     const lastOk = j.last_ok ? (now - new Date(j.last_ok)) / 36e5 : null;
     const level = j.state === "failed" ? "failed" : lastOk === null || lastOk > maxHours ? "stale" : j.state === "partial" ? "stale" : "ok";
     const text = j.state === "failed" ? `last run failed ${ago((now - new Date(j.at)) / 36e5)}${lastOk !== null ? ` · last good ${ago(lastOk)}` : ""}`
+      : j.state === "partial" && j.note === "no stream key" ? "waiting for its Companies House streaming key (CH_STREAM_KEY)"
       : j.state === "partial" ? `ran out of time ${ago((now - new Date(j.at)) / 36e5)} — carries on next run`
       : `updated ${ago(lastOk ?? 0)}`;
     const blocked = searchBlocked(j);

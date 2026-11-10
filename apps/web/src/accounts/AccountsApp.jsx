@@ -288,6 +288,11 @@ function Accounts({ data, password }) {
 
       <div className="controls">
         <div className="tabs" role="tablist">
+          <button role="tab" aria-selected={filters.view === "alerts"} className={`tab alerts-tab${filters.view === "alerts" ? " on" : ""}`}
+                  title="New finance directors, refinancing, new owners, charges to FX providers — from Companies House, every 3 hours"
+                  onClick={() => set({ section: "", view: "alerts" })}>
+            Alerts
+          </button>
           <button role="tab" aria-selected={filters.view === "calls"} className={`tab calls-tab${filters.view === "calls" ? " on" : ""}`}
                   title={`Today's ${CALL_TODAY_MAX}: £20m–£300m, strong FX proof, a recent FX loss or a trigger — confirmed contacts first`}
                   onClick={() => set({ section: "", view: "calls" })}>
@@ -320,7 +325,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls", "alerts"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -356,7 +361,8 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "calls" ? <CallToday password={password} listRows={open} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
+      {filters.view === "alerts" ? <Alerts password={password} listed={listedNumbers} onOpen={openCompany} />
+       : filters.view === "calls" ? <CallToday password={password} listRows={open} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
                                              checks={checks} onCrm={setCrm} />
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
@@ -802,6 +808,66 @@ function exportLosses(rows) {
   }));
   downloadSheet(out, columnsFor(LOSS_EXPORT, { company_and_fd: "Company – Finance Director", fx_loss_gbp: "FX loss (£)", fx_prior_gbp: "Prior year (£)", turnover_gbp: "Turnover (£)" }, NUMBER_FIELDS),
                 `fx-losses-${new Date().toISOString().slice(0, 10)}.xlsx`, "FX losses");
+}
+
+// The Alerts tab: what changed at the companies on your lists (tools/ch_alerts.py, every 3 hours from Companies
+// House's streaming feeds) — hot ones first — and new leads found by a charge to an FX provider or for trade finance.
+const ALERT_FILTERS = [["", "All"], ["hot", "Hot"], ["new_fd", "New FD"], ["charges", "Charges"], ["owners", "Owners"], ["directors", "Directors"]];
+const alertMatches = (a, f) => !f || (f === "hot" ? a.hot : f === "new_fd" ? a.kind === "new_fd"
+  : f === "charges" ? /charge/.test(a.kind) : f === "owners" ? /owner/.test(a.kind) : /director/.test(a.kind));
+function Alerts({ password, listed, onOpen }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [filter, setFilter] = useState("");
+  const [mineOnly, setMineOnly] = useState(false);
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}?view=alerts`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then(async (res) => { const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`); return body; })
+      .then((body) => { if (live) setData(body); })
+      .catch((e) => { if (live) { setError(e.message); setData({ items: [], discoveries: [] }); } });
+    return () => { live = false; };
+  }, [password]);
+  const items = useMemo(() => (data?.items || []).filter((a) => alertMatches(a, filter) && (!mineOnly || a.tracked))
+    .sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0) || String(b.at).localeCompare(String(a.at))), [data, filter, mineOnly]);
+  if (!data) return <div className="list"><div className="empty">Loading alerts…</div></div>;
+  const open = (a) => (e) => { if (listed.has(a.company_number) && e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(a.company_number); } };
+  return (
+    <div className="list">
+      {error && <div className="save-error" role="alert">Alerts couldn't load ({error}).</div>}
+      <div className="filters filings-bar">
+        <div className="groups" role="group" aria-label="Alert kind">
+          {ALERT_FILTERS.map(([k, label]) => (
+            <button key={k || "all"} aria-pressed={filter === k} className={`grp${filter === k ? " on" : ""}`} onClick={() => setFilter(k)}>{label}</button>
+          ))}
+        </div>
+        <label className="check"><input type="checkbox" checked={mineOnly} onChange={(e) => setMineOnly(e.target.checked)} /> On my lists only</label>
+        <span className="muted">{items.length} alerts{data.made_at ? ` · checked ${filedWhen(String(data.made_at).slice(0, 10))}` : ""}</span>
+      </div>
+      {(data.discoveries || []).length > 0 && (
+        <p className="filings-note">New leads found: <b>{data.discoveries.length}</b> companies with a charge to an FX provider or for trade
+          finance — the finder checks them (size, FX proof, finance contact) in its next run.</p>
+      )}
+      <div className="sheet-wrap">
+        <table className="sheet alerts-sheet">
+          <thead><tr><th>When</th><th>Alert</th><th>Company</th><th>Detail</th></tr></thead>
+          <tbody>
+            {items.map((a) => (
+              <tr key={a.id} className={a.hot ? "hot" : ""}>
+                <td className="num">{a.at ? filedWhen(String(a.at).slice(0, 10)) : ""}</td>
+                <td><span className={`chip${a.hot ? " warn" : ""}`}>{a.title}</span></td>
+                <td><a href={listed.has(a.company_number) ? companyPath(a.company_number) : a.url} onClick={open(a)}
+                       target={listed.has(a.company_number) ? undefined : "_blank"} rel="noreferrer">{a.company_name || a.company_number}</a>
+                  {!a.tracked && <span className="muted"> · new lead</span>}</td>
+                <td>{a.detail} <a href={a.url} target="_blank" rel="noreferrer" className="muted">Companies House ↗</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!items.length && <div className="empty">No alerts yet — they arrive every 3 hours once the Companies House streaming key is set.</div>}
+    </div>
+  );
 }
 
 // The Call today tab: the day's shortlist (format.js callToday) across your Accounts list and the Recent FX filings

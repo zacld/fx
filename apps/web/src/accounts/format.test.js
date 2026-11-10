@@ -299,7 +299,7 @@ describe("freshness strip", () => {
       market: { at: "2026-11-01T06:00:00Z", state: "ok", last_ok: "2026-11-01T06:00:00Z" },
     } };
     const lines = statusLines(status, now);
-    expect(lines.map((l) => [l.job, l.level])).toEqual([["finder", "ok"], ["filings", "failed"], ["market", "stale"], ["audit", "unknown"]]);
+    expect(lines.map((l) => [l.job, l.level])).toEqual([["finder", "ok"], ["filings", "failed"], ["market", "stale"], ["audit", "unknown"], ["alerts", "unknown"]]);
     expect(lines[0].text).toBe("updated 11h ago");
     expect(lines[1].text).toBe("last run failed 46h ago · last good 3 days ago");
     expect(searchAllowance(status)).toBe("Tavily 812 of 1,000 · Serper 40 used (no cap)");
