@@ -374,7 +374,7 @@ describe("Call today", () => {
     const guess = cognismRow({ company_number: "X1", company_name: "G LTD", finance_contact: "A B", finance_contact_confidence: "Guess", no_fd_likely: "yes",
       finance_contact_linkedin: "https://www.google.com/search?q=x" });
     expect([guess.first_name, guess.linkedin_url, guess.role_to_find]).toEqual(["", "", "Managing Director"]);
-    expect(cognismCsv([list[0]]).split("\n")[0]).toBe("company_and_fd,company_name,domain,company_number,postcode,country,first_name,last_name,job_title,linkedin_url,role_to_find,turnover_gbp,why_fx,companies_house_url");
+    expect(cognismCsv([list[0]]).split("\n")[0]).toBe("company_and_fd,company_name,domain,first_name,last_name,job_title,linkedin_url,email,direct_phone,mobile,role_to_find,country,postcode,company_number,turnover_gbp,why_fx,notes,companies_house_url");
   });
   it("gives one copy-ready cell: company and finance director, or who to ask for", () => {
     expect(companyAndFd(list[0])).toBe("LOSS LTD – Jane Smith, Finance Director");

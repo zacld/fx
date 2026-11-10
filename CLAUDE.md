@@ -387,7 +387,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Director", or "ACME LIMITED – ask for the Finance Director" — one cell to copy. "Export for Cognism" (Accounts, Call today, FX
   losses; `cognismRow` / `COGNISM_FIELDS` in `format.js`): company, domain, company number, postcode, the presented
   finance contact split into first / last name with job title and a linkedin.com/in URL found by the searches, else
-  the role to find — the columns Cognism's upload matches on. Zac enriches it in Cognism on the bank's licence; what
+  the role to find — the columns Cognism's upload matches on, with plain headers ("First Name", "Website") and blank
+  Email / Direct Phone / Mobile / Notes columns to fill in. Every export is an Excel file (`apps/web/src/accounts/xlsx.js`,
+  no library: one sheet, bold frozen header with a filter, text as text — nothing runs as a formula, company numbers
+  keep their leading zero — figures as numbers), Nov 2026: a CSV opened in one column and garbled £ / – / ✓. Zac enriches it in Cognism on the bank's licence; what
   Cognism returns stays there and is never loaded back into this system.
 - **Lead checklist + reasons not to progress** (the team's onboarding steer, Nov 2026: quality before volume, protect
   the reputation with Sales, "look at every reason this would not be an opportunity"; `leadChecklist` /

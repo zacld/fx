@@ -253,8 +253,16 @@ export function companyAndFd(r) {
 
 // --- Export for Cognism: only what its upload matches on (company, domain, location, the person if named) -------------
 // Zac enriches this in Cognism on the bank's licence; what Cognism returns stays there, never back in this system.
-export const COGNISM_FIELDS = ["company_and_fd", "company_name", "domain", "company_number", "postcode", "country", "first_name", "last_name",
-  "job_title", "linkedin_url", "role_to_find", "turnover_gbp", "why_fx", "companies_house_url"];
+// In the order Cognism's upload reads them, with plain headers its column matching recognises; Email, Direct phone,
+// Mobile and Notes are left blank to be filled in (by Cognism's enrichment or by hand).
+export const COGNISM_COLUMNS = [
+  ["company_and_fd", "Company – Finance Director", 44], ["company_name", "Company Name", 34], ["domain", "Website", 24],
+  ["first_name", "First Name", 14], ["last_name", "Last Name", 16], ["job_title", "Job Title", 24], ["linkedin_url", "LinkedIn URL", 34],
+  ["email", "Email", 28], ["direct_phone", "Direct Phone", 16], ["mobile", "Mobile", 16], ["role_to_find", "Role to Find", 22],
+  ["country", "Country", 14], ["postcode", "Postcode", 11], ["company_number", "Company Number", 15], ["turnover_gbp", "Turnover (£)", 14, true],
+  ["why_fx", "Why FX", 50], ["notes", "Notes", 30], ["companies_house_url", "Companies House", 40],
+].map(([key, header, width, number]) => ({ key, header, width, number: Boolean(number) }));
+export const COGNISM_FIELDS = COGNISM_COLUMNS.map((c) => c.key);
 const TITLES = /^(mr|mrs|ms|miss|dr|prof|sir|dame|lord|lady)\.?$/i;
 export function splitName(name = "") {
   const words = String(name).replace(/\(.*?\)/g, " ").split(/\s+/).filter((w) => w && !TITLES.test(w));
@@ -269,7 +277,7 @@ export function cognismRow(r) {
   return {
     company_and_fd: companyAndFd(r), company_name: r.company_name || "", domain: domainOf(r.website), company_number: r.company_number || "",
     postcode: r.postcode || "", country: "United Kingdom", first_name: first, last_name: last,
-    job_title: named ? r.finance_contact_role || "" : "", linkedin_url: linkedin,
+    job_title: named ? r.finance_contact_role || "" : "", linkedin_url: linkedin, email: "", direct_phone: "", mobile: "", notes: "",
     role_to_find: r.no_fd_likely ? "Managing Director" : "Finance Director / CFO", turnover_gbp: r.turnover_gbp || "",
     why_fx: why, companies_house_url: r.companies_house_url || `https://find-and-update.company-information.service.gov.uk/company/${r.company_number}`,
   };
