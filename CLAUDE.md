@@ -444,6 +444,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   discovery (`discoveries`, filed FX score 60) that the finder checks first (`DISCOVERIES_FILE`, merged into
   `priority_from_filings`). Hot alerts go to Telegram as found and the last 24 hours as a morning summary, when
   `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` are set (Zac's own chat; nothing to prospects). Counts only in the log.
+  **News and job adverts** (same tool, `--signals`, daily before the digest): Google News RSS headlines (last
+  `NEWS_DAYS` 10) classified by what they say (`headline_kind`) — a finance director / CFO appointed (`news_fd`), or
+  buying / opening / selling abroad, a King's Award for International Trade, UK Export Finance backing (`news_abroad`)
+  — and job adverts for treasury / FX / export roles from Adzuna and Reed's free APIs (`hiring`; secrets
+  `ADZUNA_APP_ID` + `ADZUNA_APP_KEY`, `REED_API_KEY`, skipped when unset; recruiters left out). A company on the
+  lists is matched by name; one not on them is found on Companies House by its exact registered name (active,
+  `LOOKUPS_MAX` 40 a run) and becomes a discovery (filed FX score 50–55). King's Award and UKEF lists come in
+  through the headlines (their gov.uk lists' formats weren't verifiable from here).
 - **Look** (Nov 2026: "clean dark theme, Google-Sheet professional vibe, finances Zint-style"): neutral dark greys,
   gridlines, flat panels, tabular figures (the theme block at the end of `CSS` in `AccountsApp.jsx`). The Accounts list
   defaults to a **Sheet** — a dense sortable grid (`SHEET_COLUMNS` in `format.js`: company, turnover, growth, FX proof,

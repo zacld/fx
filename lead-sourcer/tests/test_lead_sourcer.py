@@ -3215,3 +3215,45 @@ class TestChAlerts(unittest.TestCase):
         self.assertIn("1 hot, 1 other", text)
         self.assertIn("1 × new director", text)
         self.assertEqual(self.m.digest([], now), "")
+
+    RSS = """<?xml version="1.0"?><rss><channel>
+<item><title>Acme Trading appoints Jane Smith as finance director - Insider Media</title><link>https://n/1</link>
+<pubDate>Mon, 09 Nov 2026 08:00:00 GMT</pubDate><source url="x">Insider Media</source></item>
+<item><title>Brightbloom Flowers acquires Dutch grower BV - The Grocer</title><link>https://n/2</link>
+<pubDate>Sun, 08 Nov 2026 08:00:00 GMT</pubDate></item>
+<item><title>Why the pound fell today - BBC</title><link>https://n/3</link><pubDate>Sun, 08 Nov 2026 08:00:00 GMT</pubDate></item>
+<item><title>Old News Ltd appoints CFO - X</title><link>https://n/4</link><pubDate>Mon, 01 Sep 2026 08:00:00 GMT</pubDate></item>
+</channel></rss>"""
+
+    def test_news_signals_match_lists_and_find_new_leads(self):
+        m = self.m
+        self.assertEqual(m.headline_subject("Brightbloom Flowers acquires Dutch grower BV - The Grocer"), "Brightbloom Flowers")
+        self.assertEqual(m.headline_subject("Why the pound fell today - BBC"), "")
+        self.assertEqual(m.headline_subject("Acme CEO appoints new team"), "")
+        items = m.news_items("q", fetcher=lambda url: self.RSS, today=self.TODAY)
+        self.assertNotIn("Old News Ltd appoints CFO - X", [i["headline"] for i in items])   # older than NEWS_DAYS
+        looked = []
+
+        def lookup(name):
+            looked.append(name)
+            return {"company_number": "07654321", "company_name": "BRIGHTBLOOM FLOWERS LIMITED"} if "Brightbloom" in name else None
+        alerts, found = m.news_signals(self.TRACKED, "", fetcher=lambda url: self.RSS, today=self.TODAY, lookup=lookup)
+        kinds = {(a["kind"], a["company_number"], a["tracked"]) for a in alerts}
+        self.assertIn(("news_fd", "01234567", True), kinds)          # on the list: matched by name, no lookup
+        self.assertIn(("news_abroad", "07654321", False), kinds)     # not on the list: found by its exact name
+        self.assertEqual([r["company_number"] for r in found], ["07654321"])
+        self.assertGreaterEqual(found[0]["filed_fx_score"], 50)       # the finder's priority floor
+        self.assertNotIn("Acme Trading", looked)
+
+    def test_job_adverts_skip_recruiters_and_need_keys(self):
+        m = self.m
+        with mock.patch.dict(os.environ, {"ADZUNA_APP_ID": "", "ADZUNA_APP_KEY": "", "REED_API_KEY": ""}):
+            self.assertEqual(m.job_adverts(fetch_json=lambda url, user: self.fail("no call without keys")), [])
+        payload = {"results": [{"employerName": "Hays Specialist Recruitment", "jobTitle": "Treasury Analyst", "date": "05/11/2026"},
+                               {"employerName": "Acme Trading Ltd", "jobTitle": "Treasury Analyst", "date": "05/11/2026", "jobUrl": "j"}]}
+        with mock.patch.dict(os.environ, {"ADZUNA_APP_ID": "", "ADZUNA_APP_KEY": "", "REED_API_KEY": "k"}):
+            ads = m.job_adverts(fetch_json=lambda url, user: payload)
+        self.assertTrue(ads and all(a["employer"] == "Acme Trading Ltd" for a in ads))
+        self.assertEqual(ads[0]["date"], "2026-11-05")
+        alerts, found = m.job_signals(self.TRACKED, "", ads[:1], lookup=lambda n: None)
+        self.assertEqual((alerts[0]["kind"], alerts[0]["company_number"], found), ("hiring", "01234567", []))

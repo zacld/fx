@@ -945,9 +945,13 @@ function FinanceCharts({ r }) {
 
 // The Alerts tab: what changed at the companies on your lists (tools/ch_alerts.py, every 3 hours from Companies
 // House's streaming feeds) — hot ones first — and new leads found by a charge to an FX provider or for trade finance.
-const ALERT_FILTERS = [["", "All"], ["hot", "Hot"], ["new_fd", "New FD"], ["charges", "Charges"], ["owners", "Owners"], ["directors", "Directors"]];
-const alertMatches = (a, f) => !f || (f === "hot" ? a.hot : f === "new_fd" ? a.kind === "new_fd"
-  : f === "charges" ? /charge/.test(a.kind) : f === "owners" ? /owner/.test(a.kind) : /director/.test(a.kind));
+const ALERT_FILTERS = [["", "All"], ["hot", "Hot"], ["new_fd", "New FD"], ["charges", "Charges"], ["owners", "Owners"],
+  ["directors", "Directors"], ["abroad", "Expanding abroad"], ["hiring", "Hiring"]];
+const alertMatches = (a, f) => !f || (f === "hot" ? a.hot : f === "new_fd" ? /^(new|news)_fd$/.test(a.kind)
+  : f === "charges" ? /charge/.test(a.kind) : f === "owners" ? /owner/.test(a.kind) : f === "abroad" ? a.kind === "news_abroad"
+  : f === "hiring" ? a.kind === "hiring" : /director/.test(a.kind));
+const alertSource = (a) => (/companieshouse|company-information/.test(a.url || "") ? "Companies House ↗"
+  : a.kind === "hiring" ? "Job advert ↗" : /^news/.test(a.kind) ? "Article ↗" : "Source ↗");
 function Alerts({ password, listed, onOpen }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -978,8 +982,9 @@ function Alerts({ password, listed, onOpen }) {
         <span className="muted">{items.length} alerts{data.made_at ? ` · checked ${filedWhen(String(data.made_at).slice(0, 10))}` : ""}</span>
       </div>
       {(data.discoveries || []).length > 0 && (
-        <p className="filings-note">New leads found: <b>{data.discoveries.length}</b> companies with a charge to an FX provider or for trade
-          finance — the finder checks them (size, FX proof, finance contact) in its next run.</p>
+        <p className="filings-note">New leads found: <b>{data.discoveries.length}</b> companies not on the lists — a charge to an FX
+          provider or for trade finance, a new finance director or a move abroad in the news, a King's Award or UK Export Finance
+          backing, or a treasury / FX / export job advert. The finder checks them (size, FX proof, finance contact) in its next run.</p>
       )}
       <div className="sheet-wrap">
         <table className="sheet alerts-sheet">
@@ -992,7 +997,7 @@ function Alerts({ password, listed, onOpen }) {
                 <td><a href={listed.has(a.company_number) ? companyPath(a.company_number) : a.url} onClick={open(a)}
                        target={listed.has(a.company_number) ? undefined : "_blank"} rel="noreferrer">{a.company_name || a.company_number}</a>
                   {!a.tracked && <span className="muted"> · new lead</span>}</td>
-                <td>{a.detail} <a href={a.url} target="_blank" rel="noreferrer" className="muted">Companies House ↗</a></td>
+                <td>{a.detail} <a href={a.url} target="_blank" rel="noreferrer" className="muted">{alertSource(a)}</a></td>
               </tr>
             ))}
           </tbody>

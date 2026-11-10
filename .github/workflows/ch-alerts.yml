@@ -63,8 +63,25 @@ jobs:
           seconds=240; [ "${{ github.event_name }}" = "push" ] && seconds=30
           python3 tools/ch_alerts.py --tracked tracked.json --state stream.json --alerts alerts.json \
             --discoveries discoveries.json --seconds $seconds --telegram
+      # Once a day, before the digest: headlines (new finance directors, moves abroad, King's Award and UK Export Finance
+      # winners) and job adverts (treasury / FX / export roles; Adzuna and Reed free keys, optional) — the lists'
+      # companies as alerts, others found on Companies House by exact name as new leads.
+      - name: News and job adverts
+        if: github.event.schedule == '41 6 * * *' || github.event_name != 'schedule'
+        working-directory: lead-sourcer
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          REED_API_KEY: ${{ secrets.REED_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PYTHONUNBUFFERED: '1'
+        run: |
+          tg=--telegram; [ "${{ github.event_name }}" = "push" ] && tg=
+          python3 tools/ch_alerts.py --tracked tracked.json --alerts alerts.json --discoveries discoveries.json --signals $tg
       - name: Save
-        if: github.event.schedule != '41 6 * * *' && github.event_name != 'push'
+        if: github.event_name != 'push'
         id: save
         run: |
           cd apps/web
