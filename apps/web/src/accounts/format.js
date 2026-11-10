@@ -251,6 +251,31 @@ export function companyAndFd(r) {
   return `${r.company_name || ""} – ${who}`;
 }
 
+// --- Export for Cognism: only what its upload matches on (company, domain, location, the person if named) -------------
+// Zac enriches this in Cognism on the bank's licence; what Cognism returns stays there, never back in this system.
+export const COGNISM_FIELDS = ["company_and_fd", "company_name", "domain", "company_number", "postcode", "country", "first_name", "last_name",
+  "job_title", "linkedin_url", "role_to_find", "turnover_gbp", "why_fx", "companies_house_url"];
+const TITLES = /^(mr|mrs|ms|miss|dr|prof|sir|dame|lord|lady)\.?$/i;
+export function splitName(name = "") {
+  const words = String(name).replace(/\(.*?\)/g, " ").split(/\s+/).filter((w) => w && !TITLES.test(w));
+  return words.length < 2 ? { first: words[0] || "", last: "" } : { first: words[0], last: words[words.length - 1] };
+}
+export const domainOf = (website = "") => String(website).trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").split(/[/?#]/)[0].toLowerCase();
+export function cognismRow(r) {
+  const named = presentedContact(r);
+  const { first, last } = named ? splitName(r.finance_contact) : { first: "", last: "" };
+  const linkedin = /linkedin\.com\/in\//i.test(r.finance_contact_linkedin || "") ? r.finance_contact_linkedin : "";
+  const why = [r.recent_fx_loss, parts(r.triggers)[0], r.fx_forwards || r.fx_today, r.currencies_in_accounts].filter(Boolean)[0] || "";
+  return {
+    company_and_fd: companyAndFd(r), company_name: r.company_name || "", domain: domainOf(r.website), company_number: r.company_number || "",
+    postcode: r.postcode || "", country: "United Kingdom", first_name: first, last_name: last,
+    job_title: named ? r.finance_contact_role || "" : "", linkedin_url: linkedin,
+    role_to_find: r.no_fd_likely ? "Managing Director" : "Finance Director / CFO", turnover_gbp: r.turnover_gbp || "",
+    why_fx: why, companies_house_url: r.companies_house_url || `https://find-and-update.company-information.service.gov.uk/company/${r.company_number}`,
+  };
+}
+export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
+
 export const EXPORT_FIELDS = [
   "company_and_fd", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
