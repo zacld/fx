@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cognismCsv, cognismRow, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -384,5 +384,18 @@ describe("Call today", () => {
     expect(companyAndFd(list[0])).toBe("LOSS LTD – Jane Smith, Finance Director");
     expect(companyAndFd({ company_name: "X LTD" })).toBe("X LTD – ask for the Finance Director");
     expect(companyAndFd({ company_name: "Y LTD", no_fd_likely: "yes", finance_contact: "A B", finance_contact_confidence: "Guess" })).toBe("Y LTD – ask for the Managing Director");
+  });
+});
+
+describe("finance charts", () => {
+  it("reads figures, regions, turnover years and the size scale", () => {
+    expect([parseMoney("£56m"), parseMoney("£3.3m"), parseMoney("£850k"), parseMoney("£1.2bn"), parseMoney("12,000")]).toEqual([56e6, 3.3e6, 850e3, 1.2e9, 12000]);
+    expect(Number.isNaN(parseMoney("n/a"))).toBe(true);
+    expect(regionBars({ turnover_regions: "Europe £3.3m · United Kingdom £56m · Rest of the world £0" })).toEqual(
+      [{ region: "United Kingdom", value: 56e6 }, { region: "Europe", value: 3.3e6 }]);
+    expect(turnoverYears({ turnover_gbp: "46000000", turnover_growth: "+15%" })).toEqual({ now: 46e6, prior: 40e6, growth: 15 });
+    expect(turnoverYears({ turnover_gbp: "46000000" }).prior).toBe(0);
+    expect([sizePosition(1e6), sizePosition(1e9), sizePosition(5e10), sizePosition(0)]).toEqual([0, 1, 1, null]);
+    expect(sizePosition(31.6227766e6)).toBeCloseTo(0.5, 3);
   });
 });

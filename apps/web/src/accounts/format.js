@@ -585,3 +585,51 @@ export function searchAllowance(status) {
   if (!Array.isArray(s) || !s.length) return "";
   return s.map((p) => `${p.name[0].toUpperCase()}${p.name.slice(1)} ${p.cap ? `${Math.max(0, p.cap - p.used).toLocaleString()} of ${p.cap.toLocaleString()}` : `${p.used.toLocaleString()} used (no cap)`}`).join(" · ");
 }
+
+// --- Finance charts (the company page) and the sheet view --------------------------------------------------------
+
+// "£56m" / "£3.3m" / "£850k" / "£1.2bn" / "56,000,000" -> pounds; NaN when not a figure.
+export function parseMoney(text = "") {
+  const m = /(-)?£?\s*([\d,]+(?:\.\d+)?)\s*(bn|m|k)?\b/i.exec(String(text));
+  if (!m) return NaN;
+  const n = Number(m[2].replace(/,/g, "")) * ({ bn: 1e9, m: 1e6, k: 1e3 }[(m[3] || "").toLowerCase()] || 1);
+  return m[1] ? -n : n;
+}
+
+// "UK £56m · Europe £3.3m · Rest of the world £1.2m" -> [{region, value}], biggest first.
+export function regionBars(r) {
+  return String(r.turnover_regions || "").split(/\s*·\s*/).map((part) => {
+    const m = /^(.*?)\s+(-?£[\d.,]+\s*(?:bn|m|k)?)$/i.exec(part.trim());
+    return m ? { region: m[1], value: parseMoney(m[2]) } : null;
+  }).filter((x) => x && Number.isFinite(x.value) && x.value > 0).sort((a, b) => b.value - a.value);
+}
+
+// Turnover this year and last (from the growth figure when last year's isn't kept), pounds.
+export function turnoverYears(r) {
+  const now = Number(r.turnover_gbp) || 0;
+  const growth = parseFloat(String(r.turnover_growth || "").replace("+", ""));
+  const prior = Number(r.turnover_prior_gbp) || (now && Number.isFinite(growth) && growth > -100 ? now / (1 + growth / 100) : 0);
+  return { now, prior, growth: Number.isFinite(growth) ? growth : null };
+}
+
+// Where a turnover sits on a log scale from £1m to £1bn (0–1), for the size bar with the £20m–£300m band shaded.
+export const SIZE_SCALE = [1e6, 1e9];
+export const sizePosition = (gbp) => (gbp > 0 ? Math.min(1, Math.max(0, Math.log10(gbp / SIZE_SCALE[0]) / Math.log10(SIZE_SCALE[1] / SIZE_SCALE[0]))) : null);
+
+// The sheet view's columns: [key, header, value(r), sort key(r), number?]
+export const SHEET_COLUMNS = [
+  ["company", "Company", (r) => r.company_name, (r) => r.company_name || ""],
+  ["turnover", "Turnover", (r) => (r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""),
+   (r) => -(Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0), true],
+  ["growth", "Growth", (r) => r.turnover_growth || "", (r) => -(parseFloat(r.turnover_growth) || -1e9), true],
+  ["fxscore", "FX proof", (r) => (fxScore(r) ? String(fxScore(r)) : ""), (r) => -fxScore(r), true],
+  ["fxloss", "FX gain/loss", (r) => (r.fx_gain_loss_gbp ? `${Number(r.fx_gain_loss_gbp) < 0 ? "−" : "+"}${money(Math.abs(Number(r.fx_gain_loss_gbp)))}` : ""),
+   (r) => Number(r.fx_gain_loss_gbp) || 0, true],
+  ["currencies", "Currencies", (r) => r.currencies_in_accounts || r.main_currency || "", (r) => r.currencies_in_accounts || r.main_currency || "~"],
+  ["fx", "How they do FX", (r) => r.fx_forwards || r.fx_today || "", (r) => (r.fx_forwards ? 0 : r.fx_today ? 1 : 2)],
+  ["contact", "Finance contact", (r) => (presentedContact(r) ? `${r.finance_contact}${r.finance_contact_role ? `, ${r.finance_contact_role}` : ""}` : askFor(r)),
+   (r) => CONTACT_GROUPS.indexOf(contactGroup(r))],
+  ["grade", "Grade", (r) => (presentedContact(r) ? r.finance_contact_confidence || "" : ""), (r) => CONTACT_GROUPS.indexOf(contactGroup(r))],
+  ["bank", "Bank", (r) => (r.incumbent_bank || r.main_bank || "").split(":")[0], (r) => (r.incumbent_bank || r.main_bank || "~").toLowerCase()],
+  ["trigger", "Trigger", (r) => parts(r.triggers)[0] || r.recent_fx_loss || "", (r) => (r.triggers || r.recent_fx_loss ? 0 : 1)],
+];
