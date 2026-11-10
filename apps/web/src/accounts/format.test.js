@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { cognismCsv, cognismRow, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -364,6 +364,17 @@ describe("Call today", () => {
     expect(reasonsNotToProgress({ turnover_gbp: "40000000" }).filter((x) => x.serious).map((x) => x.text)).toEqual(["No FX in its filed accounts"]);
     const held = { ...list[1], company_number: "L9", turnover_check: "x", qualified: "Out" };
     expect(callToday([held], [], { today })).toEqual([]);
+  });
+  it("exports the columns Cognism matches on", () => {
+    expect(splitName("Mr Alan James Metcalfe")).toEqual({ first: "Alan", last: "Metcalfe" });
+    expect(domainOf("https://www.acme.co.uk/about")).toBe("acme.co.uk");
+    const row = cognismRow({ ...list[0], website: "www.loss.co.uk", postcode: "LS1 4AP", finance_contact_linkedin: "https://uk.linkedin.com/in/jane-smith" });
+    expect(row).toMatchObject({ company_name: "LOSS LTD", domain: "loss.co.uk", first_name: "Jane", last_name: "Smith", job_title: "Finance Director",
+      linkedin_url: "https://uk.linkedin.com/in/jane-smith", role_to_find: "Finance Director / CFO", country: "United Kingdom" });
+    const guess = cognismRow({ company_number: "X1", company_name: "G LTD", finance_contact: "A B", finance_contact_confidence: "Guess", no_fd_likely: "yes",
+      finance_contact_linkedin: "https://www.google.com/search?q=x" });
+    expect([guess.first_name, guess.linkedin_url, guess.role_to_find]).toEqual(["", "", "Managing Director"]);
+    expect(cognismCsv([list[0]]).split("\n")[0]).toBe("company_and_fd,company_name,domain,company_number,postcode,country,first_name,last_name,job_title,linkedin_url,role_to_find,turnover_gbp,why_fx,companies_house_url");
   });
   it("gives one copy-ready cell: company and finance director, or who to ask for", () => {
     expect(companyAndFd(list[0])).toBe("LOSS LTD – Jane Smith, Finance Director");

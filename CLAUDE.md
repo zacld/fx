@@ -384,7 +384,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   contacts first, then likely, then "ask for the FD", each by FX proof (owned abroad lower) + 30 for the loss + 15 for
   a trigger. Every pick lists why; Contacted drops it and the next moves up; CSV export. Every CSV export (Accounts,
   FX losses, Call today) starts with `company_and_fd` (`companyAndFd`): "ACME LIMITED – Jane Smith, Finance
-  Director", or "ACME LIMITED – ask for the Finance Director" — one cell to copy.
+  Director", or "ACME LIMITED – ask for the Finance Director" — one cell to copy. "Export for Cognism" (Accounts, Call today, FX
+  losses; `cognismRow` / `COGNISM_FIELDS` in `format.js`): company, domain, company number, postcode, the presented
+  finance contact split into first / last name with job title and a linkedin.com/in URL found by the searches, else
+  the role to find — the columns Cognism's upload matches on. Zac enriches it in Cognism on the bank's licence; what
+  Cognism returns stays there and is never loaded back into this system.
 - **Lead checklist + reasons not to progress** (the team's onboarding steer, Nov 2026: quality before volume, protect
   the reputation with Sales, "look at every reason this would not be an opportunity"; `leadChecklist` /
   `reasonsNotToProgress` / `checklistLine` in `format.js`, shown on Call today cards and the company page, columns
