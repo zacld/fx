@@ -2143,7 +2143,7 @@ class TestHttpFrontEnds(unittest.TestCase):
              mock.patch.object(main, "run_pipeline", return_value=[row]) as run:
             status, body = _request(base + "/niches")
             self.assertEqual(status, 200)
-            self.assertEqual(len(body["niches"]), 74)
+            self.assertEqual(len(body["niches"]), 116)
 
             status, body = _request(base + "/run", {"niches": ["no-such-niche"]})
             self.assertEqual(status, 400)
@@ -2167,7 +2167,7 @@ class TestHttpFrontEnds(unittest.TestCase):
         with mock.patch.object(main, "run_pipeline", return_value=[]) as run:
             status, body = _request(base + "/api/run")
             self.assertEqual(status, 200)
-            self.assertEqual(len(body["niches"]), 74)
+            self.assertEqual(len(body["niches"]), 116)
 
             status, body = _request(base + "/api/run", {"min_turnover": 20_000_000})
             self.assertEqual(status, 400)
@@ -3257,3 +3257,57 @@ class TestChAlerts(unittest.TestCase):
         self.assertEqual(ads[0]["date"], "2026-11-05")
         alerts, found = m.job_signals(self.TRACKED, "", ads[:1], lookup=lambda n: None)
         self.assertEqual((alerts[0]["kind"], alerts[0]["company_number"], found), ("hiring", "01234567", []))
+
+
+class TestNiches(unittest.TestCase):
+    """sourcer/niches.py: goods niches from customs codes, measured scores, the finder's order."""
+
+    FLOWERS = {"id": "goods-cut-flowers-plants", "hmrc_codes": ["0602", "0603"]}
+    HORSES = {"id": "goods-bloodstock", "hmrc_codes": ["0101"], "flow": "both"}
+
+    def trade(self, imports, exports=None):
+        return {"import_codes": Counter(imports), "export_codes": Counter(exports or {}),
+                "import_months": {"202601"}, "export_months": set()}
+
+    def test_goods_niche_needs_real_weight(self):
+        from sourcer import niches as nr
+        florist = self.trade({"06031100": 10, "06029050": 6, "39231090": 2})
+        self.assertEqual(nr.goods_niche(florist, [self.FLOWERS, self.HORSES])["id"], "goods-cut-flowers-plants")
+        general = self.trade({"06031100": 3, **{f"8471{i:04d}": 10 for i in range(5)}})   # 3 of 53 code-months
+        self.assertIsNone(nr.goods_niche(general, [self.FLOWERS]))
+        exporter = self.trade({}, {"01012100": 5})
+        self.assertEqual(nr.goods_niche(exporter, [self.HORSES])["id"], "goods-bloodstock")   # flow "both"
+        self.assertIsNone(nr.goods_niche(exporter, [{"id": "x", "hmrc_codes": ["0101"]}]))   # imports only
+        self.assertIsNone(nr.goods_niche(None, [self.FLOWERS]))
+
+    def test_measure_tiers_and_open(self):
+        from sourcer import niches as nr
+        self.assertTrue(nr.is_open({"fx_today": "Doesn't hedge"}))
+        self.assertFalse(nr.is_open({"fx_today": "Uses an FX provider: Ebury"}))
+        self.assertFalse(nr.is_open({"fx_forwards": "to purchase US$2m"}))
+        good = nr.measure(100, 12, 9)
+        self.assertEqual((good["hit_rate"], good["verdict"]), (12.0, "keep"))
+        self.assertEqual(nr.measure(60, 0, 0)["verdict"], "drop")
+        self.assertEqual(nr.measure(8, 1, 1)["verdict"], "few")
+        stats = {"a": good, "b": nr.measure(60, 0, 0), "c": nr.measure(8, 1, 1)}
+        self.assertEqual([nr.tier(i, stats) for i in ("a", "b", "c", "unknown")], [3, 0, 1, 1])
+        self.assertTrue(nr.dropped("b", stats))
+        self.assertFalse(nr.dropped("a", stats))
+
+    def test_niche_hits_measures_sector_goods_and_headings(self):
+        spec = importlib.util.spec_from_file_location("niche_hits", os.path.join(os.path.dirname(__file__), "..", "tools", "niche_hits.py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        niches = [{"id": "wine", "name": "Wine", "sic_codes": ["46342"]}, {"id": "goods-flowers", "name": "Flowers", "hmrc_codes": ["0603"]}]
+        companies = [{"company_number": f"F{i}", "sic_codes": ["46220"], "accounts_category": "full"} for i in range(20)] + \
+                    [{"company_number": f"W{i}", "sic_codes": ["46342"], "accounts_category": "medium"} for i in range(50)] + \
+                    [{"company_number": "SMALL", "sic_codes": ["46342"], "accounts_category": "small"}]
+        trades = {f"F{i}": {"import_codes": Counter({"06031100": 12}), "export_codes": Counter(),
+                            "import_months": {f"2026{m:02d}" for m in range(1, 7)}, "export_months": set()} for i in range(20)}
+        filings = {f"F{i}": {"company_number": f"F{i}", "filed_fx_score": 70, "fx_today": "Doesn't hedge" if i else "Uses forward contracts"}
+                   for i in range(6)}
+        out = m.measure_all(niches, companies, trades, filings)
+        flowers, wine = out["niches"]["goods-flowers"], out["niches"]["wine"]
+        self.assertEqual((flowers["sized"], flowers["strong"], flowers["open"], flowers["kind"]), (20, 6, 5, "goods"))
+        self.assertEqual((wine["sized"], wine["strong"], wine["verdict"]), (50, 0, "drop"))
+        self.assertEqual([(h["heading"], h["covered"]) for h in out["headings"]], [("0603", True)])
