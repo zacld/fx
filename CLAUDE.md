@@ -59,6 +59,12 @@ priorities — is still binding. Only the *file names* changed.
 
 ## Lead sourcer (`lead-sourcer/`) — who it finds
 
+**Steer (10 Nov 2026): discovery, not finances.** Zac: "forget currency pairs etc — we don't need to focus on getting
+their finances any more at all; we have a good level and I will see the rest on my other tools" (Zint, Cognism). Keep
+what's built working, but build nothing more for reading companies' accounts, currency pairs, wallet sizes or charts.
+New work goes into **finding the right companies and the moment to call them**: new sources of FX-heavy companies
+(uncontacted niches), triggers (new FD, refinancing, expansion abroad, hiring), and getting those to Zac fast.
+
 A separate, rule-based Python tool for the standing account list (not
 event-driven). It is still bound by Priorities 1 and 12: no AI calls, no
 LinkedIn/social scraping, no phone lookups, no outreach.
