@@ -34,6 +34,8 @@ jobs:
           cache: npm
       - name: Build main as the deploy does
         working-directory: deployed
+        env:   # the deploy bakes this into the old dashboard's script; the same here so the hashes compare
+          VITE_COMPANIES_HOUSE_API_KEY: ${{ secrets.VITE_COMPANIES_HOUSE_API_KEY }}
         run: npm ci --no-audit --no-fund && npm run build
       - name: Live site against the build
         run: node apps/web/scripts/site-check.mjs https://fx-dashboard-a2y.pages.dev deployed/apps/web/dist

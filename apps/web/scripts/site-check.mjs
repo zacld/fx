@@ -51,6 +51,12 @@ for (const path of [...assets].sort()) {
   if (!same) problems.push(`${path}: ${local ? "differs from the build" : "not in the build"}`);
   if (/\.js$/.test(path)) {
     const js = body.toString("utf8");
+    // An API key in a public script (Companies House keys are UUIDs): counted, never printed.
+    const keys = new Set(js.match(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi) || []);
+    if (keys.size) {
+      console.log(`      key-shaped strings readable in it: ${keys.size} (not printed)`);
+      problems.push(`${path}: ${keys.size} API-key-shaped string(s) readable by anyone who opens the script`);
+    }
     const hosts = new Set([...js.matchAll(/https?:\/\/([a-z0-9.-]+\.[a-z]{2,})/gi)].map((m) => m[1].toLowerCase()));
     console.log(`      hosts named in it: ${[...hosts].sort().join(", ") || "none"}`);
   }
@@ -63,13 +69,28 @@ const ALLOWED = /^(link|script) https:\/\/(fonts\.googleapis\.com|fonts\.gstatic
 for (const k of outside.keys()) if (!ALLOWED.test(k)) problems.push(`loads from an unexpected outside host: ${k}`);
 
 console.log("\nPrivate data locked without the password:");
-const LOCKED = [["/api/accounts", 401], ["/api/accounts?view=ranked", 401], ["/api/leads", 401], ["/api/market", 401],
-  ["/data/leads.json", 404], ["/data/accounts.json", 404]];
-for (const [path, want] of LOCKED) {
+const home = (await get("/")).body;
+const LOCKED = ["/api/accounts", "/api/accounts?view=ranked", "/api/accounts?view=filings", "/api/accounts?view=alerts", "/api/leads"];
+for (const path of LOCKED) {
   const { res } = await get(path, { headers: { authorization: "Bearer not-the-password" } });
-  const ok = res.status === want || (want === 404 && [404, 308].includes(res.status)) || (want === 401 && [401, 403].includes(res.status));
-  console.log(`  ${path.padEnd(30)} ${res.status}  ${ok ? "ok" : "OPEN?"}`);
-  if (!ok) problems.push(`${path} answered ${res.status} without the password (expected ${want})`);
+  const ok = [401, 403].includes(res.status);
+  console.log(`  ${path.padEnd(30)} ${res.status}  ${ok ? "locked" : "OPEN?"}`);
+  if (!ok) problems.push(`${path} answered ${res.status} with a wrong password`);
+}
+// Files that must not be public: a 404, or Cloudflare's fallback to the app page (the file itself isn't there).
+for (const path of ["/data/leads.json", "/data/accounts.json", "/data/fx_companies.csv", "/accounts.json", "/leads.json"]) {
+  const { res, body } = await get(path);
+  const fallback = res.status === 200 && (sha(body) === sha(home) || /^\s*<!doctype html/i.test(body.toString("utf8", 0, 100)));
+  const ok = res.status === 404 || fallback;
+  console.log(`  ${path.padEnd(30)} ${res.status}  ${res.status === 404 ? "not there" : fallback ? "not there (the app page is shown instead)" : "SERVED?"}`);
+  if (!ok) problems.push(`${path} is served publicly (${res.status})`);
+}
+// Public by design: the /moves page's exchange rates (no password) — must carry no company data.
+{
+  const { res, body } = await get("/api/market");
+  const leaks = /company_number|company_name|finance_contact/.test(body.toString("utf8"));
+  console.log(`  /api/market (public: rates only)  ${res.status}  ${leaks ? "HAS COMPANY DATA?" : "rates only"}`);
+  if (leaks) problems.push("/api/market (public) contains company data");
 }
 
 console.log("\nSecurity headers on /accounts:");
