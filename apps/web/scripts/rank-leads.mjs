@@ -4,7 +4,7 @@
 // Prints counts, company names, scores and niche learnings — no people's names (the repo is public).
 import { readFile } from "node:fs/promises";
 import { ALERTS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
-import { nicheLearnings, rankLeads } from "../src/accounts/ranking.js";
+import { filedMonth, nicheLearnings, rankLeads } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
 const [enrichPath] = process.argv.slice(2);
@@ -15,18 +15,18 @@ let filingRows = index?.rows || [];
 for (const { month } of index?.months || []) filingRows = filingRows.concat((await store.get(filingsMonthKey(month), "json"))?.rows || []);
 const listRows = list?.rows || [];
 
-const { rows, ruled_out, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany(alerts?.items || []) });
+const { rows, ruled_out, niche_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany(alerts?.items || []) });
 const learn = nicheLearnings(scored);
 const made_at = new Date().toISOString();
-await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niches: learn });
+await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, niches: learn });
 
 const live = scored.filter((s) => !s.absurd);
 const bucket = (lo, hi) => live.filter((s) => s.score >= lo && s.score < hi).length;
 console.log(`Leads scanned: ${scored.length.toLocaleString()} (Accounts list ${listRows.length.toLocaleString()}, FX filings not on it ${rows.length.toLocaleString()}); ` +
-            `ruled out as absurd ${Object.keys(ruled_out).length.toLocaleString()}`);
+            `ruled out as absurd ${Object.keys(ruled_out).length.toLocaleString()}; list companies relabelled ${Object.keys(niche_of).length.toLocaleString()}`);
 console.log(`Scores: 80+ ${bucket(80, 1e9)} · 60–79 ${bucket(60, 80)} · 40–59 ${bucket(40, 60)} · under 40 ${bucket(-1e9, 40)}`);
 const filedMonths = {};
-for (const r of filingRows) filedMonths[(r.filed || "").slice(0, 7) || "?"] = (filedMonths[(r.filed || "").slice(0, 7) || "?"] || 0) + 1;
+for (const r of filingRows) filedMonths[filedMonth(r)] = (filedMonths[filedMonth(r)] || 0) + 1;
 console.log("FX filings by month filed: " + Object.entries(filedMonths).sort().map(([m, n]) => `${m} ${n}`).join(", "));
 const short = (parts) => parts.slice(0, 4).map(([w, p]) => `${w.split(" (")[0].slice(0, 40)} ${p > 0 ? "+" : ""}${p}`).join(" · ");
 console.log("\nTop 30 leads:");

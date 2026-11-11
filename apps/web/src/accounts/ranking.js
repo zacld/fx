@@ -3,7 +3,7 @@
 // sector — tools/niche_hits.py) and an absurd check (banks, insurers, funds, FX providers themselves, public bodies,
 // not-for-profits, dissolved companies: sourcer/absurd.py) that qualifies it Out. Shared by scripts/rank-leads.mjs
 // (which saves the result as leads/ranked and prints what it learns per niche) and the Accounts page.
-import { filingRow, leadScore, nicheTiers } from "./format.js";
+import { filingRow, filedIso, leadScore, nicheTiers } from "./format.js";
 
 export const FILINGS_SECTION = "From FX filings";
 // What a filings row keeps on the Accounts page (the full row stays in the Recent FX filings tab).
@@ -17,10 +17,20 @@ export const RANKED_FIELDS = [
 const slim = (r) => Object.fromEntries(RANKED_FIELDS.filter((k) => r[k] !== undefined && r[k] !== "").map((k) => [k, r[k]]));
 
 // {rows (filings companies not on the list, slim, with fx_niche / section / qualified), ruled_out ({number: reason}
-// for both lists), scored (every lead with its score, for the report)}.
+// for both lists), niche_of ({number: corrected niche} for list companies), scored (every lead with its score)}.
 export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, today = new Date() } = {}) {
   const tiers = nicheTiers(niches);
   const onList = new Set(listRows.map((r) => r.company_number));
+  // A list company's niche: the corrected one (customs goods, else a sector code that really names a niche) wins over
+  // the finder's older label; a sector niche the correction doesn't confirm (a catch-all code) is dropped.
+  const sectorNames = new Set(Object.values(niches).filter((n) => n?.kind === "sector").map((n) => n.name));
+  const nicheOf = {};
+  for (const r of listRows) {
+    const e = enrich[r.company_number];
+    if (!e) continue;
+    const niche = e.niche || (sectorNames.has(r.fx_niche) ? "" : r.fx_niche || "");
+    if (niche !== (r.fx_niche || "")) nicheOf[r.company_number] = niche;
+  }
   const ruledOut = {};
   const tag = (r) => {
     const e = enrich[r.company_number] || {};
@@ -34,19 +44,22 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
   });
   listRows.forEach(tag);
   const ctx = { niches: tiers, signals, today };
-  const scored = [...listRows.map((r) => ({ ...r, onList: true })), ...rows.map((r) => ({ ...filingRow(r), onList: false }))]
+  const scored = [...listRows.map((r) => ({ ...r, onList: true, fx_niche: nicheOf[r.company_number] ?? r.fx_niche })),
+    ...rows.map((r) => ({ ...filingRow(r), onList: false }))]
     .map((r) => {
-      const niche = r.fx_niche || enrich[r.company_number]?.niche || "";
+      const niche = r.fx_niche || "";
       const s = leadScore({ ...r, fx_niche: niche }, ctx);
       return { company_number: r.company_number, company_name: r.company_name, onList: r.onList, niche, score: s.score,
                parts: s.parts, absurd: ruledOut[r.company_number] || "", band: s.parts.some(([w]) => w.startsWith("Turnover £20m")),
                loss: s.parts.some(([w]) => w.startsWith("FX loss")) };
     })
     .sort((a, b) => b.score - a.score);
-  return { rows, ruled_out: ruledOut, scored };
+  return { rows, ruled_out: ruledOut, niche_of: nicheOf, scored };
 }
 
 // Per niche, from the scored leads: how many, average score, how many score 60+, in the band, with an FX loss, ruled out.
+export const filedMonth = (r) => (filedIso(r) || "").slice(0, 7) || "unknown";
+
 export function nicheLearnings(scored = [], minLeads = 8) {
   const by = new Map();
   for (const s of scored) {

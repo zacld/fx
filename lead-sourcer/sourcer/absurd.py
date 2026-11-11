@@ -16,7 +16,7 @@ from typing import Optional
 # that also lists 64209 "holding company" stays).
 NOT_A_PROSPECT_SIC = (
     ("64110", "the central bank"), ("64191", "a bank"), ("64192", "a building society"),
-    ("6430", "an investment trust, fund or unit trust"), ("64205", "a financial services holding company"),
+    ("6430", "an investment trust, fund or unit trust"),
     ("651", "an insurer"), ("652", "a reinsurer"), ("653", "a pension fund"),
     ("6611", "a financial market"), ("6612", "a securities / FX broker — FX is its product"),
     ("6621", "a loss adjuster"), ("6622", "an insurance broker"), ("6630", "a fund manager"),
@@ -41,7 +41,8 @@ NAME_RULES = (
     (re.compile(r"\bINVESTMENT TRUST\b|\bSICAV\b|\bOEIC\b|\bUNIT TRUST\b|\bFUND (?:LIMITED|LTD|PLC|LP)\b"), "a fund"),
     (re.compile(r"\((?:IN )?(?:LIQUIDATION|ADMINISTRATION)\)"), "in liquidation or administration"),
 )
-NOT_FOR_PROFIT_TYPES = re.compile(r"guarant|charit|community interest|industrial and provident|registered society", re.I)
+# Co-operatives (registered societies) trade commercially — an organic milk co-op exports — so they stay.
+NOT_FOR_PROFIT_TYPES = re.compile(r"guarant|charit|community interest", re.I)
 
 
 def reason(name: str, record: Optional[dict]) -> str:
@@ -61,7 +62,7 @@ def reason(name: str, record: Optional[dict]) -> str:
         if all(hits):
             return f"{hits[0][0].upper()}{hits[0][1:]} (sector {sics[0]}) — not a prospect for FX payments"
     if NOT_FOR_PROFIT_TYPES.search(record.get("type") or ""):
-        return "Not-for-profit (limited by guarantee, charity or society) — not a commercial FX prospect"
+        return "Not-for-profit (limited by guarantee, charity or community interest company) — not a commercial FX prospect"
     for pattern, why in NAME_RULES:
         if pattern.search(up):
             return f"{why[0].upper()}{why[1:]}, by its name — not a prospect for FX payments"

@@ -36,12 +36,13 @@ def measure_all(niches: list[dict], companies: list[dict], trade_by_company: dic
     members: dict[str, set[str]] = defaultdict(set)
     sized_numbers = {c["company_number"] for c in companies if c["accounts_category"] in niche_rules.SIZED}
     by_number = {c["company_number"]: c for c in companies}
-    sic_niches = [n for n in niches if n.get("sic_codes")]
+    catch_all = niche_rules.catch_all_codes(niches)
+    sic_niches = [(n, niche_rules.niche_codes(n, catch_all)) for n in niches if n.get("sic_codes")]
     goods = [n for n in niches if n.get("hmrc_codes")]
     for number in sized_numbers:
         sics = set(by_number[number]["sic_codes"])
-        for n in sic_niches:
-            if sics & set(map(str, n["sic_codes"])):
+        for n, codes in sic_niches:
+            if sics & codes:   # its specific codes only: a catch-all code names no niche
                 members[n["id"]].add(number)
         trade = trade_by_company.get(number)
         if trade and len(trade["import_months"] | trade["export_months"]) >= REGULAR_MONTHS:
@@ -83,10 +84,11 @@ def measure_all(niches: list[dict], companies: list[dict], trade_by_company: dic
 def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches: list[dict]) -> dict:
     """{number: {niche, niche_kind, sic, absurd}} for the Accounts + FX filings lists' companies."""
     out = {}
+    catch_all = niche_rules.catch_all_codes(niches)
     for number, name in tracked.items():
         record = registry.get(number)
         sics = (record or {}).get("sic_codes") or []
-        niche = niche_rules.company_niche(trade_by_company.get(number), sics, niches)
+        niche = niche_rules.company_niche(trade_by_company.get(number), sics, niches, catch_all)
         out[number] = {"niche": niche["name"] if niche else "", "niche_kind": ("goods" if niche.get("hmrc_codes") else "sector") if niche else "",
                        "sic": sics, "absurd": absurd.reason(name, record)}
     return out

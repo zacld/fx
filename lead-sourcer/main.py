@@ -460,6 +460,13 @@ def section_for(company: dict, turnover: Optional[dict], band: tuple[int, int] =
 
 
 # Companies the FX filings scan found (sourcer/filings.py) that no niche or customs record brings in.
+# A company whose only niche codes are catch-alls ("non-specialised wholesale of food") — still a candidate, but no
+# niche's name or measured score is claimed for it (a toothbrush wholesaler isn't a musical instrument distributor).
+BROAD_SECTOR_NICHE = {
+    "id": "_broad_sector", "name": "Broad wholesale / trade sector", "sic_codes": [], "currency_pairs": [],
+    "exposure_reason": "Its sector code is a broad one many kinds of business share; its customs records and filed "
+                       "accounts say what it trades and in which currencies.", "call_angle": "",
+}
 FILINGS_NICHE = {
     "id": "_fx_filings", "name": "FX in their filed accounts", "sic_codes": [], "currency_pairs": [],
     "exposure_reason": "Their own filed accounts show foreign-currency flows (the FX filings scan).", "call_angle": "",
@@ -927,13 +934,14 @@ def run_pipeline(
     # Measured niches (tools/niche_hits.py, NICHE_STATS_FILE): checked in score order, poor ones skipped.
     niche_stats = niche_rules.load_stats(os.environ.get("NICHE_STATS_FILE", ""))
     goods = [n for n in niches if n.get("hmrc_codes")]
+    catch_all = niche_rules.catch_all_codes(niches)
     queue = []
     skipped_niches: Counter = Counter()
     for company in candidates:
         trade = trade_by_company.get(company["company_number"])
         matching_niches = [n for n in niches if set(map(str, n.get("sic_codes", []))) & set(company["sic_codes"])]
         # What its customs records show it trading beats the sector it chose for itself.
-        niche = niche_rules.goods_niche(trade, goods) or (best_niche(company["sic_codes"], matching_niches) if matching_niches else None)
+        niche = niche_rules.goods_niche(trade, goods) or niche_rules.sector_niche(company["sic_codes"], niches, catch_all)
         if niche and niche_rules.dropped(niche["id"], niche_stats):
             skipped_niches[niche["id"]] += 1
             niche = None
@@ -943,6 +951,8 @@ def run_pipeline(
             niche = trader_niche(trade)
         elif company["company_number"] in (priority or {}):
             niche = FILINGS_NICHE
+        elif matching_niches:
+            niche = BROAD_SECTOR_NICHE   # only catch-all codes: a candidate, but no niche claimed
         else:
             continue
         queue.append((niche, company, trade))

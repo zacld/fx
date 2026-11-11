@@ -3343,3 +3343,17 @@ class TestAbsurdLeads(unittest.TestCase):
         self.assertEqual((out["1"]["niche"], out["2"]["niche"], out["2"]["niche_kind"]), ("Wine", "Flowers", "goods"))
         self.assertTrue(out["3"]["absurd"] and out["4"]["absurd"])
         self.assertEqual(out["1"]["absurd"], "")
+
+
+class TestCatchAllCodes(unittest.TestCase):
+    def test_catch_all_codes_name_no_niche(self):
+        from sourcer import niches as nr
+        niches = [{"id": "music", "name": "Musical instruments", "sic_codes": ["46499", "32200"]},
+                  {"id": "toys", "name": "Toys", "sic_codes": ["46499", "47650"]},
+                  {"id": "sport", "name": "Sport", "sic_codes": ["46499", "47640"]},
+                  {"id": "lux", "name": "Luxury", "sic_codes": ["46499", "47770"]},
+                  {"id": "broad", "name": "Broad", "sic_codes": [str(20000 + i) for i in range(12)]}]
+        self.assertEqual(nr.catch_all_codes(niches), {"46499"})
+        self.assertIsNone(nr.sector_niche(["46499"], niches))                       # a toothbrush wholesaler
+        self.assertEqual(nr.sector_niche(["46499", "32200"], niches)["id"], "music")   # makes instruments too
+        self.assertEqual(nr.sector_niche(["20003"], niches)["id"], "broad")

@@ -390,7 +390,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      the share naming no forwards or FX provider (open); score = hit rate × (0.5 + 0.5 × open share). The finder
      (`NICHE_STATS_FILE`) checks niches in score tiers (3 best … 0; unmeasured 1) and skips niches measured as poor
      (verdict "drop": 40+ companies, under 1% hit rate). The run also lists every customs heading by score, flagging
-     ones no goods niche covers yet — where new niches come from. Which sectors to add is measured, not guessed:
+     ones no goods niche covers yet — where new niches come from. **Catch-all codes name no niche** (11 Nov 2026: a
+     toothbrush wholesaler was labelled a musical instrument distributor through 46499): a SIC code 4+ specific niches
+     share (`niches.catch_all_codes`: 46390, 46900, 46690, 46460, 46750, 74900, 46499) is left out of sector-niche
+     matching and measuring; a company with only such codes is still a candidate, as "Broad wholesale / trade sector"
+     (`main.BROAD_SECTOR_NICHE`), after its customs record's trader niche. Which sectors to add is measured, not guessed:
      `tools/sector_hits.py` (workflow "Sector hits", read-only) counts the FX filings scan's strong finds per SIC
      code against each sector's full / medium / group-accounts companies and lists the best-hitting sectors the
      niches don't cover.

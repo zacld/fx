@@ -33,3 +33,16 @@ describe("rankLeads", () => {
     expect(learn.find((n) => n.niche === "(no niche)")).toMatchObject({ leads: 1, ruled_out: 1, avg: 0 });
   });
 });
+
+describe("niche relabelling", () => {
+  it("drops a list company's sector niche the corrected tagging doesn't confirm, and takes a customs one", () => {
+    const niches = { m: { name: "Musical Instrument Distributors", kind: "sector", score: 9, hit_rate: 10, verdict: "keep" } };
+    const list = [{ company_number: "T1", company_name: "TOOTHBRUSHES LTD", fx_niche: "Musical Instrument Distributors" },
+                  { company_number: "T2", company_name: "NUTS LTD", fx_niche: "Proven trader: 08 fruit & nuts" },
+                  { company_number: "T3", company_name: "KEEP LTD", fx_niche: "FX in their filed accounts" }];
+    const enrich = { T1: { niche: "" }, T2: { niche: "Nut, seed & dried fruit importers" }, T3: { niche: "" } };
+    const { niche_of, scored } = rankLeads(list, [], { enrich, niches });
+    expect(niche_of).toEqual({ T1: "", T2: "Nut, seed & dried fruit importers" });
+    expect(scored.find((s) => s.company_number === "T1").parts.some(([w]) => w.startsWith("Niche"))).toBe(false);
+  });
+});

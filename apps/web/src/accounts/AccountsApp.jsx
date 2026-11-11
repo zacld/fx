@@ -107,8 +107,9 @@ function Accounts({ data, password }) {
   const baseRows = useMemo(() => {
     const out = ranked.ruled_out || {};
     const onList = new Set((data.rows || []).map((r) => r.company_number));
-    const listed = [...(data.rows || []).map((r) => (out[r.company_number] && r.qualified !== "Out"
-      ? { ...r, qualified: "Out", qualify_reason: out[r.company_number] } : r)),
+    const relabel = ranked.niche_of || {};
+    const listed = [...(data.rows || []).map((r) => (relabel[r.company_number] !== undefined ? { ...r, fx_niche: relabel[r.company_number] } : r))
+      .map((r) => (out[r.company_number] && r.qualified !== "Out" ? { ...r, qualified: "Out", qualify_reason: out[r.company_number] } : r)),
       ...(ranked.rows || []).filter((r) => !onList.has(r.company_number))
         .map((r, i) => ({ ...filingRow(r), rank: 100000 + i, companies_house_url: chCompanyUrl(r.company_number) }))];
     const known = new Set(listed.map((r) => r.company_number));
