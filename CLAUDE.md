@@ -390,7 +390,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      the share naming no forwards or FX provider (open); score = hit rate × (0.5 + 0.5 × open share). The finder
      (`NICHE_STATS_FILE`) checks niches in score tiers (3 best … 0; unmeasured 1) and skips niches measured as poor
      (verdict "drop": 40+ companies, under 1% hit rate). The run also lists every customs heading by score, flagging
-     ones no goods niche covers yet — where new niches come from. Which sectors to add is measured, not guessed:
+     ones no goods niche covers yet — where new niches come from. **Catch-all codes name no niche** (11 Nov 2026: a
+     toothbrush wholesaler was labelled a musical instrument distributor through 46499): a SIC code 4+ specific niches
+     share (`niches.catch_all_codes`: 46390, 46900, 46690, 46460, 46750, 74900, 46499) is left out of sector-niche
+     matching and measuring; a company with only such codes is still a candidate, as "Broad wholesale / trade sector"
+     (`main.BROAD_SECTOR_NICHE`), after its customs record's trader niche. Which sectors to add is measured, not guessed:
      `tools/sector_hits.py` (workflow "Sector hits", read-only) counts the FX filings scan's strong finds per SIC
      code against each sector's full / medium / group-accounts companies and lists the best-hitting sectors the
      niches don't cover.
@@ -412,6 +416,21 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the Sheet has a Score column, cards and Call today show the breakdown, the company page a "Why it ranks" panel, and
   the exports carry `lead_score` / `lead_reasons`. Call today orders its picks by it. The weights are logged here to be
   recalibrated against what Sales takes.
+- **Every lead ranked** (Zac, 11 Nov 2026: "scan all the leads, rank them in our scoring system, add them to the
+  Accounts page, learn which niches are better — you'll come across some absurd ones"): the "Niche hits" workflow
+  (daily 04:23 UTC) also tags every company on the Accounts and FX filings lists (`alerts-store.mjs tracked`) with its
+  niche (`niches.company_niche`: customs goods first, else its sector), its SIC codes (`bulk.scan(registry=…)`) and an
+  **absurd check** (`sourcer/absurd.py`: dissolved / in liquidation, an FX provider itself, banks, building societies,
+  funds and trusts, insurers, pension schemes, brokers, fund managers, public bodies, trade bodies, not-for-profits —
+  by sector only when all its codes are such, else by type or registered name), then `scripts/rank-leads.mjs` scores
+  every lead with the page's own lead score (`src/accounts/ranking.js` `rankLeads`) and saves `leads/ranked` (GET
+  `?view=ranked`: the filings companies not on the list, slim — `RANKED_FIELDS` — with their niche; `ruled_out` for
+  both lists; `niches`, the per-niche learnings: leads, average score, 60+, in the band, FX loss, ruled out). The page
+  adds those companies to the Accounts list (section "From FX filings", their own company page) and qualifies the
+  absurd ones Out with the reason (seen under "Show qualified out"). The run prints the top 30, the niches by average
+  lead score and the absurd ones by reason. **Niches tab**: each niche's measured hit rate, open share, score and
+  verdict beside its leads' numbers, sortable; clicking a niche searches the list for it; uncovered customs headings
+  listed under it.
 - **Call today tab** (Accounts page, first tab; `callToday` / `CALL_RULES` in `format.js`): the day's 25 across the
   Accounts list and the Recent FX filings list (its candidates precomputed at save as `filings/calls`, `filingsCalls`
   in `api/accounts.mjs`, GET `/api/accounts?view=calls`): turnover £20m–£300m (filed or group), filed FX proof 50+, not

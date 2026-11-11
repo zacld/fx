@@ -442,7 +442,7 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
     if (reasonsNotToProgress(r, { today }).some((x) => x.serious)) return null;
     const loss = -Number(r.fx_gain_loss_gbp) || 0;
     const filedOn = filedIso(r);
-    const recentLoss = onList ? Boolean(r.recent_fx_loss) : loss >= rules.minLoss && Boolean(filedOn) && filedOn >= since;
+    const recentLoss = Boolean(r.recent_fx_loss) || (loss >= rules.minLoss && Boolean(filedOn) && filedOn >= since);
     const trigger = parts(r.triggers)[0] || "";
     if (!recentLoss && !trigger) return null;
     const fx = r.fx_forwards || r.fx_today || r.currencies_in_accounts || r.turnover_regions || "";

@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FILINGS_SECTION } from "./ranking.js";
 import { leadLine, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
@@ -94,15 +95,30 @@ function Accounts({ data, password }) {
   const [contacted, setContacted] = useState(data.contacted || {});
   // Companies contacted but no longer in the latest scan stay on the Contacted tab (their follow-ups still matter),
   // shown with what the marks remember.
+  // Every other lead we've scanned, ranked (leads/ranked: the Recent FX filings list's companies not on this list, and
+  // the absurd ones — banks, funds, FX providers, dissolved — qualified Out on both).
+  const [ranked, setRanked] = useState({ rows: [], ruled_out: {}, niches: [] });
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}?view=ranked`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) setRanked(body); }).catch(() => {});
+    return () => { live = false; };
+  }, [password]);
   const baseRows = useMemo(() => {
-    const listed = data.rows || [];
+    const out = ranked.ruled_out || {};
+    const onList = new Set((data.rows || []).map((r) => r.company_number));
+    const relabel = ranked.niche_of || {};
+    const listed = [...(data.rows || []).map((r) => (relabel[r.company_number] !== undefined ? { ...r, fx_niche: relabel[r.company_number] } : r))
+      .map((r) => (out[r.company_number] && r.qualified !== "Out" ? { ...r, qualified: "Out", qualify_reason: out[r.company_number] } : r)),
+      ...(ranked.rows || []).filter((r) => !onList.has(r.company_number))
+        .map((r, i) => ({ ...filingRow(r), rank: 100000 + i, companies_house_url: chCompanyUrl(r.company_number) }))];
     const known = new Set(listed.map((r) => r.company_number));
     const dropped = Object.entries(contacted).filter(([n]) => !known.has(n)).map(([n, mark]) => ({
       company_number: n, company_name: mark.name || `Company ${n}`, rank: 99999, dropped: true,
       companies_house_url: `https://find-and-update.company-information.service.gov.uk/company/${n}`,
     }));
     return [...listed, ...dropped];
-  }, [data.rows, contacted]);
+  }, [data.rows, contacted, ranked]);
   // The lead score's inputs: each measured niche's tier and each company's recent alerts (?view=signals).
   const [signals, setSignals] = useState({ niches: {}, signals: {} });
   useEffect(() => {
@@ -244,7 +260,7 @@ function Accounts({ data, password }) {
     return filters.view === "contacted" ? sortFollowUps(matched, contacted) : sortRows(matched, sort);
   }, [rows, filters, sort, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const open = rows.filter((r) => !contacted[r.company_number]);
-  const listedNumbers = useMemo(() => new Set((data.rows || []).map((r) => r.company_number)), [data.rows]);
+  const listedNumbers = useMemo(() => new Set(rows.filter((r) => !r.dropped).map((r) => r.company_number)), [rows]);
   const groupCounts = useMemo(() => {
     const base = filterRows(rows, { ...ctx, contact: "" });
     return Object.fromEntries(["", ...CONTACT_GROUPS].map((g) => [g, g ? base.filter((r) => contactGroup(r) === g).length : base.length]));
@@ -312,7 +328,7 @@ function Accounts({ data, password }) {
                   onClick={() => set({ section: "", view: "calls" })}>
             Call today
           </button>
-          {["", ...(data.sections || [])].map((s) => {
+          {["", ...(data.sections || []), ...(ranked.rows?.length ? [FILINGS_SECTION] : [])].map((s) => {
             const on = !filters.view && filters.section === s;
             return (
               <button key={s || "all"} role="tab" aria-selected={on} className={`tab${on ? " on" : ""}`}
@@ -334,12 +350,16 @@ function Accounts({ data, password }) {
                   title="Companies whose latest accounts show a loss on currency" onClick={() => set({ section: "", view: "losses" })}>
             FX losses
           </button>
+          <button role="tab" aria-selected={filters.view === "niches"} className={`tab niches-tab${filters.view === "niches" ? " on" : ""}`}
+                  title="Which niches prove FX most often, and how their leads score" onClick={() => set({ section: "", view: "niches" })}>
+            Niches
+          </button>
           <button role="tab" aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
                   title="The Investec email for each company you send here" onClick={() => set({ section: "", view: "email" })}>
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -384,6 +404,8 @@ function Accounts({ data, password }) {
        : filters.view === "calls" ? <CallToday password={password} listRows={open} lead={leadCtx} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
                                              checks={checks} onCrm={setCrm} />
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
+       : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []}
+                                             headings={signals.headings || []} onPick={(name) => set({ section: "", view: "", query: name })} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
       <div className="list">
@@ -1046,6 +1068,53 @@ function CallToday({ password, listRows, lead, contacted, onContact, onOpen, onE
       </div>
       {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} checks={checks} onCrm={onCrm} />)}
       {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or Recent FX filings tabs.</div>}
+    </div>
+  );
+}
+
+// The Niches tab: each niche's measured FX hit rate (tools/niche_hits.py) beside how its leads score (leads/ranked) —
+// which niches are worth the time. Clicking a niche searches the list for it.
+function Niches({ measured, madeAt, learned, headings, onPick }) {
+  const [by, setBy] = useState("score");
+  const learnedBy = Object.fromEntries(learned.map((n) => [n.niche, n]));
+  const rows = Object.values(measured).filter((m) => m?.name).map((m) => ({ ...m, ...(learnedBy[m.name] || {}) }));
+  const key = { score: (r) => -(r.score || 0), avg: (r) => -(r.avg || 0), leads: (r) => -(r.leads || 0), open: (r) => -(r.open_share || 0) }[by];
+  rows.sort((a, b) => key(a) - key(b));
+  const pct = (v) => (v === undefined ? "" : `${Math.round(v * (v > 1 ? 1 : 100))}%`);
+  if (!rows.length) return <div className="list"><div className="empty">No niche measurement yet — it arrives with the next "Niche hits" run.</div></div>;
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <select className="input" value={by} onChange={(e) => setBy(e.target.value)} aria-label="Sort niches">
+          <option value="score">Sort: measured score (FX hit rate × open)</option>
+          <option value="avg">Sort: average lead score</option>
+          <option value="leads">Sort: most leads</option>
+          <option value="open">Sort: most still open (no hedging named)</option>
+        </select>
+        <span className="muted">{rows.length} niches · measured {madeAt ? filedWhen(madeAt.slice(0, 10)) : ""} · hit rate = share of the niche's
+          full / medium / group-accounts companies whose filings prove FX; open = of those, none naming forwards or an FX provider</span>
+      </div>
+      <div className="sheet-wrap">
+        <table className="sheet">
+          <thead><tr><th>Niche</th><th>Kind</th><th className="num">FX hit rate</th><th className="num">Open</th><th className="num">Score</th>
+            <th>Verdict</th><th className="num">Leads</th><th className="num">Avg lead score</th><th className="num">60+</th><th className="num">£20–300m</th><th className="num">FX loss</th><th className="num">Ruled out</th></tr></thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.name} className={r.verdict === "drop" ? "muted-row" : ""}>
+                <td><button className="linkish" onClick={() => onPick(r.name)} title="Show its companies">{r.name}</button></td>
+                <td>{r.kind}</td><td className="num">{r.hit_rate}%</td><td className="num">{pct(r.open_share)}</td><td className="num">{r.score}</td>
+                <td>{r.verdict === "drop" ? "Skipped by the finder" : r.verdict === "few" ? "Too few to tell" : ""}</td>
+                <td className="num">{r.leads ?? ""}</td><td className="num">{r.avg ?? ""}</td><td className="num">{r.strong ?? ""}</td>
+                <td className="num">{r.band ?? ""}</td><td className="num">{r.loss ?? ""}</td><td className="num">{r.ruled_out || ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {headings.some((h) => !h.covered) && (
+        <p className="filings-note">Customs headings no goods niche covers yet, best first: {headings.filter((h) => !h.covered).slice(0, 12)
+          .map((h) => `${h.heading} ${h.chapter} (${h.hit_rate}% prove FX, ${h.strong} companies)`).join(" · ")}</p>
+      )}
     </div>
   );
 }
@@ -1722,6 +1791,9 @@ a{color:var(--accent)}
 .viz-svg .lbl{fill:var(--text);font-weight:600}
 .viz-svg .tick{fill:var(--muted);font-size:11px}
 @media(max-width:700px){.sheet-wrap{max-height:none}.viz-grid{grid-template-columns:1fr}}
+.linkish{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;font:inherit;text-align:left}
+.linkish:hover{text-decoration:underline}
+.sheet tr.muted-row td{color:var(--muted)}
 .lead-line{display:flex;gap:8px;align-items:baseline;margin:6px 0;font-size:12px;line-height:1.5;min-width:0}
 .lead-line .muted{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .chip.lead-chip{background:rgba(138,180,248,.16);color:var(--accent);font-weight:600;flex:none;font-variant-numeric:tabular-nums}

@@ -1,4 +1,7 @@
 name: Niche hits
+# (and lead ranking: every company the Accounts and FX filings lists hold gets its niche, sector codes and an absurd
+# check — banks, insurers, funds, FX providers, public bodies, not-for-profits, dissolved — then every lead is scored
+# with the Accounts page's lead score, apps/web/scripts/rank-leads.mjs, saved as leads/ranked for the page.)
 
 # How good each niche is, measured (lead-sourcer/tools/niche_hits.py): for every niche — sector niches and goods niches
 # (what HMRC's customs lists show companies importing) — and every customs heading, how many full / medium / group
@@ -9,7 +12,7 @@ name: Niche hits
 
 on:
   schedule:
-    - cron: '23 4 * * 0'     # Sunday morning, before the evening finder run
+    - cron: '23 4 * * *'     # every morning: after the evening finder run, before the day
   workflow_dispatch:
   push:
     branches: ['main', 'claude/**']
@@ -18,6 +21,9 @@ on:
       - lead-sourcer/tools/niche_hits.py
       - lead-sourcer/sourcer/niches.py
       - lead-sourcer/config/fx_niches.json
+      - lead-sourcer/sourcer/absurd.py
+      - apps/web/scripts/rank-leads.mjs
+      - apps/web/src/accounts/ranking.js
 
 concurrency:
   group: niche-hits
@@ -62,16 +68,20 @@ jobs:
           restore-keys: |
             hmrc-v2-
             hmrc-traders-
-      - name: The FX filings list
+      - name: The FX filings list and every tracked company
         run: |
           npm ci --workspace apps/web --no-audit --no-fund > /dev/null
           cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/fx-filings.json
+          node scripts/alerts-store.mjs tracked ../../lead-sourcer/tracked.json
       - name: Measure the niches
         working-directory: lead-sourcer
         env:
           PYTHONUNBUFFERED: "1"
         run: |
           zip=$(ls -t ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip 2>/dev/null | head -1 || true)
-          python3 tools/niche_hits.py --filings fx-filings.json --out niche_stats.json ${zip:+--bulk "$zip"}
+          python3 tools/niche_hits.py --filings fx-filings.json --out niche_stats.json --tracked tracked.json \
+            --enrich-out enrich.json ${zip:+--bulk "$zip"}
       - name: Save
         run: cd apps/web && node scripts/alerts-store.mjs put niches ../../lead-sourcer/niche_stats.json
+      - name: Rank every lead
+        run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json

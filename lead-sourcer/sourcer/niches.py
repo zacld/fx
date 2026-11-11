@@ -62,6 +62,38 @@ def goods_niche(trade: Optional[dict], niches: list[dict]) -> Optional[dict]:
     return hits[0][1] if hits else None
 
 
+BROAD_NICHE_CODES = 10      # a sector niche with this many codes is the measured broad one, not a specific niche
+CATCH_ALL_SHARE = 4         # a code this many specific niches share ("non-specialised wholesale of food", "other
+                            # household goods") names no niche: a toothbrush wholesaler isn't a musical instrument one
+
+
+def catch_all_codes(niches: list[dict]) -> set[str]:
+    counts: Counter = Counter(str(c) for n in niches if 0 < len(n.get("sic_codes") or []) < BROAD_NICHE_CODES
+                              for c in n["sic_codes"])
+    return {c for c, k in counts.items() if k >= CATCH_ALL_SHARE}
+
+
+def niche_codes(niche: dict, catch_all: set[str]) -> set[str]:
+    """The SIC codes that really name this niche (catch-all codes left out)."""
+    return set(map(str, niche.get("sic_codes") or [])) - catch_all
+
+
+def sector_niche(sics: list[str], niches: list[dict], catch_all: Optional[set[str]] = None) -> Optional[dict]:
+    """The SIC niche sharing the most specific codes with the company; the broad measured one only when nothing narrower
+    fits; None when only catch-all codes match."""
+    catch_all = catch_all_codes(niches) if catch_all is None else catch_all
+    codes = set(sics or [])
+    fits = [n for n in niches if codes & niche_codes(n, catch_all)]
+    if not fits:
+        return None
+    return max(fits, key=lambda n: (len(n["sic_codes"]) < BROAD_NICHE_CODES, len(codes & niche_codes(n, catch_all))))
+
+
+def company_niche(trade: Optional[dict], sics: list[str], niches: list[dict], catch_all: Optional[set[str]] = None) -> Optional[dict]:
+    """What its customs records show it trading, else the sector it chose for itself."""
+    return goods_niche(trade, [n for n in niches if n.get("hmrc_codes")]) or sector_niche(sics, niches, catch_all)
+
+
 def is_open(row: dict) -> bool:
     """No forward contracts and no FX provider named in its filings: probably paying the bank's rate."""
     return not (row.get("fx_forwards") or _SERVED.search(row.get("fx_today") or ""))

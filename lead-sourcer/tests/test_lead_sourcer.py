@@ -3311,3 +3311,49 @@ class TestNiches(unittest.TestCase):
         self.assertEqual((flowers["sized"], flowers["strong"], flowers["open"], flowers["kind"]), (20, 6, 5, "goods"))
         self.assertEqual((wine["sized"], wine["strong"], wine["verdict"]), (50, 0, "drop"))
         self.assertEqual([(h["heading"], h["covered"]) for h in out["headings"]], [("0603", True)])
+
+
+class TestAbsurdLeads(unittest.TestCase):
+    """sourcer/absurd.py: leads no FX desk would call, whatever their filings show."""
+
+    def test_reasons(self):
+        from sourcer import absurd
+        live = {"status": "Active", "type": "Private Limited Company"}
+        self.assertIn("FX provider", absurd.reason("EBURY PARTNERS UK LIMITED", {**live, "sic_codes": ["66190"]}))
+        self.assertIn("a bank".capitalize(), absurd.reason("X BANK PLC", {**live, "sic_codes": ["64191"]}))
+        self.assertEqual(absurd.reason("ACME HOLDINGS LIMITED", {**live, "sic_codes": ["64209", "46390"]}), "")   # a trading group
+        self.assertIn("Not trading", absurd.reason("X LTD", {"status": "Liquidation", "type": "", "sic_codes": ["46390"]}))
+        self.assertIn("dissolved", absurd.reason("Y LTD", None))
+        self.assertIn("Not-for-profit", absurd.reason("UNI", {"status": "Active", "type": "PRI/LBG/NSC (Private, Limited by guarantee)", "sic_codes": ["85421"]}))
+        self.assertEqual(absurd.reason("WEST BANK FOODS LIMITED", {**live, "sic_codes": ["46390"]}), "")
+        self.assertIn("pension", absurd.reason("ACME PENSION TRUSTEES LIMITED", {**live, "sic_codes": ["82990"]}).lower())
+
+    def test_enrich_tracked(self):
+        spec = importlib.util.spec_from_file_location("niche_hits", os.path.join(os.path.dirname(__file__), "..", "tools", "niche_hits.py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        niches = [{"id": "broad", "name": "Broad", "sic_codes": [str(46000 + i) for i in range(12)]},
+                  {"id": "wine", "name": "Wine", "sic_codes": ["46003", "46342"]},
+                  {"id": "goods-flowers", "name": "Flowers", "hmrc_codes": ["0603"]}]
+        registry = {"1": {"status": "Active", "type": "Private Limited Company", "sic_codes": ["46003"]},
+                    "2": {"status": "Active", "type": "Private Limited Company", "sic_codes": ["46003"]},
+                    "3": {"status": "Active", "type": "Private Limited Company", "sic_codes": ["64191"]}}
+        trades = {"2": {"import_codes": Counter({"06031100": 9}), "export_codes": Counter(), "import_months": {"202601"}, "export_months": set()}}
+        out = m.enrich_tracked({"1": "A LTD", "2": "B LTD", "3": "C BANK PLC", "4": "GONE LTD"}, registry, trades, niches)
+        self.assertEqual((out["1"]["niche"], out["2"]["niche"], out["2"]["niche_kind"]), ("Wine", "Flowers", "goods"))
+        self.assertTrue(out["3"]["absurd"] and out["4"]["absurd"])
+        self.assertEqual(out["1"]["absurd"], "")
+
+
+class TestCatchAllCodes(unittest.TestCase):
+    def test_catch_all_codes_name_no_niche(self):
+        from sourcer import niches as nr
+        niches = [{"id": "music", "name": "Musical instruments", "sic_codes": ["46499", "32200"]},
+                  {"id": "toys", "name": "Toys", "sic_codes": ["46499", "47650"]},
+                  {"id": "sport", "name": "Sport", "sic_codes": ["46499", "47640"]},
+                  {"id": "lux", "name": "Luxury", "sic_codes": ["46499", "47770"]},
+                  {"id": "broad", "name": "Broad", "sic_codes": [str(20000 + i) for i in range(12)]}]
+        self.assertEqual(nr.catch_all_codes(niches), {"46499"})
+        self.assertIsNone(nr.sector_niche(["46499"], niches))                       # a toothbrush wholesaler
+        self.assertEqual(nr.sector_niche(["46499", "32200"], niches)["id"], "music")   # makes instruments too
+        self.assertEqual(nr.sector_niche(["20003"], niches)["id"], "broad")
