@@ -62,6 +62,20 @@ def goods_niche(trade: Optional[dict], niches: list[dict]) -> Optional[dict]:
     return hits[0][1] if hits else None
 
 
+def sector_niche(sics: list[str], niches: list[dict]) -> Optional[dict]:
+    """The SIC niche sharing the most codes with the company; the broad measured catch-all only when nothing narrower fits."""
+    codes = set(sics or [])
+    fits = [n for n in niches if codes & set(map(str, n.get("sic_codes") or []))]
+    if not fits:
+        return None
+    return max(fits, key=lambda n: (len(codes & set(map(str, n["sic_codes"]))), len(n["sic_codes"]) < 10))
+
+
+def company_niche(trade: Optional[dict], sics: list[str], niches: list[dict]) -> Optional[dict]:
+    """What its customs records show it trading, else the sector it chose for itself."""
+    return goods_niche(trade, [n for n in niches if n.get("hmrc_codes")]) or sector_niche(sics, niches)
+
+
 def is_open(row: dict) -> bool:
     """No forward contracts and no FX provider named in its filings: probably paying the bank's rate."""
     return not (row.get("fx_forwards") or _SERVED.search(row.get("fx_today") or ""))

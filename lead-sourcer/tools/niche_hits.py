@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from sourcer import bulk, hmrc, matching, niches as niche_rules  # noqa: E402
+from sourcer import absurd, bulk, hmrc, matching, niches as niche_rules  # noqa: E402
 
 REGULAR_MONTHS = 3          # customs records in this many months: a regular trader
 HEADING_MIN_STRONG = 5      # headings listed as suggestions need this many strong finds
@@ -80,6 +80,18 @@ def measure_all(niches: list[dict], companies: list[dict], trade_by_company: dic
     return {"niches": stats, "headings": headings}
 
 
+def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches: list[dict]) -> dict:
+    """{number: {niche, niche_kind, sic, absurd}} for the Accounts + FX filings lists' companies."""
+    out = {}
+    for number, name in tracked.items():
+        record = registry.get(number)
+        sics = (record or {}).get("sic_codes") or []
+        niche = niche_rules.company_niche(trade_by_company.get(number), sics, niches)
+        out[number] = {"niche": niche["name"] if niche else "", "niche_kind": ("goods" if niche.get("hmrc_codes") else "sector") if niche else "",
+                       "sic": sics, "absurd": absurd.reason(name, record)}
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--filings", required=True)
@@ -87,6 +99,8 @@ def main() -> None:
     parser.add_argument("--months", type=int, default=12)
     parser.add_argument("--niches", default=os.path.join(os.path.dirname(__file__), "..", "config", "fx_niches.json"))
     parser.add_argument("--out", default="niche_stats.json")
+    parser.add_argument("--tracked", default="", help="{number: name} of the Accounts + FX filings lists' companies")
+    parser.add_argument("--enrich-out", default="", help="each tracked company's niche, sector codes and absurd check")
     args = parser.parse_args()
 
     with open(args.filings, encoding="utf-8") as f:
@@ -97,16 +111,30 @@ def main() -> None:
     traders = hmrc.build_traders(paths, since)
     print(f"HMRC: {len(traders):,} traders over {args.months} months; FX filings companies: {len(filings):,}")
     sics = {str(s) for n in niches for s in n.get("sic_codes", [])}
+    tracked = {}
+    if args.tracked:
+        with open(args.tracked, encoding="utf-8") as f:
+            tracked = json.load(f) or {}
+    registry: dict = {}
     candidates, by_postcode, by_name = bulk.scan(
         args.bulk or bulk.download(), sics, set(niche_rules.SIZED),
-        postcodes={pc for _, pc in traders}, names={n for n, _ in traders})
+        postcodes={pc for _, pc in traders}, names={n for n, _ in traders},
+        numbers=set(tracked) or None, registry=registry if tracked else None)
     trade_by_company = matching.match_all(traders, by_postcode, by_name)
     companies = {c["company_number"]: c for c in candidates}
     for e in trade_by_company.values():
         companies.setdefault(e["company"]["company_number"], e["company"])
     print(f"Matched traders: {len(trade_by_company):,}; companies measured: {len(companies):,}")
 
-    result = measure_all(niches, list(companies.values()), trade_by_company, filings)
+    result = measure_all(niches, list(companies.values()), trade_by_company, filings)   # sized ones only, inside
+    if args.enrich_out:
+        enrich = enrich_tracked(tracked, registry, trade_by_company, niches)
+        with open(args.enrich_out, "w", encoding="utf-8") as f:
+            json.dump({"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "companies": enrich}, f)
+        why = Counter(e["absurd"].split(" — ")[0].split(" (sector")[0].split(", by its name")[0] for e in enrich.values() if e["absurd"])
+        print(f"Tracked companies: {len(tracked):,}; on the register {len(registry):,}; with a niche "
+              f"{sum(1 for e in enrich.values() if e['niche']):,}; absurd {sum(why.values()):,}: "
+              + ", ".join(f"{k} {n}" for k, n in why.most_common()))
     result["made_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     result["basis"] = (f"HMRC importer/exporter lists ({args.months} months, regular = {REGULAR_MONTHS}+ months), Companies "
                        f"House bulk file (full / medium / group accounts), FX filings scan (strong = filed FX score "

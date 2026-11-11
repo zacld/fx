@@ -134,6 +134,7 @@ def scan(
     postcodes: Optional[set[str]] = None,
     names: Optional[set[str]] = None,
     numbers: Optional[set[str]] = None,
+    registry: Optional[dict] = None,
 ) -> tuple[list[dict], dict[str, list[dict]], dict[str, list[dict]]]:
     """
     One pass over the bulk file:
@@ -144,6 +145,8 @@ def scan(
     indexes are for matching HMRC traders, which can be any size or sector.
     `numbers`: companies taken as candidates whatever their SIC code or accounts
     category (the FX filings scan's strongest finds).
+    `registry`: when given, filled with {number: {status, type, sic_codes, name}} for every company in `numbers`,
+    whatever its status or type (tools/niche_hits.py: dissolved and not-for-profit companies among the leads).
     """
     from sourcer.matching import normalise_name, normalise_postcode
 
@@ -161,6 +164,11 @@ def scan(
         scanned += 1
         if scanned % 1_000_000 == 0:
             print(f"  bulk file: {scanned:,} companies scanned, {len(candidates):,} candidates", flush=True)
+        if registry is not None and numbers and len(values) >= width and values[col["CompanyNumber"]].strip() in numbers:
+            registry[values[col["CompanyNumber"]].strip()] = {
+                "status": values[col["CompanyStatus"]].strip(), "type": values[col["CompanyCategory"]].strip(),
+                "sic_codes": [code for code in (sic_code(values[i]) for i in sic_cols) if code],
+                "name": values[col["CompanyName"]].strip()}
         if len(values) < width or values[col["CompanyStatus"]].strip() != "Active":
             continue
         company_type = values[col["CompanyCategory"]].lower()

@@ -79,6 +79,7 @@ export function signalsByCompany(items = []) {
   for (const list of Object.values(out)) list.sort((a, b) => String(b.at).localeCompare(String(a.at)));
   return out;
 }
+export const RANKED_KEY = "leads/ranked";   // {made_at, rows, ruled_out, niches}: every scanned lead ranked (scripts/rank-leads.mjs)
 export const NICHES_KEY = "niches/stats";   // {made_at, niches: {id: measured numbers}, headings}: tools/niche_hits.py
 export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
 export const CALLS_KEY = "filings/calls";   // {made_at, count, rows}: the Call today tab's candidates from the filings list
@@ -201,6 +202,9 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     const [niches, alerts] = await Promise.all([NICHES_KEY, ALERTS_KEY].map((k) => blobs.get(k, { type: "json" })));
     return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [],
                    signals: signalsByCompany(alerts?.items || []) }, 200);
+  }
+  if (params.get("view") === "ranked") {
+    return reply((await blobs.get(RANKED_KEY, { type: "json" })) || { rows: [], ruled_out: {}, niches: [] }, 200);
   }
   if (params.get("view") === "calls") {
     return reply((await blobs.get(CALLS_KEY, { type: "json" })) || { rows: [] }, 200);
