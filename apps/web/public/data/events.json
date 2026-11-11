@@ -7740,6 +7740,59 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "0f0b3b2d44f98948": {
+    "id": "0f0b3b2d44f98948",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/australian-investor-home-lending-plunges-32-in-q3-as-tax-curbs-and-rba-hikes-bite-harder/",
+    "headline": "Australian investor home lending plunges 32% in Q3 as tax curbs and RBA hikes bite harder",
+    "raw_summary": "A drop in home lending this sharp gives the RBA more evidence that its five hikes this year are biting. That supports the case for a pause after November’s split decision, and it is a modest headwind for the Australian dollar. Short-dated Australian government bond yields may be sensitive to any further sign that housing is cooling faster than the central bank expects. Bank stocks face slower mortgage growth, especially in investor lending, which has traditionally been a profitable segment. With energy-driven inflation still the RBA’s main worry, oil prices remain the swing factor for whether ",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-11-11T12:26:05.482Z",
+    "event_type": "Macro monetary policy",
+    "event_breadth": "broad_macro",
+    "summary": "The RBA’s recent rate hikes and tax curbs have caused a sharp drop in Australian investor home lending, creating modest pressure on the Australian dollar. UK businesses that pay Australian suppliers in AUD could see slightly higher GBP costs, while those receiving AUD revenue get a marginal benefit. The effect is indirect, so the event is best used as market colour rather than a fresh sales trigger today.",
+    "currency_pairs": [
+      "AUD/GBP"
+    ],
+    "urgency_score": 3,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Modest AUD pressure may affect UK importers of Australian goods, but the impact is indirect and low urgency",
+    "trigger_strength": "weak",
+    "trigger_score": 24,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK Australian wine importers",
+      "UK beef and lamb importers sourcing from Australia",
+      "UK education providers with Australian student tuition"
+    ],
+    "why_now": "Upcoming AUD‑denominated invoices are due while the AUD may be weakening after the latest RBA hikes",
+    "discovery_recommendation": "Context only – the story offers macro background but no immediate, actionable FX trigger for new outreach",
+    "confidence_level": "medium",
+    "confidence_reason": "The event is a macro monetary‑policy story with only a secondary effect on the AUD, so FX relevance is plausible but not concrete",
+    "what_happened": "Australian investor home lending plunged 32% in Q3 as tax curbs and the Reserve Bank of Australia's five rate hikes this year took effect",
+    "what_changed_financially": "The RBA's aggressive tightening and tax changes are putting modest downward pressure on the Australian dollar",
+    "who_pays_more": "UK companies that import Australian‑priced goods (e.g., wine, beef, wool) and must convert GBP to AUD for supplier invoices",
+    "who_receives_less": "UK firms that receive revenue in AUD (e.g., education providers with Australian students) see only a slight upside, not a loss",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP→AUD payments for Australian imports and AUD→GBP conversions for UK exporters receiving Australian revenue",
+    "fx_payment_logic": "UK importers order goods priced in Australian dollars, receive an invoice in AUD, and then convert GBP to AUD to pay the supplier. If the AUD weakens after the RBA hikes, more GBP is needed per AUD, raising the cost of those purchases. Conversely, UK exporters receiving AUD receipts convert them back to GBP, gaining a small upside when the AUD is weaker.",
+    "sales_angle": "If you have upcoming payments to Australian suppliers, the recent RBA hikes could make the AUD a bit cheaper against the pound, affecting your invoice costs.",
+    "business_impact_summary": "UK firms importing Australian wine, beef or other commodities may see a modest increase in GBP outlay for their next AUD invoices. Education and service firms that earn in AUD get a slight upside, but the overall margin impact is low. The timing aligns with near‑term invoice cycles, making it a background note rather than a pressing call driver.",
+    "exposure_types": [
+      "AUD supplier payment exposure",
+      "AUD revenue conversion"
+    ],
+    "overall_sales_angle": "The RBA’s tightening is nudging the AUD lower, so any UK business with near‑term AUD invoices should check whether their cost base has shifted modestly.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "0f1333b74a4977dd": {
     "id": "0f1333b74a4977dd",
     "headline": "British Pound: Fragile labour market clouds BoE hikes - Commerzbank",
@@ -16582,6 +16635,199 @@
       "Potential for pricing pressure on exports"
     ],
     "ai_model": "llama-3.3-70b-versatile"
+  },
+  "1e1d9c95226b4466": {
+    "id": "1e1d9c95226b4466",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/us-october-core-cpi-vs-0-2-expected/",
+    "headline": "US October core CPI +0.3% vs +0.2% expected",
+    "raw_summary": "Prior core m/m was +0.3% Core unrounded +0.297% Core CPI y/y not published vs +2.6% prior Core unrounded y/y&nbsp;not published vs +2.564% prior Headline CPI m/m +0.4% vs +0.3% expected (prior +0.6%) Headline CPI y/y not published vs 3.7% prior Unrounded not published vs +3.738% prior Core goods +0.2% vs +0.3% m/m prior Real weekly earnings 0.0%&nbsp;vs -0.5% prior (revised to -0.4%) Supercore m/m roughly +0.4%, with just over half driven by services less energy services Key sub-components: Owners’ equivalent rent: +0.3% vs +0.3% prior Rent of primary residence: +0.2% vs +0.2% prior Motor vehi",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; -2 \\bspeculators|\\boptions trader",
+    "detected_at": "2026-11-11T12:27:00.391Z",
+    "event_type": "Currency move",
+    "event_breadth": "broad_currency",
+    "summary": "US core CPI came in hotter than expected, lifting the USD and weakening the GBP. UK companies that pay USD‑priced supplier invoices now face higher GBP costs, while exporters receiving USD see a modest conversion benefit. The move is fresh, so firms with imminent USD payments should review their FX strategy today.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "Stronger‑than‑expected US core CPI is pushing the USD higher, increasing costs for UK importers of USD‑priced goods and affecting UK exporters who receive USD revenue.",
+    "trigger_strength": "medium",
+    "trigger_score": 62,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK importers of US semiconductor and electronics components",
+      "UK manufacturers sourcing US pharmaceutical APIs",
+      "UK aerospace firms buying US‑made parts",
+      "UK consultancy and professional services firms billing US clients in USD"
+    ],
+    "why_now": "Upcoming USD invoices will be settled at a higher GBP cost following the CPI‑driven USD rally.",
+    "discovery_recommendation": "Limited run — two distinct payment‑flow niches (USD import costs and USD revenue conversion) are worth targeting.",
+    "confidence_level": "medium",
+    "confidence_reason": "The CPI surprise is real and markets have already reacted, but the move is moderate and the FX impact is indirect.",
+    "what_happened": "US core CPI for October rose 0.3% month‑on‑month, beating the 0.2% consensus forecast.",
+    "what_changed_financially": "The surprise inflation reading lifted the USD, causing GBP/USD to weaken.",
+    "who_pays_more": "UK businesses that pay USD‑denominated supplier invoices (e.g., electronics, pharma, aerospace component importers).",
+    "who_receives_less": "UK exporters converting USD receipts into GBP see a modest benefit, but may face pricing pressure on future USD contracts.",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP revenue vs USD supplier costs (or USD receipt conversion).",
+    "fx_payment_logic": "UK importers receive invoices from US suppliers in USD, then convert GBP to USD to pay; a stronger USD means more GBP is needed per invoice, eroding margins. Conversely, UK exporters invoice US customers in USD and later convert the receipts back to GBP; a stronger USD can increase the GBP amount received, but also creates pricing pressure for future contracts.",
+    "sales_angle": "If you have USD invoices coming due this week, the latest CPI numbers have made the rate less favourable than it was yesterday.",
+    "business_impact_summary": "UK importers of US‑priced components will see higher landed costs on orders placed before the CPI release, tightening margins. Export‑oriented service firms with US clients will enjoy a slight upside on conversion but should watch for future pricing adjustments. Both groups benefit from a timely FX review.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "The CPI‑driven USD rally means any USD invoice you settle now costs more in GBP – a perfect moment to discuss hedging or rate‑locking options.",
+    "target_segments": [
+      {
+        "segment_name": "UK importers of US semiconductor and electronics components",
+        "category_priority_score": 78,
+        "business_model": "UK electronics distributors buying chips, boards and other components from US manufacturers, paying invoices in USD and selling finished products in GBP.",
+        "exposure_level": "High",
+        "exposure_type": "Import cost exposure – USD supplier payments vs GBP revenue",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Supplier sends USD invoice → UK buyer converts GBP to USD at spot rate → stronger USD means more GBP per invoice → margin compression.",
+        "margin_risk": "Medium — a 0.5% move in GBP/USD on £2 m annual spend ≈ £10 k extra cost if unhedged.",
+        "payment_timing_risk": "Medium — typical 30‑60 day payment terms create an open FX window.",
+        "affected_payment_flow": "USD payments to US component suppliers, usually £100 k‑£2 m per quarter.",
+        "micro_categories": [
+          {
+            "name": "UK distributors of US microchips",
+            "why": "Pay USD for high‑value chips; a weaker GBP raises purchase cost directly.",
+            "search_queries": [
+              "\"microchip distributor\" UK",
+              "\"semiconductor importer\" United Kingdom",
+              "\"US chip supplier\" UK"
+            ],
+            "companies_house_terms": [
+              "microchip",
+              "semiconductor",
+              "chip import"
+            ]
+          },
+          {
+            "name": "UK importers of US consumer electronics",
+            "why": "Invoice in USD for phones, tablets, etc.; margin hit when GBP weakens.",
+            "search_queries": [
+              "\"consumer electronics importer\" UK",
+              "\"US electronics wholesale\" United Kingdom",
+              "\"imported from USA\" electronics UK"
+            ],
+            "companies_house_terms": [
+              "electronics import",
+              "consumer electronics",
+              "USA electronics"
+            ]
+          },
+          {
+            "name": "UK manufacturers sourcing US printed circuit boards",
+            "why": "PCB suppliers invoice in USD; cost rise directly affects production margins.",
+            "search_queries": [
+              "\"PCB supplier\" UK",
+              "\"printed circuit board\" import United Kingdom",
+              "\"US PCB\" UK distributor"
+            ],
+            "companies_house_terms": [
+              "PCB",
+              "printed circuit board",
+              "circuit board import"
+            ]
+          }
+        ],
+        "website_validation_signals": [],
+        "segment_signals": []
+      },
+      {
+        "segment_name": "UK exporters receiving USD revenue from US clients (professional services)",
+        "category_priority_score": 70,
+        "business_model": "UK consultancy, legal or financial advisory firms billing US customers in USD and converting receipts into GBP.",
+        "exposure_level": "Medium",
+        "exposure_type": "Revenue conversion – USD receipts into GBP",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "US client pays invoice in USD → UK firm holds USD or converts to GBP → a stronger USD yields more GBP per USD, but future pricing may need adjustment.",
+        "margin_risk": "Low‑to‑medium — current USD strength adds a modest upside, but creates volatility for future contracts.",
+        "payment_timing_risk": "Medium — receipts may sit unconverted for days to weeks, exposing the firm to rate swings.",
+        "affected_payment_flow": "USD receipts from US customers, typically £50 k‑£500 k per project, converted to GBP.",
+        "micro_categories": [
+          {
+            "name": "UK IT consulting firms with US clients",
+            "why": "Bill US tech firms in USD; conversion rate directly impacts GBP profit.",
+            "search_queries": [
+              "\\\"IT consulting\\\" \\\"United States\\\" client UK",
+              "\"software consultancy\" USA client United Kingdom",
+              "\"digital transformation\" US client UK"
+            ],
+            "companies_house_terms": [
+              "IT consulting",
+              "software consultancy",
+              "digital services"
+            ]
+          },
+          {
+            "name": "UK legal firms serving US corporations",
+            "why": "Legal fees invoiced in USD; conversion risk on settlement.",
+            "search_queries": [
+              "\\\"legal services\\\" \\\"US client\\\" UK",
+              "\"law firm\" \"United States\" client United Kingdom",
+              "\"cross‑border legal\" USA UK"
+            ],
+            "companies_house_terms": [
+              "legal services",
+              "law firm",
+              "cross‑border"
+            ]
+          }
+        ],
+        "website_validation_signals": [],
+        "segment_signals": []
+      }
+    ],
+    "companies_house_terms": [
+      "microchip",
+      "semiconductor",
+      "chip import",
+      "electronics import",
+      "consumer electronics",
+      "USA electronics",
+      "PCB",
+      "printed circuit board",
+      "circuit board import",
+      "IT consulting",
+      "software consultancy",
+      "digital services",
+      "legal services",
+      "law firm",
+      "cross‑border"
+    ],
+    "all_search_queries": [
+      "\"microchip distributor\" UK",
+      "\"semiconductor importer\" United Kingdom",
+      "\"US chip supplier\" UK",
+      "\"consumer electronics importer\" UK",
+      "\"US electronics wholesale\" United Kingdom",
+      "\"imported from USA\" electronics UK",
+      "\"PCB supplier\" UK",
+      "\"printed circuit board\" import United Kingdom",
+      "\"US PCB\" UK distributor",
+      "\\\"IT consulting\\\" \\\"United States\\\" client UK",
+      "\"software consultancy\" USA client United Kingdom",
+      "\"digital transformation\" US client UK",
+      "\\\"legal services\\\" \\\"US client\\\" UK",
+      "\"law firm\" \"United States\" client United Kingdom",
+      "\"cross‑border legal\" USA UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
   },
   "1e290ba627e0615f": {
     "id": "1e290ba627e0615f",
@@ -34948,24 +35194,46 @@
   },
   "3c080a7a6bd65fda": {
     "id": "3c080a7a6bd65fda",
+    "headline": "Bank of England’s Lombardelli warns UK’s ‘low-hire, low-fire’ labour market hurting young people – business live",
     "source": "The Guardian Biz",
     "source_url": "https://www.theguardian.com/business/live/2026/nov/10/nvidia-shareholder-lawsuit-jensen-huang-relationship-suspected-chinese-spy-fbi-trump-bank-of-england-latest-news-updates",
-    "headline": "Bank of England’s Lombardelli warns UK’s ‘low-hire, low-fire’ labour market hurting young people – business live",
-    "raw_summary": "Rolling coverage of the latest economic and financial news Nvidia and Jensen Huang sued by shareholders over affair with alleged Chinese spy The AI poster boy, the ‘Chinese spy’ and Trump: how an affair may have harmed US security Jensen Huang’s image has been shattered. Could he be pushed out at Nvidia? A senior US central banker is calling for a hike in interest rates next month. Federal Reserve governor Christopher Waller is arguing that the Fed should raise short-term borrowing costs next month even if government data shows inflation cooling. “While I am hoping for an improvement over Sept",
-    "pre_relevance_score": 7,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
     "detected_at": "2026-11-10T13:14:59.241Z",
     "status": "low_relevance",
+    "event_type": "",
+    "event_breadth": "sector_specific",
+    "currency_pairs": [],
+    "urgency_score": 1,
+    "commercial_relevance": 1,
+    "commercial_relevance_reason": "The story is about UK labour market conditions and a Fed governor's commentary, with no direct currency move, tariff, commodity or payment‑flow impact for UK B2B firms.",
     "trigger_strength": "reject",
     "trigger_score": 7,
     "discovery_mode": "reject",
     "recommended_query_budget": 0,
-    "urgency_score": 1,
-    "commercial_relevance": 1,
-    "commercial_relevance_reason": "The story is about UK labour market conditions and a Fed governor's commentary, with no direct currency move, tariff, commodity or payment‑flow impact for UK B2B firms.",
+    "likely_affected_businesses": [],
+    "why_now": "",
     "confidence_level": "high",
     "confidence_reason": "The event contains no FX‑related rate decision, tariff change, or commodity price shift that would create a concrete payment‑flow exposure for UK businesses.",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "",
+    "sales_angle": "",
+    "overall_sales_angle": "",
+    "summary": "",
     "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Rolling coverage of the latest economic and financial news Nvidia and Jensen Huang sued by shareholders over affair with alleged Chinese spy The AI poster boy, the ‘Chinese spy’ and Trump: how an affair may have harmed US security Jensen Huang’s image has been shattered. Could he be pushed out at Nvidia? A senior US central banker is calling for a hike in interest rates next month. Federal Reserve governor Christopher Waller is arguing that the Fed should raise short-term borrowing costs next month even if government data shows inflation cooling. “While I am hoping for an improvement over Sept",
+    "pre_relevance_score": 7,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
     "ai_model": "openai/gpt-oss-120b"
   },
   "3c14e6d71d40e53c": {
@@ -39770,6 +40038,136 @@
     ],
     "ai_model": "llama-3.3-70b-versatile"
   },
+  "448d881793cc9826": {
+    "id": "448d881793cc9826",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/investinglive-asia-pacific-market-news-kosdaq-jumps-nearly-5-as-ai-rebounds-oil-firms/",
+    "headline": "investingLive Asia-Pacific market news: KOSDAQ jumps nearly 5% as AI rebounds, oil firms",
+    "raw_summary": "Three reasons Goldman has added another Fed rate hike to its forecast, higher and higher! Morgan Stanley’s Wilson: correction in final phase, three reasons oil can fall into 2027 Asia midday: Nikkei up for third day, KOSDAQ jumps 5% as AI stocks rebound CoreWeave stock jumps nearly 13% after earnings. Buy the rally or sell into resistance? Three forecasts that show why BofA thinks the memory chip boom can avoid a 2028 bust Three drivers setting gold’s tone as December Fed hike bets build, according to Standard Chartered SoftBank shares down after swings to $7 billion Q2 loss on $3.7 billion US",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "detected_at": "2026-11-11T12:25:03.558Z",
+    "event_type": "Central bank forecast",
+    "event_breadth": "broad_macro",
+    "summary": "Goldman’s added Fed‑hike forecast nudges the USD higher versus the GBP. UK businesses that pay US‑dollar invoices or receive USD revenue face a near‑term FX impact, making it timely to review hedging or conversion strategies.",
+    "currency_pairs": [
+      "GBP/USD"
+    ],
+    "urgency_score": 6,
+    "commercial_relevance": 6,
+    "commercial_relevance_reason": "Goldman added a Fed rate‑hike forecast, pushing GBP/USD higher and affecting UK firms that pay US‑dollar invoices or receive USD revenue",
+    "trigger_strength": "medium",
+    "trigger_score": 60,
+    "discovery_mode": "limited",
+    "recommended_query_budget": 12,
+    "likely_affected_businesses": [
+      "UK semiconductor importers",
+      "UK aerospace parts manufacturers sourcing from the US",
+      "UK consulting firms billing US clients"
+    ],
+    "why_now": "Many firms have invoices or conversion windows within the next few days, so the rate move can affect costs or receipts today",
+    "discovery_recommendation": "Limited run — two distinct payment‑flow niches worth targeting",
+    "confidence_level": "medium",
+    "confidence_reason": "The forecast change is real but not a surprise decision; it creates moderate urgency for firms with near‑term USD exposure",
+    "what_happened": "Goldman Sachs raised its outlook to expect an additional 25‑basis‑point Fed rate hike this year",
+    "what_changed_financially": "The higher‑for‑longer US rate outlook lifts the USD against the GBP",
+    "who_pays_more": "UK importers of US‑priced components such as semiconductors, aerospace parts, and raw materials",
+    "who_receives_less": "UK exporters invoicing US customers see a modest gain but may face future pricing pressure",
+    "margin_risk": "Medium",
+    "payment_timing_risk": "Medium",
+    "affected_payment_flow": "GBP→USD payments to US suppliers and USD→GBP receipts from US customers",
+    "fx_payment_logic": "A UK company that orders goods priced in USD receives an invoice in dollars, converts GBP to USD to pay, and a weaker GBP means more pounds are needed; conversely a UK exporter receiving USD must convert the receipt back to GBP, where a weaker GBP yields slightly more pounds per dollar.",
+    "sales_angle": "If you have USD invoices or receipts this week, the latest Fed‑hike outlook means the rate is worse than it was yesterday.",
+    "business_impact_summary": "Importers of US components will see higher GBP costs on upcoming payments, squeezing margins, while exporters to the US get a small upside on conversion but may need to reprice future contracts.",
+    "exposure_types": [
+      "USD supplier payment exposure",
+      "USD revenue conversion"
+    ],
+    "overall_sales_angle": "The new Fed‑hike forecast is pushing the dollar up, so any GBP‑USD transaction due soon is now more expensive for payers and slightly more valuable for receivers.",
+    "target_segments": [
+      {
+        "segment_name": "UK professional services firms billing US clients",
+        "category_priority_score": 71,
+        "business_model": "UK consultancy or legal firm billing US customers in USD, converting receipts to GBP for payroll and overhead",
+        "exposure_level": "Medium",
+        "exposure_type": "Revenue conversion – USD receipts vs GBP expenses",
+        "likely_currency_pairs": [
+          "GBP/USD"
+        ],
+        "fx_payment_logic": "Client pays in USD, the firm converts the receipt to GBP; a weaker GBP yields slightly more pounds per dollar, but future pricing may need adjustment",
+        "margin_risk": "Low‑Medium — a 2% GBP/USD move on £1 m annual USD revenue ≈ £20k extra GBP if unhedged",
+        "payment_timing_risk": "Medium — receipts may sit for 7‑14 days before conversion",
+        "affected_payment_flow": "USD receipts from US clients, typically £50k‑£500k per project, monthly",
+        "website_validation_signals": [
+          "US‑based client",
+          "services to United States",
+          "billing in USD",
+          "international consultancy"
+        ],
+        "avoid_segments": [
+          "purely domestic UK firms",
+          "agencies without US clients"
+        ],
+        "sales_angle": "Your USD‑denominated contracts with US clients will convert to more GBP under the current rate outlook.",
+        "exposure_thesis_template": "This consultancy invoices US customers in USD; a stronger USD now means higher GBP receipts.",
+        "micro_categories": [
+          {
+            "name": "UK IT consulting firms with US SaaS clients",
+            "why": "Bills US SaaS customers in USD, converting to GBP for UK payroll",
+            "search_queries": [
+              "\"IT consulting\" \"US client\" UK",
+              "\"software services\" \"United States\" UK",
+              "\"billing in USD\" UK consultancy"
+            ],
+            "companies_house_terms": [
+              "IT consulting",
+              "us client",
+              "software services"
+            ]
+          },
+          {
+            "name": "UK legal firms advising US tech companies",
+            "why": "Charges US tech firms in USD, then converts revenue to GBP",
+            "search_queries": [
+              "\"legal services\" \"US tech\" UK",
+              "\"law firm\" \"United States\" client UK",
+              "\"billing USD\" law firm UK"
+            ],
+            "companies_house_terms": [
+              "legal services",
+              "us tech",
+              "law firm"
+            ]
+          }
+        ],
+        "segment_signals": [
+          "US‑based client",
+          "services to United States",
+          "billing in USD",
+          "international consultancy"
+        ]
+      }
+    ],
+    "companies_house_terms": [
+      "IT consulting",
+      "us client",
+      "software services",
+      "legal services",
+      "us tech",
+      "law firm"
+    ],
+    "all_search_queries": [
+      "\"IT consulting\" \"US client\" UK",
+      "\"software services\" \"United States\" UK",
+      "\"billing in USD\" UK consultancy",
+      "\"legal services\" \"US tech\" UK",
+      "\"law firm\" \"United States\" client UK",
+      "\"billing USD\" law firm UK"
+    ],
+    "status": "ready",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "44bd8d3aab548aaa": {
     "id": "44bd8d3aab548aaa",
     "headline": "Singapore doubles 2026 growth outlook to 4.5-5.5% on tech cycle upgrade",
@@ -40809,6 +41207,59 @@
     "ai_model": "llama-3.3-70b-versatile",
     "web_discovery_done": true,
     "web_discovery_at": "2026-05-21T08:31:47.855Z"
+  },
+  "4695da7605ccab1a": {
+    "id": "4695da7605ccab1a",
+    "source": "The Guardian Biz",
+    "source_url": "https://www.theguardian.com/business/2026/nov/11/bank-of-england-inflation-response-risks-higher-interest-rates-for-longer",
+    "headline": "Bank of England’s inflation response ‘risks higher interest rates for longer’",
+    "raw_summary": "Thinktank Niesr says timid rate rise last week likely to make inflation more persistent feature of UK economy The Bank of England is risking higher interest rates for longer after a hesitant response to rising inflation , according to leading thinktank. In a searing critique of the central bank’s tactics, the National Institute of Economic and Social Research (Niesr) said a timid increase in interest rates last week was likely to mean inflation staying above the Bank’s 2% target until at least 2030. Continue reading...",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bbank of england|\\bboe\\b|\\bba; +3 \\binterest rate|\\brate decisio",
+    "detected_at": "2026-11-11T12:23:39.658Z",
+    "event_type": "Policy decision",
+    "event_breadth": "broad_macro",
+    "summary": "The BoE’s cautious 25‑bp rate rise may keep interest rates higher for longer, raising financing costs for UK firms with GBP‑denominated debt. While the FX impact is indirect, businesses with upcoming loan repayments should be aware of the cost increase.",
+    "currency_pairs": [
+      "GBP/USD",
+      "GBP/EUR"
+    ],
+    "urgency_score": 4,
+    "commercial_relevance": 3,
+    "commercial_relevance_reason": "Higher UK rates may raise financing costs for SMEs, a peripheral FX consideration",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK SMEs with bank financing",
+      "UK property development firms",
+      "UK manufacturers with revolving credit facilities"
+    ],
+    "why_now": "The rate hike just occurred, so upcoming loan interest payments will be calculated at the new higher rate.",
+    "discovery_recommendation": "Context only — macro backdrop, no direct payment‑flow hook to chase today.",
+    "confidence_level": "high",
+    "confidence_reason": "The BoE rate decision is factual and the impact on loan repayments is clear, though FX link is indirect",
+    "what_happened": "The Bank of England raised its policy rate by 0.25 % in a cautious move, as noted by the NIESR think‑tank.",
+    "what_changed_financially": "A modest interest‑rate increase, signalling potentially higher rates for longer.",
+    "who_pays_more": "UK businesses with variable‑rate GBP loans, especially SMEs and property developers.",
+    "who_receives_less": "none",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "GBP loan repayments and interest payments",
+    "fx_payment_logic": "Higher UK rates tend to support the pound, but more importantly they increase the cost of borrowing in GBP; companies that convert foreign revenue to GBP to service debt will face higher interest expenses, a secondary FX consideration.",
+    "sales_angle": "With the BoE’s latest rate hike, any variable‑rate GBP loan you have will cost more from the next payment date.",
+    "business_impact_summary": "UK SMEs and developers with GBP‑denominated debt will see higher interest costs soon, which can squeeze margins and affect cash flow. The FX angle is indirect, mainly through the pound’s potential strengthening.",
+    "exposure_types": [
+      "GBP loan interest exposure"
+    ],
+    "overall_sales_angle": "The recent rate rise means your next loan interest payment could be higher – worth reviewing your financing costs today.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
   },
   "46b0af48c020a6ac": {
     "id": "46b0af48c020a6ac",
@@ -42200,16 +42651,13 @@
   },
   "48db7cbe54ff7a69": {
     "id": "48db7cbe54ff7a69",
+    "headline": "NY Fed October survey shows 1, 3 and 5 year inflation expectations unchanged",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/ny-fed-october-survey-shows-1-3-and-5-year-inflation-expectations-unchanged/",
-    "headline": "NY Fed October survey shows 1, 3 and 5 year inflation expectations unchanged",
-    "raw_summary": "One-year inflation unchanged at 3% Three-year inflation unchanged at 3.3% Five-year inflation unchanged at 3.9% Expectations of rising unemployment at highest since April 2020 Year-haead epxected gas price change moderates Credit access expectations unchanged Households more upbeat on personal finance This survey runs in contrast to much of the mainstream thinking, particularly around unemployment. That might simply be highlighting AI angst. This article was written by Adam Button at investinglive.com.",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
     "detected_at": "2026-11-10T13:21:12.176Z",
+    "status": "context_only",
     "event_type": "Survey",
     "event_breadth": "sector_specific",
-    "summary": "The NY Fed survey showed unchanged US inflation expectations, implying little immediate pressure on the USD. UK firms that trade in USD face no new FX cost or benefit today, but should stay aware of any future shifts. This is a background signal rather than a trigger for immediate action.",
     "currency_pairs": [
       "USD/GBP"
     ],
@@ -42225,28 +42673,32 @@
       "UK exporters to US markets"
     ],
     "why_now": "The survey shows no change, so there is no urgent FX risk to address now, but it signals a stable backdrop for future rate moves.",
-    "discovery_recommendation": "Context only — monitor but no discovery needed",
     "confidence_level": "medium",
     "confidence_reason": "Survey data is factual but does not directly move rates",
+    "discovery_recommendation": "Context only — monitor but no discovery needed",
     "what_happened": "The New York Fed’s October Survey of Consumer Expectations reported that one‑year, three‑year and five‑year inflation expectations remained unchanged at 3.0%, 3.3% and 3.9% respectively.",
     "what_changed_financially": "Inflation expectations were unchanged, suggesting no immediate shift in market expectations for US interest rates and thus little immediate impact on the USD value.",
     "who_pays_more": "UK businesses with USD‑denominated costs (e.g., importers of US raw materials) see no new cost pressure today.",
     "who_receives_less": "UK exporters receiving USD revenue do not gain any additional conversion benefit today.",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP↔USD conversions for importers of US goods and exporters to US customers",
     "fx_payment_logic": "UK importers of US‑priced inputs receive invoices in USD and must convert GBP to USD to pay; exporters receive USD receipts and convert back to GBP. With inflation expectations unchanged, the USD‑GBP rate is expected to stay stable, so the FX transaction cost remains roughly the same as before.",
-    "sales_angle": "The latest NY Fed survey shows no change in US inflation expectations, so there’s no immediate pressure on GBP/USD – but staying ahead of any future moves is still wise.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK businesses dealing in USD – both importers of US goods and exporters to US customers – see no immediate cost increase or revenue boost from today’s rate environment. The stable expectations mean FX exposure remains unchanged for now.",
-    "exposure_types": [
-      "GBP/USD rate exposure"
-    ],
+    "sales_angle": "The latest NY Fed survey shows no change in US inflation expectations, so there’s no immediate pressure on GBP/USD – but staying ahead of any future moves is still wise.",
     "overall_sales_angle": "Unchanged US inflation expectations mean GBP/USD is likely stable today, so there’s no urgent FX risk but a good time to review hedging strategies before any future shift.",
+    "summary": "The NY Fed survey showed unchanged US inflation expectations, implying little immediate pressure on the USD. UK firms that trade in USD face no new FX cost or benefit today, but should stay aware of any future shifts. This is a background signal rather than a trigger for immediate action.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "One-year inflation unchanged at 3% Three-year inflation unchanged at 3.3% Five-year inflation unchanged at 3.9% Expectations of rising unemployment at highest since April 2020 Year-haead epxected gas price change moderates Credit access expectations unchanged Households more upbeat on personal finance This survey runs in contrast to much of the mainstream thinking, particularly around unemployment. That might simply be highlighting AI angst. This article was written by Adam Button at investinglive.com.",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\benergy price|\\bgas price|\\bf",
+    "exposure_types": [
+      "GBP/USD rate exposure"
+    ],
     "ai_model": "openai/gpt-oss-120b"
   },
   "48de2026995fb01f": {
@@ -49655,16 +50107,13 @@
   },
   "52ea7cc84a3d31a1": {
     "id": "52ea7cc84a3d31a1",
+    "headline": "investingLive Asia-Pacific market news: AI rebound rolls on, oil slips",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/investinglive-asia-pacific-market-news-ai-rebound-rolls-on-oil-slips/",
-    "headline": "investingLive Asia-Pacific market news: AI rebound rolls on, oil slips",
-    "raw_summary": "China trade recap: surplus tops $1 trillion as AI boom powers exports, tensions loom Australia to mandate AI breach reporting, set up regulator after OpenAI agent breach Nikkei, KOSPI extend rebound as AI and chip stocks surge, recouping Friday’s rout China October exports beat forecasts, imports surge 41.6% as trade surplus narrows FedEx adds four weekly China-US freighter flights as AI hardware demand keeps cargo busy Anthropic retracts IPO pricing details sent to bankers, says figures were inaccurate Anthropic lines up $26 billion from Nvidia, Google, others as IPO priced at $70 to $80 PBOC",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-11-10T13:20:12.794Z",
+    "status": "ready",
     "event_type": "Commodity / freight demand shock",
     "event_breadth": "commodity",
-    "summary": "FedEx added extra China‑US cargo flights as AI‑hardware demand surged, while China’s imports jumped sharply. The resulting freight‑rate pressure lifts the USD cost of importing Chinese electronics, meaning UK importers will see higher GBP expenses on upcoming invoices.",
     "currency_pairs": [
       "GBP/USD",
       "GBP/CNY"
@@ -49682,28 +50131,26 @@
       "UK logistics firms handling China‑US freight"
     ],
     "why_now": "Q4 freight bookings and supplier invoices are being priced against rising air‑cargo rates, so costs will rise before year‑end.",
-    "discovery_recommendation": "Limited run — two distinct import‑focused segments with clear USD/CNY exposure.",
     "confidence_level": "high",
     "confidence_reason": "The event reports concrete flight additions and a sharp import surge, giving a clear payment‑flow hook for UK businesses.",
+    "discovery_recommendation": "Limited run — two distinct import‑focused segments with clear USD/CNY exposure.",
     "what_happened": "FedEx added four weekly China‑US freighter flights as AI‑hardware demand kept cargo capacity tight, while China’s October imports rose 41.6%.",
     "what_changed_financially": "Tighter air‑cargo capacity is driving higher freight rates, raising the USD cost of importing Chinese AI hardware and other electronics.",
     "who_pays_more": "UK firms importing AI servers, GPUs, and other Chinese electronics that pay suppliers and freight charges in USD or CNY.",
     "who_receives_less": "These UK firms face higher GBP outlays for the same USD/CNY invoices; freight carriers capture higher rates.",
-    "margin_risk": "Medium‑High",
-    "payment_timing_risk": "High",
     "affected_payment_flow": "GBP → USD/CNY payments to Chinese suppliers and freight carriers, with revenue earned in GBP.",
     "fx_payment_logic": "UK companies order AI servers or consumer electronics from Chinese manufacturers, receive invoices in USD or CNY, and also book air‑cargo that is priced in USD. When freight rates rise, the amount of GBP needed to buy the same USD/CNY increases, compressing margins unless the exposure is hedged.",
-    "sales_angle": "If you have Chinese supplier or freight invoices due this quarter, the latest cargo‑rate spike means you’ll pay more GBP per USD today.",
+    "margin_risk": "Medium‑High",
+    "payment_timing_risk": "High",
     "business_impact_summary": "UK importers of AI hardware and consumer electronics face higher landed costs due to rising USD‑denominated freight and supplier invoices. The timing of Q4 shipments means the cost impact is immediate, creating margin pressure that can be mitigated with FX hedging.",
-    "exposure_types": [
-      "Freight cost exposure",
-      "Import cost exposure"
-    ],
+    "sales_angle": "If you have Chinese supplier or freight invoices due this quarter, the latest cargo‑rate spike means you’ll pay more GBP per USD today.",
     "overall_sales_angle": "Rising air‑cargo rates are inflating the GBP cost of your Chinese supplier and freight invoices – a timely reason to review hedging.",
+    "summary": "FedEx added extra China‑US cargo flights as AI‑hardware demand surged, while China’s imports jumped sharply. The resulting freight‑rate pressure lifts the USD cost of importing Chinese electronics, meaning UK importers will see higher GBP expenses on upcoming invoices.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [
       {
         "segment_name": "UK AI‑hardware importers",
-        "category_priority_score": 85,
         "business_model": "UK tech firms buying AI servers, GPUs and related hardware from Chinese manufacturers, paying suppliers in USD/CNY and selling solutions to UK customers in GBP.",
         "exposure_level": "Very High",
         "exposure_type": "Import cost exposure – USD freight and CNY supplier payments vs GBP revenue",
@@ -49711,22 +50158,14 @@
           "GBP/USD",
           "GBP/CNY"
         ],
+        "why_affected": "",
+        "why_financially_exposed": "",
         "fx_payment_logic": "Importer receives a USD invoice for hardware and a USD freight bill, converts GBP to USD/CNY to settle; a weaker GBP or higher freight rate means more GBP per USD, eroding margin.",
         "margin_risk": "High — a 5% rise in air‑cargo rates on a £2m annual import spend equals roughly £100k extra cost if unhedged.",
         "payment_timing_risk": "High — freight booked 30‑60 days ahead, supplier invoices settled 45‑90 days after order.",
         "affected_payment_flow": "USD/CNY payments to Chinese hardware suppliers and freight carriers, typically £200k‑£2m per shipment, quarterly.",
-        "website_validation_signals": [
-          "AI server",
-          "GPU",
-          "imported from China",
-          "data centre",
-          "cloud infrastructure"
-        ],
-        "avoid_segments": [
-          "UK retailers that only sell finished products without import operations"
-        ],
-        "sales_angle": "Your Q4 AI‑hardware orders are now facing higher freight costs in USD, squeezing margins.",
-        "exposure_thesis_template": "This company imports AI hardware from China; rising freight rates increase the GBP cost of USD‑denominated supplier and shipping invoices.",
+        "ideal_company_profile": "",
+        "category_priority_score": 85,
         "micro_categories": [
           {
             "name": "UK importers of Chinese AI server racks",
@@ -49757,13 +50196,27 @@
             ]
           }
         ],
+        "high_intent_search_queries": [],
+        "companies_house_terms": [],
+        "website_validation_signals": [
+          "AI server",
+          "GPU",
+          "imported from China",
+          "data centre",
+          "cloud infrastructure"
+        ],
         "segment_signals": [
           "AI server",
           "GPU",
           "imported from China",
           "data centre",
           "cloud infrastructure"
-        ]
+        ],
+        "avoid_segments": [
+          "UK retailers that only sell finished products without import operations"
+        ],
+        "sales_angle": "Your Q4 AI‑hardware orders are now facing higher freight costs in USD, squeezing margins.",
+        "exposure_thesis_template": "This company imports AI hardware from China; rising freight rates increase the GBP cost of USD‑denominated supplier and shipping invoices."
       }
     ],
     "companies_house_terms": [
@@ -49781,8 +50234,13 @@
       "\"graphics accelerator\" UK",
       "\"china GPU\" distributor UK"
     ],
-    "status": "ready",
-    "ai_provider": "groq",
+    "raw_summary": "China trade recap: surplus tops $1 trillion as AI boom powers exports, tensions loom Australia to mandate AI breach reporting, set up regulator after OpenAI agent breach Nikkei, KOSPI extend rebound as AI and chip stocks surge, recouping Friday’s rout China October exports beat forecasts, imports surge 41.6% as trade surplus narrows FedEx adds four weekly China-US freighter flights as AI hardware demand keeps cargo busy Anthropic retracts IPO pricing details sent to bankers, says figures were inaccurate Anthropic lines up $26 billion from Nvidia, Google, others as IPO priced at $70 to $80 PBOC",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "Freight cost exposure",
+      "Import cost exposure"
+    ],
     "ai_model": "openai/gpt-oss-120b"
   },
   "52f3d8c975eb504e": {
@@ -79583,16 +80041,13 @@
   },
   "853599a57cad87c6": {
     "id": "853599a57cad87c6",
+    "headline": "UK retail sales rise 1.5%, best since June, but fuel costs and Budget caution weigh",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/uk-retail-sales-rise-1-5-best-since-june-but-fuel-costs-and-budget-caution-weigh-0/",
-    "headline": "UK retail sales rise 1.5%, best since June, but fuel costs and Budget caution weigh",
-    "raw_summary": "The data give a mixed signal for UK rates and sterling. Headline spending is firmer, but much of the gain reflects higher fuel prices, so it shows energy costs rather than stronger real demand. That supports the view that the oil shock is acting as a tax on households, which tends to weigh on discretionary spending and confidence over time. Flat non-food sales and the weakest confidence since April argue against reading the numbers as a pickup in underlying consumer momentum. Any easing in oil prices from Middle East de-escalation would offer households relief at the pump, while the Budget rem",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-11-10T13:16:41.217Z",
+    "status": "context_only",
     "event_type": "Economic data",
     "event_breadth": "sector_specific",
-    "summary": "Retail sales in the UK jumped 1.5% on higher fuel prices, signalling that fuel costs are rising. While this boosts headline sales, it means firms that import fuel or run fuel‑intensive fleets may face higher USD‑denominated expenses. The effect on B2B FX exposure is indirect, serving mainly as background for future conversations.",
     "currency_pairs": [],
     "urgency_score": 2,
     "commercial_relevance": 2,
@@ -79607,29 +80062,33 @@
       "UK fleet operators"
     ],
     "why_now": "Fuel import contracts and price adjustments are typically settled within the next quarter, so the recent price rise could impact costs soon",
-    "discovery_recommendation": "Context only — the event offers macro background but lacks a direct, actionable FX payment‑flow hook for immediate outreach",
     "confidence_level": "medium",
     "confidence_reason": "The event is clear economic data but does not specify a concrete FX payment flow for UK B2B firms",
+    "discovery_recommendation": "Context only — the event offers macro background but lacks a direct, actionable FX payment‑flow hook for immediate outreach",
     "what_happened": "UK retail sales rose 1.5% in the month, the strongest since June, driven largely by higher fuel prices",
     "what_changed_financially": "Higher fuel costs lifted nominal sales, while real consumer demand remains weak, creating pressure on discretionary spenders",
     "who_pays_more": "UK fuel distributors, transport and logistics firms that import fuel or diesel priced in USD",
     "who_receives_less": "UK retailers dependent on discretionary consumer spending may see tighter margins",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP revenue versus USD‑priced fuel import payments",
     "fx_payment_logic": "UK companies that buy fuel or diesel from overseas receive invoices in USD, convert GBP to USD to pay, and a rise in fuel prices means they need to spend more GBP for the same volume, creating a modest FX cost pressure.",
-    "sales_angle": "If you import fuel or operate a large vehicle fleet, the recent jump in fuel prices could be increasing your USD‑denominated costs.",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "Fuel distributors and haulage firms may see higher import costs as fuel prices rise, while retailers relying on consumer discretionary spend could face tighter margins. Both groups have a modest exposure to GBP/USD movements, but the link is indirect.",
+    "sales_angle": "If you import fuel or operate a large vehicle fleet, the recent jump in fuel prices could be increasing your USD‑denominated costs.",
+    "overall_sales_angle": "Higher fuel prices may be raising your USD‑denominated fuel costs – worth a quick check on your exposure",
+    "summary": "Retail sales in the UK jumped 1.5% on higher fuel prices, signalling that fuel costs are rising. While this boosts headline sales, it means firms that import fuel or run fuel‑intensive fleets may face higher USD‑denominated expenses. The effect on B2B FX exposure is indirect, serving mainly as background for future conversations.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "The data give a mixed signal for UK rates and sterling. Headline spending is firmer, but much of the gain reflects higher fuel prices, so it shows energy costs rather than stronger real demand. That supports the view that the oil shock is acting as a tax on households, which tends to weigh on discretionary spending and confidence over time. Flat non-food sales and the weakest confidence since April argue against reading the numbers as a pickup in underlying consumer momentum. Any easing in oil prices from Middle East de-escalation would offer households relief at the pump, while the Budget rem",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+4 \\bgbp\\b|\\bpound\\b|\\bsterling\\b; +4 \\bbank of england|\\bboe\\b|\\bba; +3 \\boil price|\\bcrude oil|\\bwti|",
     "exposure_types": [
       "USD fuel import cost exposure",
       "margin pressure from higher fuel prices"
     ],
-    "overall_sales_angle": "Higher fuel prices may be raising your USD‑denominated fuel costs – worth a quick check on your exposure",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "856f8819fb9293c1": {
@@ -87390,16 +87849,13 @@
   },
   "8fd1005bf1f1be8b": {
     "id": "8fd1005bf1f1be8b",
+    "headline": "Australian consumer sentiment sinks to four-year low as rates and living costs bite",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/australian-consumer-sentiment-sinks-to-four-year-low-as-rates-and-living-costs-bite/",
-    "headline": "Australian consumer sentiment sinks to four-year low as rates and living costs bite",
-    "raw_summary": "Together with this morning’s NAB survey , the reading strengthens the case for an RBA pause in December and lowers the odds of a sixth hike. That leaves the Australian dollar with little support from rate expectations, at a time when it is already exposed to swings in AI-linked equities. Front-end Australian bond yields are the most sensitive to any shift toward pricing an earlier end to the tightening cycle. Above-target inflation and petrol prices near A$2.40 a litre keep the RBA from pivoting quickly. Lower oil prices would be the fastest route to relief for households. - Australian househo",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-11-10T13:19:20.246Z",
+    "status": "context_only",
     "event_type": "Monetary policy commentary",
     "event_breadth": "broad_currency",
-    "summary": "Australian consumer sentiment hit a four‑year low, bolstering expectations of an RBA pause. While the AUD lacks strong rate support, the move is not yet reflected in the exchange rate, giving only a low‑risk FX context for UK firms dealing with AUD. Use this as background rather than a fresh call trigger today.",
     "currency_pairs": [
       "AUD/GBP"
     ],
@@ -87416,29 +87872,33 @@
       "UK education providers with Australian student fees"
     ],
     "why_now": "Upcoming AUD‑denominated invoices could be settled at a less favourable rate if the AUD moves after the sentiment shock",
-    "discovery_recommendation": "Context only — no immediate actionable FX exposure, keep as background for future outreach",
     "confidence_level": "medium",
     "confidence_reason": "Event is a sentiment survey and policy expectation, not a concrete currency move",
+    "discovery_recommendation": "Context only — no immediate actionable FX exposure, keep as background for future outreach",
     "what_happened": "Australian consumer sentiment fell to a four‑year low, reinforcing expectations that the Reserve Bank of Australia will pause rate hikes in December",
     "what_changed_financially": "Market expectations of unchanged Australian rates reduce support for the AUD, but the exchange rate has not moved sharply yet",
     "who_pays_more": "UK importers of Australian commodities (e.g., wine, beef, minerals) could face higher GBP costs if the AUD strengthens later",
     "who_receives_less": "UK exporters of services to Australian customers may receive fewer GBP per AUD if the AUD weakens",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP↔AUD payments for imports and exports",
     "fx_payment_logic": "UK businesses that pay Australian suppliers must convert GBP to AUD; if the AUD later strengthens due to the policy pause, they will need more GBP per AUD, squeezing margins. Conversely, UK firms receiving AUD payments will get fewer GBP if the AUD weakens.",
-    "sales_angle": "If you have upcoming AUD‑denominated invoices, the current market sentiment suggests the rate could shift, so it may be worth reviewing your FX strategy.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK importers of Australian goods could see higher costs if the AUD strengthens, while exporters earning in AUD might see a modest benefit if it weakens, but the effect is modest and not urgent. The sentiment shift provides a background cue for future FX planning.",
+    "sales_angle": "If you have upcoming AUD‑denominated invoices, the current market sentiment suggests the rate could shift, so it may be worth reviewing your FX strategy.",
+    "overall_sales_angle": "The sentiment dip hints at a possible AUD move, so consider checking your exposure before any invoices settle.",
+    "summary": "Australian consumer sentiment hit a four‑year low, bolstering expectations of an RBA pause. While the AUD lacks strong rate support, the move is not yet reflected in the exchange rate, giving only a low‑risk FX context for UK firms dealing with AUD. Use this as background rather than a fresh call trigger today.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Together with this morning’s NAB survey , the reading strengthens the case for an RBA pause in December and lowers the odds of a sixth hike. That leaves the Australian dollar with little support from rate expectations, at a time when it is already exposed to swings in AI-linked equities. Front-end Australian bond yields are the most sensitive to any shift toward pricing an earlier end to the tightening cycle. Above-target inflation and petrol prices near A$2.40 a litre keep the RBA from pivoting quickly. Lower oil prices would be the fastest route to relief for households. - Australian househo",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
     "exposure_types": [
       "AUD supplier payment exposure",
       "AUD revenue conversion"
     ],
-    "overall_sales_angle": "The sentiment dip hints at a possible AUD move, so consider checking your exposure before any invoices settle.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "8fd505743b2da1cf": {
@@ -90629,16 +91089,13 @@
   },
   "957f0793a40485cc": {
     "id": "957f0793a40485cc",
+    "headline": "US CPI preview: Wall Street sees cooler inflation but the Fed may not blink",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/us-cpi-preview-wall-street-sees-cooler-inflation-but-the-fed-may-not-blink/",
-    "headline": "US CPI preview: Wall Street sees cooler inflation but the Fed may not blink",
-    "raw_summary": "Perhaps one of the more intriguing prospects heading into the US CPI report today is what if&nbsp;inflation cools and the Fed simply decides to shrug it off? Well, that may very well happen. Wall Street is expecting a softer inflation reading for October but I wouldn't be so quick to assume that it will be enough to change the Fed's thinking ahead of the December meeting. The consensus estimate is for headline inflation to rise by 0.3% m/m in October, down from 0.6% in September. Meanwhile, core inflation is expected to ease to 0.2% m/m - down from 0.3% in the month before. Morgan Stanley and ",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; -2 \\bspeculators|\\boptions trader",
     "detected_at": "2026-11-10T13:17:34.888Z",
+    "status": "context_only",
     "event_type": "Macro forecast",
     "event_breadth": "broad_currency",
-    "summary": "Wall Street expects a cooler US CPI reading, but the Fed may stay on hold. This creates a potential for the USD to stay firm, which could raise costs for UK firms paying USD invoices or affect the value of USD revenue. The risk is speculative until the data is released.",
     "currency_pairs": [
       "GBP/USD"
     ],
@@ -90655,29 +91112,33 @@
       "UK software firms invoicing US clients in USD"
     ],
     "why_now": "The CPI preview signals a possible near‑term USD move, creating a short‑window FX risk for upcoming invoices",
-    "discovery_recommendation": "Context only — monitor the actual CPI release before allocating discovery resources",
     "confidence_level": "medium",
     "confidence_reason": "Event is a forecast preview, not an actual CPI release or policy decision",
+    "discovery_recommendation": "Context only — monitor the actual CPI release before allocating discovery resources",
     "what_happened": "Wall Street expects October US CPI to show cooler inflation, yet analysts think the Fed may keep rates unchanged at the December meeting",
     "what_changed_financially": "The market anticipates a softer inflation reading, which could keep the USD strong if the Fed holds rates, but no immediate FX move has occurred",
     "who_pays_more": "UK importers of US‑priced raw materials, components or services that settle in USD",
     "who_receives_less": "UK exporters that receive USD revenue and convert to GBP (benefit is limited and may reverse if USD strengthens further)",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "GBP payments to USD suppliers or USD receipts converted to GBP",
     "fx_payment_logic": "UK businesses that owe USD‑denominated invoices must convert GBP to USD; if the dollar remains strong after the CPI release, they will need more GBP per USD, squeezing margins. Conversely, firms receiving USD revenue will convert to GBP at a rate that could be less favourable if the dollar strengthens further.",
-    "sales_angle": "If you have upcoming USD invoices, the market’s expectation of a strong dollar after the CPI could increase your costs today.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK importers of US‑priced goods may see higher GBP costs on pending invoices, while exporters with USD revenue could face a modest upside that may reverse if the dollar rallies. The timing is tight because the actual CPI data will drive any real move.",
+    "sales_angle": "If you have upcoming USD invoices, the market’s expectation of a strong dollar after the CPI could increase your costs today.",
+    "overall_sales_angle": "The CPI preview hints at a strong dollar that could hit your USD invoices – worth a quick check before the data lands.",
+    "summary": "Wall Street expects a cooler US CPI reading, but the Fed may stay on hold. This creates a potential for the USD to stay firm, which could raise costs for UK firms paying USD invoices or affect the value of USD revenue. The risk is speculative until the data is released.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Perhaps one of the more intriguing prospects heading into the US CPI report today is what if&nbsp;inflation cools and the Fed simply decides to shrug it off? Well, that may very well happen. Wall Street is expecting a softer inflation reading for October but I wouldn't be so quick to assume that it will be enough to change the Fed's thinking ahead of the December meeting. The consensus estimate is for headline inflation to rise by 0.3% m/m in October, down from 0.6% in September. Meanwhile, core inflation is expected to ease to 0.2% m/m - down from 0.3% in the month before. Morgan Stanley and ",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; -2 \\bspeculators|\\boptions trader",
     "exposure_types": [
       "USD supplier payment exposure",
       "USD revenue conversion"
     ],
-    "overall_sales_angle": "The CPI preview hints at a strong dollar that could hit your USD invoices – worth a quick check before the data lands.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "95967696d113a555": {
@@ -92237,16 +92698,13 @@
   },
   "96f0007073ee4827": {
     "id": "96f0007073ee4827",
+    "headline": "China trade recap: surplus tops $1 trillion as AI boom powers exports, tensions loom",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/china-trade-recap-surplus-tops-1-trillion-as-ai-boom-powers-exports-tensions-loom/",
-    "headline": "China trade recap: surplus tops $1 trillion as AI boom powers exports, tensions loom",
-    "raw_summary": "Strong AI-led exports support Asian tech and supply-chain stocks, adding to today’s regional rebound. The bigger issue is political. A surplus above $1 trillion makes new trade barriers more likely, from the EU in particular, and puts trade at the centre of next week’s Xi-Trump meeting. The rebound in China’s crude imports to the highest since March, as buyers replace disrupted Middle East supply, is a supportive signal for oil demand even as prices ease on Iran de-escalation hopes. The import surge is a modest positive for commodity exporters and the Australian dollar, though weak Chinese con",
-    "pre_relevance_score": 9,
-    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu",
     "detected_at": "2026-11-10T13:13:29.257Z",
+    "status": "context_only",
     "event_type": "Trade balance",
     "event_breadth": "broad_macro",
-    "summary": "China’s trade surplus topped $1 trillion, powered by AI‑related exports, while crude imports hit a multi‑month high. The surge could prompt new trade barriers and affect currency demand, creating indirect cost pressure for UK firms that import Chinese tech or oil. Keep this as contextual insight for future conversations.",
     "currency_pairs": [],
     "urgency_score": 3,
     "commercial_relevance": 3,
@@ -92261,29 +92719,33 @@
       "UK oil and gas firms buying crude from China"
     ],
     "why_now": "Potential EU trade barriers could be announced soon, affecting upcoming orders and FX conversion costs",
-    "discovery_recommendation": "Context only — keep as background for future outreach",
     "confidence_level": "medium",
     "confidence_reason": "The event is macro‑level with no explicit FX move; relevance to UK FX exposure is plausible but not certain",
+    "discovery_recommendation": "Context only — keep as background for future outreach",
     "what_happened": "China posted a trade surplus above $1 trillion, driven by AI‑related exports, while its crude oil imports rose to the highest level since March.",
     "what_changed_financially": "Export volumes and crude imports surged, increasing demand for foreign currencies and raising the risk of new trade barriers against China",
     "who_pays_more": "UK importers of Chinese technology, electronics and oil‑related products may face higher costs if tariffs or currency pressure materialise",
     "who_receives_less": "UK exporters to China could see reduced demand if trade tensions lead to tighter market access",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "Payments in USD or CNY for Chinese‑origin goods and services",
     "fx_payment_logic": "UK companies that buy Chinese‑made technology or oil need to convert GBP into USD or CNY to settle supplier invoices; a stronger Chinese currency or new tariffs would increase the GBP amount required, squeezing margins.",
-    "sales_angle": "If you have upcoming purchases of Chinese tech components, the growing trade surplus could lead to higher duties or currency pressure soon.",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK importers of Chinese AI hardware and semiconductor parts may see higher landed costs if tariffs are introduced or if the RMB strengthens, while UK oil firms could face higher USD‑priced crude costs. The timing is immediate as companies plan orders for the next quarter.",
+    "sales_angle": "If you have upcoming purchases of Chinese tech components, the growing trade surplus could lead to higher duties or currency pressure soon.",
+    "overall_sales_angle": "China’s booming AI exports may trigger new trade barriers, so UK importers of Chinese tech should review their FX and tariff exposure now.",
+    "summary": "China’s trade surplus topped $1 trillion, powered by AI‑related exports, while crude imports hit a multi‑month high. The surge could prompt new trade barriers and affect currency demand, creating indirect cost pressure for UK firms that import Chinese tech or oil. Keep this as contextual insight for future conversations.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Strong AI-led exports support Asian tech and supply-chain stocks, adding to today’s regional rebound. The bigger issue is political. A surplus above $1 trillion makes new trade barriers more likely, from the EU in particular, and puts trade at the centre of next week’s Xi-Trump meeting. The rebound in China’s crude imports to the highest since March, as buyers replace disrupted Middle East supply, is a supportive signal for oil demand even as prices ease on Iran de-escalation hopes. The import surge is a modest positive for commodity exporters and the Australian dollar, though weak Chinese con",
+    "pre_relevance_score": 9,
+    "pre_relevance_reason": "+5 \\btariff|\\btrade war|\\btrade d; +3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu",
     "exposure_types": [
       "Potential tariff exposure",
       "Currency conversion risk"
     ],
-    "overall_sales_angle": "China’s booming AI exports may trigger new trade barriers, so UK importers of Chinese tech should review their FX and tariff exposure now.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "9711da1445de5ed0": {
@@ -104569,6 +105031,55 @@
     "web_discovery_done": true,
     "web_discovery_at": "2026-09-14T10:20:09.320Z"
   },
+  "aaccb24f2f5a165e": {
+    "id": "aaccb24f2f5a165e",
+    "source": "ForexLive",
+    "source_url": "https://investinglive.com/news/germany-october-inflation-slows-but-winter-energy-risks-keep-ecb-rate-hike-bets-alive/",
+    "headline": "Germany October inflation slows, but winter energy risks keep ECB rate hike bets alive",
+    "raw_summary": "Germany October final CPI +2.8% vs +2.8% y/y prelim Prior +3.3% Germany October final HICP +2.8% vs +2.8% y/y prelim Prior +3.3% The final report here pretty much confirms what we already seen with the preliminary report from earlier. The easing in price pressures in Europe's largest economy owed much to a slower increase in energy prices in October, as well as the introduction of&nbsp;temporary fuel tax cuts starting 1 October&nbsp;(scheduled to run through the end of the year). That being said, all measures of underlying inflation also fell with services and goods prices also dropping on the",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\binterest rate|\\brate decisio; +3 \\benergy price|\\bgas price|\\bf",
+    "detected_at": "2026-11-11T12:24:08.811Z",
+    "event_type": "Economic data",
+    "event_breadth": "broad_macro",
+    "summary": "German inflation eased in October, supporting the view that the ECB may stay hawkish. The move is unlikely to cause an immediate GBP/EUR swing, so UK firms face minimal immediate FX pressure.",
+    "currency_pairs": [],
+    "urgency_score": 3,
+    "commercial_relevance": 4,
+    "commercial_relevance_reason": "German inflation data may influence EUR strength, but impact on UK B2B FX is indirect and low urgency",
+    "trigger_strength": "weak",
+    "trigger_score": 32,
+    "discovery_mode": "context_only",
+    "recommended_query_budget": 0,
+    "likely_affected_businesses": [
+      "UK importers of EU‑priced raw materials",
+      "UK exporters invoicing EU customers in EUR"
+    ],
+    "why_now": "The data could shift EUR/GBP expectations, but any rate move would be gradual rather than immediate",
+    "discovery_recommendation": "Context only — the event provides macro background but no concrete payment‑flow hook for new outreach",
+    "confidence_level": "medium",
+    "confidence_reason": "Data point is factual; any FX effect is secondary to market expectations",
+    "what_happened": "Germany's October CPI slowed to 2.8% year‑on‑year, matching the preliminary figure and down from 3.3% in September, helped by lower energy prices and a temporary fuel tax cut",
+    "what_changed_financially": "A modest easing of euro‑zone inflation pressure, keeping expectations that the ECB may keep rates higher for longer",
+    "who_pays_more": "None directly; any cost impact would be felt by UK firms with EUR‑denominated expenses if the euro strengthens",
+    "who_receives_less": "None directly; UK exporters receiving EUR could see a slight benefit if the euro gains",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
+    "affected_payment_flow": "Potential EUR‑GBP conversion for UK importers or exporters",
+    "fx_payment_logic": "UK companies that pay suppliers in euros or receive revenue in euros would only be affected if the euro’s value changes against the pound, which this data point might influence slowly over time.",
+    "sales_angle": "If you have EUR‑denominated invoices, the latest German CPI could subtly affect the exchange rate outlook, but there’s no urgent change today.",
+    "business_impact_summary": "The inflation slowdown is a background factor; UK importers paying in euros and exporters receiving euros may see a modest shift in rates over the coming weeks, but there’s no immediate cost pressure.",
+    "exposure_types": [
+      "EUR‑GBP rate outlook"
+    ],
+    "overall_sales_angle": "German inflation data is a macro signal rather than a direct FX trigger, so any impact on UK euro‑exposed businesses will be gradual.",
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "status": "context_only",
+    "ai_provider": "groq",
+    "ai_model": "openai/gpt-oss-120b"
+  },
   "aadd161ee91e9447": {
     "id": "aadd161ee91e9447",
     "headline": "Euro slides below 1.1600 as Warsh brings Fed rate hike back into play",
@@ -107367,24 +107878,46 @@
   },
   "af757f91284e0673": {
     "id": "af757f91284e0673",
+    "headline": "Why Sudan's Civil War Is Becoming a U.S. National Security Threat",
     "source": "OilPrice.com",
     "source_url": "https://oilprice.com/Geopolitics/Africa/Why-Sudans-Civil-War-Is-Becoming-a-US-National-Security-Threat.html",
-    "headline": "Why Sudan's Civil War Is Becoming a U.S. National Security Threat",
-    "raw_summary": "Sudan’s devastating civil war is often described as a humanitarian catastrophe. It is that, unquestionably, but for the United States, the conflict is also a strategic challenge involving Red Sea security, Iran’s regional influence, counterterrorism, international trade, and access to critical minerals. Washington should not treat Sudan as a distant crisis to be dealt with after more pressing matters. Its outcome will affect the security of a strategically important region connecting the Middle East, Africa, and international maritime…",
-    "pre_relevance_score": 4,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bred sea|\\bsuez|\\bpanama cana",
     "detected_at": "2026-11-10T13:21:47.079Z",
     "status": "low_relevance",
+    "event_type": "",
+    "event_breadth": "sector_specific",
+    "currency_pairs": [],
+    "urgency_score": 1,
+    "commercial_relevance": 1,
+    "commercial_relevance_reason": "The article discusses Sudan's civil war as a US security issue without any concrete FX, tariff, commodity price or payment‑flow impact for UK businesses.",
     "trigger_strength": "reject",
     "trigger_score": 5,
     "discovery_mode": "reject",
     "recommended_query_budget": 0,
-    "urgency_score": 1,
-    "commercial_relevance": 1,
-    "commercial_relevance_reason": "The article discusses Sudan's civil war as a US security issue without any concrete FX, tariff, commodity price or payment‑flow impact for UK businesses.",
+    "likely_affected_businesses": [],
+    "why_now": "",
     "confidence_level": "high",
     "confidence_reason": "No specific currency movement, tariff change, or commodity price shock is mentioned; the content is purely geopolitical analysis.",
+    "discovery_recommendation": "",
+    "what_happened": "",
+    "what_changed_financially": "",
+    "who_pays_more": "",
+    "who_receives_less": "",
+    "affected_payment_flow": "",
+    "fx_payment_logic": "",
+    "margin_risk": "",
+    "payment_timing_risk": "",
+    "business_impact_summary": "",
+    "sales_angle": "",
+    "overall_sales_angle": "",
+    "summary": "",
     "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Sudan’s devastating civil war is often described as a humanitarian catastrophe. It is that, unquestionably, but for the United States, the conflict is also a strategic challenge involving Red Sea security, Iran’s regional influence, counterterrorism, international trade, and access to critical minerals. Washington should not treat Sudan as a distant crisis to be dealt with after more pressing matters. Its outcome will affect the security of a strategically important region connecting the Middle East, Africa, and international maritime…",
+    "pre_relevance_score": 4,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bred sea|\\bsuez|\\bpanama cana",
     "ai_model": "openai/gpt-oss-120b"
   },
   "af865bd16326040a": {
@@ -112667,16 +113200,13 @@
   },
   "b7d7850ecde26053": {
     "id": "b7d7850ecde26053",
+    "headline": "China October exports beat forecasts, imports surge 41.6% as trade surplus narrows",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/china-october-exports-beat-forecasts-imports-surge-41-6-as-trade-surplus-narrows/",
-    "headline": "China October exports beat forecasts, imports surge 41.6% as trade surplus narrows",
-    "raw_summary": "Stronger-than-expected exports suggest physical demand for AI hardware held up through October, offering some support to Asian tech and supply-chain stocks after last week’s selloff. The import surprise is the more notable signal. If it reflects firmer domestic demand rather than just higher commodity prices, it would be a positive for commodity exporters and the Australian dollar, which also trades as a China proxy. If higher oil prices drove much of the gain, it points to the energy shock lifting China’s import bill. A narrower surplus may slightly ease trade frictions ahead of the Trump-Xi ",
-    "pre_relevance_score": 6,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-11-10T13:16:05.725Z",
+    "status": "context_only",
     "event_type": "Trade data",
     "event_breadth": "sector_specific",
-    "summary": "China’s October trade data showed a strong export beat and a 41.6% jump in imports, narrowing the surplus. The import surge could lift the yuan, nudging USD/CNY and GBP/USD rates. UK firms with upcoming payments to Chinese suppliers should watch the move as it may raise the GBP cost of those invoices.",
     "currency_pairs": [
       "USD/CNY",
       "GBP/USD"
@@ -112694,29 +113224,33 @@
       "UK manufacturers sourcing components from China"
     ],
     "why_now": "The surprise in China’s trade data may shift CNY rates today, affecting any imminent payments to Chinese suppliers",
-    "discovery_recommendation": "Context only — keep as market colour, not a fresh lead source",
     "confidence_level": "medium",
     "confidence_reason": "Data release is clear but FX impact is indirect and requires a second‑step conversion",
+    "discovery_recommendation": "Context only — keep as market colour, not a fresh lead source",
     "what_happened": "China's October exports beat forecasts while imports jumped 41.6%, narrowing the trade surplus",
     "what_changed_financially": "Higher Chinese import demand could push the yuan stronger, influencing USD/CNY and GBP/USD rates",
     "who_pays_more": "UK importers of Chinese electronics, AI hardware and other components priced in USD or CNY",
     "who_receives_less": "UK exporters receiving payments in CNY may see reduced GBP value",
-    "margin_risk": "Low to medium",
-    "payment_timing_risk": "Medium",
     "affected_payment_flow": "GBP → USD (or CNY) payments to Chinese suppliers",
     "fx_payment_logic": "UK companies that buy goods from China typically pay in USD or, increasingly, in CNY. A stronger yuan means more USD (and therefore more GBP) is needed to settle the same invoice, compressing margins on upcoming purchases.",
-    "sales_angle": "If you have Chinese supplier invoices due soon, the latest China trade numbers could make those payments cost more in GBP.",
+    "margin_risk": "Low to medium",
+    "payment_timing_risk": "Medium",
     "business_impact_summary": "UK importers of Chinese electronics and AI hardware may see higher GBP costs on pending invoices, while exporters receiving CNY payments could experience a modest dip in GBP value. The effect is immediate for any payments settled in the next few days.",
+    "sales_angle": "If you have Chinese supplier invoices due soon, the latest China trade numbers could make those payments cost more in GBP.",
+    "overall_sales_angle": "China’s surprise import surge may push the yuan higher, so upcoming Chinese supplier payments could be more expensive in GBP today.",
+    "summary": "China’s October trade data showed a strong export beat and a 41.6% jump in imports, narrowing the surplus. The import surge could lift the yuan, nudging USD/CNY and GBP/USD rates. UK firms with upcoming payments to Chinese suppliers should watch the move as it may raise the GBP cost of those invoices.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
+    "target_segments": [],
+    "companies_house_terms": [],
+    "all_search_queries": [],
+    "raw_summary": "Stronger-than-expected exports suggest physical demand for AI hardware held up through October, offering some support to Asian tech and supply-chain stocks after last week’s selloff. The import surprise is the more notable signal. If it reflects firmer domestic demand rather than just higher commodity prices, it would be a positive for commodity exporters and the Australian dollar, which also trades as a China proxy. If higher oil prices drove much of the gain, it points to the energy shock lifting China’s import bill. A narrower surplus may slightly ease trade frictions ahead of the Trump-Xi ",
+    "pre_relevance_score": 6,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +4 \\bshipping cost|\\bfreight|\\bsu; +3 \\boil price|\\bcrude oil|\\bwti|",
     "exposure_types": [
       "CNY appreciation risk",
       "USD/CNY rate risk"
     ],
-    "overall_sales_angle": "China’s surprise import surge may push the yuan higher, so upcoming Chinese supplier payments could be more expensive in GBP today.",
-    "target_segments": [],
-    "companies_house_terms": [],
-    "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
     "ai_model": "openai/gpt-oss-120b"
   },
   "b7e33a9796f497c5": {
@@ -134729,16 +135263,13 @@
   },
   "e121ad6152c3538a": {
     "id": "e121ad6152c3538a",
+    "headline": "US CPI takes centre stage as markets look to steady the ship after the midterm selloff",
     "source": "ForexLive",
     "source_url": "https://investinglive.com/news/us-cpi-takes-centre-stage-as-markets-look-to-steady-the-ship-after-the-midterm-selloff/",
-    "headline": "US CPI takes centre stage as markets look to steady the ship after the midterm selloff",
-    "raw_summary": "So, what'd I miss? It's been quite a buzzing start to the week but today, it seems that markets might settle for doing nothing - at least in European morning trade. The US inflation data is&nbsp;looming later and I suspect European traders might be more than happy to sit on their hands until then. US CPI day means that the inflation numbers&nbsp;will be the main event for markets. As such,&nbsp;I wouldn't expect much excitement in the hours to follow as traders keep their powder dry ahead of the release; that unless we get some surprise headlines during the session. The October report is expec",
-    "pre_relevance_score": 5,
-    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
     "detected_at": "2026-11-10T13:18:21.497Z",
+    "status": "context_only",
     "event_type": "Economic data release",
     "event_breadth": "broad_macro",
-    "summary": "US CPI is due later today; markets are waiting, so there is no immediate FX move. Any UK business with USD exposure should watch the release for a possible rate swing.",
     "currency_pairs": [
       "USD/GBP"
     ],
@@ -134754,28 +135285,32 @@
       "UK exporters receiving USD revenue"
     ],
     "why_now": "The CPI release could cause a sudden USD move later today, but there is no actionable impact until the data is out.",
-    "discovery_recommendation": "Context only — monitor post‑release FX movement before initiating outreach.",
     "confidence_level": "medium",
     "confidence_reason": "Event is factual (CPI release schedule) but no actual rate move has occurred",
+    "discovery_recommendation": "Context only — monitor post‑release FX movement before initiating outreach.",
     "what_happened": "US CPI data for October is scheduled for release later today, with markets awaiting the numbers.",
     "what_changed_financially": "No change yet; markets are pricing in potential USD strength or weakness depending on the inflation outcome.",
     "who_pays_more": "None at this moment",
     "who_receives_less": "None at this moment",
-    "margin_risk": "Low",
-    "payment_timing_risk": "Low",
     "affected_payment_flow": "USD‑GBP conversions for UK businesses that pay or receive USD",
     "fx_payment_logic": "UK companies that have invoices in USD (either paying US suppliers or receiving USD from US customers) must convert between GBP and USD. If the CPI surprises, the USD could strengthen or weaken, altering the GBP amount needed or received.",
-    "sales_angle": "If you have upcoming USD invoices, the upcoming CPI could shift the rate later today.",
+    "margin_risk": "Low",
+    "payment_timing_risk": "Low",
     "business_impact_summary": "UK firms with USD‑denominated payables or receivables may see their cost or revenue change once the CPI numbers are released, but the impact is only potential until the data is out.",
-    "exposure_types": [
-      "USD/GBP rate risk"
-    ],
+    "sales_angle": "If you have upcoming USD invoices, the upcoming CPI could shift the rate later today.",
     "overall_sales_angle": "Upcoming US CPI could move USD/GBP, affecting any UK business with USD exposure today.",
+    "summary": "US CPI is due later today; markets are waiting, so there is no immediate FX move. Any UK business with USD exposure should watch the release for a possible rate swing.",
+    "ai_provider": "groq",
+    "fallback_mode": false,
     "target_segments": [],
     "companies_house_terms": [],
     "all_search_queries": [],
-    "status": "context_only",
-    "ai_provider": "groq",
+    "raw_summary": "So, what'd I miss? It's been quite a buzzing start to the week but today, it seems that markets might settle for doing nothing - at least in European morning trade. The US inflation data is&nbsp;looming later and I suspect European traders might be more than happy to sit on their hands until then. US CPI day means that the inflation numbers&nbsp;will be the main event for markets. As such,&nbsp;I wouldn't expect much excitement in the hours to follow as traders keep their powder dry ahead of the release; that unless we get some surprise headlines during the session. The October report is expec",
+    "pre_relevance_score": 5,
+    "pre_relevance_reason": "+3 \\bimport|\\bexport\\b; +3 \\binterest rate|\\brate decisio; +3 \\boil price|\\bcrude oil|\\bwti|",
+    "exposure_types": [
+      "USD/GBP rate risk"
+    ],
     "ai_model": "openai/gpt-oss-120b"
   },
   "e147f46f7259f6fe": {
