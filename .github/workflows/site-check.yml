@@ -1,0 +1,41 @@
+name: Site check
+
+# Is the live dashboard exactly what main builds — no injected scripts, no tampered files, private data locked?
+# (apps/web/scripts/site-check.mjs: live pages and files hashed against a fresh build of main; outside hosts listed;
+# /api and private data checked without the password; security headers shown.) Weekly, and when it changes.
+# Read-only; prints paths, hashes, hosts and status codes only.
+
+on:
+  schedule:
+    - cron: '37 7 * * 1'
+  workflow_dispatch:
+  push:
+    branches: ['main', 'claude/**']
+    paths:
+      - .github/workflows/site-check.yml
+      - apps/web/scripts/site-check.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4          # this script
+      - uses: actions/checkout@v4          # what's deployed: main
+        with:
+          ref: main
+          path: deployed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Build main as the deploy does
+        working-directory: deployed
+        env:   # the deploy bakes this into the old dashboard's script; the same here so the hashes compare
+          VITE_COMPANIES_HOUSE_API_KEY: ${{ secrets.VITE_COMPANIES_HOUSE_API_KEY }}
+        run: npm ci --no-audit --no-fund && npm run build
+      - name: Live site against the build
+        run: node apps/web/scripts/site-check.mjs https://fx-dashboard-a2y.pages.dev deployed/apps/web/dist
