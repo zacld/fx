@@ -5,13 +5,13 @@
 //   node scripts/alerts-store.mjs get|put niches file.json      each niche's measured numbers (tools/niche_hits.py)
 // Counts only in the log (public repo).
 import { readFile, writeFile } from "node:fs/promises";
-import { ALERTS_KEY, DEALS_KEY, DISCOVERIES_KEY, FILINGS_KEY, KEY, NICHES_KEY, STORE, STREAM_KEY, filingsMonthKey } from "../api/accounts.mjs";
+import { ALERTS_KEY, DEALS_KEY, DISCOVERIES_KEY, DOMAINS_KEY, FILINGS_KEY, KEY, NICHES_KEY, STORE, STREAM_KEY, filingsMonthKey } from "../api/accounts.mjs";
 import { openStore } from "./store.mjs";
 
-const KEYS = { alerts: ALERTS_KEY, stream: STREAM_KEY, discoveries: DISCOVERIES_KEY, niches: NICHES_KEY, deals: DEALS_KEY };
+const KEYS = { alerts: ALERTS_KEY, stream: STREAM_KEY, discoveries: DISCOVERIES_KEY, niches: NICHES_KEY, deals: DEALS_KEY, domains: DOMAINS_KEY };
 const [command, name, file] = process.argv.slice(2);
 if (command === "tracked" ? !name : !(["get", "put"].includes(command) && KEYS[name] && file)) {
-  console.error("usage: node alerts-store.mjs tracked out.json | get|put alerts|stream|discoveries|niches|deals file.json");
+  console.error("usage: node alerts-store.mjs tracked out.json | get|put alerts|stream|discoveries|niches|deals|domains file.json");
   process.exit(2);
 }
 const store = await openStore(STORE);

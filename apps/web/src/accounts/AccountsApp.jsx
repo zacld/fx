@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { filedIso, leadLine, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { filedIso, leadLine, setKnownSites, siteOf, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { applyEmail } from "../../api/accounts.mjs";
@@ -124,7 +124,7 @@ function Accounts({ data, password }) {
   useEffect(() => {
     let live = true;
     fetch(`${API}?view=signals`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) setSignals(body); }).catch(() => {});
+      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) { setKnownSites(body.websites); setSignals(body); } }).catch(() => {});
     return () => { live = false; };
   }, [password]);
   const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, madeAt: data.made_at }),
@@ -406,6 +406,9 @@ function Accounts({ data, password }) {
           <button className="btn-sm export" onClick={exportCsv} disabled={!visible.length}>Export Excel ({visible.length})</button>
           <button className="btn-sm" onClick={() => downloadCognism(visible, "accounts")} disabled={!visible.length}
                   title="Company, domain, postcode and the finance contact's first / last name — the columns Cognism matches on">Export for Cognism</button>
+          <button className="btn-sm" onClick={() => downloadCognismCompanies(visible, "accounts")} disabled={!visible.some(siteOf)}
+                  title="Only companies with a confirmed website, one row each — upload as a company list in Cognism, then search people by job title">
+            Cognism company list ({visible.filter(siteOf).length})</button>
         </div>
         </>}
       </div>
@@ -836,6 +839,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
         <span className="muted">{rows.length.toLocaleString()} of {all.length.toLocaleString()} with an FX loss</span>
         <button className="btn-sm export" onClick={() => exportLosses(rows)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "fx-losses")} disabled={!rows.length}>Export for Cognism</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "fx-losses")} disabled={!rows.some(siteOf)}>Cognism company list ({rows.filter(siteOf).length})</button>
       </div>
       <p className="filings-note">Companies whose latest filed accounts show a loss on currency (exchange differences), from your Accounts list and the
         Recent FX filings scan. Each figure links to the accounts it came from; figures that failed the sense checks are left out. Companies you've
@@ -1077,6 +1081,7 @@ function CallToday({ password, listRows, lead, contacted, onContact, onOpen, onE
           £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Highest lead score first. Mark one Contacted and the next moves up.</span>
         <button className="btn-sm export" onClick={() => exportCalls(rows, checks)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "call-today")} disabled={!rows.length}>Export for Cognism</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "call-today")} disabled={!rows.some(siteOf)}>Cognism company list ({rows.filter(siteOf).length})</button>
       </div>
       {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} checks={checks} onCrm={onCrm} />)}
       {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or Recent FX filings tabs.</div>}
@@ -1303,6 +1308,10 @@ function downloadCognism(rows, name) {
   downloadSheet(rows.map(cognismRow), COGNISM_COLUMNS, `${name}-cognism-${new Date().toISOString().slice(0, 10)}.xlsx`, "Cognism");
 }
 
+function downloadCognismCompanies(rows, name) {
+  downloadSheet(cognismCompanyRows(rows), COGNISM_COMPANY_COLUMNS, `${name}-cognism-companies-${new Date().toISOString().slice(0, 10)}.xlsx`, "Companies");
+}
+
 // Figures written as numbers in the spreadsheets (sortable, summable); everything else as text.
 const NUMBER_FIELDS = ["rank", "filed_fx_score", "turnover_gbp", "fx_wallet_low_gbp", "fx_wallet_high_gbp", "fx_gain_loss_gbp",
   "fx_gain_loss_prior_gbp", "fx_loss_gbp", "fx_prior_gbp"];
@@ -1501,7 +1510,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen, o
           {fresh && <span className="new">New</span>}
           <CompanyLink r={r} onOpen={onOpen} />
           {r.trading_as && <span className="site">t/a {r.trading_as}</span>}
-          {r.website && <a className="site" href={siteUrl(r.website)} target="_blank" rel="noreferrer">{siteLabel(r.website)}</a>}
+          {siteOf(r) && <a className="site" href={siteUrl(siteOf(r))} target="_blank" rel="noreferrer">{siteLabel(siteOf(r))}</a>}
         </div>
         <div className="card-r">
           <div className="figures">
@@ -1569,7 +1578,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
           <div className="pg-sub">
             {r.trading_as && <span>t/a {r.trading_as}</span>}
             {r.company_number && <a href={r.companies_house_url} target="_blank" rel="noreferrer">Companies House {r.company_number}</a>}
-            {r.website && <a href={siteUrl(r.website)} target="_blank" rel="noreferrer">{siteLabel(r.website)}</a>}
+            {siteOf(r) && <a href={siteUrl(siteOf(r))} target="_blank" rel="noreferrer">{siteLabel(siteOf(r))}</a>}
             {r.fx_niche && <span>{r.fx_niche}</span>}
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, cognismCompanyRows, setKnownSites, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -455,4 +455,18 @@ describe("Deals in the lead score", () => {
     expect(appointedIso("appointed 3rd March 2026")).toBe("2026-03-03");
     expect(appointedIso("appointed 03/04/2026")).toBe("2026-04-03");
   });
+});
+
+describe("Websites for Cognism", () => {
+  it("Known websites fill the Cognism exports; the company list keeps only companies with a website", () => {
+    setKnownSites({ "01234567": "https://www.acme.co.uk/" });
+    const rows = [{ company_number: "01234567", company_name: "ACME LIMITED", lead_score: 90 }, { company_number: "07654321", company_name: "NOSITE LIMITED" }];
+    expect(cognismRow(rows[0]).domain).toBe("acme.co.uk");
+    expect(cognismRow({ ...rows[0], website: "https://own.com/" }).domain).toBe("own.com");
+    const list = cognismCompanyRows(rows);
+    expect(list.length).toBe(1);
+    expect(list[0].domain).toBe("acme.co.uk");
+    expect(list[0].role_to_find).toMatch(/Finance Director; CFO/);
+    setKnownSites({});
+});
 });

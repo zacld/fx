@@ -1,13 +1,14 @@
 // Rank every lead we've scanned (src/accounts/ranking.js) and save it for the Accounts page (leads/ranked):
-//   node scripts/rank-leads.mjs enrich.json      — enrich.json from tools/niche_hits.py --enrich-out
+//   node scripts/rank-leads.mjs enrich.json [order.json]   — enrich.json from tools/niche_hits.py --enrich-out; order.json:
+//   every live lead's company number, best first (for tools/find_domains.py)
 // Reads the Accounts list, the Recent FX filings list, the measured niches and the alerts from the site's private store.
 // Prints counts, company names, scores and niche learnings — no people's names (the repo is public).
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { ALERTS_KEY, DEALS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { filedMonth, nicheLearnings, rankLeads } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
-const [enrichPath] = process.argv.slice(2);
+const [enrichPath, orderPath] = process.argv.slice(2);   // orderPath: company numbers, best lead first (find_domains.py)
 const enrich = enrichPath ? (JSON.parse(await readFile(enrichPath, "utf8")).companies || {}) : {};
 const store = await openStore(STORE);
 const [list, index, niches, alerts, deals] = await Promise.all([KEY, FILINGS_KEY, NICHES_KEY, ALERTS_KEY, DEALS_KEY].map((k) => store.get(k, "json")));
@@ -21,6 +22,7 @@ const made_at = new Date().toISOString();
 await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, niches: learn });
 
 const live = scored.filter((s) => !s.absurd);
+if (orderPath) await writeFile(orderPath, JSON.stringify(live.map((s) => s.company_number)));
 const bucket = (lo, hi) => live.filter((s) => s.score >= lo && s.score < hi).length;
 console.log(`Leads scanned: ${scored.length.toLocaleString()} (Accounts list ${listRows.length.toLocaleString()}, FX filings not on it ${rows.length.toLocaleString()}); ` +
             `ruled out as absurd ${Object.keys(ruled_out).length.toLocaleString()}; list companies relabelled ${Object.keys(niche_of).length.toLocaleString()}`);

@@ -261,3 +261,84 @@ def look_up_many(companies: Iterable[tuple], fetcher: Optional[Fetcher] = None,
 
     with ThreadPoolExecutor(max_workers=max(1, min(workers or WORKERS, len(companies) or 1))) as pool:
         return {c[0]: result for c, result in zip(companies, pool.map(one, companies))}
+
+
+# --- The company's website for every lead (tools/find_domains.py) ----------------------------------------------------
+# Cognism, Zint and a quick Google all match a company on its website; the FX filings list's companies had none. Same
+# rule as above: a guessed address counts only when the site shows the company's registration number (UK companies must
+# publish it on their website) or its full registered name, on the homepage or a legal / contact / about page it links.
+
+_LEGAL_WORDS = (("privacy", 3), ("terms", 3), ("legal", 3), ("imprint", 3), ("cookie", 2), ("contact", 2), ("about", 1))
+MAX_SITE_PAGES = 3   # the homepage and two of its legal / contact / about pages
+
+
+_PLAIN_WORDS = {"UK", "GB", "EUROPE", "EUROPEAN", "PRODUCTS", "SYSTEMS", "SOLUTIONS", "COMPANY", "CO", "THE"}
+
+
+def domain_guesses(company_name: str, limit: int = 12) -> list[str]:
+    """candidate_domains plus the shapes a UK company's address usually takes: the name without "UK" / "Products" /
+    "Europe" (with and without "and"), .uk, a "uk" / "group" ending, and the first word alone when it's distinctive;
+    most likely first."""
+    words = [re.sub(r"[^a-z0-9]", "", w) for w in matching.normalise_name(company_name).lower().split()]
+    words = [w for w in words if w]
+    core = [w for w in words if w.upper() not in _DROP_WORDS] or words
+    if not core:
+        return []
+    plain = [w for w in core if w.upper() not in _PLAIN_WORDS] or core
+    with_and = [w for w in words if w.upper() not in _PLAIN_WORDS | (_DROP_WORDS - {"AND"})]
+    labels = ["".join(with_and), "".join(plain), "-".join(plain)]
+    guesses = [f"https://www.{label}{tld}/" for label in dict.fromkeys(labels) if 2 < len(label) <= 63
+               for tld in (".co.uk", ".com")]
+    joined = "".join(plain)
+    extra = [f"https://www.{joined}.uk/", f"https://www.{joined}uk.co.uk/", f"https://www.{joined}uk.com/"]
+    if "group" in words:
+        extra += [f"https://www.{joined}group.co.uk/", f"https://www.{joined}group.com/"]
+    if len(plain) > 1 and len(plain[0]) >= 5:
+        extra += [f"https://www.{plain[0]}.co.uk/", f"https://www.{plain[0]}.com/"]
+    return list(dict.fromkeys([*guesses, *candidate_domains(company_name), *extra]))[:limit]
+
+
+def legal_links(html: str, base_url: str, limit: int = MAX_SITE_PAGES - 1) -> list[str]:
+    """Same-site privacy / terms / legal / contact / about pages — where a company's registered details are printed."""
+    host = urllib.parse.urlparse(base_url).netloc.lower().removeprefix("www.")
+    scored: dict[str, int] = {}
+    for href, text in re.findall(r'(?is)<a\b[^>]*href=["\']([^"\'#]+)["\'][^>]*>(.*?)</a>', html):
+        url = _join(base_url, href)
+        parsed = urllib.parse.urlparse(url) if url else None
+        if not parsed or parsed.scheme not in ("http", "https") or parsed.netloc.lower().removeprefix("www.") != host:
+            continue
+        hay = (parsed.path + " " + re.sub(r"<[^>]+>", " ", text)).lower()
+        score = max((w for k, w in _LEGAL_WORDS if k in hay), default=0)
+        if score and url.rstrip("/") != base_url.rstrip("/"):
+            scored[url] = max(scored.get(url, 0), score)
+    return [u for u, _ in sorted(scored.items(), key=lambda kv: (-kv[1], len(kv[0])))][:limit]
+
+
+def find_site(company_number: str, company_name: str, fetcher: Optional[Fetcher] = None,
+              hints: Iterable[str] = ()) -> dict:
+    """{"website", "confidence" (high: its number shown / medium: its full name), "page"} — empty when no guessed
+    address shows the company's own details. At most MAX_SITE_PAGES pages a site; robots.txt respected beyond the
+    homepage; social sites never."""
+    fetcher = fetcher or fetch
+    for guess in dict.fromkeys([*hints, *domain_guesses(company_name)]):
+        got = fetcher(guess)
+        if not got:
+            continue
+        url, html = got
+        host = urllib.parse.urlparse(url).netloc.lower()
+        if not host or any(s in host for s in _SOCIAL):
+            continue
+        page, confidence = url, confirms_company(page_text(html), company_number, company_name)
+        if not confidence:
+            robots = _robots(url, fetcher)
+            for link in legal_links(html, url):
+                if not robots.can_fetch(USER_AGENT, link):
+                    continue
+                more = fetcher(link)
+                confidence = more and confirms_company(page_text(more[1]), company_number, company_name)
+                if confidence:
+                    page = link
+                    break
+        if confidence:
+            return {"website": f"{urllib.parse.urlparse(url).scheme}://{host}/", "confidence": confidence, "page": page}
+    return {"website": "", "confidence": "", "page": ""}
