@@ -37,6 +37,7 @@ def _load(path, default):
         return default
 
 
+REORG_SAME_DAY = 4       # companies one buyer takes on the same day: a group reorganisation
 NEW_COMPANY_DAYS = 180   # a target incorporated this close to the deal was set up, not bought (a new SPV)
 
 
@@ -102,6 +103,11 @@ def main() -> None:
     bulk.scan(args.bulk or bulk.download(), set(), set(), numbers=numbers, registry=registry)
     names = {n: r.get("name", "") for n, r in registry.items()}
     found = owners.deals(changes, names)
+    # A buyer taking REORG_SAME_DAY+ companies on one day is a new holding company put over a group — a reorganisation,
+    # not purchases (one GB Global Management "bought" 20 of its own group on 4 Nov 2026)
+    per_day = Counter((d["company_number"], d["date"]) for d in found if d["kind"] == "acquired")
+    reorg = sum(1 for d in found if d["kind"] == "acquired" and per_day[(d["company_number"], d["date"])] >= REORG_SAME_DAY)
+    found = [d for d in found if not (d["kind"] == "acquired" and per_day[(d["company_number"], d["date"])] >= REORG_SAME_DAY)]
     kept, why_out = [], Counter()
     for d in found:
         rec = registry.get(d["company_number"])
@@ -127,6 +133,7 @@ def main() -> None:
         json.dump({"made_at": made, "window_days": args.window, "count": len(kept), "items": kept}, f)
     kinds = Counter(d["kind"] for d in found)
     kept_kinds = Counter(d["kind"] for d in kept)
+    print(f"Group reorganisations left out (a buyer taking {REORG_SAME_DAY}+ companies on one day): {reorg:,}")
     print(f"Deals found: {dict(kinds)}; kept (active, an FX sign): {dict(kept_kinds)}; left out: {dict(why_out)}")
     print(f"On your lists: {sum(d['tracked'] for d in kept)}")
     for d in kept[:25]:
