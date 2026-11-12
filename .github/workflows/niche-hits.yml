@@ -37,7 +37,7 @@ permissions:
 jobs:
   niches:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 130
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -97,4 +97,11 @@ jobs:
           cd apps/web && node scripts/alerts-store.mjs put niches ../../lead-sourcer/niche_stats.json
           node scripts/alerts-store.mjs put deals ../../lead-sourcer/deals.json
       - name: Rank every lead
-        run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json
+        run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json
+      # Every lead's own website (best leads first), confirmed by its company number or registered name on the site:
+      # what Cognism, Zint and a quick Google match a company on. Found sites are kept; ~40 minutes a day until done.
+      - name: Websites
+        run: |
+          cd apps/web && (node scripts/alerts-store.mjs get domains ../../lead-sourcer/domains_cache.json || echo '{}' > ../../lead-sourcer/domains_cache.json)
+          cd ../../lead-sourcer && PYTHONUNBUFFERED=1 python3 tools/find_domains.py --tracked tracked.json --order lead_order.json --cache domains_cache.json --out domains.json --budget 2400
+          cd ../apps/web && node scripts/alerts-store.mjs put domains ../../lead-sourcer/domains.json

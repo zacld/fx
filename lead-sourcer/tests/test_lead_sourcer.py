@@ -3359,6 +3359,36 @@ class TestCatchAllCodes(unittest.TestCase):
         self.assertEqual(nr.sector_niche(["20003"], niches)["id"], "broad")
 
 
+class TestFindDomains(unittest.TestCase):
+    """sourcer/website.find_site and tools/find_domains.py: every lead's own website, confirmed on the site."""
+
+    def test_guesses_drop_uk_and_products(self):
+        from sourcer import website
+        g = website.domain_guesses("BAKER & BAKER PRODUCTS UK LIMITED")
+        self.assertEqual(g[:2], ["https://www.bakerandbaker.co.uk/", "https://www.bakerandbaker.com/"])
+        self.assertIn("https://www.gozney.co.uk/", website.domain_guesses("GOZNEY GROUP LIMITED")[:2])
+
+    def test_confirmed_on_the_privacy_page_and_lookalikes_refused(self):
+        from sourcer import website
+        pages = {
+            "https://www.acmewine.co.uk/": ("https://www.acmewine.co.uk/", '<a href="/privacy-policy">Privacy</a> Fine wines'),
+            "https://www.acmewine.co.uk/robots.txt": ("https://www.acmewine.co.uk/robots.txt", "User-agent: *\nAllow: /"),
+            "https://www.acmewine.co.uk/privacy-policy": ("x", "Acme Wine Ltd, registered in England no. 01234567"),
+            "https://www.acmewine.com/": ("https://www.acmewine.com/", "Acme Wine Inc, Napa"),
+        }
+        got = website.find_site("01234567", "ACME WINE LIMITED", fetcher=pages.get)
+        self.assertEqual((got["website"], got["confidence"]), ("https://www.acmewine.co.uk/", "high"))
+        self.assertEqual(website.find_site("09999999", "ACME WINE LIMITED", fetcher=pages.get)["website"], "")
+
+    def test_queue_best_first_found_never_again(self):
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+        import find_domains as fd
+        from datetime import date
+        tracked = {"1": "A", "2": "B", "3": "C", "4": "D"}
+        cache = {"sites": {"2": {"website": "x"}}, "none": {"3": "2026-11-01", "4": "2026-08-01"}}
+        self.assertEqual(fd.queue(tracked, ["4", "2", "1"], cache, date(2026, 11, 12)), [("4", "D"), ("1", "A")])
+
+
 class TestDeals(unittest.TestCase):
     """sourcer/deals.py (acquisitions, FD appointments in a filing) and sourcer/owners.py (who bought whom)."""
 

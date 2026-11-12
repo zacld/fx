@@ -272,6 +272,10 @@ export function splitName(name = "") {
   const words = String(name).replace(/\(.*?\)/g, " ").split(/\s+/).filter((w) => w && !TITLES.test(w));
   return words.length < 2 ? { first: words[0] || "", last: "" } : { first: words[0], last: words[words.length - 1] };
 }
+// Websites the daily website finder confirmed (tools/find_domains.py, ?view=signals → websites): a row's own website wins.
+let knownSites = {};
+export const setKnownSites = (map) => { knownSites = map || {}; };
+export const siteOf = (r) => r.website || knownSites[r.company_number] || "";
 export const domainOf = (website = "") => String(website).trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").split(/[/?#]/)[0].toLowerCase();
 export function cognismRow(r) {
   const named = presentedContact(r);
@@ -279,12 +283,24 @@ export function cognismRow(r) {
   const linkedin = /linkedin\.com\/in\//i.test(r.finance_contact_linkedin || "") ? r.finance_contact_linkedin : "";
   const why = [r.recent_fx_loss, parts(r.triggers)[0], r.fx_forwards || r.fx_today, r.currencies_in_accounts].filter(Boolean)[0] || "";
   return {
-    company_and_fd: companyAndFd(r), company_name: r.company_name || "", domain: domainOf(r.website), company_number: r.company_number || "",
+    company_and_fd: companyAndFd(r), company_name: r.company_name || "", domain: domainOf(siteOf(r)), company_number: r.company_number || "",
     postcode: r.postcode || "", country: "United Kingdom", first_name: first, last_name: last,
     job_title: named ? r.finance_contact_role || "" : "", linkedin_url: linkedin, email: "", direct_phone: "", mobile: "", notes: "",
     role_to_find: r.no_fd_likely ? "Managing Director" : "Finance Director / CFO", turnover_gbp: r.turnover_gbp || "",
     why_fx: why, companies_house_url: r.companies_house_url || `https://find-and-update.company-information.service.gov.uk/company/${r.company_number}`,
   };
+}
+// Cognism's company list (search by company, then filter by job title): only companies with a confirmed website — the
+// field Cognism matches companies on — one row each, best lead first as given.
+export const COGNISM_COMPANY_COLUMNS = [
+  ["company_name", "Company Name", 34], ["domain", "Website", 26], ["country", "Country", 14], ["role_to_find", "Job Titles to Find", 30],
+  ["company_number", "Company Number", 15], ["lead_score", "Lead Score", 10, true], ["why_fx", "Why FX", 50],
+].map(([key, header, width, number]) => ({ key, header, width, number: Boolean(number) }));
+export function cognismCompanyRows(rows) {
+  return rows.filter((r) => siteOf(r)).map((r) => ({
+    ...cognismRow(r), lead_score: r.lead_score ?? "",
+    role_to_find: r.no_fd_likely ? "Managing Director; Finance Director" : "Finance Director; CFO; Financial Controller; Head of Finance",
+  }));
 }
 export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
 

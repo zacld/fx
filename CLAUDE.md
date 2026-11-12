@@ -452,6 +452,20 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   deal (`lead_flags.hit`). **Hit list tab**: those companies, highest score first ("Also without an FX loss" widens
   it), Excel export. **New money tab** (GET `?view=deals`): the ownership register's deals and the news of PE deals and
   funding, newest first, filters, each with its FX sign. Contact-finding is no longer being extended.
+- **Every lead's website** (Zac, 12 Nov 2026: 7,000 companies uploaded to Cognism, ~100 enriched — the FX filings
+  list's companies carried no website and most rows no named person, so Cognism had nothing to match on):
+  `tools/find_domains.py` in the daily "Niche hits" run, after the ranking (`rank-leads.mjs … lead_order.json`: best lead
+  first), ~40 minutes a day (`--budget`) until every tracked company is tried. Addresses guessed from the registered name
+  (`website.domain_guesses`: with / without "and", "UK", "Products", "Europe"; .co.uk / .com / .uk; a "group" / "uk"
+  ending; the first word when distinctive) and kept only when the site shows the company's number (high) or full
+  registered name (medium) — the homepage or at most two of its privacy / terms / contact / about pages, robots.txt
+  respected (`website.find_site`). Store key `domains` (`{sites: {number: {website, confidence, found}}, none: {number:
+  date}}`; a "none" tried again after 30 days); `?view=signals` gives the page `websites`, used wherever a row has no
+  website of its own (`siteOf`, `setKnownSites` in `format.js`): cards, the company page and the Cognism exports.
+  **Cognism company list** (Accounts, Call today, FX losses; `cognismCompanyRows` / `COGNISM_COMPANY_COLUMNS`): only
+  companies with a website, one row each — Company Name, Website, Country, Job Titles to Find, Company Number, Lead
+  Score, Why FX — to upload as a company list and search people by job title, rather than contact enrichment (which
+  needs a person's name, email or LinkedIn URL on each row).
 - **Call today tab** (Accounts page, first tab; `callToday` / `CALL_RULES` in `format.js`): the day's 25 across the
   Accounts list and the Recent FX filings list (its candidates precomputed at save as `filings/calls`, `filingsCalls`
   in `api/accounts.mjs`, GET `/api/accounts?view=calls`): turnover £20m–£300m (filed or group), filed FX proof 50+, not

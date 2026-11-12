@@ -84,6 +84,7 @@ export function signalsByCompany(items = []) {
   return out;
 }
 export const RANKED_KEY = "leads/ranked";   // {made_at, rows, ruled_out, niches}: every scanned lead ranked (scripts/rank-leads.mjs)
+export const DOMAINS_KEY = "domains";   // {made_at, sites: {number: {website, confidence, found}}, none}: tools/find_domains.py
 export const DEALS_KEY = "deals";   // {made_at, items}: purchases from the ownership register (tools/psc_deals.py)
 export const NICHES_KEY = "niches/stats";   // {made_at, niches: {id: measured numbers}, headings}: tools/niche_hits.py
 export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
@@ -204,8 +205,9 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
   }
   // For the lead score: each measured niche's numbers (niche_hits) and each company's recent alerts (kind, date, title).
   if (params.get("view") === "signals") {
-    const [niches, alerts, deals] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY].map((k) => blobs.get(k, { type: "json" })));
-    return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [],
+    const [niches, alerts, deals, domains] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY, DOMAINS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    const websites = Object.fromEntries(Object.entries(domains?.sites || {}).map(([n, s]) => [n, s.website]));
+    return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [], websites,
                    signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) }, 200);
   }
   // The New money tab: purchases from the ownership register, plus the news of PE deals and funding rounds.
