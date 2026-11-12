@@ -3403,3 +3403,14 @@ class TestNewMoneyHeadlines(unittest.TestCase):
                  "Bloom Labs raises £25m Series B to expand into US": ("news_funding", "Bloom Labs")}
         for h, want in cases.items():
             self.assertEqual((m.headline_kind(h), m.headline_subject(h)), want, h)
+
+    def test_new_spv_is_not_a_purchase(self):
+        spec = importlib.util.spec_from_file_location("psc_deals", os.path.join(os.path.dirname(__file__), "..", "tools", "psc_deals.py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        deal = {"kind": "acquired", "company_number": "01234567", "other_number": "17569000", "date": "2026-11-09"}
+        self.assertTrue(m.newly_formed(deal, {}))                                                    # not on the monthly file yet
+        self.assertTrue(m.newly_formed(deal, {"17569000": {"incorporated": "2026-10-30"}}))           # set up weeks ago
+        self.assertFalse(m.newly_formed(deal, {"17569000": {"incorporated": "1998-03-02"}}))          # an old company: bought
+        pe = {"kind": "pe_buyout", "company_number": "00000001", "other_number": "", "date": "2026-10-01"}
+        self.assertFalse(m.newly_formed(pe, {"00000001": {"incorporated": "2004-01-01"}}))

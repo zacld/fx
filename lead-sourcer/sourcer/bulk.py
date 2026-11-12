@@ -169,7 +169,8 @@ def scan(
                 "status": values[col["CompanyStatus"]].strip(), "type": values[col["CompanyCategory"]].strip(),
                 "sic_codes": [code for code in (sic_code(values[i]) for i in sic_cols) if code],
                 "name": values[col["CompanyName"]].strip(),
-                "category": normalise_category(values[col["Accounts.AccountCategory"]])}
+                "category": normalise_category(values[col["Accounts.AccountCategory"]]),
+                "incorporated": _iso_date(values[col["IncorporationDate"]])}
         if len(values) < width or values[col["CompanyStatus"]].strip() != "Active":
             continue
         company_type = values[col["CompanyCategory"]].lower()

@@ -18,13 +18,14 @@ import json
 import os
 import sys
 from collections import Counter
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 from sourcer import bulk, niches as niche_rules, owners  # noqa: E402
 
 SIZED = set(niche_rules.SIZED)
+STATS: dict = {}   # measured niches (--niche-stats), to leave out niches measured as poor
 CACHE = os.path.join(os.path.expanduser("~"), ".cache", "fx-lead-sourcer", "psc")
 
 
@@ -36,6 +37,22 @@ def _load(path, default):
         return default
 
 
+NEW_COMPANY_DAYS = 180   # a target incorporated this close to the deal was set up, not bought (a new SPV)
+
+
+def newly_formed(deal: dict, registry: dict) -> bool:
+    """The company bought (the target) is a new company the buyer set up — not on the register's monthly file yet, or
+    incorporated within NEW_COMPANY_DAYS of the deal."""
+    target = deal["other_number"] if deal["kind"] == "acquired" else deal["company_number"]
+    rec = registry.get(target)
+    if not rec:
+        return True
+    inc = rec.get("incorporated") or ""
+    if not inc or not deal.get("date"):
+        return False
+    return inc >= (date.fromisoformat(deal["date"][:10]) - timedelta(days=NEW_COMPANY_DAYS)).isoformat()
+
+
 def fx_signs(deal: dict, record: dict, tracked: dict, traders: dict, niches: list[dict], catch_all: set) -> list[str]:
     n = deal["company_number"]
     signs = []
@@ -45,7 +62,7 @@ def fx_signs(deal: dict, record: dict, tracked: dict, traders: dict, niches: lis
     if months:
         signs.append(f"imports/exports in {months} of the last 12 months (HMRC)")
     niche = niche_rules.sector_niche(record.get("sic_codes") or [], niches, catch_all)
-    if niche:
+    if niche and not niche_rules.dropped(niche["id"], STATS):   # a niche the finder skips (property…) is no FX sign
         signs.append(f"FX niche: {niche['name']}")
     if deal["kind"] == "overseas_buyer":
         signs.append(f"owner abroad ({deal['other_country']})")
@@ -61,8 +78,10 @@ def main() -> None:
     p.add_argument("--zip", default="", help="a downloaded snapshot (else the latest is fetched)")
     p.add_argument("--window", type=int, default=owners.WINDOW_DAYS)
     p.add_argument("--out", default="deals.json")
+    p.add_argument("--niche-stats", default="niche_stats.json")
     args = p.parse_args()
 
+    STATS.update(niche_rules.load_stats(args.niche_stats))
     tracked = _load(args.tracked, {}) or {}
     traders = _load(args.traders, {}) or {}
     niches = (_load(args.niches, {}) or {}).get("niches") or []
@@ -88,6 +107,9 @@ def main() -> None:
         rec = registry.get(d["company_number"])
         if not rec or rec.get("status", "").lower() != "active":
             why_out["not active"] += 1
+            continue
+        if newly_formed(d, registry):
+            why_out["a new company set up, not bought"] += 1
             continue
         if rec.get("category") not in SIZED and d["company_number"] not in tracked:
             why_out["too small to file full / medium / group accounts"] += 1
