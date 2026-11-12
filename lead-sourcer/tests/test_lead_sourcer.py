@@ -3423,5 +3423,9 @@ class TestNewMoneyHeadlines(unittest.TestCase):
         self.assertTrue(m.newly_formed(deal, {}))                                                    # not on the monthly file yet
         self.assertTrue(m.newly_formed(deal, {"17569000": {"incorporated": "2026-10-30"}}))           # set up weeks ago
         self.assertFalse(m.newly_formed(deal, {"17569000": {"incorporated": "1998-03-02"}}))          # an old company: bought
+        estate = {"kind": "acquired", "other_number": "09000001", "other_party": "CANE HILL PARK (GATEWAY) MANAGEMENT COMPANY LIMITED"}
+        self.assertTrue(m.shell_target(estate, {}))
+        self.assertTrue(m.shell_target({**estate, "other_party": "ACME LIMITED"}, {"09000001": {"category": "DORMANT"}}))
+        self.assertFalse(m.shell_target({**estate, "other_party": "ACME LIMITED"}, {"09000001": {"category": "FULL"}}))
         pe = {"kind": "pe_buyout", "company_number": "00000001", "other_number": "", "date": "2026-10-01"}
         self.assertFalse(m.newly_formed(pe, {"00000001": {"incorporated": "2004-01-01"}}))

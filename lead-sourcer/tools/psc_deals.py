@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
@@ -52,6 +53,18 @@ def newly_formed(deal: dict, registry: dict) -> bool:
     if not inc or not deal.get("date"):
         return False
     return inc >= (date.fromisoformat(deal["date"][:10]) - timedelta(days=NEW_COMPANY_DAYS)).isoformat()
+
+
+_SHELL_NAME = re.compile(r"\b(?:MANAGEMENT COMPANY|RESIDENTS|RTM COMPANY|FREEHOLD|NOMINEES?)\b", re.I)
+
+
+def shell_target(deal: dict, registry: dict) -> bool:
+    """A buyer's "purchase" that isn't a business: a dormant company, or an estate / residents' management, right-to-
+    manage, freehold or nominee company (a housebuilder handing over an estate's management company)."""
+    if deal["kind"] != "acquired":
+        return False
+    rec = registry.get(deal["other_number"]) or {}
+    return "DORMANT" in (rec.get("category") or "").upper() or bool(_SHELL_NAME.search(deal.get("other_party") or ""))
 
 
 def fx_signs(deal: dict, record: dict, tracked: dict, traders: dict, niches: list[dict], catch_all: set) -> list[str]:
@@ -116,6 +129,9 @@ def main() -> None:
             continue
         if newly_formed(d, registry):
             why_out["a new company set up, not bought"] += 1
+            continue
+        if shell_target(d, registry):
+            why_out["bought a dormant or management company"] += 1
             continue
         if rec.get("category") not in SIZED and d["company_number"] not in tracked:
             why_out["too small to file full / medium / group accounts"] += 1

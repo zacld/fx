@@ -441,7 +441,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `tools/psc_deals.py`, in the daily "Niche hits" workflow; ~2.6GB, corporate owners only): every company with a new
   corporate owner in the last 120 days — `pe_buyout` (a Bidco / Topco / Midco … vehicle, a named UK PE house, a fund),
   `eot`, `overseas_buyer`, and `acquired` (a UK trading company bought it: the buyer is the lead); a group reshuffle
-  (owner sharing the target's name, or one vehicle replacing another) skipped; kept when active, filing full / medium /
+  (owner sharing the target's name, one vehicle replacing another, a buyer taking 4+ companies in a day), a company the
+  buyer just set up, and a dormant / estate-management / nominee company bought skipped; kept when active, filing full / medium /
   group accounts (or on the lists) and with an FX sign (on the lists, HMRC trader `traders.json` from niche_hits, an FX
   niche, a buyer abroad); store key `deals`, also the finder's discoveries (`DEALS_FILE`, 60 for PE / buying, 50
   others); (3) the news (`tools/ch_alerts.py --signals`: `news_pe` — buyouts, "backed by" / "acquired by" a PE house
