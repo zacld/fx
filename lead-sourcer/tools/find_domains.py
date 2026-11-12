@@ -53,7 +53,7 @@ def main() -> None:
     ap.add_argument("--order", default="")
     ap.add_argument("--cache", default="")
     ap.add_argument("--out", required=True)
-    ap.add_argument("--max", type=int, default=4000)
+    ap.add_argument("--max", type=int, default=8000)
     ap.add_argument("--budget", type=int, default=2400, help="seconds before no new company is started")
     args = ap.parse_args()
 
