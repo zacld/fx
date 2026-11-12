@@ -10,3 +10,5 @@
 # Only a change to this file starts anything; any other push of the scanner runs the 20-company test (never saved).
 # Round 3 (10 Nov 2026): accounts kept in another currency, subsidiaries abroad, foreign-currency borrowings.
 rescan 20
+# Round 4 (12 Nov 2026): companies bought in the year and finance directors appointed (sourcer/deals.py) — the hit list.
+rescan 20

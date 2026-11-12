@@ -34,7 +34,7 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import date
 from typing import Iterable, Optional
 
-from sourcer import accounts, fx_notes, hooks, incumbent
+from sourcer import accounts, deals, fx_notes, hooks, incumbent
 
 DOWNLOADS = "https://download.companieshouse.gov.uk/"
 LIST_PAGES = {"daily": DOWNLOADS + "en_accountsdata.html", "monthly": DOWNLOADS + "en_monthlyaccountsdata.html"}
@@ -466,6 +466,8 @@ def tidy(rows: list[dict]) -> int:
                 line = r["hmrc_trade"].removeprefix("HMRC customs records: ").split(" (matched")[0]
                 lines.append(f"HMRC customs: {line} (+{CUSTOMS_POINTS})")
             r.update(filed_fx_score=score, filed_fx="; ".join(lines))
+        elif deals.tidy_row(r):
+            changed += 1
     return changed
 
 
@@ -569,6 +571,7 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         "accounts_url": url,
         **{k: v for k, v in cols.items() if not k.endswith("_url")},
     }
+    row.update(deals.columns(plain_text))   # who it bought, a finance director appointed (triggers)
     mentions, mention_count = fx_mentions(plain_text)
     row.update(fx_mentions=mentions, fx_mention_count=mention_count)
     row["fx_in_filing"] = shows_fx(facts, today["fx_today"])

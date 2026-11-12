@@ -431,6 +431,27 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   lead score and the absurd ones by reason. **Niches tab**: each niche's measured hit rate, open share, score and
   verdict beside its leads' numbers, sortable; clicking a niche searches the list for it; uncovered customs headings
   listed under it.
+- **Deals: the Hit list and New money** (Zac, 12 Nov 2026: "forget the contact etc — go hard on companies who filed
+  recently with an FX loss and a new FD, or are purchasing subsidiaries; and companies just funded which will have FX,
+  or just bought by a PE"). Three sources: (1) the filing's own text (`sourcer/deals.py`, in every FX filings row —
+  rescan round 4, `files_rescanned_r4`): companies bought in the year (`acquisitions`, `acquired_abroad`, the sentence
+  in `acquisitions_evidence`; policy text skipped; every word of a bought company's name capitalised — "the acquisition of
+  the Company by X Limited" is the filer being bought, not buying; `deals.tidy_row` in `filings.tidy` clears older reads) and a finance director / CFO the directors' list says was appointed
+  (`new_fd_in_accounts`); (2) Companies House's free daily ownership snapshot (`sourcer/owners.py`,
+  `tools/psc_deals.py`, in the daily "Niche hits" workflow; ~2.6GB, corporate owners only): every company with a new
+  corporate owner in the last 120 days — `pe_buyout` (a Bidco / Topco / Midco … vehicle, a named UK PE house, a fund),
+  `eot`, `overseas_buyer`, and `acquired` (a UK trading company bought it: the buyer is the lead); a group reshuffle
+  (owner sharing the target's name, one vehicle replacing another, a buyer taking 4+ companies in a day), a company the
+  buyer just set up, and a dormant / estate-management / nominee company bought skipped; kept when active, filing full / medium /
+  group accounts (or on the lists) and with an FX sign (on the lists, HMRC trader `traders.json` from niche_hits, an FX
+  niche, a buyer abroad); store key `deals`, also the finder's discoveries (`DEALS_FILE`, 60 for PE / buying, 50
+  others); (3) the news (`tools/ch_alerts.py --signals`: `news_pe` — buyouts, "backed by" / "acquired by" a PE house
+  — and `news_funding` — "raises £25m Series B"). Lead score (`LEAD_POINTS`): buying companies 15, a PE deal 15, just
+  funded 10, a new overseas owner / EOT 10, a new FD named in accounts filed within 365 days 20, and the **hit-list
+  combo** 15 when an FX loss of £50k+ in accounts filed in the last 6 months comes with a new FD, a purchase or a PE
+  deal (`lead_flags.hit`). **Hit list tab**: those companies, highest score first ("Also without an FX loss" widens
+  it), Excel export. **New money tab** (GET `?view=deals`): the ownership register's deals and the news of PE deals and
+  funding, newest first, filters, each with its FX sign. Contact-finding is no longer being extended.
 - **Call today tab** (Accounts page, first tab; `callToday` / `CALL_RULES` in `format.js`): the day's 25 across the
   Accounts list and the Recent FX filings list (its candidates precomputed at save as `filings/calls`, `filingsCalls`
   in `api/accounts.mjs`, GET `/api/accounts?view=calls`): turnover £20m–£300m (filed or group), filed FX proof 50+, not

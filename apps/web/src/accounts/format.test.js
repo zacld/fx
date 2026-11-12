@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -413,9 +413,11 @@ describe("Lead score", () => {
     const s = leadScore(r, { today, niches, signals });
     expect(Object.fromEntries(s.parts.map(([why, p]) => [why.split(" (")[0].split(":")[0], p]))).toEqual({
       "Strong FX proof in its filings": 20, "FX loss of £320k": 30, "… in accounts filed 1 Oct 2026": 10, "Niche": 15,
-      "New finance director": 20, "Subsidiaries abroad": 10, "Turnover £20m–£300m": 10, "No hedging named — probably on the bank's rate": 5 });
-    expect(s.score).toBe(120);
-    expect(leadLine(s)).toMatch(/^Lead score 120: Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
+      "New finance director": 20, "Subsidiaries abroad": 10, "Turnover £20m–£300m": 10, "No hedging named — probably on the bank's rate": 5,
+      "Hit list": 15 });
+    expect(s.score).toBe(135);
+    expect(s.flags).toMatchObject({ recentLoss: true, newFd: true, hit: true });
+    expect(leadLine(s)).toMatch(/^Lead score 135: Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
   });
   it("counts a new FD from the triggers, other changes once, and owned abroad lower", () => {
     const r = { company_number: "N2", filed_fx_score: 20, triggers: "New finance director appointed 2026-10-12 | new charge to HSBC (2026-09)",
@@ -434,5 +436,23 @@ describe("Lead score", () => {
     const rows = withLeadScores([{ company_number: "A", rank: 1 }, { company_number: "B", rank: 2, filed_fx_score: 55 }], { today });
     expect(sortRows(rows, "lead").map((r) => r.company_number)).toEqual(["B", "A"]);
     expect(rows[1].lead_reasons).toBe("Strong FX proof in its filings (55) +20; No hedging named — probably on the bank's rate +5");
+  });
+});
+
+describe("Deals in the lead score", () => {
+  const today = new Date("2026-11-12T12:00:00Z");
+  it("scores buying companies, PE deals, funding and a new FD named in the accounts; the hit list needs a recent loss", () => {
+    const r = { company_number: "D1", fx_gain_loss_gbp: "-120000", accounts_filed_on: "2026-10-20", acquisitions: "Hoffmann GmbH (abroad)",
+      new_fd_in_accounts: "Finance director appointed 2 June 2026" };
+    const signals = { D1: [{ kind: "pe_buyout", at: "2026-10-01", title: "Bought by private equity: WIDGET BIDCO LIMITED" },
+                           { kind: "news_funding", at: "2026-11-01T07:00:00", title: "In the news: just raised funding" }] };
+    const s = leadScore(r, { today, signals });
+    const why = Object.fromEntries(s.parts.map(([w, p]) => [w.split(":")[0], p]));
+    expect(why).toMatchObject({ "New finance director": 20, "Buying companies": 15, "Private-equity deal": 15, "Just raised funding": 10, "Hit list": 15 });
+    expect(s.flags.hit).toBe(true);
+    const old = leadScore({ ...r, accounts_filed_on: "2025-12-01", new_fd_in_accounts: "Finance director appointed 2 June 2024" }, { today });
+    expect(old.flags).toMatchObject({ recentLoss: false, newFd: false, buying: true, hit: false });
+    expect(appointedIso("appointed 3rd March 2026")).toBe("2026-03-03");
+    expect(appointedIso("appointed 03/04/2026")).toBe("2026-04-03");
   });
 });

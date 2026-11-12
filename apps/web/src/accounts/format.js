@@ -652,7 +652,21 @@ export const LEAD_POINTS = {
   nicheByTier: [0, 3, 8, 15],
   newFd: 20, newFdDays: 120, trigger: 10, abroadNews: 8, hiring: 5, signalDays: 120,
   subsidiaries: 10, open: 5, ownedAbroad: -10,
+  // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
+  // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
+  // employee ownership trust 10, and the hit-list combo — a recent FX loss with a new FD / a purchase / a PE deal — 15.
+  buying: 15, peBought: 15, funded: 10, newOwner: 10, combo: 15, fdInAccountsDays: 365,
 };
+const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+// "Finance director appointed 2 June 2026" -> "2026-06-02" ("" when it can't be read).
+export function appointedIso(text = "") {
+  const m = /(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3})[a-z]*\s+(20\d\d)/.exec(text) || null;
+  if (m && MONTHS[m[2].toLowerCase()] !== undefined) {
+    return new Date(Date.UTC(+m[3], MONTHS[m[2].toLowerCase()], +m[1])).toISOString().slice(0, 10);
+  }
+  const d = /(\d{1,2})\/(\d{1,2})\/(20\d\d)/.exec(text);
+  return d ? new Date(Date.UTC(+d[3], +d[2] - 1, +d[1])).toISOString().slice(0, 10) : "";
+}
 const NEW_FD = /\bnew (?:finance director|FD|CFO|chief financial officer)|\b(?:finance director|CFO|chief financial officer)\b[^.;]*\b(?:appointed|joined)/i;
 
 // {niche name: {tier, hit_rate, open_share}} from the measured niches; tiers as the finder's (sourcer/niches.py TIERS).
@@ -681,10 +695,22 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, ma
   const fdSignal = recent.find((s) => /^(new|news)_fd$/.test(s.kind));
   const triggers = parts(r.triggers);
   const fdTrigger = [...triggers, r.fact_1, r.fact_2].find((t) => t && NEW_FD.test(t));
-  if (fdSignal || fdTrigger) add(rules.newFd, fdSignal ? `New finance director (${fdSignal.title})` : `New finance director: ${fdTrigger}`);
+  const fdFiled = r.new_fd_in_accounts && appointedIso(r.new_fd_in_accounts) >= day(rules.fdInAccountsDays) ? r.new_fd_in_accounts : "";
+  const newFd = Boolean(fdSignal || fdTrigger || fdFiled);
+  if (newFd) add(rules.newFd, fdSignal ? `New finance director (${fdSignal.title})` : fdTrigger ? `New finance director: ${fdTrigger}` : `New finance director: ${fdFiled} (accounts)`);
+  // Deals: buying companies (its accounts, or the ownership register), bought by PE, just funded, a new owner
+  const bought = recent.find((s) => s.kind === "acquired");
+  const buying = Boolean(r.acquisitions || bought);
+  if (buying) add(rules.buying, `Buying companies: ${r.acquisitions || bought.title}`);
+  const pe = recent.find((s) => /^(pe_buyout|news_pe|new_owner_pe)$/.test(s.kind));
+  if (pe) add(rules.peBought, `Private-equity deal: ${pe.title}`);
+  const funded = recent.find((s) => s.kind === "news_funding");
+  if (funded) add(rules.funded, `Just raised funding: ${funded.title}`);
+  const owner = !pe && recent.find((s) => /^(overseas_buyer|eot)$/.test(s.kind));
+  if (owner) add(rules.newOwner, `New owner: ${owner.title}`);
   const other = triggers.find((t) => !NEW_FD.test(t)) ||
-    recent.find((s) => /^(new_owner|new_owner_pe|new_charge|charge_paid|fx_charge)$/.test(s.kind))?.title;
-  add(other ? rules.trigger : 0, `Change: ${other}`);
+    recent.find((s) => /^(new_owner|new_charge|charge_paid|fx_charge)$/.test(s.kind))?.title;
+  add(other && !owner ? rules.trigger : 0, `Change: ${other}`);
   const abroad = recent.find((s) => s.kind === "news_abroad");
   add(abroad ? rules.abroadNews : 0, `In the news: ${abroad?.title || ""}`);
   const hiring = recent.find((s) => s.kind === "hiring");
@@ -693,7 +719,11 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, ma
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
   add(r.run_from_abroad ? rules.ownedAbroad : 0, "Owned abroad: FX may be run by the parent");
-  return { score: out.reduce((n, [, p]) => n + p, 0), parts: out };
+  const recentLoss = loss >= rules.lossMin && Boolean(filedOn) && filedOn >= day(rules.recentDays);
+  const change = newFd ? "a new FD" : buying ? "buying companies" : pe ? "a private-equity deal" : "";
+  if (recentLoss && change) add(rules.combo, `Hit list: a recent FX loss and ${change}`);
+  return { score: out.reduce((n, [, p]) => n + p, 0), parts: out,
+           flags: { recentLoss, newFd, buying, pe: Boolean(pe), funded: Boolean(funded), hit: Boolean(recentLoss && change) } };
 }
 
 // "Lead score 85: FX loss of £320k +30 · … " — the breakdown in one line.
@@ -703,5 +733,5 @@ export const leadLine = (s) => `Lead score ${s.score}: ${s.parts.map(([why, p]) 
 export const withLeadScores = (rows, ctx) => rows.map((r) => {
   if (r.dropped) return r;
   const s = leadScore(r, ctx);
-  return { ...r, lead_score: s.score, lead_parts: s.parts, lead_reasons: s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ") };
+  return { ...r, lead_score: s.score, lead_parts: s.parts, lead_flags: s.flags, lead_reasons: s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ") };
 });

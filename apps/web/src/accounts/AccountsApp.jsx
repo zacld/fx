@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { leadLine, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { filedIso, leadLine, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { applyEmail } from "../../api/accounts.mjs";
@@ -323,6 +323,16 @@ function Accounts({ data, password }) {
                   onClick={() => set({ section: "", view: "alerts" })}>
             Alerts
           </button>
+          <button role="tab" aria-selected={filters.view === "hits"} className={`tab hits-tab${filters.view === "hits" ? " on" : ""}`}
+                  title="Filed lately with an FX loss — and a new finance director, buying companies or a private-equity deal"
+                  onClick={() => set({ section: "", view: "hits" })}>
+            Hit list <span className="tab-n">{open.filter((r) => r.lead_flags?.hit && !isOut(r)).length}</span>
+          </button>
+          <button role="tab" aria-selected={filters.view === "money"} className={`tab money-tab${filters.view === "money" ? " on" : ""}`}
+                  title="Just bought by private equity, buying companies, just funded, a new overseas owner"
+                  onClick={() => set({ section: "", view: "money" })}>
+            New money
+          </button>
           <button role="tab" aria-selected={filters.view === "calls"} className={`tab calls-tab${filters.view === "calls" ? " on" : ""}`}
                   title={`Today's ${CALL_TODAY_MAX}: £20m–£300m, strong FX proof, a recent FX loss or a trigger — confirmed contacts first`}
                   onClick={() => set({ section: "", view: "calls" })}>
@@ -359,7 +369,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -400,7 +410,9 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "alerts" ? <Alerts password={password} listed={listedNumbers} onOpen={openCompany} />
+      {filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} />
+       : filters.view === "alerts" ? <Alerts password={password} listed={listedNumbers} onOpen={openCompany} />
        : filters.view === "calls" ? <CallToday password={password} listRows={open} lead={leadCtx} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
                                              checks={checks} onCrm={setCrm} />
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
@@ -1115,6 +1127,125 @@ function Niches({ measured, madeAt, learned, headings, onPick }) {
         <p className="filings-note">Customs headings no goods niche covers yet, best first: {headings.filter((h) => !h.covered).slice(0, 12)
           .map((h) => `${h.heading} ${h.chapter} (${h.hit_rate}% prove FX, ${h.strong} companies)`).join(" · ")}</p>
       )}
+    </div>
+  );
+}
+
+// The Hit list tab (Zac, 12 Nov 2026): companies whose accounts, filed in the last 6 months, show an FX loss — and that
+// have a new finance director, are buying companies, or just had a private-equity deal. Highest lead score first; a
+// switch adds the same changes without the loss (filed lately). Every pick shows its reasons.
+function HitList({ rows, onOpen, onContact, onEmail }) {
+  const [wider, setWider] = useState(false);
+  const recentlyFiled = (r) => { const f = filedIso(r); return f && f >= new Date(Date.now() - 183 * 864e5).toISOString().slice(0, 10); };
+  const list = rows.filter((r) => !isOut(r) && !r.dropped && (r.lead_flags?.hit ||
+    (wider && recentlyFiled(r) && (r.lead_flags?.newFd || r.lead_flags?.buying || r.lead_flags?.pe))))
+    .sort((a, b) => (b.lead_score || 0) - (a.lead_score || 0));
+  const change = (r) => [r.lead_flags?.newFd && (r.new_fd_in_accounts || "New finance director"),
+    r.lead_flags?.buying && `Buying: ${r.acquisitions || "see the ownership register"}`, r.lead_flags?.pe && "Private-equity deal"].filter(Boolean);
+  const exportHits = () => downloadSheet(list.map((r, i) => ({
+    rank: i + 1, company_name: r.company_name, company_number: r.company_number, lead_score: r.lead_score,
+    fx_loss_gbp: Number(r.fx_gain_loss_gbp) < 0 ? -Number(r.fx_gain_loss_gbp) : "", accounts_filed: filedIso(r),
+    change: change(r).join(" | "), acquisitions: r.acquisitions || "", new_fd: r.new_fd_in_accounts || "",
+    turnover_gbp: r.turnover_gbp || "", lead_reasons: r.lead_reasons || "", accounts_url: r.accounts_url || "",
+    companies_house_url: chCompanyUrl(r.company_number),
+  })), columnsFor(["rank", "company_name", "company_number", "lead_score", "fx_loss_gbp", "accounts_filed", "change", "acquisitions",
+    "new_fd", "turnover_gbp", "lead_reasons", "accounts_url", "companies_house_url"], { fx_loss_gbp: "FX loss (£)", turnover_gbp: "Turnover (£)" },
+    ["rank", "lead_score", "fx_loss_gbp", "turnover_gbp"]), `hit-list-${new Date().toISOString().slice(0, 10)}.xlsx`, "Hit list");
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <span className="muted">{list.length} companies: accounts filed in the last 6 months with an FX loss of £50k+, and a new finance
+          director, buying companies or a private-equity deal{wider ? " — or one of those changes with a recent filing" : ""}. Highest lead score first.</span>
+        <label className="check"><input type="checkbox" checked={wider} onChange={(e) => setWider(e.target.checked)} /> Also without an FX loss</label>
+        <button className="btn-sm export" onClick={exportHits} disabled={!list.length}>Export Excel ({list.length})</button>
+      </div>
+      {list.slice(0, 200).map((r, i) => (
+        <article className="card loss-card" key={r.company_number}>
+          <div className="card-top">
+            <div className="card-name">
+              <span className="call-n">{i + 1}</span>
+              <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
+              {r.section && <span className="chip">{r.section}</span>}
+            </div>
+            <div className="loss-fig">
+              {Number(r.fx_gain_loss_gbp) < 0 && <b className="call-turnover">−{money(-Number(r.fx_gain_loss_gbp))}</b>}
+              <span className="muted">FX {Number(r.fx_gain_loss_gbp) < 0 ? "loss" : "result"} · filed {filedWhen(filedIso(r))}</span>
+            </div>
+          </div>
+          <ul className="call-why">{change(r).map((c) => <li key={c}>{c}</li>)}</ul>
+          <LeadScore r={r} />
+          {r.acquisitions_evidence && <p className="panel-p muted" title={r.acquisitions_evidence}>“{r.acquisitions_evidence.slice(0, 220)}{r.acquisitions_evidence.length > 220 ? "…" : ""}”</p>}
+          <div className="card-foot">
+            <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>
+            <EmailButton r={r} onEmail={onEmail} />
+            <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>
+          </div>
+        </article>
+      ))}
+      {!list.length && <div className="empty">Nothing yet — the year's filings are being read again for purchases and finance directors (a day or two), and the ownership register's deals arrive each morning.</div>}
+    </div>
+  );
+}
+
+// The New money tab: who was just bought by private equity, who is buying companies, who just raised funding, who has
+// a new overseas owner or an employee ownership trust — from Companies House's ownership register (last 120 days,
+// each with its FX sign) and the news. Newest first.
+const MONEY_KINDS = { pe_buyout: "Bought by PE", news_pe: "PE deal (news)", acquired: "Buying companies", news_funding: "Just funded",
+  overseas_buyer: "New overseas owner", eot: "Employee ownership trust" };
+const MONEY_FILTERS = [["", "All"], ["pe", "Private equity"], ["acquired", "Buying companies"], ["news_funding", "Just funded"],
+  ["overseas_buyer", "Overseas owner"], ["eot", "EOT"]];
+function NewMoney({ password, listed, onOpen }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [filter, setFilter] = useState("");
+  const [mine, setMine] = useState(false);
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}?view=deals`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then(async (res) => { const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`); return body; })
+      .then((body) => { if (live) setData(body); })
+      .catch((e) => { if (live) { setError(e.message); setData({ items: [], news: [] }); } });
+    return () => { live = false; };
+  }, [password]);
+  const rows = useMemo(() => {
+    const items = [...(data?.items || []).map((d) => ({ ...d, at: d.date, signs: (d.fx_signs || []).join(" · "),
+      url: `https://find-and-update.company-information.service.gov.uk/company/${d.company_number}/persons-with-significant-control` })),
+      ...(data?.news || []).map((a) => ({ kind: a.kind, at: String(a.at).slice(0, 10), company_number: a.company_number, company_name: a.company_name,
+        detail: a.detail, signs: a.tracked ? "on your lists" : "", tracked: a.tracked, url: a.url }))];
+    return items.filter((d) => (!filter || (filter === "pe" ? /pe/.test(d.kind) : d.kind === filter)) && (!mine || d.tracked || listed.has(d.company_number)))
+      .sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  }, [data, filter, mine, listed]);
+  if (!data) return <div className="list"><div className="empty">Loading new money…</div></div>;
+  const open = (d) => (e) => { if (listed.has(d.company_number) && e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(d.company_number); } };
+  return (
+    <div className="list">
+      {error && <div className="save-error" role="alert">New money couldn't load ({error}).</div>}
+      <div className="filters filings-bar">
+        <div className="groups" role="group" aria-label="Kind">
+          {MONEY_FILTERS.map(([k, label]) => <button key={k || "all"} aria-pressed={filter === k} className={`grp${filter === k ? " on" : ""}`} onClick={() => setFilter(k)}>{label}</button>)}
+        </div>
+        <label className="check"><input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} /> On my lists only</label>
+        <span className="muted">{rows.length} · ownership register {data.made_at ? `read ${filedWhen(data.made_at.slice(0, 10))}` : "not read yet"} (last {data.window_days || 120} days, with an FX sign)</span>
+      </div>
+      <div className="sheet-wrap">
+        <table className="sheet">
+          <thead><tr><th>When</th><th>What</th><th>Company</th><th>Detail</th><th>FX sign</th></tr></thead>
+          <tbody>
+            {rows.slice(0, 500).map((d, i) => (
+              <tr key={`${d.kind}:${d.company_number}:${i}`}>
+                <td className="num">{d.at ? filedWhen(d.at) : ""}</td>
+                <td><span className={`chip${/pe|acquired/.test(d.kind) ? " warn" : ""}`}>{MONEY_KINDS[d.kind] || d.kind}</span></td>
+                <td><a href={listed.has(d.company_number) ? companyPath(d.company_number) : chCompanyUrl(d.company_number)} onClick={open(d)}
+                       target={listed.has(d.company_number) ? undefined : "_blank"} rel="noreferrer">{d.company_name || d.company_number}</a>
+                  {!listed.has(d.company_number) && <span className="muted"> · new lead</span>}</td>
+                <td>{d.detail} <a href={d.url} target="_blank" rel="noreferrer" className="muted">{/^news/.test(d.kind) ? "Article ↗" : "Owners ↗"}</a></td>
+                <td className="muted">{d.signs}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!rows.length && <div className="empty">Nothing yet — the ownership register is read each morning, and the news of funding rounds and PE deals daily.</div>}
     </div>
   );
 }

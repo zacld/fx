@@ -494,6 +494,15 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
                 rows += (json.load(f) or {}).get("rows") or []
         except (OSError, ValueError):
             continue
+    # purchases from the ownership register (tools/psc_deals.py, DEALS_FILE): a PE buyout or a company buying
+    # subsidiaries is checked first (60), an overseas buyer or an employee ownership trust next (50)
+    try:
+        with open(os.environ.get("DEALS_FILE", "") or os.devnull, encoding="utf-8") as f:
+            for d in (json.load(f) or {}).get("items") or []:
+                rows.append({"company_number": d.get("company_number", ""), "company_name": d.get("company_name", ""),
+                             "filed_fx_score": 60 if d.get("kind") in ("pe_buyout", "acquired") else 50})
+    except (OSError, ValueError):
+        pass
     if not rows:
         return {}
     # ranked by filed FX proof (less ABROAD_RULES points when the FX is probably run abroad), moved up +25, an FX loss
