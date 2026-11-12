@@ -15,7 +15,11 @@ _ENTITY = (r"(?:Limited|Ltd\.?|LLP|PLC|plc|GmbH|AG|B\.?V\.?|N\.?V\.?|S\.?A\.?S?|
            r"Inc\.?|LLC|Corp(?:oration)?\.?|Pty\.? Ltd|Pte\.? Ltd|AB|A/S|ApS|Oy|AS|Sp\. z o\.o\.|K\.?K\.?|Kft\.?|SE)")
 FOREIGN = re.compile(r"\b(?:GmbH|AG|B\.?V\.?|N\.?V\.?|S\.?A\.?S?|S\.?r\.?l\.?|S\.?p\.?A\.?|S\.?L\.?U?|Inc\.?|LLC|Corp(?:oration)?|"
                      r"Pty|Pte|AB|A/S|ApS|Oy|AS|Sp\. z o\.o\.|K\.?K\.?|Kft)\b")
-_NAME = rf"((?:[A-Z0-9][\w&'’.-]*\s+){{0,6}}?{_ENTITY})"
+# every word of the name starts with a capital or a digit, even inside the case-blind patterns: "the Company by Acme
+# Limited" (the filer being bought) and "85 shares in Acme Limited" aren't names of companies bought
+_WORD = r"(?-i:[A-Z0-9])[\w&'’.-]*"
+_NAME = rf"(?:the\s+)?((?:{_WORD}\s+){{0,6}}?{_ENTITY})"
+_NAME_ONLY = re.compile(rf"(?:{_WORD}\s+){{0,6}}?{_ENTITY}")
 _ACQ = [
     re.compile(rf"\bacquired\s+(?:the\s+)?(?:entire|whole|100%|all)\s+(?:of\s+the\s+)?(?:issued\s+)?(?:share\s+capital|shares)\s+(?:in|of)\s+{_NAME}", re.I),
     re.compile(rf"\b(?:completed|completion of)\s+(?:the\s+)?acquisition\s+of\s+{_NAME}", re.I),
@@ -77,6 +81,22 @@ def finance_appointments(text: str) -> list[dict]:
             start = m.start() - len(before) + (cut + 1 if cut >= 0 else 0)
             out.append({"when": when, "sentence": flat[start:m.end()].strip(" ;,")[:300]})
     return out[:2]
+
+
+def tidy_row(row: dict) -> bool:
+    """Rows read before the capitalised-name rule: drop bought-company names it no longer takes ("by Acme Limited",
+    "85 shares in …"); with none left the row isn't buying. Returns whether the row changed."""
+    names = [n for n in (row.get("acquisitions") or "").split("; ") if n]
+    if not names or names == ["Bought a subsidiary in the year"]:
+        return False
+    keep = [n for n in names if _NAME_ONLY.fullmatch(n.removesuffix(" (abroad)"))]
+    if keep == names:
+        return False
+    row["acquisitions"] = "; ".join(keep)
+    row["acquired_abroad"] = "yes" if any(n.endswith(" (abroad)") for n in keep) else ""
+    if not keep:
+        row["acquisitions_evidence"] = ""
+    return True
 
 
 def columns(text: str) -> dict:

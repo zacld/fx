@@ -3372,6 +3372,17 @@ class TestDeals(unittest.TestCase):
         self.assertEqual(c["new_fd_in_accounts"], "Finance director appointed 2 June 2026")
         self.assertTrue(c["new_fd_in_accounts_evidence"].startswith("B Smith"))
         self.assertEqual(deals.columns("Business combinations are accounted for using the acquisition method.")["acquisitions"], "")
+
+    def test_the_filer_being_bought_is_not_buying(self):
+        from sourcer import deals
+        t = ("On 3 March 2026 the Group completed the acquisition of the Company by Inspiring Travel 2024 Limited for £4m. "
+             "During the year the company acquired 85 shares in Gravitas Worldwide Holdings Limited, a freight company. "
+             "The group completed the acquisition of Lazy Day Foods Limited on 2 June 2026.")
+        self.assertEqual(deals.columns(t)["acquisitions"], "Lazy Day Foods Limited")
+        row = {"acquisitions": "by Inspiring Travel 2024 Limited", "acquisitions_evidence": "…"}
+        self.assertTrue(deals.tidy_row(row))
+        self.assertEqual((row["acquisitions"], row["acquisitions_evidence"]), ("", ""))
+        self.assertFalse(deals.tidy_row({"acquisitions": "Bewicke Maine Limited; Hoffmann GmbH (abroad)"}))
         self.assertEqual(deals.columns("Purchase of subsidiary undertakings, net of cash acquired (4,200).")["acquisitions"],
                          "Bought a subsidiary in the year")
 

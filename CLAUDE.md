@@ -435,7 +435,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   recently with an FX loss and a new FD, or are purchasing subsidiaries; and companies just funded which will have FX,
   or just bought by a PE"). Three sources: (1) the filing's own text (`sourcer/deals.py`, in every FX filings row —
   rescan round 4, `files_rescanned_r4`): companies bought in the year (`acquisitions`, `acquired_abroad`, the sentence
-  in `acquisitions_evidence`; policy text skipped) and a finance director / CFO the directors' list says was appointed
+  in `acquisitions_evidence`; policy text skipped; every word of a bought company's name capitalised — "the acquisition of
+  the Company by X Limited" is the filer being bought, not buying; `deals.tidy_row` in `filings.tidy` clears older reads) and a finance director / CFO the directors' list says was appointed
   (`new_fd_in_accounts`); (2) Companies House's free daily ownership snapshot (`sourcer/owners.py`,
   `tools/psc_deals.py`, in the daily "Niche hits" workflow; ~2.6GB, corporate owners only): every company with a new
   corporate owner in the last 120 days — `pe_buyout` (a Bidco / Topco / Midco … vehicle, a named UK PE house, a fund),

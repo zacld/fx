@@ -466,6 +466,8 @@ def tidy(rows: list[dict]) -> int:
                 line = r["hmrc_trade"].removeprefix("HMRC customs records: ").split(" (matched")[0]
                 lines.append(f"HMRC customs: {line} (+{CUSTOMS_POINTS})")
             r.update(filed_fx_score=score, filed_fx="; ".join(lines))
+        elif deals.tidy_row(r):
+            changed += 1
     return changed
 
 
