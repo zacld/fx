@@ -103,6 +103,7 @@ def main() -> None:
     parser.add_argument("--out", default="niche_stats.json")
     parser.add_argument("--tracked", default="", help="{number: name} of the Accounts + FX filings lists' companies")
     parser.add_argument("--enrich-out", default="", help="each tracked company's niche, sector codes and absurd check")
+    parser.add_argument("--traders-out", default="", help="{company number: months of customs records} (tools/psc_deals.py)")
     args = parser.parse_args()
 
     with open(args.filings, encoding="utf-8") as f:
@@ -129,6 +130,10 @@ def main() -> None:
     print(f"Matched traders: {len(trade_by_company):,}; companies measured: {len(companies):,}")
 
     result = measure_all(niches, list(companies.values()), trade_by_company, filings)   # sized ones only, inside
+    if args.traders_out:
+        with open(args.traders_out, "w", encoding="utf-8") as f:
+            json.dump({n: len(e["import_months"] | e["export_months"]) for n, e in trade_by_company.items()
+                       if len(e["import_months"] | e["export_months"]) >= REGULAR_MONTHS}, f)
     if args.enrich_out:
         enrich = enrich_tracked(tracked, registry, trade_by_company, niches)
         with open(args.enrich_out, "w", encoding="utf-8") as f:

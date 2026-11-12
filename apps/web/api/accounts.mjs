@@ -69,6 +69,10 @@ export function filingsLosses(rows = []) {
 
 export const ALERTS_KEY = "alerts";          // {made_at, count, items}: tools/ch_alerts.py — new FD, charges, owners…
 export const DISCOVERIES_KEY = "discoveries";   // {made_at, rows}: companies found by a charge to an FX provider / trade finance
+// The ownership register's purchases as signals: {company_number, kind, at, title}.
+export const dealSignals = (items = []) => items.map((d) => ({ company_number: d.company_number, kind: d.kind, at: d.date,
+  title: d.detail }));
+
 // {company number: [{kind, at, title}]} from the alerts, newest first — what the lead score reads.
 export function signalsByCompany(items = []) {
   const out = {};
@@ -80,6 +84,7 @@ export function signalsByCompany(items = []) {
   return out;
 }
 export const RANKED_KEY = "leads/ranked";   // {made_at, rows, ruled_out, niches}: every scanned lead ranked (scripts/rank-leads.mjs)
+export const DEALS_KEY = "deals";   // {made_at, items}: purchases from the ownership register (tools/psc_deals.py)
 export const NICHES_KEY = "niches/stats";   // {made_at, niches: {id: measured numbers}, headings}: tools/niche_hits.py
 export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
 export const CALLS_KEY = "filings/calls";   // {made_at, count, rows}: the Call today tab's candidates from the filings list
@@ -199,9 +204,15 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
   }
   // For the lead score: each measured niche's numbers (niche_hits) and each company's recent alerts (kind, date, title).
   if (params.get("view") === "signals") {
-    const [niches, alerts] = await Promise.all([NICHES_KEY, ALERTS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    const [niches, alerts, deals] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY].map((k) => blobs.get(k, { type: "json" })));
     return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [],
-                   signals: signalsByCompany(alerts?.items || []) }, 200);
+                   signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) }, 200);
+  }
+  // The New money tab: purchases from the ownership register, plus the news of PE deals and funding rounds.
+  if (params.get("view") === "deals") {
+    const [deals, alerts] = await Promise.all([DEALS_KEY, ALERTS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    return reply({ made_at: deals?.made_at || "", window_days: deals?.window_days || 0, items: deals?.items || [],
+                   news: (alerts?.items || []).filter((a) => /^news_(pe|funding)$/.test(a.kind)) }, 200);
   }
   if (params.get("view") === "ranked") {
     return reply((await blobs.get(RANKED_KEY, { type: "json" })) || { rows: [], ruled_out: {}, niches: [] }, 200);
@@ -217,7 +228,7 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     }
     const filings = await blobs.get(FILINGS_KEY, { type: "json" });
     if (!filings) return reply({ error: "no FX filings scanned yet — they arrive with the next FX filings run" }, 404);
-    const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, files_rescanned_r3: _r3, ...rest } = filings;
+    const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, files_rescanned_r3: _r3, files_rescanned_r4: _r4, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
   const [data, marks, noted, status, emails, checks] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY, CHECKS_KEY]

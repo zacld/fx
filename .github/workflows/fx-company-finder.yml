@@ -158,6 +158,8 @@ jobs:
           node scripts/alerts-store.mjs get discoveries ../../lead-sourcer/discoveries.json || true
           # each niche's measured hit rate (niche-hits.yml): best niches checked first, poor ones skipped
           node scripts/alerts-store.mjs get niches ../../lead-sourcer/niche_stats.json || true
+          # purchases from the ownership register (niche-hits.yml): PE buyouts and companies buying subsidiaries first
+          node scripts/alerts-store.mjs get deals ../../lead-sourcer/deals.json || true
 
       - name: Find companies
         working-directory: lead-sourcer
@@ -165,6 +167,7 @@ jobs:
         env:
           DISCOVERIES_FILE: discoveries.json
           NICHE_STATS_FILE: niche_stats.json
+          DEALS_FILE: deals.json
           # Stops starting new companies after this (the rest wait for the next run, their lookups cached),
           # leaving time for the contact search, the cache save and the upload inside the job's 240 minutes.
           FINDER_BUDGET_MIN: "140"

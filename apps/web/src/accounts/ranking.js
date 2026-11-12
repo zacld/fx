@@ -13,6 +13,7 @@ export const RANKED_FIELDS = [
   "fx_forwards", "fx_sensitivity", "turnover_regions", "subsidiaries_abroad", "reporting_currency", "fx_borrowings",
   "filed_fx_score", "filed_fx", "hmrc_trade", "moved_up", "incumbent_bank", "owner", "triggers", "run_from_abroad", "accounts_url",
   "employees", "bank_debt", "fd_search_url",
+  "acquisitions", "acquisitions_evidence", "acquired_abroad", "new_fd_in_accounts", "new_fd_in_accounts_evidence",
 ];
 const slim = (r) => Object.fromEntries(RANKED_FIELDS.filter((k) => r[k] !== undefined && r[k] !== "").map((k) => [k, r[k]]));
 

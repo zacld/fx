@@ -3357,3 +3357,49 @@ class TestCatchAllCodes(unittest.TestCase):
         self.assertIsNone(nr.sector_niche(["46499"], niches))                       # a toothbrush wholesaler
         self.assertEqual(nr.sector_niche(["46499", "32200"], niches)["id"], "music")   # makes instruments too
         self.assertEqual(nr.sector_niche(["20003"], niches)["id"], "broad")
+
+
+class TestDeals(unittest.TestCase):
+    """sourcer/deals.py (acquisitions, FD appointments in a filing) and sourcer/owners.py (who bought whom)."""
+
+    def test_acquisitions_and_fd_in_accounts(self):
+        from sourcer import deals
+        t = ("On 14 March 2026 the Company acquired the entire issued share capital of Hoffmann Werkzeuge GmbH for €12m. "
+             "Accounting policy: on the acquisition of a subsidiary, the fair value of the identifiable assets is recognised. "
+             "Directors: A Jones; B Smith – Finance Director (appointed 2 June 2026); C Brown (resigned 1 May 2026).")
+        c = deals.columns(t)
+        self.assertEqual((c["acquisitions"], c["acquired_abroad"]), ("Hoffmann Werkzeuge GmbH (abroad)", "yes"))
+        self.assertEqual(c["new_fd_in_accounts"], "Finance director appointed 2 June 2026")
+        self.assertTrue(c["new_fd_in_accounts_evidence"].startswith("B Smith"))
+        self.assertEqual(deals.columns("Business combinations are accounted for using the acquisition method.")["acquisitions"], "")
+        self.assertEqual(deals.columns("Purchase of subsidiary undertakings, net of cash acquired (4,200).")["acquisitions"],
+                         "Bought a subsidiary in the year")
+
+    def test_owner_changes_to_deals(self):
+        from sourcer import owners as o
+        recs = [("00000001", {"name": "WIDGET BIDCO LIMITED", "notified_on": "2026-10-01", "identification": {"country_registered": "England"}}),
+                ("00000002", {"name": "ACME HOLDINGS LIMITED", "notified_on": "2026-10-05", "identification": {"country_registered": "England", "registration_number": "123"}}),
+                ("00000003", {"name": "BIGCO TRADING LIMITED", "notified_on": "2026-09-20", "identification": {"country_registered": "England And Wales", "registration_number": "1234567"}}),
+                ("00000004", {"name": "HOFFMANN AG", "notified_on": "2026-10-20", "identification": {"country_registered": "Germany"}}),
+                ("00000005", {"name": "OLD OWNER LTD", "notified_on": "2016-04-06", "identification": {}}),
+                ("00000007", {"name": "ACME TOPCO LIMITED", "notified_on": "2026-10-01", "identification": {}}),
+                ("00000007", {"name": "ACME MIDCO LIMITED", "notified_on": "2020-01-01", "ceased_on": "2026-10-01", "identification": {}})]
+        names = {"00000001": "WIDGET MAKERS LTD", "00000002": "ACME LTD", "00000003": "SMALLCO FOODS LTD", "00000004": "BRITPARTS LTD",
+                 "00000007": "ACME LTD", "01234567": "BIGCO TRADING LIMITED"}
+        found = {(d["kind"], d["company_number"]) for d in o.deals(o.recent_changes(recs, date(2026, 11, 12)), names)}
+        self.assertEqual(found, {("pe_buyout", "00000001"), ("acquired", "01234567"), ("overseas_buyer", "00000004")})
+        self.assertEqual(o.ch_number("SC12345"), "SC012345")
+        self.assertEqual(o.owner_kind("X TRUSTEES (EMPLOYEE OWNERSHIP TRUST) LIMITED", {}), "eot")
+
+
+class TestNewMoneyHeadlines(unittest.TestCase):
+    def test_pe_and_funding_headlines(self):
+        spec = importlib.util.spec_from_file_location("ch_alerts", os.path.join(os.path.dirname(__file__), "..", "tools", "ch_alerts.py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        cases = {"Acme Foods acquired by Palatine Private Equity - Insider": ("news_pe", "Acme Foods"),
+                 "LDC backs Widget Engineering in £40m deal": ("news_pe", "Widget Engineering"),
+                 "Management buyout of Smith Logistics backed by BGF": ("news_pe", "Smith Logistics"),
+                 "Bloom Labs raises £25m Series B to expand into US": ("news_funding", "Bloom Labs")}
+        for h, want in cases.items():
+            self.assertEqual((m.headline_kind(h), m.headline_subject(h)), want, h)

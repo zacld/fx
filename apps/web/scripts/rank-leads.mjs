@@ -3,19 +3,19 @@
 // Reads the Accounts list, the Recent FX filings list, the measured niches and the alerts from the site's private store.
 // Prints counts, company names, scores and niche learnings — no people's names (the repo is public).
 import { readFile } from "node:fs/promises";
-import { ALERTS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+import { ALERTS_KEY, DEALS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { filedMonth, nicheLearnings, rankLeads } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
 const [enrichPath] = process.argv.slice(2);
 const enrich = enrichPath ? (JSON.parse(await readFile(enrichPath, "utf8")).companies || {}) : {};
 const store = await openStore(STORE);
-const [list, index, niches, alerts] = await Promise.all([KEY, FILINGS_KEY, NICHES_KEY, ALERTS_KEY].map((k) => store.get(k, "json")));
+const [list, index, niches, alerts, deals] = await Promise.all([KEY, FILINGS_KEY, NICHES_KEY, ALERTS_KEY, DEALS_KEY].map((k) => store.get(k, "json")));
 let filingRows = index?.rows || [];
 for (const { month } of index?.months || []) filingRows = filingRows.concat((await store.get(filingsMonthKey(month), "json"))?.rows || []);
 const listRows = list?.rows || [];
 
-const { rows, ruled_out, niche_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany(alerts?.items || []) });
+const { rows, ruled_out, niche_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) });
 const learn = nicheLearnings(scored);
 const made_at = new Date().toISOString();
 await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, niches: learn });
@@ -24,6 +24,9 @@ const live = scored.filter((s) => !s.absurd);
 const bucket = (lo, hi) => live.filter((s) => s.score >= lo && s.score < hi).length;
 console.log(`Leads scanned: ${scored.length.toLocaleString()} (Accounts list ${listRows.length.toLocaleString()}, FX filings not on it ${rows.length.toLocaleString()}); ` +
             `ruled out as absurd ${Object.keys(ruled_out).length.toLocaleString()}; list companies relabelled ${Object.keys(niche_of).length.toLocaleString()}`);
+const hits = scored.filter((x) => !x.absurd && x.parts.some(([w]) => w.startsWith("Hit list")));
+console.log(`Hit list (a recent FX loss and a new FD / buying companies / a PE deal): ${hits.length}`);
+hits.slice(0, 20).forEach((x) => console.log(`  ${x.score}  ${x.company_name} — ${x.parts.filter(([w]) => /FX loss|finance director|Buying|Private-equity/.test(w)).map(([w]) => w.slice(0, 60)).join(" · ")}`));
 console.log(`Scores: 80+ ${bucket(80, 1e9)} · 60–79 ${bucket(60, 80)} · 40–59 ${bucket(40, 60)} · under 40 ${bucket(-1e9, 40)}`);
 const filedMonths = {};
 for (const r of filingRows) filedMonths[filedMonth(r)] = (filedMonths[filedMonth(r)] || 0) + 1;

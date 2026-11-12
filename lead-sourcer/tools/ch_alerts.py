@@ -238,9 +238,14 @@ NEWS_QUERIES = {   # Google News RSS, UK edition — each headline matched to th
                     '"export contract" UK', '"expands into" Europe UK firm', '"distribution agreement" UK manufacturer',
                     '"new factory" abroad UK company', '"King\'s Award for International Trade"',
                     '"UK Export Finance" backs', '"UK Export Finance" supports', 'UKEF guarantee exporter'],
+    # New money (Zac, 12 Nov 2026: "companies which have just been funded which will have FX, or just got bought by a PE")
+    "news_funding": ['raises "Series A" UK', 'raises "Series B" UK', 'raises "Series C" UK', '"growth investment" UK company',
+                     '"secures £" investment international expansion', '"funding round" UK US expansion'],
+    "news_pe": ['"management buyout" UK', '"private equity" backs UK company', '"acquired by" private equity UK',
+                '"secondary buyout" UK', '"backed by" private equity acquires', '"investment from" private equity UK firm'],
 }
 _SUBJECT = re.compile(r"^(?:UK\s+|British\s+)?(.+?)\s+(?:has\s+)?(?:appoints|appointed|names|hires|welcomes|acquires|"
-                      r"buys|opens|expands|wins|secures|signs|lands|launches)\b", re.I)
+                      r"buys|opens|expands|wins|secures|signs|lands|launches|raises|closes|bags|completes)\b", re.I)
 _NOT_A_COMPANY = re.compile(r"^(?:the|a|an|how|why|what|who|uk|britain|government|council|nhs|police|university)\b|"
                             r"\b(?:ceo|chief|boss|founder|director|minister|chancellor)\b", re.I)
 RECRUITERS = re.compile(r"\b(?:hays|michael\s+page|robert\s+(?:half|walters)|reed|page\s+group|harvey\s+nash|"
@@ -282,12 +287,28 @@ def _clean_subject(name: str) -> str:
     return "" if not name or _NOT_A_COMPANY.search(name) or len(name) > 60 or not name[0].isupper() else name
 
 
+_BOUGHT_SUBJECT = re.compile(r"^(?:UK\s+|British\s+)?(.+?)\s+(?:is\s+|has\s+been\s+)?(?:acquired|bought|backed|sold)\s+(?:by|to)\b", re.I)
+_BACKS_OBJECT = re.compile(r"\b(?:backs|invests in|invests £[\d.]+\s?m in|acquires|completes (?:an? )?(?:investment in|buyout of|MBO of|"
+                           r"management buyout of))\s+(?:UK\s+|British\s+|\w+-based\s+)?(.+?)(?:\s+(?:in|with|as|for|to|on)\b|$|,)", re.I)
+_BUYOUT_OF = re.compile(r"\b(?:management buy-?out|MBO|buy-?out)\s+(?:of|at)\s+(.+?)(?:\s+(?:in|with|as|for|to|on|backed)\b|$|,)", re.I)
+
+
 def headline_subject(headline: str) -> str:
-    """The company a headline is about: who appoints / acquires / wins, or whom UK Export Finance backs."""
+    """The company a headline is about: who appoints / acquires / wins / raises, who was bought or backed, or whom
+    UK Export Finance or a PE house backs."""
     text = headline.split(" - ")[0].strip()
     ukef = _UKEF_OBJECT.search(text)
     if ukef:
         return _clean_subject(ukef.group(1))
+    m = _BOUGHT_SUBJECT.match(text)
+    if m:
+        inner = re.sub(r"^(?:the\s+)?(?:management\s+buy-?out|MBO|buy-?out)\s+(?:of|at)\s+", "", m.group(1), flags=re.I)
+        return _clean_subject(inner)
+    if _PE_HEADLINE.search(text):
+        for rx in (_BUYOUT_OF, _BACKS_OBJECT):
+            m = rx.search(text)
+            if m:
+                return _clean_subject(m.group(1))
     m = _SUBJECT.match(text)
     return _clean_subject(m.group(1)) if m else ""
 
@@ -305,10 +326,23 @@ _ABROAD_HEADLINE = re.compile(r"\b(?:acquir\w*|buys?|bought|opens?|expands?|expa
                               r"\bKing'?s Award for (?:International Trade|Enterprise)", re.I)
 
 
+_PE_HEADLINE = re.compile(r"\bmanagement buy-?out\b|\bMBO\b|\bsecondary buy-?out\b|\bprivate equity\b|\bPE[- ]backed\b|"
+                          r"\b(?:backed|acquired|bought)\s+by\s+[A-Z][\w&]*(?:\s+[A-Z][\w&]*){0,3}\s+(?:Capital|Partners|Equity|LDC|BGF)\b|"
+                          r"\b(?:LDC|BGF|Inflexion|Bridgepoint|Livingbridge|Palatine|Mobeus|Foresight|YFM|NorthEdge|Kester|"
+                          r"Growth Capital Partners|Elysian|Tenzing|Synova|ECI)\b\s+(?:backs|invests|acquires|completes)", re.I)
+_FUNDING_HEADLINE = re.compile(r"\b(?:raises?|raised|secures?|secured|lands?|closes?|bags?|completes?)\b[^.]*?(?:£|\$|€)\s?\d[\d.,]*\s?"
+                               r"(?:m|mn|million|bn|billion)\b|\bSeries [A-E]\b|\bgrowth (?:investment|funding|capital)\b", re.I)
+
+
 def headline_kind(headline: str) -> str:
-    """news_fd (a finance director / CFO appointed), news_abroad (buying, opening or selling abroad), or ""."""
+    """news_fd (a finance director / CFO appointed), news_pe (bought by / backed by private equity, a buyout),
+    news_funding (a funding round), news_abroad (buying, opening or selling abroad), or ""."""
     if _FD_HEADLINE.search(headline):
         return "news_fd"
+    if _PE_HEADLINE.search(headline):
+        return "news_pe"
+    if _FUNDING_HEADLINE.search(headline):
+        return "news_funding"
     if re.search(r"\b(?:UK Export Finance|UKEF)\b", headline, re.I):
         return "news_abroad"
     return "news_abroad" if _ABROAD_HEADLINE.search(headline) else ""
@@ -374,7 +408,8 @@ def news_signals(tracked: dict[str, str], api_key: str, fetcher=None, today: Opt
                         company = lookup(subject)
                 if not company or not company.get("company_number"):
                     continue
-                title = "In the news: new finance director" if kind == "news_fd" else "In the news: expanding abroad"
+                title = {"news_fd": "In the news: new finance director", "news_pe": "In the news: private-equity deal",
+                         "news_funding": "In the news: just raised funding"}.get(kind, "In the news: expanding abroad")
                 alerts.append({"id": f"{kind}:{company['company_number']}:{item['date']}", "at": item["date"] + "T07:00:00",
                                "kind": kind, "company_number": company["company_number"], "company_name": company["company_name"],
                                "tracked": bool(number), "hot": True, "title": title,
@@ -382,7 +417,7 @@ def news_signals(tracked: dict[str, str], api_key: str, fetcher=None, today: Opt
                 if not number:
                     found.append({"company_number": company["company_number"], "company_name": company["company_name"],
                                   "discovered": item["date"], "discovered_by": f"news: {h}",
-                                  "filed_fx_score": 55 if kind == "news_abroad" else 50})
+                                  "filed_fx_score": 55 if kind in ("news_abroad", "news_pe") else 50})
     STATS.update({"headlines": len(seen), "name lookups": lookups})
     return alerts, found
 
