@@ -5,7 +5,7 @@
     "size_fit": "£10m-£300m",
     "generated": "2026-06-22",
     "goods_niches": "Niches named by what companies actually import (HMRC customs goods codes: 4-digit headings or 6-digit subheadings, matched as prefixes of the 8-digit codes in HMRC's monthly importer/exporter lists) — proof of the trade, unlike a self-chosen SIC code. Measured weekly by tools/niche_hits.py; the finder orders by the measured score and skips niches that measure badly.",
-    "broker_shy": "Sectors payment firms (non-bank FX brokers) often decline or restrict — AML high-risk goods, commodities, sanctions-heavy trades — where a bank's FX desk can win (Zac, 13 Nov 2026). Each such niche carries `broker_shy`, the reason. Never: firearms, weapons, gambling, crypto, cannabis, adult (niches.SHY_NEVER). Check the bank's own sector appetite before calling."
+    "broker_shy": "Sectors payment firms (non-bank FX brokers) often decline or restrict — AML high-risk goods, commodities, sanctions-heavy trades — where a bank's FX desk can win (Zac, 13 Nov 2026). Each such niche carries `broker_shy`, the reason. Never: firearms, weapons, gambling, crypto, cannabis, adult (niches.SHY_NEVER). Check the bank's own sector appetite before calling. `needs_sic`: the customs goods count only with the niche's own sector code too (an agency importing laptops isn't a phone wholesaler; a haulier importing lorries isn't a car exporter)."
   },
   "niches": [
     {
@@ -1294,7 +1294,7 @@
       "id": "shy-mining-quarrying",
       "name": "Mining, quarrying & ore traders",
       "sic_codes": ["07100", "07210", "07290", "08110", "08120", "08910", "08990", "09100", "09900"],
-      "hmrc_codes": ["26"],
+      "hmrc_codes": ["2601", "2602", "2603", "2604", "2605", "2606", "2607", "2608", "2609", "2610", "2611", "2612", "2613", "2614", "2615", "2616", "2617"],
       "flow": "both",
       "currency_pairs": ["USD/GBP", "EUR/GBP"],
       "exposure_reason": "Ores, minerals and quarried stone are priced in dollars on world markets; UK miners and ore traders buy equipment abroad and sell or ship in dollars.",
@@ -1325,7 +1325,8 @@
       "call_angle": "Recovered materials go to buyers abroad at euro and dollar prices that move every month — how are you fixing the sterling you'll get?",
       "broker_shy": "Waste exports carry waste-crime and trade-mispricing risk — payment firms often restrict waste and recycling companies.",
       "size_fit": "£20m-£300m",
-      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)",
+      "needs_sic": true
     },
     {
       "id": "shy-fuel-oil-traders",
@@ -1338,33 +1339,36 @@
       "call_angle": "You buy at dollar prices and sell in pounds — when the dollar moves between cargo and invoice, who carries that?",
       "broker_shy": "Sanctions on oil cargoes and large commodity tickets — usually outside payment firms' appetite.",
       "size_fit": "£20m-£300m",
-      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)",
+      "needs_sic": true
     },
     {
       "id": "shy-vehicle-traders",
       "name": "Vehicle importers & used-car exporters",
       "sic_codes": ["45111", "45112", "45190"],
-      "hmrc_codes": ["8703", "8704", "8711"],
+      "hmrc_codes": ["8703"],
       "flow": "both",
       "currency_pairs": ["EUR/GBP", "JPY/GBP", "USD/GBP"],
       "exposure_reason": "Cars come in from Europe and Japan in euros and yen, and used cars go out to Africa, the Middle East and Asia in dollars.",
       "call_angle": "Each car you buy from Europe or Japan or ship abroad is a currency deal — how are you getting your rate on those?",
       "broker_shy": "Used-car exports are a known trade-based money-laundering route — payment firms often decline vehicle traders.",
       "size_fit": "£20m-£300m",
-      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)",
+      "needs_sic": true
     },
     {
       "id": "shy-phones-electronics-traders",
       "name": "Mobile phone & electronics wholesalers",
-      "sic_codes": ["46520"],
-      "hmrc_codes": ["8517", "8471", "8542"],
+      "sic_codes": ["46520", "46510"],
+      "hmrc_codes": ["8517"],
       "flow": "both",
       "currency_pairs": ["USD/GBP", "EUR/GBP"],
       "exposure_reason": "Phones, laptops and chips are bought from distributors in dollars and euros and sold to UK resellers in pounds.",
       "call_angle": "You buy stock in dollars and sell it on in pounds within weeks — how are you fixing the rate on each buy?",
       "broker_shy": "Phones and chips were the main goods in MTIC VAT fraud — many payment firms won't take electronics wholesalers.",
       "size_fit": "£20m-£300m",
-      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)",
+      "needs_sic": true
     },
     {
       "id": "shy-tobacco",

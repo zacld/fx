@@ -148,7 +148,9 @@ def broker_shy(trade: Optional[dict], sics: list[str], name: str, niches: list[d
     if set(sics or []) & SHY_NEVER_SIC or SHY_NEVER_NAME.search(name or ""):
         return None
     shy = [n for n in niches if n.get("broker_shy")]
-    goods = goods_niche(trade, [n for n in shy if n.get("hmrc_codes")])
-    sector = None if goods else next((n for n in shy if set(map(str, n.get("sic_codes") or [])) & set(sics or [])), None)
+    in_sector = lambda n: bool(set(map(str, n.get("sic_codes") or [])) & set(sics or []))   # noqa: E731
+    # `needs_sic`: its goods alone are too common (laptops, lorries, oils) — the company's own sector must say so too
+    goods = goods_niche(trade, [n for n in shy if n.get("hmrc_codes") and (not n.get("needs_sic") or in_sector(n))])
+    sector = None if goods else next((n for n in shy if in_sector(n)), None)
     hit = goods or sector
     return {"niche": hit["name"], "why": hit["broker_shy"]} if hit else None

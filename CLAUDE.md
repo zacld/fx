@@ -461,7 +461,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   wholesalers, waste & recycling exporters, fuel & oil traders, vehicle importers / used-car exporters, phone &
   electronics wholesalers (MTIC), tobacco, diamonds & gemstones, grain / sugar / oilseed traders. The finder searches
   them like any niche; every tracked lead is tagged in the daily "Niche hits" run (`niches.broker_shy`: customs goods
-  first, else the sector; `enrich.json` `shy` → `rankLeads` `shy_of` → `leads/ranked`). Never: weapons and firearms,
+  first, else the sector; `enrich.json` `shy` → `rankLeads` `shy_of` → `leads/ranked`; `needs_sic` on phones,
+  vehicles, waste and fuel: their goods are too common — an agency importing laptops or a haulier importing lorries —
+  so the company's own sector code must match too). Never: weapons and firearms,
   military vehicles, gambling, security dealing (SIC `SHY_NEVER_SIC`), or a name saying firearms / betting / casino /
   crypto / cannabis / adult… (`SHY_NEVER_NAME`). **Hard to broker tab**: those leads by sector, highest lead score
   first, with why brokers shy away, Excel export and a Cognism company list; it reminds Zac to check Investec's own
