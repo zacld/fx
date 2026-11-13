@@ -3383,6 +3383,10 @@ class TestHardToBroker(unittest.TestCase):
         self.assertIsNone(niches.broker_shy(phones, ["73110"], "ACME MEDIA LIMITED", self.niches))
         self.assertEqual(niches.broker_shy(phones, ["46520"], "ACME MOBILE LIMITED", self.niches)["niche"],
                          "Mobile phone & electronics wholesalers")
+        # a car dealership isn't a used-car exporter; one whose customs records show car exports is
+        self.assertIsNone(niches.broker_shy(None, ["45111"], "ACME MOTORS LIMITED", self.niches))
+        cars = {"import_codes": self.Counter(), "export_codes": self.Counter({"87032310": 8})}
+        self.assertEqual(niches.broker_shy(cars, ["45112"], "ACME MOTORS LIMITED", self.niches)["niche"], "Used-car & vehicle exporters")
 
     def test_never_weapons_gambling_crypto(self):
         from sourcer import niches

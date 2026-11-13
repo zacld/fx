@@ -458,7 +458,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   recyclables etc — no firearms, no gambling"): niches carrying `broker_shy` (the reason payment firms — non-bank FX
   brokers — often decline or restrict them) in `fx_niches.json`: scrap metal, bullion, jewellery, watches, art &
   antiques, vapes, shipping, bloodstock, ferro-alloys, and new ones (`shy-*`) — mining / quarrying / ores, metal & ore
-  wholesalers, waste & recycling exporters, fuel & oil traders, vehicle importers / used-car exporters, phone &
+  wholesalers, waste & recycling exporters, fuel & oil traders, used-car exporters (customs exports only, `goods_only`), phone &
   electronics wholesalers (MTIC), tobacco, diamonds & gemstones, grain / sugar / oilseed traders. The finder searches
   them like any niche; every tracked lead is tagged in the daily "Niche hits" run (`niches.broker_shy`: customs goods
   first, else the sector; `enrich.json` `shy` → `rankLeads` `shy_of` → `leads/ranked`; `needs_sic` on phones,

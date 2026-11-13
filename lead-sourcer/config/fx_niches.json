@@ -5,7 +5,7 @@
     "size_fit": "£10m-£300m",
     "generated": "2026-06-22",
     "goods_niches": "Niches named by what companies actually import (HMRC customs goods codes: 4-digit headings or 6-digit subheadings, matched as prefixes of the 8-digit codes in HMRC's monthly importer/exporter lists) — proof of the trade, unlike a self-chosen SIC code. Measured weekly by tools/niche_hits.py; the finder orders by the measured score and skips niches that measure badly.",
-    "broker_shy": "Sectors payment firms (non-bank FX brokers) often decline or restrict — AML high-risk goods, commodities, sanctions-heavy trades — where a bank's FX desk can win (Zac, 13 Nov 2026). Each such niche carries `broker_shy`, the reason. Never: firearms, weapons, gambling, crypto, cannabis, adult (niches.SHY_NEVER). Check the bank's own sector appetite before calling. `needs_sic`: the customs goods count only with the niche's own sector code too (an agency importing laptops isn't a phone wholesaler; a haulier importing lorries isn't a car exporter)."
+    "broker_shy": "Sectors payment firms (non-bank FX brokers) often decline or restrict — AML high-risk goods, commodities, sanctions-heavy trades — where a bank's FX desk can win (Zac, 13 Nov 2026). Each such niche carries `broker_shy`, the reason. Never: firearms, weapons, gambling, crypto, cannabis, adult (niches.SHY_NEVER). Check the bank's own sector appetite before calling. `needs_sic`: the customs goods count only with the niche's own sector code too (an agency importing laptops isn't a phone wholesaler; a haulier importing lorries isn't a car exporter). `goods_only`: the sector code alone doesn't tag (a UK car dealership isn't a used-car exporter: its customs records must show the exports)."
   },
   "niches": [
     {
@@ -1344,17 +1344,18 @@
     },
     {
       "id": "shy-vehicle-traders",
-      "name": "Vehicle importers & used-car exporters",
+      "name": "Used-car & vehicle exporters",
       "sic_codes": ["45111", "45112", "45190"],
       "hmrc_codes": ["8703"],
-      "flow": "both",
+      "flow": "export",
       "currency_pairs": ["EUR/GBP", "JPY/GBP", "USD/GBP"],
-      "exposure_reason": "Cars come in from Europe and Japan in euros and yen, and used cars go out to Africa, the Middle East and Asia in dollars.",
-      "call_angle": "Each car you buy from Europe or Japan or ship abroad is a currency deal — how are you getting your rate on those?",
+      "exposure_reason": "Used cars go out to Africa, the Middle East and Asia, paid in dollars and other currencies.",
+      "call_angle": "Each car you ship abroad is a currency deal — how are you getting your rate when the buyer pays?",
       "broker_shy": "Used-car exports are a known trade-based money-laundering route — payment firms often decline vehicle traders.",
       "size_fit": "£20m-£300m",
       "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)",
-      "needs_sic": true
+      "needs_sic": true,
+      "goods_only": true
     },
     {
       "id": "shy-phones-electronics-traders",
