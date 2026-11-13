@@ -454,6 +454,18 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   deal (`lead_flags.hit`). **Hit list tab**: those companies, highest score first ("Also without an FX loss" widens
   it), Excel export. **New money tab** (GET `?view=deals`): the ownership register's deals and the news of PE deals and
   funding, newest first, filters, each with its FX sign. Contact-finding is no longer being extended.
+- **Hard to broker** (Zac, 13 Nov 2026: "a separate section where we go after sectors brokers can't — mining,
+  recyclables etc — no firearms, no gambling"): niches carrying `broker_shy` (the reason payment firms — non-bank FX
+  brokers — often decline or restrict them) in `fx_niches.json`: scrap metal, bullion, jewellery, watches, art &
+  antiques, vapes, shipping, bloodstock, ferro-alloys, and new ones (`shy-*`) — mining / quarrying / ores, metal & ore
+  wholesalers, waste & recycling exporters, fuel & oil traders, vehicle importers / used-car exporters, phone &
+  electronics wholesalers (MTIC), tobacco, diamonds & gemstones, grain / sugar / oilseed traders. The finder searches
+  them like any niche; every tracked lead is tagged in the daily "Niche hits" run (`niches.broker_shy`: customs goods
+  first, else the sector; `enrich.json` `shy` → `rankLeads` `shy_of` → `leads/ranked`). Never: weapons and firearms,
+  military vehicles, gambling, security dealing (SIC `SHY_NEVER_SIC`), or a name saying firearms / betting / casino /
+  crypto / cannabis / adult… (`SHY_NEVER_NAME`). **Hard to broker tab**: those leads by sector, highest lead score
+  first, with why brokers shy away, Excel export and a Cognism company list; it reminds Zac to check Investec's own
+  sector appetite before calling. No lead-score change.
 - **Every lead's website** (Zac, 12 Nov 2026: 7,000 companies uploaded to Cognism, ~100 enriched — the FX filings
   list's companies carried no website and most rows no named person, so Cognism had nothing to match on):
   `tools/find_domains.py` in the daily "Niche hits" run, after the ranking (`rank-leads.mjs … lead_order.json`: best lead

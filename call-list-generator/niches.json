@@ -4,7 +4,8 @@
     "description": "Specific FX-exposed UK business niches for cold-call targeting. Each niche represents a distinct buyer type with identifiable currency exposure.",
     "size_fit": "£10m-£300m",
     "generated": "2026-06-22",
-    "goods_niches": "Niches named by what companies actually import (HMRC customs goods codes: 4-digit headings or 6-digit subheadings, matched as prefixes of the 8-digit codes in HMRC's monthly importer/exporter lists) — proof of the trade, unlike a self-chosen SIC code. Measured weekly by tools/niche_hits.py; the finder orders by the measured score and skips niches that measure badly."
+    "goods_niches": "Niches named by what companies actually import (HMRC customs goods codes: 4-digit headings or 6-digit subheadings, matched as prefixes of the 8-digit codes in HMRC's monthly importer/exporter lists) — proof of the trade, unlike a self-chosen SIC code. Measured weekly by tools/niche_hits.py; the finder orders by the measured score and skips niches that measure badly.",
+    "broker_shy": "Sectors payment firms (non-bank FX brokers) often decline or restrict — AML high-risk goods, commodities, sanctions-heavy trades — where a bank's FX desk can win (Zac, 13 Nov 2026). Each such niche carries `broker_shy`, the reason. Never: firearms, weapons, gambling, crypto, cannabis, adult (niches.SHY_NEVER). Check the bank's own sector appetite before calling."
   },
   "niches": [
     {
@@ -429,7 +430,8 @@
       "currency_pairs": ["USD/GBP"],
       "exposure_reason": "Shipping revenues and charter rates are denominated globally in USD, while UK-registered ship owners carry GBP-denominated operating costs, crew, and debt service.",
       "call_angle": "Vessel earnings in dollars against GBP operating costs is a classic cross-currency mismatch — is that exposure managed at the parent level, or is there something sitting open at the vessel-owning entity?",
-      "size_fit": "£10m-£300m"
+      "size_fit": "£10m-£300m",
+      "broker_shy": "Heavy sanctions screening on vessels, cargoes and ports — payment firms often step back from shipping."
     },
     {
       "id": "oil-gas-services",
@@ -465,7 +467,8 @@
       "currency_pairs": ["USD/GBP"],
       "exposure_reason": "UK jewellery manufacturers and gold traders buy gold and platinum in USD (London Bullion Market pricing) and sell finished goods to UK retail and export markets in GBP and other currencies.",
       "call_angle": "Gold is priced in dollars and you're buying it to make products priced in sterling — if you're not hedging the USD/GBP leg of your metal procurement, your cost of goods moves every day the market is open.",
-      "size_fit": "£10m-£300m"
+      "size_fit": "£10m-£300m",
+      "broker_shy": "High-value, portable goods on the money-laundering high-risk list — payment firms often decline or cap them."
     },
     {
       "id": "scandinavian-furniture-importers",
@@ -705,7 +708,8 @@
       "currency_pairs": ["EUR/GBP", "USD/GBP"],
       "exposure_reason": "Customs records show live horses moving in or out — bloodstock is bought and sold at the Irish and French sales in euros and the Kentucky sales in dollars.",
       "call_angle": "Horses bought at Goffs, Arqana or Keeneland are paid in euros or dollars — how do you handle the currency on sale days?",
-      "size_fit": "£20m-£300m"
+      "size_fit": "£20m-£300m",
+      "broker_shy": "High-value private sales through agents across borders — bloodstock is a restricted sector for many payment firms."
     },
     {
       "id": "goods-equestrian-tack",
@@ -1035,7 +1039,8 @@
       "currency_pairs": ["CHF/GBP", "USD/GBP", "EUR/GBP"],
       "exposure_reason": "Customs records show regular watch or jewellery imports — Swiss watches in francs, Asian and Italian jewellery in dollars and euros.",
       "call_angle": "Swiss suppliers invoice in francs and jewellery in dollars — how are you managing that?",
-      "size_fit": "£20m-£300m"
+      "size_fit": "£20m-£300m",
+      "broker_shy": "High-value, portable goods on the money-laundering high-risk list — payment firms often decline or cap them."
     },
     {
       "id": "goods-art-antiques",
@@ -1046,7 +1051,8 @@
       "currency_pairs": ["USD/GBP", "EUR/GBP", "CHF/GBP"],
       "exposure_reason": "Customs records show art, antiques or collectables moving in or out — bought and sold at auction in New York, Paris and Geneva in dollars, euros and francs.",
       "call_angle": "Pieces bought at auction abroad are paid in dollars or euros — how do you handle the currency on those?",
-      "size_fit": "£20m-£300m"
+      "size_fit": "£20m-£300m",
+      "broker_shy": "Art market participants have been under the Money Laundering Regulations since 2020 — many payment firms avoid them."
     },
     {
       "id": "goods-medical-devices",
@@ -1146,7 +1152,8 @@
       "exposure_reason": "Customs records show scrap or recycled metal moving in or out — priced off the dollar metal markets and sold to mills in Turkey, India and Europe.",
       "call_angle": "Scrap's priced in dollars and sold abroad — how are you handling the currency between buying and selling?",
       "size_fit": "£20m-£300m",
-      "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026"
+      "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026",
+      "broker_shy": "Cash-heavy trade with a long record of money-laundering and theft cases — many payment firms won't onboard scrap dealers."
     },
     {
       "id": "goods-precious-metals",
@@ -1158,7 +1165,8 @@
       "exposure_reason": "Customs records show gold, silver, platinum or precious-metal scrap moving in or out — all priced in dollars.",
       "call_angle": "Precious metals are priced in dollars — how do you manage the currency on top of the metal price?",
       "size_fit": "£20m-£300m",
-      "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026"
+      "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026",
+      "broker_shy": "Bullion is on the money-laundering high-risk list (HMRC supervises high-value dealers) — payment firms often decline or cap it."
     },
     {
       "id": "goods-ferro-alloys",
@@ -1170,7 +1178,8 @@
       "exposure_reason": "Customs records show regular imports of ferro-alloys or specialty metals — traded in dollars on the world metal markets.",
       "call_angle": "Alloys are bought in dollars — how are you handling that currency for your foundry or mill customers?",
       "size_fit": "£20m-£300m",
-      "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026"
+      "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026",
+      "broker_shy": "Specialty metals touch sanctions and export controls (Russia, China) — payment firms often step back."
     },
     {
       "id": "goods-vehicle-parts",
@@ -1230,7 +1239,8 @@
       "exposure_reason": "Customs records show vapes or nicotine products coming in month after month — almost all made in China and paid in dollars.",
       "call_angle": "Stock comes in from China in dollars — how are you fixing the rate on those orders?",
       "size_fit": "£20m-£300m",
-      "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026"
+      "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026",
+      "broker_shy": "Excise fraud and illicit-trade risk — vapes and nicotine sit on many payment firms' restricted lists."
     },
     {
       "id": "goods-juice-preserves",
@@ -1279,6 +1289,121 @@
       "call_angle": "Your products come in from Europe and Asia — how are you managing the euros and dollars?",
       "size_fit": "£20m-£300m",
       "found_by": "tools/niche_hits.py customs-heading league, 10 Nov 2026"
+    },
+    {
+      "id": "shy-mining-quarrying",
+      "name": "Mining, quarrying & ore traders",
+      "sic_codes": ["07100", "07210", "07290", "08110", "08120", "08910", "08990", "09100", "09900"],
+      "hmrc_codes": ["26"],
+      "flow": "both",
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "Ores, minerals and quarried stone are priced in dollars on world markets; UK miners and ore traders buy equipment abroad and sell or ship in dollars.",
+      "call_angle": "Ore and mineral prices are set in dollars — when you sell or buy a cargo, who fixes the sterling side of it for you?",
+      "broker_shy": "Commodity and jurisdiction risk (sanctions, conflict minerals) and large single payments — outside most payment firms' appetite.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+    },
+    {
+      "id": "shy-metal-ore-traders",
+      "name": "Metal & ore wholesalers",
+      "sic_codes": ["46720"],
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "Metals are priced in dollars on the LME; wholesalers buy from mills and traders abroad and hold stock against a dollar price.",
+      "call_angle": "Your stock is priced off the LME in dollars — how do you protect the sterling value between buying and selling it on?",
+      "broker_shy": "Large commodity tickets, sanctions on Russian metals and trade-mispricing risk — payment firms often limit metal traders.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+    },
+    {
+      "id": "shy-waste-recycling",
+      "name": "Waste, recycling & recovered-materials exporters",
+      "sic_codes": ["38110", "38210", "38220", "38320", "46770"],
+      "hmrc_codes": ["3915", "4707", "6309", "6310", "7001", "8549"],
+      "flow": "both",
+      "currency_pairs": ["EUR/GBP", "USD/GBP"],
+      "exposure_reason": "Recovered paper, plastics, textiles and e-waste are sold to mills and processors in Europe and Asia, priced in euros or dollars.",
+      "call_angle": "Recovered materials go to buyers abroad at euro and dollar prices that move every month — how are you fixing the sterling you'll get?",
+      "broker_shy": "Waste exports carry waste-crime and trade-mispricing risk — payment firms often restrict waste and recycling companies.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+    },
+    {
+      "id": "shy-fuel-oil-traders",
+      "name": "Fuel, oil & lubricant traders",
+      "sic_codes": ["46711", "46719", "19201", "19209"],
+      "hmrc_codes": ["2709", "2710", "2711", "2713"],
+      "flow": "both",
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "Oil and fuel are bought at dollar prices (Platts, Brent) and sold in pounds at the pump, depot or to fleets.",
+      "call_angle": "You buy at dollar prices and sell in pounds — when the dollar moves between cargo and invoice, who carries that?",
+      "broker_shy": "Sanctions on oil cargoes and large commodity tickets — usually outside payment firms' appetite.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+    },
+    {
+      "id": "shy-vehicle-traders",
+      "name": "Vehicle importers & used-car exporters",
+      "sic_codes": ["45111", "45112", "45190"],
+      "hmrc_codes": ["8703", "8704", "8711"],
+      "flow": "both",
+      "currency_pairs": ["EUR/GBP", "JPY/GBP", "USD/GBP"],
+      "exposure_reason": "Cars come in from Europe and Japan in euros and yen, and used cars go out to Africa, the Middle East and Asia in dollars.",
+      "call_angle": "Each car you buy from Europe or Japan or ship abroad is a currency deal — how are you getting your rate on those?",
+      "broker_shy": "Used-car exports are a known trade-based money-laundering route — payment firms often decline vehicle traders.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+    },
+    {
+      "id": "shy-phones-electronics-traders",
+      "name": "Mobile phone & electronics wholesalers",
+      "sic_codes": ["46520"],
+      "hmrc_codes": ["8517", "8471", "8542"],
+      "flow": "both",
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "Phones, laptops and chips are bought from distributors in dollars and euros and sold to UK resellers in pounds.",
+      "call_angle": "You buy stock in dollars and sell it on in pounds within weeks — how are you fixing the rate on each buy?",
+      "broker_shy": "Phones and chips were the main goods in MTIC VAT fraud — many payment firms won't take electronics wholesalers.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+    },
+    {
+      "id": "shy-tobacco",
+      "name": "Tobacco importers & wholesalers",
+      "sic_codes": ["12000", "46350"],
+      "hmrc_codes": ["2401", "2402", "2403"],
+      "flow": "both",
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "Leaf, cigars and finished tobacco come from the Americas, Africa and Europe, priced in dollars and euros.",
+      "call_angle": "Leaf and cigars are bought in dollars and euros months ahead — are you fixing those rates or taking them on the day?",
+      "broker_shy": "Excise fraud and illicit-trade risk — tobacco sits on most payment firms' restricted lists.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+    },
+    {
+      "id": "shy-diamonds-gemstones",
+      "name": "Diamond & gemstone traders",
+      "sic_codes": [],
+      "hmrc_codes": ["7101", "7102", "7103", "7104", "7105"],
+      "flow": "both",
+      "currency_pairs": ["USD/GBP"],
+      "exposure_reason": "Diamonds and gemstones trade in dollars through Antwerp, Dubai, Mumbai and New York.",
+      "call_angle": "Stones are bought and sold in dollars — how are you converting the sterling side, and at what spread?",
+      "broker_shy": "Diamonds are on the money-laundering high-risk list (Kimberley Process, sanctions on Russian stones) — payment firms often decline.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
+    },
+    {
+      "id": "shy-soft-commodities",
+      "name": "Grain, sugar, oilseed & soft-commodity traders",
+      "sic_codes": ["46210"],
+      "hmrc_codes": ["1001", "1003", "1005", "1201", "1205", "1507", "1511", "1701"],
+      "flow": "both",
+      "currency_pairs": ["USD/GBP", "EUR/GBP"],
+      "exposure_reason": "Grain, oilseeds, vegetable oils and sugar are priced in dollars on world markets and in euros on Euronext.",
+      "call_angle": "Your cargoes are priced in dollars and euros months before they're paid — how do you lock the sterling side?",
+      "broker_shy": "Large commodity tickets and the margin lines they need — beyond what payment firms can carry; banks do.",
+      "size_fit": "£20m-£300m",
+      "found_by": "broker-shy: sectors payment firms often won't take (Zac, 13 Nov 2026)"
     }
   ]
 }

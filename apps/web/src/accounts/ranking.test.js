@@ -46,3 +46,13 @@ describe("niche relabelling", () => {
     expect(scored.find((s) => s.company_number === "T1").parts.some(([w]) => w.startsWith("Niche"))).toBe(false);
   });
 });
+
+describe("Hard to broker", () => {
+  it("tags list and filings companies from the morning enrich, never a ruled-out one", () => {
+    const enrich = { "1": { shy: { niche: "Scrap & recycled-metal traders", why: "x" } }, "2": { absurd: "A bank", shy: { niche: "Scrap & recycled-metal traders", why: "x" } },
+                     "3": { shy: { niche: "Tobacco importers & wholesalers", why: "y" } } };
+    const { shy_of } = rankLeads([{ company_number: "1", company_name: "A" }, { company_number: "2", company_name: "B" }],
+                                  [{ company_number: "3", company_name: "C" }], { enrich });
+    expect(Object.keys(shy_of).sort()).toEqual(["1", "3"]);
+  });
+});

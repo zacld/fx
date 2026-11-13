@@ -328,6 +328,11 @@ function Accounts({ data, password }) {
                   onClick={() => set({ section: "", view: "hits" })}>
             Hit list <span className="tab-n">{open.filter((r) => r.lead_flags?.hit && !isOut(r)).length}</span>
           </button>
+          <button role="tab" aria-selected={filters.view === "shy"} className={`tab${filters.view === "shy" ? " on" : ""}`}
+                  title="Sectors payment firms often won't take — scrap, bullion, mining, waste, fuel, vehicles, tobacco… where a bank can win"
+                  onClick={() => set({ section: "", view: "shy" })}>
+            Hard to broker <span className="tab-n">{open.filter((r) => ranked.shy_of?.[r.company_number] && !isOut(r)).length}</span>
+          </button>
           <button role="tab" aria-selected={filters.view === "money"} className={`tab money-tab${filters.view === "money" ? " on" : ""}`}
                   title="Just bought by private equity, buying companies, just funded, a new overseas owner"
                   onClick={() => set({ section: "", view: "money" })}>
@@ -369,7 +374,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -414,6 +419,7 @@ function Accounts({ data, password }) {
       </div>
 
       {filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} />
        : filters.view === "alerts" ? <Alerts password={password} listed={listedNumbers} onOpen={openCompany} />
        : filters.view === "calls" ? <CallToday password={password} listRows={open} lead={leadCtx} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
@@ -1188,6 +1194,67 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
         </article>
       ))}
       {!list.length && <div className="empty">Nothing yet — the year's filings are being read again for purchases and finance directors (a day or two), and the ownership register's deals arrive each morning.</div>}
+    </div>
+  );
+}
+
+// The Hard to broker tab (Zac, 13 Nov 2026): leads in sectors payment firms often decline or restrict — scrap, bullion,
+// jewellery, art, mining, metals, waste, fuel, vehicles, phones, tobacco, vapes, shipping, bloodstock, commodities —
+// where a bank's FX desk can win. Tagged daily (sourcer/niches.broker_shy: customs records first, else the sector);
+// never weapons, gambling, crypto, cannabis or adult. Grouped by sector, highest lead score first.
+function HardToBroker({ rows, shyOf, onOpen, onContact, onEmail }) {
+  const [sector, setSector] = useState("");
+  const all = rows.filter((r) => shyOf[r.company_number] && !isOut(r) && !r.dropped)
+    .sort((a, b) => (b.lead_score || 0) - (a.lead_score || 0));
+  const counts = {};
+  for (const r of all) counts[shyOf[r.company_number].niche] = (counts[shyOf[r.company_number].niche] || 0) + 1;
+  const list = sector ? all.filter((r) => shyOf[r.company_number].niche === sector) : all;
+  const exportShy = () => downloadSheet(list.map((r, i) => ({
+    rank: i + 1, company_name: r.company_name, company_number: r.company_number, website: siteOf(r), lead_score: r.lead_score,
+    sector: shyOf[r.company_number].niche, why_brokers_shy: shyOf[r.company_number].why, turnover_gbp: r.turnover_gbp || "",
+    fx_loss_gbp: Number(r.fx_gain_loss_gbp) < 0 ? -Number(r.fx_gain_loss_gbp) : "", lead_reasons: r.lead_reasons || "",
+    companies_house_url: chCompanyUrl(r.company_number),
+  })), columnsFor(["rank", "company_name", "company_number", "website", "lead_score", "sector", "why_brokers_shy", "turnover_gbp",
+    "fx_loss_gbp", "lead_reasons", "companies_house_url"], { why_brokers_shy: "Why brokers shy away", turnover_gbp: "Turnover (£)",
+    fx_loss_gbp: "FX loss (£)" }, ["rank", "lead_score", "turnover_gbp", "fx_loss_gbp"]),
+    `hard-to-broker-${new Date().toISOString().slice(0, 10)}.xlsx`, "Hard to broker");
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <span className="muted">{list.length} companies in sectors payment firms often decline or limit — where a bank's FX desk can win.
+          Check Investec's own appetite for the sector before calling. Never weapons, gambling, crypto, cannabis or adult.</span>
+        <select value={sector} onChange={(e) => setSector(e.target.value)} aria-label="Sector">
+          <option value="">All sectors ({all.length})</option>
+          {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
+        </select>
+        <button className="btn-sm export" onClick={exportShy} disabled={!list.length}>Export Excel ({list.length})</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(list, "hard-to-broker")} disabled={!list.some(siteOf)}>
+          Cognism company list ({list.filter(siteOf).length})</button>
+      </div>
+      {list.slice(0, 200).map((r, i) => (
+        <article className="card loss-card" key={r.company_number}>
+          <div className="card-top">
+            <div className="card-name">
+              <span className="call-n">{i + 1}</span>
+              <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
+              <span className="chip">{shyOf[r.company_number].niche}</span>
+              {siteOf(r) && <a className="site" href={siteUrl(siteOf(r))} target="_blank" rel="noreferrer">{siteLabel(siteOf(r))}</a>}
+            </div>
+            <div className="loss-fig">
+              {r.turnover_gbp && <b className="call-turnover">{money(Number(r.turnover_gbp))}</b>}
+              {Number(r.fx_gain_loss_gbp) < 0 && <span className="muted">FX loss {money(-Number(r.fx_gain_loss_gbp))}</span>}
+            </div>
+          </div>
+          <p className="panel-p muted">{shyOf[r.company_number].why}</p>
+          <LeadScore r={r} />
+          <div className="card-foot">
+            <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>
+            <EmailButton r={r} onEmail={onEmail} />
+            <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>
+          </div>
+        </article>
+      ))}
+      {!list.length && <div className="empty">Nothing tagged yet — the morning ranking run tags every lead's sector (first run after this change).</div>}
     </div>
   );
 }

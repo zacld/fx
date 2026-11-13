@@ -18,7 +18,8 @@ export const RANKED_FIELDS = [
 const slim = (r) => Object.fromEntries(RANKED_FIELDS.filter((k) => r[k] !== undefined && r[k] !== "").map((k) => [k, r[k]]));
 
 // {rows (filings companies not on the list, slim, with fx_niche / section / qualified), ruled_out ({number: reason}
-// for both lists), niche_of ({number: corrected niche} for list companies), scored (every lead with its score)}.
+// for both lists), niche_of ({number: corrected niche} for list companies), shy_of ({number: {niche, why}}: hard to
+// broker, both lists), scored (every lead with its score)}.
 export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, today = new Date() } = {}) {
   const tiers = nicheTiers(niches);
   const onList = new Set(listRows.map((r) => r.company_number));
@@ -33,9 +34,11 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
     if (niche !== (r.fx_niche || "")) nicheOf[r.company_number] = niche;
   }
   const ruledOut = {};
+  const shyOf = {};   // hard to broker (tools/niche_hits.py, sourcer/niches.broker_shy): {number: {niche, why}}
   const tag = (r) => {
     const e = enrich[r.company_number] || {};
     if (e.absurd) ruledOut[r.company_number] = e.absurd;
+    if (e.shy && !e.absurd) shyOf[r.company_number] = e.shy;
     return e;
   };
   const rows = filingRows.filter((r) => r.company_number && !onList.has(r.company_number)).map((r) => {
@@ -55,7 +58,7 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
                loss: s.parts.some(([w]) => w.startsWith("FX loss")) };
     })
     .sort((a, b) => b.score - a.score);
-  return { rows, ruled_out: ruledOut, niche_of: nicheOf, scored };
+  return { rows, ruled_out: ruledOut, niche_of: nicheOf, shy_of: shyOf, scored };
 }
 
 // Per niche, from the scored leads: how many, average score, how many score 60+, in the band, with an FX loss, ruled out.

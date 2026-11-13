@@ -82,7 +82,7 @@ def measure_all(niches: list[dict], companies: list[dict], trade_by_company: dic
 
 
 def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches: list[dict]) -> dict:
-    """{number: {niche, niche_kind, sic, absurd}} for the Accounts + FX filings lists' companies."""
+    """{number: {niche, niche_kind, sic, absurd, shy}} for the Accounts + FX filings lists' companies (shy: hard to broker)."""
     out = {}
     catch_all = niche_rules.catch_all_codes(niches)
     for number, name in tracked.items():
@@ -90,7 +90,8 @@ def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches
         sics = (record or {}).get("sic_codes") or []
         niche = niche_rules.company_niche(trade_by_company.get(number), sics, niches, catch_all)
         out[number] = {"niche": niche["name"] if niche else "", "niche_kind": ("goods" if niche.get("hmrc_codes") else "sector") if niche else "",
-                       "sic": sics, "absurd": absurd.reason(name, record)}
+                       "sic": sics, "absurd": absurd.reason(name, record),
+                       "shy": niche_rules.broker_shy(trade_by_company.get(number), sics, name, niches) or ""}
     return out
 
 

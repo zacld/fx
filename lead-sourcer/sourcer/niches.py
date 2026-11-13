@@ -130,3 +130,25 @@ def tier(niche_id: str, stats: dict) -> int:
 
 def dropped(niche_id: str, stats: dict) -> bool:
     return (stats.get(niche_id) or {}).get("verdict") == "drop"
+
+
+# --- Hard to broker (Zac, 13 Nov 2026) ----------------------------------------------------------------------------------
+# Sectors payment firms (non-bank FX brokers) often decline or restrict — AML high-risk goods, commodities, sanctions-
+# heavy trades — where a bank's FX desk can win. Niches carrying `broker_shy` (the reason) in config/fx_niches.json.
+# Never these, whatever the niche: weapons and firearms, gambling, crypto, cannabis, adult.
+SHY_NEVER_SIC = {"25400", "30400", "92000", "64991"}   # weapons & ammunition, military vehicles, gambling, security dealing
+SHY_NEVER_NAME = re.compile(r"\b(?:firearms?|guns?|gunsmiths?|ammunition|munitions|weapons?|armou?ry|casinos?|betting|"
+                            r"bookmakers?|bingo|lotter(?:y|ies)|gambling|crypto\w*|bitcoin|blockchain|cannabis|cbd|hemp|"
+                            r"adult|escorts?)\b", re.I)
+
+
+def broker_shy(trade: Optional[dict], sics: list[str], name: str, niches: list[dict]) -> Optional[dict]:
+    """{"niche", "why"} when the company trades in (customs records) or is registered in (SIC) a hard-to-broker niche;
+    None for anything on the never list."""
+    if set(sics or []) & SHY_NEVER_SIC or SHY_NEVER_NAME.search(name or ""):
+        return None
+    shy = [n for n in niches if n.get("broker_shy")]
+    goods = goods_niche(trade, [n for n in shy if n.get("hmrc_codes")])
+    sector = None if goods else next((n for n in shy if set(map(str, n.get("sic_codes") or [])) & set(sics or [])), None)
+    hit = goods or sector
+    return {"niche": hit["name"], "why": hit["broker_shy"]} if hit else None
