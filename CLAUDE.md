@@ -411,7 +411,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   accounts filed in the last 90 days 10, new on the list 5, the company's niche by its measured tier (15 / 8 / 3,
   `nicheTiers` from `niches/stats`), a new finance director 20 (an Alerts `new_fd` / `news_fd` in the last 120 days or
   a trigger naming one), another change 10 (owner, charges), expanding abroad in the news 8, hiring for treasury / FX 5,
-  subsidiaries abroad 10, £20m–£300m 10, no hedging named 5, owned abroad −10. GET `/api/accounts?view=signals` gives
+  subsidiaries abroad 10, £20m–£300m 10, no hedging named 5, owned abroad −10, a name ending in UK / (UK) / U.K. /
+  (GB) −10 (Zac, 13 Nov 2026: "obviously got an overseas owner" — `ukArmName`; not on top of owned abroad, and not when
+  the register shows only people as owners). GET `/api/accounts?view=signals` gives
   the page the niche tiers and each company's recent alerts. The Accounts list sorts by it by default ("Lead score"),
   the Sheet has a Score column, cards and Call today show the breakdown, the company page a "Why it ranks" panel, and
   the exports carry `lead_score` / `lead_reasons`. Call today orders its picks by it. The weights are logged here to be

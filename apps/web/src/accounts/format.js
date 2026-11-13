@@ -668,6 +668,8 @@ export const LEAD_POINTS = {
   nicheByTier: [0, 3, 8, 15],
   newFd: 20, newFdDays: 120, trigger: 10, abroadNews: 8, hiring: 5, signalDays: 120,
   subsidiaries: 10, open: 5, ownedAbroad: -10,
+  // Zac, 13 Nov 2026: "if a company is NAME then UK, score it lower — it's obviously got an overseas owner"
+  ukArmName: -10,
   // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
   // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
   // employee ownership trust 10, and the hit-list combo — a recent FX loss with a new FD / a purchase / a PE deal — 15.
@@ -683,6 +685,12 @@ export function appointedIso(text = "") {
   const d = /(\d{1,2})\/(\d{1,2})\/(20\d\d)/.exec(text);
   return d ? new Date(Date.UTC(+d[3], +d[2] - 1, +d[1])).toISOString().slice(0, 10) : "";
 }
+// "ACME UK LIMITED", "ACME (UK) LTD", "ACME U.K. LIMITED", "ACME (GB) LIMITED": usually a foreign group's UK arm.
+const UK_ARM = /\s\(?(?:U\.?K\.?|G\.?B\.?|GREAT BRITAIN|UNITED KINGDOM)\)?\s+(?:LIMITED|LTD\.?|PLC|LLP)\s*$/i;
+// Owned by people (a family business that put UK in its name) — the register shows no foreign parent behind it.
+const peopleOwned = (r) => /^Owned by \d+ individuals?$/.test(r.owner || "") ||
+  (Boolean(r.owners) && String(r.owners).split(";").every((o) => /\(individual/i.test(o)));
+export const ukArmName = (r) => UK_ARM.test(String(r.company_name || "").trim()) && !peopleOwned(r);
 const NEW_FD = /\bnew (?:finance director|FD|CFO|chief financial officer)|\b(?:finance director|CFO|chief financial officer)\b[^.;]*\b(?:appointed|joined)/i;
 
 // {niche name: {tier, hit_rate, open_share}} from the measured niches; tiers as the finder's (sourcer/niches.py TIERS).
@@ -735,6 +743,7 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, ma
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
   add(r.run_from_abroad ? rules.ownedAbroad : 0, "Owned abroad: FX may be run by the parent");
+  add(!r.run_from_abroad && ukArmName(r) ? rules.ukArmName : 0, "Name ends in UK — probably a foreign group's UK arm");
   const recentLoss = loss >= rules.lossMin && Boolean(filedOn) && filedOn >= day(rules.recentDays);
   const change = newFd ? "a new FD" : buying ? "buying companies" : pe ? "a private-equity deal" : "";
   if (recentLoss && change) add(rules.combo, `Hit list: a recent FX loss and ${change}`);
