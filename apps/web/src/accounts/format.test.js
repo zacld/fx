@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, cognismCompanyRows, setKnownSites, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -469,4 +469,20 @@ describe("Websites for Cognism", () => {
     expect(list[0].role_to_find).toMatch(/Finance Director; CFO/);
     setKnownSites({});
 });
+});
+
+describe("A name ending in UK scores lower", () => {
+  const base = { company_number: "1", fx_gain_loss_gbp: "-300000", filed_fx_score: 60 };
+  const score = (r) => leadScore({ ...base, ...r }).score;
+  it("takes 10 off ACME UK LIMITED / (UK) LTD / (GB) LIMITED, not ACME LIMITED", () => {
+    const plain = score({ company_name: "ACME LIMITED" });
+    for (const name of ["ACME UK LIMITED", "ACME (UK) LTD", "ACME U.K. LIMITED", "ACME (GB) LIMITED"]) expect(score({ company_name: name })).toBe(plain - 10);
+    expect(score({ company_name: "UKAY LIMITED" })).toBe(plain);
+  });
+  it("not twice when the register already shows the overseas owner, and not for a family-owned company", () => {
+    const abroad = score({ company_name: "ACME LIMITED", run_from_abroad: "Owned from Germany (ACME GMBH)" });
+    expect(score({ company_name: "ACME UK LIMITED", run_from_abroad: "Owned from Germany (ACME GMBH)" })).toBe(abroad);
+    expect(score({ company_name: "PEERS HARDY (UK) LIMITED", owner: "Owned by 3 individuals" })).toBe(score({ company_name: "ACME LIMITED" }));
+    expect(ukArmName({ company_name: "ACME UK LIMITED", owners: "J Smith (individual, England)" })).toBe(false);
+  });
 });
