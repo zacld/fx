@@ -16,10 +16,10 @@ let filingRows = index?.rows || [];
 for (const { month } of index?.months || []) filingRows = filingRows.concat((await store.get(filingsMonthKey(month), "json"))?.rows || []);
 const listRows = list?.rows || [];
 
-const { rows, ruled_out, niche_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) });
+const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) });
 const learn = nicheLearnings(scored);
 const made_at = new Date().toISOString();
-await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, niches: learn });
+await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, niches: learn });
 
 const live = scored.filter((s) => !s.absurd);
 if (orderPath) await writeFile(orderPath, JSON.stringify(live.map((s) => s.company_number)));
@@ -39,6 +39,12 @@ live.slice(0, 30).forEach((s, i) => console.log(`${String(i + 1).padStart(3)}. $
 console.log("\nNiches by average lead score (8+ leads):");
 console.log("  avg  leads  60+  band  FX loss  ruled out  niche");
 for (const n of learn) console.log(`${String(n.avg).padStart(5)} ${String(n.leads).padStart(6)} ${String(n.strong).padStart(4)} ${String(n.band).padStart(5)} ${String(n.loss).padStart(8)} ${String(n.ruled_out).padStart(10)}  ${n.niche}`);
+const shyBy = {};
+for (const s of live) if (shy_of[s.company_number]) (shyBy[shy_of[s.company_number].niche] ||= []).push(s);
+console.log(`\nHard to broker: ${Object.values(shyBy).flat().length} leads`);
+for (const [niche, list] of Object.entries(shyBy).sort((a, b) => b[1].length - a[1].length)) {
+  console.log(`  ${String(list.length).padStart(4)}  ${niche}: ${list.slice(0, 4).map((s) => `${s.company_name} (${s.score})`).join("; ")}`);
+}
 const reasons = {};
 for (const [number, why] of Object.entries(ruled_out)) {
   const k = why.split(" — ")[0].replace(/ \(sector \d+\)/, "").replace(/, by its name/, "");

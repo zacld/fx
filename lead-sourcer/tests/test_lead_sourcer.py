@@ -2143,7 +2143,7 @@ class TestHttpFrontEnds(unittest.TestCase):
              mock.patch.object(main, "run_pipeline", return_value=[row]) as run:
             status, body = _request(base + "/niches")
             self.assertEqual(status, 200)
-            self.assertEqual(len(body["niches"]), 128)
+            self.assertEqual(len(body["niches"]), 137)
 
             status, body = _request(base + "/run", {"niches": ["no-such-niche"]})
             self.assertEqual(status, 400)
@@ -2167,7 +2167,7 @@ class TestHttpFrontEnds(unittest.TestCase):
         with mock.patch.object(main, "run_pipeline", return_value=[]) as run:
             status, body = _request(base + "/api/run")
             self.assertEqual(status, 200)
-            self.assertEqual(len(body["niches"]), 128)
+            self.assertEqual(len(body["niches"]), 137)
 
             status, body = _request(base + "/api/run", {"min_turnover": 20_000_000})
             self.assertEqual(status, 400)
@@ -3357,6 +3357,43 @@ class TestCatchAllCodes(unittest.TestCase):
         self.assertIsNone(nr.sector_niche(["46499"], niches))                       # a toothbrush wholesaler
         self.assertEqual(nr.sector_niche(["46499", "32200"], niches)["id"], "music")   # makes instruments too
         self.assertEqual(nr.sector_niche(["20003"], niches)["id"], "broad")
+
+
+class TestHardToBroker(unittest.TestCase):
+    """sourcer/niches.broker_shy: sectors payment firms often decline — never weapons, gambling, crypto, cannabis, adult."""
+
+    def setUp(self):
+        import json
+        from collections import Counter
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config", "fx_niches.json"), encoding="utf-8") as f:
+            self.niches = json.load(f)["niches"]
+        self.Counter = Counter
+
+    def test_customs_goods_then_sector_tag_the_lead(self):
+        from sourcer import niches
+        scrap = {"import_codes": self.Counter(), "export_codes": self.Counter({"72044910": 10})}
+        got = niches.broker_shy(scrap, ["46900"], "ACME METALS LIMITED", self.niches)
+        self.assertEqual(got["niche"], "Scrap & recycled-metal traders")
+        self.assertIn("payment firms", got["why"])
+        self.assertEqual(niches.broker_shy(None, ["08110"], "ACME QUARRIES LIMITED", self.niches)["niche"],
+                         "Mining, quarrying & ore traders")
+        self.assertIsNone(niches.broker_shy(None, ["46390"], "ACME FOODS LIMITED", self.niches))
+        # an agency importing phones isn't a phone wholesaler; a wholesaler registered as one is
+        phones = {"import_codes": self.Counter({"85171300": 12}), "export_codes": self.Counter()}
+        self.assertIsNone(niches.broker_shy(phones, ["73110"], "ACME MEDIA LIMITED", self.niches))
+        self.assertEqual(niches.broker_shy(phones, ["46520"], "ACME MOBILE LIMITED", self.niches)["niche"],
+                         "Mobile phone & electronics wholesalers")
+        # a car dealership isn't a used-car exporter; one whose customs records show car exports is
+        self.assertIsNone(niches.broker_shy(None, ["45111"], "ACME MOTORS LIMITED", self.niches))
+        cars = {"import_codes": self.Counter(), "export_codes": self.Counter({"87032310": 8})}
+        self.assertEqual(niches.broker_shy(cars, ["45112"], "ACME MOTORS LIMITED", self.niches)["niche"], "Used-car & vehicle exporters")
+
+    def test_never_weapons_gambling_crypto(self):
+        from sourcer import niches
+        self.assertIsNone(niches.broker_shy(None, ["25400", "46720"], "ACME LIMITED", self.niches))
+        self.assertIsNone(niches.broker_shy(None, ["46720"], "ACME BETTING LIMITED", self.niches))
+        self.assertIsNone(niches.broker_shy(None, ["46520"], "ACME CRYPTO TRADING LIMITED", self.niches))
+        self.assertIsNotNone(niches.broker_shy(None, ["46720"], "ACME METALS LIMITED", self.niches))
 
 
 class TestFindDomains(unittest.TestCase):
