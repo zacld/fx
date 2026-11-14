@@ -1,0 +1,22 @@
+name: Modern slavery registry probe
+
+# Read-only: the shape of the modern slavery statement registry's yearly download (columns, counts, the size, sector
+# and country values) — no people's names printed (the repo is public). Runs when the probe changes.
+on:
+  push:
+    paths:
+      - lead-sourcer/tools/mss_probe.py
+      - .github/workflows/mss-probe.yml
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - working-directory: lead-sourcer
+        run: python tools/mss_probe.py
