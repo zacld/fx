@@ -113,7 +113,13 @@ def download(months: int = 12, cache_dir: str = DEFAULT_CACHE_DIR, kind: str = "
     os.makedirs(cache_dir, exist_ok=True)
     files = list_files(kind=kind)
     if not files:
-        raise RuntimeError(f"no HMRC {kind} files found on uktradeinfo")
+        # uktradeinfo down (502s seen 14 Nov 2026): carry on with the files already downloaded, rather than stop
+        cached = cached_files(cache_dir, kind)
+        if not cached:
+            raise RuntimeError(f"no HMRC {kind} files found on uktradeinfo, and none cached")
+        print(f"WARNING: uktradeinfo unreachable — using the {len(cached)} HMRC {kind} files already downloaded")
+        since, wanted = window((k for _, k in cached), months)
+        return [p for (_, k), p in sorted(cached.items()) if k in wanted], since
     since, wanted = window((k for _, k in files), months)
     this_year = time.strftime("%Y")
     paths = []
@@ -132,6 +138,19 @@ def download(months: int = 12, cache_dir: str = DEFAULT_CACHE_DIR, kind: str = "
         paths.append(path)
     print(f"  HMRC {kind} files: {len(paths)}, keeping {since[:4]}-{since[4:]} onwards")
     return paths, since
+
+
+_CACHED_RE = re.compile(r"^(import|export)s-(stats-)?(M\d{4}|A\d{4}(?:-H[12])?)\.zip$")
+
+
+def cached_files(cache_dir: str, kind: str = "traders") -> dict[tuple[str, str], str]:
+    """{(flow, key): path} of the files download() saved before (imports-M2609.zip, exports-stats-A2025.zip …)."""
+    out = {}
+    for name in os.listdir(cache_dir) if os.path.isdir(cache_dir) else []:
+        m = _CACHED_RE.match(name)
+        if m and bool(m.group(2)) == (kind == "stats"):
+            out[(m.group(1), m.group(3))] = os.path.join(cache_dir, name)
+    return out
 
 
 def _clean(field: str) -> str:

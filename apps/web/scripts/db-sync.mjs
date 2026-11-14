@@ -3,7 +3,7 @@
 // page's own), group and niche; every alert, deal and customs moment; Zac's marks (contacted, notes, verdicts, CRM
 // checks, email drafts). Run after each workflow that writes them (finder upload, Niche hits, Alerts):
 //   CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… node scripts/db-sync.mjs
-// Counts only in the log (public repo); checked live 14 Nov 2026. Without D1 permission on the token it says so and stops, changing nothing.
+// Counts only in the log (public repo). Without D1 permission on the token it says so and stops, changing nothing.
 import { ALERTS_KEY, CHECKS_KEY, CONTACTED_KEY, DEALS_KEY, DETAIL_SHARDS, DETAILS_PREFIX, EMAILS_KEY, FILINGS_KEY, KEY,
   MOMENTS_KEY, NICHES_KEY, NOTES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";

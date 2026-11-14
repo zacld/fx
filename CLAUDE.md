@@ -494,7 +494,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   cached as `hmrc-24m-*`; niches still measured on the latest 12, `codes_since`): first customs records in 24 months
   within the latest 3 months of the files = `new_trader` (20), imports or exports started when it traded the other way
   before = `new_import` / `new_export` (15), 4+ more months active than the year before or twice the kinds of goods =
-  `trade_up` (10); dated two months after the month (the files' lag). Store key `moments`; the lists' companies are
+  `trade_up` (10); dated two months after the month (the files' lag). When uktradeinfo is down (502s, 14 Nov 2026) `hmrc.download` carries on with the files already downloaded (`cached_files`) instead of stopping the run. Store key `moments`; the lists' companies are
   signals and show in the Alerts tab ("Customs"); companies not on them filing full / medium / group accounts with a
   new flow are the finder's discoveries (`MOMENTS_FILE`, 55 new trader / 50 a flow started). (3) **The accounts
   already read** (`accountsMoments` in `format.js`): overseas share up 5+ points on last year (10; last year's share
