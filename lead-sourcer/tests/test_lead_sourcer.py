@@ -3366,6 +3366,25 @@ class TestCatchAllCodes(unittest.TestCase):
         self.assertEqual(nr.sector_niche(["20003"], niches)["id"], "broad")
 
 
+class TestModernSlaveryRegistry(unittest.TestCase):
+    """sourcer/mss.py: £36m+ private companies with a supply chain abroad or a goods sector, from the registry."""
+
+    CSV = ("CompanyNumber,OrganisationName,SectorType,Turnover,OrganisationSectors,ParentName,Risk1Location,Risk2Location,Risk3Location\n"
+           '1234567,ACME FASHION LIMITED,Private,£60 million to £100 million,"Fashion, textiles, apparel and luxury goods",,"China\r\nIndia","United Kingdom",\n'
+           '2345678,BIG BANK LIMITED,Private,£100 million to £500 million,"Financial, insurance and real estate activities",,,,\n'
+           '3456789,ACME FOODS LIMITED,Private,£36 million to £60 million,"Food and beverages, agriculture and fishing",ACME GROUP,,,\n'
+           '4567890,HUGE PLC,Private,Over £500 million,Retail,,China,,\n'
+           '5678901,A COUNCIL,Public,£60 million to £100 million,Public sector,,,,\n')
+
+    def test_candidates(self):
+        from sourcer import mss
+        got = mss.candidates(self.CSV)
+        self.assertEqual(sorted(got), ["01234567", "03456789"])
+        self.assertEqual((got["01234567"]["countries"], got["01234567"]["score"]), (["China", "India"], mss.SCORE_ABROAD))
+        self.assertEqual((got["03456789"]["score"], got["03456789"]["band"]), (mss.SCORE_GOODS, "£36m–£60m"))
+        self.assertIn("Supply chain abroad (China, India)", got["01234567"]["reason"])
+
+
 class TestGroups(unittest.TestCase):
     """sourcer/owners.tee_parents / group_of: each company's top UK parent from the ownership snapshot."""
 

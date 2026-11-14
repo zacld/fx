@@ -96,7 +96,7 @@ jobs:
           path: ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip
           key: ch-bulk-v2-${{ steps.month.outputs.month }}
 
-      # gov.uk gender pay gap and modern slavery registries (finance-contact names), refreshed monthly.
+      # gov.uk modern slavery registry (a discovery source: sourcer/mss.py) and gender pay gap files, refreshed monthly.
       - name: Restore the gov.uk registry files
         id: registries
         uses: actions/cache/restore@v4
@@ -158,6 +158,9 @@ jobs:
           DISCOVERIES_FILE: discoveries.json
           NICHE_STATS_FILE: niche_stats.json
           DEALS_FILE: deals.json
+          # the modern slavery statement registry (£36m+, supply chain abroad / goods sector): checked with the
+          # FX filings scan's finds (sourcer/mss.py; the yearly files cached with the gov.uk registry files)
+          MSS_DISCOVERY: "1"
           # Stops starting new companies after this (the rest wait for the next run, their lookups cached),
           # leaving time for the cache save and the upload inside the job's 240 minutes.
           FINDER_BUDGET_MIN: "180"

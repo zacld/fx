@@ -474,6 +474,14 @@ FILINGS_NICHE = {
 # Share of a run's slots the FX filings scan's strongest finds may take before the customs and niche candidates.
 FILINGS_PRIORITY_SHARE = float(os.environ.get("FILINGS_PRIORITY_SHARE", "0.7"))   # Nov 2026: 0.5 -> 0.7, to work through the filings backlog
 FILINGS_PRIORITY_MIN_SCORE = 50
+# The modern slavery statement registry (sourcer/mss.py): £36m+ private companies whose supply chain runs abroad or
+# whose sector is goods trade, checked with the FX filings scan's finds (MSS_DISCOVERY=1, set in the finder workflow).
+MSS_NICHE = {
+    "id": "_modern_slavery", "name": "Supply chain abroad (modern slavery statement)", "sic_codes": [], "currency_pairs": [],
+    "exposure_reason": "Its modern slavery statement (turnover £36m+) names supply-chain countries abroad or a goods-trade "
+                       "sector.", "call_angle": "",
+}
+MSS_FOUND: dict[str, dict] = {}
 FX_LOSS_PRIORITY = 100_000   # an FX loss this big in the filings list: checked first in the finder, whatever its score
 
 
@@ -503,6 +511,12 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
                              "filed_fx_score": 60 if d.get("kind") in ("pe_buyout", "acquired") else 50})
     except (OSError, ValueError):
         pass
+    if os.environ.get("MSS_DISCOVERY", "0") == "1":   # on in the finder workflow (a network download)
+        from sourcer import mss
+        MSS_FOUND.update(mss.load())
+        rows += [{"company_number": n, "company_name": c["name"], "filed_fx_score": c["score"]} for n, c in MSS_FOUND.items()]
+        print(f"  Modern slavery statements: {len(MSS_FOUND):,} private companies in the band with a supply chain abroad "
+              f"or a goods sector ({sum(1 for c in MSS_FOUND.values() if c['countries']):,} naming countries)")
     if not rows:
         return {}
     # ranked by filed FX proof (less ABROAD_RULES points when the FX is probably run abroad), moved up +25, an FX loss
@@ -960,7 +974,7 @@ def run_pipeline(
         elif trade:
             niche = trader_niche(trade)
         elif company["company_number"] in (priority or {}):
-            niche = FILINGS_NICHE
+            niche = MSS_NICHE if company["company_number"] in MSS_FOUND else FILINGS_NICHE
         elif matching_niches:
             niche = BROAD_SECTOR_NICHE   # only catch-all codes: a candidate, but no niche claimed
         else:

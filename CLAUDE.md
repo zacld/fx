@@ -470,6 +470,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the company page; the **Cognism company list** is one row per group, named as the group (top parent) with the
   group's website when known, else the company's own, plus "Registered Company (lead)" and "Group Companies on the
   List" columns.
+- **Modern slavery statement registry as a source** (14 Nov 2026, discovery review): every organisation with £36m+
+  turnover publishes a statement; the registry's yearly CSV (`registries.MSS_URL`, ~12,000 statements; columns
+  checked with `tools/mss_probe.py`, workflow "Modern slavery registry probe", no names printed) gives company number,
+  turnover band, sectors, parent and the countries of named supply-chain risks (Risk1-3Location). `sourcer/mss.py`
+  keeps private companies in the £36m–£60m / £60m–£100m / £100m–£500m bands whose supply chain runs abroad (60) or
+  whose sector is goods trade (50) — not finance / property, charities, public bodies or education only — and the
+  finder (`MSS_DISCOVERY=1` in its workflow) checks them with the FX filings scan's finds (`priority_from_filings`),
+  niche "Supply chain abroad (modern slavery statement)" when nothing else names one. Size-qualified by law, and it
+  reaches companies whose accounts aren't in the online files.
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
   Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,
