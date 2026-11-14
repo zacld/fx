@@ -37,7 +37,7 @@ on:
       max_enrich:
         description: "How many companies to check (under 200 = a test run: the Accounts page is left as it is)"
         required: false
-        default: "3500"
+        default: "5000"
       own_bank:
         description: "Your bank's name — its existing clients get flagged (blank = repository variable OWN_BANK, else Investec)"
         required: false
@@ -183,7 +183,9 @@ jobs:
           # its 140, nearly all from the cache: only ~30 new companies a night while ~39,000 candidates waited. Now the
           # time budget sets the pace (~9s per new company): a night that runs out uploads what it reached and keeps
           # the rest of the last list (upload --carry); the next night carries on from the cache.
-          DEFAULT_ENRICH: "3500"
+          # 3,500 -> 5,000 the same day: the first such run checked its 3,750 in 104 of 180 minutes (1,433 new) and the
+          # list's long text moved to separate detail items (upload-accounts.mjs), so the list item fits more companies.
+          DEFAULT_ENRICH: "5000"
         run: |
           priority=""; [ -s fx-filings.json ] && priority="--priority-file fx-filings.json"
           python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv --no-contacts $priority

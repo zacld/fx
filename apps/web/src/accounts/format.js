@@ -750,7 +750,7 @@ export function ownCurrency(r) {
 }
 // {code: {"1w", "1m", as_of}} from the market moves document (/api/market).
 export const movesByCurrency = (market) => Object.fromEntries((market?.currencies || []).map((c) => [c.code, { ...c.changes, as_of: market.as_of }]));
-const FORWARDS_DUE = /within\s+(?:one|1|twelve|12)\s+(?:year|months)|(?:less than|under)\s+(?:one|1)\s+year|matur\w*\s+(?:with)?in\s+(?:the\s+)?(?:next\s+)?(?:12|twelve)\s+months|(?:matur|expir|settl)\w*[^.;]{0,40}\bwithin\s+(?:one|a|1)\s+year/i;
+export const FORWARDS_DUE = /within\s+(?:one|1|twelve|12)\s+(?:year|months)|(?:less than|under)\s+(?:one|1)\s+year|matur\w*\s+(?:with)?in\s+(?:the\s+)?(?:next\s+)?(?:12|twelve)\s+months|(?:matur|expir|settl)\w*[^.;]{0,40}\bwithin\s+(?:one|a|1)\s+year/i;
 // The accounts' own changes: overseas share rising, an FX gain turned to a loss, forwards maturing within a year.
 export function accountsMoments(r, rules = LEAD_POINTS) {
   const out = [];
@@ -763,7 +763,7 @@ export function accountsMoments(r, rules = LEAD_POINTS) {
     out.push([rules.fxSwing, `FX swung from a ${money(prior)} gain to a ${money(-fx)} loss`]);
   }
   const fwd = `${r.fx_forwards_evidence || ""} ${r.fx_forwards || ""}`;
-  if (r.fx_forwards && FORWARDS_DUE.test(fwd)) out.push([rules.forwardsMaturing, "Forward contracts maturing within a year — renewal coming"]);
+  if (r.fx_forwards && (r.fx_forwards_due === "yes" || FORWARDS_DUE.test(fwd))) out.push([rules.forwardsMaturing, "Forward contracts maturing within a year — renewal coming"]);
   return out;
 }
 const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
