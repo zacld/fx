@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyEmail, filingsCalls, filingsLosses, filingsMonth, handle, markFirstSeen, recordStatus } from "../api/accounts.mjs";
+import { alertsSummary, applyEmail, filingsCalls, filingsLosses, filingsMonth, handle, markFirstSeen, recordStatus } from "../api/accounts.mjs";
 
 const list = { made_at: "2026-10-21T06:00:00+00:00", count: 1, rows: [{ company_name: "A LTD", rank: 1 }] };
 // An in-memory Blobs store: the list under "latest", Zac's contacted marks under "contacted".
@@ -219,5 +219,18 @@ describe("markFirstSeen", () => {
     const next = { made_at: "2026-10-28", rows: [{ company_number: "01" }, { company_number: "02" }, { company_number: "03" }] };
     expect(markFirstSeen(old, next).rows.map((r) => r.first_seen)).toEqual(["2026-10-01", "2026-10-27", "2026-10-28"]);
     expect(markFirstSeen(null, next).rows.every((r) => r.first_seen === "2026-10-28")).toBe(true);
+  });
+});
+
+describe("Alert banner summary", () => {
+  it("lists the last 7 days' hot alerts, newest first, and counts the last day's", () => {
+    const now = new Date("2026-11-14T12:00:00Z");
+    const items = [{ at: "2026-11-14T09:00:00", hot: true, title: "Changed bank", company_number: "01" },
+      { at: "2026-11-13T09:00:00", hot: false, title: "New director", company_number: "02" },
+      { at: "2026-11-01T09:00:00", hot: true, title: "Old", company_number: "03" },
+      { at: "2026-11-12T09:00:00", hot: true, title: "Funding round likely", company_number: "04", company_name: "ACME" }];
+    const s = alertsSummary(items, now);
+    expect(s.hot.map((a) => a.title)).toEqual(["Changed bank", "Funding round likely"]);
+    expect(s.day).toBe(1);
   });
 });

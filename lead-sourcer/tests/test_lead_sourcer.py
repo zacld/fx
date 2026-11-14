@@ -3264,23 +3264,6 @@ class TestChAlerts(unittest.TestCase):
         mortgage = [dict(charges[0], floating_all=False, classification="Legal mortgage"), charges[1]]
         self.assertIsNone(self.m.bank_switch(mortgage, self.TODAY))             # a property loan isn't the main bank
 
-    def test_hot_alerts_go_by_email_in_one_message(self):
-        hot = [{"title": "Changed bank: Barclays → HSBC", "company_name": "ACME TRADING LIMITED", "company_number": "01234567",
-                "detail": "x", "url": "u"}, {"title": "Funding round likely", "company_number": "07654321", "url": "v"}]
-        mails, pings = [], []
-        with mock.patch.dict(os.environ, {"SMTP_USER": "me@example.com", "SMTP_PASSWORD": "app-password"}):
-            out = self.m.send_hot(hot, "New hot alerts", send_email=lambda subj, body: mails.append((subj, body)) or True,
-                                  send_telegram=lambda text: pings.append(text) or True)
-        self.assertEqual((out, len(mails), pings), ("email (2 alerts)", 1, []))
-        self.assertIn("2 hot — Changed bank: Barclays → HSBC: ACME TRADING LIMITED", mails[0][0])
-        self.assertIn("Funding round likely: 07654321", mails[0][1])
-        with mock.patch.dict(os.environ, {"SMTP_USER": "", "SMTP_PASSWORD": ""}):   # no email set up: Telegram, one each
-            out = self.m.send_hot(hot, "x", send_email=lambda *a: self.fail("no email"), send_telegram=lambda t: pings.append(t) or True)
-        self.assertEqual((out, len(pings)), ("Telegram 2", 2))
-        self.assertEqual(self.m.send_hot([], "x"), "nothing")
-        with mock.patch.dict(os.environ, {"SMTP_USER": "", "SMTP_PASSWORD": ""}):
-            self.assertFalse(self.m.email("s", "b"))
-
     def test_gazette_petitions(self):
         atom = """<feed xmlns="http://www.w3.org/2005/Atom">
 <entry><title>ACME TRADING LIMITED</title><published>2026-11-06T00:00:00Z</published><link href="https://g/1"/>
@@ -3485,7 +3468,8 @@ class TestAbsurdLeads(unittest.TestCase):
         niches = [{"id": "broad", "name": "Broad", "sic_codes": [str(46000 + i) for i in range(12)]},
                   {"id": "wine", "name": "Wine", "sic_codes": ["46003", "46342"]},
                   {"id": "goods-flowers", "name": "Flowers", "hmrc_codes": ["0603"]}]
-        registry = {"1": {"status": "Active", "type": "Private Limited Company", "sic_codes": ["46003"]},
+        registry = {"1": {"status": "Active", "type": "Private Limited Company", "sic_codes": ["46003"],
+                          "address": "Unit 4, Dock Road, Bristol", "postcode": "BS1 1AA"},
                     "2": {"status": "Active", "type": "Private Limited Company", "sic_codes": ["46003"]},
                     "3": {"status": "Active", "type": "Private Limited Company", "sic_codes": ["64191"]}}
         trades = {"2": {"import_codes": Counter({"06031100": 9}), "export_codes": Counter(), "import_months": {"202601"}, "export_months": set()}}
@@ -3493,6 +3477,7 @@ class TestAbsurdLeads(unittest.TestCase):
         self.assertEqual((out["1"]["niche"], out["2"]["niche"], out["2"]["niche_kind"]), ("Wine", "Flowers", "goods"))
         self.assertTrue(out["3"]["absurd"] and out["4"]["absurd"])
         self.assertEqual(out["1"]["absurd"], "")
+        self.assertEqual((out["1"]["address"], out["1"]["postcode"], out["4"]["address"]), ("Unit 4, Dock Road, Bristol", "BS1 1AA", ""))
 
 
 class TestCatchAllCodes(unittest.TestCase):

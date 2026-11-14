@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -553,5 +553,36 @@ describe("Moments in the lead score", () => {
     expect(reasonsNotToProgress(r, { today }).find((x) => x.serious).text).toMatch(/^Winding-up petition \(Gazette\) \(2026-11-06\) — hold off/);
     setKnownSignals({});
     expect(reasonsNotToProgress(r, { today }).some((x) => /hold off/.test(x.text))).toBe(false);
+  });
+});
+
+describe("Outreach plan", () => {
+  const row = (n, score, extra = {}) => ({ company_number: n, company_name: `CO ${n} LIMITED`, lead_score: score, filed_fx_score: 60,
+    turnover_gbp: "40000000", ...extra });
+  it("puts the top leads in the letter, then the rest to a cold call (something timely) or the email sequence", () => {
+    const rows = [row("A", 90), row("B", 80, { lead_flags: { moment: "Changed bank: Barclays → HSBC" } }), row("C", 70),
+      row("D", 60, { triggers: "new charge to HSBC (2026-10)" }), row("E", 95, { qualified: "Out" }), row("F", 85),
+      row("G", 50, { turnover_gbp: "5000000" })];
+    const plan = outreachPlan(rows, { contacted: { F: { contacted: true } }, letters: 2 });
+    expect(plan.letter.map((r) => r.company_number)).toEqual(["A", "B"]);
+    expect(plan.call.map((r) => [r.company_number, r.why_now])).toEqual([["D", "new charge to HSBC (2026-10)"]]);
+    expect(plan.email.map((r) => r.company_number)).toEqual(["C"]);
+    expect(plan.held.map((r) => r.company_number)).toEqual(["G"]);          // below £20m: a serious reason not to progress
+    const why = (r) => Object.fromEntries(r.outreach_why.map((w) => [w.label, w.text]));
+    expect(why(plan.letter[0])["Why the letter"]).toBe("In the top 2: #1 of 4 by lead score (90), one per group, nothing serious against it.");
+    expect(why(plan.call[0])["Why a cold call"]).toMatch(/^Something timely to raise: new charge to HSBC \(2026-10\)\. #4 of 4/);
+    expect(why(plan.email[0])["Why the email sequence"]).toMatch(/^A good fit \(#3 of 4 by lead score \(70\), outside the letter's top 2\) but nothing timely/);
+    expect(why(plan.letter[1])["Timely too"]).toBe("Changed bank: Barclays → HSBC");
+  });
+  it("keeps one per group and leaves out a group already contacted", () => {
+    setKnownGroups({ A: { top: "P1", hops: 1 }, B: { top: "P1", hops: 1 }, C: { top: "P2", hops: 1 }, D: { top: "P2", hops: 1 } });
+    const plan = outreachPlan([row("A", 90), row("B", 80), row("C", 70), row("D", 60)], { contacted: { D: { contacted: true } }, letters: 5 });
+    expect(plan.letter.map((r) => [r.company_number, (r.group_members || []).map((m) => m.company_number)])).toEqual([["A", ["B"]]]);
+    setKnownGroups({});
+  });
+  it("addresses the letter to the named finance contact, else the role", () => {
+    expect(letterAddressee({})).toBe("The Finance Director");
+    expect(letterAddressee({ no_fd_likely: "yes" })).toBe("The Managing Director");
+    expect(timelyReason({ lead_flags: { newFd: true } })).toBe("New finance director");
   });
 });

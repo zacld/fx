@@ -27,10 +27,9 @@ Alerts:
   insolvency      an insolvency / liquidation / administration filing or case: hold off (a reason not to progress)
   petition        a winding-up petition in the Gazette (--signals): hold off
 
-Read-only on Companies House; free. Public repo: the log holds counts only. Email (Zac, 14 Nov 2026: "I'd rather it
-send me an email"; SMTP_USER + SMTP_PASSWORD secrets — a Gmail address and an app password — ALERT_EMAIL_TO optional,
-else SMTP_USER) gets one email a run listing the new hot alerts, and the 7am digest; Telegram (TELEGRAM_BOT_TOKEN +
-TELEGRAM_CHAT_ID) only when no email is set up. Nothing is sent otherwise, and never to anyone but Zac.
+Read-only on Companies House; free. Public repo: the log holds counts only. The alerts live on the dashboard (the
+Accounts page's Alerts tab and its hot-alerts banner — Zac, 14 Nov 2026: "just have the alert on the dash"); Telegram
+(TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID secrets) gets them too only if those are ever set. Nothing goes to anyone else.
 """
 
 from __future__ import annotations
@@ -629,46 +628,14 @@ def telegram(text: str) -> bool:
         return False
 
 
-def email(subject: str, text: str) -> bool:
-    """One plain-text email to Zac (ALERT_EMAIL_TO, else SMTP_USER) through SMTP over SSL (SMTP_HOST, default Gmail);
-    False when not set up or it fails. The body never reaches the log (public repo)."""
-    import smtplib
-    import ssl
-    from email.message import EmailMessage
-    user, password = os.environ.get("SMTP_USER", "").strip(), os.environ.get("SMTP_PASSWORD", "").strip()
-    if not user or not password:
-        return False
-    msg = EmailMessage()
-    msg["Subject"], msg["From"], msg["To"] = subject, user, os.environ.get("ALERT_EMAIL_TO", "").strip() or user
-    msg.set_content(text)
-    try:
-        with smtplib.SMTP_SSL(os.environ.get("SMTP_HOST", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", "465") or 465),
-                              context=ssl.create_default_context(), timeout=30) as smtp:
-            smtp.login(user, password)
-            smtp.send_message(msg)
-        return True
-    except (OSError, smtplib.SMTPException):
-        return False
-
-
-def email_set_up() -> bool:
-    return bool(os.environ.get("SMTP_USER", "").strip() and os.environ.get("SMTP_PASSWORD", "").strip())
-
-
-def send_hot(alerts: list[dict], heading: str, limit: int = 20, send_email=email, send_telegram=None) -> str:
-    """The new hot alerts: one email listing them all when email is set up, else one Telegram message each.
-    Returns what was sent, for the log ("email (3 alerts)", "Telegram 2", "nothing")."""
+def send_hot(alerts: list[dict], heading: str, limit: int = 20, send_telegram=None) -> str:
+    """The new hot alerts to Telegram, one message each, when its secrets are set (dormant otherwise: Zac, 14 Nov 2026 —
+    "just have the alert on the dash"; the Accounts page shows them). Returns what was sent, for the log."""
     if not alerts:
         return "nothing"
-    if email_set_up():
-        when = datetime.now(timezone.utc).strftime("%d %b %H:%M UTC")
-        body = "\n\n".join(alert_line(a) for a in alerts[:limit])
-        body += "\n\nAll alerts: the Alerts tab on the Accounts page"
-        subject = f"FX alerts: {len(alerts)} hot — {alerts[0].get('title', '')}: {alerts[0].get('company_name') or alerts[0]['company_number']}"
-        return f"email ({len(alerts)} alerts)" if send_email(subject[:150], f"{heading} — {when}\n\n{body}") else "email failed"
     send_telegram = send_telegram or telegram
     sent = sum(1 for a in alerts[:limit] if send_telegram(alert_line(a)))
-    return f"Telegram {sent}" if sent else "nothing (no email or Telegram set up)"
+    return f"Telegram {sent}" if sent else "nothing (the dashboard shows them)"
 
 
 def alert_line(a: dict) -> str:
@@ -788,8 +755,8 @@ def main() -> None:
     parser.add_argument("--discoveries", default="discoveries.json")
     parser.add_argument("--seconds", type=float, default=240, help="per stream")
     parser.add_argument("--telegram", action="store_true",
-                        help="send the new hot alerts (one email a run; Telegram when no email is set up)")
-    parser.add_argument("--digest", action="store_true", help="send the last 24 hours' summary (email, else Telegram) and stop")
+                        help="send the new hot alerts to Telegram when its secrets are set")
+    parser.add_argument("--digest", action="store_true", help="send the last 24 hours' summary to Telegram (if set) and stop")
     parser.add_argument("--signals", action="store_true",
                         help="news headlines (new FD, expansion abroad) and job adverts instead of the streams")
     args = parser.parse_args()
@@ -799,12 +766,7 @@ def main() -> None:
     now = datetime.now(timezone.utc)
     if args.digest:
         text = digest(alerts, now)
-        if not text:
-            how = "nothing new"
-        elif email_set_up():
-            how = "emailed" if email(text.split("\n")[0], text) else "email failed"
-        else:
-            how = "sent to Telegram" if telegram(text) else "not sent (no email or Telegram set up)"
+        how = "nothing new" if not text else "sent to Telegram" if telegram(text) else "on the dashboard only"
         print(f"digest: {len([a for a in alerts if (a.get('at') or '') >= (now - timedelta(hours=24)).isoformat()[:19]])} "
               f"alerts in the last 24 hours; {how}")
         return

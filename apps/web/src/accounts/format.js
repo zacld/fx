@@ -881,3 +881,60 @@ export const withLeadScores = (rows, ctx) => rows.map((r) => {
   const s = leadScore(r, ctx);
   return { ...r, lead_score: s.score, lead_parts: s.parts, lead_flags: s.flags, lead_reasons: s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ") };
 });
+
+// --- The outreach plan (Zac, 14 Nov 2026: "the best leads ranked top 40, which we send our outreach letter to … then
+// rank the rest by either email sequence or cold call") ----------------------------------------------------------------
+// Every lead not contacted, not qualified out and with no serious reason not to progress, one per group (a group with
+// any company contacted is left out: one approach per group), by lead score: the top `letters` get the Investec letter;
+// the rest go to a cold call when there's something timely to say (a moment, a recently filed FX loss, a new FD, a deal,
+// a trigger) or to the email sequence when there isn't (a good fit with no news: the sequence warms them up).
+export const OUTREACH = { letters: 40 };
+export function timelyReason(r) {
+  const f = r.lead_flags || {};
+  const loss = -Number(r.fx_gain_loss_gbp) || 0;
+  return f.moment || (f.recentLoss && `FX loss of ${money(loss)} in accounts filed ${filedWhen(filedIso(r))}`)
+    || (f.newFd && "New finance director") || (f.buying && `Buying companies${r.acquisitions ? `: ${r.acquisitions}` : ""}`)
+    || (f.pe && "Private-equity deal") || (f.funded && "Just raised funding") || parts(r.triggers)[0] || "";
+}
+export const letterAddressee = (r) => (presentedContact(r)
+  ? `${r.finance_contact}${r.finance_contact_role ? `, ${r.finance_contact_role}` : ""}`
+  : r.no_fd_likely ? "The Managing Director" : "The Finance Director");
+export function outreachPlan(rows = [], { contacted = {}, letters = OUTREACH.letters, today = new Date() } = {}) {
+  const touched = new Set(rows.filter((r) => contacted[r.company_number]).map(groupKey));
+  const live = rows.filter((r) => !r.dropped && !contacted[r.company_number] && !isOut(r) && !touched.has(groupKey(r)));
+  const ready = [];
+  const held = [];
+  for (const r of live) (reasonsNotToProgress(r, { today }).some((x) => x.serious) ? held : ready).push(r);
+  const ranked = collapseGroups([...ready].sort((a, b) => (b.lead_score || 0) - (a.lead_score || 0)
+    || String(a.company_name).localeCompare(String(b.company_name))));
+  const all = ranked.map((r, i) => ({ ...r, why_now: timelyReason(r), outreach_rank: i + 1 }));
+  const list = (r) => (r.outreach_rank <= letters ? "letter" : r.why_now ? "call" : "email");
+  const out = { letter: [], call: [], email: [], held };
+  for (const r of all) {
+    const k = list(r);
+    out[k].push({ ...r, outreach_list: k, outreach_why: outreachWhy(r, k, { letters, total: all.length }) });
+  }
+  return out;
+}
+
+// Why a lead sits in its outreach list, in words: its place in the ranking, the lead score's biggest reasons, and the
+// timely reason (or its absence) that decided cold call v email sequence. [{label, text}] for the card and the export.
+export function outreachWhy(r, list, { letters = OUTREACH.letters, total = 0 } = {}) {
+  const reasons = (r.lead_parts || []).filter(([, p]) => p > 0).slice(0, 4).map(([w, p]) => `${w} (+${p})`);
+  const minus = (r.lead_parts || []).filter(([, p]) => p < 0).map(([w, p]) => `${w} (${p})`);
+  const place = `#${r.outreach_rank}${total ? ` of ${total}` : ""} by lead score (${r.lead_score || 0})`;
+  const out = [];
+  if (list === "letter") {
+    out.push({ label: "Why the letter", text: `In the top ${letters}: ${place}, one per group, nothing serious against it.` });
+  } else if (list === "call") {
+    out.push({ label: "Why a cold call", text: `Something timely to raise: ${r.why_now}. ${place} — outside the letter's top ${letters}, so a call while it's fresh.` });
+  } else {
+    out.push({ label: "Why the email sequence", text: `A good fit (${place}, outside the letter's top ${letters}) but nothing timely to call about yet — no recent FX loss filing, new finance director, deal, trigger or moment. The sequence keeps them warm; a trigger moves them to a cold call.` });
+  }
+  if (reasons.length) out.push({ label: "What scores it", text: reasons.join(" · ") });
+  if (minus.length) out.push({ label: "Against it", text: minus.join(" · ") });
+  if (list === "letter" && r.why_now) out.push({ label: "Timely too", text: r.why_now });
+  if (r.group_members?.length) out.push({ label: "Group", text: `Stands for ${r.group_members.length} other group compan${r.group_members.length === 1 ? "y" : "ies"} on the list: ${r.group_members.map((m) => m.company_name).join("; ")}` });
+  return out;
+}
+export const outreachWhyLine = (r) => (r.outreach_why || []).map((w) => `${w.label}: ${w.text}`).join(" | ");

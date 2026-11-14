@@ -5,7 +5,7 @@
 // A mark: {at, touches: [{at, channel}], response, response_at, follow_up_at} — `at` is the first contact. Marks
 // saved before touches existed ({at} only) count as one touch.
 
-export const CHANNELS = { phone: "Phone", email: "Email", linkedin: "LinkedIn", in_person: "In person" };
+export const CHANNELS = { letter: "Letter", phone: "Phone", email: "Email", linkedin: "LinkedIn", in_person: "In person" };
 export const RESPONSES = { replied: "Replied", booked: "Meeting booked", not_interested: "Not interested" };
 export const FOLLOW_UP_DAYS = [2, 4, 7];   // after the 1st, 2nd and 3rd touch
 export const NURTURE_DAYS = 90;            // after that with no reply: look again in about three months
@@ -70,7 +70,7 @@ export const STATES = {
 };
 
 const NEXT_ACTION = {
-  phone: "Email follow-up", email: "Call the office", linkedin: "LinkedIn follow-up", in_person: "Email follow-up", "": "Call the office",
+  letter: "Call the office", phone: "Email follow-up", email: "Call the office", linkedin: "LinkedIn follow-up", in_person: "Email follow-up", "": "Call the office",
 };
 
 /**
