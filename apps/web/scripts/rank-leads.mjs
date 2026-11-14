@@ -4,8 +4,8 @@
 // Reads the Accounts list, the Recent FX filings list, the measured niches and the alerts from the site's private store.
 // Prints counts, company names, scores and niche learnings — no people's names (the repo is public).
 import { readFile, writeFile } from "node:fs/promises";
-import { ALERTS_KEY, DEALS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
-import { filedMonth, nicheLearnings, rankLeads } from "../src/accounts/ranking.js";
+import { ALERTS_KEY, DEALS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+import { filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
 // orderPath: company numbers, best lead first (find_domains.py); groupsPath: each company's top UK parent (psc_deals.py)
@@ -21,8 +21,10 @@ const listRows = list?.rows || [];
 
 const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) });
 const learn = nicheLearnings(scored);
+const verdicts = (await store.get(VERDICTS_KEY, "json")) || {};
+const reviewed = verdictLearnings(scored, verdicts, { shyOf: shy_of });
 const made_at = new Date().toISOString();
-await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, niches: learn });
+await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, niches: learn, verdicts: reviewed });
 
 const live = scored.filter((s) => !s.absurd);
 if (orderPath) await writeFile(orderPath, JSON.stringify(live.map((s) => s.company_number)));
@@ -52,6 +54,10 @@ for (const s of live) if (shy_of[s.company_number]) (shyBy[shy_of[s.company_numb
 console.log(`\nHard to broker: ${Object.values(shyBy).flat().length} leads`);
 for (const [niche, list] of Object.entries(shyBy).sort((a, b) => b[1].length - a[1].length)) {
   console.log(`  ${String(list.length).padStart(4)}  ${niche}: ${list.slice(0, 4).map((s) => `${s.company_name} (${s.score})`).join("; ")}`);
+}
+console.log(`\nYour verdicts: ${reviewed.reviewed} leads reviewed` + (reviewed.reviewed ? ` — not a fit because: ${Object.entries(reviewed.reasons).map(([k, n]) => `${k} ${n}`).join(", ") || "none"}` : ""));
+for (const kind of ["source", "band", "niche", "sector"]) {
+  for (const g of reviewed[kind].slice(0, kind === "niche" ? 15 : 10)) console.log(`  ${kind.padEnd(6)} ${String(g.good_share).padStart(3)}% good (${g.good}/${g.reviewed})  ${g.key}`);
 }
 const reasons = {};
 for (const [number, why] of Object.entries(ruled_out)) {

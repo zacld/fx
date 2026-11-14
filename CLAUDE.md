@@ -470,6 +470,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the company page; the **Cognism company list** is one row per group, named as the group (top parent) with the
   group's website when known, else the company's own, plus "Registered Company (lead)" and "Group Companies on the
   List" columns.
+- **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
+  real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
+  Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,
+  the Hit list and Hard to broker (`VerdictButtons`); store key `verdicts` (POST `{company_number, verdict, reason}`,
+  `null` clears). Not a fit qualifies the lead Out everywhere. The daily ranking (`ranking.js` `verdictLearnings`,
+  `leads/ranked.verdicts`) splits them by source (finder / FX filings scan), lead-score band, niche and hard-to-broker
+  sector, printed in the run and shown at the top of the Niches tab — the evidence for re-weighting `LEAD_POINTS` and
+  the niches.
 - **Hard to broker** (Zac, 13 Nov 2026: "a separate section where we go after sectors brokers can't — mining,
   recyclables etc — no firearms, no gambling"): niches carrying `broker_shy` (the reason payment firms — non-bank FX
   brokers — often decline or restrict them) in `fx_niches.json`: scrap metal, bullion, jewellery, watches, art &
