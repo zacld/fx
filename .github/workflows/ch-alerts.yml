@@ -110,4 +110,4 @@ jobs:
         run: |
           state=failed; [ "${{ steps.save.outcome }}" = success ] && state=ok
           [ -f lead-sourcer/alerts_partial.txt ] && state=partial
-          cd apps/web && node scripts/status.mjs alerts $state "$( [ -f ../../lead-sourcer/alerts_partial.txt ] && echo 'no stream key' )"
+          cd apps/web && node scripts/status.mjs alerts $state "$(cat ../../lead-sourcer/alerts_partial.txt 2>/dev/null)"

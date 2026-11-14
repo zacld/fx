@@ -812,13 +812,15 @@ def main() -> None:
     if args.signals:
         run_signals(args, store, alerts, now)
         return
-    key = os.environ.get("CH_STREAM_KEY", "").strip()
+    # A streaming key (CH_STREAM_KEY) if there is one, else the REST key: the streams' docs ask only for "an API key"
+    stream_key = os.environ.get("CH_STREAM_KEY", "").strip()
+    key = stream_key or os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
     if not key:
-        print("No CH_STREAM_KEY secret: Companies House's streaming feeds need their own key (developer hub → "
-              "your application → create a 'Streaming API' key). Nothing read.")
+        print("No Companies House key (CH_STREAM_KEY or COMPANIES_HOUSE_API_KEY). Nothing read.")
         with open("alerts_partial.txt", "w") as f:
             f.write("no stream key")
         return
+    print(f"Streams read with the {'streaming key (CH_STREAM_KEY)' if stream_key else 'REST key (COMPANIES_HOUSE_API_KEY)'}")
     tracked = _load(args.tracked, {}) or {}
     state = _load(args.state, {}) or {}
     today = now.date()
@@ -829,6 +831,11 @@ def main() -> None:
         state[name] = last
         stats[f"{name} events"] = len(events)
         print(f"  {name}: {len(events):,} events ({why})")
+        if why == "HTTP 401":
+            print("    401: this key isn't allowed on the streams — the developer hub's application needs a key made "
+                  "for the Streaming API (CH_STREAM_KEY)")
+            with open("alerts_partial.txt", "w") as f:
+                f.write("stream key rejected")
         for ev in events:
             a = classify(ev, tracked, today)
             if a:
