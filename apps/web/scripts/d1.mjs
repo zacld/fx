@@ -29,13 +29,20 @@ export async function openD1({ schema = true } = {}) {
                 "(Cloudflare dashboard → My Profile → API Tokens → edit the token); until then the site runs from the store.");
     return null;
   }
+  // D1 reports the rows each statement read and wrote (what the free plan's daily limits count): kept in `used`.
+  const used = { read: 0, written: 0 };
   const query = async (sql, params = []) => {
     const result = await cfJson(`/d1/database/${id}/query`, {
       method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sql, params }),
     });
+    for (const r of result || []) {
+      used.read += Number(r.meta?.rows_read || 0);
+      used.written += Number(r.meta?.rows_written || 0);
+    }
     return (result || []).flatMap((r) => r.results || []);
   };
-  if (schema) await applySchema(query);
-  opened = { query, id, where: `D1 ${DB_NAME}` };
+  let remade = false;
+  if (schema) remade = await applySchema(query);
+  opened = { query, id, used, remade, where: `D1 ${DB_NAME}` };
   return opened;
 }

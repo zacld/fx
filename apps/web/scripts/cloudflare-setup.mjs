@@ -61,8 +61,9 @@ if (process.env.ACCOUNTS_PASSWORD) {
 }
 
 // The Accounts database (D1, api/db.mjs): created and its tables made the first time; bound as FX_DB when the token
-// may use D1 (Account → D1: Edit) — without it the site deploys as before, on the store alone.
-const d1 = await openD1().catch((e) => { console.log(`Database not set up: ${e.message}`); return null; });
+// may use D1 (Account → D1: Edit) — without it the site deploys as before, on the store alone. The tables are made by
+// the syncs (scripts/db-sync.mjs), not here: a deploy never writes to the database, so its daily limit never costs the binding.
+const d1 = await openD1({ schema: false }).catch((e) => { console.log(`Database not set up: ${e.message}`); return null; });
 
 await writeFile(resolve(import.meta.dirname, "../wrangler.toml"), [
   "# Written by scripts/cloudflare-setup.mjs before each deploy (not committed).",
