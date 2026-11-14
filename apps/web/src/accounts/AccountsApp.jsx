@@ -476,7 +476,7 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+      {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} />
@@ -1251,14 +1251,37 @@ const OUTREACH_LISTS = [
   ["call", "Cold call", "Something happened you can talk about now — a moment, a recently filed FX loss, a new FD, a deal or a trigger."],
   ["email", "Email sequence", "A good fit with no news yet: the sequence warms them up until something happens."],
 ];
-function Outreach({ rows, contacted, onOpen, onContact, onEmail }) {
+function Outreach({ rows, contacted, password, onOpen, onContact, onEmail }) {
   const [list, setList] = useState("letter");
-  const plan = useMemo(() => outreachPlan(rows, { contacted }), [rows, contacted]);
-  const shown = plan[list] || [];
+  // From the database when the site has one (ranked there, a page at a time — api/db.mjs outreachPage); else the
+  // same plan worked out here from the loaded list (format.js outreachPlan).
+  const local = useMemo(() => outreachPlan(rows, { contacted }), [rows, contacted]);
+  const [server, setServer] = useState(null);
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}?view=outreach&list=${list}&limit=200`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live) setServer(body?.rows ? body : null); })
+      .catch(() => { if (live) setServer(null); });
+    return () => { live = false; };
+  }, [list, contacted, password]);
+  const fromDb = Boolean(server && server.list === list);
+  const plan = fromDb ? { ...Object.fromEntries(["letter", "call", "email"].map((k) => [k, { length: server.counts[k] }])),
+                          held: { length: server.counts.held }, [list]: server.rows } : local;
+  const shown = (fromDb ? server.rows : plan[list]) || [];
+  const fullList = async () => {
+    if (!fromDb) return shown;
+    const all = [];
+    for (let offset = 0; ; offset += 500) {
+      const res = await fetch(`${API}?view=outreach&list=${list}&limit=500&offset=${offset}`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" });
+      const body = res.ok ? await res.json() : null;
+      all.push(...(body?.rows || []));
+      if (!body?.rows || body.rows.length < 500) return all;
+    }
+  };
   const stamp = new Date().toISOString().slice(0, 10);
   const top = (r) => (r.lead_parts || []).slice(0, 3).map(([w]) => w).join(" · ");
-  const exportList = () => {
-    const out = shown.map((r, i) => ({
+  const exportList = async () => {
+    const out = (await fullList()).map((r, i) => ({
       rank: i + 1, company_name: r.company_name, addressee: letterAddressee(r), address: r.registered_address || "",
       postcode: r.postcode || "", company_number: r.company_number, website: siteOf(r), lead_score: r.lead_score,
       why_now: r.why_now || "", why: top(r), justification: outreachWhyLine(r), group_companies: (r.group_members || []).map((m) => m.company_name).join("; "),
@@ -1276,17 +1299,18 @@ function Outreach({ rows, contacted, onOpen, onContact, onEmail }) {
         <div className="groups" role="group" aria-label="Outreach list">
           {OUTREACH_LISTS.map(([k, label, hint]) => (
             <button key={k} aria-pressed={list === k} className={`grp${list === k ? " on" : ""}`} title={hint} onClick={() => setList(k)}>
-              {k === "letter" ? `${label} ${OUTREACH.letters}` : label} <span className="tab-n">{plan[k].length}</span>
+              {k === "letter" ? `${label} ${OUTREACH.letters}` : label} <span className="tab-n">{plan[k]?.length ?? 0}</span>
             </button>
           ))}
         </div>
-        <button className="btn-sm export" onClick={exportList} disabled={!shown.length}>Export Excel ({shown.length})</button>
+        <button className="btn-sm export" onClick={exportList} disabled={!shown.length}>Export Excel ({plan[list]?.length ?? shown.length})</button>
         {list !== "letter" && <button className="btn-sm" onClick={() => downloadCognismCompanies(shown, `outreach-${list}`)} disabled={!cognismCompanyRows(shown).length}>
           Cognism company list ({cognismCompanyRows(shown).length})</button>}
       </div>
       <p className="filings-note">{OUTREACH_LISTS.find(([k]) => k === list)[2]} Highest lead score first. Mark one Contacted
         {list === "letter" ? " → Letter once it's posted" : ""} and the next moves up. {plan.held.length} more leads are held back by a serious
-        reason not to progress (outside £20m–£300m, no FX in the filings, a hold-off); contacted groups are left out.</p>
+        reason not to progress (outside £20m–£300m, no FX in the filings, a hold-off); contacted groups are left out.
+        {fromDb && <span className="muted"> Ranked in the database{server.synced_at ? ` (copied ${filedWhen(server.synced_at.slice(0, 10))})` : ""}.</span>}</p>
       {shown.slice(0, 200).map((r, i) => (
         <article className="card loss-card" key={r.company_number}>
           <div className="card-top">

@@ -1,9 +1,9 @@
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-import { applySchema, batches, companyRecord, hashOf, markRecord, signalRecord, syncTable } from "../api/db.mjs";
+import { applySchema, batches, companyRecord, hashOf, markRecord, outreachPage, setMark, signalRecord, syncTable } from "../api/db.mjs";
 import { buildRecords } from "../scripts/db-sync.mjs";
 import { handle } from "../api/accounts.mjs";
-import { setKnownGroups } from "./accounts/format.js";
+import { outreachPlan, setKnownGroups, withLeadScores } from "./accounts/format.js";
 
 const { DatabaseSync } = createRequire(import.meta.url)("node:sqlite");
 // D1's `query(sql, params) -> rows` on Node's own SQLite (the same engine D1 runs)
@@ -79,5 +79,39 @@ describe("Database (D1) mirror", () => {
       { password: "pw", store: () => ({ get: async () => null }), db, delay: 0 }).then((r) => r.json());
     expect(await ask(query)).toEqual({ bound: true, synced: { at: "2026-11-14T20:00:00Z" }, counts: { companies: 1, signals: 0, marks: 0 } });
     expect(await ask(null)).toEqual({ bound: false });
+  });
+  it("ranks the Outreach lists in the database exactly as the page does", async () => {
+    const { query } = memoryDb();
+    await applySchema(query);
+    const today = new Date("2026-11-14");
+    const rows = Array.from({ length: 60 }, (_, i) => ({ company_number: String(10000000 + i), company_name: `CO ${String(i).padStart(2, "0")} LIMITED`,
+      filed_fx_score: 30 + (i * 7) % 50, turnover_gbp: String(25e6 + i * 1e6), fx_gain_loss_gbp: i % 3 ? String(-60000 - i * 1000) : "",
+      accounts_filed_on: i % 2 ? "2026-10-01" : "2025-06-01", triggers: i % 5 === 0 ? `new charge to HSBC (2026-10)` : "" }));
+    rows.push({ company_number: "20000001", company_name: "SMALL LIMITED", filed_fx_score: 60, turnover_gbp: "5000000" });   // held: under £20m
+    const groups = { 10000001: { top: "P1", hops: 1 }, 10000002: { top: "P1", hops: 1 }, 10000004: { top: "P2", hops: 1 }, 10000005: { top: "P2", hops: 1 } };
+    const contacted = { 10000005: { at: "2026-11-10", touches: 1 } };
+    const verdict = { 10000007: { verdict: "not_fit", reason: "Too small" } };
+    const recs = buildRecords({ list: { rows }, ranked: { group_of: groups }, marks: { contacted, verdict }, today });
+    await syncTable(query, "companies", recs.companies);
+    await syncTable(query, "marks", recs.marks);
+    // the page's own plan on the same rows
+    setKnownGroups(groups);
+    const scored = withLeadScores(rows.map((r) => (verdict[r.company_number] ? { ...r, qualified: "Out" } : r)), { today });
+    const plan = outreachPlan(scored, { contacted, letters: 10, today });
+    for (const list of ["letter", "call", "email"]) {
+      const page = await outreachPage(query, { list, limit: 500, letters: 10 });
+      expect(page.rows.map((r) => r.company_number)).toEqual(plan[list].map((r) => r.company_number));
+      expect(page.counts[list]).toBe(plan[list].length);
+      expect(page.rows.map((r) => r.why_now)).toEqual(plan[list].map((r) => r.why_now));
+    }
+    const letter = await outreachPage(query, { list: "letter", limit: 3, offset: 2, letters: 10 });
+    expect(letter.rows.map((r) => r.outreach_rank)).toEqual([3, 4, 5]);                     // a page at a time
+    // a Contacted saved on the page drops the company (and its group) at once
+    const first = (await outreachPage(query, { list: "letter", limit: 1, letters: 10 })).rows[0].company_number;
+    await setMark(query, first, "contacted", { at: "2026-11-14", touches: 1 });
+    expect((await outreachPage(query, { list: "letter", limit: 1, letters: 10 })).rows[0].company_number).not.toBe(first);
+    await setMark(query, first, "contacted", null);
+    expect((await outreachPage(query, { list: "letter", limit: 1, letters: 10 })).rows[0].company_number).toBe(first);
+    setKnownGroups({});
   });
 });

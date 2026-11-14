@@ -535,8 +535,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `groupKey`, niche corrections, ruled-out reasons) and writes only rows whose hash changed (`syncTable`: batched
   `INSERT … SELECT FROM json_each(?)`, one parameter a batch; deletes what's gone), then checks the database's counts
   against the store's ("match" / "MISMATCH" fails the step). GET `?view=db` says whether the site sees it, when it
-  was last copied and how many rows. Tested on Node's own SQLite (`src/db.test.js`). **Stage 2**: the Accounts page
-  served from the database a page at a time, ranked and filtered in SQL (store fallback). **Stage 3**: the writers
+  was last copied and how many rows. Tested on Node's own SQLite (`src/db.test.js`). **Stage 2 (started)**: the sync
+  also stores each company's outreach inputs (`COLUMNS`, added by `applySchema` when missing: `held` — a serious reason
+  not to progress — `timely`, `hit`, `shy`, `lead` — the score's parts); GET `?view=outreach&list=letter|call|email&offset
+  &limit` ranks the **Outreach tab** in SQL (`outreachPage`: one per group by window function, contacted groups and Not
+  a fit left out, the top 40 the letter, then cold call / email by the timely reason — the same lists as `outreachPlan`,
+  tested side by side) and the tab uses it when the site has the database ("Ranked in the database (copied …)"), else
+  works it out in the browser as before; exports page through the whole list. Every save on the page (contacted,
+  notes, verdict, CRM tick, email) is also written to the database at once (`setMark`), never failing the save. Next:
+  the other tabs and the main list served the same way. **Stage 3**: the writers
   go straight to the database and the store's list, detail shards and month items retire.
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,

@@ -15,6 +15,8 @@
 // put there by the finder workflow — never in the repo or the public build.
 // Platform-free: functions/api/accounts.js passes the password and the store.
 import { applyContact, invalidChange } from "../src/accounts/followups.js";
+import { outreachPage, setMark } from "./db.mjs";
+import { OUTREACH, outreachWhy } from "../src/accounts/format.js";
 
 export const STORE = "fx-accounts";
 export const KEY = "latest";
@@ -185,6 +187,13 @@ export function markFirstSeen(previous, next) {
 // `store()` gives {get(key, {type: "json"}), setJSON(key, value)} (api/kv.mjs over the KV binding). A save reads the
 // marks the previous one wrote: KV shows a write at once to later requests in the same Cloudflare location, and the
 // page sends saves one at a time.
+// A save also goes to the database when the site has one (api/db.mjs) — never failing the save: the store is the
+// source until stage 3, and the next sync puts the database right.
+async function mirror(db, number, kind, value) {
+  if (!db) return;
+  try { await setMark(db, number, kind, value ?? null); } catch { /* the next sync catches up */ }
+}
+
 export async function handle(req, { password = "", store, db = null, delay = WRONG_PASSWORD_DELAY_MS } = {}) {
   if (req.method !== "GET" && req.method !== "POST") return reply({ error: "method not allowed" }, 405);
   if (!password) return reply({ error: "ACCOUNTS_PASSWORD is not set on the site yet" }, 503);
@@ -207,6 +216,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       }
       const emails = applyEmail((await blobs.get(EMAILS_KEY, { type: "json" })) || {}, number, e, new Date().toISOString());
       await blobs.setJSON(EMAILS_KEY, emails);
+      await mirror(db, number, "email", emails[number]);
       return reply({ emails }, 200);
     }
     if ("verdict" in body) {   // Zac's review of a lead: good / not a fit (with a reason) / cleared — never a bank record
@@ -219,6 +229,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       if (body.verdict) verdicts[number] = { verdict: body.verdict, ...(body.reason ? { reason: body.reason } : {}), at: new Date().toISOString() };
       else delete verdicts[number];
       await blobs.setJSON(VERDICTS_KEY, verdicts);
+      await mirror(db, number, "verdict", verdicts[number]);
       return reply({ verdicts }, 200);
     }
     if ("crm_checked" in body) {   // the lead checklist's own tick: Zac checked the bank's CRM (kept here as a date only)
@@ -229,6 +240,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       if (body.crm_checked) checks[number] = { ...(checks[number] || {}), crm: new Date().toISOString() };
       else delete checks[number];
       await blobs.setJSON(CHECKS_KEY, checks);
+      await mirror(db, number, "check", checks[number]);
       return reply({ checks }, 200);
     }
     const change = Object.fromEntries(["contacted", "channel", "response", "follow_up_at", "company_name"]
@@ -246,6 +258,8 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     if (typeof notes === "string") { if (notes.trim()) noted[number] = { text: notes.trim(), at }; else delete noted[number]; }
     if (touchesContact) await blobs.setJSON(CONTACTED_KEY, marks);
     if (typeof notes === "string") await blobs.setJSON(NOTES_KEY, noted);
+    if (touchesContact) await mirror(db, number, "contacted", marks[number]);
+    if (typeof notes === "string") await mirror(db, number, "notes", noted[number]);
     return reply({ contacted: marks, notes: noted }, 200);
   }
   const params = new URL(req.url).searchParams;
@@ -274,6 +288,16 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
                    news: (alerts?.items || []).filter((a) => /^news_(pe|funding)$/.test(a.kind)) }, 200);
   }
   // The database move (api/db.mjs): is it bound, when was it last copied, how many rows — the check before stage 2.
+  // The Outreach tab from the database (stage 2): one list a page at a time, ranked in SQL; each row with its why.
+  if (params.get("view") === "outreach") {
+    if (!db) return reply({ error: "no database yet" }, 404);
+    const list = ["letter", "call", "email"].includes(params.get("list")) ? params.get("list") : "letter";
+    const limit = Math.min(Math.max(Number(params.get("limit")) || 50, 1), 500);
+    const offset = Math.max(Number(params.get("offset")) || 0, 0);
+    const page = await outreachPage(db, { list, offset, limit, letters: OUTREACH.letters });
+    const rows = page.rows.map((r) => ({ ...r, outreach_list: list, outreach_why: outreachWhy(r, list, { letters: OUTREACH.letters, total: page.total }) }));
+    return reply({ list, offset, limit, rows, counts: page.counts, total: page.total, synced_at: page.synced_at, source: "database" }, 200);
+  }
   if (params.get("view") === "db") {
     if (!db) return reply({ bound: false }, 200);
     const [synced] = await db("SELECT value FROM meta WHERE key = 'synced'");

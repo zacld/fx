@@ -8,7 +8,7 @@ import { ALERTS_KEY, CHECKS_KEY, CONTACTED_KEY, DEALS_KEY, DETAIL_SHARDS, DETAIL
   MOMENTS_KEY, NICHES_KEY, NOTES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
 import { companyRecord, markRecord, signalRecord, syncTable } from "../api/db.mjs";
-import { filingRow, groupKey, leadScore, movesByCurrency, nicheTiers, setKnownGroups } from "../src/accounts/format.js";
+import { filingRow, groupKey, leadScore, movesByCurrency, nicheTiers, reasonsNotToProgress, setKnownGroups, timelyReason } from "../src/accounts/format.js";
 import { RANKED_FIELDS } from "../src/accounts/ranking.js";
 import { openD1 } from "./d1.mjs";
 import { openStore } from "./store.mjs";
@@ -20,6 +20,16 @@ export function buildRecords({ list, details = [], filingRows = [], ranked = {},
   const signalItems = [...(alerts.items || []), ...dealSignals(deals.items || []), ...(moments.items || [])];
   const ctx = { niches: nicheTiers(niches.niches || {}), signals: signalsByCompany(signalItems), moves, today };
   const detailOf = Object.assign({}, ...details.map((d) => d || {}));
+  const shyOf = ranked.shy_of || {};
+  // The outreach inputs the database ranks on (stage 2): the lead score with its parts, a serious reason not to
+  // progress (held), the timely reason (cold call v email), the hit-list flag, the hard-to-broker sector.
+  const scoreOf = (row) => {
+    const s = leadScore(row, ctx);
+    const scored = { ...row, lead_flags: s.flags };
+    const held = reasonsNotToProgress(row, { today, signals: ctx.signals }).find((x) => x.serious)?.text || "";
+    return { score: s.score, held, timely: timelyReason(scored), hit: s.flags.hit, shy: shyOf[row.company_number]?.niche || "",
+             lead: { score: s.score, parts: s.parts, flags: s.flags } };
+  };
   const ruledOut = ranked.ruled_out || {};
   const nicheOf = ranked.niche_of || {};
   const companies = [];
@@ -29,7 +39,7 @@ export function buildRecords({ list, details = [], filingRows = [], ranked = {},
     onList.add(r.company_number);
     const row = { ...r, fx_niche: nicheOf[r.company_number] ?? r.fx_niche };
     if (ruledOut[r.company_number]) Object.assign(row, { qualified: "Out", qualify_reason: ruledOut[r.company_number] });
-    companies.push(companyRecord(row, { source: "list", details: detailOf[r.company_number], score: leadScore(row, ctx).score,
+    companies.push(companyRecord(row, { source: "list", details: detailOf[r.company_number], ...scoreOf(row),
       groupKey: groupKey(row), niche: row.fx_niche, ruledOut: ruledOut[r.company_number] || "" }));
   }
   const fullFiling = new Map(filingRows.filter((r) => r.company_number).map((r) => [r.company_number, r]));
@@ -37,7 +47,7 @@ export function buildRecords({ list, details = [], filingRows = [], ranked = {},
     if (!slim.company_number || onList.has(slim.company_number)) continue;
     const full = fullFiling.get(slim.company_number) || {};
     const extra = Object.fromEntries(Object.entries(full).filter(([k, v]) => !RANKED_FIELDS.includes(k) && v !== "" && v !== null && v !== undefined));
-    companies.push(companyRecord(slim, { source: "filings", details: extra, score: leadScore(filingRow(slim), ctx).score,
+    companies.push(companyRecord(slim, { source: "filings", details: extra, ...scoreOf(filingRow(slim)),
       groupKey: groupKey(slim), niche: slim.fx_niche, ruledOut: ruledOut[slim.company_number] || "" }));
   }
   const signals = [
