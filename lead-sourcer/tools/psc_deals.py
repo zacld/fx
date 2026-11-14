@@ -93,6 +93,7 @@ def main() -> None:
     p.add_argument("--window", type=int, default=owners.WINDOW_DAYS)
     p.add_argument("--out", default="deals.json")
     p.add_argument("--niche-stats", default="niche_stats.json")
+    p.add_argument("--groups-out", default="", help="each tracked company's top UK parent (owners.group_of)")
     args = p.parse_args()
 
     STATS.update(niche_rules.load_stats(args.niche_stats))
@@ -102,11 +103,16 @@ def main() -> None:
     catch_all = niche_rules.catch_all_codes(niches)
     zip_path = args.zip or owners.download(owners.snapshot_url(), CACHE)
     print(f"PSC snapshot: {os.path.basename(zip_path)} ({os.path.getsize(zip_path) / 1e9:.1f} GB)")
-    changes = owners.recent_changes(owners.corporate_records(zip_path), window_days=args.window)
+    parents: dict = {}
+    owner_names: dict = {}
+    changes = owners.recent_changes(owners.tee_parents(owners.corporate_records(zip_path), parents, owner_names),
+                                    window_days=args.window)
+    groups = {n: owners.group_of(n, parents, owner_names) for n in tracked}
+    groups = {n: g for n, g in groups.items() if g["hops"] or g["abroad"]}
     print(f"Companies with a new corporate owner in the last {args.window} days: {len(changes):,}")
 
     # Names, status, size and sector codes of every company involved (targets and UK buyers), one bulk-file pass
-    numbers = set(changes)
+    numbers = set(changes) | {g["top"] for g in groups.values() if g["hops"]}
     for c in changes.values():
         for d in c["new"]:
             n = owners.ch_number((d.get("identification") or {}).get("registration_number") or "")
@@ -115,6 +121,18 @@ def main() -> None:
     registry: dict = {}
     bulk.scan(args.bulk or bulk.download(), set(), set(), numbers=numbers, registry=registry)
     names = {n: r.get("name", "") for n, r in registry.items()}
+    if args.groups_out:
+        for g in groups.values():
+            g["top_name"] = names.get(g["top"]) or g["top_name"]
+        with open(args.groups_out, "w", encoding="utf-8") as f:
+            json.dump({"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "groups": groups}, f)
+        by_top = Counter(g["top"] for g in groups.values() if g["hops"])
+        print(f"Groups: {sum(1 for g in groups.values() if g['hops']):,} of {len(tracked):,} tracked companies have a UK "
+              f"parent ({len(by_top):,} groups); {sum(1 for g in groups.values() if g['abroad']):,} owned from abroad at the top; "
+              f"groups with 2+ tracked companies: {sum(1 for k in by_top.values() if k > 1):,}")
+        for top, k in by_top.most_common(10):
+            if k > 1:
+                print(f"  {k:3}  {names.get(top) or next(g['top_name'] for g in groups.values() if g['top'] == top)}")
     found = owners.deals(changes, names)
     # A buyer taking REORG_SAME_DAY+ companies on one day is a new holding company put over a group — a reorganisation,
     # not purchases (one GB Global Management "bought" 20 of its own group on 4 Nov 2026)

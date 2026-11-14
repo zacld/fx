@@ -3359,6 +3359,25 @@ class TestCatchAllCodes(unittest.TestCase):
         self.assertEqual(nr.sector_niche(["20003"], niches)["id"], "broad")
 
 
+class TestGroups(unittest.TestCase):
+    """sourcer/owners.tee_parents / group_of: each company's top UK parent from the ownership snapshot."""
+
+    def test_walks_up_uk_owners_and_notes_the_owner_abroad(self):
+        from sourcer import owners
+        recs = [("00000003", {"name": "ACME TOPCO LIMITED", "identification": {"country_registered": "England", "registration_number": "2"}}),
+                ("00000002", {"name": "ACME HOLDINGS LIMITED", "identification": {"country_registered": "England & Wales", "registration_number": "1"}}),
+                ("00000001", {"name": "ACME AG", "identification": {"country_registered": "Germany", "registration_number": "HRB 9"}}),
+                ("00000004", {"name": "GONE LIMITED", "ceased_on": "2020-01-01", "identification": {"country_registered": "England", "registration_number": "5"}}),
+                ("00000006", {"name": "LOOP B LIMITED", "identification": {"country_registered": "England", "registration_number": "7"}}),
+                ("00000007", {"name": "LOOP A LIMITED", "identification": {"country_registered": "England", "registration_number": "6"}})]
+        parents, names = {}, {}
+        self.assertEqual(len(list(owners.tee_parents(iter(recs), parents, names))), 6)   # records pass through
+        self.assertEqual(owners.group_of("00000003", parents, names),
+                         {"top": "00000001", "top_name": "ACME HOLDINGS LIMITED", "hops": 2, "abroad": "ACME AG (Germany)"})
+        self.assertEqual(owners.group_of("00000004", parents, names)["hops"], 0)          # a ceased owner isn't a parent
+        self.assertLessEqual(owners.group_of("00000006", parents, names)["hops"], 2)       # a loop stops
+
+
 class TestHardToBroker(unittest.TestCase):
     """sourcer/niches.broker_shy: sectors payment firms often decline — never weapons, gambling, crypto, cannabis, adult."""
 

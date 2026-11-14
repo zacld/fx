@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -484,5 +484,23 @@ describe("A name ending in UK scores lower", () => {
     expect(score({ company_name: "ACME UK LIMITED", run_from_abroad: "Owned from Germany (ACME GMBH)" })).toBe(abroad);
     expect(score({ company_name: "PEERS HARDY (UK) LIMITED", owner: "Owned by 3 individuals" })).toBe(score({ company_name: "ACME LIMITED" }));
     expect(ukArmName({ company_name: "ACME UK LIMITED", owners: "J Smith (individual, England)" })).toBe(false);
+  });
+});
+
+describe("Groups", () => {
+  it("one row per group, the best lead standing for it; the Cognism list named and addressed as the group", () => {
+    setKnownGroups({ "1": { top: "9", top_name: "ACME GROUP LIMITED", hops: 1, abroad: "" }, "2": { top: "9", top_name: "ACME GROUP LIMITED", hops: 2, abroad: "" } });
+    setKnownSites({ "9": "https://www.acmegroup.com/", "1": "https://acme-uk.co.uk/" });
+    const rows = [{ company_number: "1", company_name: "ACME UK LIMITED", lead_score: 50 },
+                  { company_number: "2", company_name: "ACME FOODS LIMITED", lead_score: 80 },
+                  { company_number: "3", company_name: "SOLO LIMITED", lead_score: 60, website: "https://solo.co.uk" }];
+    const one = collapseGroups(rows);
+    expect(one.map((r) => r.company_number)).toEqual(["2", "3"]);
+    expect(one[0].group_members).toEqual([{ company_number: "1", company_name: "ACME UK LIMITED" }]);
+    const list = cognismCompanyRows(rows);
+    expect(list.map((r) => [r.company_name, r.domain, r.registered_company])).toEqual([
+      ["ACME GROUP LIMITED", "acmegroup.com", "ACME FOODS LIMITED"], ["SOLO LIMITED", "solo.co.uk", "SOLO LIMITED"]]);
+    expect(list[0].group_companies).toBe("ACME UK LIMITED");
+    setKnownGroups({}); setKnownSites({});
   });
 });

@@ -276,6 +276,30 @@ export function splitName(name = "") {
 let knownSites = {};
 export const setKnownSites = (map) => { knownSites = map || {}; };
 export const siteOf = (r) => r.website || knownSites[r.company_number] || "";
+// Groups (Zac, 14 Nov 2026: Cognism files people under the group, and one group showed up as several leads): each
+// company's top UK parent from the ownership register (tools/psc_deals.py --groups-out → leads/ranked group_of:
+// {number: {top, top_name, hops, abroad}}). hops 0 = it is its own top.
+let knownGroups = {};
+export const setKnownGroups = (map) => { knownGroups = map || {}; };
+export const groupOf = (r) => knownGroups[r.company_number] || null;
+export const groupKey = (r) => (groupOf(r)?.hops ? groupOf(r).top : r.company_number);
+export const groupName = (r) => (groupOf(r)?.hops ? groupOf(r).top_name || "" : "");
+// One row per group: the group's best lead (highest lead score, else first) stands for it, the others listed on it as
+// group_members [{company_number, company_name}]. Rows not in a group pass through as they are.
+export function collapseGroups(rows) {
+  const best = new Map();
+  for (const r of rows) {
+    const k = groupKey(r);
+    const b = best.get(k);
+    if (!b) best.set(k, { lead: r, members: [] });
+    else if ((r.lead_score || 0) > (b.lead.lead_score || 0)) { b.members.push(b.lead); b.lead = r; }
+    else b.members.push(r);
+  }
+  const keep = new Map([...best.values()].map((b) => [b.lead, b.members]));
+  return rows.filter((r) => keep.has(r)).map((r) => (keep.get(r).length
+    ? { ...r, group_members: keep.get(r).map((m) => ({ company_number: m.company_number, company_name: m.company_name })) }
+    : r));
+}
 export const domainOf = (website = "") => String(website).trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").split(/[/?#]/)[0].toLowerCase();
 export function cognismRow(r) {
   const named = presentedContact(r);
@@ -290,17 +314,26 @@ export function cognismRow(r) {
     why_fx: why, companies_house_url: r.companies_house_url || `https://find-and-update.company-information.service.gov.uk/company/${r.company_number}`,
   };
 }
-// Cognism's company list (search by company, then filter by job title): only companies with a confirmed website — the
-// field Cognism matches companies on — one row each, best lead first as given.
+// Cognism's company list (search by company, then filter by job title): one row per group — named as the group (its
+// top UK parent) with the group's website when Cognism would file the people there, else the company's own — and only
+// rows with a confirmed website, the field Cognism matches companies on. Best lead first as given.
 export const COGNISM_COMPANY_COLUMNS = [
   ["company_name", "Company Name", 34], ["domain", "Website", 26], ["country", "Country", 14], ["role_to_find", "Job Titles to Find", 30],
+  ["registered_company", "Registered Company (lead)", 34], ["group_companies", "Group Companies on the List", 40],
   ["company_number", "Company Number", 15], ["lead_score", "Lead Score", 10, true], ["why_fx", "Why FX", 50],
 ].map(([key, header, width, number]) => ({ key, header, width, number: Boolean(number) }));
 export function cognismCompanyRows(rows) {
-  return rows.filter((r) => siteOf(r)).map((r) => ({
-    ...cognismRow(r), lead_score: r.lead_score ?? "",
-    role_to_find: r.no_fd_likely ? "Managing Director; Finance Director" : "Finance Director; CFO; Financial Controller; Head of Finance",
-  }));
+  return collapseGroups(rows).map((r) => {
+    const g = groupOf(r);
+    const groupSite = g?.hops ? knownSites[g.top] || "" : "";
+    const site = groupSite || siteOf(r);
+    return site && {
+      ...cognismRow(r), lead_score: r.lead_score ?? "",
+      company_name: (g?.hops && g.top_name) || r.company_name || "", domain: domainOf(site),
+      registered_company: r.company_name || "", group_companies: (r.group_members || []).map((m) => m.company_name).join("; "),
+      role_to_find: r.no_fd_likely ? "Managing Director; Finance Director" : "Finance Director; CFO; Financial Controller; Head of Finance",
+    };
+  }).filter(Boolean);
 }
 export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
 

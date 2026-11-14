@@ -457,6 +457,19 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   deal (`lead_flags.hit`). **Hit list tab**: those companies, highest score first ("Also without an FX loss" widens
   it), Excel export. **New money tab** (GET `?view=deals`): the ownership register's deals and the news of PE deals and
   funding, newest first, filters, each with its FX sign. Contact-finding is no longer being extended.
+- **Groups: one lead per group** (Zac, 14 Nov 2026: Cognism files people under the group or brand, not the subsidiary
+  we list, and one group showed up as several leads): the daily "Niche hits" run's ownership-snapshot pass
+  (`tools/psc_deals.py --groups-out groups.json`, same single read of the file: `owners.tee_parents`) walks every
+  tracked company up its current UK corporate owners with a Companies House number to its top UK parent
+  (`owners.group_of`: `{top, top_name, hops, abroad}` — a joint venture's lowest-numbered UK owner, loops stopped,
+  the owner registered abroad above the top noted), names from the register file; `rank-leads.mjs` saves it in
+  `leads/ranked` as `group_of` and prints the groups with 2+ leads; `find_domains.py --groups` looks up each lead's
+  top parent's website straight after the lead's own. The page (`setKnownGroups`, `groupKey`, `collapseGroups` in
+  `format.js`): the Accounts list shows **one row per group** by default ("One per group" toggle) — the group's best
+  lead by lead score, the others folded in (`group_members`, "+N group companies"), a "Group: …" chip on cards and
+  the company page; the **Cognism company list** is one row per group, named as the group (top parent) with the
+  group's website when known, else the company's own, plus "Registered Company (lead)" and "Group Companies on the
+  List" columns.
 - **Hard to broker** (Zac, 13 Nov 2026: "a separate section where we go after sectors brokers can't — mining,
   recyclables etc — no firearms, no gambling"): niches carrying `broker_shy` (the reason payment firms — non-bank FX
   brokers — often decline or restrict them) in `fx_niches.json`: scrap metal, bullion, jewellery, watches, art &

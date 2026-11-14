@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { filedIso, leadLine, setKnownSites, siteOf, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { filedIso, leadLine, setKnownSites, siteOf, setKnownGroups, groupOf, groupName, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { applyEmail } from "../../api/accounts.mjs";
@@ -101,7 +101,7 @@ function Accounts({ data, password }) {
   useEffect(() => {
     let live = true;
     fetch(`${API}?view=ranked`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) setRanked(body); }).catch(() => {});
+      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) { setKnownGroups(body.group_of); setRanked(body); } }).catch(() => {});
     return () => { live = false; };
   }, [password]);
   const baseRows = useMemo(() => {
@@ -131,7 +131,7 @@ function Accounts({ data, password }) {
                           [signals, data.made_at]);
   const rows = useMemo(() => withLeadScores(baseRows, leadCtx), [baseRows, leadCtx]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
-                                            triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false });
+                                            triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true });
   const [sort, setSort] = useState("lead");
   // Sheet (a dense, sortable grid) or Cards; remembered in this browser
   const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
@@ -257,8 +257,10 @@ function Accounts({ data, password }) {
   const pairs = useMemo(() => [...new Set(rows.flatMap((r) => parts(r.currency_pairs)))].sort(), [rows]);
   const visible = useMemo(() => {
     const matched = filterRows(rows, ctx);
-    return filters.view === "contacted" ? sortFollowUps(matched, contacted) : sortRows(matched, sort);
-  }, [rows, filters, sort, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+    if (filters.view === "contacted") return sortFollowUps(matched, contacted);
+    const sorted = sortRows(matched, sort);
+    return filters.oneGroup ? collapseGroups(sorted) : sorted;   // one row per group, its best lead standing for it
+  }, [rows, filters, sort, contacted, notes, data.made_at, ranked]);   // eslint-disable-line react-hooks/exhaustive-deps
   const open = rows.filter((r) => !contacted[r.company_number]);
   const listedNumbers = useMemo(() => new Set(rows.filter((r) => !r.dropped).map((r) => r.company_number)), [rows]);
   const groupCounts = useMemo(() => {
@@ -403,6 +405,7 @@ function Accounts({ data, password }) {
           <label className="check"><input type="checkbox" checked={filters.fdOnly} onChange={(e) => set({ fdOnly: e.target.checked })} /> FD named</label>
           <label className="check"><input type="checkbox" checked={filters.triggersOnly} onChange={(e) => set({ triggersOnly: e.target.checked })} /> Triggers</label>
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>
+          <label className="check" title="Companies in the same group (one top UK parent) shown once, as the group's best lead"><input type="checkbox" checked={filters.oneGroup} onChange={(e) => set({ oneGroup: e.target.checked })} /> One per group</label>
           <div className="seg" role="group" aria-label="Layout">
             {[["sheet", "Sheet"], ["cards", "Cards"]].map(([v, label]) => (
               <button key={v} aria-pressed={layout === v} className={layout === v ? "on" : ""} onClick={() => pickLayout(v)}>{label}</button>
@@ -411,9 +414,9 @@ function Accounts({ data, password }) {
           <button className="btn-sm export" onClick={exportCsv} disabled={!visible.length}>Export Excel ({visible.length})</button>
           <button className="btn-sm" onClick={() => downloadCognism(visible, "accounts")} disabled={!visible.length}
                   title="Company, domain, postcode and the finance contact's first / last name — the columns Cognism matches on">Export for Cognism</button>
-          <button className="btn-sm" onClick={() => downloadCognismCompanies(visible, "accounts")} disabled={!visible.some(siteOf)}
+          <button className="btn-sm" onClick={() => downloadCognismCompanies(visible, "accounts")} disabled={!cognismCompanyRows(visible).length}
                   title="Only companies with a confirmed website, one row each — upload as a company list in Cognism, then search people by job title">
-            Cognism company list ({visible.filter(siteOf).length})</button>
+            Cognism company list ({cognismCompanyRows(visible).length})</button>
         </div>
         </>}
       </div>
@@ -845,7 +848,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
         <span className="muted">{rows.length.toLocaleString()} of {all.length.toLocaleString()} with an FX loss</span>
         <button className="btn-sm export" onClick={() => exportLosses(rows)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "fx-losses")} disabled={!rows.length}>Export for Cognism</button>
-        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "fx-losses")} disabled={!rows.some(siteOf)}>Cognism company list ({rows.filter(siteOf).length})</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "fx-losses")} disabled={!cognismCompanyRows(rows).length}>Cognism company list ({cognismCompanyRows(rows).length})</button>
       </div>
       <p className="filings-note">Companies whose latest filed accounts show a loss on currency (exchange differences), from your Accounts list and the
         Recent FX filings scan. Each figure links to the accounts it came from; figures that failed the sense checks are left out. Companies you've
@@ -1087,7 +1090,7 @@ function CallToday({ password, listRows, lead, contacted, onContact, onOpen, onE
           £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Highest lead score first. Mark one Contacted and the next moves up.</span>
         <button className="btn-sm export" onClick={() => exportCalls(rows, checks)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "call-today")} disabled={!rows.length}>Export for Cognism</button>
-        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "call-today")} disabled={!rows.some(siteOf)}>Cognism company list ({rows.filter(siteOf).length})</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "call-today")} disabled={!cognismCompanyRows(rows).length}>Cognism company list ({cognismCompanyRows(rows).length})</button>
       </div>
       {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} checks={checks} onCrm={onCrm} />)}
       {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or Recent FX filings tabs.</div>}
@@ -1198,6 +1201,19 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
   );
 }
 
+// The company's group (its top UK parent, from the ownership register) and the other group companies the list holds,
+// when "One per group" folded them into this row.
+function GroupChips({ r }) {
+  const name = groupName(r), abroad = groupOf(r)?.abroad;
+  const members = r.group_members || [];
+  if (!name && !members.length && !abroad) return null;
+  return (<>
+    {name && <span className="chip" title={`Top UK parent: ${name} (${groupOf(r).top})${abroad ? ` — owned by ${abroad}` : ""}`}>Group: {name}</span>}
+    {!name && abroad && <span className="chip" title="Its corporate owner is registered abroad">Owner abroad: {abroad}</span>}
+    {members.length > 0 && <span className="chip" title={members.map((m) => m.company_name).join("\n")}>+{members.length} group compan{members.length === 1 ? "y" : "ies"}</span>}
+  </>);
+}
+
 // The Hard to broker tab (Zac, 13 Nov 2026): leads in sectors payment firms often decline or restrict — scrap, bullion,
 // jewellery, art, mining, metals, waste, fuel, vehicles, phones, tobacco, vapes, shipping, bloodstock, commodities —
 // where a bank's FX desk can win. Tagged daily (sourcer/niches.broker_shy: customs records first, else the sector);
@@ -1228,8 +1244,8 @@ function HardToBroker({ rows, shyOf, onOpen, onContact, onEmail }) {
           {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
         </select>
         <button className="btn-sm export" onClick={exportShy} disabled={!list.length}>Export Excel ({list.length})</button>
-        <button className="btn-sm" onClick={() => downloadCognismCompanies(list, "hard-to-broker")} disabled={!list.some(siteOf)}>
-          Cognism company list ({list.filter(siteOf).length})</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(list, "hard-to-broker")} disabled={!cognismCompanyRows(list).length}>
+          Cognism company list ({cognismCompanyRows(list).length})</button>
       </div>
       {list.slice(0, 200).map((r, i) => (
         <article className="card loss-card" key={r.company_number}>
@@ -1239,6 +1255,7 @@ function HardToBroker({ rows, shyOf, onOpen, onContact, onEmail }) {
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
               <span className="chip">{shyOf[r.company_number].niche}</span>
               {siteOf(r) && <a className="site" href={siteUrl(siteOf(r))} target="_blank" rel="noreferrer">{siteLabel(siteOf(r))}</a>}
+          <GroupChips r={r} />
             </div>
             <div className="loss-fig">
               {r.turnover_gbp && <b className="call-turnover">{money(Number(r.turnover_gbp))}</b>}
@@ -1646,6 +1663,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
             {r.trading_as && <span>t/a {r.trading_as}</span>}
             {r.company_number && <a href={r.companies_house_url} target="_blank" rel="noreferrer">Companies House {r.company_number}</a>}
             {siteOf(r) && <a href={siteUrl(siteOf(r))} target="_blank" rel="noreferrer">{siteLabel(siteOf(r))}</a>}
+            <GroupChips r={r} />
             {r.fx_niche && <span>{r.fx_niche}</span>}
           </div>
         </div>
