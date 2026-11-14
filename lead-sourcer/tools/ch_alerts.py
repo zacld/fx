@@ -255,6 +255,11 @@ JOB_QUERIES = ["treasury analyst", "treasury manager", "foreign exchange", "FX h
                "international trade manager", "export sales manager", "currency risk"]
 STATS: dict[str, int] = {}   # counts for the log (public repo: no names)
 LOOKUPS_MAX = 40            # Companies House name searches a run, for subjects not on the lists
+# 14 Nov 2026 (discovery review: news and job adverts were the noisiest source — low volume, name-matching): headlines
+# and adverts are triggers on companies already on the lists. Only a private-equity deal or a funding round about a
+# company not on them is looked up and becomes a lead (the New money tab); a new FD, expansion abroad or a job advert
+# at an unknown company isn't.
+DISCOVER_FROM_NEWS = ("news_pe", "news_funding")
 
 
 def tracked_index(tracked: dict[str, str]) -> list[tuple[re.Pattern, str]]:
@@ -383,9 +388,10 @@ def news_items(query: str, fetcher=None, today: Optional[date] = None) -> list[d
 
 def news_signals(tracked: dict[str, str], api_key: str, fetcher=None, today: Optional[date] = None,
                  lookup=None) -> tuple[list[dict], list[dict]]:
-    """(alerts, discovery rows) from the day's headlines: a company on the lists named in a finance-director or
-    expansion-abroad headline is an alert (hot); one not on the lists, found on Companies House by its exact name,
-    is a new lead for the finder to check."""
+    """(alerts, discovery rows) from the day's headlines: a company on the lists named in a finance-director,
+    expansion-abroad, private-equity or funding headline is an alert (hot); a company not on the lists, found on
+    Companies House by its exact name, is a new lead only for a private-equity deal or a funding round
+    (DISCOVER_FROM_NEWS)."""
     index = tracked_index(tracked)
     lookup = lookup or (lambda name: find_company(name, api_key) if api_key else None)
     alerts, found, lookups, seen = [], [], 0, set()
@@ -401,7 +407,7 @@ def news_signals(tracked: dict[str, str], api_key: str, fetcher=None, today: Opt
                     continue
                 number = match_tracked(h.split(" - ")[0], index)
                 company = {"company_number": number, "company_name": tracked.get(number, "")} if number else None
-                if not company and lookups < LOOKUPS_MAX:
+                if not company and kind in DISCOVER_FROM_NEWS and lookups < LOOKUPS_MAX:
                     subject = headline_subject(h)
                     if subject:
                         lookups += 1
@@ -457,15 +463,18 @@ def _fetch_json(url: str, basic_user: Optional[str]):
         return None
 
 
-def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], lookup=None) -> tuple[list[dict], list[dict]]:
-    """(alerts, discovery rows): an employer on the lists hiring for treasury / FX / import-export is an alert; one not
-    on the lists, found on Companies House by its exact name, is a new lead."""
+def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], lookup=None,
+                discover: bool = False) -> tuple[list[dict], list[dict]]:
+    """(alerts, discovery rows): an employer on the lists hiring for treasury / FX / import-export is an alert. With
+    `discover` (off since 14 Nov 2026), one not on the lists, found on Companies House by its exact name, is a new lead."""
     index = tracked_index(tracked)
     lookup = lookup or (lambda name: find_company(name, api_key) if api_key else None)
     alerts, found, lookups, seen = [], [], 0, {}
     for j in adverts:
         number = match_tracked(j["employer"], index)
         if not number:
+            if not discover:
+                continue
             key = matching.normalise_name(j["employer"])
             if key not in seen and lookups < LOOKUPS_MAX:
                 lookups += 1

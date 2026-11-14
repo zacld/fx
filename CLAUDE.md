@@ -569,8 +569,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   buying / opening / selling abroad, a King's Award for International Trade, UK Export Finance backing (`news_abroad`)
   — and job adverts for treasury / FX / export roles from Adzuna and Reed's free APIs (`hiring`; secrets
   `ADZUNA_APP_ID` + `ADZUNA_APP_KEY`, `REED_API_KEY`, skipped when unset; recruiters left out). A company on the
-  lists is matched by name; one not on them is found on Companies House by its exact registered name (active,
-  `LOOKUPS_MAX` 40 a run) and becomes a discovery (filed FX score 50–55). King's Award and UKEF lists come in
+  lists is matched by name. Since 14 Nov 2026 (discovery review: the noisiest source) headlines and adverts are
+  triggers on listed companies only; just a private-equity deal or funding round about a company not on them
+  (`DISCOVER_FROM_NEWS`) is looked up on Companies House by its exact registered name (active, `LOOKUPS_MAX` 40 a
+  run) and becomes a discovery (filed FX score 50–55) — a new FD, expansion abroad or job advert elsewhere isn't. King's Award and UKEF lists come in
   through the headlines (their gov.uk lists' formats weren't verifiable from here).
 - **Look** (Nov 2026: "clean dark theme, Google-Sheet professional vibe, finances Zint-style"): neutral dark greys,
   gridlines, flat panels, tabular figures (the theme block at the end of `CSS` in `AccountsApp.jsx`). The Accounts list

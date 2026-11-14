@@ -3240,7 +3240,14 @@ class TestChAlerts(unittest.TestCase):
         alerts, found = m.news_signals(self.TRACKED, "", fetcher=lambda url: self.RSS, today=self.TODAY, lookup=lookup)
         kinds = {(a["kind"], a["company_number"], a["tracked"]) for a in alerts}
         self.assertIn(("news_fd", "01234567", True), kinds)          # on the list: matched by name, no lookup
-        self.assertIn(("news_abroad", "07654321", False), kinds)     # not on the list: found by its exact name
+        # not on the list: expansion abroad is a trigger only for companies already tracked — no lookup, no lead
+        self.assertNotIn(("news_abroad", "07654321", False), kinds)
+        self.assertEqual((found, looked), ([], []))
+        # a funding round (or PE deal) about a company not on the lists is still found by its exact name: New money
+        funded = self.RSS.replace("Brightbloom Flowers acquires Dutch grower BV - The Grocer",
+                                  "Brightbloom Flowers raises £25m Series B to grow abroad - Sifted")
+        alerts, found = m.news_signals(self.TRACKED, "", fetcher=lambda url: funded, today=self.TODAY, lookup=lookup)
+        self.assertIn(("news_funding", "07654321", False), {(a["kind"], a["company_number"], a["tracked"]) for a in alerts})
         self.assertEqual([r["company_number"] for r in found], ["07654321"])
         self.assertGreaterEqual(found[0]["filed_fx_score"], 50)       # the finder's priority floor
         self.assertNotIn("Acme Trading", looked)
