@@ -95,6 +95,32 @@ export function signalsByCompany(items = []) {
   for (const list of Object.values(out)) list.sort((a, b) => String(b.at).localeCompare(String(a.at)));
   return out;
 }
+// The list's long text (Zac, 14 Nov 2026: "slim it down so we can fit more"): the quoted evidence sentences and other
+// fields only the company page shows live in DETAIL_SHARDS store items ("details/0".."details/15", {number: {field:
+// value}}), not in the list the page loads; the company page fetches its own (GET ?view=details&company=…).
+export const DETAILS_PREFIX = "details/";
+export const DETAIL_SHARDS = 16;
+export const DETAIL_FIELDS = ["fx_wallet_basis", "currency_evidence", "fx_evidence", "hmrc_goods", "all_directors",
+  "banking_relationships", "untapped_reasons", "verify_finance_contact_url", "fx_exposure", "turnover_source",
+  "company_secretary", "accounts_signed_by", "generic_emails", "search_check"];
+export const isDetailField = (k) => k.endsWith("_evidence") || DETAIL_FIELDS.includes(k);
+export const detailShard = (number) => {
+  let h = 0;
+  for (const c of String(number)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h % DETAIL_SHARDS;
+};
+// {rows: the list without detail fields, shards: [{number: {detail fields}}] × DETAIL_SHARDS}
+export function splitDetails(rows = []) {
+  const shards = Array.from({ length: DETAIL_SHARDS }, () => ({}));
+  const slim = rows.map((r) => {
+    const keep = {};
+    const more = {};
+    for (const [k, v] of Object.entries(r)) (isDetailField(k) ? more : keep)[k] = v;
+    if (Object.keys(more).length && r.company_number) shards[detailShard(r.company_number)][r.company_number] = more;
+    return keep;
+  });
+  return { rows: slim, shards };
+}
 export const RANKED_KEY = "leads/ranked";   // {made_at, rows, ruled_out, niches}: every scanned lead ranked (scripts/rank-leads.mjs)
 export const DOMAINS_KEY = "domains";   // {made_at, sites: {number: {website, confidence, found}}, none}: tools/find_domains.py
 export const DEALS_KEY = "deals";   // {made_at, items}: purchases from the ownership register (tools/psc_deals.py)
@@ -246,6 +272,11 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     const [deals, alerts] = await Promise.all([DEALS_KEY, ALERTS_KEY].map((k) => blobs.get(k, { type: "json" })));
     return reply({ made_at: deals?.made_at || "", window_days: deals?.window_days || 0, items: deals?.items || [],
                    news: (alerts?.items || []).filter((a) => /^news_(pe|funding)$/.test(a.kind)) }, 200);
+  }
+  if (params.get("view") === "details") {
+    const number = String(params.get("company") || "").toUpperCase();
+    const shard = number ? await blobs.get(`${DETAILS_PREFIX}${detailShard(number)}`, { type: "json" }) : null;
+    return reply({ company_number: number, details: shard?.[number] || {} }, 200);
   }
   if (params.get("view") === "ranked") {
     return reply((await blobs.get(RANKED_KEY, { type: "json" })) || { rows: [], ruled_out: {}, niches: [] }, 200);

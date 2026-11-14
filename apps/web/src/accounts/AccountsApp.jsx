@@ -172,6 +172,16 @@ function Accounts({ data, password }) {
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
+  // The company page's long text (quoted evidence, wallet basis, directors…): kept apart from the list, loaded when opened
+  const [details, setDetails] = useState({});
+  useEffect(() => {
+    if (!pageNo || details[pageNo]) return undefined;
+    let live = true;
+    fetch(`${API}?view=details&company=${encodeURIComponent(pageNo)}`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((body) => { if (live && body) setDetails((d) => ({ ...d, [pageNo]: body.details || {} })); }).catch(() => {});
+    return () => { live = false; };
+  }, [pageNo, password]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { window.scrollTo(0, pageNo ? 0 : listScroll); }, [pageNo]);   // eslint-disable-line react-hooks/exhaustive-deps
   const openCompany = useCallback((number) => {
     setListScroll(window.scrollY);
@@ -332,7 +342,8 @@ function Accounts({ data, password }) {
   };
 
   if (pageNo) {
-    const r = rows.find((x) => x.company_number === pageNo);
+    const found = rows.find((x) => x.company_number === pageNo);
+    const r = found && details[pageNo] ? { ...found, ...details[pageNo] } : found;
     return (
       <VerdictContext.Provider value={verdictCtx}>
       <CompanyPage r={r} number={pageNo} madeAt={data.made_at} mark={contacted[pageNo]} onContact={contact}

@@ -234,3 +234,20 @@ describe("Alert banner summary", () => {
     expect(s.day).toBe(1);
   });
 });
+
+describe("List slimmed: long text in detail items", () => {
+  it("splits the evidence and other long text into shards by company number, and serves one company's", async () => {
+    const { splitDetails, detailShard, DETAILS_PREFIX } = await import("../api/accounts.mjs");
+    const rows = [{ company_number: "01234567", company_name: "A LTD", fx_forwards: "to buy US$4m", fx_forwards_evidence: "\"The forwards…\" (p23)",
+      all_directors: "Jo Bloggs", turnover_gbp: "40000000" }, { company_number: "SC123456", company_name: "B LTD" }];
+    const { rows: slim, shards } = splitDetails(rows);
+    expect(slim[0]).toEqual({ company_number: "01234567", company_name: "A LTD", fx_forwards: "to buy US$4m", turnover_gbp: "40000000" });
+    expect(shards[detailShard("01234567")]["01234567"]).toEqual({ fx_forwards_evidence: "\"The forwards…\" (p23)", all_directors: "Jo Bloggs" });
+    expect(shards.flatMap((s) => Object.keys(s))).toEqual(["01234567"]);
+    const items = { [`${DETAILS_PREFIX}${detailShard("01234567")}`]: shards[detailShard("01234567")] };
+    const store = () => ({ get: async (k) => items[k] ?? null, set: async () => {} });
+    const res = await handle(new Request("https://x/api/accounts?view=details&company=01234567", { headers: { authorization: "Bearer pw" } }),
+      { password: "pw", store, delay: 0 });
+    expect((await res.json()).details.all_directors).toBe("Jo Bloggs");
+  });
+});

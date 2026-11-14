@@ -656,7 +656,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   are cached 7 days (`sourcer/register_cache.py`, `REGISTER_CACHE_DAYS`; sooner
   when newer accounts are filed) to keep within the GitHub Actions minutes; its
   website and news lookups likewise (`LOOKUP_CACHE_DAYS`, 7 — they took ~20 min
-  of each run). The 3,500 slots a run (`DEFAULT_ENRICH`, 14 Nov 2026: a run checked its 2,000 in 13 of its 140 minutes, nearly all
+  of each run). The 5,000 slots a run (`DEFAULT_ENRICH`; 3,500 → 5,000 the same day, when the first run without the contact hunt checked 3,750 in 104 of its 180 minutes and added 1,433 new companies, and the list was slimmed: the long text — every `*_evidence` quote and `DETAIL_FIELDS` in `api/accounts.mjs` — lives in 16 detail items, `details/0..15`, that the company page loads for itself, GET `?view=details&company=…`; the upload prints the biggest fields and, still over the item limit, leaves out the lowest-ranked companies rather than not uploading; forwards maturing within a year is precomputed as `fx_forwards_due`; 14 Nov 2026: a run checked its 2,000 in 13 of its 140 minutes, nearly all
   from the cache — ~30 new companies a night while ~39,000 candidates waited; now the time budget, `FINDER_BUDGET_MIN`
   180, sets the pace, and a night that runs out uploads what it reached with `upload-accounts.mjs --carry`, keeping the
   last list's other companies, so the list never shrinks; the upload prints the list's size and refuses one over 24 MB;
