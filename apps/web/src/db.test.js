@@ -25,10 +25,10 @@ describe("Database (D1) mirror", () => {
     await applySchema(query);   // safe to repeat
     const a = companyRecord({ company_number: "01", company_name: "A LTD", turnover_gbp: "40000000" }, { source: "list", score: 72, details: { x: "long" } });
     const b = companyRecord({ company_number: "02", company_name: "B LTD" }, { source: "filings", score: 40 });
-    expect(await syncTable(query, "companies", [a, b], { now: "t1" })).toEqual({ written: 2, deleted: 0, unchanged: 0, total: 2 });
-    expect(await syncTable(query, "companies", [a, b], { now: "t2" })).toEqual({ written: 0, deleted: 0, unchanged: 2, total: 2 });
+    expect(await syncTable(query, "companies", [a, b], { now: "t1" })).toEqual({ written: 2, deleted: 0, unchanged: 0, deferred: 0, total: 2 });
+    expect(await syncTable(query, "companies", [a, b], { now: "t2" })).toEqual({ written: 0, deleted: 0, unchanged: 2, deferred: 0, total: 2 });
     const a2 = companyRecord({ company_number: "01", company_name: "A LTD", turnover_gbp: "41000000" }, { source: "list", score: 75 });
-    expect(await syncTable(query, "companies", [a2], { now: "t3" })).toEqual({ written: 1, deleted: 1, unchanged: 0, total: 1 });
+    expect(await syncTable(query, "companies", [a2], { now: "t3" })).toEqual({ written: 1, deleted: 1, unchanged: 0, deferred: 0, total: 1 });
     const rows = await query("SELECT number, lead_score, turnover_gbp, updated_at, details, row FROM companies");
     expect(rows.map((r) => [r.number, r.lead_score, r.turnover_gbp, r.updated_at, r.details])).toEqual([["01", 75, 41000000, "t3", null]]);
     expect(JSON.parse(rows[0].row).company_name).toBe("A LTD");
@@ -93,25 +93,60 @@ describe("Database (D1) mirror", () => {
     const verdict = { 10000007: { verdict: "not_fit", reason: "Too small" } };
     const recs = buildRecords({ list: { rows }, ranked: { group_of: groups }, marks: { contacted, verdict }, today });
     await syncTable(query, "companies", recs.companies);
-    await syncTable(query, "marks", recs.marks);
+    await query("INSERT INTO meta (key, value) VALUES ('synced', ?1)", [JSON.stringify({ at: "2026-11-14T20:00:00Z", deferred: 0 })]);
+    const marks = { contacted: Object.keys(contacted), notFit: Object.keys(verdict) };
     // the page's own plan on the same rows
     setKnownGroups(groups);
     const scored = withLeadScores(rows.map((r) => (verdict[r.company_number] ? { ...r, qualified: "Out" } : r)), { today });
     const plan = outreachPlan(scored, { contacted, letters: 10, today });
     for (const list of ["letter", "call", "email"]) {
-      const page = await outreachPage(query, { list, limit: 500, letters: 10 });
+      const page = await outreachPage(query, { list, limit: 500, letters: 10, ...marks });
+      expect(page.complete).toBe(true);
       expect(page.rows.map((r) => r.company_number)).toEqual(plan[list].map((r) => r.company_number));
       expect(page.counts[list]).toBe(plan[list].length);
       expect(page.rows.map((r) => r.why_now)).toEqual(plan[list].map((r) => r.why_now));
     }
-    const letter = await outreachPage(query, { list: "letter", limit: 3, offset: 2, letters: 10 });
+    const letter = await outreachPage(query, { list: "letter", limit: 3, offset: 2, letters: 10, ...marks });
     expect(letter.rows.map((r) => r.outreach_rank)).toEqual([3, 4, 5]);                     // a page at a time
-    // a Contacted saved on the page drops the company (and its group) at once
-    const first = (await outreachPage(query, { list: "letter", limit: 1, letters: 10 })).rows[0].company_number;
-    await setMark(query, first, "contacted", { at: "2026-11-14", touches: 1 });
-    expect((await outreachPage(query, { list: "letter", limit: 1, letters: 10 })).rows[0].company_number).not.toBe(first);
-    await setMark(query, first, "contacted", null);
-    expect((await outreachPage(query, { list: "letter", limit: 1, letters: 10 })).rows[0].company_number).toBe(first);
+    // a Contacted saved on the page (in the store) drops the company — and its group — at once, database written or not
+    const first = (await outreachPage(query, { list: "letter", limit: 1, letters: 10, ...marks })).rows[0].company_number;
+    const after = await outreachPage(query, { list: "letter", limit: 1, letters: 10, ...marks, contacted: [...marks.contacted, first] });
+    expect(after.rows[0].company_number).not.toBe(first);
+    expect((await outreachPage(query, { list: "letter", limit: 1, letters: 10, ...marks })).rows[0].company_number).toBe(first);
+    // a copy cut short by the daily budget isn't served: the page ranks in the browser until a full copy
+    await query("UPDATE meta SET value = ?1 WHERE key = 'synced'", [JSON.stringify({ at: "x", deferred: 5 })]);
+    expect((await outreachPage(query, { list: "letter", limit: 1, letters: 10 })).complete).toBe(false);
     setKnownGroups({});
+  });
+  it("keeps to a write budget, best first, and leaves the rest for the next sync", async () => {
+    const { query } = memoryDb();
+    await applySchema(query);
+    const recs = Array.from({ length: 10 }, (_, i) => companyRecord({ company_number: `0${i}`, company_name: `C${i}` }, { source: "list", score: 100 - i }));
+    expect(await syncTable(query, "companies", recs, { budget: 4 })).toMatchObject({ written: 4, deferred: 6 });
+    expect((await query("SELECT number FROM companies ORDER BY number")).map((r) => r.number)).toEqual(["00", "01", "02", "03"]);
+    expect(await syncTable(query, "companies", recs, { budget: 100 })).toMatchObject({ written: 6, unchanged: 4, deferred: 0 });
+    expect(await syncTable(query, "companies", recs.slice(0, 7), { budget: 2 })).toMatchObject({ deleted: 2, deferred: 1 });
+  });
+  it("doesn't rewrite a company when only the figures in its reasons move (a currency's %, a fading moment)", () => {
+    const rec = (pct) => companyRecord({ company_number: "01" }, { source: "list", score: 60,
+      lead: { score: 60, parts: [[`Its currency moved: the pound up ${pct}% against USD in a week`, 10]], flags: {} } });
+    expect(rec("3.1").hash).toBe(rec("3.4").hash);
+    expect(JSON.parse(rec("3.4").lead).parts[0][0]).toContain("3.4%");
+    const other = companyRecord({ company_number: "01" }, { source: "list", score: 60,
+      lead: { score: 60, parts: [["FX loss of £80k", 10]], flags: {} } });
+    expect(other.hash).not.toBe(rec("3.1").hash);
+  });
+  it("remakes the tables once for a new layout: one row per record, no indexes", async () => {
+    const { query } = memoryDb();
+    await query("CREATE TABLE companies (number TEXT PRIMARY KEY, x TEXT)");
+    await query("CREATE INDEX companies_score ON companies (x)");
+    await query("CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT)");
+    await query("INSERT INTO meta VALUES ('synced', '{\"at\":\"old\"}')");
+    expect(await applySchema(query)).toBe(true);
+    expect(await applySchema(query)).toBe(false);
+    const objects = await query("SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'");
+    expect(objects.filter((o) => o.type === "index")).toEqual([]);
+    expect(objects.filter((o) => o.type === "table" && o.name !== "meta").every((o) => /WITHOUT ROWID/.test(o.sql))).toBe(true);
+    expect(await query("SELECT key FROM meta ORDER BY key")).toEqual([{ key: "schema" }]);
   });
 });

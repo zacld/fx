@@ -529,14 +529,24 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `signals` — alerts, deals, customs moments; `marks` — contacted, notes, verdict, check, email; `meta`), shared by the
   Functions (binding `FX_DB`, `d1Query`) and the workflows (`scripts/d1.mjs`, Cloudflare's HTTP API; needs **Account →
   D1: Edit** on `CLOUDFLARE_API_TOKEN` — without it everything skips with a note and the site runs from the store).
-  `cloudflare-setup.mjs` creates the database `fx-dashboard-db`, its tables and the binding on deploy. **Stage 1
+  `cloudflare-setup.mjs` creates the database `fx-dashboard-db` and the binding on deploy (never writes to it; the syncs
+  make the tables). **Free plan's daily limits** (14 Nov 2026: the first day's syncs hit 100,000 rows written — every
+  index entry counts as a row, and every company was rewritten): `SCHEMA_VERSION` 2 — tables `WITHOUT ROWID`, no
+  secondary indexes (one row written per record; a version change drops and remakes them, refilled by the next sync);
+  the hash ignores figures in the lead score's reasons (a currency's % move, a fading moment) so a company is rewritten
+  only when something real changes; each sync keeps to `DAILY_WRITES` (60,000 a day, counted from D1's own
+  `rows_written`, meta `writes`), marks and signals first, then companies best lead score first, the rest `deferred` to
+  the next sync; a sync that meets Cloudflare's limit says so and stops cleanly. The Outreach view takes Contacted and Not
+  a fit from the store (right even when the database can't be written; contacted groups by key lookups, group members
+  in one GROUP BY, so rows read stay low) and isn't served until a full copy exists (`complete`): the page ranks in the
+  browser meanwhile. **Stage 1
   (now): a mirror** — `scripts/db-sync.mjs` (step "Database" after the finder upload, the Niche hits ranking and each
   Alerts save; `continue-on-error`) builds every record from the store (`buildRecords`: the page's own `leadScore`,
   `groupKey`, niche corrections, ruled-out reasons) and writes only rows whose hash changed (`syncTable`: batched
   `INSERT … SELECT FROM json_each(?)`, one parameter a batch; deletes what's gone), then checks the database's counts
   against the store's ("match" / "MISMATCH" fails the step). GET `?view=db` says whether the site sees it, when it
   was last copied and how many rows. Tested on Node's own SQLite (`src/db.test.js`). **Stage 2 (started)**: the sync
-  also stores each company's outreach inputs (`COLUMNS`, added by `applySchema` when missing: `held` — a serious reason
+  also stores each company's outreach inputs (columns `held` — a serious reason
   not to progress — `timely`, `hit`, `shy`, `lead` — the score's parts); GET `?view=outreach&list=letter|call|email&offset
   &limit` ranks the **Outreach tab** in SQL (`outreachPage`: one per group by window function, contacted groups and Not
   a fit left out, the top 40 the letter, then cold call / email by the timely reason — the same lists as `outreachPlan`,

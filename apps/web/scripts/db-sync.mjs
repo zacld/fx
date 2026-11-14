@@ -62,8 +62,21 @@ export function buildRecords({ list, details = [], filingRows = [], ranked = {},
   return { companies, signals, marks: markRows };
 }
 
+// The free plan's daily limit is 100,000 rows written (reset at midnight UTC); the syncs keep to DAILY_WRITES of it,
+// leaving the rest for the page's own saves. The day's writes so far are kept in meta ("writes": {day, rows}, from D1's
+// own counts); a sync past the budget writes the best companies first and leaves the rest for the next.
+export const DAILY_WRITES = 60_000;
+export const LIMIT_HIT = /limit exceeded|too many requests|daily.*limit|7429|exceeded/i;
+
 async function main() {
-  const db = await openD1();
+  let db;
+  try {
+    db = await openD1();
+  } catch (e) {
+    if (!LIMIT_HIT.test(e.message)) throw e;
+    console.log(`Database: Cloudflare's daily limit reached (${e.message.slice(0, 120)}) — skipped; it resets at midnight UTC, the site runs from the store meanwhile`);
+    return;
+  }
   if (!db) return;
   const store = await openStore(STORE);
   const get = (k) => store.get(k, "json").catch(() => null);
@@ -77,18 +90,47 @@ async function main() {
   const records = buildRecords({ list: list || {}, details, filingRows, ranked: ranked || {}, niches: niches || {}, alerts: alerts || {},
     deals: deals || {}, moments: moments || {}, moves,
     marks: { contacted: contacted || {}, notes: notes || {}, verdict: verdicts || {}, check: checks || {}, email: emails || {} } });
+  records.companies.sort((a, b) => (b.lead_score ?? -1e9) - (a.lead_score ?? -1e9));   // the best first, if the budget runs short
   const now = new Date().toISOString();
+  const day = now.slice(0, 10);
+  const [w] = await db.query("SELECT value FROM meta WHERE key = 'writes'");
+  const before = w ? JSON.parse(w.value) : {};
+  const usedToday = (before.day === day ? Number(before.rows) || 0 : 0) + db.used.written;
+  let budget = Math.max(0, DAILY_WRITES - usedToday);
+  if (db.remade) console.log("Database: tables remade for the new layout (one row written per record, no indexes) — filling them again");
+  console.log(`Database: ${usedToday.toLocaleString()} rows written today so far; this sync may write ${budget.toLocaleString()}`);
   const out = {};
-  for (const table of ["companies", "signals", "marks"]) out[table] = await syncTable(db.query, table, records[table], { now });
-  await db.query("INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
-    ["synced", JSON.stringify({ at: now, list_made_at: list?.made_at || "", counts: Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.total])) })]);
-  const bySource = await db.query("SELECT source, COUNT(*) AS n FROM companies GROUP BY source");
-  for (const [table, r] of Object.entries(out)) {
-    console.log(`Database ${table}: ${r.total.toLocaleString()} (${r.written.toLocaleString()} written, ${r.deleted.toLocaleString()} deleted, ${r.unchanged.toLocaleString()} unchanged)`);
+  try {
+    for (const table of ["marks", "signals", "companies"]) {   // the small tables first: Zac's marks always fit
+      const start = db.used.written;
+      out[table] = await syncTable(db.query, table, records[table], { now, budget });
+      budget = Math.max(0, budget - (db.used.written - start));
+    }
+  } catch (e) {
+    if (!LIMIT_HIT.test(e.message)) throw e;
+    console.log(`Database: Cloudflare's daily write limit reached part-way (${e.message.slice(0, 120)}) — the rest goes on the next sync after midnight UTC`);
   }
+  const total = usedToday + db.used.written;
+  try {
+    await db.query("INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
+      ["writes", JSON.stringify({ day, rows: total + 2 })]);
+    await db.query("INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
+      ["synced", JSON.stringify({ at: now, list_made_at: list?.made_at || "", counts: Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.total])),
+        deferred: Object.values(out).reduce((n, v) => n + v.deferred, 0) })]);
+  } catch (e) {
+    if (!LIMIT_HIT.test(e.message)) throw e;
+  }
+  for (const [table, r] of Object.entries(out)) {
+    console.log(`Database ${table}: ${r.total.toLocaleString()} (${r.written.toLocaleString()} written, ${r.deleted.toLocaleString()} deleted, ` +
+                `${r.unchanged.toLocaleString()} unchanged${r.deferred ? `, ${r.deferred.toLocaleString()} left for the next sync (daily budget)` : ""})`);
+  }
+  console.log(`Database: ${db.used.written.toLocaleString()} rows written and ${db.used.read.toLocaleString()} read by this sync; ` +
+              `${total.toLocaleString()} of the ${DAILY_WRITES.toLocaleString()} budget (Cloudflare's limit 100,000) used today`);
+  if (Object.values(out).some((r) => r.deferred) || Object.keys(out).length < 3) return;   // not a full copy: nothing to check yet
+  const bySource = await db.query("SELECT source, COUNT(*) AS n FROM companies GROUP BY source");
   const expect = { list: (list?.rows || []).length, filings: records.companies.filter((c) => c.source === "filings").length };
   const got = Object.fromEntries(bySource.map((r) => [r.source, Number(r.n)]));
-  const match = got.list === expect.list && (got.filings || 0) === expect.filings;
+  const match = (got.list || 0) === expect.list && (got.filings || 0) === expect.filings;
   console.log(`Check: Accounts list ${got.list ?? 0} in the database v ${expect.list} in the store; FX filings ${got.filings ?? 0} v ${expect.filings} — ${match ? "match" : "MISMATCH"}`);
   if (!match) process.exitCode = 1;
 }

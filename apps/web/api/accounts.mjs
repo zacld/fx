@@ -294,7 +294,10 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     const list = ["letter", "call", "email"].includes(params.get("list")) ? params.get("list") : "letter";
     const limit = Math.min(Math.max(Number(params.get("limit")) || 50, 1), 500);
     const offset = Math.max(Number(params.get("offset")) || 0, 0);
-    const page = await outreachPage(db, { list, offset, limit, letters: OUTREACH.letters });
+    const [contacted, verdicts] = await Promise.all([CONTACTED_KEY, VERDICTS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    const notFit = Object.entries(verdicts || {}).filter(([, v]) => v?.verdict === "not_fit").map(([n]) => n);
+    const page = await outreachPage(db, { list, offset, limit, letters: OUTREACH.letters, contacted: Object.keys(contacted || {}), notFit });
+    if (!page.complete) return reply({ error: "the database is still being filled" }, 404);   // the page ranks in the browser
     const rows = page.rows.map((r) => ({ ...r, outreach_list: list, outreach_why: outreachWhy(r, list, { letters: OUTREACH.letters, total: page.total }) }));
     return reply({ list, offset, limit, rows, counts: page.counts, total: page.total, synced_at: page.synced_at, source: "database" }, 200);
   }
