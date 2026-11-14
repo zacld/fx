@@ -103,6 +103,20 @@ describe("/api/accounts", () => {
     expect((await (await post({ company_number: "01234567", crm_checked: false })).json()).checks).toEqual({});
   });
 
+  it("keeps Zac's verdicts (good / not a fit with a listed reason) and returns them with the list", async () => {
+    const s = memory();
+    s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }] };
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const post = (body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer s3cret" }, body: JSON.stringify(body) }), opts);
+    expect((await post({ company_number: "01234567", verdict: "client" })).status).toBe(400);
+    expect((await post({ company_number: "01234567", verdict: "not_fit", reason: "Already banks with us" })).status).toBe(400);
+    const v = await (await post({ company_number: "01234567", verdict: "not_fit", reason: "Too small" })).json();
+    expect([v.verdicts["01234567"].verdict, v.verdicts["01234567"].reason]).toEqual(["not_fit", "Too small"]);
+    const got = await (await handle(new Request("https://x/api/accounts", { headers: { authorization: "Bearer s3cret" } }), opts)).json();
+    expect(Object.keys(got.verdicts)).toEqual(["01234567"]);
+    expect((await (await post({ company_number: "01234567", verdict: null })).json()).verdicts).toEqual({});
+  });
+
   it("serves the alerts and the leads they found", async () => {
     const s = memory();
     const opts = { password: "s3cret", store: s, delay: 0 };

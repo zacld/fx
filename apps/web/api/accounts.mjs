@@ -19,6 +19,8 @@ import { applyContact, invalidChange } from "../src/accounts/followups.js";
 export const STORE = "fx-accounts";
 export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
+export const VERDICTS_KEY = "verdicts";     // {company_number: {verdict: "good" | "not_fit", reason, at}} — Zac's review
+export const VERDICT_REASONS = ["Too small", "Too big", "No real FX", "Wrong sector", "FX run abroad", "Other"];
 export const CHECKS_KEY = "checks";         // {company_number: {crm: iso}} — the lead checklist's "CRM checked" tick
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index
@@ -168,6 +170,18 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
       await blobs.setJSON(EMAILS_KEY, emails);
       return reply({ emails }, 200);
     }
+    if ("verdict" in body) {   // Zac's review of a lead: good / not a fit (with a reason) / cleared — never a bank record
+      const ok = body.verdict === null || body.verdict === "good" ||
+        (body.verdict === "not_fit" && (!body.reason || VERDICT_REASONS.includes(body.reason)));
+      if (!COMPANY_NUMBER.test(number || "") || !ok) {
+        return reply({ error: `send {company_number, verdict: "good" | "not_fit" | null, reason?: ${VERDICT_REASONS.join(" | ")}}` }, 400);
+      }
+      const verdicts = (await blobs.get(VERDICTS_KEY, { type: "json" })) || {};
+      if (body.verdict) verdicts[number] = { verdict: body.verdict, ...(body.reason ? { reason: body.reason } : {}), at: new Date().toISOString() };
+      else delete verdicts[number];
+      await blobs.setJSON(VERDICTS_KEY, verdicts);
+      return reply({ verdicts }, 200);
+    }
     if ("crm_checked" in body) {   // the lead checklist's own tick: Zac checked the bank's CRM (kept here as a date only)
       if (!COMPANY_NUMBER.test(number || "") || typeof body.crm_checked !== "boolean") {
         return reply({ error: "send {company_number, crm_checked: true | false}" }, 400);
@@ -233,8 +247,8 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, files_rescanned_r3: _r3, files_rescanned_r4: _r4, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
-  const [data, marks, noted, status, emails, checks] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY, CHECKS_KEY]
+  const [data, marks, noted, status, emails, checks, verdicts] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY, CHECKS_KEY, VERDICTS_KEY]
     .map((k) => blobs.get(k, { type: "json" })));
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);
-  return reply({ ...data, contacted: marks || {}, notes: noted || {}, status: status || {}, emails: emails || {}, checks: checks || {} }, 200);
+  return reply({ ...data, contacted: marks || {}, notes: noted || {}, status: status || {}, emails: emails || {}, checks: checks || {}, verdicts: verdicts || {} }, 200);
 }

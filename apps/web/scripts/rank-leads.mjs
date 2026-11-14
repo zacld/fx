@@ -4,11 +4,14 @@
 // Reads the Accounts list, the Recent FX filings list, the measured niches and the alerts from the site's private store.
 // Prints counts, company names, scores and niche learnings — no people's names (the repo is public).
 import { readFile, writeFile } from "node:fs/promises";
-import { ALERTS_KEY, DEALS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
-import { filedMonth, nicheLearnings, rankLeads } from "../src/accounts/ranking.js";
+import { ALERTS_KEY, DEALS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+import { filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
-const [enrichPath, orderPath] = process.argv.slice(2);   // orderPath: company numbers, best lead first (find_domains.py)
+// orderPath: company numbers, best lead first (find_domains.py); groupsPath: each company's top UK parent (psc_deals.py)
+const [enrichPath, orderPath, groupsPath] = process.argv.slice(2);
+let groupOf = {};
+try { groupOf = groupsPath ? (JSON.parse(await readFile(groupsPath, "utf8")).groups || {}) : {}; } catch { /* no groups this run */ }
 const enrich = enrichPath ? (JSON.parse(await readFile(enrichPath, "utf8")).companies || {}) : {};
 const store = await openStore(STORE);
 const [list, index, niches, alerts, deals] = await Promise.all([KEY, FILINGS_KEY, NICHES_KEY, ALERTS_KEY, DEALS_KEY].map((k) => store.get(k, "json")));
@@ -18,8 +21,10 @@ const listRows = list?.rows || [];
 
 const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) });
 const learn = nicheLearnings(scored);
+const verdicts = (await store.get(VERDICTS_KEY, "json")) || {};
+const reviewed = verdictLearnings(scored, verdicts, { shyOf: shy_of });
 const made_at = new Date().toISOString();
-await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, niches: learn });
+await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, niches: learn, verdicts: reviewed });
 
 const live = scored.filter((s) => !s.absurd);
 if (orderPath) await writeFile(orderPath, JSON.stringify(live.map((s) => s.company_number)));
@@ -39,11 +44,20 @@ live.slice(0, 30).forEach((s, i) => console.log(`${String(i + 1).padStart(3)}. $
 console.log("\nNiches by average lead score (8+ leads):");
 console.log("  avg  leads  60+  band  FX loss  ruled out  niche");
 for (const n of learn) console.log(`${String(n.avg).padStart(5)} ${String(n.leads).padStart(6)} ${String(n.strong).padStart(4)} ${String(n.band).padStart(5)} ${String(n.loss).padStart(8)} ${String(n.ruled_out).padStart(10)}  ${n.niche}`);
+const byGroup = {};
+for (const s of live) { const g = groupOf[s.company_number]; if (g?.hops) (byGroup[g.top] ||= { name: g.top_name, members: [] }).members.push(s); }
+const multi = Object.values(byGroup).filter((g) => g.members.length > 1).sort((a, b) => b.members.length - a.members.length);
+console.log(`\nGroups: ${Object.keys(byGroup).length} groups among the leads; ${multi.length} with 2+ leads (${multi.reduce((n, g) => n + g.members.length, 0)} leads → ${multi.length} rows)`);
+multi.slice(0, 10).forEach((g) => console.log(`  ${String(g.members.length).padStart(3)}  ${g.name}: ${g.members.slice(0, 4).map((s) => s.company_name).join("; ")}`));
 const shyBy = {};
 for (const s of live) if (shy_of[s.company_number]) (shyBy[shy_of[s.company_number].niche] ||= []).push(s);
 console.log(`\nHard to broker: ${Object.values(shyBy).flat().length} leads`);
 for (const [niche, list] of Object.entries(shyBy).sort((a, b) => b[1].length - a[1].length)) {
   console.log(`  ${String(list.length).padStart(4)}  ${niche}: ${list.slice(0, 4).map((s) => `${s.company_name} (${s.score})`).join("; ")}`);
+}
+console.log(`\nYour verdicts: ${reviewed.reviewed} leads reviewed` + (reviewed.reviewed ? ` — not a fit because: ${Object.entries(reviewed.reasons).map(([k, n]) => `${k} ${n}`).join(", ") || "none"}` : ""));
+for (const kind of ["source", "band", "niche", "sector"]) {
+  for (const g of reviewed[kind].slice(0, kind === "niche" ? 15 : 10)) console.log(`  ${kind.padEnd(6)} ${String(g.good_share).padStart(3)}% good (${g.good}/${g.reviewed})  ${g.key}`);
 }
 const reasons = {};
 for (const [number, why] of Object.entries(ruled_out)) {

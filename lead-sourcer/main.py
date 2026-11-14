@@ -474,6 +474,14 @@ FILINGS_NICHE = {
 # Share of a run's slots the FX filings scan's strongest finds may take before the customs and niche candidates.
 FILINGS_PRIORITY_SHARE = float(os.environ.get("FILINGS_PRIORITY_SHARE", "0.7"))   # Nov 2026: 0.5 -> 0.7, to work through the filings backlog
 FILINGS_PRIORITY_MIN_SCORE = 50
+# The modern slavery statement registry (sourcer/mss.py): £36m+ private companies whose supply chain runs abroad or
+# whose sector is goods trade, checked with the FX filings scan's finds (MSS_DISCOVERY=1, set in the finder workflow).
+MSS_NICHE = {
+    "id": "_modern_slavery", "name": "Supply chain abroad (modern slavery statement)", "sic_codes": [], "currency_pairs": [],
+    "exposure_reason": "Its modern slavery statement (turnover £36m+) names supply-chain countries abroad or a goods-trade "
+                       "sector.", "call_angle": "",
+}
+MSS_FOUND: dict[str, dict] = {}
 FX_LOSS_PRIORITY = 100_000   # an FX loss this big in the filings list: checked first in the finder, whatever its score
 
 
@@ -503,6 +511,12 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
                              "filed_fx_score": 60 if d.get("kind") in ("pe_buyout", "acquired") else 50})
     except (OSError, ValueError):
         pass
+    if os.environ.get("MSS_DISCOVERY", "0") == "1":   # on in the finder workflow (a network download)
+        from sourcer import mss
+        MSS_FOUND.update(mss.load())
+        rows += [{"company_number": n, "company_name": c["name"], "filed_fx_score": c["score"]} for n, c in MSS_FOUND.items()]
+        print(f"  Modern slavery statements: {len(MSS_FOUND):,} private companies in the band with a supply chain abroad "
+              f"or a goods sector ({sum(1 for c in MSS_FOUND.values() if c['countries']):,} naming countries)")
     if not rows:
         return {}
     # ranked by filed FX proof (less ABROAD_RULES points when the FX is probably run abroad), moved up +25, an FX loss
@@ -868,6 +882,7 @@ def run_pipeline(
     websites: bool = True,
     news_check: bool = True,
     registry_check: bool = True,
+    contacts: bool = True,
     priority: Optional[dict[str, float]] = None,
 ) -> list[dict]:
     """
@@ -959,7 +974,7 @@ def run_pipeline(
         elif trade:
             niche = trader_niche(trade)
         elif company["company_number"] in (priority or {}):
-            niche = FILINGS_NICHE
+            niche = MSS_NICHE if company["company_number"] in MSS_FOUND else FILINGS_NICHE
         elif matching_niches:
             niche = BROAD_SECTOR_NICHE   # only catch-all codes: a candidate, but no niche claimed
         else:
@@ -1248,7 +1263,7 @@ def run_pipeline(
         known = finance_contact(p["args"][3], p["kwargs"]["facts"] or {}, sites.get(number), in_news.get(number),
                                 filed.get(number))
         officer = next((o for o in p["args"][3] if known and people.same_person(o["name"], known["name"])), None)
-        if api_key and officer and known["confidence"] in (people.LIKELY, people.GUESS):
+        if contacts and api_key and officer and known["confidence"] in (people.LIKELY, people.GUESS):
             related = companies_house.name_words(company["company_name"]) | companies_house.name_words(
                 parents.get(number, ("", ""))[1])
             found = companies_house.officer_appointments(officer.get("appointments_url", ""), api_key, related)
@@ -1416,6 +1431,9 @@ def parse_args() -> argparse.Namespace:
                         help="Don't check the news for finance appointments")
     parser.add_argument("--no-registries", action="store_true",
                         help="Don't load the gender pay gap and modern slavery registries")
+    parser.add_argument("--no-contacts", action="store_true",
+                        help="Discovery only: no finance-contact hunt (implies --no-websites --no-news --no-registries and no "
+                             "officer-appointment calls) — Cognism finds the people (Zac, 14 Nov 2026)")
     parser.add_argument("--no-turnover-check", action="store_true", help="Don't read filed accounts; go on accounts category alone (fewer API calls)")
     parser.add_argument("--hmrc-months", type=int, default=DEFAULT_HMRC_MONTHS, metavar="N",
                         help=f"Months of HMRC importer/exporter records to load, 0 to skip (default: {DEFAULT_HMRC_MONTHS})")
@@ -1446,9 +1464,10 @@ def main() -> None:
             band_min=parse_positive_int(args.band_min, "band_min"),
             band_max=parse_positive_int(args.band_max, "band_max"),
             own_bank=args.own_bank,
-            websites=not args.no_websites,
-            news_check=not args.no_news,
-            registry_check=not args.no_registries,
+            websites=not (args.no_websites or args.no_contacts),
+            news_check=not (args.no_news or args.no_contacts),
+            registry_check=not (args.no_registries or args.no_contacts),
+            contacts=not args.no_contacts,
             turnover_check=not args.no_turnover_check,
             max_enrich=args.max_enrich,
             hmrc_months=max(args.hmrc_months, 0),

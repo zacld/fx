@@ -17,11 +17,9 @@ name: FX company finder
 #      company banks with, recent triggers (new owner, refinancing, new
 #      director), when to call, and group roll-ups; splits into Core /
 #      Above / Below the band.
-# Then a web search per checked company confirms who runs the finance: search APIs
-# with keys (secrets SEARCH1API_KEY, TAVILY_API_KEY, EXA_API_KEY, SERPER_API_KEY), each
-# within its monthly allowance; at most SEARCH_MAX_PER_RUN searches a run (default 150).
-# Runs every weekday morning; searched companies are cached for 60 days, so each morning's
-# searches go to companies not yet checked.
+# No finance-contact hunt since 14 Nov 2026 (--no-contacts: no web searches, team pages, news or registry lookups —
+# Cognism finds the people); the run's time goes to checking more companies. tools/confirm_contacts.py is kept
+# but no longer run.
 # Output: the dashboard's password-protected Accounts page (no run attachments: the repo is public).
 # Nothing is committed and nobody is contacted. Logs print aggregate counts only.
 #
@@ -39,7 +37,7 @@ on:
       max_enrich:
         description: "How many companies to check (under 200 = a test run: the Accounts page is left as it is)"
         required: false
-        default: "1200"
+        default: "3500"
       own_bank:
         description: "Your bank's name — its existing clients get flagged (blank = repository variable OWN_BANK, else Investec)"
         required: false
@@ -98,7 +96,7 @@ jobs:
           path: ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip
           key: ch-bulk-v2-${{ steps.month.outputs.month }}
 
-      # gov.uk gender pay gap and modern slavery registries (finance-contact names), refreshed monthly.
+      # gov.uk modern slavery registry (a discovery source: sourcer/mss.py) and gender pay gap files, refreshed monthly.
       - name: Restore the gov.uk registry files
         id: registries
         uses: actions/cache/restore@v4
@@ -128,14 +126,6 @@ jobs:
           key: register-${{ github.run_id }}
           restore-keys: register-
 
-      # Search results are kept for 60 days, so a company re-checked within that costs no credits. Restored before
-      # the finder too: the company's own web address in last run's results is tried for its website.
-      - name: Restore search results
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cache/fx-lead-sourcer/search
-          key: search-${{ github.run_id }}
-          restore-keys: search-
 
       # The FX filings scan's list (Recent FX filings tab): its strongest finds — filed FX proof 50+, or moved up from
       # small accounts — are checked first (main.priority_from_filings). Missing or unreachable: the run goes on without.
@@ -168,9 +158,12 @@ jobs:
           DISCOVERIES_FILE: discoveries.json
           NICHE_STATS_FILE: niche_stats.json
           DEALS_FILE: deals.json
+          # the modern slavery statement registry (£36m+, supply chain abroad / goods sector): checked with the
+          # FX filings scan's finds (sourcer/mss.py; the yearly files cached with the gov.uk registry files)
+          MSS_DISCOVERY: "1"
           # Stops starting new companies after this (the rest wait for the next run, their lookups cached),
-          # leaving time for the contact search, the cache save and the upload inside the job's 240 minutes.
-          FINDER_BUDGET_MIN: "140"
+          # leaving time for the cache save and the upload inside the job's 240 minutes.
+          FINDER_BUDGET_MIN: "180"
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           CH_RATE_LIMIT_SECONDS: "0.8"   # leaves headroom on the key the discovery pipeline also uses
           PYTHONUNBUFFERED: "1"
@@ -183,10 +176,14 @@ jobs:
           # scanned filings); a filing once read is cached 90 days. Customs-proven traders are checked first.
           # slots for companies still in the running (ones already known to be out don't take one); 1,200 fits
           # now that websites and news are cached for a week
-          DEFAULT_ENRICH: "2000"   # Nov 2026: 1,200 -> 2,000 (a run checked 1,200 in ~12 min of its 140)
+          # 14 Nov 2026: 2,000 -> 3,500, contact hunt off (Zac: "we have Cognism") — a run checked its 2,000 in 13 min of
+          # its 140, nearly all from the cache: only ~30 new companies a night while ~39,000 candidates waited. Now the
+          # time budget sets the pace (~9s per new company): a night that runs out uploads what it reached and keeps
+          # the rest of the last list (upload --carry); the next night carries on from the cache.
+          DEFAULT_ENRICH: "3500"
         run: |
           priority=""; [ -s fx-filings.json ] && priority="--priority-file fx-filings.json"
-          python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv $priority
+          python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv --no-contacts $priority
 
       - name: Save Companies House lookups
         if: always()
@@ -220,34 +217,6 @@ jobs:
           path: ~/.cache/fx-lead-sourcer/hmrc
           key: hmrc-v2-${{ steps.month.outputs.month }}
 
-      # Who really runs the finance: a Google search (Search1API) per checked company, best first,
-      # re-grading the finance contact. Skipped (list still written) without the SEARCH1API_KEY secret.
-      - name: Confirm finance contacts
-        id: confirm
-        continue-on-error: true
-        working-directory: lead-sourcer
-        env:
-          # Search APIs used in this order, each within its monthly allowance (free tiers first).
-          SEARCH1API_KEY: ${{ secrets.SEARCH1API_KEY }}
-          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
-          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
-          SEARCH1API_MONTHLY: ${{ vars.SEARCH1API_MONTHLY || '200' }}
-          TAVILY_MONTHLY: ${{ vars.TAVILY_MONTHLY || '1000' }}
-          EXA_MONTHLY: ${{ vars.EXA_MONTHLY || '500' }}
-          SERPER_MONTHLY: ${{ vars.SERPER_MONTHLY || '2500' }}   # Serper's 2,500 free sign-up searches (one-off)
-          SEARCH_MAX_PER_RUN: ${{ vars.SEARCH_MAX_PER_RUN || '150' }}   # clears the backlog; back to ~75 once Serper's credits are spent
-          PYTHONUNBUFFERED: "1"
-        run: python tools/confirm_contacts.py fx_companies.csv --output fx_companies.xlsx --csv-out fx_companies_confirmed.csv
-
-      # Saved even if the search step fails part-way: the searches it made were paid for.
-      - name: Save search results
-        if: always()
-        continue-on-error: true
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cache/fx-lead-sourcer/search
-          key: search-${{ github.run_id }}
 
       # No run attachments: on a public repo anyone with a GitHub account could download them, and the list
       # names finance directors. The list goes only to the password-protected Accounts page below (CSV export there).
@@ -262,9 +231,7 @@ jobs:
         continue-on-error: true
         working-directory: lead-sourcer
         run: |
-          list=fx_companies.csv
-          [ -f fx_companies_confirmed.csv ] && list=fx_companies_confirmed.csv
-          python tools/to_accounts_json.py "$list" --output accounts.json
+          python tools/to_accounts_json.py fx_companies.csv --output accounts.json
 
       - uses: actions/setup-node@v4
         if: steps.accounts.outcome == 'success'
@@ -290,14 +257,12 @@ jobs:
           if [ -n "$MAX_ENRICH" ] && [ "$MAX_ENRICH" -lt 200 ]; then
             echo "Test run ($MAX_ENRICH companies): Accounts page not updated"; exit 0
           fi
-          if [ -f lead-sourcer/finder_partial.txt ]; then
-            echo "Time budget used before every company was checked: Accounts page not updated (the next run carries on from the cache)"; exit 0
-          fi
+          carry=""; [ -f lead-sourcer/finder_partial.txt ] && carry="--carry"   # companies not reached tonight stay
           npm ci --workspace apps/web --no-audit --no-fund
-          node apps/web/scripts/upload-accounts.mjs lead-sourcer/accounts.json
+          node apps/web/scripts/upload-accounts.mjs lead-sourcer/accounts.json $carry
 
       # The Accounts page's freshness strip: this run's outcome (ok / partial: the time budget ran out before every
-      # company was checked / failed) and the search allowance left. Not for small test runs.
+      # company was checked / failed). Not for small test runs.
       - name: Record the outcome (Accounts page freshness strip)
         if: always() && (inputs.max_enrich == '' || inputs.max_enrich == null || fromJSON(inputs.max_enrich) >= 200)
         env:
@@ -306,4 +271,4 @@ jobs:
         run: |
           state=failed; [ "${{ steps.upload.outcome }}" = success ] && state=ok
           [ -f lead-sourcer/finder_partial.txt ] && state=partial
-          node apps/web/scripts/status.mjs finder $state "" lead-sourcer/search_allowance.json
+          node apps/web/scripts/status.mjs finder $state

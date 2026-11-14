@@ -1,9 +1,9 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { filedIso, leadLine, setKnownSites, siteOf, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { filedIso, leadLine, setKnownSites, siteOf, setKnownGroups, groupOf, groupName, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
-import { applyEmail } from "../../api/accounts.mjs";
+import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
@@ -101,7 +101,7 @@ function Accounts({ data, password }) {
   useEffect(() => {
     let live = true;
     fetch(`${API}?view=ranked`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) setRanked(body); }).catch(() => {});
+      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) { setKnownGroups(body.group_of); setRanked(body); } }).catch(() => {});
     return () => { live = false; };
   }, [password]);
   const baseRows = useMemo(() => {
@@ -129,9 +129,11 @@ function Accounts({ data, password }) {
   }, [password]);
   const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, madeAt: data.made_at }),
                           [signals, data.made_at]);
-  const rows = useMemo(() => withLeadScores(baseRows, leadCtx), [baseRows, leadCtx]);
+  const rows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
+    ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
+  [baseRows, leadCtx, verdicts]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
-                                            triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false });
+                                            triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true });
   const [sort, setSort] = useState("lead");
   // Sheet (a dense, sortable grid) or Cards; remembered in this browser
   const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
@@ -139,6 +141,7 @@ function Accounts({ data, password }) {
   const [shown, setShown] = useState(PAGE);
   const [notes, setNotes] = useState(data.notes || {});
   const [checks, setChecks] = useState(data.checks || {});
+  const [verdicts, setVerdicts] = useState(data.verdicts || {});
   const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
 
@@ -245,6 +248,19 @@ function Accounts({ data, password }) {
     }
   }, [save, checks]);
 
+  // Zac's review of a lead (Good lead / Not a fit + reason): shown at once, undone if the save fails. Not a fit drops it
+  // from every list like "qualified Out"; the daily ranking measures each source and niche against these.
+  const setVerdict = useCallback(async (number, verdict, reason = "") => {
+    setSaveError("");
+    const before = verdicts;
+    setVerdicts((v) => { const next = { ...v }; if (verdict) next[number] = { verdict, ...(reason ? { reason } : {}), at: new Date().toISOString() }; else delete next[number]; return next; });
+    try { await save(number, { verdict: verdict || null, ...(reason ? { reason } : {}) }); } catch (e) {
+      setVerdicts(before);
+      setSaveError(`Couldn't save the verdict (${e.message}).`);
+    }
+  }, [save, verdicts]);
+  const verdictCtx = useMemo(() => ({ verdicts, setVerdict }), [verdicts, setVerdict]);
+
   const saveNote = useCallback(async (number, text) => {
     setSaveError("");
     try { await save(number, { notes: text }); return true; } catch (e) {
@@ -257,8 +273,10 @@ function Accounts({ data, password }) {
   const pairs = useMemo(() => [...new Set(rows.flatMap((r) => parts(r.currency_pairs)))].sort(), [rows]);
   const visible = useMemo(() => {
     const matched = filterRows(rows, ctx);
-    return filters.view === "contacted" ? sortFollowUps(matched, contacted) : sortRows(matched, sort);
-  }, [rows, filters, sort, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+    if (filters.view === "contacted") return sortFollowUps(matched, contacted);
+    const sorted = sortRows(matched, sort);
+    return filters.oneGroup ? collapseGroups(sorted) : sorted;   // one row per group, its best lead standing for it
+  }, [rows, filters, sort, contacted, notes, data.made_at, ranked]);   // eslint-disable-line react-hooks/exhaustive-deps
   const open = rows.filter((r) => !contacted[r.company_number]);
   const listedNumbers = useMemo(() => new Set(rows.filter((r) => !r.dropped).map((r) => r.company_number)), [rows]);
   const groupCounts = useMemo(() => {
@@ -297,13 +315,16 @@ function Accounts({ data, password }) {
   if (pageNo) {
     const r = rows.find((x) => x.company_number === pageNo);
     return (
+      <VerdictContext.Provider value={verdictCtx}>
       <CompanyPage r={r} number={pageNo} madeAt={data.made_at} mark={contacted[pageNo]} onContact={contact}
                    note={notes[pageNo]} onSaveNote={(text) => saveNote(pageNo, text)} onBack={backToList} saveError={saveError} onEmail={toEmail}
                    checks={checks} onCrm={setCrm} />
+      </VerdictContext.Provider>
     );
   }
 
   return (
+    <VerdictContext.Provider value={verdictCtx}>
     <main>
       <StatusStrip status={data.status} />
       <div className="stats">
@@ -403,6 +424,7 @@ function Accounts({ data, password }) {
           <label className="check"><input type="checkbox" checked={filters.fdOnly} onChange={(e) => set({ fdOnly: e.target.checked })} /> FD named</label>
           <label className="check"><input type="checkbox" checked={filters.triggersOnly} onChange={(e) => set({ triggersOnly: e.target.checked })} /> Triggers</label>
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>
+          <label className="check" title="Companies in the same group (one top UK parent) shown once, as the group's best lead"><input type="checkbox" checked={filters.oneGroup} onChange={(e) => set({ oneGroup: e.target.checked })} /> One per group</label>
           <div className="seg" role="group" aria-label="Layout">
             {[["sheet", "Sheet"], ["cards", "Cards"]].map(([v, label]) => (
               <button key={v} aria-pressed={layout === v} className={layout === v ? "on" : ""} onClick={() => pickLayout(v)}>{label}</button>
@@ -411,9 +433,9 @@ function Accounts({ data, password }) {
           <button className="btn-sm export" onClick={exportCsv} disabled={!visible.length}>Export Excel ({visible.length})</button>
           <button className="btn-sm" onClick={() => downloadCognism(visible, "accounts")} disabled={!visible.length}
                   title="Company, domain, postcode and the finance contact's first / last name — the columns Cognism matches on">Export for Cognism</button>
-          <button className="btn-sm" onClick={() => downloadCognismCompanies(visible, "accounts")} disabled={!visible.some(siteOf)}
+          <button className="btn-sm" onClick={() => downloadCognismCompanies(visible, "accounts")} disabled={!cognismCompanyRows(visible).length}
                   title="Only companies with a confirmed website, one row each — upload as a company list in Cognism, then search people by job title">
-            Cognism company list ({visible.filter(siteOf).length})</button>
+            Cognism company list ({cognismCompanyRows(visible).length})</button>
         </div>
         </>}
       </div>
@@ -425,7 +447,7 @@ function Accounts({ data, password }) {
        : filters.view === "calls" ? <CallToday password={password} listRows={open} lead={leadCtx} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
                                              checks={checks} onCrm={setCrm} />
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
-       : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []}
+       : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []} verdicts={ranked.verdicts}
                                              headings={signals.headings || []} onPick={(name) => set({ section: "", view: "", query: name })} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
@@ -455,6 +477,7 @@ function Accounts({ data, password }) {
       </div>
       )}
     </main>
+    </VerdictContext.Provider>
   );
 }
 
@@ -845,7 +868,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
         <span className="muted">{rows.length.toLocaleString()} of {all.length.toLocaleString()} with an FX loss</span>
         <button className="btn-sm export" onClick={() => exportLosses(rows)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "fx-losses")} disabled={!rows.length}>Export for Cognism</button>
-        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "fx-losses")} disabled={!rows.some(siteOf)}>Cognism company list ({rows.filter(siteOf).length})</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "fx-losses")} disabled={!cognismCompanyRows(rows).length}>Cognism company list ({cognismCompanyRows(rows).length})</button>
       </div>
       <p className="filings-note">Companies whose latest filed accounts show a loss on currency (exchange differences), from your Accounts list and the
         Recent FX filings scan. Each figure links to the accounts it came from; figures that failed the sense checks are left out. Companies you've
@@ -1087,7 +1110,7 @@ function CallToday({ password, listRows, lead, contacted, onContact, onOpen, onE
           £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Highest lead score first. Mark one Contacted and the next moves up.</span>
         <button className="btn-sm export" onClick={() => exportCalls(rows, checks)} disabled={!rows.length}>Export Excel ({rows.length})</button>
         <button className="btn-sm" onClick={() => downloadCognism(rows, "call-today")} disabled={!rows.length}>Export for Cognism</button>
-        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "call-today")} disabled={!rows.some(siteOf)}>Cognism company list ({rows.filter(siteOf).length})</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "call-today")} disabled={!cognismCompanyRows(rows).length}>Cognism company list ({cognismCompanyRows(rows).length})</button>
       </div>
       {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} checks={checks} onCrm={onCrm} />)}
       {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or Recent FX filings tabs.</div>}
@@ -1097,7 +1120,23 @@ function CallToday({ password, listRows, lead, contacted, onContact, onOpen, onE
 
 // The Niches tab: each niche's measured FX hit rate (tools/niche_hits.py) beside how its leads score (leads/ranked) —
 // which niches are worth the time. Clicking a niche searches the list for it.
-function Niches({ measured, madeAt, learned, headings, onPick }) {
+// Your verdicts (Good lead / Not a fit), measured by the daily ranking: where good leads come from.
+function VerdictLearnings({ v }) {
+  if (!v?.reviewed) return <p className="filings-note">Mark leads "Good lead" or "Not a fit" as you review them: each morning's ranking measures which sources, niches and score bands give good leads.</p>;
+  const table = (title, list) => list.length > 0 && (
+    <div className="verdict-table"><b>{title}</b>
+      {list.slice(0, 8).map((g) => <div key={g.key}><span className="num">{g.good_share}%</span> good ({g.good}/{g.reviewed}) · {g.key}</div>)}
+    </div>);
+  return (
+    <div className="panel verdict-panel">
+      <b>Your verdicts: {v.reviewed} leads reviewed</b>
+      {Object.keys(v.reasons).length > 0 && <span className="muted"> — not a fit: {Object.entries(v.reasons).map(([k, n]) => `${k} ${n}`).join(", ")}</span>}
+      <div className="verdict-tables">{table("By source", v.source)}{table("By lead score", v.band)}{table("By niche", v.niche)}{table("Hard to broker", v.sector)}</div>
+    </div>
+  );
+}
+
+function Niches({ measured, madeAt, learned, headings, onPick, verdicts }) {
   const [by, setBy] = useState("score");
   const learnedBy = Object.fromEntries(learned.map((n) => [n.niche, n]));
   const rows = Object.values(measured).filter((m) => m?.name).map((m) => ({ ...m, ...(learnedBy[m.name] || {}) }));
@@ -1107,6 +1146,7 @@ function Niches({ measured, madeAt, learned, headings, onPick }) {
   if (!rows.length) return <div className="list"><div className="empty">No niche measurement yet — it arrives with the next "Niche hits" run.</div></div>;
   return (
     <div className="list">
+      <VerdictLearnings v={verdicts} />
       <div className="filters filings-bar">
         <select className="input" value={by} onChange={(e) => setBy(e.target.value)} aria-label="Sort niches">
           <option value="score">Sort: measured score (FX hit rate × open)</option>
@@ -1190,12 +1230,58 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
             <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>
             <EmailButton r={r} onEmail={onEmail} />
             <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>
+            <VerdictButtons number={r.company_number} />
           </div>
         </article>
       ))}
       {!list.length && <div className="empty">Nothing yet — the year's filings are being read again for purchases and finance directors (a day or two), and the ownership register's deals arrive each morning.</div>}
     </div>
   );
+}
+
+// Zac's review of a lead: Good lead, or Not a fit with a reason (stored as his own verdict — never a bank record).
+const VerdictContext = createContext({ verdicts: {}, setVerdict: () => {} });
+function VerdictButtons({ number }) {
+  const { verdicts, setVerdict } = useContext(VerdictContext);
+  const [asking, setAsking] = useState(false);
+  const v = verdicts[number];
+  if (v) {
+    return (
+      <span className={`verdict verdict-${v.verdict}`}>
+        {v.verdict === "good" ? "Good lead" : `Not a fit${v.reason ? `: ${v.reason}` : ""}`}
+        <button className="btn-link" onClick={() => setVerdict(number, null)} title="Clear your verdict">undo</button>
+      </span>
+    );
+  }
+  if (asking) {
+    return (
+      <span className="verdict">
+        {VERDICT_REASONS.map((reason) => (
+          <button key={reason} className="btn-sm" onClick={() => { setAsking(false); setVerdict(number, "not_fit", reason); }}>{reason}</button>
+        ))}
+        <button className="btn-link" onClick={() => setAsking(false)}>cancel</button>
+      </span>
+    );
+  }
+  return (
+    <span className="verdict">
+      <button className="btn-sm" onClick={() => setVerdict(number, "good")} title="A lead worth calling — counts towards measuring which sources and niches work">Good lead</button>
+      <button className="btn-sm" onClick={() => setAsking(true)} title="Not a fit — drops it from the lists; pick why">Not a fit</button>
+    </span>
+  );
+}
+
+// The company's group (its top UK parent, from the ownership register) and the other group companies the list holds,
+// when "One per group" folded them into this row.
+function GroupChips({ r }) {
+  const name = groupName(r), abroad = groupOf(r)?.abroad;
+  const members = r.group_members || [];
+  if (!name && !members.length && !abroad) return null;
+  return (<>
+    {name && <span className="chip" title={`Top UK parent: ${name} (${groupOf(r).top})${abroad ? ` — owned by ${abroad}` : ""}`}>Group: {name}</span>}
+    {!name && abroad && <span className="chip" title="Its corporate owner is registered abroad">Owner abroad: {abroad}</span>}
+    {members.length > 0 && <span className="chip" title={members.map((m) => m.company_name).join("\n")}>+{members.length} group compan{members.length === 1 ? "y" : "ies"}</span>}
+  </>);
 }
 
 // The Hard to broker tab (Zac, 13 Nov 2026): leads in sectors payment firms often decline or restrict — scrap, bullion,
@@ -1228,8 +1314,8 @@ function HardToBroker({ rows, shyOf, onOpen, onContact, onEmail }) {
           {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
         </select>
         <button className="btn-sm export" onClick={exportShy} disabled={!list.length}>Export Excel ({list.length})</button>
-        <button className="btn-sm" onClick={() => downloadCognismCompanies(list, "hard-to-broker")} disabled={!list.some(siteOf)}>
-          Cognism company list ({list.filter(siteOf).length})</button>
+        <button className="btn-sm" onClick={() => downloadCognismCompanies(list, "hard-to-broker")} disabled={!cognismCompanyRows(list).length}>
+          Cognism company list ({cognismCompanyRows(list).length})</button>
       </div>
       {list.slice(0, 200).map((r, i) => (
         <article className="card loss-card" key={r.company_number}>
@@ -1239,6 +1325,7 @@ function HardToBroker({ rows, shyOf, onOpen, onContact, onEmail }) {
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
               <span className="chip">{shyOf[r.company_number].niche}</span>
               {siteOf(r) && <a className="site" href={siteUrl(siteOf(r))} target="_blank" rel="noreferrer">{siteLabel(siteOf(r))}</a>}
+          <GroupChips r={r} />
             </div>
             <div className="loss-fig">
               {r.turnover_gbp && <b className="call-turnover">{money(Number(r.turnover_gbp))}</b>}
@@ -1251,6 +1338,7 @@ function HardToBroker({ rows, shyOf, onOpen, onContact, onEmail }) {
             <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>
             <EmailButton r={r} onEmail={onEmail} />
             <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>
+            <VerdictButtons number={r.company_number} />
           </div>
         </article>
       ))}
@@ -1588,6 +1676,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen, o
             <FxFigure r={r} />
           </div>
           <ContactedButton number={r.company_number} name={r.company_name} mark={mark} onContact={onContact} />
+          <VerdictButtons number={r.company_number} />
         </div>
       </div>
       <FxStrip r={r} />
@@ -1646,10 +1735,12 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
             {r.trading_as && <span>t/a {r.trading_as}</span>}
             {r.company_number && <a href={r.companies_house_url} target="_blank" rel="noreferrer">Companies House {r.company_number}</a>}
             {siteOf(r) && <a href={siteUrl(siteOf(r))} target="_blank" rel="noreferrer">{siteLabel(siteOf(r))}</a>}
+            <GroupChips r={r} />
             {r.fx_niche && <span>{r.fx_niche}</span>}
           </div>
         </div>
         <ContactedButton number={r.company_number} name={r.company_name} mark={mark} onContact={onContact} />
+        <VerdictButtons number={r.company_number} />
       </header>
       {mark && (
         <section className="panel">
@@ -1952,6 +2043,13 @@ body{background:var(--bg);color:var(--text);font-feature-settings:"tnum" 1}
 .input,select.input{background:var(--surface);border-color:var(--line);border-radius:4px;color:var(--text)}
 .btn-sm{border-radius:4px;background:var(--surface-2);border-color:var(--line);color:var(--text-2)}
 .btn-sm:hover{background:#303236;color:var(--text)}
+.verdict{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--text-2)}
+.verdict-good{color:var(--good)}
+.verdict-not_fit{color:var(--muted)}
+.verdict-panel{padding:10px 12px;margin-bottom:10px}
+.verdict-tables{display:flex;flex-wrap:wrap;gap:18px;margin-top:8px;font-size:12px}
+.verdict-table{min-width:200px}
+.btn-link{background:none;border:0;padding:0 2px;color:inherit;text-decoration:underline;cursor:pointer;font-size:12px}
 .grp{border-radius:4px}
 a{color:var(--accent)}
 .muted{color:var(--muted)}

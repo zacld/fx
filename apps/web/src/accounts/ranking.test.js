@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FILINGS_SECTION, nicheLearnings, rankLeads } from "./ranking.js";
+import { FILINGS_SECTION, nicheLearnings, rankLeads, verdictLearnings } from "./ranking.js";
 
 describe("rankLeads", () => {
   const today = new Date("2026-11-10T12:00:00Z");
@@ -54,5 +54,17 @@ describe("Hard to broker", () => {
     const { shy_of } = rankLeads([{ company_number: "1", company_name: "A" }, { company_number: "2", company_name: "B" }],
                                   [{ company_number: "3", company_name: "C" }], { enrich });
     expect(Object.keys(shy_of).sort()).toEqual(["1", "3"]);
+  });
+});
+
+describe("Verdict learnings", () => {
+  it("splits Zac's verdicts by source, score band, niche and sector", () => {
+    const scored = [{ company_number: "1", onList: true, niche: "Scrap", score: 85 }, { company_number: "2", onList: false, niche: "Scrap", score: 45 },
+                    { company_number: "3", onList: false, niche: "Wine", score: 90 }];
+    const out = verdictLearnings(scored, { "1": { verdict: "good" }, "2": { verdict: "not_fit", reason: "Too small" } }, { shyOf: { "1": { niche: "Scrap" }, "2": { niche: "Scrap" } } });
+    expect(out.reviewed).toBe(2);
+    expect(out.niche).toEqual([{ key: "Scrap", good: 1, not_fit: 1, reviewed: 2, good_share: 50 }]);
+    expect(out.band.map((g) => g.key).sort()).toEqual(["40–59", "80+"]);
+    expect(out.reasons).toEqual({ "Too small": 1 });
   });
 });

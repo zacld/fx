@@ -53,12 +53,18 @@ def main() -> None:
     ap.add_argument("--order", default="")
     ap.add_argument("--cache", default="")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--groups", default="", help="psc_deals.py --groups-out: each lead's top UK parent is looked up too")
     ap.add_argument("--max", type=int, default=8000)
     ap.add_argument("--budget", type=int, default=2400, help="seconds before no new company is started")
     args = ap.parse_args()
 
     tracked = _load(args.tracked, {})
     order = _load(args.order, []) if args.order else []
+    groups = (_load(args.groups, {}) or {}).get("groups", {}) if args.groups else {}
+    if groups:   # a group's website is what Cognism matches on: each lead's top parent, straight after the lead
+        tops = {g["top"]: g.get("top_name") or "" for g in groups.values() if g.get("hops") and g.get("top_name")}
+        tracked = {**tracked, **{n: name for n, name in tops.items() if n not in tracked}}
+        order = [x for n in order for x in (n, (groups.get(n) or {}).get("top", n))]
     cache = _load(args.cache, {}) if args.cache else {}
     sites, none = dict(cache.get("sites", {})), dict(cache.get("none", {}))
     today = date.today()

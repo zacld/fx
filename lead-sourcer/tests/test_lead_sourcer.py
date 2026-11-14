@@ -3240,7 +3240,14 @@ class TestChAlerts(unittest.TestCase):
         alerts, found = m.news_signals(self.TRACKED, "", fetcher=lambda url: self.RSS, today=self.TODAY, lookup=lookup)
         kinds = {(a["kind"], a["company_number"], a["tracked"]) for a in alerts}
         self.assertIn(("news_fd", "01234567", True), kinds)          # on the list: matched by name, no lookup
-        self.assertIn(("news_abroad", "07654321", False), kinds)     # not on the list: found by its exact name
+        # not on the list: expansion abroad is a trigger only for companies already tracked — no lookup, no lead
+        self.assertNotIn(("news_abroad", "07654321", False), kinds)
+        self.assertEqual((found, looked), ([], []))
+        # a funding round (or PE deal) about a company not on the lists is still found by its exact name: New money
+        funded = self.RSS.replace("Brightbloom Flowers acquires Dutch grower BV - The Grocer",
+                                  "Brightbloom Flowers raises £25m Series B to grow abroad - Sifted")
+        alerts, found = m.news_signals(self.TRACKED, "", fetcher=lambda url: funded, today=self.TODAY, lookup=lookup)
+        self.assertIn(("news_funding", "07654321", False), {(a["kind"], a["company_number"], a["tracked"]) for a in alerts})
         self.assertEqual([r["company_number"] for r in found], ["07654321"])
         self.assertGreaterEqual(found[0]["filed_fx_score"], 50)       # the finder's priority floor
         self.assertNotIn("Acme Trading", looked)
@@ -3357,6 +3364,44 @@ class TestCatchAllCodes(unittest.TestCase):
         self.assertIsNone(nr.sector_niche(["46499"], niches))                       # a toothbrush wholesaler
         self.assertEqual(nr.sector_niche(["46499", "32200"], niches)["id"], "music")   # makes instruments too
         self.assertEqual(nr.sector_niche(["20003"], niches)["id"], "broad")
+
+
+class TestModernSlaveryRegistry(unittest.TestCase):
+    """sourcer/mss.py: £36m+ private companies with a supply chain abroad or a goods sector, from the registry."""
+
+    CSV = ("CompanyNumber,OrganisationName,SectorType,Turnover,OrganisationSectors,ParentName,Risk1Location,Risk2Location,Risk3Location\n"
+           '1234567,ACME FASHION LIMITED,Private,£60 million to £100 million,"Fashion, textiles, apparel and luxury goods",,"China\r\nIndia","United Kingdom",\n'
+           '2345678,BIG BANK LIMITED,Private,£100 million to £500 million,"Financial, insurance and real estate activities",,,,\n'
+           '3456789,ACME FOODS LIMITED,Private,£36 million to £60 million,"Food and beverages, agriculture and fishing",ACME GROUP,,,\n'
+           '4567890,HUGE PLC,Private,Over £500 million,Retail,,China,,\n'
+           '5678901,A COUNCIL,Public,£60 million to £100 million,Public sector,,,,\n')
+
+    def test_candidates(self):
+        from sourcer import mss
+        got = mss.candidates(self.CSV)
+        self.assertEqual(sorted(got), ["01234567", "03456789"])
+        self.assertEqual((got["01234567"]["countries"], got["01234567"]["score"]), (["China", "India"], mss.SCORE_ABROAD))
+        self.assertEqual((got["03456789"]["score"], got["03456789"]["band"]), (mss.SCORE_GOODS, "£36m–£60m"))
+        self.assertIn("Supply chain abroad (China, India)", got["01234567"]["reason"])
+
+
+class TestGroups(unittest.TestCase):
+    """sourcer/owners.tee_parents / group_of: each company's top UK parent from the ownership snapshot."""
+
+    def test_walks_up_uk_owners_and_notes_the_owner_abroad(self):
+        from sourcer import owners
+        recs = [("00000003", {"name": "ACME TOPCO LIMITED", "identification": {"country_registered": "England", "registration_number": "2"}}),
+                ("00000002", {"name": "ACME HOLDINGS LIMITED", "identification": {"country_registered": "England & Wales", "registration_number": "1"}}),
+                ("00000001", {"name": "ACME AG", "identification": {"country_registered": "Germany", "registration_number": "HRB 9"}}),
+                ("00000004", {"name": "GONE LIMITED", "ceased_on": "2020-01-01", "identification": {"country_registered": "England", "registration_number": "5"}}),
+                ("00000006", {"name": "LOOP B LIMITED", "identification": {"country_registered": "England", "registration_number": "7"}}),
+                ("00000007", {"name": "LOOP A LIMITED", "identification": {"country_registered": "England", "registration_number": "6"}})]
+        parents, names = {}, {}
+        self.assertEqual(len(list(owners.tee_parents(iter(recs), parents, names))), 6)   # records pass through
+        self.assertEqual(owners.group_of("00000003", parents, names),
+                         {"top": "00000001", "top_name": "ACME HOLDINGS LIMITED", "hops": 2, "abroad": "ACME AG (Germany)"})
+        self.assertEqual(owners.group_of("00000004", parents, names)["hops"], 0)          # a ceased owner isn't a parent
+        self.assertLessEqual(owners.group_of("00000006", parents, names)["hops"], 2)       # a loop stops
 
 
 class TestHardToBroker(unittest.TestCase):

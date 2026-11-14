@@ -78,3 +78,30 @@ export function nicheLearnings(scored = [], minLeads = 8) {
              band: live.filter((s) => s.band).length, loss: live.filter((s) => s.loss).length, ruled_out: list.length - live.length };
   }).filter((n) => n.leads >= minLeads).sort((a, b) => b.avg - a.avg);
 }
+
+// How Zac's verdicts (Good lead / Not a fit, api VERDICTS_KEY) split by where the lead came from, its niche, its lead
+// score band and its hard-to-broker sector — what to recalibrate the score and the niches against. Each group:
+// {key, good, not_fit, reviewed, good_share}; reasons: {reason: count}.
+export const scoreBand = (score) => (score >= 80 ? "80+" : score >= 60 ? "60–79" : score >= 40 ? "40–59" : "under 40");
+export function verdictLearnings(scored = [], verdicts = {}, { shyOf = {} } = {}) {
+  const groups = { source: {}, niche: {}, band: {}, sector: {} };
+  const reasons = {};
+  let reviewed = 0;
+  const add = (kind, key, v) => {
+    const g = (groups[kind][key] ||= { key, good: 0, not_fit: 0 });
+    g[v] += 1;
+  };
+  for (const s of scored) {
+    const v = verdicts[s.company_number]?.verdict;
+    if (v !== "good" && v !== "not_fit") continue;
+    reviewed += 1;
+    add("source", s.onList ? "Accounts list (finder)" : "FX filings scan", v);
+    add("niche", s.niche || "(no niche)", v);
+    add("band", scoreBand(s.score), v);
+    if (shyOf[s.company_number]) add("sector", shyOf[s.company_number].niche, v);
+    if (v === "not_fit") reasons[verdicts[s.company_number].reason || "No reason"] = (reasons[verdicts[s.company_number].reason || "No reason"] || 0) + 1;
+  }
+  const done = (o) => Object.values(o).map((g) => ({ ...g, reviewed: g.good + g.not_fit, good_share: Math.round((100 * g.good) / (g.good + g.not_fit)) }))
+    .sort((a, b) => b.reviewed - a.reviewed);
+  return { reviewed, source: done(groups.source), niche: done(groups.niche), band: done(groups.band), sector: done(groups.sector), reasons };
+}

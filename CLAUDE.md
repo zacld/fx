@@ -113,7 +113,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   them in a former / non-finance role makes it a Guess, and a Guess is moved
   to the clues with why (`people.weak_contact_to_clue`): no one is presented
   as the finance contact on weak evidence.
-  Then the confirmation step (`tools/confirm_contacts.py`, run in the
+  **Switched off 14 Nov 2026** (Zac: "we don't need to build lead enrichment, we have Cognism"): the nightly finder
+  runs `--no-contacts` — no website team pages, news, registry or officer-appointment lookups and no confirmation
+  searches; only what the register and accounts already name. The code below is kept, not run.
+  Then the confirmation step (`tools/confirm_contacts.py`, formerly run in the
   finder workflow): a web search per checked company through search APIs
   used within their free/paid allowances in turn — Search1API, Tavily, Exa,
   Serper (secrets `*_API_KEY`, monthly caps `*_MONTHLY`, ≤
@@ -454,6 +457,36 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   deal (`lead_flags.hit`). **Hit list tab**: those companies, highest score first ("Also without an FX loss" widens
   it), Excel export. **New money tab** (GET `?view=deals`): the ownership register's deals and the news of PE deals and
   funding, newest first, filters, each with its FX sign. Contact-finding is no longer being extended.
+- **Groups: one lead per group** (Zac, 14 Nov 2026: Cognism files people under the group or brand, not the subsidiary
+  we list, and one group showed up as several leads): the daily "Niche hits" run's ownership-snapshot pass
+  (`tools/psc_deals.py --groups-out groups.json`, same single read of the file: `owners.tee_parents`) walks every
+  tracked company up its current UK corporate owners with a Companies House number to its top UK parent
+  (`owners.group_of`: `{top, top_name, hops, abroad}` — a joint venture's lowest-numbered UK owner, loops stopped,
+  the owner registered abroad above the top noted), names from the register file; `rank-leads.mjs` saves it in
+  `leads/ranked` as `group_of` and prints the groups with 2+ leads; `find_domains.py --groups` looks up each lead's
+  top parent's website straight after the lead's own. The page (`setKnownGroups`, `groupKey`, `collapseGroups` in
+  `format.js`): the Accounts list shows **one row per group** by default ("One per group" toggle) — the group's best
+  lead by lead score, the others folded in (`group_members`, "+N group companies"), a "Group: …" chip on cards and
+  the company page; the **Cognism company list** is one row per group, named as the group (top parent) with the
+  group's website when known, else the company's own, plus "Registered Company (lead)" and "Group Companies on the
+  List" columns.
+- **Modern slavery statement registry as a source** (14 Nov 2026, discovery review): every organisation with £36m+
+  turnover publishes a statement; the registry's yearly CSV (`registries.MSS_URL`, ~12,000 statements; columns
+  checked with `tools/mss_probe.py`, workflow "Modern slavery registry probe", no names printed) gives company number,
+  turnover band, sectors, parent and the countries of named supply-chain risks (Risk1-3Location). `sourcer/mss.py`
+  keeps private companies in the £36m–£60m / £60m–£100m / £100m–£500m bands whose supply chain runs abroad (60) or
+  whose sector is goods trade (50) — not finance / property, charities, public bodies or education only — and the
+  finder (`MSS_DISCOVERY=1` in its workflow) checks them with the FX filings scan's finds (`priority_from_filings`),
+  niche "Supply chain abroad (modern slavery statement)" when nothing else names one. Size-qualified by law, and it
+  reaches companies whose accounts aren't in the online files.
+- **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
+  real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
+  Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,
+  the Hit list and Hard to broker (`VerdictButtons`); store key `verdicts` (POST `{company_number, verdict, reason}`,
+  `null` clears). Not a fit qualifies the lead Out everywhere. The daily ranking (`ranking.js` `verdictLearnings`,
+  `leads/ranked.verdicts`) splits them by source (finder / FX filings scan), lead-score band, niche and hard-to-broker
+  sector, printed in the run and shown at the top of the Niches tab — the evidence for re-weighting `LEAD_POINTS` and
+  the niches.
 - **Hard to broker** (Zac, 13 Nov 2026: "a separate section where we go after sectors brokers can't — mining,
   recyclables etc — no firearms, no gambling"): niches carrying `broker_shy` (the reason payment firms — non-bank FX
   brokers — often decline or restrict them) in `fx_niches.json`: scrap metal, bullion, jewellery, watches, art &
@@ -545,8 +578,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   buying / opening / selling abroad, a King's Award for International Trade, UK Export Finance backing (`news_abroad`)
   — and job adverts for treasury / FX / export roles from Adzuna and Reed's free APIs (`hiring`; secrets
   `ADZUNA_APP_ID` + `ADZUNA_APP_KEY`, `REED_API_KEY`, skipped when unset; recruiters left out). A company on the
-  lists is matched by name; one not on them is found on Companies House by its exact registered name (active,
-  `LOOKUPS_MAX` 40 a run) and becomes a discovery (filed FX score 50–55). King's Award and UKEF lists come in
+  lists is matched by name. Since 14 Nov 2026 (discovery review: the noisiest source) headlines and adverts are
+  triggers on listed companies only; just a private-equity deal or funding round about a company not on them
+  (`DISCOVER_FROM_NEWS`) is looked up on Companies House by its exact registered name (active, `LOOKUPS_MAX` 40 a
+  run) and becomes a discovery (filed FX score 50–55) — a new FD, expansion abroad or job advert elsewhere isn't. King's Award and UKEF lists come in
   through the headlines (their gov.uk lists' formats weren't verifiable from here).
 - **Look** (Nov 2026: "clean dark theme, Google-Sheet professional vibe, finances Zint-style"): neutral dark greys,
   gridlines, flat panels, tabular figures (the theme block at the end of `CSS` in `AccountsApp.jsx`). The Accounts list
@@ -576,7 +611,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   are cached 7 days (`sourcer/register_cache.py`, `REGISTER_CACHE_DAYS`; sooner
   when newer accounts are filed) to keep within the GitHub Actions minutes; its
   website and news lookups likewise (`LOOKUP_CACHE_DAYS`, 7 — they took ~20 min
-  of each run). The 2,000 slots a run (`DEFAULT_ENRICH`; 1,200 until 8 Nov 2026 — a run checked those in ~12 of its
+  of each run). The 3,500 slots a run (`DEFAULT_ENRICH`, 14 Nov 2026: a run checked its 2,000 in 13 of its 140 minutes, nearly all
+  from the cache — ~30 new companies a night while ~39,000 candidates waited; now the time budget, `FINDER_BUDGET_MIN`
+  180, sets the pace, and a night that runs out uploads what it reached with `upload-accounts.mjs --carry`, keeping the
+  last list's other companies, so the list never shrinks; the upload prints the list's size and refuses one over 24 MB;
+  before that 2,000, and 1,200 until 8 Nov 2026 — a run checked those in ~12 of its
   140 minutes, so scanned paper accounts and the filings backlog were waiting on slots, not OCR time) go to companies still in
   the running: ones the cache already shows are out (filed turnover under the
   floor, an unconfirmed subsidiary) don't take one, so the next candidates in line

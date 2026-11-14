@@ -169,3 +169,42 @@ def deals(changes: dict[str, dict], names: dict[str, str]) -> list[dict]:
                             "company_number": target, "company_name": target_name, "other_number": ch_number(ident.get("registration_number") or ""),
                             "detail": f"{label}: {owner} (from {when})"})
     return out
+
+
+# --- Groups: every company's top UK parent (Zac, 14 Nov 2026: Cognism files people under the group, not the
+# subsidiary we list, and one group showed up as several leads) ------------------------------------------------------
+
+def _uk_owner(ident: dict) -> bool:
+    where = " ".join(str(ident.get(k) or "") for k in ("country_registered", "place_registered", "legal_authority"))
+    return bool(UK_PLACES.search(where)) and not CROWN.search((ident.get("country_registered") or "").strip())
+
+
+def tee_parents(records, parents: dict, names: dict) -> Iterator[tuple[str, dict]]:
+    """Pass the snapshot's records through unchanged while noting each company's current corporate owners:
+    parents {number: [(owner number or "", owner name, UK?, country)]}, names {owner number: name}."""
+    for number, d in records:
+        if not d.get("ceased_on"):
+            ident = d.get("identification") or {}
+            uk = _uk_owner(ident)
+            owner_no = ch_number(ident.get("registration_number") or "") if uk else ""
+            parents.setdefault(number, []).append((owner_no, d.get("name") or "", uk,
+                                                   ident.get("country_registered") or ident.get("place_registered") or ""))
+            if owner_no:
+                names.setdefault(owner_no, d.get("name") or "")
+        yield number, d
+
+
+def group_of(number: str, parents: dict, names: dict, max_hops: int = 8) -> dict:
+    """{top, top_name, hops, abroad}: the company's top UK parent, walking up current UK corporate owners with a
+    Companies House number (a joint venture's lowest-numbered UK owner; loops stopped), and the owner registered abroad
+    above it, if any. hops 0 = the company is its own top."""
+    cur, seen, hops = number, {number}, 0
+    while hops < max_hops:
+        ups = sorted(p[0] for p in parents.get(cur, []) if p[0] and p[2] and p[0] not in seen)
+        if not ups:
+            break
+        cur = ups[0]
+        seen.add(cur)
+        hops += 1
+    abroad = next((f"{p[1]} ({p[3]})" if p[3] else p[1] for p in parents.get(cur, []) if not p[2] and p[1]), "")
+    return {"top": cur, "top_name": names.get(cur, "") if hops else "", "hops": hops, "abroad": abroad}
