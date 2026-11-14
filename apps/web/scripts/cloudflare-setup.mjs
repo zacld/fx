@@ -2,11 +2,14 @@
 //   - the KV namespace for the site's private data (created the first time);
 //   - the Pages project (created the first time; its address is printed and written to $GITHUB_OUTPUT as `url`);
 //   - the Accounts password as a secret on the project, from ACCOUNTS_PASSWORD (left as it is when that's unset);
-//   - wrangler.toml next to the build, binding the namespace as FX_STORE for the Pages Functions.
+//   - the Accounts database (D1, created the first time; needs Account → D1: Edit on the token — skipped without it);
+//   - wrangler.toml next to the build, binding the namespace as FX_STORE (and the database as FX_DB) for the Functions.
 // Needs CLOUDFLARE_API_TOKEN (Account: Cloudflare Pages Edit + Workers KV Storage Edit) and CLOUDFLARE_ACCOUNT_ID.
 import { appendFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { BINDING } from "../api/kv.mjs";
+import { DB_BINDING, DB_NAME } from "../api/db.mjs";
+import { openD1 } from "./d1.mjs";
 import { accountIdProblem, cloudflareConfigured, kvNamespaceId } from "./store.mjs";
 
 export const PROJECT = process.env.CLOUDFLARE_PAGES_PROJECT || "fx-dashboard";
@@ -57,6 +60,10 @@ if (process.env.ACCOUNTS_PASSWORD) {
   console.log("ACCOUNTS_PASSWORD not set in GitHub: the project's password is left as it is");
 }
 
+// The Accounts database (D1, api/db.mjs): created and its tables made the first time; bound as FX_DB when the token
+// may use D1 (Account → D1: Edit) — without it the site deploys as before, on the store alone.
+const d1 = await openD1().catch((e) => { console.log(`Database not set up: ${e.message}`); return null; });
+
 await writeFile(resolve(import.meta.dirname, "../wrangler.toml"), [
   "# Written by scripts/cloudflare-setup.mjs before each deploy (not committed).",
   `name = "${PROJECT}"`,
@@ -67,7 +74,8 @@ await writeFile(resolve(import.meta.dirname, "../wrangler.toml"), [
   `binding = "${BINDING}"`,
   `id = "${namespace}"`,
   "",
+  ...(d1 ? ["[[d1_databases]]", `binding = "${DB_BINDING}"`, `database_name = "${DB_NAME}"`, `database_id = "${d1.id}"`, ""] : []),
 ].join("\n"));
 
-console.log(`Pages project ${PROJECT} at ${url}; KV store bound as ${BINDING}`);
+console.log(`Pages project ${PROJECT} at ${url}; KV store bound as ${BINDING}${d1 ? `; database ${DB_NAME} bound as ${DB_BINDING}` : "; no database yet"}`);
 if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, `url=${url}\nproject=${PROJECT}\n`);

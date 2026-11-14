@@ -522,6 +522,22 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   ranking, what scores it, what counts against it, the group it stands for). Contacted → Letter (a channel in
   `followups.js`) moves it out and the next one up; the follow-up after a letter is a call. Excel export per list
   (the letter's with addresses), and a Cognism company list for the call and email lists.
+- **The database move** (Zac, 14 Nov 2026: "go ahead with the database move", after the architecture review scored
+  the key-value storage 4/10 — 25 MB items forced month splits, detail shards and trimming, and the browser loads and
+  scores everything): Cloudflare **D1** (SQLite, free plan), `apps/web/api/db.mjs` (schema `SCHEMA`: `companies` — one
+  row per company on either list, `row` / `details` JSON plus lead_score, group_key, source, niche, ruled_out columns;
+  `signals` — alerts, deals, customs moments; `marks` — contacted, notes, verdict, check, email; `meta`), shared by the
+  Functions (binding `FX_DB`, `d1Query`) and the workflows (`scripts/d1.mjs`, Cloudflare's HTTP API; needs **Account →
+  D1: Edit** on `CLOUDFLARE_API_TOKEN` — without it everything skips with a note and the site runs from the store).
+  `cloudflare-setup.mjs` creates the database `fx-dashboard-db`, its tables and the binding on deploy. **Stage 1
+  (now): a mirror** — `scripts/db-sync.mjs` (step "Database" after the finder upload, the Niche hits ranking and each
+  Alerts save; `continue-on-error`) builds every record from the store (`buildRecords`: the page's own `leadScore`,
+  `groupKey`, niche corrections, ruled-out reasons) and writes only rows whose hash changed (`syncTable`: batched
+  `INSERT … SELECT FROM json_each(?)`, one parameter a batch; deletes what's gone), then checks the database's counts
+  against the store's ("match" / "MISMATCH" fails the step). GET `?view=db` says whether the site sees it, when it
+  was last copied and how many rows. Tested on Node's own SQLite (`src/db.test.js`). **Stage 2**: the Accounts page
+  served from the database a page at a time, ranked and filtered in SQL (store fallback). **Stage 3**: the writers
+  go straight to the database and the store's list, detail shards and month items retire.
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
   Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,

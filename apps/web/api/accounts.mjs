@@ -185,7 +185,7 @@ export function markFirstSeen(previous, next) {
 // `store()` gives {get(key, {type: "json"}), setJSON(key, value)} (api/kv.mjs over the KV binding). A save reads the
 // marks the previous one wrote: KV shows a write at once to later requests in the same Cloudflare location, and the
 // page sends saves one at a time.
-export async function handle(req, { password = "", store, delay = WRONG_PASSWORD_DELAY_MS } = {}) {
+export async function handle(req, { password = "", store, db = null, delay = WRONG_PASSWORD_DELAY_MS } = {}) {
   if (req.method !== "GET" && req.method !== "POST") return reply({ error: "method not allowed" }, 405);
   if (!password) return reply({ error: "ACCOUNTS_PASSWORD is not set on the site yet" }, 503);
   const given = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
@@ -272,6 +272,13 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     const [deals, alerts] = await Promise.all([DEALS_KEY, ALERTS_KEY].map((k) => blobs.get(k, { type: "json" })));
     return reply({ made_at: deals?.made_at || "", window_days: deals?.window_days || 0, items: deals?.items || [],
                    news: (alerts?.items || []).filter((a) => /^news_(pe|funding)$/.test(a.kind)) }, 200);
+  }
+  // The database move (api/db.mjs): is it bound, when was it last copied, how many rows — the check before stage 2.
+  if (params.get("view") === "db") {
+    if (!db) return reply({ bound: false }, 200);
+    const [synced] = await db("SELECT value FROM meta WHERE key = 'synced'");
+    const counts = await db("SELECT 'companies' AS t, COUNT(*) AS n FROM companies UNION ALL SELECT 'signals', COUNT(*) FROM signals UNION ALL SELECT 'marks', COUNT(*) FROM marks");
+    return reply({ bound: true, synced: synced ? JSON.parse(synced.value) : null, counts: Object.fromEntries(counts.map((c) => [c.t, Number(c.n)])) }, 200);
   }
   if (params.get("view") === "details") {
     const number = String(params.get("company") || "").toUpperCase();

@@ -27,6 +27,8 @@ on:
       - lead-sourcer/tools/psc_deals.py
       - apps/web/scripts/rank-leads.mjs
       - apps/web/src/accounts/ranking.js
+      - apps/web/scripts/db-sync.mjs
+      - apps/web/api/db.mjs
 
 concurrency:
   group: niche-hits
@@ -108,6 +110,11 @@ jobs:
           node scripts/alerts-store.mjs put moments ../../lead-sourcer/moments.json
       - name: Rank every lead
         run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json
+      # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
+      # until the Cloudflare token may use D1; never fails the run.
+      - name: Database
+        continue-on-error: true
+        run: cd apps/web && node scripts/db-sync.mjs
       # Every lead's own website (best leads first), confirmed by its company number or registered name on the site:
       # what Cognism, Zint and a quick Google match a company on. Found sites are kept; ~40 minutes a day until done.
       - name: Websites
