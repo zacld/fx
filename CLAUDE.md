@@ -113,7 +113,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   them in a former / non-finance role makes it a Guess, and a Guess is moved
   to the clues with why (`people.weak_contact_to_clue`): no one is presented
   as the finance contact on weak evidence.
-  Then the confirmation step (`tools/confirm_contacts.py`, run in the
+  **Switched off 14 Nov 2026** (Zac: "we don't need to build lead enrichment, we have Cognism"): the nightly finder
+  runs `--no-contacts` — no website team pages, news, registry or officer-appointment lookups and no confirmation
+  searches; only what the register and accounts already name. The code below is kept, not run.
+  Then the confirmation step (`tools/confirm_contacts.py`, formerly run in the
   finder workflow): a web search per checked company through search APIs
   used within their free/paid allowances in turn — Search1API, Tavily, Exa,
   Serper (secrets `*_API_KEY`, monthly caps `*_MONTHLY`, ≤
@@ -576,7 +579,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   are cached 7 days (`sourcer/register_cache.py`, `REGISTER_CACHE_DAYS`; sooner
   when newer accounts are filed) to keep within the GitHub Actions minutes; its
   website and news lookups likewise (`LOOKUP_CACHE_DAYS`, 7 — they took ~20 min
-  of each run). The 2,000 slots a run (`DEFAULT_ENRICH`; 1,200 until 8 Nov 2026 — a run checked those in ~12 of its
+  of each run). The 3,500 slots a run (`DEFAULT_ENRICH`, 14 Nov 2026: a run checked its 2,000 in 13 of its 140 minutes, nearly all
+  from the cache — ~30 new companies a night while ~39,000 candidates waited; now the time budget, `FINDER_BUDGET_MIN`
+  180, sets the pace, and a night that runs out uploads what it reached with `upload-accounts.mjs --carry`, keeping the
+  last list's other companies, so the list never shrinks; the upload prints the list's size and refuses one over 24 MB;
+  before that 2,000, and 1,200 until 8 Nov 2026 — a run checked those in ~12 of its
   140 minutes, so scanned paper accounts and the filings backlog were waiting on slots, not OCR time) go to companies still in
   the running: ones the cache already shows are out (filed turnover under the
   floor, an unconfirmed subsidiary) don't take one, so the next candidates in line
