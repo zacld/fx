@@ -3355,6 +3355,23 @@ class TestChAlerts(unittest.TestCase):
         self.assertEqual((alerts[0]["kind"], alerts[0]["company_number"], found), ("hiring", "01234567", []))
 
 
+class TestHmrcOffline(unittest.TestCase):
+    def test_uses_the_files_already_downloaded_when_uktradeinfo_is_down(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in ("imports-M2609.zip", "exports-M2609.zip", "imports-A2025-H2.zip", "imports-stats-M2609.zip", "notes.txt"):
+                open(os.path.join(tmp, name), "wb").close()
+            with mock.patch.object(hmrc, "list_files", return_value={}):
+                paths, since = hmrc.download(12, cache_dir=tmp)
+                self.assertEqual(sorted(os.path.basename(p) for p in paths),
+                                 ["exports-M2609.zip", "imports-A2025-H2.zip", "imports-M2609.zip"])
+                self.assertEqual(since, "202510")
+                self.assertEqual([os.path.basename(p) for p in hmrc.download(12, cache_dir=tmp, kind="stats")[0]],
+                                 ["imports-stats-M2609.zip"])
+            with tempfile.TemporaryDirectory() as empty, mock.patch.object(hmrc, "list_files", return_value={}):
+                with self.assertRaises(RuntimeError):
+                    hmrc.download(12, cache_dir=empty)
+
+
 class TestCustomsMoments(unittest.TestCase):
     """sourcer/hmrc.moment: a new currency flow in HMRC's importer / exporter lists."""
     LATEST = "202609"
