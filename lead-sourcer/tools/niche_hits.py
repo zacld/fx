@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -95,6 +96,32 @@ def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches
     return out
 
 
+def write_moments(path: str, trade: dict, latest: str, tracked: dict, months: int) -> None:
+    """Customs moments (hmrc.moment) for the lists' companies — triggers on the lead score — and for companies not on
+    them that file full / medium / group accounts — new importers / exporters the finder checks first. Saved as the
+    store's "moments"."""
+    items = []
+    for number, e in trade.items():
+        m = hmrc.moment(e, latest, months) if latest else None
+        if not m:
+            continue
+        on_list = number in tracked
+        if not on_list and (m["kind"] == "trade_up" or e["company"].get("accounts_category") not in niche_rules.SIZED):
+            continue
+        items.append({"id": f"{m['kind']}:{number}:{m['since']}", "company_number": number,
+                      "company_name": tracked.get(number) or e["company"].get("company_name", ""), "tracked": on_list,
+                      "hot": False, "url": hmrc.LATEST_PAGE, **m})
+    items.sort(key=lambda i: (i["at"], i["company_name"]), reverse=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "latest": latest, "months": months,
+                   "count": len(items), "items": items}, f)
+    kinds = Counter((i["kind"], i["tracked"]) for i in items)
+    print(f"Customs moments (files to {latest}): " + ", ".join(
+        f"{k} {kinds[(k, True)]} on the lists / {kinds[(k, False)]} new" for k in ("new_trader", "new_import", "new_export", "trade_up")))
+    for i in [i for i in items if not i["tracked"]][:15]:
+        print(f"  {i['kind']:<11} {i['company_name'][:50]:<50} {i['detail'][:80]}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--filings", required=True)
@@ -105,15 +132,26 @@ def main() -> None:
     parser.add_argument("--tracked", default="", help="{number: name} of the Accounts + FX filings lists' companies")
     parser.add_argument("--enrich-out", default="", help="each tracked company's niche, sector codes and absurd check")
     parser.add_argument("--traders-out", default="", help="{company number: months of customs records} (tools/psc_deals.py)")
+    parser.add_argument("--history-months", type=int, default=24,
+                        help="customs months read for the moments (new importers / exporters, trade growing)")
+    parser.add_argument("--moments-out", default="", help="customs moments: the lists' companies, and new traders to check")
     args = parser.parse_args()
 
     with open(args.filings, encoding="utf-8") as f:
         filings = {r["company_number"]: r for r in (json.load(f) or {}).get("rows") or [] if r.get("company_number")}
     with open(args.niches, encoding="utf-8") as f:
         niches = json.load(f)["niches"]
-    paths, since = hmrc.download(args.months)
-    traders = hmrc.build_traders(paths, since)
-    print(f"HMRC: {len(traders):,} traders over {args.months} months; FX filings companies: {len(filings):,}")
+    history = max(args.months, args.history_months)
+    paths, since = hmrc.download(history)
+    # the latest month in the files, from the cached monthly names (imports-M2609.zip); a year back from it: the measured window
+    latest = max((m.group(1) for m in (re.search(r"-M(\d{4})\.zip$", p) for p in paths) if m), default="")
+    latest = "20" + latest if latest else ""
+    since12 = hmrc.months_back(latest, args.months - 1) if latest else since
+    traders = hmrc.build_traders(paths, since, codes_since=since12)
+    if not latest:
+        latest = max((p for t in traders.values() for p in t["import_months"] | t["export_months"]), default="")
+    print(f"HMRC: {len(traders):,} traders over {history} months (to {latest}); measured on {args.months}; "
+          f"FX filings companies: {len(filings):,}")
     sics = {str(s) for n in niches for s in n.get("sic_codes", [])}
     tracked = {}
     if args.tracked:
@@ -124,7 +162,16 @@ def main() -> None:
         args.bulk or bulk.download(), sics, set(niche_rules.SIZED),
         postcodes={pc for _, pc in traders}, names={n for n, _ in traders},
         numbers=set(tracked) or None, registry=registry if tracked else None)
-    trade_by_company = matching.match_all(traders, by_postcode, by_name)
+    trade_full = matching.match_all(traders, by_postcode, by_name)
+    if args.moments_out:
+        write_moments(args.moments_out, trade_full, latest, tracked, history)
+    # the measured window: the latest args.months (codes were only counted from then)
+    trade_by_company = {}
+    for n, e in trade_full.items():
+        t = {**e, "import_months": {p for p in e["import_months"] if p >= since12},
+             "export_months": {p for p in e["export_months"] if p >= since12}}
+        if t["import_months"] or t["export_months"]:
+            trade_by_company[n] = t
     companies = {c["company_number"]: c for c in candidates}
     for e in trade_by_company.values():
         companies.setdefault(e["company"]["company_number"], e["company"])

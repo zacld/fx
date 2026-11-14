@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { filedIso, leadLine, setKnownSites, siteOf, setKnownGroups, groupOf, groupName, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, siteOf, setKnownGroups, groupOf, groupName, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
@@ -124,11 +124,21 @@ function Accounts({ data, password }) {
   useEffect(() => {
     let live = true;
     fetch(`${API}?view=signals`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) { setKnownSites(body.websites); setSignals(body); } }).catch(() => {});
+      .then((res) => (res.ok ? res.json() : null)).then((body) => {
+        if (live && body) { setKnownSites(body.websites); setKnownSignals(body.signals); setSignals(body); }
+      }).catch(() => {});
     return () => { live = false; };
   }, [password]);
-  const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, madeAt: data.made_at }),
-                          [signals, data.made_at]);
+  // The pound's moves (official ECB rates, /api/market — public): a company's own currency moving is a reason to call.
+  const [moves, setMoves] = useState({});
+  useEffect(() => {
+    let live = true;
+    fetch("/api/market", { cache: "no-store" }).then((res) => (res.ok ? res.json() : null))
+      .then((body) => { if (live && body) setMoves(movesByCurrency(body)); }).catch(() => {});
+    return () => { live = false; };
+  }, []);
+  const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, moves, madeAt: data.made_at }),
+                          [signals, moves, data.made_at]);
   const rows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
     ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
   [baseRows, leadCtx, verdicts]);
@@ -1023,12 +1033,18 @@ function FinanceCharts({ r }) {
 
 // The Alerts tab: what changed at the companies on your lists (tools/ch_alerts.py, every 3 hours from Companies
 // House's streaming feeds) — hot ones first — and new leads found by a charge to an FX provider or for trade finance.
-const ALERT_FILTERS = [["", "All"], ["hot", "Hot"], ["new_fd", "New FD"], ["charges", "Charges"], ["owners", "Owners"],
-  ["directors", "Directors"], ["abroad", "Expanding abroad"], ["hiring", "Hiring"]];
+const ALERT_FILTERS = [["", "All"], ["hot", "Hot"], ["new_fd", "New FD"], ["money", "Money in"], ["charges", "Banks & charges"],
+  ["owners", "Owners & deals"], ["directors", "Directors"], ["customs", "Customs"], ["abroad", "Expanding abroad"], ["hiring", "Hiring"],
+  ["trouble", "Hold off"]];
+const ALERT_GROUPS = {
+  money: /^(shares_allotted|articles_changed|funding_round|news_funding)$/, charges: /charge|bank_switch/,
+  owners: /owner|auditor_changed|year_end_changed/, customs: /^(new_trader|new_import|new_export|trade_up)$/,
+  trouble: /^(insolvency|petition)$/, directors: /director/,
+};
 const alertMatches = (a, f) => !f || (f === "hot" ? a.hot : f === "new_fd" ? /^(new|news)_fd$/.test(a.kind)
-  : f === "charges" ? /charge/.test(a.kind) : f === "owners" ? /owner/.test(a.kind) : f === "abroad" ? a.kind === "news_abroad"
-  : f === "hiring" ? a.kind === "hiring" : /director/.test(a.kind));
+  : f === "abroad" ? a.kind === "news_abroad" : f === "hiring" ? a.kind === "hiring" : ALERT_GROUPS[f]?.test(a.kind));
 const alertSource = (a) => (/companieshouse|company-information/.test(a.url || "") ? "Companies House ↗"
+  : /uktradeinfo/.test(a.url || "") ? "HMRC lists ↗" : /thegazette/.test(a.url || "") ? "The Gazette ↗"
   : a.kind === "hiring" ? "Job advert ↗" : /^news/.test(a.kind) ? "Article ↗" : "Source ↗");
 function Alerts({ password, listed, onOpen }) {
   const [data, setData] = useState(null);
@@ -1071,7 +1087,7 @@ function Alerts({ password, listed, onOpen }) {
             {items.map((a) => (
               <tr key={a.id} className={a.hot ? "hot" : ""}>
                 <td className="num">{a.at ? filedWhen(String(a.at).slice(0, 10)) : ""}</td>
-                <td><span className={`chip${a.hot ? " warn" : ""}`}>{a.title}</span></td>
+                <td><span className={`chip${a.hot ? " warn" : ALERT_GROUPS.trouble.test(a.kind) ? " out" : ""}`}>{a.title}</span></td>
                 <td><a href={listed.has(a.company_number) ? companyPath(a.company_number) : a.url} onClick={open(a)}
                        target={listed.has(a.company_number) ? undefined : "_blank"} rel="noreferrer">{a.company_name || a.company_number}</a>
                   {!a.tracked && <span className="muted"> · new lead</span>}</td>

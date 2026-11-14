@@ -444,6 +444,19 @@ def _overseas_share(scanner: "_IxbrlScanner", turnover: Optional[float], period_
     return abroad / total
 
 
+def _overseas_share_prior(scanner: "_IxbrlScanner", end: str) -> Optional[float]:
+    """Last year's overseas share, from last year's tagged turnover by region and last year's total (the same checks):
+    a growing share abroad is a reason to call."""
+    if not end:
+        return None
+    totals = _by_period(scanner, TURNOVER_CONCEPTS, False)
+    earlier = [e for e in totals if e and e <= _months_before(end, 10)]
+    if not earlier:
+        return None
+    prior_end = max(earlier)
+    return _overseas_share(scanner, totals[prior_end], prior_end)
+
+
 def _region_label(member: str) -> str:
     """"NorthAmericaMember" -> "North America", "RestWorld" -> "Rest of world"."""
     name = re.sub(r"Member$", "", member.split(":")[-1])
@@ -467,7 +480,8 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-10a"   # + accounts kept in another currency, subsidiaries abroad, foreign-currency borrowings
+FACTS_VERSION = "2026-11-14a"   # + last year's overseas share (tagged filings); 2026-11-10a: accounts kept in another
+                                # currency, subsidiaries abroad, foreign-currency borrowings
 
 
 # Scanned filings under this turnover (when known) don't get their currency notes OCR'd: they're out of the band.
@@ -646,6 +660,7 @@ def extract_facts(document: bytes) -> dict:
       fx_gain_loss_prior        last year's FX gain/loss, or None
       turnover_prior            last year's turnover, or None
       overseas_share            share of turnover from outside the UK (0-1), or None
+      overseas_share_prior      the same for last year (tagged filings only), or None
       cash, bank_borrowings, net_assets   latest balance-sheet figures in GBP, or None
       auditor, auditor_tier     the audit firm named in the accounts and its tier
       finance_people            [{"name", "title"}] named with a finance title
@@ -686,6 +701,7 @@ def extract_facts(document: bytes) -> dict:
         "fx_gain_loss_prior": _prior(scanner, FX_GAIN_LOSS_CONCEPTS, True, fx[1]) if fx else None,
         "turnover_prior": _prior(scanner, TURNOVER_CONCEPTS, False, turnover[1]) if turnover else None,
         "overseas_share": _overseas_share(scanner, turnover[0] if turnover else None, end),
+        "overseas_share_prior": _overseas_share_prior(scanner, turnover[1] if turnover else ""),
         "cash": cash[0] if cash else None,
         "bank_borrowings": abs(debt[0]) if debt else None,
         "net_assets": net[0] if net else None,
@@ -1078,6 +1094,7 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
         "fx_gain_loss_prior": None,
         "turnover_prior": abs(turnover[1]) if turnover and turnover[1] else None,
         "overseas_share": None,
+        "overseas_share_prior": None,
         "cash": abs(cash[0]) if cash else None,
         "bank_borrowings": None,
         "net_assets": net[0] if net else None,

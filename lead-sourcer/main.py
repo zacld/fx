@@ -156,6 +156,7 @@ CSV_FIELDS = [
     "accounts_filed_on",
     "turnover_growth",
     "overseas_turnover_share",
+    "overseas_turnover_share_prior",
     "cost_of_sales_gbp",
     "cash_gbp",
     "bank_borrowings_gbp",
@@ -511,6 +512,16 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
                              "filed_fx_score": 60 if d.get("kind") in ("pe_buyout", "acquired") else 50})
     except (OSError, ValueError):
         pass
+    # customs moments (tools/niche_hits.py, MOMENTS_FILE): companies new to importing / exporting, or that just started
+    # the other flow, filing full / medium / group accounts and not on the lists yet — a brand-new currency flow
+    try:
+        with open(os.environ.get("MOMENTS_FILE", "") or os.devnull, encoding="utf-8") as f:
+            for m in (json.load(f) or {}).get("items") or []:
+                if not m.get("tracked") and m.get("kind") in ("new_trader", "new_import", "new_export"):
+                    rows.append({"company_number": m.get("company_number", ""), "company_name": m.get("company_name", ""),
+                                 "filed_fx_score": 55 if m["kind"] == "new_trader" else 50})
+    except (OSError, ValueError):
+        pass
     if os.environ.get("MSS_DISCOVERY", "0") == "1":   # on in the finder workflow (a network download)
         from sourcer import mss
         MSS_FOUND.update(mss.load())
@@ -763,6 +774,7 @@ def company_row(
         fx_gain_loss_evidence=f.get("fx_gain_loss_evidence", ""),
         turnover_growth=f"{growth * 100:+.0f}%" if growth is not None else "",
         overseas_turnover_share=f"{f['overseas_share'] * 100:.0f}%" if f.get("overseas_share") is not None else "",
+        overseas_turnover_share_prior=f"{f['overseas_share_prior'] * 100:.0f}%" if f.get("overseas_share_prior") is not None else "",
         cash_gbp=_money(f.get("cash")),
         bank_borrowings_gbp=_money(f.get("bank_borrowings")),
         net_assets_gbp=_money(f.get("net_assets")),

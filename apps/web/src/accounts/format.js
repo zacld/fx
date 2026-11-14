@@ -488,11 +488,13 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
   const numbers = new Set(listRows.map((r) => r.company_number));
   const pick = (r, onList) => {
     if (!inCoreBand(r) || fxScore(r) < rules.minScore || r.qualified === "Out") return null;
-    if (reasonsNotToProgress(r, { today }).some((x) => x.serious)) return null;
+    if (reasonsNotToProgress(r, { today, signals: lead.signals || knownSignals }).some((x) => x.serious)) return null;
     const loss = -Number(r.fx_gain_loss_gbp) || 0;
     const filedOn = filedIso(r);
     const recentLoss = Boolean(r.recent_fx_loss) || (loss >= rules.minLoss && Boolean(filedOn) && filedOn >= since);
-    const trigger = parts(r.triggers)[0] || "";
+    const row = onList ? r : filingRow(r);
+    const lead_ = leadScore(row, { ...lead, today });   // the order: the lead score (LEAD_POINTS), its reasons shown
+    const trigger = parts(r.triggers)[0] || lead_.flags.moment || "";
     if (!recentLoss && !trigger) return null;
     const fx = r.fx_forwards || r.fx_today || r.currencies_in_accounts || r.turnover_regions || "";
     const why = [
@@ -501,8 +503,6 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
       `Filed FX proof ${fxScore(r)}${fx ? `: ${fx}` : ""}`,
       r.run_from_abroad && "Owned abroad: pitch the UK team",
     ].filter(Boolean);
-    const row = onList ? r : filingRow(r);
-    const lead_ = leadScore(row, { ...lead, today });   // the order: the lead score (LEAD_POINTS), its reasons shown
     return { ...row, onList, loss, filedOn, why, score: lead_.score, lead_score: lead_.score, lead_parts: lead_.parts,
              group: CONTACT_GROUPS.indexOf(contactGroup(r)) };
   };
@@ -554,10 +554,15 @@ export function leadChecklist(r, checks = {}) {
 export const checklistLine = (items) => items.map((i) => `${{ yes: "✓", no: "✗", check: "?", warn: "!" }[i.state]} ${i.label.split(" (")[0]}`).join(" · ");
 
 // Every reason this would NOT be an opportunity, from the records. Serious ones keep a company off Call today.
-export function reasonsNotToProgress(r, { today = new Date() } = {}) {
+// Each company's signals as the page last loaded them (?view=signals), for the reasons not to progress wherever shown.
+let knownSignals = {};
+export const setKnownSignals = (map) => { knownSignals = map || {}; };
+export function reasonsNotToProgress(r, { today = new Date(), signals = knownSignals } = {}) {
   const out = [];
   const add = (text, serious = false) => out.push({ text, serious });
   const t = Number(r.turnover_gbp) || 0;
+  const trouble = (signals[r.company_number] || []).find((s) => HOLD_OFF_KINDS.includes(s.kind));
+  if (trouble) add(`${trouble.title}${trouble.at ? ` (${String(trouble.at).slice(0, 10)})` : ""} — hold off`, true);
   if (r.qualified === "Out") add(`Qualified out${r.qualify_reason ? `: ${r.qualify_reason}` : ""}`, true);
   if (t > CORE_BAND[1]) add(`Turnover ${money(t)} — above £300m (check the desk's upper limit)`, true);
   else if (t && t < CORE_BAND[0]) add(`Turnover ${money(t)} — below £20m`, true);
@@ -707,7 +712,60 @@ export const LEAD_POINTS = {
   // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
   // employee ownership trust 10, and the hit-list combo — a recent FX loss with a new FD / a purchase / a PE deal — 15.
   buying: 15, peBought: 15, funded: 10, newOwner: 10, combo: 15, fdInAccountsDays: 365,
+  // Moments (Zac, 14 Nov 2026: "a company that just got funded, a new FD, large FX losses — let's think of more"). Each
+  // fades with age: full points for fullDays, down to half by halfDays, half until momentDays, then nothing.
+  fundingRound: 15, sharesAllotted: 8, articles: 5, bankSwitch: 15, auditorChanged: 8, yearEndChanged: 8,
+  directorAbroad: 5, newTrader: 20, newFlow: 15, tradeUp: 10, fullDays: 30, halfDays: 90, momentDays: 120,
+  // from the company's own accounts: overseas share up 5+ points on last year, a gain turned into a £25k+ loss,
+  // forward contracts maturing within a year (renewal coming)
+  overseasRising: 10, overseasRiseMin: 5, fxSwing: 10, fxSwingMin: 25000, forwardsMaturing: 5,
+  // its main currency (from its own documents) moved 3%+ in a week or 5%+ in a month against the pound (ECB rates)
+  currencyMoved: 10, moveWeek: 3, moveMonth: 5,
+  // an insolvency filing or case, or a winding-up petition: hold off
+  insolvency: -60,
 };
+// The signal kinds that are moments (above), each with its points key; the strongest of a group counts once.
+export const MOMENT_KINDS = {
+  funding_round: "fundingRound", shares_allotted: "sharesAllotted", articles_changed: "articles", bank_switch: "bankSwitch",
+  auditor_changed: "auditorChanged", year_end_changed: "yearEndChanged", director_abroad: "directorAbroad",
+  new_trader: "newTrader", new_import: "newFlow", new_export: "newFlow", trade_up: "tradeUp",
+};
+const MOMENT_GROUPS = [["funding_round", "shares_allotted", "articles_changed"], ["new_trader", "new_import", "new_export", "trade_up"]];
+export const HOLD_OFF_KINDS = ["insolvency", "petition"];
+// 1 → 0.5 → 0 as a moment ages (rules.fullDays / halfDays / momentDays).
+export function fade(at, today = new Date(), rules = LEAD_POINTS) {
+  const t = Date.parse(String(at || "").slice(0, 10));
+  if (!Number.isFinite(t)) return 0;
+  const age = (today.getTime() - t) / 864e5;
+  if (age <= rules.fullDays) return 1;
+  if (age <= rules.halfDays) return 1 - (0.5 * (age - rules.fullDays)) / (rules.halfDays - rules.fullDays);
+  return age <= rules.momentDays ? 0.5 : 0;
+}
+const pct = (v) => (v === undefined || v === null || v === "" ? null : parseFloat(String(v)));
+// "USD" from a row's main currency when it comes from the company's own documents (not the niche's default).
+export function ownCurrency(r) {
+  if (/niche default/i.test(r.currency_source || "")) return "";
+  const code = String(r.main_currency || r.currency || "").match(/\b[A-Z]{3}\b/)?.[0] || "";
+  return code === "GBP" ? "" : code;
+}
+// {code: {"1w", "1m", as_of}} from the market moves document (/api/market).
+export const movesByCurrency = (market) => Object.fromEntries((market?.currencies || []).map((c) => [c.code, { ...c.changes, as_of: market.as_of }]));
+const FORWARDS_DUE = /within\s+(?:one|1|twelve|12)\s+(?:year|months)|(?:less than|under)\s+(?:one|1)\s+year|matur\w*\s+(?:with)?in\s+(?:the\s+)?(?:next\s+)?(?:12|twelve)\s+months|(?:matur|expir|settl)\w*[^.;]{0,40}\bwithin\s+(?:one|a|1)\s+year/i;
+// The accounts' own changes: overseas share rising, an FX gain turned to a loss, forwards maturing within a year.
+export function accountsMoments(r, rules = LEAD_POINTS) {
+  const out = [];
+  const now = pct(r.overseas_turnover_share), before = pct(r.overseas_turnover_share_prior);
+  if (now !== null && before !== null && now - before >= rules.overseasRiseMin) {
+    out.push([rules.overseasRising, `Overseas sales up: ${Math.round(now)}% of turnover v ${Math.round(before)}% last year`]);
+  }
+  const fx = Number(r.fx_gain_loss_gbp), prior = r.fx_gain_loss_prior_gbp === undefined || r.fx_gain_loss_prior_gbp === "" ? NaN : Number(r.fx_gain_loss_prior_gbp);
+  if (Number.isFinite(fx) && Number.isFinite(prior) && prior > 0 && -fx >= rules.fxSwingMin) {
+    out.push([rules.fxSwing, `FX swung from a ${money(prior)} gain to a ${money(-fx)} loss`]);
+  }
+  const fwd = `${r.fx_forwards_evidence || ""} ${r.fx_forwards || ""}`;
+  if (r.fx_forwards && FORWARDS_DUE.test(fwd)) out.push([rules.forwardsMaturing, "Forward contracts maturing within a year — renewal coming"]);
+  return out;
+}
 const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
 // "Finance director appointed 2 June 2026" -> "2026-06-02" ("" when it can't be read).
 export function appointedIso(text = "") {
@@ -732,7 +790,7 @@ export function nicheTiers(stats = {}) {
   return Object.fromEntries(Object.values(stats).filter((s) => s?.name).map((s) => [s.name, { ...s, tier: tierOf(s) }]));
 }
 
-export function leadScore(r, { today = new Date(), niches = {}, signals = {}, madeAt = "", rules = LEAD_POINTS } = {}) {
+export function leadScore(r, { today = new Date(), niches = {}, signals = {}, moves = {}, madeAt = "", rules = LEAD_POINTS } = {}) {
   const out = [];
   const add = (points, why) => { if (points) out.push([why, points]); };
   const day = (n) => new Date(today.getTime() - n * 864e5).toISOString().slice(0, 10);
@@ -765,8 +823,37 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, ma
   if (funded) add(rules.funded, `Just raised funding: ${funded.title}`);
   const owner = !pe && recent.find((s) => /^(overseas_buyer|eot)$/.test(s.kind));
   if (owner) add(rules.newOwner, `New owner: ${owner.title}`);
+  // Moments, each fading with age; one per group (a funding round beats its parts, a new trader beats trade growing)
+  const all = signals[r.company_number] || [];
+  const moments = [];
+  const seen = new Set();
+  for (const s of all) {
+    const key = MOMENT_KINDS[s.kind];
+    if (!key) continue;
+    const group = MOMENT_GROUPS.find((g) => g.includes(s.kind));
+    const points = Math.round((rules[key] || 0) * fade(s.at, today, rules));
+    if (!points) continue;
+    moments.push({ s, points, group: group ? group.join() : s.kind });
+  }
+  moments.sort((a, b) => b.points - a.points);
+  for (const m of moments) {
+    if (seen.has(m.group)) continue;
+    seen.add(m.group);
+    add(m.points, `${m.s.title}${m.s.detail ? `: ${m.s.detail}` : ""}${fade(m.s.at, today, rules) < 1 ? ` (${String(m.s.at).slice(0, 10)})` : ""}`);
+  }
+  const switched = moments.some((m) => m.s.kind === "bank_switch");
+  for (const [points, why] of accountsMoments(r, rules)) add(points, why);
+  const ccy = ownCurrency(r);
+  const move = ccy && moves[ccy];
+  if (move) {
+    const week = Number(move["1w"]), month = Number(move["1m"]);
+    const big = Math.abs(week) >= rules.moveWeek ? ["a week", week] : Math.abs(month) >= rules.moveMonth ? ["a month", month] : null;
+    if (big) add(rules.currencyMoved, `Its currency moved: the pound ${big[1] > 0 ? "up" : "down"} ${Math.abs(big[1]).toFixed(1)}% against ${ccy} in ${big[0]}`);
+  }
+  const holdOff = all.find((s) => HOLD_OFF_KINDS.includes(s.kind));
+  if (holdOff) add(rules.insolvency, `${holdOff.title} — hold off`);
   const other = triggers.find((t) => !NEW_FD.test(t)) ||
-    recent.find((s) => /^(new_owner|new_charge|charge_paid|fx_charge)$/.test(s.kind))?.title;
+    recent.find((s) => /^(new_owner|new_charge|charge_paid|fx_charge)$/.test(s.kind) && !(switched && /charge/.test(s.kind)))?.title;
   add(other && !owner ? rules.trigger : 0, `Change: ${other}`);
   const abroad = recent.find((s) => s.kind === "news_abroad");
   add(abroad ? rules.abroadNews : 0, `In the news: ${abroad?.title || ""}`);
@@ -781,7 +868,8 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, ma
   const change = newFd ? "a new FD" : buying ? "buying companies" : pe ? "a private-equity deal" : "";
   if (recentLoss && change) add(rules.combo, `Hit list: a recent FX loss and ${change}`);
   return { score: out.reduce((n, [, p]) => n + p, 0), parts: out,
-           flags: { recentLoss, newFd, buying, pe: Boolean(pe), funded: Boolean(funded), hit: Boolean(recentLoss && change) } };
+           flags: { recentLoss, newFd, buying, pe: Boolean(pe), funded: Boolean(funded), hit: Boolean(recentLoss && change),
+                    moment: moments[0] ? moments[0].s.title : "", holdOff: holdOff ? holdOff.title : "" } };
 }
 
 // "Lead score 85: FX loss of £320k +30 · … " — the breakdown in one line.

@@ -107,6 +107,7 @@ def match_all(traders: dict, by_postcode: dict[str, list[dict]], by_name: Option
             "company": company, "confidence": confidence,
             "import_months": set(), "export_months": set(),
             "import_codes": type(trader["import_codes"])(), "export_codes": type(trader["export_codes"])(),
+            "early_codes": set(),
         })
         if confidence == "high":
             e["confidence"] = "high"
@@ -114,4 +115,5 @@ def match_all(traders: dict, by_postcode: dict[str, list[dict]], by_name: Option
         e["export_months"] |= trader["export_months"]
         e["import_codes"].update(trader["import_codes"])
         e["export_codes"].update(trader["export_codes"])
+        e["early_codes"].update(trader.get("early_codes") or ())
     return matched

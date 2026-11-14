@@ -80,7 +80,7 @@ export function signalsByCompany(items = []) {
   const out = {};
   for (const a of items) {
     if (!a?.company_number) continue;
-    (out[a.company_number] ||= []).push({ kind: a.kind, at: a.at, title: a.title });
+    (out[a.company_number] ||= []).push({ kind: a.kind, at: a.at, title: a.title, ...(a.detail ? { detail: String(a.detail).slice(0, 140) } : {}) });
   }
   for (const list of Object.values(out)) list.sort((a, b) => String(b.at).localeCompare(String(a.at)));
   return out;
@@ -88,6 +88,9 @@ export function signalsByCompany(items = []) {
 export const RANKED_KEY = "leads/ranked";   // {made_at, rows, ruled_out, niches}: every scanned lead ranked (scripts/rank-leads.mjs)
 export const DOMAINS_KEY = "domains";   // {made_at, sites: {number: {website, confidence, found}}, none}: tools/find_domains.py
 export const DEALS_KEY = "deals";   // {made_at, items}: purchases from the ownership register (tools/psc_deals.py)
+// {made_at, latest, items: [{company_number, kind, at, title, detail, tracked}]}: customs moments (tools/niche_hits.py) —
+// new to importing / exporting, a flow started, trade growing — signals like the alerts
+export const MOMENTS_KEY = "moments";
 export const NICHES_KEY = "niches/stats";   // {made_at, niches: {id: measured numbers}, headings}: tools/niche_hits.py
 export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
 export const CALLS_KEY = "filings/calls";   // {made_at, count, rows}: the Call today tab's candidates from the filings list
@@ -214,15 +217,18 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     return reply((await blobs.get(LOSSES_KEY, { type: "json" })) || { rows: [] }, 200);
   }
   if (params.get("view") === "alerts") {
-    const [alerts, found] = await Promise.all([ALERTS_KEY, DISCOVERIES_KEY].map((k) => blobs.get(k, { type: "json" })));
-    return reply({ ...(alerts || { items: [] }), discoveries: found?.rows || [] }, 200);
+    const [alerts, found, moments] = await Promise.all([ALERTS_KEY, DISCOVERIES_KEY, MOMENTS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    // customs moments for the lists' companies sit with the alerts (new to importing / exporting, trade growing)
+    const items = [...(alerts?.items || []), ...(moments?.items || []).filter((m) => m.tracked)]
+      .sort((a, b) => String(b.at || "").localeCompare(String(a.at || "")));
+    return reply({ ...(alerts || {}), items, discoveries: found?.rows || [] }, 200);
   }
   // For the lead score: each measured niche's numbers (niche_hits) and each company's recent alerts (kind, date, title).
   if (params.get("view") === "signals") {
-    const [niches, alerts, deals, domains] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY, DOMAINS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    const [niches, alerts, deals, domains, moments] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY, DOMAINS_KEY, MOMENTS_KEY].map((k) => blobs.get(k, { type: "json" })));
     const websites = Object.fromEntries(Object.entries(domains?.sites || {}).map(([n, s]) => [n, s.website]));
     return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [], websites,
-                   signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) }, 200);
+                   signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) }, 200);
   }
   // The New money tab: purchases from the ownership register, plus the news of PE deals and funding rounds.
   if (params.get("view") === "deals") {

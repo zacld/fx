@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-tools/ch_alerts.py — "ping me when…": Companies House's streaming feeds (officers, charges, owners) read since the
-last run, turned into alerts for the companies on the Accounts and FX filings lists, plus new leads found in the
+tools/ch_alerts.py — "ping me when…": Companies House's streaming feeds (officers, charges, owners, filings,
+insolvency cases) read since the last run, turned into alerts for the companies on the Accounts and FX filings lists, plus new leads found in the
 charges feed (a charge in favour of an FX provider or for trade finance proves FX activity — any company).
 
     CH_STREAM_KEY=… python3 tools/ch_alerts.py --tracked tracked.json --state stream.json --alerts alerts.json \
@@ -17,6 +17,15 @@ Alerts:
   fx_charge       a charge in favour of an FX provider, or for trade finance / foreign exchange (hot; also a discovery
                   for a company not on the lists)
   new_owner       a new corporate owner (private-equity backed when the owner looks like a deal vehicle: hot)
+  director_abroad a new director whose country of residence is outside the UK (an overseas parent or expansion)
+  shares_allotted new shares issued (a return of allotment, SH01): money coming in
+  articles_changed new articles, share classes created / renamed / their rights varied: usually a funding round or deal
+  funding_round   both of those within FUNDING_PAIR_DAYS (hot)
+  bank_switch     an all-assets charge paid off and a new one to a different bank within SWITCH_DAYS (hot)
+  auditor_changed an auditor resigned or was replaced: often before a sale, a deal or a bigger auditor
+  year_end_changed the accounting year-end moved: often lining up with a new owner after a takeover
+  insolvency      an insolvency / liquidation / administration filing or case: hold off (a reason not to progress)
+  petition        a winding-up petition in the Gazette (--signals): hold off
 
 Read-only on Companies House; free. Public repo: the log holds counts only. Telegram (TELEGRAM_BOT_TOKEN +
 TELEGRAM_CHAT_ID secrets) gets the hot alerts as they're found and the 7am digest; nothing is sent otherwise.
@@ -42,13 +51,19 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from sourcer import companies_house, news, triggers  # noqa: E402
 
 STREAM_BASE = "https://stream.companieshouse.gov.uk"
-STREAMS = {"officers": "/officers", "charges": "/charges", "psc": "/persons-with-significant-control"}
+STREAMS = {"officers": "/officers", "charges": "/charges", "psc": "/persons-with-significant-control",
+           "filings": "/filings", "insolvency": "/insolvency-cases"}
 RECENT_DAYS = 30            # an appointment, charge or change dated within this of the event counts as new
 OWNER_RECENT_DAYS = 60
-ALERTS_MAX = 600
+ALERTS_MAX = 2000
 NEWS_CHECKS_MAX = 25        # new directors checked against the news a run (Google News RSS: keep it gentle)
 FD_NEWS_DAYS = 150          # a news appointment this recent confirms the new director as the finance director
-HOT = {"new_fd", "fx_charge", "new_owner_pe"}
+HOT = {"new_fd", "fx_charge", "new_owner_pe", "funding_round", "bank_switch"}
+FUNDING_PAIR_DAYS = 60      # new shares and new articles / share classes this close together: a funding round
+SWITCH_DAYS = 180           # an all-assets charge paid off and a new one to another bank this close: a bank switch
+SWITCH_CHECKS_MAX = 60      # charges registers read a run (one REST call each) to confirm a switch
+HOME = {"united kingdom", "uk", "england", "scotland", "wales", "northern ireland", "great britain", "gb", "britain",
+        "jersey", "guernsey", "isle of man", ""}
 
 # Charges that prove FX: the holder is an FX provider, or the charge is for trade finance / foreign exchange.
 FX_PROVIDERS = re.compile(r"\b(?:EBURY|CORPAY|CONVERA|CAMBRIDGE\s+(?:GLOBAL|MERCANTILE)|MONEYCORP|WESTERN\s+UNION|"
@@ -124,6 +139,15 @@ def classify(event: dict, tracked: dict[str, str], today: date) -> Optional[dict
     if number not in tracked:
         return None
 
+    if kind.startswith("filing-history"):
+        return filing_alert(base, data, today)
+
+    if kind.startswith("company-insolvency"):
+        cases = data.get("cases") or []
+        what = ", ".join(sorted({(c.get("type") or "").replace("-", " ") for c in cases if c.get("type")})) or "insolvency case"
+        return {**base, "id": f"insolvency:{number}:{len(cases)}", "kind": "insolvency", "title": "Insolvency case opened",
+                "detail": what, "url": company_url(number) + "/insolvency", "hot": False}
+
     if kind.startswith("company-officers"):
         role = (data.get("officer_role") or "").lower()
         if role not in ("director", "corporate-director", "secretary"):
@@ -135,8 +159,11 @@ def classify(event: dict, tracked: dict[str, str], today: date) -> Optional[dict
         if not data.get("resigned_on") and _within(data.get("appointed_on") or "", today, RECENT_DAYS):
             occupation = data.get("occupation") or ""
             fd = bool(re.search(r"financ|\bCFO\b|treasur", occupation, re.I))
-            return {**base, "kind": "new_fd" if fd else "new_director",
-                    "title": "New finance director" if fd else ("New director" if role != "secretary" else "New company secretary"),
+            country = (data.get("country_of_residence") or "").strip()
+            abroad = not fd and role != "secretary" and country.lower().replace(".", "").strip() not in HOME
+            title = "New finance director" if fd else ("New company secretary" if role == "secretary" else
+                                                       f"New director based in {country.title()}" if abroad else "New director")
+            return {**base, "kind": "new_fd" if fd else "director_abroad" if abroad else "new_director", "title": title,
                     "detail": f"{who}{f' ({occupation})' if occupation else ''}", "person": who,
                     "url": company_url(number) + "/officers", "hot": fd}
         return None
@@ -156,9 +183,100 @@ def classify(event: dict, tracked: dict[str, str], today: date) -> Optional[dict
     return None
 
 
+# --- Filings: money coming in, a deal being prepared, trouble -------------------------------------------------------
+
+_ARTICLES_TYPES = {"MA", "SH08", "SH10", "SH02", "CC04"}       # articles; share classes renamed / rights varied / split
+_ARTICLES_WORDS = re.compile(r"articles|class(?:es)? of shares|share class|variation of (?:class )?rights|"
+                             r"redesignat|sub-?divi|preference shares|RES01|RES12", re.I)
+_INSOLVENCY = re.compile(r"^(?:LIQ|LRESEX|LRESSP|AM0|AM1|AM2|WU|COM[0-9]|4\.|2\.|600|F10)", re.I)
+
+
+def _capital(values: dict) -> str:
+    """ "GBP 1,234.56" from a return of allotment's statement of capital."""
+    parts = [f"{c.get('currency', '')} {c.get('figure', '')}".strip() for c in (values or {}).get("capital") or []
+             if c.get("figure")]
+    return " + ".join(parts)
+
+
+def filing_alert(base: dict, data: dict, today: date) -> Optional[dict]:
+    """A tracked company's filing as an alert: new shares, new articles / share classes, a new auditor, a moved
+    year-end, insolvency. Only filings dated within RECENT_DAYS."""
+    if not _within(data.get("date") or "", today, RECENT_DAYS):
+        return None
+    ftype = (data.get("type") or "").upper()
+    category = (data.get("category") or "").lower()
+    words = " ".join([data.get("description") or "", ftype] +
+                     [f"{r.get('type', '')} {r.get('description', '')}" for r in data.get("resolutions") or []])
+    number = base["company_number"]
+    filed = f"filed {data.get('date', '')[:10]}"
+    if category in ("insolvency", "liquidation", "administration") or _INSOLVENCY.match(ftype):
+        return {**base, "kind": "insolvency", "title": "Insolvency filing", "detail": f"{ftype} {filed}",
+                "url": company_url(number) + "/filing-history", "hot": False}
+    if ftype == "SH01":
+        cap = _capital(data.get("description_values") or {})
+        return {**base, "kind": "shares_allotted", "title": "New shares issued (money coming in)",
+                "detail": f"return of allotment {filed}" + (f"; capital now {cap}" if cap else ""),
+                "url": company_url(number) + "/filing-history", "hot": False}
+    if ftype in _ARTICLES_TYPES or (category in ("resolution", "incorporation", "capital") and _ARTICLES_WORDS.search(words)):
+        return {**base, "kind": "articles_changed", "title": "New articles / share classes (often a funding round or deal)",
+                "detail": f"{ftype or category} {filed}", "url": company_url(number) + "/filing-history", "hot": False}
+    if ftype == "AA01":
+        new_end = ((data.get("description_values") or {}).get("new_date") or "")[:10]
+        return {**base, "kind": "year_end_changed", "title": "Accounting year-end changed (often after a takeover)",
+                "detail": filed + (f"; new year-end {new_end}" if new_end else ""),
+                "url": company_url(number) + "/filing-history", "hot": False}
+    if category == "auditors" or ftype.startswith("AUD"):
+        return {**base, "kind": "auditor_changed", "title": "Auditor resigned or changed",
+                "detail": f"{ftype} {filed}", "url": company_url(number) + "/filing-history", "hot": False}
+    return None
+
+
+def funding_rounds(alerts: list[dict]) -> list[dict]:
+    """New shares and new articles / share classes at the same company within FUNDING_PAIR_DAYS: a funding round."""
+    by: dict[str, dict[str, list[dict]]] = {}
+    for a in alerts:
+        if a["kind"] in ("shares_allotted", "articles_changed"):
+            by.setdefault(a["company_number"], {}).setdefault(a["kind"], []).append(a)
+    out = []
+    for number, kinds in by.items():
+        pairs = [(s, r) for s in kinds.get("shares_allotted", []) for r in kinds.get("articles_changed", [])
+                 if _day(s.get("at") or "") and _day(r.get("at") or "")
+                 and abs((_day(s["at"]) - _day(r["at"])).days) <= FUNDING_PAIR_DAYS]
+        if not pairs:
+            continue
+        s, r = max(pairs, key=lambda p: max(p[0]["at"], p[1]["at"]))
+        at = max(s["at"], r["at"])
+        out.append({**{k: s.get(k, "") for k in ("company_number", "company_name", "tracked")},
+                    "id": f"funding_round:{number}:{at[:7]}", "at": at, "kind": "funding_round",
+                    "title": "Funding round likely: new shares + new articles", "detail": f"{s.get('detail', '')}; {r.get('detail', '')}",
+                    "url": company_url(number) + "/filing-history", "hot": True})
+    return out
+
+
+def bank_switch(charges: list[dict], today: date, days: int = SWITCH_DAYS) -> Optional[tuple[str, str, str]]:
+    """(old bank, new bank, date) when an all-assets / debenture charge held by one bank was satisfied and one to a
+    different bank created within `days` of today; None otherwise. charges: companies_house.get_charges rows."""
+    from sourcer import banks
+    def group(c: dict) -> str:
+        g = banks.classify(c.get("name") or "")
+        return g[0] if g else ""
+    def all_assets(c: dict) -> bool:
+        return c.get("floating_all") or bool(re.search(r"debenture|all assets", f"{c.get('classification')} {c.get('particulars')}", re.I))
+    since = (today - timedelta(days=days)).isoformat()
+    new = [c for c in charges if all_assets(c) and group(c) and (c.get("created_on") or "") >= since
+           and c.get("status") in ("outstanding", "part-satisfied")]
+    paid = [c for c in charges if all_assets(c) and group(c) and (c.get("satisfied_on") or "") >= since
+            and c.get("status") == "fully-satisfied"]
+    for n in sorted(new, key=lambda c: c.get("created_on") or "", reverse=True):
+        for p in paid:
+            if group(p) != group(n):
+                return group(p), group(n), max(n.get("created_on") or "", p.get("satisfied_on") or "")
+    return None
+
+
 def confirm_fd(alert: dict, fetcher=None, today: Optional[date] = None) -> dict:
     """A new director the news names as the company's finance director / CFO (recently) becomes a new_fd alert."""
-    if alert["kind"] != "new_director" or not alert.get("company_name") or not alert.get("person"):
+    if alert["kind"] not in ("new_director", "director_abroad") or not alert.get("company_name") or not alert.get("person"):
         return alert
     surname = alert["person"].split()[-1].upper()
     for p in news.appointments(alert["company_name"], fetcher=fetcher, today=today):
@@ -555,6 +673,43 @@ def merge_alerts(old: list[dict], new: Iterable[dict]) -> list[dict]:
     return sorted(by_id.values(), key=lambda a: a.get("at") or "", reverse=True)[:ALERTS_MAX]
 
 
+# --- The Gazette: winding-up petitions (before Companies House shows any insolvency) --------------------------------
+
+GAZETTE_FEED = ("https://www.thegazette.co.uk/all-notices/notice/data.feed?noticetype=2450&results-page-size=100"
+                "&start-publish-date={since}")   # notice code 2450: petitions to wind up (companies); Open Government Licence
+GAZETTE_DAYS = 14
+_ATOM = "{http://www.w3.org/2005/Atom}"
+_CO_NUMBER = re.compile(r"\b((?:SC|NI|OC|SO|NC)?\d{6,8})\b")
+
+
+def gazette_petitions(tracked: dict[str, str], fetcher=None, today: Optional[date] = None) -> tuple[list[dict], int]:
+    """(petition alerts for the lists' companies, notices read): matched by the company number in the notice, else by
+    its name as the notice writes it."""
+    today = today or date.today()
+    xml = (fetcher or news.fetch)(GAZETTE_FEED.format(since=(today - timedelta(days=GAZETTE_DAYS)).isoformat()))
+    if not xml:
+        return [], 0
+    try:
+        root = ET.fromstring(xml)
+    except ET.ParseError:
+        return [], 0
+    index = tracked_index(tracked)
+    out, read = [], 0
+    for entry in root.iter(_ATOM + "entry"):
+        read += 1
+        title = re.sub(r"\s+", " ", entry.findtext(_ATOM + "title") or "").strip()
+        text = " ".join(t for t in entry.itertext() if t)
+        number = next((n.zfill(8) for n in _CO_NUMBER.findall(text) if n.zfill(8) in tracked), "") or match_tracked(title, index)
+        if not number:
+            continue
+        when = (entry.findtext(_ATOM + "published") or entry.findtext(_ATOM + "updated") or today.isoformat())[:10]
+        link = next((l.get("href") for l in entry.iter(_ATOM + "link") if l.get("href")), "")
+        out.append({"id": f"petition:{number}:{when}", "at": when + "T07:00:00", "kind": "petition", "company_number": number,
+                    "company_name": tracked.get(number, ""), "tracked": True, "title": "Winding-up petition (Gazette)",
+                    "detail": title[:160], "url": link or company_url(number), "hot": False})
+    return out, read
+
+
 def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
     tracked = _load(args.tracked, {}) or {}
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
@@ -566,7 +721,8 @@ def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
     for r in news_found + job_found:
         rows.setdefault(r["company_number"], r)
     old_ids = {a["id"] for a in alerts}
-    found = news_alerts + job_alerts
+    petitions, notices = gazette_petitions(tracked, today=now.date())
+    found = news_alerts + job_alerts + petitions
     fresh = [a for a in found if a["id"] not in old_ids]
     alerts = merge_alerts(alerts, found)
     sent = 0
@@ -579,7 +735,8 @@ def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
     keys = "with job-board keys" if os.environ.get("ADZUNA_APP_ID") or os.environ.get("REED_API_KEY") else "no job-board keys"
     print(f"Signals: headlines read {STATS.get('headlines', 0)}, Companies House name lookups {STATS.get('name lookups', 0)}; "
           f"news alerts {len(news_alerts)} (new leads {len(news_found)}), job adverts read {len(adverts)} ({keys}), "
-          f"hiring alerts {len(job_alerts)} (new leads {len(job_found)}); new alerts {len(fresh)}; Telegram sent {sent}")
+          f"hiring alerts {len(job_alerts)} (new leads {len(job_found)}); Gazette winding-up notices read {notices}, on the "
+          f"lists {len(petitions)}; new alerts {len(fresh)}; Telegram sent {sent}")
 
 
 def main() -> None:
@@ -631,7 +788,7 @@ def main() -> None:
                 found.append(a)
     news_checked = 0
     for i, a in enumerate(found):
-        if a["kind"] == "new_director" and news_checked < NEWS_CHECKS_MAX:
+        if a["kind"] in ("new_director", "director_abroad") and news_checked < NEWS_CHECKS_MAX:
             found[i] = confirm_fd(a, today=today)
             news_checked += 1
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
@@ -643,6 +800,21 @@ def main() -> None:
             rows.setdefault(a["company_number"], {"company_number": a["company_number"], "company_name": a["company_name"],
                                                    "discovered": a["at"][:10], "discovered_by": a["detail"],
                                                    "fx_today": f"Uses an FX provider: {a['detail']}", "filed_fx_score": 60})
+    # A charge moving: read that company's charges register once to see whether it changed bank
+    switch_checked = 0
+    for a in list(found):
+        if a["kind"] in ("new_charge", "charge_paid") and a["tracked"] and api_key and switch_checked < SWITCH_CHECKS_MAX:
+            switch_checked += 1
+            try:
+                moved = bank_switch(companies_house.get_charges(a["company_number"], api_key), today)
+            except Exception:  # noqa: BLE001 — one register that won't read never stops the run
+                moved = None
+            if moved:
+                found.append({**{k: a[k] for k in ("company_number", "company_name", "tracked")}, "id": f"bank_switch:{a['company_number']}:{moved[2][:10]}",
+                              "at": a["at"], "kind": "bank_switch", "title": f"Changed bank: {moved[0]} → {moved[1]}",
+                              "detail": f"all-assets charge to {moved[0]} paid off, new one to {moved[1]}",
+                              "url": company_url(a["company_number"]) + "/charges", "hot": True})
+    found += [f for f in funding_rounds(merge_alerts(alerts, found)) if f["id"] not in {a["id"] for a in alerts}]
     old_ids = {a["id"] for a in alerts}
     alerts = merge_alerts(alerts, found)
     fresh = [a for a in found if a["id"] not in old_ids]
@@ -658,7 +830,7 @@ def main() -> None:
     for a in fresh:
         kinds[a["kind"]] = kinds.get(a["kind"], 0) + 1
     print(f"New alerts: {len(fresh)} ({', '.join(f'{k} {n}' for k, n in sorted(kinds.items())) or 'none'}); "
-          f"news checks {news_checked}; Telegram sent {sent}; discoveries on file {len(rows)}; tracked companies {len(tracked):,}")
+          f"news checks {news_checked}; charges registers read {switch_checked}; Telegram sent {sent}; discoveries on file {len(rows)}; tracked companies {len(tracked):,}")
 
 
 if __name__ == "__main__":

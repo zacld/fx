@@ -1,6 +1,7 @@
-# Alerts: Companies House's streaming feeds (officers, charges, owners) read every few hours for the companies on the
-# Accounts and FX filings lists — new finance director (confirmed in the news), directors leaving, new or paid-off
-# charges, new owners — plus new leads from charges to FX providers / for trade finance (any company). Saved to the
+# Alerts: Companies House's streaming feeds (officers, charges, owners, filings, insolvency cases) read every few hours
+# for the companies on the Accounts and FX filings lists — new finance director (confirmed in the news), directors
+# leaving or based abroad, new or paid-off charges and bank switches, new owners, new shares / articles (funding rounds),
+# auditor and year-end changes, insolvency — plus new leads from charges to FX providers / for trade finance (any company). Saved to the
 # site's private store (the Accounts page's Alerts tab); hot ones to Telegram when its secrets are set, and a summary
 # each morning. Secrets: CH_STREAM_KEY (Companies House developer hub: a "Streaming API" key, not the REST key),
 # COMPANIES_HOUSE_API_KEY (names of discovered companies), TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID (optional).
@@ -28,7 +29,7 @@ permissions:
 jobs:
   alerts:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -63,7 +64,7 @@ jobs:
           seconds=240; [ "${{ github.event_name }}" = "push" ] && seconds=30
           python3 tools/ch_alerts.py --tracked tracked.json --state stream.json --alerts alerts.json \
             --discoveries discoveries.json --seconds $seconds --telegram
-      # Once a day, before the digest: headlines (new finance directors, moves abroad, King's Award and UK Export Finance
+      # Once a day, before the digest: Gazette winding-up petitions, headlines (new finance directors, moves abroad, King's Award and UK Export Finance
       # winners) and job adverts (treasury / FX / export roles; Adzuna and Reed free keys, optional) — the lists'
       # companies as alerts, others found on Companies House by exact name as new leads.
       - name: News and job adverts

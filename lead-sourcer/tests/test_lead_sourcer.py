@@ -489,6 +489,19 @@ class TestFxFilingsFirst(PipelineTestCase):
         self.assertEqual(main.priority_from_filings(path), {"04": 45.0})
         self.assertEqual(main.priority_from_filings(os.path.join(self.tmp.name, "missing.json")), {})
 
+    def test_priority_from_customs_moments(self):
+        path = os.path.join(self.tmp.name, "filings.json")
+        moments = os.path.join(self.tmp.name, "moments.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"rows": []}, f)
+        with open(moments, "w", encoding="utf-8") as f:
+            json.dump({"items": [{"company_number": "11", "kind": "new_trader", "tracked": False},
+                                 {"company_number": "12", "kind": "new_export", "tracked": False},
+                                 {"company_number": "13", "kind": "trade_up", "tracked": False},
+                                 {"company_number": "14", "kind": "new_trader", "tracked": True}]}, f)
+        with mock.patch.dict(os.environ, {"MOMENTS_FILE": moments}):
+            self.assertEqual(main.priority_from_filings(path), {"11": 55.0, "12": 50.0})
+
     def test_fx_probably_run_abroad_ranks_lower(self):
         path = os.path.join(self.tmp.name, "filings.json")
         abroad = "Owned by CLOETTA AB (Sweden) — overseas parent"
@@ -1183,6 +1196,24 @@ class TestAccountsExtras(unittest.TestCase):
         facts = accounts.extract_facts(total.encode())
         self.assertNotIn("Total", " ".join(r["region"] for r in facts["regions"]))
         self.assertAlmostEqual(facts["overseas_share"], 9_001 / 23_412, places=3)
+
+    def test_overseas_share_last_year(self):
+        doc = ixbrl().decode()
+        self.assertIsNone(accounts.extract_facts(doc.encode())["overseas_share_prior"])   # no regions tagged for 2023
+        ctx = lambda cid, end, member: (
+            f' <xbrli:context id="{cid}"><xbrli:entity><xbrli:identifier scheme="x">01</xbrli:identifier>'
+            f'<xbrli:segment><xbrldi:explicitMember dimension="core:GeographicalAreasDimension">{member}</xbrldi:explicitMember>'
+            f'</xbrli:segment></xbrli:entity><xbrli:period><xbrli:startDate>{end[:4]}-01-01</xbrli:startDate>'
+            f'<xbrli:endDate>{end}</xbrli:endDate></xbrli:period></xbrli:context>\n')
+        cell = lambda cid, v: (f'<tr><td><ix:nonFraction name="core:TurnoverRevenue" contextRef="{cid}" unitRef="CUR" '
+                               f'scale="3">{v}</ix:nonFraction></td></tr>')
+        more = doc.replace("</ix:resources>", ctx("FY2024-UK", "2024-12-31", "core:UnitedKingdom")
+                           + ctx("FY2023-UK", "2023-12-31", "core:UnitedKingdom") + ctx("FY2023-EU", "2023-12-31", "core:Europe")
+                           + "</ix:resources>").replace(
+            "</table>", cell("FY2024-UK", "14,411") + cell("FY2023-UK", "15,870") + cell("FY2023-EU", "4,000") + "</table>")
+        facts = accounts.extract_facts(more.encode())
+        self.assertAlmostEqual(facts["overseas_share"], 9_001 / 23_412, places=3)
+        self.assertAlmostEqual(facts["overseas_share_prior"], 4_000 / 19_870, places=3)   # 20% -> 38%: growing abroad
 
     def test_auditor(self):
         self.assertEqual(accounts.auditor_from_text("Statutory Auditor KPMG LLP 1 Sovereign Square"), ("KPMG", "Big Four"))
@@ -3185,6 +3216,64 @@ class TestChAlerts(unittest.TestCase):
                         "notified_on": "2026-10-20", "identification": {"country_registered": "England"}}), self.TRACKED, self.TODAY)
         self.assertEqual((pe["kind"], pe["hot"]), ("new_owner_pe", True))
 
+    def test_filings_insolvency_and_directors_abroad(self):
+        c = self.m.classify
+        fh = lambda data: self.ev("filing-history", "/company/01234567/filing-history/MzA", data)
+        sh = c(fh({"type": "SH01", "category": "capital", "date": "2026-11-02", "description": "capital-allotment-shares",
+                   "description_values": {"capital": [{"currency": "GBP", "figure": "1,250.00"}]}}), self.TRACKED, self.TODAY)
+        self.assertEqual(sh["kind"], "shares_allotted")
+        self.assertIn("GBP 1,250.00", sh["detail"])
+        art = c(fh({"type": "RESOLUTIONS", "category": "resolution", "date": "2026-10-20",
+                    "resolutions": [{"type": "RES01", "description": "resolution-adopt-articles"}]}), self.TRACKED, self.TODAY)
+        self.assertEqual(art["kind"], "articles_changed")
+        self.assertEqual(c(fh({"type": "AA01", "category": "accounts", "date": "2026-11-01"}), self.TRACKED, self.TODAY)["kind"],
+                         "year_end_changed")
+        self.assertEqual(c(fh({"type": "AUD", "category": "auditors", "date": "2026-11-01"}), self.TRACKED, self.TODAY)["kind"],
+                         "auditor_changed")
+        self.assertEqual(c(fh({"type": "LIQ02", "category": "insolvency", "date": "2026-11-01"}), self.TRACKED, self.TODAY)["kind"],
+                         "insolvency")
+        self.assertIsNone(c(fh({"type": "CS01", "category": "confirmation-statement", "date": "2026-11-01"}), self.TRACKED, self.TODAY))
+        self.assertIsNone(c(fh({"type": "SH01", "category": "capital", "date": "2025-01-01"}), self.TRACKED, self.TODAY))   # old
+        ins = c(self.ev("company-insolvency", "/company/01234567/insolvency", {"cases": [{"type": "creditors-voluntary-liquidation"}]}),
+                self.TRACKED, self.TODAY)
+        self.assertEqual((ins["kind"], ins["detail"]), ("insolvency", "creditors voluntary liquidation"))
+        abroad = c(self.ev("company-officers", "/company/01234567/appointments/d", {"name": "MULLER, Hans", "officer_role": "director",
+                                                                                   "appointed_on": "2026-11-03", "country_of_residence": "Germany"}),
+                   self.TRACKED, self.TODAY)
+        self.assertEqual((abroad["kind"], abroad["title"]), ("director_abroad", "New director based in Germany"))
+        home = c(self.ev("company-officers", "/company/01234567/appointments/e", {"name": "SMITH, Jo", "officer_role": "director",
+                                                                                 "appointed_on": "2026-11-03", "country_of_residence": "England"}),
+                 self.TRACKED, self.TODAY)
+        self.assertEqual(home["kind"], "new_director")
+        # new shares and new articles within 60 days: a funding round (one per company)
+        sh["at"], art["at"] = "2026-11-02T09:00:00", "2026-10-20T09:00:00"
+        rounds = self.m.funding_rounds([sh, art, dict(sh, id="x")])
+        self.assertEqual([(r["kind"], r["hot"]) for r in rounds], [("funding_round", True)])
+        self.assertEqual(self.m.funding_rounds([sh]), [])
+
+    def test_bank_switch(self):
+        charges = [{"name": "HSBC UK Bank PLC", "created_on": "2026-10-01", "status": "outstanding", "satisfied_on": "",
+                    "classification": "A registered charge", "particulars": "", "floating_all": True},
+                   {"name": "Barclays Bank PLC", "created_on": "2017-03-01", "status": "fully-satisfied", "satisfied_on": "2026-10-20",
+                    "classification": "Debenture", "particulars": "", "floating_all": False}]
+        self.assertEqual(self.m.bank_switch(charges, self.TODAY), ("Barclays", "HSBC", "2026-10-20"))
+        same = [dict(charges[0]), dict(charges[1], name="HSBC Bank PLC")]
+        self.assertIsNone(self.m.bank_switch(same, self.TODAY))                 # same bank: a refinancing, not a switch
+        old = [dict(charges[0], created_on="2025-01-01"), charges[1]]
+        self.assertIsNone(self.m.bank_switch(old, self.TODAY))
+        mortgage = [dict(charges[0], floating_all=False, classification="Legal mortgage"), charges[1]]
+        self.assertIsNone(self.m.bank_switch(mortgage, self.TODAY))             # a property loan isn't the main bank
+
+    def test_gazette_petitions(self):
+        atom = """<feed xmlns="http://www.w3.org/2005/Atom">
+<entry><title>ACME TRADING LIMITED</title><published>2026-11-06T00:00:00Z</published><link href="https://g/1"/>
+<content>In the High Court ... Company Number: 01234567 ... petition to wind up</content></entry>
+<entry><title>SOMEONE ELSE LIMITED</title><published>2026-11-06T00:00:00Z</published><content>Company Number: 07777777</content></entry>
+</feed>"""
+        alerts, read = self.m.gazette_petitions(self.TRACKED, fetcher=lambda url: atom, today=self.TODAY)
+        self.assertEqual((read, [(a["kind"], a["company_number"]) for a in alerts]), (2, [("petition", "01234567")]))
+        self.assertEqual(self.m.gazette_petitions(self.TRACKED, fetcher=lambda url: None, today=self.TODAY), ([], 0))
+
     def test_news_confirms_a_new_finance_director(self):
         alert = {"kind": "new_director", "company_name": "ACME TRADING LIMITED", "person": "Jane Smith", "detail": "Jane Smith",
                  "hot": False, "title": "New director"}
@@ -3264,6 +3353,43 @@ class TestChAlerts(unittest.TestCase):
         self.assertEqual(ads[0]["date"], "2026-11-05")
         alerts, found = m.job_signals(self.TRACKED, "", ads[:1], lookup=lambda n: None)
         self.assertEqual((alerts[0]["kind"], alerts[0]["company_number"], found), ("hiring", "01234567", []))
+
+
+class TestCustomsMoments(unittest.TestCase):
+    """sourcer/hmrc.moment: a new currency flow in HMRC's importer / exporter lists."""
+    LATEST = "202609"
+
+    def m(self, imp=(), exp=(), **kw):
+        return hmrc.moment({"import_months": set(imp), "export_months": set(exp), "import_codes": Counter({"22042138": 2}),
+                            "export_codes": Counter(), **kw}, self.LATEST)
+
+    def test_new_flows(self):
+        new = self.m(imp=["202608", "202609"])
+        self.assertEqual((new["kind"], new["since"], new["at"]), ("new_trader", "202608", "2026-10-01"))
+        self.assertIn("imports from Aug 2026", new["detail"])
+        self.assertEqual(self.m(imp=["202609"], exp=["202501", "202502"])["kind"], "new_import")
+        self.assertEqual(self.m(imp=["202501", "202601"], exp=["202607"])["kind"], "new_export")
+        self.assertIsNone(self.m(imp=["202501", "202609"]))                       # a regular importer: nothing new
+        self.assertIsNone(self.m())
+
+    def test_trade_growing(self):
+        before = ["202411", "202501"]
+        now = ["202510", "202512", "202602", "202604", "202606", "202609"]
+        up = self.m(imp=before + now)
+        self.assertEqual(up["kind"], "trade_up")
+        self.assertIn("6 of the last 12 months v 2", up["detail"])
+        self.assertIsNone(self.m(imp=before + now[:4]))                          # +2 months: not enough
+        goods = hmrc.moment({"import_months": {"202501", "202609"}, "export_months": set(), "early_codes": {"1", "2"},
+                             "import_codes": Counter({str(i): 1 for i in range(10, 18)}), "export_codes": Counter()}, self.LATEST)
+        self.assertIn("8 kinds of goods in the last 12 months v 2", goods["detail"])
+
+    def test_codes_counted_from_the_measured_year(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [write_hmrc_zip(tmp, "import", p, [hmrc_line(p, "WINE CO LTD", "UNIT 4", "BS1 1AA", [code])])
+                     for p, code in (("202501", "11111111"), ("202609", "22042138"))]
+            t = hmrc.build_traders(paths, codes_since="202510")[("WINE", "BS11AA")]
+        self.assertEqual((sorted(t["import_months"]), dict(t["import_codes"]), t["early_codes"]),
+                         (["202501", "202609"], {"22042138": 1}, {"11111111"}))
 
 
 class TestNiches(unittest.TestCase):
