@@ -4,7 +4,9 @@
 # auditor and year-end changes, insolvency — plus new leads from charges to FX providers / for trade finance (any company). Saved to the
 # site's private store (the Accounts page's Alerts tab); hot ones to Telegram when its secrets are set, and a summary
 # each morning. Secrets: CH_STREAM_KEY (Companies House developer hub: a "Streaming API" key, not the REST key),
-# COMPANIES_HOUSE_API_KEY (names of discovered companies), TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID (optional).
+# COMPANIES_HOUSE_API_KEY (names of discovered companies), SMTP_USER + SMTP_PASSWORD (a Gmail address and an app
+# password: the hot alerts by email, one a run, and the morning digest; ALERT_EMAIL_TO optional, else SMTP_USER),
+# TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID (optional, only used when email isn't set up).
 # Public repo: the log holds counts only.
 name: Alerts
 
@@ -59,11 +61,14 @@ jobs:
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
           PYTHONUNBUFFERED: '1'
         run: |
-          seconds=240; [ "${{ github.event_name }}" = "push" ] && seconds=30
+          seconds=240; tg=--telegram; [ "${{ github.event_name }}" = "push" ] && seconds=30 && tg=
           python3 tools/ch_alerts.py --tracked tracked.json --state stream.json --alerts alerts.json \
-            --discoveries discoveries.json --seconds $seconds --telegram
+            --discoveries discoveries.json --seconds $seconds $tg
       # Once a day, before the digest: Gazette winding-up petitions, headlines (new finance directors, moves abroad, King's Award and UK Export Finance
       # winners) and job adverts (treasury / FX / export roles; Adzuna and Reed free keys, optional) — the lists'
       # companies as alerts, others found on Companies House by exact name as new leads.
@@ -77,6 +82,9 @@ jobs:
           REED_API_KEY: ${{ secrets.REED_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
           PYTHONUNBUFFERED: '1'
         run: |
           tg=--telegram; [ "${{ github.event_name }}" = "push" ] && tg=
@@ -93,6 +101,9 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
         run: python3 tools/ch_alerts.py --alerts alerts.json --digest
       - name: Record the outcome (Accounts page freshness strip)
         if: always() && github.event_name != 'push' && github.event.schedule != '41 6 * * *'

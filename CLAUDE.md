@@ -602,8 +602,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   paid off, new corporate owner (private-equity backed: hot), and a charge in favour of an FX provider or for trade
   finance / foreign exchange (`FX_PROVIDERS`, `FX_PURPOSE`; hot) — for any company: one not on the lists becomes a
   discovery (`discoveries`, filed FX score 60) that the finder checks first (`DISCOVERIES_FILE`, merged into
-  `priority_from_filings`). Hot alerts go to Telegram as found and the last 24 hours as a morning summary, when
-  `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` are set (Zac's own chat; nothing to prospects). Counts only in the log.
+  `priority_from_filings`). Hot alerts go by **email** (Zac, 14 Nov 2026: "I'd rather it send me an email"): one email a run listing the
+  new hot ones and the last 24 hours as a morning summary, through Gmail's SMTP with an app password (secrets `SMTP_USER`,
+  `SMTP_PASSWORD`, optional `ALERT_EMAIL_TO`; `ch_alerts.email` / `send_hot`; test pushes send nothing). Telegram
+  (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) only when email isn't set up. Zac's own inbox; nothing to prospects. Counts only in the log.
   **News and job adverts** (same tool, `--signals`, daily before the digest): Google News RSS headlines (last
   `NEWS_DAYS` 10) classified by what they say (`headline_kind`) — a finance director / CFO appointed (`news_fd`), or
   buying / opening / selling abroad, a King's Award for International Trade, UK Export Finance backing (`news_abroad`)
