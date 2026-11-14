@@ -122,4 +122,4 @@ export async function openStore(name) {
   throw new Error("no store configured: set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (or the old NETLIFY_* secrets)");
 }
 
-export { cloudflareStore, netlifyStore };
+export { cf, cfJson, cloudflareStore, netlifyStore };

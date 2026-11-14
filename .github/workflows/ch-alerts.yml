@@ -88,6 +88,12 @@ jobs:
         run: |
           cd apps/web
           for k in stream alerts discoveries; do node scripts/alerts-store.mjs put $k ../../lead-sourcer/$k.json; done
+      # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
+      # until the Cloudflare token may use D1; never fails the run.
+      - name: Database
+        if: github.event_name != 'push' && steps.save.outcome == 'success'
+        continue-on-error: true
+        run: cd apps/web && node scripts/db-sync.mjs
       - name: Morning digest
         if: github.event.schedule == '41 6 * * *'
         working-directory: lead-sourcer
