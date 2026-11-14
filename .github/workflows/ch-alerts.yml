@@ -6,7 +6,7 @@
 # each morning. Secrets: CH_STREAM_KEY (Companies House developer hub: a "Streaming API" key, not the REST key),
 # COMPANIES_HOUSE_API_KEY (names of discovered companies), TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID (optional; the alerts
 # live on the dashboard).
-# Public repo: the log holds counts only.
+# Public repo: the log holds counts only. (Test run 14 Nov 2026: stream key + database check.)
 name: Alerts
 
 on:
