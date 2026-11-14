@@ -12,7 +12,7 @@ export const RANKED_FIELDS = [
   "turnover_foreign_gbp", "group_parent", "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_today", "currency", "currencies_in_accounts",
   "fx_forwards", "fx_sensitivity", "turnover_regions", "subsidiaries_abroad", "reporting_currency", "fx_borrowings",
   "filed_fx_score", "filed_fx", "hmrc_trade", "moved_up", "incumbent_bank", "owner", "triggers", "run_from_abroad", "accounts_url",
-  "employees", "bank_debt", "fd_search_url",
+  "employees", "bank_debt", "fd_search_url", "fx_forwards_evidence",
   "acquisitions", "acquisitions_evidence", "acquired_abroad", "new_fd_in_accounts", "new_fd_in_accounts_evidence",
 ];
 const slim = (r) => Object.fromEntries(RANKED_FIELDS.filter((k) => r[k] !== undefined && r[k] !== "").map((k) => [k, r[k]]));
@@ -20,7 +20,7 @@ const slim = (r) => Object.fromEntries(RANKED_FIELDS.filter((k) => r[k] !== unde
 // {rows (filings companies not on the list, slim, with fx_niche / section / qualified), ruled_out ({number: reason}
 // for both lists), niche_of ({number: corrected niche} for list companies), shy_of ({number: {niche, why}}: hard to
 // broker, both lists), scored (every lead with its score)}.
-export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, today = new Date() } = {}) {
+export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, moves = {}, today = new Date() } = {}) {
   const tiers = nicheTiers(niches);
   const onList = new Set(listRows.map((r) => r.company_number));
   // A list company's niche: the corrected one (customs goods, else a sector code that really names a niche) wins over
@@ -47,7 +47,7 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
              ...(e.absurd ? { qualified: "Out", qualify_reason: e.absurd } : {}) };
   });
   listRows.forEach(tag);
-  const ctx = { niches: tiers, signals, today };
+  const ctx = { niches: tiers, signals, moves, today };
   const scored = [...listRows.map((r) => ({ ...r, onList: true, fx_niche: nicheOf[r.company_number] ?? r.fx_niche })),
     ...rows.map((r) => ({ ...filingRow(r), onList: false }))]
     .map((r) => {

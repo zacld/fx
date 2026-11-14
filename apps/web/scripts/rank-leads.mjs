@@ -4,7 +4,9 @@
 // Reads the Accounts list, the Recent FX filings list, the measured niches and the alerts from the site's private store.
 // Prints counts, company names, scores and niche learnings — no people's names (the repo is public).
 import { readFile, writeFile } from "node:fs/promises";
-import { ALERTS_KEY, DEALS_KEY, FILINGS_KEY, KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+import { ALERTS_KEY, DEALS_KEY, FILINGS_KEY, KEY, MOMENTS_KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
+import { movesByCurrency } from "../src/accounts/format.js";
 import { filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
@@ -14,12 +16,15 @@ let groupOf = {};
 try { groupOf = groupsPath ? (JSON.parse(await readFile(groupsPath, "utf8")).groups || {}) : {}; } catch { /* no groups this run */ }
 const enrich = enrichPath ? (JSON.parse(await readFile(enrichPath, "utf8")).companies || {}) : {};
 const store = await openStore(STORE);
-const [list, index, niches, alerts, deals] = await Promise.all([KEY, FILINGS_KEY, NICHES_KEY, ALERTS_KEY, DEALS_KEY].map((k) => store.get(k, "json")));
+const [list, index, niches, alerts, deals, moments] = await Promise.all([KEY, FILINGS_KEY, NICHES_KEY, ALERTS_KEY, DEALS_KEY, MOMENTS_KEY].map((k) => store.get(k, "json")));
+let moves = {};
+try { moves = movesByCurrency(await (await openStore(MARKET_STORE)).get(MARKET_KEY, "json")); } catch { /* no market data: no currency moments */ }
 let filingRows = index?.rows || [];
 for (const { month } of index?.months || []) filingRows = filingRows.concat((await store.get(filingsMonthKey(month), "json"))?.rows || []);
 const listRows = list?.rows || [];
 
-const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || [])]) });
+const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, moves,
+  signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) });
 const learn = nicheLearnings(scored);
 const verdicts = (await store.get(VERDICTS_KEY, "json")) || {};
 const reviewed = verdictLearnings(scored, verdicts, { shyOf: shy_of });
@@ -31,6 +36,12 @@ if (orderPath) await writeFile(orderPath, JSON.stringify(live.map((s) => s.compa
 const bucket = (lo, hi) => live.filter((s) => s.score >= lo && s.score < hi).length;
 console.log(`Leads scanned: ${scored.length.toLocaleString()} (Accounts list ${listRows.length.toLocaleString()}, FX filings not on it ${rows.length.toLocaleString()}); ` +
             `ruled out as absurd ${Object.keys(ruled_out).length.toLocaleString()}; list companies relabelled ${Object.keys(niche_of).length.toLocaleString()}`);
+const momentCount = {};
+for (const s of scored) for (const [w] of s.parts) {
+  const k = /^(Funding round|New shares|New articles|Changed bank|Auditor|Accounting year-end|New director based|New to importing|Started (importing|exporting)|Customs trade growing|Overseas sales up|FX swung|Forward contracts maturing|Its currency moved|Insolvency|Winding-up)/.exec(w)?.[0];
+  if (k) momentCount[k] = (momentCount[k] || 0) + 1;
+}
+console.log(`Moments in the lead score: ${Object.entries(momentCount).map(([k, n]) => `${k} ${n}`).join(", ") || "none yet"}`);
 const hits = scored.filter((x) => !x.absurd && x.parts.some(([w]) => w.startsWith("Hit list")));
 console.log(`Hit list (a recent FX loss and a new FD / buying companies / a PE deal): ${hits.length}`);
 hits.slice(0, 20).forEach((x) => console.log(`  ${x.score}  ${x.company_name} — ${x.parts.filter(([w]) => /FX loss|finance director|Buying|Private-equity/.test(w)).map(([w]) => w.slice(0, 60)).join(" · ")}`));

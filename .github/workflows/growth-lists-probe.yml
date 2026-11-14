@@ -1,0 +1,26 @@
+name: Growth lists probe
+
+# Read-only: what the International Track 200 (fasttrack.co.uk) allows — robots.txt, terms clauses on automated access
+# and reuse, whether its league table is in the HTML — and the format of gov.uk's King's Awards winners lists. Decides
+# whether an importer may be built; nothing is saved. Runs when the probe changes.
+on:
+  push:
+    paths:
+      - lead-sourcer/tools/growth_lists_probe.py
+      - .github/workflows/growth-lists-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - working-directory: lead-sourcer
+        run: python tools/growth_lists_probe.py

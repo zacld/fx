@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -502,5 +502,56 @@ describe("Groups", () => {
       ["ACME GROUP LIMITED", "acmegroup.com", "ACME FOODS LIMITED"], ["SOLO LIMITED", "solo.co.uk", "SOLO LIMITED"]]);
     expect(list[0].group_companies).toBe("ACME UK LIMITED");
     setKnownGroups({}); setKnownSites({});
+  });
+});
+
+describe("Moments in the lead score", () => {
+  const today = new Date("2026-11-14T12:00:00Z");
+  const sig = (kind, at, title, detail = "") => ({ kind, at, title, detail });
+  it("fades a moment with age: full for 30 days, half by 90, gone after 120", () => {
+    expect(fade("2026-11-01", today)).toBe(1);
+    expect(fade("2026-08-16", today)).toBeCloseTo(0.5, 1);
+    expect(fade("2026-08-01", today)).toBe(0.5);
+    expect(fade("2026-06-01", today)).toBe(0);
+    expect(fade("", today)).toBe(0);
+  });
+  it("counts a funding round once (not its parts), a bank switch, customs and register moments", () => {
+    const signals = { M1: [
+      sig("funding_round", "2026-11-05T09:00:00", "Funding round likely: new shares + new articles"),
+      sig("shares_allotted", "2026-11-05T09:00:00", "New shares issued (money coming in)"),
+      sig("articles_changed", "2026-10-20T09:00:00", "New articles / share classes (often a funding round or deal)"),
+      sig("bank_switch", "2026-11-02T09:00:00", "Changed bank: Barclays → HSBC"),
+      sig("new_charge", "2026-11-02T09:00:00", "New bank charge (refinancing)"),
+      sig("new_trader", "2026-11-01", "New to importing / exporting (HMRC)", "imports from Aug 2026"),
+      sig("trade_up", "2026-11-01", "Customs trade growing (HMRC)"),
+      sig("auditor_changed", "2026-09-01T09:00:00", "Auditor resigned or changed"),
+    ] };
+    const s = leadScore({ company_number: "M1" }, { today, signals });
+    const got = Object.fromEntries(s.parts.map(([w, p]) => [w.split(":")[0], p]));
+    expect(got).toMatchObject({ "Funding round likely": 15, "Changed bank": 15, "New to importing / exporting (HMRC)": 20 });
+    expect(got["Auditor resigned or changed (2026-09-01)"]).toBe(5);    // 74 days old: 8 faded to 5
+    expect(s.parts.some(([w]) => /^New shares|^New articles|^Customs trade growing|^Change: /.test(w))).toBe(false);
+    expect(s.flags.moment).toBe("New to importing / exporting (HMRC)");
+  });
+  it("reads the accounts' own changes and the company's currency moving", () => {
+    const r = { company_number: "M2", overseas_turnover_share: "38%", overseas_turnover_share_prior: "20%", fx_gain_loss_gbp: "-60000",
+      fx_gain_loss_prior_gbp: "15000", fx_forwards: "Forward contracts to buy US$4m",
+      fx_forwards_evidence: '"The forward contracts mature within one year" (p23)', main_currency: "USD", currency_source: "forward contracts in the accounts" };
+    expect(accountsMoments(r).map(([p, w]) => [p, w.split(":")[0]])).toEqual([[10, "Overseas sales up"], [10, "FX swung from a £15k gain to a £60k loss"],
+      [5, "Forward contracts maturing within a year — renewal coming"]]);
+    const moves = movesByCurrency({ as_of: "2026-11-13", currencies: [{ code: "USD", changes: { "1w": -3.4, "1m": -1 } }, { code: "EUR", changes: { "1w": 1, "1m": 2 } }] });
+    const s = leadScore(r, { today, moves });
+    expect(s.parts.find(([w]) => w.startsWith("Its currency moved"))).toEqual(["Its currency moved: the pound down 3.4% against USD in a week", 10]);
+    expect(ownCurrency({ main_currency: "USD", currency_source: "niche default (not the company's documents)" })).toBe("");
+    expect(leadScore({ ...r, main_currency: "EUR" }, { today, moves }).parts.some(([w]) => w.startsWith("Its currency"))).toBe(false);
+  });
+  it("holds off a company with an insolvency filing or a winding-up petition", () => {
+    const signals = { M3: [sig("petition", "2026-11-06T07:00:00", "Winding-up petition (Gazette)")] };
+    const r = { company_number: "M3", filed_fx_score: 70, turnover_gbp: "40000000" };
+    expect(leadScore(r, { today, signals }).parts.find(([w]) => w.includes("hold off"))[1]).toBe(-60);
+    setKnownSignals(signals);
+    expect(reasonsNotToProgress(r, { today }).find((x) => x.serious).text).toMatch(/^Winding-up petition \(Gazette\) \(2026-11-06\) — hold off/);
+    setKnownSignals({});
+    expect(reasonsNotToProgress(r, { today }).some((x) => /hold off/.test(x.text))).toBe(false);
   });
 });

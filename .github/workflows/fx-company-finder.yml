@@ -150,6 +150,8 @@ jobs:
           node scripts/alerts-store.mjs get niches ../../lead-sourcer/niche_stats.json || true
           # purchases from the ownership register (niche-hits.yml): PE buyouts and companies buying subsidiaries first
           node scripts/alerts-store.mjs get deals ../../lead-sourcer/deals.json || true
+          # companies new to importing / exporting (niche-hits.yml, HMRC's monthly lists): a brand-new currency flow
+          node scripts/alerts-store.mjs get moments ../../lead-sourcer/moments.json || true
 
       - name: Find companies
         working-directory: lead-sourcer
@@ -158,6 +160,7 @@ jobs:
           DISCOVERIES_FILE: discoveries.json
           NICHE_STATS_FILE: niche_stats.json
           DEALS_FILE: deals.json
+          MOMENTS_FILE: moments.json
           # the modern slavery statement registry (£36m+, supply chain abroad / goods sector): checked with the
           # FX filings scan's finds (sourcer/mss.py; the yearly files cached with the gov.uk registry files)
           MSS_DISCOVERY: "1"

@@ -23,6 +23,7 @@ on:
       - lead-sourcer/config/fx_niches.json
       - lead-sourcer/sourcer/absurd.py
       - lead-sourcer/sourcer/owners.py
+      - lead-sourcer/sourcer/hmrc.py
       - lead-sourcer/tools/psc_deals.py
       - apps/web/scripts/rank-leads.mjs
       - apps/web/src/accounts/ranking.js
@@ -66,8 +67,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/.cache/fx-lead-sourcer/hmrc
-          key: hmrc-v2-${{ steps.month.outputs.month }}
+          key: hmrc-24m-${{ steps.month.outputs.month }}
           restore-keys: |
+            hmrc-24m-
             hmrc-v2-
             hmrc-traders-
       - name: The FX filings list and every tracked company
@@ -82,7 +84,14 @@ jobs:
         run: |
           zip=$(ls -t ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip 2>/dev/null | head -1 || true)
           python3 tools/niche_hits.py --filings fx-filings.json --out niche_stats.json --tracked tracked.json \
-            --enrich-out enrich.json --traders-out traders.json ${zip:+--bulk "$zip"}
+            --enrich-out enrich.json --traders-out traders.json --moments-out moments.json ${zip:+--bulk "$zip"}
+      # 24 months of HMRC trader files (the customs moments: new importers / exporters, trade growing), once a month
+      - name: Keep the HMRC trader files
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: ~/.cache/fx-lead-sourcer/hmrc
+          key: hmrc-24m-${{ steps.month.outputs.month }}
       # Who bought whom in the last 120 days (Companies House's free daily ownership snapshot, ~2.6GB): private-equity
       # buyouts, employee ownership trusts, overseas buyers, and UK companies buying subsidiaries — kept with an FX sign.
       - name: Deals from the ownership register
@@ -96,6 +105,7 @@ jobs:
         run: |
           cd apps/web && node scripts/alerts-store.mjs put niches ../../lead-sourcer/niche_stats.json
           node scripts/alerts-store.mjs put deals ../../lead-sourcer/deals.json
+          node scripts/alerts-store.mjs put moments ../../lead-sourcer/moments.json
       - name: Rank every lead
         run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json
       # Every lead's own website (best leads first), confirmed by its company number or registered name on the site:

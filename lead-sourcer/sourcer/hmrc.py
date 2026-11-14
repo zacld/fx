@@ -172,11 +172,14 @@ def iter_records(path: str, since: str = "") -> Iterator[dict]:
                 }
 
 
-def build_traders(paths: Iterable[str], since: str = "") -> dict[tuple[str, str], dict]:
+def build_traders(paths: Iterable[str], since: str = "", codes_since: str = "") -> dict[tuple[str, str], dict]:
     """
     One record per trader (keyed on normalised name + postcode) across all
     the monthly files: the months it imported / exported and how many months
-    each commodity code appeared.
+    each commodity code appeared. With codes_since (YYYYMM), codes are counted
+    only from that month on; earlier ones are kept as a set, early_codes (a
+    longer history read for the months traded, the goods measured on the
+    latest year — tools/niche_hits.py).
     """
     from sourcer.matching import normalise_name, normalise_postcode
 
@@ -189,11 +192,72 @@ def build_traders(paths: Iterable[str], since: str = "") -> dict[tuple[str, str]
             t = traders.setdefault(key, {
                 "name": rec["name"], "postcode": rec["postcode"],
                 "import_months": set(), "export_months": set(),
-                "import_codes": Counter(), "export_codes": Counter(),
+                "import_codes": Counter(), "export_codes": Counter(), "early_codes": set(),
             })
             t[f"{rec['flow']}_months"].add(rec["period"])
-            t[f"{rec['flow']}_codes"].update(set(rec["codes"]))
+            if codes_since and rec["period"] < codes_since:
+                t["early_codes"].update(rec["codes"])
+            else:
+                t[f"{rec['flow']}_codes"].update(set(rec["codes"]))
     return traders
+
+
+def months_back(period: str, n: int) -> str:
+    """ "202611", 2 -> "202609"."""
+    y, m = int(period[:4]), int(period[4:6]) - n
+    while m <= 0:
+        y, m = y - 1, m + 12
+    return f"{y:04d}{m:02d}"
+
+
+RECENT_MONTHS = 3          # first customs records within the latest this many months of the files: a new flow
+LAG_MONTHS = 2             # the files are published about this long after the month they cover
+TRADE_UP_MONTHS = 4        # this many more months active than the year before: trade growing
+_MONTH_NAMES = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+
+
+def _month_label(period: str) -> str:
+    return f"{_MONTH_NAMES[int(period[4:6]) - 1]} {period[:4]}"
+
+
+def moment(trade: dict, latest: str, months: int = 24) -> Optional[dict]:
+    """
+    The moment a company's customs records show, or None: kind new_trader (its first records in `months` months,
+    within the latest RECENT_MONTHS), new_import / new_export (that flow started recently; it traded the other way
+    before) or trade_up (TRADE_UP_MONTHS+ more months active than the year before, or twice as many kinds of goods —
+    5+ more). {kind, title, detail, since (YYYYMM), at (ISO date: when the files showed it)}.
+    """
+    imp, exp = set(trade.get("import_months") or ()), set(trade.get("export_months") or ())
+    if not imp and not exp:
+        return None
+    recent = months_back(latest, RECENT_MONTHS - 1)
+    year = months_back(latest, 11)
+    def made(kind: str, title: str, detail: str, since: str) -> dict:
+        shown = months_back(since, -LAG_MONTHS)
+        return {"kind": kind, "title": title, "detail": detail, "since": since, "at": f"{shown[:4]}-{shown[4:]}-01"}
+    every = imp | exp
+    flows = " and ".join(w for w, m in (("imports", imp), ("exports", exp)) if m)
+    goods = ", ".join(chapters(Counter(trade.get("import_codes") or {}) + Counter(trade.get("export_codes") or {}), 2))
+    if min(every) >= recent:
+        return made("new_trader", "New to importing / exporting (HMRC)",
+                    f"first customs records in {months} months: {flows} from {_month_label(min(every))}"
+                    + (f" ({goods})" if goods else ""), min(every))
+    if imp and min(imp) >= recent and exp:
+        return made("new_import", "Started importing (HMRC)",
+                    f"imports from {_month_label(min(imp))}; exported before" + (f" ({goods})" if goods else ""), min(imp))
+    if exp and min(exp) >= recent and imp:
+        return made("new_export", "Started exporting (HMRC)",
+                    f"exports from {_month_label(min(exp))}; imported before" + (f" ({goods})" if goods else ""), min(exp))
+    now_n, before_n = len({p for p in every if p >= year}), len({p for p in every if p < year})
+    late = set(trade.get("import_codes") or ()) | set(trade.get("export_codes") or ())
+    early = set(trade.get("early_codes") or ())
+    if before_n and now_n >= before_n + TRADE_UP_MONTHS:
+        return made("trade_up", "Customs trade growing (HMRC)",
+                    f"active in {now_n} of the last 12 months v {before_n} the year before", year)
+    if early and len(late) >= 2 * len(early) and len(late) - len(early) >= 5:
+        return made("trade_up", "Customs trade growing (HMRC)",
+                    f"{len(late)} kinds of goods in the last 12 months v {len(early)} the year before", year)
+    return None
 
 
 def chapters(codes: Counter, top: int = 3) -> list[str]:

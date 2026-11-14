@@ -479,6 +479,37 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   finder (`MSS_DISCOVERY=1` in its workflow) checks them with the FX filings scan's finds (`priority_from_filings`),
   niche "Supply chain abroad (modern slavery statement)" when nothing else names one. Size-qualified by law, and it
   reaches companies whose accounts aren't in the online files.
+- **Moments: the time to call** (Zac, 14 Nov 2026: "a company which just got funded, a new FD, large FX losses — let's
+  think of more … add all of these"). Each a signal (kind, at, title, detail) the lead score reads, **fading with age**
+  (`fade`: full points for 30 days, half by 90, half until 120, then none; `LEAD_POINTS` fullDays / halfDays /
+  momentDays), one per group (a funding round beats its parts; a new trader beats trade growing):
+  (1) **Companies House streams** (`tools/ch_alerts.py`, the filings and insolvency-cases feeds added to officers /
+  charges / owners): new shares issued (SH01, `shares_allotted` 8), new articles / share classes (MA, SH08, SH10, SH02,
+  resolutions adopting articles — `articles_changed` 5), both within 60 days = `funding_round` (15, hot), a new
+  auditor (`auditor_changed` 8), the year-end moved (AA01, `year_end_changed` 8), a new director resident abroad
+  (`director_abroad` 5; the register still gives the country of residence), and a **bank switch** — a new or paid-off
+  charge reads that company's charges register once (`SWITCH_CHECKS_MAX` 60 a run) and an all-assets charge to one bank
+  paid off with a new one to another within 180 days is `bank_switch` (15, hot; its charge isn't counted again as a
+  "Change"). (2) **HMRC customs** (`hmrc.moment`, in the daily "Niche hits" run, 24 months of trader files read and
+  cached as `hmrc-24m-*`; niches still measured on the latest 12, `codes_since`): first customs records in 24 months
+  within the latest 3 months of the files = `new_trader` (20), imports or exports started when it traded the other way
+  before = `new_import` / `new_export` (15), 4+ more months active than the year before or twice the kinds of goods =
+  `trade_up` (10); dated two months after the month (the files' lag). Store key `moments`; the lists' companies are
+  signals and show in the Alerts tab ("Customs"); companies not on them filing full / medium / group accounts with a
+  new flow are the finder's discoveries (`MOMENTS_FILE`, 55 new trader / 50 a flow started). (3) **The accounts
+  already read** (`accountsMoments` in `format.js`): overseas share up 5+ points on last year (10; last year's share
+  from tagged filings only — `accounts.overseas_share_prior`, `overseas_turnover_share_prior`, `FACTS_VERSION`
+  2026-11-14a), an FX gain last year turned into a £25k+ loss (`fxSwing` 10), forward contracts the accounts say mature
+  within a year (5: renewal coming). A rise in the sensitivity figure isn't read (last year's isn't kept). (4) **Its
+  currency moved**: the company's own main currency (not a niche default, `ownCurrency`) moved 3%+ against the pound in
+  a week or 5%+ in a month on the market moves page's ECB rates (`currencyMoved` 10; the page reads `/api/market`,
+  `rank-leads.mjs` the `fx-market/latest` store item). (5) **Hold off**: an insolvency filing or case, or a winding-up
+  petition in the Gazette (`gazette_petitions`, notice code 2450, daily with the news; matched by company number, else
+  name) — −60 and a serious reason not to progress, so it's never on Call today. Call today takes the strongest moment
+  as its trigger. The Alerts tab filters Money in / Banks & charges / Owners & deals / Customs / Hold off. **Growth
+  lists** (the Sunday Times International Track 200, King's Award winners): `tools/growth_lists_probe.py` (workflow
+  "Growth lists probe", read-only) checks the publisher's terms, robots.txt and format first — no importer until they
+  allow it.
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
   Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,
@@ -564,15 +595,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `EMAILS_MAX`), so they follow Zac across devices; drafts from before (this browser's storage) moved over once.
 - **Alerts** (`tools/ch_alerts.py`, workflow "Alerts" every 3 hours + a morning digest; the Accounts page's Alerts tab,
   GET `/api/accounts?view=alerts`, store keys `alerts`, `discoveries`, `ch/stream`; `apps/web/scripts/alerts-store.mjs`):
-  Companies House's streaming feeds (officers, charges, owners — secret `CH_STREAM_KEY`, a "Streaming API" key from the
+  Companies House's streaming feeds (officers, charges, owners, filings, insolvency cases — secret `CH_STREAM_KEY`, a "Streaming API" key from the
   developer hub, not the REST key) read from the last timepoint for the Accounts + FX filings lists' companies: new
   director (confirmed as the new finance director when Google News names them with a finance title in the last 150
   days — `confirm_fd`; Companies House no longer shows occupations), director left, new charge (refinancing), charge
   paid off, new corporate owner (private-equity backed: hot), and a charge in favour of an FX provider or for trade
   finance / foreign exchange (`FX_PROVIDERS`, `FX_PURPOSE`; hot) — for any company: one not on the lists becomes a
   discovery (`discoveries`, filed FX score 60) that the finder checks first (`DISCOVERIES_FILE`, merged into
-  `priority_from_filings`). Hot alerts go to Telegram as found and the last 24 hours as a morning summary, when
-  `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` are set (Zac's own chat; nothing to prospects). Counts only in the log.
+  `priority_from_filings`). Hot alerts go by **email** (Zac, 14 Nov 2026: "I'd rather it send me an email"): one email a run listing the
+  new hot ones and the last 24 hours as a morning summary, through Gmail's SMTP with an app password (secrets `SMTP_USER`,
+  `SMTP_PASSWORD`, optional `ALERT_EMAIL_TO`; `ch_alerts.email` / `send_hot`; test pushes send nothing). Telegram
+  (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) only when email isn't set up. Zac's own inbox; nothing to prospects. Counts only in the log.
   **News and job adverts** (same tool, `--signals`, daily before the digest): Google News RSS headlines (last
   `NEWS_DAYS` 10) classified by what they say (`headline_kind`) — a finance director / CFO appointed (`news_fd`), or
   buying / opening / selling abroad, a King's Award for International Trade, UK Export Finance backing (`news_abroad`)
