@@ -170,7 +170,12 @@ def scan(
                 "sic_codes": [code for code in (sic_code(values[i]) for i in sic_cols) if code],
                 "name": values[col["CompanyName"]].strip(),
                 "category": normalise_category(values[col["Accounts.AccountCategory"]]),
-                "incorporated": _iso_date(values[col["IncorporationDate"]])}
+                "incorporated": _iso_date(values[col["IncorporationDate"]]),
+                # the registered office, for a letter (the Outreach tab)
+                "address": ", ".join(a for a in (values[col[c]].strip() for c in (
+                    "RegAddress.CareOf", "RegAddress.POBox", "RegAddress.AddressLine1", "RegAddress.AddressLine2",
+                    "RegAddress.PostTown", "RegAddress.County") if c in col) if a),
+                "postcode": values[col["RegAddress.PostCode"]].strip()}
         if len(values) < width or values[col["CompanyStatus"]].strip() != "Active":
             continue
         company_type = values[col["CompanyCategory"]].lower()

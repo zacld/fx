@@ -44,6 +44,7 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
   const rows = filingRows.filter((r) => r.company_number && !onList.has(r.company_number)).map((r) => {
     const e = tag(r);
     return { ...slim(r), section: FILINGS_SECTION, from_filings: true, fx_niche: e.niche || "", sic: e.sic || [],
+             ...(e.address ? { registered_address: e.address, postcode: e.postcode || "" } : {}),
              ...(e.absurd ? { qualified: "Out", qualify_reason: e.absurd } : {}) };
   });
   listRows.forEach(tag);

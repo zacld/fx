@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, siteOf, setKnownGroups, groupOf, groupName, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
@@ -139,6 +139,8 @@ function Accounts({ data, password }) {
   }, []);
   const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, moves, madeAt: data.made_at }),
                           [signals, moves, data.made_at]);
+  // Zac's Good lead / Not a fit verdicts: declared before the rows that read them
+  const [verdicts, setVerdicts] = useState(data.verdicts || {});
   const rows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
     ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
   [baseRows, leadCtx, verdicts]);
@@ -151,9 +153,16 @@ function Accounts({ data, password }) {
   const [shown, setShown] = useState(PAGE);
   const [notes, setNotes] = useState(data.notes || {});
   const [checks, setChecks] = useState(data.checks || {});
-  const [verdicts, setVerdicts] = useState(data.verdicts || {});
   const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
+  // When the Alerts tab was last opened (this browser): the banner counts hot alerts newer than that.
+  const [alertsSeen, setAlertsSeen] = useState(() => { try { return localStorage.getItem("fx-alerts-seen") || ""; } catch { return ""; } });
+  useEffect(() => {
+    if (filters.view !== "alerts") return;
+    const now = new Date().toISOString().slice(0, 19);
+    try { localStorage.setItem("fx-alerts-seen", now); } catch { /* private window */ }
+    setAlertsSeen(now);
+  }, [filters.view]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   // A company's own page at /accounts/<number>; the browser's back button returns to the list where it was.
   const [pageNo, setPageNo] = useState(() => numberFromPath(window.location.pathname));
@@ -337,6 +346,7 @@ function Accounts({ data, password }) {
     <VerdictContext.Provider value={verdictCtx}>
     <main>
       <StatusStrip status={data.status} />
+      <AlertBanner summary={signals.alerts_summary} seen={alertsSeen} onOpen={() => set({ section: "", view: "alerts" })} />
       <div className="stats">
         {stats.map(({ n, l, s, c, view }) => {
           const inner = <><div className="stat-n" style={{ color: c }}>{n}</div>
@@ -349,6 +359,11 @@ function Accounts({ data, password }) {
 
       <div className="controls">
         <div className="tabs" role="tablist">
+          <button role="tab" aria-selected={filters.view === "outreach"} className={`tab outreach-tab${filters.view === "outreach" ? " on" : ""}`}
+                  title={`The top ${OUTREACH.letters} for the Investec letter, then the rest: cold call (something timely to say) or email sequence`}
+                  onClick={() => set({ section: "", view: "outreach" })}>
+            Outreach <span className="tab-n">{OUTREACH.letters}</span>
+          </button>
           <button role="tab" aria-selected={filters.view === "alerts"} className={`tab alerts-tab${filters.view === "alerts" ? " on" : ""}`}
                   title="New finance directors, refinancing, new owners, charges to FX providers — from Companies House, every 3 hours"
                   onClick={() => set({ section: "", view: "alerts" })}>
@@ -405,7 +420,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -450,7 +465,8 @@ function Accounts({ data, password }) {
         </>}
       </div>
 
-      {filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+      {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} />
        : filters.view === "alerts" ? <Alerts password={password} listed={listedNumbers} onOpen={openCompany} />
@@ -1201,6 +1217,95 @@ function Niches({ measured, madeAt, learned, headings, onPick, verdicts }) {
 // The Hit list tab (Zac, 12 Nov 2026): companies whose accounts, filed in the last 6 months, show an FX loss — and that
 // have a new finance director, are buying companies, or just had a private-equity deal. Highest lead score first; a
 // switch adds the same changes without the loss (filed lately). Every pick shows its reasons.
+// The hot alerts on the dashboard: new since the Alerts tab was last opened, the latest few named; opens the tab.
+function AlertBanner({ summary, seen, onOpen }) {
+  const hot = summary?.hot || [];
+  const fresh = hot.filter((a) => String(a.at || "") > (seen || ""));
+  if (!hot.length) return null;
+  const show = (fresh.length ? fresh : hot).slice(0, 3);
+  return (
+    <button className={`alert-banner${fresh.length ? " fresh" : ""}`} onClick={onOpen} title="Open the Alerts tab">
+      <b>{fresh.length ? `${fresh.length} new hot alert${fresh.length === 1 ? "" : "s"}` : `${hot.length} hot alert${hot.length === 1 ? "" : "s"} this week`}</b>
+      {show.map((a) => <span key={`${a.company_number}${a.at}${a.title}`} className="ab-item">{a.title}: {a.company_name || a.company_number}</span>)}
+      <span className="ab-go">Alerts →</span>
+    </button>
+  );
+}
+
+// The outreach plan (format.js outreachPlan): the top OUTREACH.letters leads for the Investec letter (with the registered
+// office to post it to), then the rest — cold call when there's something timely to say, else the email sequence — each
+// by lead score, one per group. Marking a company Contacted (Letter / Phone / Email…) moves it out and the next one up.
+const OUTREACH_LISTS = [
+  ["letter", "Letter — top", "The Investec outreach letter: the best leads by lead score, one per group."],
+  ["call", "Cold call", "Something happened you can talk about now — a moment, a recently filed FX loss, a new FD, a deal or a trigger."],
+  ["email", "Email sequence", "A good fit with no news yet: the sequence warms them up until something happens."],
+];
+function Outreach({ rows, contacted, onOpen, onContact, onEmail }) {
+  const [list, setList] = useState("letter");
+  const plan = useMemo(() => outreachPlan(rows, { contacted }), [rows, contacted]);
+  const shown = plan[list] || [];
+  const stamp = new Date().toISOString().slice(0, 10);
+  const top = (r) => (r.lead_parts || []).slice(0, 3).map(([w]) => w).join(" · ");
+  const exportList = () => {
+    const out = shown.map((r, i) => ({
+      rank: i + 1, company_name: r.company_name, addressee: letterAddressee(r), address: r.registered_address || "",
+      postcode: r.postcode || "", company_number: r.company_number, website: siteOf(r), lead_score: r.lead_score,
+      why_now: r.why_now || "", why: top(r), justification: outreachWhyLine(r), group_companies: (r.group_members || []).map((m) => m.company_name).join("; "),
+      turnover_gbp: r.turnover_gbp || "", companies_house_url: chCompanyUrl(r.company_number),
+    }));
+    const cols = list === "letter"
+      ? ["rank", "company_name", "addressee", "address", "postcode", "company_number", "lead_score", "justification", "why_now", "website", "group_companies", "companies_house_url"]
+      : ["rank", "company_name", "company_number", "website", "lead_score", "justification", "why_now", "addressee", "turnover_gbp", "group_companies", "companies_house_url"];
+    downloadSheet(out, columnsFor(cols, { addressee: list === "letter" ? "Addressee" : "Ask for", why_now: "Why now", justification: "Why this list" },
+      ["rank", "lead_score", "turnover_gbp"]), `outreach-${list}-${stamp}.xlsx`, OUTREACH_LISTS.find(([k]) => k === list)[1]);
+  };
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <div className="groups" role="group" aria-label="Outreach list">
+          {OUTREACH_LISTS.map(([k, label, hint]) => (
+            <button key={k} aria-pressed={list === k} className={`grp${list === k ? " on" : ""}`} title={hint} onClick={() => setList(k)}>
+              {k === "letter" ? `${label} ${OUTREACH.letters}` : label} <span className="tab-n">{plan[k].length}</span>
+            </button>
+          ))}
+        </div>
+        <button className="btn-sm export" onClick={exportList} disabled={!shown.length}>Export Excel ({shown.length})</button>
+        {list !== "letter" && <button className="btn-sm" onClick={() => downloadCognismCompanies(shown, `outreach-${list}`)} disabled={!cognismCompanyRows(shown).length}>
+          Cognism company list ({cognismCompanyRows(shown).length})</button>}
+      </div>
+      <p className="filings-note">{OUTREACH_LISTS.find(([k]) => k === list)[2]} Highest lead score first. Mark one Contacted
+        {list === "letter" ? " → Letter once it's posted" : ""} and the next moves up. {plan.held.length} more leads are held back by a serious
+        reason not to progress (outside £20m–£300m, no FX in the filings, a hold-off); contacted groups are left out.</p>
+      {shown.slice(0, 200).map((r, i) => (
+        <article className="card loss-card" key={r.company_number}>
+          <div className="card-top">
+            <div className="card-name">
+              <span className="call-n">{i + 1}</span>
+              <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
+              {r.group_members?.length > 0 && <span className="chip" title={r.group_members.map((m) => m.company_name).join("; ")}>+{r.group_members.length} group companies</span>}
+              {r.section && <span className="chip">{r.section}</span>}
+            </div>
+            <div className="loss-fig"><b className="call-turnover">{r.lead_score}</b><span className="muted">lead score</span></div>
+          </div>
+          {list === "letter"
+            ? <p className="panel-p"><b>{letterAddressee(r)}</b>{r.registered_address ? ` · ${r.registered_address}${r.postcode ? `, ${r.postcode}` : ""}` : " · address: see Companies House"}</p>
+            : r.why_now && <ul className="call-why"><li>{r.why_now}</li></ul>}
+          <dl className="outreach-why">
+            {(r.outreach_why || []).map((w) => <div key={w.label}><dt>{w.label}</dt><dd>{w.text}</dd></div>)}
+          </dl>
+          <div className="card-foot">
+            <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>
+            <EmailButton r={r} onEmail={onEmail} />
+            <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>
+            <VerdictButtons number={r.company_number} />
+          </div>
+        </article>
+      ))}
+      {!shown.length && <div className="empty">Nobody here yet.</div>}
+    </div>
+  );
+}
+
 function HitList({ rows, onOpen, onContact, onEmail }) {
   const [wider, setWider] = useState(false);
   const recentlyFiled = (r) => { const f = filedIso(r); return f && f >= new Date(Date.now() - 183 * 864e5).toISOString().slice(0, 10); };
@@ -1901,6 +2006,16 @@ select.input option{background:#0F141F}
 .chip.trig{background:rgba(245,158,11,.1);color:#FBBF24}
 .chip.own{background:rgba(16,185,129,.12);color:#34D399}
 .chip.warn{background:rgba(244,114,182,.1);color:#F9A8D4}
+.alert-banner{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;width:100%;text-align:left;margin:0 0 12px;padding:10px 14px;border-radius:8px;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.06);color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.alert-banner.fresh{border-color:rgba(245,158,11,.55);background:rgba(245,158,11,.12)}
+.alert-banner b{color:#FBBF24}
+.alert-banner .ab-item{color:rgba(255,255,255,.75)}
+.alert-banner .ab-go{margin-left:auto;color:#FBBF24}
+.outreach-why{margin:8px 0 4px;display:grid;gap:4px;font-size:12.5px}
+.outreach-why>div{display:grid;grid-template-columns:150px 1fr;gap:10px}
+.outreach-why dt{color:rgba(255,255,255,.5)}
+.outreach-why dd{margin:0;color:rgba(255,255,255,.85)}
+@media (max-width:640px){.outreach-why>div{grid-template-columns:1fr;gap:0}}
 .chip.out{background:rgba(248,113,113,.12);color:#FCA5A5}
 .chip.loss{background:rgba(248,113,113,.14);color:#FCA5A5;font-weight:600}
 .new{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:10px;background:rgba(56,189,248,.15);color:#7DD3FC}

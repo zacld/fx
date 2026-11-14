@@ -75,6 +75,16 @@ export const DISCOVERIES_KEY = "discoveries";   // {made_at, rows}: companies fo
 export const dealSignals = (items = []) => items.map((d) => ({ company_number: d.company_number, kind: d.kind, at: d.date,
   title: d.detail }));
 
+// The dashboard's alert banner (Zac, 14 Nov 2026: "just have the alert on the dash"): the hot alerts of the last 7 days,
+// newest first (at most 50), and how many alerts of any kind arrived in the last 24 hours.
+export function alertsSummary(items = [], now = new Date()) {
+  const since = (days) => new Date(now.getTime() - days * 864e5).toISOString().slice(0, 19);
+  const hot = items.filter((a) => a.hot && String(a.at || "") >= since(7))
+    .sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 50)
+    .map((a) => ({ at: a.at, title: a.title, company_number: a.company_number, company_name: a.company_name || "", tracked: Boolean(a.tracked) }));
+  return { hot, day: items.filter((a) => String(a.at || "") >= since(1)).length };
+}
+
 // {company number: [{kind, at, title}]} from the alerts, newest first — what the lead score reads.
 export function signalsByCompany(items = []) {
   const out = {};
@@ -228,6 +238,7 @@ export async function handle(req, { password = "", store, delay = WRONG_PASSWORD
     const [niches, alerts, deals, domains, moments] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY, DOMAINS_KEY, MOMENTS_KEY].map((k) => blobs.get(k, { type: "json" })));
     const websites = Object.fromEntries(Object.entries(domains?.sites || {}).map(([n, s]) => [n, s.website]));
     return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [], websites,
+                   alerts_summary: alertsSummary(alerts?.items || []),
                    signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) }, 200);
   }
   // The New money tab: purchases from the ownership register, plus the news of PE deals and funding rounds.

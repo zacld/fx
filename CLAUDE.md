@@ -510,6 +510,18 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   lists** (the Sunday Times International Track 200, King's Award winners): `tools/growth_lists_probe.py` (workflow
   "Growth lists probe", read-only) checks the publisher's terms, robots.txt and format first — no importer until they
   allow it.
+- **Outreach tab** (Zac, 14 Nov 2026: "the best leads ranked top 40, which we send our outreach letter to … then rank
+  the rest by either email sequence or cold call"; the Accounts page's first tab, `outreachPlan` / `outreachWhy` in
+  `format.js`): every lead not contacted, not qualified out (verdicts included) and with no serious reason not to
+  progress, one per group (a group with any company contacted is left out), by lead score. The top `OUTREACH.letters`
+  (40) get the Investec letter — addressee (the presented finance contact, else "The Finance Director" / "The Managing
+  Director") and the registered office (list rows' own; the FX filings rows' from the bulk file via `niche_hits`
+  enrich → `rankLeads`). The rest: **cold call** when there's something timely to say (`timelyReason`: the strongest
+  moment, a recently filed FX loss, a new FD, buying companies, a PE deal, funding, a trigger), else the **email
+  sequence**. Each card and export row carries its justification (`outreach_why`: why this list, the place in the
+  ranking, what scores it, what counts against it, the group it stands for). Contacted → Letter (a channel in
+  `followups.js`) moves it out and the next one up; the follow-up after a letter is a call. Excel export per list
+  (the letter's with addresses), and a Cognism company list for the call and email lists.
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
   Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,
@@ -602,10 +614,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   paid off, new corporate owner (private-equity backed: hot), and a charge in favour of an FX provider or for trade
   finance / foreign exchange (`FX_PROVIDERS`, `FX_PURPOSE`; hot) — for any company: one not on the lists becomes a
   discovery (`discoveries`, filed FX score 60) that the finder checks first (`DISCOVERIES_FILE`, merged into
-  `priority_from_filings`). Hot alerts go by **email** (Zac, 14 Nov 2026: "I'd rather it send me an email"): one email a run listing the
-  new hot ones and the last 24 hours as a morning summary, through Gmail's SMTP with an app password (secrets `SMTP_USER`,
-  `SMTP_PASSWORD`, optional `ALERT_EMAIL_TO`; `ch_alerts.email` / `send_hot`; test pushes send nothing). Telegram
-  (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) only when email isn't set up. Zac's own inbox; nothing to prospects. Counts only in the log.
+  `priority_from_filings`). Hot alerts live **on the dashboard** (Zac, 14 Nov 2026: "forget the email, just have the alert on the dash"): the
+  Accounts page's banner (hot alerts in the last 7 days, new since the Alerts tab was last opened — `alerts_summary` in
+  `?view=signals`) and the Alerts tab. Telegram (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) only if ever set; nothing to
+  prospects. Counts only in the log.
   **News and job adverts** (same tool, `--signals`, daily before the digest): Google News RSS headlines (last
   `NEWS_DAYS` 10) classified by what they say (`headline_kind`) — a finance director / CFO appointed (`news_fd`), or
   buying / opening / selling abroad, a King's Award for International Trade, UK Export Finance backing (`news_abroad`)
