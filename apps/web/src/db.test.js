@@ -47,6 +47,9 @@ describe("Database (D1) mirror", () => {
     expect((await syncTable(query, "signals", many, { maxBytes: 20_000 })).written).toBe(300);
     expect(calls.filter((c) => c === "INSERT").length).toBeGreaterThan(3);
     expect((await query("SELECT COUNT(*) AS n FROM signals"))[0].n).toBe(300);
+    // signals gone from the store are deleted (keyed by `id`, which json_each has a column of too)
+    expect((await syncTable(query, "signals", many.slice(0, 100), { maxBytes: 20_000 })).deleted).toBe(200);
+    expect((await query("SELECT COUNT(*) AS n FROM signals"))[0].n).toBe(100);
     expect(hashOf({ a: 1 })).toBe(hashOf({ a: 1 }));
     expect(hashOf({ a: 1 })).not.toBe(hashOf({ a: 2 }));
   });

@@ -141,7 +141,9 @@ export async function syncTable(query, table, records, { now = new Date().toISOS
   for (const b of batches(write, maxBytes)) await query(upsertSql(table), [JSON.stringify(b)]);
   const { key } = TABLES[table];
   for (const b of batches(gone.map((k) => k.split("\u0001")), maxBytes)) {
-    const match = key.map((c, i) => `${c} = j.value ->> '$[${i}]'`).join(" AND ");
+    // the table's own column, by name: json_each has an `id` column too, and a bare `id` meant that one (15 Nov 2026:
+    // the signals table's deletes matched nothing, so stale signals stayed)
+    const match = key.map((c, i) => `${table}.${c} = j.value ->> '$[${i}]'`).join(" AND ");
     await query(`DELETE FROM ${table} WHERE EXISTS (SELECT 1 FROM json_each(?1) AS j WHERE ${match})`, [JSON.stringify(b)]);
   }
   return { written: write.length, deleted: gone.length, unchanged: seen.size - changed.length,
