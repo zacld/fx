@@ -352,7 +352,7 @@ export function cognismCompanyRows(rows) {
 export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
 
 export const EXPORT_FIELDS = [
-  "company_and_fd", "industry", "lead_score", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
+  "company_and_fd", "industry", "lead_score", "lead_fit", "lead_timing", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
   "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
   "finance_contact", "finance_contact_role",
@@ -721,6 +721,8 @@ export const SHEET_COLUMNS = [
   ["company", "Company", (r) => r.company_name, (r) => r.company_name || ""],
   ["industry", "Industry", (r) => industryOf(r), (r) => industryOf(r)],
   ["lead", "Score", (r) => (r.lead_score !== undefined ? String(r.lead_score) : ""), (r) => -(r.lead_score || 0), true],
+  ["fit", "Fit", (r) => (r.lead_fit !== undefined ? String(r.lead_fit) : ""), (r) => -(r.lead_fit || 0), true],
+  ["timing", "Now", (r) => (r.lead_timing !== undefined ? String(r.lead_timing) : ""), (r) => -(r.lead_timing || 0), true],
   ["turnover", "Turnover", (r) => (r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""),
    (r) => -(Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0), true],
   ["growth", "Growth", (r) => r.turnover_growth || "", (r) => -(parseFloat(r.turnover_growth) || -1e9), true],
@@ -772,6 +774,11 @@ export const LEAD_POINTS = {
   // an insolvency filing or case, or a winding-up petition: hold off
   insolvency: -60,
 };
+// Fit and Timing (Zac, 15 Nov 2026: "do the fit and timing split"): each lead's reasons count in Fit (the right
+// company — FX proof and pain, size, niche, ownership; 0–100) or Timing (why call now — moments, deals, a new FD, a
+// recent filing; 0–100). The ranking (lead_score): a lead with Fit FIT.min+ scores base + fitWeight × Fit + timingWeight
+// × Timing (32–100), so among good fits the timely ones come first; one under it scores Fit ÷ 2 (under 15), below them all.
+export const FIT = { min: 30, base: 20, fitWeight: 0.3, timingWeight: 0.5 };
 // The signal kinds that are moments (above), each with its points key; the strongest of a group counts once.
 export const MOMENT_KINDS = {
   funding_round: "fundingRound", shares_allotted: "sharesAllotted", articles_changed: "articles", bank_switch: "bankSwitch",
@@ -840,7 +847,8 @@ export function nicheTiers(stats = {}) {
 
 export function leadScore(r, { today = new Date(), niches = {}, signals = {}, moves = {}, madeAt = "", rules = LEAD_POINTS } = {}) {
   const out = [];
-  const add = (points, why) => { if (points) out.push([why, points]); };
+  let cat = "fit";   // which half each reason counts in: "fit" (the right company), "timing" (why now), "stop"
+  const add = (points, why) => { if (points) out.push([why, points, cat]); };
   const day = (n) => new Date(today.getTime() - n * 864e5).toISOString().slice(0, 10);
   const fx = fxScore(r);
   add(fx >= 50 ? rules.strongFx : fx > 0 ? rules.someFx : 0, fx >= 50 ? `Strong FX proof in its filings (${fx})` : `Some FX proof (${fx})`);
@@ -848,10 +856,14 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const filedOn = filedIso(r);
   if (loss >= rules.lossMin) {
     add(loss >= rules.bigLossMin ? rules.bigLoss : rules.loss, `FX loss of ${money(loss)}`);
+    cat = "timing";
     if (filedOn && filedOn >= day(rules.recentDays)) add(rules.recentLoss, `… in accounts filed ${filedWhen(filedOn)}`);
+    cat = "fit";
   }
+  cat = "timing";
   if (filedOn && filedOn >= day(rules.justFiledDays) && !(loss >= rules.lossMin)) add(rules.justFiled, `Accounts just filed (${filedWhen(filedOn)})`);
   if (madeAt && r.first_seen === madeAt) add(rules.newOnList, "New on the list");
+  cat = "fit";
   const niche = niches[r.fx_niche];
   if (niche) add(rules.nicheByTier[niche.tier] || 0, `Niche: ${r.fx_niche} (${niche.hit_rate}% of its companies prove FX)`);
   const recent = (signals[r.company_number] || []).filter((s) => String(s.at || "").slice(0, 10) >= day(rules.signalDays));
@@ -862,6 +874,7 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const newFd = Boolean(fdSignal || fdTrigger || fdFiled);
   const fdWhy = !newFd ? "" : fdSignal ? (fdSignal.kind === "hiring_fd" ? `Hiring a finance director (${fdSignal.title.replace(/^Hiring a finance director: /, "")}, ${String(fdSignal.at).slice(0, 10)})`
     : `New finance director (${fdSignal.title})`) : fdTrigger ? `New finance director: ${fdTrigger}` : `New finance director: ${fdFiled} (accounts)`;
+  cat = "timing";
   if (newFd) add(rules.newFd, fdWhy);
   // Deals: buying companies (its accounts, or the ownership register), bought by PE, just funded, a new owner
   const bought = recent.find((s) => s.kind === "acquired");
@@ -870,7 +883,9 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const pe = recent.find((s) => /^(pe_buyout|news_pe|new_owner_pe|pe_debt)$/.test(s.kind));
   if (pe) add(rules.peBought, `Private-equity deal: ${pe.title}`);
   const backedBy = !pe && peBackedOf(r);
+  cat = "fit";
   if (backedBy) add(rules.peBacked, `PE-backed: ${backedBy.name} — buyout lenders usually require a hedging policy`);
+  cat = "timing";
   const funded = recent.find((s) => s.kind === "news_funding");
   if (funded) add(rules.funded, `Just raised funding: ${funded.title}`);
   const owner = !pe && recent.find((s) => /^(overseas_buyer|eot)$/.test(s.kind));
@@ -903,7 +918,9 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
     if (big) add(rules.currencyMoved, `Its currency moved: the pound ${big[1] > 0 ? "up" : "down"} ${Math.abs(big[1]).toFixed(1)}% against ${ccy} in ${big[0]}`);
   }
   const holdOff = all.find((s) => HOLD_OFF_KINDS.includes(s.kind));
+  cat = "stop";
   if (holdOff) add(rules.insolvency, `${holdOff.title} — hold off`);
+  cat = "timing";
   const other = triggers.find((t) => !NEW_FD.test(t)) ||
     recent.find((s) => /^(new_owner|new_charge|charge_paid|fx_charge)$/.test(s.kind) && !(switched && /charge/.test(s.kind)))?.title;
   add(other && !owner ? rules.trigger : 0, `Change: ${other}`);
@@ -911,6 +928,7 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   add(abroad ? rules.abroadNews : 0, `In the news: ${abroad?.title || ""}`);
   const hiring = recent.find((s) => s.kind === "hiring");
   add(hiring ? rules.hiring : 0, `${hiring?.title || ""}`);
+  cat = "fit";
   add(r.subsidiaries_abroad ? rules.subsidiaries : 0, `Subsidiaries abroad: ${r.subsidiaries_abroad}`);
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
@@ -918,20 +936,27 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   add(!r.run_from_abroad && ukArmName(r) ? rules.ukArmName : 0, "Name ends in UK — probably a foreign group's UK arm");
   const recentLoss = loss >= rules.lossMin && Boolean(filedOn) && filedOn >= day(rules.recentDays);
   const change = newFd ? "a new FD" : buying ? "buying companies" : pe ? "a private-equity deal" : "";
+  cat = "timing";
   if (recentLoss && change) add(rules.combo, `Hit list: a recent FX loss and ${change}`);
-  return { score: out.reduce((n, [, p]) => n + p, 0), parts: out,
+  // Fit (the right company: FX proof and pain, size, niche, ownership) and Timing (why call now), each 0–100. A lead
+  // that fits ranks on timing; one under FIT.min ranks below every one that does, whatever its news.
+  const sum = (c) => out.filter((p) => p[2] === c).reduce((n, [, p]) => n + p, 0);
+  const fit = Math.max(0, Math.min(100, sum("fit")));
+  const timing = Math.max(0, Math.min(100, sum("timing")));
+  const score = (fit >= FIT.min ? Math.round(FIT.base + FIT.fitWeight * fit + FIT.timingWeight * timing) : Math.round(fit / 2)) + sum("stop");
+  return { score, fit, timing, parts: out,
            flags: { recentLoss, newFd, fdWhy, buying, pe: Boolean(pe), peBacked: Boolean(pe || backedBy), funded: Boolean(funded), hit: Boolean(recentLoss && change),
                     moment: moments[0] ? moments[0].s.title : "", holdOff: holdOff ? holdOff.title : "" } };
 }
 
 // "Lead score 85: FX loss of £320k +30 · … " — the breakdown in one line.
-export const leadLine = (s) => `Lead score ${s.score}: ${s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ")}`;
+export const leadLine = (s) => `Lead score ${s.score}${s.fit !== undefined ? ` (Fit ${s.fit} · Now ${s.timing})` : ""}: ${s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ")}`;
 
 // Rows with lead_score / lead_parts / lead_reasons attached (sorted by SORTS.lead; lead_reasons for the exports).
 export const withLeadScores = (rows, ctx) => rows.map((r) => {
   if (r.dropped) return r;
   const s = leadScore(r, ctx);
-  return { ...r, lead_score: s.score, lead_parts: s.parts, lead_flags: s.flags, lead_reasons: s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ") };
+  return { ...r, lead_score: s.score, lead_fit: s.fit, lead_timing: s.timing, lead_parts: s.parts, lead_flags: s.flags, lead_reasons: s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ") };
 });
 
 // --- The outreach plan (Zac, 14 Nov 2026: "the best leads ranked top 40, which we send our outreach letter to … then
