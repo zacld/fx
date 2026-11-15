@@ -419,7 +419,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the register shows only people as owners). GET `/api/accounts?view=signals` gives
   the page the niche tiers and each company's recent alerts. The Accounts list sorts by it by default ("Lead score"),
   the Sheet has a Score column, cards and Call today show the breakdown, the company page a "Why it ranks" panel, and
-  the exports carry `lead_score` / `lead_reasons`. Call today orders its picks by it. The weights are logged here to be
+  the exports carry `lead_score` / `lead_reasons`. Call today orders its picks by it. **Fit and Timing** (Zac, 15 Nov 2026: "do the fit and timing split"):
+  each reason counts in **Fit** (the right company — FX proof, the FX loss's size, niche, £20m–£300m, subsidiaries abroad,
+  no hedging named, PE-backed, owned abroad / UK-arm name −; 0–100, `lead_fit`) or **Timing** (why now — the loss filed
+  lately, just filed, new on the list, new FD, deals, funding, owner, moments, currency moved, triggers, news, hiring, the
+  hit-list combo; 0–100, `lead_timing`); an insolvency hold-off stays a stop. `lead_score` = 20 + 0.3 × Fit + 0.5 × Timing
+  when Fit ≥ `FIT.min` (30), else Fit ÷ 2 — so good fits rank on timing and news never lifts a poor fit above them.
+  Tabs **Best fit** (Fit 30+, by Fit) and **Call now** (Fit 30+ with Timing > 0, by Timing), each with its half's
+  reasons, an industry filter and Excel export; Sheet columns Fit / Now; exports `lead_fit` / `lead_timing`. The Niches
+  tab's "Fit 60+" counts leads by Fit. The weights are logged here to be
   recalibrated against what Sales takes.
 - **Every lead ranked** (Zac, 11 Nov 2026: "scan all the leads, rank them in our scoring system, add them to the
   Accounts page, learn which niches are better — you'll come across some absurd ones"): the "Niche hits" workflow

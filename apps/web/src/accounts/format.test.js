@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { FIT, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -415,9 +415,9 @@ describe("Lead score", () => {
       "Strong FX proof in its filings": 20, "FX loss of £320k": 30, "… in accounts filed 1 Oct 2026": 10, "Niche": 15,
       "New finance director": 20, "Subsidiaries abroad": 10, "Turnover £20m–£300m": 10, "No hedging named — probably on the bank's rate": 5,
       "Hit list": 15 });
-    expect(s.score).toBe(135);
+    expect([s.fit, s.timing, s.score]).toEqual([90, 45, 70]);   // fit 20+30+15+10+10+5, now 10+20+15; 20 + 0.3×90 + 0.5×45
     expect(s.flags).toMatchObject({ recentLoss: true, newFd: true, hit: true });
-    expect(leadLine(s)).toMatch(/^Lead score 135: Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
+    expect(leadLine(s)).toMatch(/^Lead score 70 \(Fit 90 · Now 45\): Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
   });
   it("counts a new FD from the triggers, other changes once, and owned abroad lower", () => {
     const r = { company_number: "N2", filed_fx_score: 20, triggers: "New finance director appointed 2026-10-12 | new charge to HSBC (2026-09)",
@@ -457,11 +457,29 @@ describe("Deals in the lead score", () => {
   });
 });
 
+describe("Fit and Timing (15 Nov 2026)", () => {
+  const today = new Date("2026-11-15T12:00:00Z");
+  it("splits the reasons: who fits ranks on timing, one that doesn't fit ranks below them all", () => {
+    const fits = { company_number: "A", filed_fx_score: 60, turnover_gbp: "50000000", fx_gain_loss_gbp: "-80000" };
+    const s = leadScore(fits, { today });
+    expect([s.fit, s.timing]).toEqual([55, 0]);   // strong proof 20, loss 20, band 10, no hedging named 5
+    expect(s.parts.every(([, , c]) => c === "fit")).toBe(true);
+    const now = leadScore({ ...fits, accounts_filed_on: "2026-10-20" }, { today });
+    expect(now.fit).toBe(55);
+    expect(now.timing).toBe(10);   // the FX loss filed lately
+    expect(now.score).toBeGreaterThan(s.score);
+    const news = leadScore({ company_number: "B" }, { today, signals: { B: [{ kind: "news_fd", at: "2026-11-10T07:00:00", title: "new FD" }] } });
+    expect([news.fit, news.timing]).toEqual([0, 20]);
+    expect(news.score).toBeLessThan(s.score);   // news without fit stays below a lead that fits
+    expect(FIT.min).toBeGreaterThan(0);
+  });
+});
+
 describe("Private equity and new finance directors (15 Nov 2026)", () => {
   const today = new Date("2026-11-15T12:00:00Z");
   it("scores PE-backed companies from the register, the accounts, buyout debt or the owner chain — once", () => {
     const own = { company_number: "P1", pe_backed: "ACME BIDCO LIMITED", pe_backed_evidence: "its owner ACME BIDCO LIMITED is a buyout vehicle" };
-    expect(leadScore(own, { today }).parts).toContainEqual(["PE-backed: ACME BIDCO LIMITED — buyout lenders usually require a hedging policy", 10]);
+    expect(leadScore(own, { today }).parts.map((p) => p.slice(0, 2))).toContainEqual(["PE-backed: ACME BIDCO LIMITED — buyout lenders usually require a hedging policy", 10]);
     expect(leadScore(own, { today }).flags.peBacked).toBe(true);
     expect(peBackedOf({ company_number: "P2", pe_sponsor: "LDC (Managers) Limited", pe_sponsor_evidence: "ultimately controlled by funds managed by LDC" }).why)
       .toContain("accounts: ultimately controlled");
@@ -481,7 +499,7 @@ describe("Private equity and new finance directors (15 Nov 2026)", () => {
     const signals = { F1: [{ kind: "hiring_fd", at: "2026-11-10T07:00:00", title: "Hiring a finance director: Finance Director" }] };
     const s = leadScore({ company_number: "F1" }, { today, signals });
     expect(s.flags.newFd).toBe(true);
-    expect(s.parts).toContainEqual(["Hiring a finance director (Finance Director, 2026-11-10)", 20]);
+    expect(s.parts.map((p) => p.slice(0, 2))).toContainEqual(["Hiring a finance director (Finance Director, 2026-11-10)", 20]);
     expect(timelyReason({ lead_flags: s.flags })).toBe("Hiring a finance director (Finance Director, 2026-11-10)");
     expect(filterRows([{ company_number: "F1", lead_flags: s.flags }, { company_number: "F2", lead_flags: {} }], { newFdOnly: true }).length).toBe(1);
   });
@@ -515,7 +533,7 @@ describe("Websites for Cognism", () => {
 
 describe("A name ending in UK scores lower", () => {
   const base = { company_number: "1", fx_gain_loss_gbp: "-300000", filed_fx_score: 60 };
-  const score = (r) => leadScore({ ...base, ...r }).score;
+  const score = (r) => leadScore({ ...base, ...r }).fit;
   it("takes 10 off ACME UK LIMITED / (UK) LTD / (GB) LIMITED, not ACME LIMITED", () => {
     const plain = score({ company_name: "ACME LIMITED" });
     for (const name of ["ACME UK LIMITED", "ACME (UK) LTD", "ACME U.K. LIMITED", "ACME (GB) LIMITED"]) expect(score({ company_name: name })).toBe(plain - 10);
@@ -583,7 +601,7 @@ describe("Moments in the lead score", () => {
       [5, "Forward contracts maturing within a year — renewal coming"]]);
     const moves = movesByCurrency({ as_of: "2026-11-13", currencies: [{ code: "USD", changes: { "1w": -3.4, "1m": -1 } }, { code: "EUR", changes: { "1w": 1, "1m": 2 } }] });
     const s = leadScore(r, { today, moves });
-    expect(s.parts.find(([w]) => w.startsWith("Its currency moved"))).toEqual(["Its currency moved: the pound down 3.4% against USD in a week", 10]);
+    expect(s.parts.find(([w]) => w.startsWith("Its currency moved")).slice(0, 2)).toEqual(["Its currency moved: the pound down 3.4% against USD in a week", 10]);
     expect(ownCurrency({ main_currency: "USD", currency_source: "niche default (not the company's documents)" })).toBe("");
     expect(leadScore({ ...r, main_currency: "EUR" }, { today, moves }).parts.some(([w]) => w.startsWith("Its currency"))).toBe(false);
   });

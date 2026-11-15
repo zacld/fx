@@ -55,7 +55,7 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
     .map((r) => {
       const niche = r.fx_niche || "";
       const s = leadScore({ ...r, fx_niche: niche }, ctx);
-      return { company_number: r.company_number, company_name: r.company_name, onList: r.onList, niche, score: s.score,
+      return { company_number: r.company_number, company_name: r.company_name, onList: r.onList, niche, score: s.score, fit: s.fit, timing: s.timing,
                parts: s.parts, absurd: ruledOut[r.company_number] || "", band: s.parts.some(([w]) => w.startsWith("Turnover £20m")),
                loss: s.parts.some(([w]) => w.startsWith("FX loss")) };
     })
@@ -76,7 +76,7 @@ export function nicheLearnings(scored = [], minLeads = 8) {
   return [...by].map(([niche, list]) => {
     const live = list.filter((s) => !s.absurd);
     const avg = live.length ? live.reduce((n, s) => n + s.score, 0) / live.length : 0;
-    return { niche, leads: list.length, avg: Math.round(avg * 10) / 10, strong: live.filter((s) => s.score >= 60).length,
+    return { niche, leads: list.length, avg: Math.round(avg * 10) / 10, strong: live.filter((s) => (s.fit ?? s.score) >= 60).length,
              band: live.filter((s) => s.band).length, loss: live.filter((s) => s.loss).length, ruled_out: list.length - live.length };
   }).filter((n) => n.leads >= minLeads).sort((a, b) => b.avg - a.avg);
 }

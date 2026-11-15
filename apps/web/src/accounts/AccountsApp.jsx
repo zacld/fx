@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
@@ -391,6 +391,16 @@ function Accounts({ data, password }) {
                   onClick={() => set({ section: "", view: "hits" })}>
             Hit list <span className="tab-n">{open.filter((r) => r.lead_flags?.hit && !isOut(r)).length}</span>
           </button>
+          <button role="tab" aria-selected={filters.view === "fit"} className={`tab${filters.view === "fit" ? " on" : ""}`}
+                  title={`The right companies, whatever the news: FX proof and FX pain, £20m–£300m, a good niche, ownership — Fit ${FIT.min}+, best first`}
+                  onClick={() => set({ section: "", view: "fit" })}>
+            Best fit <span className="tab-n">{open.filter((r) => (r.lead_fit || 0) >= FIT.min && !isOut(r)).length}</span>
+          </button>
+          <button role="tab" aria-selected={filters.view === "now"} className={`tab${filters.view === "now" ? " on" : ""}`}
+                  title={`Companies that fit (Fit ${FIT.min}+) with a reason to call now — a new FD, a deal, funding, a fresh filing, a customs or bank change — most timely first`}
+                  onClick={() => set({ section: "", view: "now" })}>
+            Call now <span className="tab-n">{open.filter((r) => (r.lead_fit || 0) >= FIT.min && (r.lead_timing || 0) > 0 && !isOut(r)).length}</span>
+          </button>
           <button role="tab" aria-selected={filters.view === "shy"} className={`tab${filters.view === "shy" ? " on" : ""}`}
                   title="Sectors payment firms often won't take — scrap, bullion, mining, waste, fuel, vehicles, tobacco… where a bank can win"
                   onClick={() => set({ section: "", view: "shy" })}>
@@ -437,7 +447,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -491,6 +501,7 @@ function Accounts({ data, password }) {
 
       {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view === "fit" || filters.view === "now" ? <FitTiming mode={filters.view} rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} rows={rows} />
        : filters.view === "alerts" ? <Alerts password={password} listed={listedNumbers} onOpen={openCompany} />
@@ -1218,7 +1229,7 @@ function Niches({ measured, madeAt, learned, headings, onPick, verdicts }) {
       <div className="sheet-wrap">
         <table className="sheet">
           <thead><tr><th>Niche</th><th>Kind</th><th className="num">FX hit rate</th><th className="num">Open</th><th className="num">Score</th>
-            <th>Verdict</th><th className="num">Leads</th><th className="num">Avg lead score</th><th className="num">60+</th><th className="num">£20–300m</th><th className="num">FX loss</th><th className="num">Ruled out</th></tr></thead>
+            <th>Verdict</th><th className="num">Leads</th><th className="num">Avg lead score</th><th className="num" title="Leads with a Fit of 60+">Fit 60+</th><th className="num">£20–300m</th><th className="num">FX loss</th><th className="num">Ruled out</th></tr></thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.name} className={r.verdict === "drop" ? "muted-row" : ""}>
@@ -1410,6 +1421,67 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
   );
 }
 
+// Best fit (mode "fit": who to call at all — sorted by Fit) and Call now (mode "now": those that fit, with a reason to
+// call now — sorted by Timing, then Fit). Each card shows that half's reasons; the export carries both.
+function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
+  const fitOnly = mode === "fit";
+  const key = fitOnly ? "lead_fit" : "lead_timing";
+  const [industry, setIndustry] = useState("");
+  const base = rows.filter((r) => !isOut(r) && !r.dropped && (r.lead_fit || 0) >= FIT.min && (fitOnly || (r.lead_timing || 0) > 0));
+  const counts = {};
+  for (const r of base) { const k = industryOf(r); counts[k] = (counts[k] || 0) + 1; }
+  const list = base.filter((r) => !industry || industryOf(r) === industry)
+    .sort((a, b) => (b[key] || 0) - (a[key] || 0) || (b.lead_score || 0) - (a.lead_score || 0));
+  const half = (r, cat) => (r.lead_parts || []).filter(([, , c]) => c === cat);
+  const line = (parts) => parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ");
+  const exportList = () => downloadSheet(list.map((r, i) => ({
+    rank: i + 1, company_name: r.company_name, company_number: r.company_number, industry: industryOf(r), lead_fit: r.lead_fit,
+    lead_timing: r.lead_timing, lead_score: r.lead_score, fit_reasons: line(half(r, "fit")), timing_reasons: line(half(r, "timing")),
+    turnover_gbp: r.turnover_gbp || "", companies_house_url: chCompanyUrl(r.company_number),
+  })), columnsFor(["rank", "company_name", "company_number", "industry", "lead_fit", "lead_timing", "lead_score", "fit_reasons", "timing_reasons",
+    "turnover_gbp", "companies_house_url"], { lead_fit: "Fit", lead_timing: "Now", turnover_gbp: "Turnover (£)" },
+    ["rank", "lead_fit", "lead_timing", "lead_score", "turnover_gbp"]), `${fitOnly ? "best-fit" : "call-now"}-${new Date().toISOString().slice(0, 10)}.xlsx`,
+    fitOnly ? "Best fit" : "Call now");
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <span className="muted">{fitOnly
+          ? `${list.length} companies with Fit ${FIT.min}+ — the right company for the desk (FX proof and FX pain, size, niche, ownership), whatever the news. Best fit first.`
+          : `${list.length} of those with a reason to call now — a new FD, a deal, funding, a fresh filing, a customs or bank change. Most timely first (moments fade over 120 days).`}</span>
+        <select value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Industry">
+          <option value="">Any industry ({base.length})</option>
+          {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
+        </select>
+        <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
+      </div>
+      {list.slice(0, 200).map((r, i) => (
+        <article className="card loss-card" key={r.company_number}>
+          <div className="card-top">
+            <div className="card-name">
+              <span className="call-n">{i + 1}</span>
+              <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
+              <span className="chip">{industryOf(r)}</span>
+            </div>
+            <div className="loss-fig">
+              <b className="call-turnover">{fitOnly ? `Fit ${r.lead_fit}` : `Now ${r.lead_timing}`}</b>
+              <span className="muted">{fitOnly ? `Now ${r.lead_timing || 0}` : `Fit ${r.lead_fit}`} · score {r.lead_score}</span>
+            </div>
+          </div>
+          <ul className="call-why">{half(r, fitOnly ? "fit" : "timing").map(([why, p]) => <li key={why}>{why} <b>{p > 0 ? "+" : "−"}{Math.abs(p)}</b></li>)}</ul>
+          {!fitOnly && <p className="panel-p muted">Fits because: {half(r, "fit").map(([w]) => w.replace(/ \(.*\)$/, "")).join(" · ")}</p>}
+          <div className="card-foot">
+            <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>
+            <EmailButton r={r} onEmail={onEmail} />
+            <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>
+            <VerdictButtons number={r.company_number} />
+          </div>
+        </article>
+      ))}
+      {!list.length && <div className="empty">No company fits yet with these filters.</div>}
+    </div>
+  );
+}
+
 // Zac's review of a lead: Good lead, or Not a fit with a reason (stored as his own verdict — never a bank record).
 const VerdictContext = createContext({ verdicts: {}, setVerdict: () => {} });
 function VerdictButtons({ number }) {
@@ -1595,10 +1667,10 @@ function NewMoney({ password, listed, onOpen, rows: listRows = [] }) {
 // The lead score as a chip with its reasons on one line (format.js leadScore: LEAD_POINTS).
 function LeadScore({ r }) {
   if (r.lead_score === undefined) return null;
-  const line = leadLine({ score: r.lead_score, parts: r.lead_parts || [] });
+  const line = leadLine({ score: r.lead_score, fit: r.lead_fit, timing: r.lead_timing, parts: r.lead_parts || [] });
   return (
     <div className="lead-line" title={line}>
-      <span className="chip lead-chip">Score {r.lead_score}</span>
+      <span className="chip lead-chip">Score {r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</span>
       <span className="muted">{(r.lead_parts || []).map(([why, p]) => `${why.replace(/ \(.*\)$/, "")} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ")}</span>
     </div>
   );
