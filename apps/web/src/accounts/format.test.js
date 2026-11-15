@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -529,6 +529,14 @@ describe("Websites for Cognism", () => {
     expect(list[0].role_to_find).toMatch(/Finance Director; CFO/);
     setKnownSites({});
 });
+});
+
+describe("UK in the name (15 Nov 2026)", () => {
+  it("finds UK as a word anywhere in the name, and holds those leads out of the other lists", () => {
+    for (const n of ["ACME UK LIMITED", "ACME (UK) LTD", "ACME U.K. LIMITED", "UK FOODS LIMITED", "ACME UK HOLDINGS LTD"]) expect(ukNamed({ company_name: n }), n).toBe(true);
+    for (const n of ["UKAY LIMITED", "PUK FOODS LTD", "DUKE STREET LTD", "ACME LIMITED"]) expect(ukNamed({ company_name: n }), n).toBe(false);
+    expect(reasonsNotToProgress({ company_name: "ACME UK LIMITED", filed_fx_score: 60, turnover_gbp: "50000000" }).some((x) => x.serious)).toBe(true);
+  });
 });
 
 describe("A name ending in UK scores lower", () => {
