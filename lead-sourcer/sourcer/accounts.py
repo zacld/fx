@@ -24,7 +24,7 @@ import urllib.request
 from html.parser import HTMLParser
 from typing import Optional
 
-from sourcer import turnover_text, banks, companies_house, fx_notes, fx_text, hooks, incumbent, pdf, people, profiles, website
+from sourcer import turnover_text, banks, companies_house, deals, fx_notes, fx_text, hooks, incumbent, pdf, pe, people, profiles, website
 
 CH_FILING_HISTORY = f"{companies_house.CH_BASE}/company/{{number}}/filing-history"
 DOCUMENT_CONTENT = "https://document-api.company-information.service.gov.uk/document/{id}/content"
@@ -480,7 +480,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-14a"   # + last year's overseas share (tagged filings); 2026-11-10a: accounts kept in another
+FACTS_VERSION = "2026-11-15a"   # + a PE sponsor named as controlling party, a finance director appointed; 2026-11-14a: + last year's overseas share (tagged filings); 2026-11-10a: accounts kept in another
                                 # currency, subsidiaries abroad, foreign-currency borrowings
 
 
@@ -719,6 +719,8 @@ def extract_facts(document: bytes) -> dict:
         "trading_names": profiles.trading_names(plain),
         **hooks.text_evidence(plain),
         **incumbent.text_evidence(plain),
+        **pe.text_evidence(plain),
+        **deals.fd_columns(plain),
         "fx_gain_loss_evidence": "tagged in the accounts" if fx else "",
         "fx_gain_loss_check": "",
         "reporting_currency": own_ccy,
@@ -1107,6 +1109,8 @@ def extract_facts_from_text(text: str, made_up_date: str = "", how: str = "pdf")
         "trading_names": profiles.trading_names(plain),
         **hooks.text_evidence(plain),
         **incumbent.text_evidence(plain),
+        **pe.text_evidence(plain),
+        **deals.fd_columns(text),
         **fx_notes.read(pages),
         "format": how,
         "fx_gain_loss_check": "",

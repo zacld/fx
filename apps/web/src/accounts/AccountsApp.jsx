@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
@@ -145,7 +145,8 @@ function Accounts({ data, password }) {
     ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
   [baseRows, leadCtx, verdicts]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
-                                            triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true });
+                                            triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
+                                            peOnly: false, newFdOnly: false });
   const [sort, setSort] = useState("lead");
   // Sheet (a dense, sortable grid) or Cards; remembered in this browser
   const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
@@ -459,6 +460,8 @@ function Accounts({ data, password }) {
           <label className="check"><input type="checkbox" checked={filters.fxLossOnly} onChange={(e) => set({ fxLossOnly: e.target.checked })} /> Recent FX loss</label>
           <label className="check"><input type="checkbox" checked={filters.fdOnly} onChange={(e) => set({ fdOnly: e.target.checked })} /> FD named</label>
           <label className="check"><input type="checkbox" checked={filters.triggersOnly} onChange={(e) => set({ triggersOnly: e.target.checked })} /> Triggers</label>
+          <label className="check" title="A private-equity owner anywhere up the chain, a PE house or fund named in the accounts, or buyout-style debt"><input type="checkbox" checked={filters.peOnly} onChange={(e) => set({ peOnly: e.target.checked })} /> PE-backed</label>
+          <label className="check" title="A new finance director: appointed (accounts, alerts, news) or being hired (job adverts)"><input type="checkbox" checked={filters.newFdOnly} onChange={(e) => set({ newFdOnly: e.target.checked })} /> New FD</label>
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>
           <label className="check" title="Companies in the same group (one top UK parent) shown once, as the group's best lead"><input type="checkbox" checked={filters.oneGroup} onChange={(e) => set({ oneGroup: e.target.checked })} /> One per group</label>
           <div className="seg" role="group" aria-label="Layout">
@@ -849,7 +852,8 @@ function Chips({ r }) {
       {r.main_bank && <Src className="chip" href={bankUrl(r)} title="Open where this bank is named">{r.main_bank}{r.bank_type ? ` · ${r.bank_type}` : ""}</Src>}
       {r.facility_ends && <Src className="chip trig" href={r.accounts_url} title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</Src>}
       {r.own_bank_client && <span className="chip own">Existing client</span>}
-      {r.pe_backed && <span className="chip warn">PE-backed</span>}
+      {peBackedOf(r) && <span className="chip warn" title={peBackedOf(r).why}>PE-backed: {peBackedOf(r).name}</span>}
+      {r.lead_flags?.newFd && <span className="chip trig" title={r.lead_flags.fdWhy}>New FD</span>}
       {r.run_from_abroad && <span className="chip warn" title={r.run_from_abroad}>Owned abroad: pitch the UK team</span>}
       {r.family_run && <span className="chip">Family-run</span>}
       {parts(r.triggers).map((t) => <span key={t} className="chip trig">{t}</span>)}
@@ -1060,19 +1064,19 @@ function FinanceCharts({ r }) {
 
 // The Alerts tab: what changed at the companies on your lists (tools/ch_alerts.py, every 3 hours from Companies
 // House's streaming feeds) — hot ones first — and new leads found by a charge to an FX provider or for trade finance.
-const ALERT_FILTERS = [["", "All"], ["hot", "Hot"], ["new_fd", "New FD"], ["money", "Money in"], ["charges", "Banks & charges"],
+const ALERT_FILTERS = [["", "All"], ["hot", "Hot"], ["new_fd", "New FD"], ["pe", "Private equity"], ["money", "Money in"], ["charges", "Banks & charges"],
   ["owners", "Owners & deals"], ["directors", "Directors"], ["customs", "Customs"], ["abroad", "Expanding abroad"], ["hiring", "Hiring"],
   ["trouble", "Hold off"]];
 const ALERT_GROUPS = {
   money: /^(shares_allotted|articles_changed|funding_round|news_funding)$/, charges: /charge|bank_switch/,
   owners: /owner|auditor_changed|year_end_changed/, customs: /^(new_trader|new_import|new_export|trade_up)$/,
-  trouble: /^(insolvency|petition)$/, directors: /director/,
+  trouble: /^(insolvency|petition)$/, directors: /director/, pe: /^(pe_buyout|news_pe|new_owner_pe|pe_debt)$/,
 };
-const alertMatches = (a, f) => !f || (f === "hot" ? a.hot : f === "new_fd" ? /^(new|news)_fd$/.test(a.kind)
+const alertMatches = (a, f) => !f || (f === "hot" ? a.hot : f === "new_fd" ? /^(new|news|hiring)_fd$/.test(a.kind)
   : f === "abroad" ? a.kind === "news_abroad" : f === "hiring" ? a.kind === "hiring" : ALERT_GROUPS[f]?.test(a.kind));
 const alertSource = (a) => (/companieshouse|company-information/.test(a.url || "") ? "Companies House ↗"
   : /uktradeinfo/.test(a.url || "") ? "HMRC lists ↗" : /thegazette/.test(a.url || "") ? "The Gazette ↗"
-  : a.kind === "hiring" ? "Job advert ↗" : /^news/.test(a.kind) ? "Article ↗" : "Source ↗");
+  : /^hiring/.test(a.kind) ? "Job advert ↗" : /^news/.test(a.kind) ? "Article ↗" : "Source ↗");
 function Alerts({ password, listed, onOpen }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -1506,7 +1510,7 @@ function HardToBroker({ rows, shyOf, onOpen, onContact, onEmail }) {
 // The New money tab: who was just bought by private equity, who is buying companies, who just raised funding, who has
 // a new overseas owner or an employee ownership trust — from Companies House's ownership register (last 120 days,
 // each with its FX sign) and the news. Newest first.
-const MONEY_KINDS = { pe_buyout: "Bought by PE", news_pe: "PE deal (news)", acquired: "Buying companies", news_funding: "Just funded",
+const MONEY_KINDS = { pe_buyout: "Bought by PE", news_pe: "PE deal (news)", pe_debt: "Buyout-style debt", acquired: "Buying companies", news_funding: "Just funded",
   overseas_buyer: "New overseas owner", eot: "Employee ownership trust" };
 const MONEY_FILTERS = [["", "All"], ["pe", "Private equity"], ["acquired", "Buying companies"], ["news_funding", "Just funded"],
   ["overseas_buyer", "Overseas owner"], ["eot", "EOT"]];

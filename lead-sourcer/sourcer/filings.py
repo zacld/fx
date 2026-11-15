@@ -34,7 +34,7 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import date
 from typing import Iterable, Optional
 
-from sourcer import accounts, deals, fx_notes, hooks, incumbent
+from sourcer import accounts, deals, fx_notes, hooks, incumbent, pe
 
 DOWNLOADS = "https://download.companieshouse.gov.uk/"
 LIST_PAGES = {"daily": DOWNLOADS + "en_accountsdata.html", "monthly": DOWNLOADS + "en_monthlyaccountsdata.html"}
@@ -346,6 +346,8 @@ def research(number: str, name: str, api_key: str, today: Optional[date] = None,
         "lenders": "; ".join(f"{c['name']}: {incumbent.charge_kind(c)}" + (f", {hooks.day(c['created_on'])}" if c.get("created_on") else "")
                              for c in lenders),
         "owner": owner_line(owners),
+        **dict(zip(("pe_backed", "pe_backed_evidence"),
+                   pe.backed(triggers.investor_owner([o for o in owners if not o.get("ceased_on")]), charges))),
         "triggers": " | ".join(triggers.find(owners, charges, directors, today)),
         "fd_search_url": news.verify_links(name)[0],
         # a group check left waiting (this run's parent reads used up) keeps the row in line for the next run
@@ -572,6 +574,7 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         **{k: v for k, v in cols.items() if not k.endswith("_url")},
     }
     row.update(deals.columns(plain_text))   # who it bought, a finance director appointed (triggers)
+    row.update(pe.text_evidence(plain_text))   # a PE house or fund named as controlling party
     mentions, mention_count = fx_mentions(plain_text)
     row.update(fx_mentions=mentions, fx_mention_count=mention_count)
     row["fx_in_filing"] = shows_fx(facts, today["fx_today"])

@@ -77,7 +77,7 @@ export const googleFd = (r) =>
 // view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
 export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
                                    showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
-                                   contacted = {}, notes = {}, role = "" } = {}) {
+                                   contacted = {}, notes = {}, role = "", peOnly = false, newFdOnly = false } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
     (view === "contacted") === Boolean(contacted[r.company_number]) &&
@@ -89,6 +89,8 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!fdOnly || hasConfirmedFd(r)) &&
     (!pair || parts(r.currency_pairs).includes(pair)) &&
     (!triggersOnly || Boolean(r.triggers)) &&
+    (!peOnly || Boolean(peBackedOf(r))) &&
+    (!newFdOnly || Boolean(r.lead_flags?.newFd)) &&
     (showOut || !isOut(r)) &&
     (!q || [r.company_name, r.finance_contact, r.finance_contact_clues, r.fx_niche, r.main_bank, r.postcode, r.company_number, notes[r.company_number]?.text]
       .some((v) => (v || "").toLowerCase().includes(q))));
@@ -282,6 +284,17 @@ export const siteOf = (r) => r.website || knownSites[r.company_number] || "";
 let knownGroups = {};
 export const setKnownGroups = (map) => { knownGroups = map || {}; };
 export const groupOf = (r) => knownGroups[r.company_number] || null;
+// Private-equity backed, and what says so: the finder's / filings scan's own reading (a PE owner on the register, a PE
+// house or fund the accounts name as controlling party, buyout-style debt), else a PE house, fund or buyout vehicle
+// anywhere up its chain of owners (the daily ownership pass, group_of[number].pe). {name, why} or null.
+export function peBackedOf(r) {
+  if (r.pe_backed) return { name: r.pe_backed, why: r.pe_backed_evidence || "a private-equity owner on the register" };
+  if (r.pe_sponsor) return { name: r.pe_sponsor, why: r.pe_sponsor_evidence ? `accounts: ${r.pe_sponsor_evidence}` : "named in its accounts" };
+  const up = groupOf(r)?.pe;
+  if (up?.name) return { name: up.name, why: `${up.name} owns it, ${up.hops} level${up.hops === 1 ? "" : "s"} up the ownership register` };
+  const owned = /^Owned by (.+?) \(.*— private-equity backed$/.exec(r.owner || "");
+  return owned ? { name: owned[1], why: r.owner } : null;
+}
 export const groupKey = (r) => (groupOf(r)?.hops ? groupOf(r).top : r.company_number);
 export const groupName = (r) => (groupOf(r)?.hops ? groupOf(r).top_name || "" : "");
 // One row per group: the group's best lead (highest lead score, else first) stands for it, the others listed on it as
@@ -712,6 +725,10 @@ export const LEAD_POINTS = {
   // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
   // employee ownership trust 10, and the hit-list combo — a recent FX loss with a new FD / a purchase / a PE deal — 15.
   buying: 15, peBought: 15, funded: 10, newOwner: 10, combo: 15, fdInAccountsDays: 365,
+  // Zac, 15 Nov 2026 ("improve the FD, PE-backed and private equity companies"): private-equity backed at all — a PE
+  // owner anywhere up the chain, a PE house or fund named in the accounts, buyout-style debt — 10 (a fresh PE deal's
+  // 15 instead when there is one); a finance director / CFO advertised counts as a new FD (20).
+  peBacked: 10,
   // Moments (Zac, 14 Nov 2026: "a company that just got funded, a new FD, large FX losses — let's think of more"). Each
   // fades with age: full points for fullDays, down to half by halfDays, half until momentDays, then nothing.
   fundingRound: 15, sharesAllotted: 8, articles: 5, bankSwitch: 15, auditorChanged: 8, yearEndChanged: 8,
@@ -807,18 +824,22 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const niche = niches[r.fx_niche];
   if (niche) add(rules.nicheByTier[niche.tier] || 0, `Niche: ${r.fx_niche} (${niche.hit_rate}% of its companies prove FX)`);
   const recent = (signals[r.company_number] || []).filter((s) => String(s.at || "").slice(0, 10) >= day(rules.signalDays));
-  const fdSignal = recent.find((s) => /^(new|news)_fd$/.test(s.kind));
+  const fdSignal = recent.find((s) => /^(new|news)_fd$|^hiring_fd$/.test(s.kind));
   const triggers = parts(r.triggers);
   const fdTrigger = [...triggers, r.fact_1, r.fact_2].find((t) => t && NEW_FD.test(t));
   const fdFiled = r.new_fd_in_accounts && appointedIso(r.new_fd_in_accounts) >= day(rules.fdInAccountsDays) ? r.new_fd_in_accounts : "";
   const newFd = Boolean(fdSignal || fdTrigger || fdFiled);
-  if (newFd) add(rules.newFd, fdSignal ? `New finance director (${fdSignal.title})` : fdTrigger ? `New finance director: ${fdTrigger}` : `New finance director: ${fdFiled} (accounts)`);
+  const fdWhy = !newFd ? "" : fdSignal ? (fdSignal.kind === "hiring_fd" ? `Hiring a finance director (${fdSignal.title.replace(/^Hiring a finance director: /, "")}, ${String(fdSignal.at).slice(0, 10)})`
+    : `New finance director (${fdSignal.title})`) : fdTrigger ? `New finance director: ${fdTrigger}` : `New finance director: ${fdFiled} (accounts)`;
+  if (newFd) add(rules.newFd, fdWhy);
   // Deals: buying companies (its accounts, or the ownership register), bought by PE, just funded, a new owner
   const bought = recent.find((s) => s.kind === "acquired");
   const buying = Boolean(r.acquisitions || bought);
   if (buying) add(rules.buying, `Buying companies: ${r.acquisitions || bought.title}`);
-  const pe = recent.find((s) => /^(pe_buyout|news_pe|new_owner_pe)$/.test(s.kind));
+  const pe = recent.find((s) => /^(pe_buyout|news_pe|new_owner_pe|pe_debt)$/.test(s.kind));
   if (pe) add(rules.peBought, `Private-equity deal: ${pe.title}`);
+  const backedBy = !pe && peBackedOf(r);
+  if (backedBy) add(rules.peBacked, `PE-backed: ${backedBy.name} — buyout lenders usually require a hedging policy`);
   const funded = recent.find((s) => s.kind === "news_funding");
   if (funded) add(rules.funded, `Just raised funding: ${funded.title}`);
   const owner = !pe && recent.find((s) => /^(overseas_buyer|eot)$/.test(s.kind));
@@ -868,7 +889,7 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const change = newFd ? "a new FD" : buying ? "buying companies" : pe ? "a private-equity deal" : "";
   if (recentLoss && change) add(rules.combo, `Hit list: a recent FX loss and ${change}`);
   return { score: out.reduce((n, [, p]) => n + p, 0), parts: out,
-           flags: { recentLoss, newFd, buying, pe: Boolean(pe), funded: Boolean(funded), hit: Boolean(recentLoss && change),
+           flags: { recentLoss, newFd, fdWhy, buying, pe: Boolean(pe), peBacked: Boolean(pe || backedBy), funded: Boolean(funded), hit: Boolean(recentLoss && change),
                     moment: moments[0] ? moments[0].s.title : "", holdOff: holdOff ? holdOff.title : "" } };
 }
 
@@ -893,7 +914,7 @@ export function timelyReason(r) {
   const f = r.lead_flags || {};
   const loss = -Number(r.fx_gain_loss_gbp) || 0;
   return f.moment || (f.recentLoss && `FX loss of ${money(loss)} in accounts filed ${filedWhen(filedIso(r))}`)
-    || (f.newFd && "New finance director") || (f.buying && `Buying companies${r.acquisitions ? `: ${r.acquisitions}` : ""}`)
+    || (f.newFd && (f.fdWhy || "New finance director")) || (f.buying && `Buying companies${r.acquisitions ? `: ${r.acquisitions}` : ""}`)
     || (f.pe && "Private-equity deal") || (f.funded && "Just raised funding") || parts(r.triggers)[0] || "";
 }
 export const letterAddressee = (r) => (presentedContact(r)

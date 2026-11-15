@@ -63,6 +63,7 @@ def acquisitions(text: str, max_items: int = 4) -> list[dict]:
 
 _FIN_TITLE = r"(?:Chief Financial Officer|CFO|Finance Director|Group Finance Director|Director of Finance|Financial Director)"
 _APPOINTED = r"\(?\s*appointed\s+(?:on\s+)?(\d{1,2}(?:st|nd|rd|th)?\s+[A-Z][a-z]+\s+20\d\d|\d{1,2}/\d{1,2}/20\d\d)\s*\)?"
+_APPOINTED_NAME = re.compile(rf"((?:(?:Mr|Mrs|Ms|Miss|Dr)\.?\s+)?(?:[A-Z][a-zA-Z'’.-]*\s+){{1,3}}[A-Z][a-zA-Z'’-]+)\s*{_APPOINTED}")
 _FIN_APPT = [re.compile(rf"{_FIN_TITLE}[^.;\n]{{0,60}}?{_APPOINTED}", re.I), re.compile(rf"{_APPOINTED}[^.;\n]{{0,40}}?{_FIN_TITLE}", re.I)]
 
 
@@ -80,7 +81,25 @@ def finance_appointments(text: str) -> list[dict]:
             cut = max(before.rfind(";"), before.rfind("."), before.rfind("\n"))
             start = m.start() - len(before) + (cut + 1 if cut >= 0 else 0)
             out.append({"when": when, "sentence": flat[start:m.end()].strip(" ;,")[:300]})
+    # a director the list shows as appointed, with no title there, whom the accounts name with a finance title
+    # elsewhere — the signature block or the strategic report ("J Smith, Chief Financial Officer")
+    for m in _APPOINTED_NAME.finditer(flat):
+        name, when = " ".join(m.group(1).split()), m.group(2)
+        if when in seen or len(name) < 5 or re.search(r"\b(?:Limited|Ltd|PLC|LLP|Director|Secretary)\b", name):
+            continue
+        titled = re.search(rf"{re.escape(name)}[\s,–-]{{1,6}}(?:\(?\s*)?{_FIN_TITLE}|{_FIN_TITLE}[\s,:–-]{{1,6}}{re.escape(name)}\b",
+                           flat, re.I)
+        if titled:
+            seen.add(when)
+            out.append({"when": when, "sentence": f"{flat[m.start():m.end()].strip(' ;,')[:160]} … {titled.group(0)[:120]}"})
     return out[:2]
+
+
+def fd_columns(text: str) -> dict:
+    """{new_fd_in_accounts, new_fd_in_accounts_evidence}: the main list's accounts read the same way as the filings'."""
+    fd = finance_appointments(text)
+    return {"new_fd_in_accounts": f"Finance director appointed {fd[0]['when']}" if fd else "",
+            "new_fd_in_accounts_evidence": fd[0]["sentence"] if fd else ""}
 
 
 def tidy_row(row: dict) -> bool:

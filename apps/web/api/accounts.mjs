@@ -105,7 +105,9 @@ export const DETAIL_SHARDS = 16;
 export const DETAIL_FIELDS = ["fx_wallet_basis", "currency_evidence", "fx_evidence", "hmrc_goods", "all_directors",
   "banking_relationships", "untapped_reasons", "verify_finance_contact_url", "fx_exposure", "turnover_source",
   "company_secretary", "accounts_signed_by", "generic_emails", "search_check"];
-export const isDetailField = (k) => k.endsWith("_evidence") || DETAIL_FIELDS.includes(k);
+// short evidence the list's chips show on hover stays on the list (why it's PE-backed)
+export const LIST_EVIDENCE = ["pe_backed_evidence"];
+export const isDetailField = (k) => (k.endsWith("_evidence") && !LIST_EVIDENCE.includes(k)) || DETAIL_FIELDS.includes(k);
 export const detailShard = (number) => {
   let h = 0;
   for (const c of String(number)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
@@ -285,7 +287,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
   if (params.get("view") === "deals") {
     const [deals, alerts] = await Promise.all([DEALS_KEY, ALERTS_KEY].map((k) => blobs.get(k, { type: "json" })));
     return reply({ made_at: deals?.made_at || "", window_days: deals?.window_days || 0, items: deals?.items || [],
-                   news: (alerts?.items || []).filter((a) => /^news_(pe|funding)$/.test(a.kind)) }, 200);
+                   news: (alerts?.items || []).filter((a) => /^(news_(pe|funding)|pe_debt)$/.test(a.kind)) }, 200);
   }
   // The database move (api/db.mjs): is it bound, when was it last copied, how many rows — the check before stage 2.
   // The Outreach tab from the database (stage 2): one list a page at a time, ranked in SQL; each row with its why.
