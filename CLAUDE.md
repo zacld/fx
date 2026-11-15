@@ -614,6 +614,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   finance), each with the fact that triggers it and the product page. No rates quoted, nothing from the bank's records,
   no AI. Company page panel, a Pitch line on My lists cards, export column `what_to_pitch`. FX filings rows now keep
   `cash_gbp` / `bank_borrowings_gbp` (new and re-read filings).
+- **UK in name** (Zac, 15 Nov 2026: "move every company that has UK in the name to its own section, remove it from the
+  others"): `ukNamed` / `UK_NAME` in `format.js` — "UK", "U.K." or "(UK)" as a word anywhere in the registered name (not
+  UKAY, PUK). Those companies are only in the **UK in name** tab (highest lead score first, industry filter, Excel
+  export); the Accounts list, Best fit / Call now, Hit list, Hard to broker, FX filings, FX losses and New money leave
+  them out, and `reasonsNotToProgress` gives them a serious reason, so Outreach (browser and database), Call today and
+  the database's `held` column drop them too. Contacted ones stay in Contacted; lists and company pages still find them.
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
   Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,

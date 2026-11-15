@@ -576,6 +576,7 @@ export function reasonsNotToProgress(r, { today = new Date(), signals = knownSig
   const add = (text, serious = false) => out.push({ text, serious });
   const t = Number(r.turnover_gbp) || 0;
   const trouble = (signals[r.company_number] || []).find((s) => HOLD_OFF_KINDS.includes(s.kind));
+  if (ukNamed(r)) add("“UK” in its name — kept in the UK in name tab, out of the other lists", true);
   if (trouble) add(`${trouble.title}${trouble.at ? ` (${String(trouble.at).slice(0, 10)})` : ""} — hold off`, true);
   if (r.qualified === "Out") add(`Qualified out${r.qualify_reason ? `: ${r.qualify_reason}` : ""}`, true);
   if (t > CORE_BAND[1]) add(`Turnover ${money(t)} — above £300m (check the desk's upper limit)`, true);
@@ -836,6 +837,10 @@ const UK_ARM = /\s\(?(?:U\.?K\.?|G\.?B\.?|GREAT BRITAIN|UNITED KINGDOM)\)?\s+(?:
 // Owned by people (a family business that put UK in its name) — the register shows no foreign parent behind it.
 const peopleOwned = (r) => /^Owned by \d+ individuals?$/.test(r.owner || "") ||
   (Boolean(r.owners) && String(r.owners).split(";").every((o) => /\(individual/i.test(o)));
+// "UK" (or U.K. / (UK)) as a word anywhere in the registered name (Zac, 15 Nov 2026: "move every company that has UK in
+// the name to its own section, remove it from the others") — not UKAY or PUK.
+export const UK_NAME = /(?:^|[^A-Z0-9])\(?U\.?K\.?\)?(?=[^A-Z0-9]|$)/i;
+export const ukNamed = (r) => UK_NAME.test(String(r?.company_name || ""));
 export const ukArmName = (r) => UK_ARM.test(String(r.company_name || "").trim()) && !peopleOwned(r);
 const NEW_FD = /\bnew (?:finance director|FD|CFO|chief financial officer)|\b(?:finance director|CFO|chief financial officer)\b[^.;]*\b(?:appointed|joined)/i;
 

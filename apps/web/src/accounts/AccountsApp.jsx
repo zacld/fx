@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { GRID_COLUMNS, SEQUENCE, gridCells, nextStep, plan, sequenceRank } from "./sequence.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
@@ -144,9 +144,12 @@ function Accounts({ data, password }) {
   // Zac's Good lead / Not a fit verdicts: declared before the rows that read them
   const [verdicts, setVerdicts] = useState(data.verdicts || {});
   const [lists, setLists] = useState(data.lists || {});   // Zac's call / chocolate-mailing / email lists
-  const rows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
+  const allRows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
     ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
   [baseRows, leadCtx, verdicts]);
+  // Companies with "UK" in the name live in their own tab only (contacted ones stay in Contacted).
+  const ukRows = useMemo(() => allRows.filter(ukNamed), [allRows]);
+  const rows = useMemo(() => allRows.filter((r) => !ukNamed(r) || contacted[r.company_number]), [allRows, contacted]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
                                             peOnly: false, newFdOnly: false, industry: "" });
@@ -335,7 +338,7 @@ function Accounts({ data, password }) {
     return filters.oneGroup ? collapseGroups(sorted) : sorted;   // one row per group, its best lead standing for it
   }, [rows, filters, sort, contacted, notes, data.made_at, ranked]);   // eslint-disable-line react-hooks/exhaustive-deps
   const open = rows.filter((r) => !contacted[r.company_number]);
-  const listedNumbers = useMemo(() => new Set(rows.filter((r) => !r.dropped).map((r) => r.company_number)), [rows]);
+  const listedNumbers = useMemo(() => new Set(allRows.filter((r) => !r.dropped).map((r) => r.company_number)), [allRows]);
   const groupCounts = useMemo(() => {
     const base = filterRows(rows, { ...ctx, contact: "" });
     return Object.fromEntries(["", ...CONTACT_GROUPS].map((g) => [g, g ? base.filter((r) => contactGroup(r) === g).length : base.length]));
@@ -375,7 +378,7 @@ function Accounts({ data, password }) {
   };
 
   if (pageNo) {
-    const found = rows.find((x) => x.company_number === pageNo);
+    const found = allRows.find((x) => x.company_number === pageNo);
     const r = found && details[pageNo] ? { ...found, ...details[pageNo] } : found;
     return (
       <VerdictContext.Provider value={verdictCtx}>
@@ -425,6 +428,11 @@ function Accounts({ data, password }) {
               {name} <span className="tab-n">{Object.values(lists).filter((v) => v.list === key).length}</span>
             </button>
           ))}
+          <button role="tab" aria-selected={filters.view === "uk"} className={`tab${filters.view === "uk" ? " on" : ""}`}
+                  title="Companies with “UK” in their name — usually a foreign group's UK arm; kept here, out of every other list"
+                  onClick={() => set({ section: "", view: "uk" })}>
+            UK in name <span className="tab-n">{ukRows.filter((r) => !contacted[r.company_number] && !isOut(r)).length}</span>
+          </button>
           <button role="tab" aria-selected={filters.view === "fit"} className={`tab${filters.view === "fit" ? " on" : ""}`}
                   title={`The right companies, whatever the news: FX proof and FX pain, £20m–£300m, a good niche, ownership — Fit ${FIT.min}+, best first`}
                   onClick={() => set({ section: "", view: "fit" })}>
@@ -481,7 +489,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -535,7 +543,8 @@ function Accounts({ data, password }) {
 
       {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
-       : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={rows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={allRows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view === "uk" ? <FitTiming mode="uk" rows={ukRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "fit" || filters.view === "now" ? <FitTiming mode={filters.view} rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} rows={rows} />
@@ -611,7 +620,7 @@ function Filings({ password, listed, onOpen, onEmail }) {
       .catch((e) => { if (live) setError(e.message); });
     return () => { live = false; };
   }, [month, monthRows, get]);
-  const all = data?.rows || monthRows[month] || [];   // data.rows: the first, single-item version
+  const all = (data?.rows || monthRows[month] || []).filter((r) => !ukNamed(r));   // data.rows: the first, single-item version; "UK" names have their own tab
   const rows = useMemo(() => sortFilings(filterFilings(all, { query, strongOnly, lossOnly, movedOnly, band }), order),
                        [all, query, strongOnly, lossOnly, movedOnly, band, order]);
   if (error) return <div className="list"><div className="empty">{error}</div></div>;
@@ -940,7 +949,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
       .catch((e) => { if (live) { setError(e.message === "Failed to fetch" ? "Couldn't reach the site — check your connection." : e.message); setFilingLosses([]); } });
     return () => { live = false; };
   }, [password]);
-  const all = useMemo(() => lossRows(listRows.filter((r) => !contacted[r.company_number]), filingLosses || []), [listRows, contacted, filingLosses]);
+  const all = useMemo(() => lossRows(listRows.filter((r) => !contacted[r.company_number]), (filingLosses || []).filter((r) => !ukNamed(r))), [listRows, contacted, filingLosses]);
   const rows = useMemo(() => sortLosses(filterLosses(all, { min, query, recentDays: recent ? 183 : 0, unhedged, grew, band }), order),
                        [all, min, query, recent, unhedged, grew, band, order]);
   const reset = (fn) => (v) => { fn(v); setShown(PAGE); };
@@ -1459,10 +1468,11 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
 // Best fit (mode "fit": who to call at all — sorted by Fit) and Call now (mode "now": those that fit, with a reason to
 // call now — sorted by Timing, then Fit). Each card shows that half's reasons; the export carries both.
 function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
-  const fitOnly = mode === "fit";
-  const key = fitOnly ? "lead_fit" : "lead_timing";
+  const uk = mode === "uk";
+  const fitOnly = mode === "fit" || uk;
+  const key = uk ? "lead_score" : fitOnly ? "lead_fit" : "lead_timing";
   const [industry, setIndustry] = useState("");
-  const base = rows.filter((r) => !isOut(r) && !r.dropped && (r.lead_fit || 0) >= FIT.min && (fitOnly || (r.lead_timing || 0) > 0));
+  const base = rows.filter((r) => !isOut(r) && !r.dropped && (uk || ((r.lead_fit || 0) >= FIT.min && (fitOnly || (r.lead_timing || 0) > 0))));
   const counts = {};
   for (const r of base) { const k = industryOf(r); counts[k] = (counts[k] || 0) + 1; }
   const list = base.filter((r) => !industry || industryOf(r) === industry)
@@ -1475,12 +1485,14 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
     turnover_gbp: r.turnover_gbp || "", companies_house_url: chCompanyUrl(r.company_number),
   })), columnsFor(["rank", "company_name", "company_number", "industry", "lead_fit", "lead_timing", "lead_score", "fit_reasons", "timing_reasons",
     "turnover_gbp", "companies_house_url"], { lead_fit: "Fit", lead_timing: "Now", turnover_gbp: "Turnover (£)" },
-    ["rank", "lead_fit", "lead_timing", "lead_score", "turnover_gbp"]), `${fitOnly ? "best-fit" : "call-now"}-${new Date().toISOString().slice(0, 10)}.xlsx`,
-    fitOnly ? "Best fit" : "Call now");
+    ["rank", "lead_fit", "lead_timing", "lead_score", "turnover_gbp"]), `${uk ? "uk-in-name" : fitOnly ? "best-fit" : "call-now"}-${new Date().toISOString().slice(0, 10)}.xlsx`,
+    uk ? "UK in name" : fitOnly ? "Best fit" : "Call now");
   return (
     <div className="list">
       <div className="filters filings-bar">
-        <span className="muted">{fitOnly
+        <span className="muted">{uk
+          ? `${list.length} companies with “UK” in their name — usually a foreign group's UK arm (ask whether FX is run here or by the parent). Out of every other list; highest lead score first.`
+          : fitOnly
           ? `${list.length} companies with Fit ${FIT.min}+ — the right company for the desk (FX proof and FX pain, size, niche, ownership), whatever the news. Best fit first.`
           : `${list.length} of those with a reason to call now — a new FD, a deal, funding, a fresh filing, a customs or bank change. Most timely first (moments fade over 120 days).`}</span>
         <select value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Industry">
@@ -1498,7 +1510,7 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
               <span className="chip">{industryOf(r)}</span>
             </div>
             <div className="loss-fig">
-              <b className="call-turnover">{fitOnly ? `Fit ${r.lead_fit}` : `Now ${r.lead_timing}`}</b>
+              <b className="call-turnover">{uk ? `Score ${r.lead_score}` : fitOnly ? `Fit ${r.lead_fit}` : `Now ${r.lead_timing}`}</b>
               <span className="muted">{fitOnly ? `Now ${r.lead_timing || 0}` : `Fit ${r.lead_fit}`} · score {r.lead_score}</span>
             </div>
           </div>
@@ -1807,7 +1819,7 @@ function NewMoney({ password, listed, onOpen, rows: listRows = [] }) {
         detail: a.detail, signs: a.tracked ? "on your lists" : "", tracked: a.tracked, url: a.url }))]
       // the deal's own sector codes (ownership register pass), else the list row's
       .map((d) => ({ ...d, industry: industryOf(d.sic?.length ? d : byNumber.get(d.company_number) || {}) }));
-    return items.filter((d) => (!filter || (filter === "pe" ? /pe/.test(d.kind) : d.kind === filter)) && (!mine || d.tracked || listed.has(d.company_number)))
+    return items.filter((d) => !ukNamed(d) && (!filter || (filter === "pe" ? /pe/.test(d.kind) : d.kind === filter)) && (!mine || d.tracked || listed.has(d.company_number)))
       .sort((a, b) => String(b.at).localeCompare(String(a.at)));
   }, [data, filter, mine, listed, byNumber]);
   const industryCounts = rows.reduce((c, d) => ({ ...c, [d.industry]: (c[d.industry] || 0) + 1 }), {});
