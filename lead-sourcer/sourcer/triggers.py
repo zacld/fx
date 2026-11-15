@@ -14,7 +14,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Optional
 
-from sourcer import banks
+from sourcer import banks, pe
 
 # Acquisition-vehicle names: a private-equity buyout almost always leaves one of these as owner.
 _DEAL_VEHICLE_WORDS = ("BIDCO", "TOPCO", "MIDCO", "ACQUISITIONCO", "ACQUICO", "NEWCO")
@@ -44,7 +44,7 @@ def investor_owner(owners: list[dict]) -> str:
     for o in owners:
         if o["kind"] == "other" or (o["kind"] == "corporate" and not o.get("ceased_on")):
             name = f" {o['name'].upper()} "
-            if any(w in name for w in _DEAL_VEHICLE_WORDS + _INVESTOR_WORDS):
+            if any(w in name for w in _DEAL_VEHICLE_WORDS + _INVESTOR_WORDS) or pe.sponsor_kind(o["name"]):
                 return o["name"]
     return ""
 

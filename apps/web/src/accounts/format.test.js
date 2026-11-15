@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -454,6 +454,36 @@ describe("Deals in the lead score", () => {
     expect(old.flags).toMatchObject({ recentLoss: false, newFd: false, buying: true, hit: false });
     expect(appointedIso("appointed 3rd March 2026")).toBe("2026-03-03");
     expect(appointedIso("appointed 03/04/2026")).toBe("2026-04-03");
+  });
+});
+
+describe("Private equity and new finance directors (15 Nov 2026)", () => {
+  const today = new Date("2026-11-15T12:00:00Z");
+  it("scores PE-backed companies from the register, the accounts, buyout debt or the owner chain — once", () => {
+    const own = { company_number: "P1", pe_backed: "ACME BIDCO LIMITED", pe_backed_evidence: "its owner ACME BIDCO LIMITED is a buyout vehicle" };
+    expect(leadScore(own, { today }).parts).toContainEqual(["PE-backed: ACME BIDCO LIMITED — buyout lenders usually require a hedging policy", 10]);
+    expect(leadScore(own, { today }).flags.peBacked).toBe(true);
+    expect(peBackedOf({ company_number: "P2", pe_sponsor: "LDC (Managers) Limited", pe_sponsor_evidence: "ultimately controlled by funds managed by LDC" }).why)
+      .toContain("accounts: ultimately controlled");
+    setKnownGroups({ P3: { top: "T1", hops: 2, pe: { name: "WIDGET TOPCO LIMITED", hops: 3 } } });
+    expect(peBackedOf({ company_number: "P3" })).toEqual({ name: "WIDGET TOPCO LIMITED", why: "WIDGET TOPCO LIMITED owns it, 3 levels up the ownership register" });
+    expect(filterRows([{ company_number: "P3" }, { company_number: "P4" }], { peOnly: true }).map((r) => r.company_number)).toEqual(["P3"]);
+    setKnownGroups({});
+    expect(peBackedOf({ company_number: "P5", owner: "Owned by ACME TOPCO LIMITED (UK, 01234567) — private-equity backed" }).name).toBe("ACME TOPCO LIMITED");
+    expect(peBackedOf({ company_number: "P6", owner: "Owned by ACME HOLDINGS LIMITED (UK, 01234567)" })).toBeNull();
+    // a fresh PE deal scores 15 instead, not both
+    const deal = leadScore(own, { today, signals: { P1: [{ kind: "pe_debt", at: "2026-11-10", title: "Buyout-style debt: a new charge to private-credit lender" }] } });
+    const why = deal.parts.map(([w]) => w.split(":")[0]);
+    expect(why).toContain("Private-equity deal");
+    expect(why).not.toContain("PE-backed");
+  });
+  it("counts a finance director advert as a new FD, with its own reason and timely line", () => {
+    const signals = { F1: [{ kind: "hiring_fd", at: "2026-11-10T07:00:00", title: "Hiring a finance director: Finance Director" }] };
+    const s = leadScore({ company_number: "F1" }, { today, signals });
+    expect(s.flags.newFd).toBe(true);
+    expect(s.parts).toContainEqual(["Hiring a finance director (Finance Director, 2026-11-10)", 20]);
+    expect(timelyReason({ lead_flags: s.flags })).toBe("Hiring a finance director (Finance Director, 2026-11-10)");
+    expect(filterRows([{ company_number: "F1", lead_flags: s.flags }, { company_number: "F2", lead_flags: {} }], { newFdOnly: true }).length).toBe(1);
   });
 });
 

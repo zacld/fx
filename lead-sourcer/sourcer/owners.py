@@ -23,6 +23,8 @@ import zipfile
 from datetime import date, timedelta
 from typing import Iterator, Optional
 
+from sourcer import pe
+
 PAGE = "https://download.companieshouse.gov.uk/en_pscdata.html"
 DOWNLOADS = "https://download.companieshouse.gov.uk/"
 USER_AGENT = "fx-lead-sourcer/1.0 (+https://github.com/zacld/fx)"
@@ -31,13 +33,7 @@ CORPORATE = '"corporate-entity-person-with-significant-control"'
 
 PE_VEHICLE = re.compile(r"\b(?:BID ?CO|TOP ?CO|MID ?CO|HOLD ?CO|ACQUISITION ?CO|ACQUISITIONS? (?:LIMITED|LTD)|NEWCO|"
                         r"PURCHASER|BUYER|INVESTCO|FINCO|DEBTCO|PROJECT [A-Z]+)\b")
-PE_HOUSES = re.compile(r"\b(?:LDC|INFLEXION|BRIDGEPOINT|LIVINGBRIDGE|PHOENIX EQUITY|PALATINE|BGF|BUSINESS GROWTH FUND|"
-                       r"FORESIGHT|YFM|MOBEUS|RUTLAND PARTNERS|MERCIA|MAVEN|LYCEUM|ENDLESS|SILVERFLEET|AUGUST EQUITY|"
-                       r"HORIZON CAPITAL|KESTER|CAIRNGORM|MML|SYNOVA|ECI PARTNERS|GRAPHITE CAPITAL|GRESHAM HOUSE|"
-                       r"PRIMARY CAPITAL|APPOSITE|TENZING|ELYSIAN|INSPIRIT|GROWTH CAPITAL PARTNERS|NORTHEDGE|RCAPITAL|"
-                       r"CONNECTION CAPITAL|PENTA CAPITAL|SOVEREIGN CAPITAL|BOWMARK|EQUISTONE|VITRUVIAN|PANORAMIC|"
-                       r"BERINGEA|PRAETURA|LITERACY CAPITAL|FPE CAPITAL|SHERRY FITZGERALD|CBPE|BLUE WATER ENERGY|"
-                       r"HG CAPITAL|HGCAPITAL|ADVENT|CINVEN|PERMIRA|CVC|KKR|BLACKSTONE|CARLYLE|TA ASSOCIATES)\b")
+PE_HOUSES = pe.HOUSES   # the private-equity houses (sourcer/pe.py: one list for owners, charges and the accounts)
 FUND = re.compile(r"\b(?:L\.?P\.?|LIMITED PARTNERSHIP|FUND [IVX\d]+|FUND)\b$")
 EOT = re.compile(r"\bEMPLOYEE OWNERSHIP\b|\bEOT\b|\bEMPLOYEE (?:BENEFIT )?TRUST\b")
 UK_PLACES = re.compile(r"companies house|register of companies|registrar of companies|england|wales|scotland|northern ireland|united kingdom", re.I)
@@ -70,7 +66,7 @@ def owner_kind(name: str, ident: dict) -> str:
     up = (name or "").upper()
     if EOT.search(up):
         return "eot"
-    if PE_VEHICLE.search(up) or PE_HOUSES.search(up) or FUND.search(up):
+    if PE_VEHICLE.search(up) or PE_HOUSES.search(up) or FUND.search(up) or pe.sponsor_kind(name):
         return "pe"
     country = (ident or {}).get("country_registered") or ""
     place = (ident or {}).get("place_registered") or ""
@@ -208,3 +204,21 @@ def group_of(number: str, parents: dict, names: dict, max_hops: int = 8) -> dict
         hops += 1
     abroad = next((f"{p[1]} ({p[3]})" if p[3] else p[1] for p in parents.get(cur, []) if not p[2] and p[1]), "")
     return {"top": cur, "top_name": names.get(cur, "") if hops else "", "hops": hops, "abroad": abroad}
+
+
+def pe_owner(number: str, parents: dict, max_hops: int = 6) -> dict:
+    """{name, hops} for the nearest current corporate owner anywhere up the chain (UK owners walked by number, owners
+    registered abroad read by name) named like a PE house, fund or buyout vehicle (pe.sponsor_kind), else {}."""
+    level, seen, hops = [number], {number}, 0
+    while level and hops < max_hops:
+        hops += 1
+        nxt = []
+        for cur in level:
+            for owner_no, name, _uk, _country in parents.get(cur, []):
+                if pe.sponsor_kind(name):
+                    return {"name": name, "hops": hops}
+                if owner_no and owner_no not in seen:
+                    seen.add(owner_no)
+                    nxt.append(owner_no)
+        level = nxt
+    return {}

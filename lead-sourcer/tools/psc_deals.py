@@ -108,7 +108,11 @@ def main() -> None:
     changes = owners.recent_changes(owners.tee_parents(owners.corporate_records(zip_path), parents, owner_names),
                                     window_days=args.window)
     groups = {n: owners.group_of(n, parents, owner_names) for n in tracked}
-    groups = {n: g for n, g in groups.items() if g["hops"] or g["abroad"]}
+    for n, g in groups.items():   # private-equity backed: a PE house, fund or buyout vehicle anywhere up the chain
+        found = owners.pe_owner(n, parents)
+        if found:
+            g["pe"] = found
+    groups = {n: g for n, g in groups.items() if g["hops"] or g["abroad"] or g.get("pe")}
     print(f"Companies with a new corporate owner in the last {args.window} days: {len(changes):,}")
 
     # Names, status, size and sector codes of every company involved (targets and UK buyers), one bulk-file pass
@@ -129,7 +133,8 @@ def main() -> None:
         by_top = Counter(g["top"] for g in groups.values() if g["hops"])
         print(f"Groups: {sum(1 for g in groups.values() if g['hops']):,} of {len(tracked):,} tracked companies have a UK "
               f"parent ({len(by_top):,} groups); {sum(1 for g in groups.values() if g['abroad']):,} owned from abroad at the top; "
-              f"groups with 2+ tracked companies: {sum(1 for k in by_top.values() if k > 1):,}")
+              f"groups with 2+ tracked companies: {sum(1 for k in by_top.values() if k > 1):,}; private-equity backed "
+              f"(a PE house, fund or buyout vehicle up the chain): {sum(1 for g in groups.values() if g.get('pe')):,}")
         for top, k in by_top.most_common(10):
             if k > 1:
                 print(f"  {k:3}  {names.get(top) or next(g['top_name'] for g in groups.values() if g['top'] == top)}")

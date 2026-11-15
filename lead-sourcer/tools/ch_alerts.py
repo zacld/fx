@@ -17,6 +17,10 @@ Alerts:
   fx_charge       a charge in favour of an FX provider, or for trade finance / foreign exchange (hot; also a discovery
                   for a company not on the lists)
   new_owner       a new corporate owner (private-equity backed when the owner looks like a deal vehicle: hot)
+  pe_debt         a new charge to a private-credit lender or a loan agency (the debt behind a buyout: hot; also a
+                  discovery for a company not on the lists)
+  hiring_fd       a finance director / CFO / head of finance advertised (--signals): a new FD arriving soon (hot; also a
+                  discovery, by exact registered name, for a company not on the lists)
   director_abroad a new director whose country of residence is outside the UK (an overseas parent or expansion)
   shares_allotted new shares issued (a return of allotment, SH01): money coming in
   articles_changed new articles, share classes created / renamed / their rights varied: usually a funding round or deal
@@ -49,7 +53,7 @@ from typing import Iterable, Optional
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from sourcer import companies_house, news, triggers  # noqa: E402
+from sourcer import companies_house, news, pe, triggers  # noqa: E402
 
 STREAM_BASE = "https://stream.companieshouse.gov.uk"
 STREAMS = {"officers": "/officers", "charges": "/charges", "psc": "/persons-with-significant-control",
@@ -59,7 +63,7 @@ OWNER_RECENT_DAYS = 60
 ALERTS_MAX = 2000
 NEWS_CHECKS_MAX = 25        # new directors checked against the news a run (Google News RSS: keep it gentle)
 FD_NEWS_DAYS = 150          # a news appointment this recent confirms the new director as the finance director
-HOT = {"new_fd", "fx_charge", "new_owner_pe", "funding_round", "bank_switch"}
+HOT = {"new_fd", "fx_charge", "new_owner_pe", "pe_debt", "hiring_fd", "funding_round", "bank_switch"}
 FUNDING_PAIR_DAYS = 60      # new shares and new articles / share classes this close together: a funding round
 SWITCH_DAYS = 180           # an all-assets charge paid off and a new one to another bank this close: a bank switch
 SWITCH_CHECKS_MAX = 60      # charges registers read a run (one REST call each) to confirm a switch
@@ -126,6 +130,10 @@ def classify(event: dict, tracked: dict[str, str], today: date) -> Optional[dict
             why = f"charge in favour of {holders}" if provider else f"charge for {purpose.group(0).lower()} ({holders})"
             return {**base, "kind": "fx_charge", "title": "Charge to an FX provider" if provider else "Trade finance / FX charge",
                     "detail": why, "url": company_url(number) + "/charges", "hot": True}
+        lender = pe.lender_kind(holders)
+        if lender and new:
+            return {**base, "kind": "pe_debt", "title": "Buyout-style debt: a new charge to " + lender.split(" (")[0][2:],
+                    "detail": f"in favour of {holders}", "url": company_url(number) + "/charges", "hot": True}
         if number not in tracked:
             return None
         if new:
@@ -176,11 +184,11 @@ def classify(event: dict, tracked: dict[str, str], today: date) -> Optional[dict
             return None
         owner = data.get("name") or ""
         country = ((data.get("identification") or {}).get("country_registered") or "").strip()
-        pe = bool(triggers.investor_owner([{"kind": "corporate", "name": owner}]))
-        return {**base, "kind": "new_owner_pe" if pe else "new_owner",
-                "title": "New owner — looks private-equity backed" if pe else "New corporate owner",
+        backed = bool(triggers.investor_owner([{"kind": "corporate", "name": owner}]))
+        return {**base, "kind": "new_owner_pe" if backed else "new_owner",
+                "title": "New owner — looks private-equity backed" if backed else "New corporate owner",
                 "detail": owner + (f" ({country})" if country else ""), "url": company_url(number) + "/persons-with-significant-control",
-                "hot": pe}
+                "hot": backed}
     return None
 
 
@@ -370,6 +378,12 @@ _NOT_A_COMPANY = re.compile(r"^(?:the|a|an|how|why|what|who|uk|britain|governmen
 RECRUITERS = re.compile(r"\b(?:hays|michael\s+page|robert\s+(?:half|walters)|reed|page\s+group|harvey\s+nash|"
                         r"randstad|adecco|manpower|recruit|recruitment|resourcing|talent|search\s+partners|staffing|"
                         r"selection|consult(?:ing|ancy)?\s+group)\b", re.I)
+# A finance director / CFO advertised (Zac, 15 Nov 2026: "improve the FD … companies"): the incoming FD reviews the
+# banking and FX in their first months — a hot alert for a company on the lists, and a new lead (exact registered name)
+# for one not on them. Two pages each: these roles are mostly advertised through recruiters, who are left out.
+FD_JOB_QUERIES = ["finance director", "chief financial officer", "CFO", "head of finance", "group finance director"]
+FD_JOB_TITLE = re.compile(r"\b(?:finance director|director of finance|financial director|chief financial officer|CFO|"
+                          r"head of finance|finance (?:and|&) operations director)\b", re.I)
 JOB_QUERIES = ["treasury analyst", "treasury manager", "foreign exchange", "FX hedging", "import export coordinator",
                "international trade manager", "export sales manager", "currency risk"]
 STATS: dict[str, int] = {}   # counts for the log (public repo: no names)
@@ -378,7 +392,7 @@ LOOKUPS_MAX = 40            # Companies House name searches a run, for subjects 
 # and adverts are triggers on companies already on the lists. Only a private-equity deal or a funding round about a
 # company not on them is looked up and becomes a lead (the New money tab); a new FD, expansion abroad or a job advert
 # at an unknown company isn't.
-DISCOVER_FROM_NEWS = ("news_pe", "news_funding")
+DISCOVER_FROM_NEWS = ("news_pe", "news_funding", "news_fd")   # a new FD at a company not on the lists: from 15 Nov 2026
 
 
 def tracked_index(tracked: dict[str, str]) -> list[tuple[re.Pattern, str]]:
@@ -554,9 +568,10 @@ def job_adverts(fetch_json=None) -> list[dict]:
     out = []
     app_id, app_key = os.environ.get("ADZUNA_APP_ID", "").strip(), os.environ.get("ADZUNA_APP_KEY", "").strip()
     reed = os.environ.get("REED_API_KEY", "").strip()
-    for q in JOB_QUERIES:
-        if app_id and app_key:
-            url = ("https://api.adzuna.com/v1/api/jobs/gb/search/1?" + urllib.parse.urlencode(
+    for q in JOB_QUERIES + FD_JOB_QUERIES:
+        pages = 2 if q in FD_JOB_QUERIES else 1
+        for page in range(1, pages + 1) if app_id and app_key else ():
+            url = (f"https://api.adzuna.com/v1/api/jobs/gb/search/{page}?" + urllib.parse.urlencode(
                 {"app_id": app_id, "app_key": app_key, "what": q, "max_days_old": 14, "results_per_page": 50}))
             for j in (fetch_json(url, None) or {}).get("results") or []:
                 out.append({"employer": (j.get("company") or {}).get("display_name", ""), "title": j.get("title", ""),
@@ -584,15 +599,18 @@ def _fetch_json(url: str, basic_user: Optional[str]):
 
 def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], lookup=None,
                 discover: bool = False) -> tuple[list[dict], list[dict]]:
-    """(alerts, discovery rows): an employer on the lists hiring for treasury / FX / import-export is an alert. With
-    `discover` (off since 14 Nov 2026), one not on the lists, found on Companies House by its exact name, is a new lead."""
+    """(alerts, discovery rows): an employer on the lists hiring for treasury / FX / import-export is an alert, and one
+    advertising for a finance director / CFO a hot one (hiring_fd). One not on the lists, found on Companies House by its
+    exact name, is a new lead for a finance director advert (from 15 Nov 2026), and for any advert with `discover`."""
     index = tracked_index(tracked)
     lookup = lookup or (lambda name: find_company(name, api_key) if api_key else None)
     alerts, found, lookups, seen = [], [], 0, {}
+    done = set()
     for j in adverts:
+        fd = bool(FD_JOB_TITLE.search(j["title"])) and not re.search(r"\b(?:interim|assistant|deputy|part[- ]time)\b", j["title"], re.I)
         number = match_tracked(j["employer"], index)
         if not number:
-            if not discover:
+            if not (discover or fd):
                 continue
             key = matching.normalise_name(j["employer"])
             if key not in seen and lookups < LOOKUPS_MAX:
@@ -603,10 +621,15 @@ def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], look
             company = {"company_number": number, "company_name": tracked[number]}
         if not company or not company.get("company_number"):
             continue
-        alerts.append({"id": f"hiring:{company['company_number']}:{matching.normalise_name(j['title'])[:40]}",
-                       "at": (j["date"] or date.today().isoformat()) + "T07:00:00", "kind": "hiring",
+        kind = "hiring_fd" if fd else "hiring"
+        if (kind, company["company_number"]) in done:   # the same role advertised on several boards / pages
+            continue
+        done.add((kind, company["company_number"]))
+        alerts.append({"id": f"{kind}:{company['company_number']}:{matching.normalise_name(j['title'])[:40]}",
+                       "at": (j["date"] or date.today().isoformat()) + "T07:00:00", "kind": kind,
                        "company_number": company["company_number"], "company_name": company["company_name"],
-                       "tracked": bool(number), "hot": False, "title": f"Hiring: {j['title'][:60]}",
+                       "tracked": bool(number), "hot": fd,
+                       "title": f"Hiring a finance director: {j['title'][:60]}" if fd else f"Hiring: {j['title'][:60]}",
                        "detail": f"advertised {j['date']}", "url": j["link"] or company_url(company["company_number"])})
         if not number:
             found.append({"company_number": company["company_number"], "company_name": company["company_name"],
@@ -743,7 +766,8 @@ def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
     keys = "with job-board keys" if os.environ.get("ADZUNA_APP_ID") or os.environ.get("REED_API_KEY") else "no job-board keys"
     print(f"Signals: headlines read {STATS.get('headlines', 0)}, Companies House name lookups {STATS.get('name lookups', 0)}; "
           f"news alerts {len(news_alerts)} (new leads {len(news_found)}), job adverts read {len(adverts)} ({keys}), "
-          f"hiring alerts {len(job_alerts)} (new leads {len(job_found)}); Gazette winding-up notices read {notices}, on the "
+          f"hiring alerts {len(job_alerts)} (finance director / CFO adverts {sum(a['kind'] == 'hiring_fd' for a in job_alerts)}; "
+          f"new leads {len(job_found)}); Gazette winding-up notices read {notices}, on the "
           f"lists {len(petitions)}; new alerts {len(fresh)}; sent: {sent}")
 
 
@@ -811,11 +835,14 @@ def main() -> None:
     discoveries = _load(args.discoveries, {}) or {}
     rows = {r["company_number"]: r for r in discoveries.get("rows") or []}
     for a in found:
-        if a["kind"] == "fx_charge" and not a["tracked"]:
+        if a["kind"] in ("fx_charge", "pe_debt") and not a["tracked"]:
             a["company_name"] = a["company_name"] or (company_name(a["company_number"], api_key) if api_key else "")
+            fx = a["kind"] == "fx_charge"
             rows.setdefault(a["company_number"], {"company_number": a["company_number"], "company_name": a["company_name"],
                                                    "discovered": a["at"][:10], "discovered_by": a["detail"],
-                                                   "fx_today": f"Uses an FX provider: {a['detail']}", "filed_fx_score": 60})
+                                                   **({"fx_today": f"Uses an FX provider: {a['detail']}"} if fx else
+                                                      {"pe_backed": a["detail"].removeprefix("in favour of ")}),
+                                                   "filed_fx_score": 60 if fx else 55})
     # A charge moving: read that company's charges register once to see whether it changed bank
     switch_checked = 0
     for a in list(found):
@@ -834,7 +861,7 @@ def main() -> None:
     old_ids = {a["id"] for a in alerts}
     alerts = merge_alerts(alerts, found)
     fresh = [a for a in found if a["id"] not in old_ids]
-    sent = send_hot([a for a in fresh if a.get("hot") and (a["tracked"] or a["kind"] == "fx_charge")],
+    sent = send_hot([a for a in fresh if a.get("hot") and (a["tracked"] or a["kind"] in ("fx_charge", "pe_debt"))],
                     "New hot alerts from Companies House") if args.telegram else "nothing (test run)"
     _save(args.state, state)
     _save(args.alerts, {"made_at": now.isoformat(), "count": len(alerts), "items": alerts})

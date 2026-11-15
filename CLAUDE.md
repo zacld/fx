@@ -457,6 +457,24 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   deal (`lead_flags.hit`). **Hit list tab**: those companies, highest score first ("Also without an FX loss" widens
   it), Excel export. **New money tab** (GET `?view=deals`): the ownership register's deals and the news of PE deals and
   funding, newest first, filters, each with its FX sign. Contact-finding is no longer being extended.
+- **Private equity and new finance directors** (Zac, 15 Nov 2026: "improve the FD, PE-backed and private equity
+  companies"). **PE-backed** (`sourcer/pe.py`; one house list, `pe.HOUSES`, shared with `owners.py`): a PE house, fund
+  (LP) or buyout vehicle (Topco / Bidco / Midco — not Holdco alone) as an owner **anywhere up the chain** (the daily
+  ownership pass: `owners.pe_owner`, saved as `group_of[number].pe` by `psc_deals.py --groups-out`), a PE house or fund
+  the accounts name as **ultimate controlling party** / "funds managed by" (`pe.text_evidence` → `pe_sponsor`, every
+  accounts reading, `FACTS_VERSION` 2026-11-15a, and the FX filings scan), or an outstanding charge to a **private-credit
+  lender or loan agency** (Ares, Pemberton, GLAS, Lucid … — `pe.lender_kind`; a bank "as security agent" alone isn't
+  counted). Main list and filings research: `pe_backed` + `pe_backed_evidence` (`pe.backed`; the evidence stays on the
+  list — `LIST_EVIDENCE` — for the chip's hover). Page: `peBackedOf` (all of these), +10 lead points (`peBacked`; a fresh
+  PE deal's 15 instead), a "PE-backed: …" chip and a PE-backed filter. Alerts: a new charge to such a lender is
+  `pe_debt` (hot, any company: a discovery at 55 when not on the lists; counted as a PE deal; in New money as
+  "Buyout-style debt"); the Alerts tab has a Private equity filter. **New FD**: finance director / CFO / head of finance
+  job adverts (Adzuna, `FD_JOB_QUERIES`, two pages each; interim / assistant / deputy left out) are `hiring_fd` — hot, a
+  new FD for the lead score (20) with its own reason and timely line (`fdWhy`), and a discovery by exact registered name
+  for a company not on the lists; `news_fd` headlines now discover too (`DISCOVER_FROM_NEWS`). The accounts' directors
+  list read on the main list as well (`deals.fd_columns` in every accounts reading: `new_fd_in_accounts`), and a director
+  shown as appointed with no title counts when the accounts name them with a finance title elsewhere (the signature
+  block, "Jane Smith, Chief Financial Officer"). A "New FD" filter and chip on the Accounts list.
 - **Groups: one lead per group** (Zac, 14 Nov 2026: Cognism files people under the group or brand, not the subsidiary
   we list, and one group showed up as several leads): the daily "Niche hits" run's ownership-snapshot pass
   (`tools/psc_deals.py --groups-out groups.json`, same single read of the file: `owners.tee_parents`) walks every

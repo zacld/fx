@@ -64,7 +64,7 @@ from typing import Optional, Union
 from sourcer import (
     accounts, banks, bulk, companies_house, currency, excel, filings, fx_notes, group as groups, hmrc, hooks, incumbent,
     matching, niches as niche_rules,
-    news, pdf, people, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
+    news, pdf, pe, people, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
 
 CSV_FIELDS = [
     "section",
@@ -130,6 +130,9 @@ CSV_FIELDS = [
     "banking_relationships",
     "own_bank_client",
     "pe_backed",
+    "pe_backed_evidence",
+    "new_fd_in_accounts",
+    "new_fd_in_accounts_evidence",
     "group_parent",
     "group_companies_in_list",
     "group_fx_wallet_high_gbp",
@@ -760,6 +763,10 @@ def company_row(
         # owned from abroad, no sign of running FX locally: the decision is probably made at head office
         parent = hooks.overseas_owner(owners)
         talking["run_from_abroad"] = hooks.run_from_abroad(parent["name"], parent["country"], talking) if parent else ""
+    # private-equity backed: a PE owner on the register, a PE house or fund named as controlling party in the accounts,
+    # or a charge to a private-credit lender / loan agency (sourcer/pe.py); the owner chain above is added by the page
+    pe_backed, pe_evidence = pe.backed(triggers.investor_owner(owners), charges or [], f.get("pe_sponsor", ""),
+                                       f.get("pe_sponsor_evidence", ""))
     return people.weak_contact_to_clue(new_row(
         **talking,
         section=section_for(company, turnover, band),
@@ -768,7 +775,10 @@ def company_row(
         triggers=" | ".join(events),
         when_to_call=when,
         planning_window_now="yes" if planning_now else "",
-        pe_backed=triggers.investor_owner(owners),
+        pe_backed=pe_backed,
+        pe_backed_evidence=pe_evidence,
+        new_fd_in_accounts=f.get("new_fd_in_accounts", ""),
+        new_fd_in_accounts_evidence=f.get("new_fd_in_accounts_evidence", ""),
         fx_gain_loss_prior_gbp=_money(f.get("fx_gain_loss_prior")),
         fx_gain_loss_check=f.get("fx_gain_loss_check", ""),
         fx_gain_loss_evidence=f.get("fx_gain_loss_evidence", ""),
