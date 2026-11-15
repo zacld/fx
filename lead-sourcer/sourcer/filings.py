@@ -570,6 +570,8 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
         "employees": str(facts["employees"]) if facts.get("employees") else "",
         "accounts_regime": regime,
         "bank_debt": bank_debt(facts, plain_text),
+        "cash_gbp": str(round(facts["cash"])) if isinstance(facts.get("cash"), (int, float)) else "",   # for "What we can pitch them"
+        "bank_borrowings_gbp": str(round(facts["bank_borrowings"])) if isinstance(facts.get("bank_borrowings"), (int, float)) else "",
         "accounts_url": url,
         **{k: v for k, v in cols.items() if not k.endswith("_url")},
     }

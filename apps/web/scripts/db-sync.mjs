@@ -5,7 +5,7 @@
 //   CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… node scripts/db-sync.mjs
 // Counts only in the log (public repo). Without D1 permission on the token it says so and stops, changing nothing.
 import { ALERTS_KEY, CHECKS_KEY, CONTACTED_KEY, DEALS_KEY, DETAIL_SHARDS, DETAILS_PREFIX, EMAILS_KEY, FILINGS_KEY, KEY,
-  MOMENTS_KEY, NICHES_KEY, NOTES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+  MOMENTS_KEY, NICHES_KEY, NOTES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, LISTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
 import { companyRecord, markRecord, signalRecord, syncTable } from "../api/db.mjs";
 import { filingRow, groupKey, leadScore, movesByCurrency, nicheTiers, reasonsNotToProgress, setKnownGroups, timelyReason } from "../src/accounts/format.js";
@@ -114,8 +114,8 @@ async function main() {
   if (!db) return;
   const store = await openStore(STORE);
   const get = (k) => store.get(k, "json").catch(() => null);
-  const [list, index, ranked, niches, alerts, deals, moments, contacted, notes, verdicts, checks, emails] = await Promise.all(
-    [KEY, FILINGS_KEY, RANKED_KEY, NICHES_KEY, ALERTS_KEY, DEALS_KEY, MOMENTS_KEY, CONTACTED_KEY, NOTES_KEY, VERDICTS_KEY, CHECKS_KEY, EMAILS_KEY].map(get));
+  const [list, index, ranked, niches, alerts, deals, moments, contacted, notes, verdicts, checks, emails, lists] = await Promise.all(
+    [KEY, FILINGS_KEY, RANKED_KEY, NICHES_KEY, ALERTS_KEY, DEALS_KEY, MOMENTS_KEY, CONTACTED_KEY, NOTES_KEY, VERDICTS_KEY, CHECKS_KEY, EMAILS_KEY, LISTS_KEY].map(get));
   const details = await Promise.all(Array.from({ length: DETAIL_SHARDS }, (_, i) => get(`${DETAILS_PREFIX}${i}`)));
   let filingRows = [];
   for (const { month } of index?.months || []) filingRows = filingRows.concat((await get(filingsMonthKey(month)))?.rows || []);
@@ -123,7 +123,7 @@ async function main() {
   try { moves = movesByCurrency(await (await openStore(MARKET_STORE)).get(MARKET_KEY, "json")); } catch { /* no market data */ }
   const records = buildRecords({ list: list || {}, details, filingRows, ranked: ranked || {}, niches: niches || {}, alerts: alerts || {},
     deals: deals || {}, moments: moments || {}, moves,
-    marks: { contacted: contacted || {}, notes: notes || {}, verdict: verdicts || {}, check: checks || {}, email: emails || {} } });
+    marks: { contacted: contacted || {}, notes: notes || {}, verdict: verdicts || {}, check: checks || {}, email: emails || {}, list: lists || {} } });
   records.companies.sort((a, b) => (b.lead_score ?? -1e9) - (a.lead_score ?? -1e9));   // the best first, if the budget runs short
   try {
     await whyRewritten(db, "companies", records.companies, "number");

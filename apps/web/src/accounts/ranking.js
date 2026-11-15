@@ -10,7 +10,7 @@ export const FILINGS_SECTION = "From FX filings";
 export const RANKED_FIELDS = [
   "company_number", "company_name", "filed", "period_end", "turnover_gbp", "turnover_basis", "turnover_check", "size_estimate",
   "turnover_foreign_gbp", "group_parent", "fx_gain_loss_gbp", "fx_gain_loss_prior_gbp", "fx_today", "currency", "currencies_in_accounts",
-  "fx_forwards", "fx_sensitivity", "turnover_regions", "subsidiaries_abroad", "reporting_currency", "fx_borrowings",
+  "fx_forwards", "fx_sensitivity", "turnover_regions", "subsidiaries_abroad", "reporting_currency", "fx_borrowings", "cash_gbp", "bank_borrowings_gbp",
   "filed_fx_score", "filed_fx", "hmrc_trade", "moved_up", "incumbent_bank", "owner", "triggers", "run_from_abroad", "accounts_url",
   "employees", "bank_debt", "fd_search_url", "fx_forwards_evidence",
   "acquisitions", "acquisitions_evidence", "acquired_abroad", "new_fd_in_accounts", "new_fd_in_accounts_evidence",
