@@ -66,6 +66,40 @@ export function buildRecords({ list, details = [], filingRows = [], ranked = {},
 // leaving the rest for the page's own saves. The day's writes so far are kept in meta ("writes": {day, rows}, from D1's
 // own counts); a sync past the budget writes the best companies first and leaves the rest for the next.
 export const DAILY_WRITES = 60_000;
+
+// Which fields differ for records about to be rewritten (a sample, compared with what the database holds): the log
+// says why a sync writes as much as it does — field names and counts only (public repo).
+export function changedFields(before, after) {
+  const out = [];
+  for (const k of new Set([...Object.keys(before || {}), ...Object.keys(after || {})])) {
+    if (k === "hash" || k === "updated_at") continue;
+    const a = before?.[k] ?? null, b = after?.[k] ?? null;
+    if (String(a) === String(b)) continue;
+    if (typeof a === "string" && typeof b === "string" && /^[[{]/.test(a) && /^[[{]/.test(b)) {
+      let x, y;
+      try { x = JSON.parse(a); y = JSON.parse(b); } catch { out.push(k); continue; }
+      if (x && y && typeof x === "object" && !Array.isArray(x)) {
+        for (const f of new Set([...Object.keys(x), ...Object.keys(y)])) {
+          if (JSON.stringify(x[f]) !== JSON.stringify(y[f])) out.push(`${k}.${f}`);
+        }
+        continue;
+      }
+    }
+    out.push(k);
+  }
+  return out;
+}
+async function whyRewritten(db, table, records, key, sample = 300) {
+  const have = new Map((await db.query(`SELECT ${key}, hash FROM ${table}`)).map((r) => [r[key], r.hash]));
+  const changed = records.filter((r) => have.has(r[key]) && have.get(r[key]) !== r.hash).slice(0, sample);
+  if (!changed.length) return;
+  const old = new Map((await db.query(`SELECT * FROM ${table} WHERE ${key} IN (SELECT value FROM json_each(?1))`,
+    [JSON.stringify(changed.map((r) => r[key]))])).map((r) => [r[key], r]));
+  const counts = {};
+  for (const r of changed) for (const f of changedFields(old.get(r[key]), r)) counts[f] = (counts[f] || 0) + 1;
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([f, n]) => `${f} ${n}`).join(", ");
+  console.log(`Database ${table}: of ${changed.length} changed records sampled, the fields that differ — ${top || "none (only the hash)"}`);
+}
 export const LIMIT_HIT = /limit exceeded|too many requests|daily.*limit|7429|exceeded/i;
 
 async function main() {
@@ -91,6 +125,10 @@ async function main() {
     deals: deals || {}, moments: moments || {}, moves,
     marks: { contacted: contacted || {}, notes: notes || {}, verdict: verdicts || {}, check: checks || {}, email: emails || {} } });
   records.companies.sort((a, b) => (b.lead_score ?? -1e9) - (a.lead_score ?? -1e9));   // the best first, if the budget runs short
+  try {
+    await whyRewritten(db, "companies", records.companies, "number");
+    await whyRewritten(db, "signals", records.signals, "id");
+  } catch (e) { console.log(`Database: couldn't compare the changed records (${e.message.slice(0, 80)})`); }
   const now = new Date().toISOString();
   const day = now.slice(0, 10);
   const [w] = await db.query("SELECT value FROM meta WHERE key = 'writes'");
