@@ -3371,6 +3371,37 @@ class TestHmrcOffline(unittest.TestCase):
                 with self.assertRaises(RuntimeError):
                     hmrc.download(12, cache_dir=empty)
 
+    def test_fills_the_months_the_site_didnt_list_from_the_cache(self):
+        # 15 Nov 2026: the latest page answered, the archive page didn't — the run read 3 months as if they were 24
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in ("imports-A2025-H2.zip", "imports-M2607.zip", "imports-M2609.zip"):
+                open(os.path.join(tmp, name), "wb").close()
+            listed = {("import", "M2609"): "u9", ("import", "M2608"): "u8"}
+            with mock.patch.object(hmrc, "list_files", return_value=listed), \
+                    mock.patch.object(hmrc, "_get", return_value=b"zip"):
+                paths, since = hmrc.download(12, cache_dir=tmp)
+            self.assertEqual(sorted(os.path.basename(p) for p in paths),
+                             ["imports-A2025-H2.zip", "imports-M2607.zip", "imports-M2608.zip", "imports-M2609.zip"])
+            self.assertEqual(since, "202510")
+
+    def test_no_moments_from_a_short_history(self):
+        spec = importlib.util.spec_from_file_location("niche_hits", os.path.join(ROOT, "tools", "niche_hits.py"))
+        niche_hits = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(niche_hits)
+        company = {"company_number": "01", "company_name": "ACME LIMITED", "accounts_category": "FULL"}
+        short = {"01": {"import_months": {"202608", "202609"}, "export_months": set(), "company": company,
+                        "import_codes": Counter({"84": 2}), "export_codes": Counter()}}
+        with tempfile.TemporaryDirectory() as tmp:
+            out = os.path.join(tmp, "moments.json")
+            niche_hits.write_moments(out, short, "202609", {"01": "ACME LIMITED"}, 24)
+            self.assertFalse(os.path.exists(out))          # not saved: the store keeps the last good moments
+            months = {f"2025{m:02d}" for m in range(1, 13)} | {f"2026{m:02d}" for m in range(1, 4)}
+            other = {"02": {"import_months": months, "export_months": set(), "company": {**company, "company_number": "02"},
+                            "import_codes": Counter({"84": 15}), "export_codes": Counter()}}
+            niche_hits.write_moments(out, {**short, **other}, "202609", {"01": "ACME LIMITED"}, 24)
+            with open(out, encoding="utf-8") as f:
+                self.assertEqual([i["kind"] for i in json.load(f)["items"]], ["new_trader"])
+
 
 class TestCustomsMoments(unittest.TestCase):
     """sourcer/hmrc.moment: a new currency flow in HMRC's importer / exporter lists."""
