@@ -130,6 +130,11 @@ describe("/api/accounts", () => {
     expect([parked.lists["01234567"].missing, parked.lists["01234567"].at]).toEqual([true, moved.lists["01234567"].at]);
     const got = await (await handle(new Request("https://x/api/accounts", { headers: { authorization: "Bearer s3cret" } }), opts)).json();
     expect(Object.keys(got.lists)).toEqual(["01234567"]);
+    expect((await post({ company_number: "01234567", sequence: { start: "nope" } })).status).toBe(400);
+    const seq = await (await post({ company_number: "01234567", sequence: { start: "2026-11-11", gift: "2026-11-05", done: { 1: "2026-11-11" } } })).json();
+    expect(seq.lists["01234567"].seq.done).toEqual({ 1: "2026-11-11" });
+    const kept = await (await post({ company_number: "01234567", list: "email" })).json();
+    expect(kept.lists["01234567"].seq.start).toBe("2026-11-11");   // moving list keeps the sequence
     expect((await (await post({ company_number: "01234567", list: null })).json()).lists).toEqual({});
   });
 

@@ -2,6 +2,7 @@ import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, u
 import { FILINGS_SECTION } from "./ranking.js";
 import { FIT, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
+import { GRID_COLUMNS, SEQUENCE, gridCells, nextStep, plan, sequenceRank } from "./sequence.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
@@ -306,7 +307,16 @@ function Accounts({ data, password }) {
       setSaveError(`Couldn't save the list (${e.message}).`);
     }
   }, [save, lists]);
-  const verdictCtx = useMemo(() => ({ verdicts, setVerdict, lists, setList }), [verdicts, setVerdict, lists, setList]);
+  const setSequence = useCallback(async (number, seq) => {
+    setSaveError("");
+    const before = lists;
+    setLists((l) => (l[number] ? { ...l, [number]: seq ? { ...l[number], seq } : (({ seq: _s, ...rest }) => rest)(l[number]) } : l));
+    try { await save(number, { sequence: seq }); } catch (e) {
+      setLists(before);
+      setSaveError(`Couldn't save the sequence (${e.message}).`);
+    }
+  }, [save, lists]);
+  const verdictCtx = useMemo(() => ({ verdicts, setVerdict, lists, setList, setSequence }), [verdicts, setVerdict, lists, setList, setSequence]);
 
   const saveNote = useCallback(async (number, text) => {
     setSaveError("");
@@ -1528,6 +1538,53 @@ function PitchPanel({ r }) {
   );
 }
 
+// The 18-step outreach sequence on a list card: start it (Day 0 = the cold email, or the gift landing), tick steps off,
+// the next one due shown first; the whole plan folds open.
+function SequencePanel({ r, which }) {
+  const { setSequence } = useContext(VerdictContext);
+  const today = new Date().toISOString().slice(0, 10);
+  const seq = r.seq;
+  if (!seq?.start) {
+    return (
+      <p className="panel-p seq-start">
+        <button className="btn-sm" onClick={() => setSequence(r.company_number, { start: today, ...(which === "post" ? { gift: today } : {}), done: {} })}
+                title="Day 0 is today: the cold email, or the day the gift is sent">Start sequence today</button>
+        <span className="muted"> or Day 0 on </span>
+        <input type="date" aria-label="Sequence Day 0" onChange={(e) => e.target.value && setSequence(r.company_number, { start: e.target.value, done: {} })} />
+      </p>
+    );
+  }
+  const steps = plan(seq);
+  const next = nextStep(seq);
+  const toggle = (step) => {
+    const done = { ...(seq.done || {}) };
+    if (done[step]) delete done[step]; else done[step] = today;
+    setSequence(r.company_number, { ...seq, done });
+  };
+  const doneCount = Object.keys(seq.done || {}).length;
+  return (
+    <details className="seq">
+      <summary>
+        {next ? <><b className={`seq-when ${next.when}`}>{next.when === "overdue" ? "Overdue" : next.when === "today" ? "Today" : filedWhen(next.due)}</b>
+          {" "}Step {next.step}: {next.label}</> : <b>Sequence finished</b>}
+        <span className="muted"> · {doneCount}/{SEQUENCE.length} done · Day 0 {filedWhen(seq.start)}</span>
+      </summary>
+      {which === "post" && (
+        <p className="panel-p">Gift sent on <input type="date" value={seq.gift || ""} onChange={(e) => setSequence(r.company_number, { ...seq, gift: e.target.value || undefined })} /></p>
+      )}
+      <ul className="seq-steps">
+        {steps.map((s) => (
+          <li key={s.step} className={s.done ? "done" : s.due < today ? "late" : ""}>
+            <label><input type="checkbox" checked={Boolean(s.done)} onChange={() => toggle(s.step)} />
+              <span className="seq-due">{filedWhen(s.due)}</span> <span className={`seq-kind ${s.kind}`}>{s.kind}</span> Step {s.step}: {s.label}</label>
+          </li>
+        ))}
+      </ul>
+      <button className="btn-link" onClick={() => { if (confirm("Clear this company's sequence?")) setSequence(r.company_number, null); }}>Clear sequence</button>
+    </details>
+  );
+}
+
 // My lists: the companies Zac put on his call, chocolate / mailing and email lists, newest first, each with an export
 // (the mailing list's carries the addressee and registered office).
 function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
@@ -1536,20 +1593,29 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
   const [missingOnly, setMissingOnly] = useState(false);
   const mine = Object.entries(lists).filter(([, v]) => v.list === which);
   const missingCount = mine.filter(([, v]) => v.missing).length;
-  const list = mine.filter(([, v]) => Boolean(v.missing) === missingOnly).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)))
-    .map(([n, v]) => ({ ...(byNumber[n] || { company_number: n, company_name: n }), added_at: v.at, missing: v.missing }));
+  const today = new Date();
+  const list = mine.filter(([, v]) => Boolean(v.missing) === missingOnly)
+    .sort((a, b) => sequenceRank(a[1].seq, today).localeCompare(sequenceRank(b[1].seq, today)) || String(b[1].at).localeCompare(String(a[1].at)))
+    .map(([n, v]) => ({ ...(byNumber[n] || { company_number: n, company_name: n }), added_at: v.at, missing: v.missing, seq: v.seq }));
+  const due = mine.filter(([, v]) => !v.missing && ["overdue", "today"].includes(nextStep(v.seq, today)?.when)).length;
   const need = { call: "a number or the finance director's name", email: "an email address", post: "a name or address" }[which] || "the details";
-  const exportList = () => downloadSheet(list.map((r, i) => ({
-    rank: i + 1, company_name: r.company_name, company_number: r.company_number, addressee: letterAddressee(r),
-    address: r.registered_address || "", postcode: r.postcode || "", lead_score: r.lead_score ?? "", why_now: timelyReason(r),
-    what_to_pitch: pitchLine(r), added: String(r.added_at || "").slice(0, 10), companies_house_url: chCompanyUrl(r.company_number),
-  })), columnsFor(["rank", "company_name", "company_number", "addressee", "address", "postcode", "lead_score", "why_now", "what_to_pitch", "added",
-    "companies_house_url"], {}, ["rank", "lead_score"]), `${which}-list-${new Date().toISOString().slice(0, 10)}.xlsx`, LIST_NAMES[which]);
+  // Laid out like Zac's follow-up grid: account, number, name, title, CRM, then blank LinkedIn / email / mobile for him to
+  // fill from Cognism on the bank's side (never stored here), Send out or Cold, the gift date and every step's date.
+  const exportList = () => downloadSheet(list.map((r) => ({
+    account_name: r.company_name, company_number: r.company_number, name: presentedContact(r) ? r.finance_contact : "",
+    job_title: presentedContact(r) ? r.finance_contact_role || "" : askFor(r), crm: "", linkedin: "", email_address: "", mobile_number: "",
+    send_out_or_cold: which === "post" ? "Send out" : "Cold", gift_send_out_date: r.seq?.gift || "", address: r.registered_address || "",
+    postcode: r.postcode || "", what_to_pitch: pitchLine(r), ...gridCells(r.seq),
+  })), columnsFor(["account_name", "company_number", "name", "job_title", "crm", "linkedin", "email_address", "mobile_number", "send_out_or_cold",
+    "gift_send_out_date", "address", "postcode", "what_to_pitch", ...GRID_COLUMNS.map(([k]) => k)],
+    { account_name: "Account Name", company_number: "Companies House Number", name: "Name", job_title: "Job Title", crm: "CRM", linkedin: "LinkedIn",
+      email_address: "Email Address", mobile_number: "Mobile Number", send_out_or_cold: "Send Out or Cold", gift_send_out_date: "Gift Send Out Date",
+      ...Object.fromEntries(GRID_COLUMNS) }, []), `${which}-list-${new Date().toISOString().slice(0, 10)}.xlsx`, LIST_NAMES[which]);
   return (
     <div className="list">
       <div className="filters filings-bar">
         <button className={`btn-sm${!missingOnly ? " on" : ""}`} aria-pressed={!missingOnly} onClick={() => setMissingOnly(false)}>
-          Ready ({mine.length - missingCount})</button>
+          Ready ({mine.length - missingCount}){due ? ` · ${due} due` : ""}</button>
         <button className={`btn-sm${missingOnly ? " on" : ""}`} aria-pressed={missingOnly} onClick={() => setMissingOnly(true)}
                 title={`Companies where you couldn't find ${need}`}>Can't find info ({missingCount})</button>
         <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
@@ -1567,6 +1633,7 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
           {which === "post" && <p className="panel-p"><b>{letterAddressee(r)}</b>{r.registered_address ? ` · ${r.registered_address}${r.postcode ? `, ${r.postcode}` : ""}` : " · address: see Companies House"}</p>}
           {pitchLine(r) && <p className="panel-p"><b>Pitch:</b> {pitchLine(r)}</p>}
           <LeadScore r={r} />
+          {!r.missing && <SequencePanel r={r} which={which} />}
           <p className="panel-p">
             <button className="btn-sm" onClick={() => setList(r.company_number, which, !r.missing)}
                     title={r.missing ? "Found it — back to Ready" : `Couldn't find ${need} — park it under Can't find info`}>
@@ -2517,6 +2584,15 @@ a{color:var(--accent)}
 .list-btns{display:inline-flex;flex-wrap:wrap;gap:4px;margin-right:6px}
 .list-btns .btn-sm.on,.filters .btn-sm.on{background:rgba(138,180,248,.18);color:var(--accent)}
 .pitch-list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.seq{margin:6px 0;font-size:13px}
+.seq>summary{cursor:pointer}
+.seq-when.overdue{color:var(--loss, #f28b82)}
+.seq-when.today{color:var(--accent)}
+.seq-steps{list-style:none;margin:6px 0;padding:0;display:grid;gap:2px}
+.seq-steps li.done{opacity:.55;text-decoration:line-through}
+.seq-steps li.late:not(.done) .seq-due{color:var(--loss, #f28b82)}
+.seq-due{display:inline-block;min-width:92px;font-variant-numeric:tabular-nums}
+.seq-kind{display:inline-block;min-width:64px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;opacity:.75}
 .pitch-list li{line-height:1.45}
 .chip.lead-chip{background:rgba(138,180,248,.16);color:var(--accent);font-weight:600;flex:none;font-variant-numeric:tabular-nums}
 .lead-parts{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}

@@ -14,6 +14,7 @@
 // The list itself lives in the site's private KV store ("fx-accounts/latest"),
 // put there by the finder workflow — never in the repo or the public build.
 // Platform-free: functions/api/accounts.js passes the password and the store.
+import { validSequence } from "../src/accounts/sequence.js";
 import { applyContact, invalidChange } from "../src/accounts/followups.js";
 import { outreachPage, setMark } from "./db.mjs";
 import { OUTREACH, outreachWhy } from "../src/accounts/format.js";
@@ -223,11 +224,22 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       await mirror(db, number, "email", emails[number]);
       return reply({ emails }, 200);
     }
+    if ("sequence" in body) {   // the outreach sequence of a company on a list: {start, gift?, done: {step: date}} or null
+      if (!validSequence(body.sequence)) return reply({ error: "send {company_number, sequence: {start: YYYY-MM-DD, gift?, done: {step: YYYY-MM-DD}} | null}" }, 400);
+      const lists = (await blobs.get(LISTS_KEY, { type: "json" })) || {};
+      if (!lists[number]) return reply({ error: "put the company on a list first" }, 400);
+      if (body.sequence) lists[number] = { ...lists[number], seq: body.sequence };
+      else { const { seq: _gone, ...rest } = lists[number]; lists[number] = rest; }
+      await blobs.setJSON(LISTS_KEY, lists);
+      await mirror(db, number, "list", lists[number]);
+      return reply({ lists }, 200);
+    }
     if ("list" in body) {   // Zac's own call / chocolate-mailing / email list; one list a company, null takes it off
       if (body.list !== null && !LISTS.includes(body.list)) return reply({ error: `send {company_number, list: ${LISTS.join(" | ")} | null}` }, 400);
       const lists = (await blobs.get(LISTS_KEY, { type: "json" })) || {};
       const kept = lists[number]?.list === body.list ? lists[number].at : null;   // marking "can't find info" keeps its place
-      if (body.list) lists[number] = { list: body.list, at: kept || new Date().toISOString(), ...(body.missing ? { missing: true } : {}) };
+      const seq = lists[number]?.seq;   // the outreach sequence carries over when the company moves list
+      if (body.list) lists[number] = { list: body.list, at: kept || new Date().toISOString(), ...(body.missing ? { missing: true } : {}), ...(seq ? { seq } : {}) };
       else delete lists[number];
       await blobs.setJSON(LISTS_KEY, lists);
       await mirror(db, number, "list", lists[number]);
