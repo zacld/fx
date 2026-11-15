@@ -592,7 +592,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **My lists, score bullets, What we can pitch them** (Zac, 15 Nov 2026): every card and company page has **+ Call list
   / + Chocolate / mailing list / + Email list** (`ListButtons`, beside the verdicts; one list a company, store key `lists`,
   POST `{company_number, list: "call" | "post" | "email" | null}`, mirrored to the database as mark `list`); the **My lists**
-  tab shows each list with an Excel export (the mailing list's with addressee and registered office). The lead score's
+  tab became three tabs, **Call list / Email list / Mail list** (`list-call` / `list-email` / `list-post`), each with **Ready** and **Can't find info** sections (`missing: true` on the mark, POST `{…, missing: true}`; the card's "Can't find info" / "Found it" button moves it) and an Excel export (the mail list's with addressee and registered office). The lead score's
   reasons are bullets grouped Fits because / Why now / Counts against (`ScoreBreakdown`; folded under "Why this score" on
   cards, open on the company page). **What we can pitch them** (`src/accounts/pitch.js`, `PRODUCTS` / `pitchFor` /
   `pitchLine`): Investec UK's public corporate products (investec.com/en_gb, read 15 Nov 2026 — corporate deposits:

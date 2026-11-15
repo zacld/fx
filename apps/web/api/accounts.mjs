@@ -23,7 +23,7 @@ export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
 export const VERDICTS_KEY = "verdicts";     // {company_number: {verdict: "good" | "not_fit", reason, at}} — Zac's review
 export const VERDICT_REASONS = ["Too small", "Too big", "No real FX", "Wrong sector", "FX run abroad", "Other"];
-export const LISTS_KEY = "lists";           // {company_number: {list: "call" | "post" | "email", at}} — Zac's own lists
+export const LISTS_KEY = "lists";           // {company_number: {list: "call" | "post" | "email", at, missing?}} — Zac's own lists
 export const LISTS = ["call", "post", "email"];   // call list, chocolate / mailing list, email list
 export const CHECKS_KEY = "checks";         // {company_number: {crm: iso}} — the lead checklist's "CRM checked" tick
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
@@ -226,7 +226,8 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     if ("list" in body) {   // Zac's own call / chocolate-mailing / email list; one list a company, null takes it off
       if (body.list !== null && !LISTS.includes(body.list)) return reply({ error: `send {company_number, list: ${LISTS.join(" | ")} | null}` }, 400);
       const lists = (await blobs.get(LISTS_KEY, { type: "json" })) || {};
-      if (body.list) lists[number] = { list: body.list, at: new Date().toISOString() };
+      const kept = lists[number]?.list === body.list ? lists[number].at : null;   // marking "can't find info" keeps its place
+      if (body.list) lists[number] = { list: body.list, at: kept || new Date().toISOString(), ...(body.missing ? { missing: true } : {}) };
       else delete lists[number];
       await blobs.setJSON(LISTS_KEY, lists);
       await mirror(db, number, "list", lists[number]);
