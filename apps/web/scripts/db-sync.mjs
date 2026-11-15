@@ -65,7 +65,7 @@ export function buildRecords({ list, details = [], filingRows = [], ranked = {},
 // The free plan's daily limit is 100,000 rows written (reset at midnight UTC); the syncs keep to DAILY_WRITES of it,
 // leaving the rest for the page's own saves. The day's writes so far are kept in meta ("writes": {day, rows}, from D1's
 // own counts); a sync past the budget writes the best companies first and leaves the rest for the next.
-export const DAILY_WRITES = 60_000;
+export const DAILY_WRITES = 40_000;   // 15 Nov 2026: 60,000 by our count still met the limit — dropping the old tables cost writes D1 counts but doesn't report back
 
 // Which fields differ for records about to be rewritten (a sample, compared with what the database holds): the log
 // says why a sync writes as much as it does — field names and counts only (public repo).
