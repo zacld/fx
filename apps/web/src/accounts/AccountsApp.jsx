@@ -2,6 +2,7 @@ import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, u
 import { FILINGS_SECTION } from "./ranking.js";
 import { FIT, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
+import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, SEQUENCE, gridCells, nextStep, plan, sequenceRank } from "./sequence.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
@@ -319,7 +320,7 @@ function Accounts({ data, password }) {
       setSaveError(`Couldn't save the sequence (${e.message}).`);
     }
   }, [save, lists]);
-  const verdictCtx = useMemo(() => ({ verdicts, setVerdict, lists, setList, setSequence }), [verdicts, setVerdict, lists, setList, setSequence]);
+  const verdictCtx = useMemo(() => ({ verdicts, setVerdict, lists, setList, setSequence, moves }), [verdicts, setVerdict, lists, setList, setSequence, moves]);
 
   const saveNote = useCallback(async (number, text) => {
     setSaveError("");
@@ -1554,6 +1555,7 @@ function PitchPanel({ r }) {
 // the next one due shown first; the whole plan folds open.
 function SequencePanel({ r, which }) {
   const { setSequence } = useContext(VerdictContext);
+  const [draft, setDraft] = useState(null);
   const today = new Date().toISOString().slice(0, 10);
   const seq = r.seq;
   if (!seq?.start) {
@@ -1589,11 +1591,39 @@ function SequencePanel({ r, which }) {
           <li key={s.step} className={s.done ? "done" : s.due < today ? "late" : ""}>
             <label><input type="checkbox" checked={Boolean(s.done)} onChange={() => toggle(s.step)} />
               <span className="seq-due">{filedWhen(s.due)}</span> <span className={`seq-kind ${s.kind}`}>{s.kind}</span> Step {s.step}: {s.label}</label>
+            {s.kind === "email" && <button className="btn-link" onClick={() => setDraft(draft === s.step ? null : s.step)}>{draft === s.step ? "hide email" : "email"}</button>}
+            {draft === s.step && <StepEmail r={r} which={which} step={s.step} />}
           </li>
         ))}
       </ul>
       <button className="btn-link" onClick={() => { if (confirm("Clear this company's sequence?")) setSequence(r.company_number, null); }}>Clear sequence</button>
     </details>
+  );
+}
+
+// One email step's draft: the step's template (templates.js) filled from the company's records, editable, with Copy and
+// where each filled part came from; any of the templates can be picked instead. Nothing is sent.
+function StepEmail({ r, which, step }) {
+  const { moves } = useContext(VerdictContext);
+  const [key, setKey] = useState(stepTemplate(which, step));
+  const filled = key ? fillTemplate(key, r, moves || {}) : null;
+  const [text, setText] = useState(filled?.text || "");
+  const [copied, setCopied] = useState(false);
+  const pick = (k) => { setKey(k); setText(k ? fillTemplate(k, r, moves || {}).text : ""); };
+  return (
+    <div className="step-email">
+      <select value={key} onChange={(e) => pick(e.target.value)} aria-label="Template">
+        <option value="">{key ? "No template" : "No template for this step yet — pick one"}</option>
+        {Object.entries(TEMPLATES).map(([k, t]) => <option key={k} value={k}>{t.name}</option>)}
+      </select>
+      {key && <>
+        <textarea className="input email-edit" rows={12} value={text} onChange={(e) => setText(e.target.value)} aria-label={`Step ${step} email`} />
+        <button className="btn-sm" onClick={async () => { try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* select by hand */ } }}>
+          {copied ? "Copied" : "Copy"}</button>
+        {/\[[^\]]+\]/.test(text) && <span className="muted"> Fill in the [brackets] before sending.</span>}
+        <p className="muted panel-p">{filled?.sources.join(" · ")}</p>
+      </>}
+    </div>
   );
 }
 
@@ -2605,6 +2635,9 @@ a{color:var(--accent)}
 .seq-steps li.late:not(.done) .seq-due{color:var(--loss, #f28b82)}
 .seq-due{display:inline-block;min-width:92px;font-variant-numeric:tabular-nums}
 .seq-kind{display:inline-block;min-width:64px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;opacity:.75}
+.seq-steps .btn-link{margin-left:8px}
+.step-email{margin:6px 0 10px 24px;display:grid;gap:6px;max-width:720px}
+.step-email textarea{width:100%;font:inherit}
 .pitch-list li{line-height:1.45}
 .chip.lead-chip{background:rgba(138,180,248,.16);color:var(--accent);font-weight:600;flex:none;font-variant-numeric:tabular-nums}
 .lead-parts{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}

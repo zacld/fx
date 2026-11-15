@@ -600,8 +600,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   break-up), two LinkedIn touches (`SEQUENCE`; days counted Mon–Fri, `addWorkingDays`); started per card ("Start
   sequence today" or a Day 0 date), each step ticked off, the next due shown first (overdue / today), list cards sorted
   by it, "N due" on the Ready button. Saved on the list mark as `seq: {start, gift?, done: {step: date}}` (POST
-  `{company_number, sequence}`, `validSequence`; kept when the company changes list). The email steps' templates come
-  from Zac (pending); nothing is sent. The lead score's
+  `{company_number, sequence}`, `validSequence`; kept when the company changes list). Each email step has an
+  "email" link opening its draft (`StepEmail`; `src/accounts/templates.js`): the desk's emails that worked (Zac, 15 Nov
+  2026) — Chocolates 1 (they've landed), Chocolates 2 (why I reached out), Generic first email (what we do: treasury /
+  lending / corporate finance), Proactive FX risk management (dedicated dealer, FTSE 100 balance sheet), Personalised
+  FX (from their accounts: turnover growth, their own currency's move on the ECB rates, working capital and money market
+  accounts). Mail list steps 1/3/5/8/12 start with choc1 / choc2 / generic / fxdesk / personal, the cold route's 1/3/8
+  with generic / personal / fxdesk (`STEP_TEMPLATES`); case study, money, Investec and break-up have none yet (any
+  template can be picked). Filled from the records only (first name of a presented contact, the company's name, growth,
+  own currency's 3-month move), with where each part came from; gaps stay [placeholders]; the originals' prospect and
+  colleague names aren't kept; signed Zac. Editable, Copy; nothing is sent. The lead score's
   reasons are bullets grouped Fits because / Why now / Counts against (`ScoreBreakdown`; folded under "Why this score" on
   cards, open on the company page). **What we can pitch them** (`src/accounts/pitch.js`, `PRODUCTS` / `pitchFor` /
   `pitchLine`): Investec UK's public corporate products (investec.com/en_gb, read 15 Nov 2026 — corporate deposits:
