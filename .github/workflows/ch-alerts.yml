@@ -91,7 +91,7 @@ jobs:
       # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
       # until the Cloudflare token may use D1; never fails the run.
       - name: Database
-        if: github.event_name != 'push' && steps.save.outcome == 'success'
+        if: github.event_name != 'push' && steps.save.outcome == 'success' && github.ref == 'refs/heads/main'
         continue-on-error: true
         run: cd apps/web && node scripts/db-sync.mjs
       - name: Morning digest

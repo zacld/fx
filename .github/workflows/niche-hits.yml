@@ -112,7 +112,9 @@ jobs:
         run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json
       # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
       # until the Cloudflare token may use D1; never fails the run.
+      # Only from main: a branch push runs this workflow in full, and its copy would spend the database's daily writes
       - name: Database
+        if: github.ref == 'refs/heads/main'
         continue-on-error: true
         run: cd apps/web && node scripts/db-sync.mjs
       # Every lead's own website (best leads first), confirmed by its company number or registered name on the site:

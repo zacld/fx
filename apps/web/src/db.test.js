@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 import { applySchema, batches, companyRecord, hashOf, markRecord, outreachPage, setMark, signalRecord, syncTable } from "../api/db.mjs";
-import { buildRecords } from "../scripts/db-sync.mjs";
+import { buildRecords, changedFields } from "../scripts/db-sync.mjs";
 import { handle } from "../api/accounts.mjs";
 import { outreachPlan, setKnownGroups, withLeadScores } from "./accounts/format.js";
 
@@ -148,5 +148,10 @@ describe("Database (D1) mirror", () => {
     expect(objects.filter((o) => o.type === "index")).toEqual([]);
     expect(objects.filter((o) => o.type === "table" && o.name !== "meta").every((o) => /WITHOUT ROWID/.test(o.sql))).toBe(true);
     expect(await query("SELECT key FROM meta ORDER BY key")).toEqual([{ key: "schema" }]);
+  });
+  it("names the fields that differ when a record is rewritten (for the sync's log)", () => {
+    const before = { number: "01", name: "A", hash: "x", row: JSON.stringify({ a: 1, b: [1, 2] }), lead: JSON.stringify({ score: 5 }), timely: "" };
+    const after = { number: "01", name: "A", hash: "y", row: JSON.stringify({ a: 1, b: [2, 1] }), lead: JSON.stringify({ score: 5 }), timely: "x" };
+    expect(changedFields(before, after).sort()).toEqual(["row.b", "timely"]);
   });
 });
