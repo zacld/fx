@@ -31,10 +31,22 @@ export async function openD1({ schema = true } = {}) {
   }
   // D1 reports the rows each statement read and wrote (what the free plan's daily limits count): kept in `used`.
   const used = { read: 0, written: 0 };
+  // D1 now and then answers "7500: internal error" (15 Nov 2026, a CREATE TABLE IF NOT EXISTS): tried again up to
+  // 3 times, a few seconds apart; the daily limit and other errors aren't retried.
+  const post = (sql, params) => cfJson(`/d1/database/${id}/query`, {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sql, params }),
+  });
   const query = async (sql, params = []) => {
-    const result = await cfJson(`/d1/database/${id}/query`, {
-      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sql, params }),
-    });
+    let result;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        result = await post(sql, params);
+        break;
+      } catch (e) {
+        if (attempt >= 3 || !/internal error|temporarily unavailable|network connection lost/i.test(e.message)) throw e;
+        await new Promise((r) => setTimeout(r, 3000 * (attempt + 1)));
+      }
+    }
     for (const r of result || []) {
       used.read += Number(r.meta?.rows_read || 0);
       used.written += Number(r.meta?.rows_written || 0);

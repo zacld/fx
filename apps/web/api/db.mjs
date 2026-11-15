@@ -158,6 +158,7 @@ export async function applySchema(query) {
     for (const t of DATA_TABLES) await query(`DROP TABLE IF EXISTS ${t}`, []);
     await query("DELETE FROM meta WHERE key = 'synced'", []);   // empty until the next full copy
   }
+  if (!remade) return false;   // the layout is current: nothing to make (one call fewer that can fail)
   for (const sql of SCHEMA) await query(sql, []);
   if (remade) await query("INSERT INTO meta (key, value) VALUES ('schema', ?1) ON CONFLICT (key) DO UPDATE SET value = excluded.value", [String(SCHEMA_VERSION)]);
   return remade;
