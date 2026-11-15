@@ -98,10 +98,21 @@ def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches
     return out
 
 
+MOMENT_MIN_MONTHS = 15   # months of customs records needed before anyone can be called a new trader
+
+
 def write_moments(path: str, trade: dict, latest: str, tracked: dict, months: int) -> None:
     """Customs moments (hmrc.moment) for the lists' companies — triggers on the lead score — and for companies not on
     them that file full / medium / group accounts — new importers / exporters the finder checks first. Saved as the
     store's "moments"."""
+    # Moments need the history behind them: with fewer months than that (a download cut short), every company looks
+    # like a new trader. Then no file is written and the store keeps the last good moments.
+    covered = {p for e in trade.values() for p in e["import_months"] | e["export_months"]}
+    need = min(months, MOMENT_MIN_MONTHS)
+    if latest and len({p for p in covered if p <= latest}) < need:
+        print(f"WARNING: customs moments skipped — the trader files cover {len(covered)} months, {need} needed; "
+              "the last saved moments stay")
+        return
     items = []
     for number, e in trade.items():
         m = hmrc.moment(e, latest, months) if latest else None

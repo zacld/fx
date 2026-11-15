@@ -120,9 +120,17 @@ def download(months: int = 12, cache_dir: str = DEFAULT_CACHE_DIR, kind: str = "
         print(f"WARNING: uktradeinfo unreachable — using the {len(cached)} HMRC {kind} files already downloaded")
         since, wanted = window((k for _, k in cached), months)
         return [p for (_, k), p in sorted(cached.items()) if k in wanted], since
-    since, wanted = window((k for _, k in files), months)
+    # The site's archive page can fail while its latest page works (15 Nov 2026: 502s on the archive): the history it
+    # didn't list comes from the files already downloaded, so a run never reads a few months as if they were 24 (every
+    # company then looked like a brand-new importer, and the lead scores swung).
+    cached = {k: p for k, p in cached_files(cache_dir, kind).items() if k not in files}
+    since, wanted = window([k for _, k in files] + [k for _, k in cached], months)
+    from_cache = [p for (_, k), p in sorted(cached.items()) if k in wanted]
+    if from_cache:
+        print(f"WARNING: uktradeinfo didn't list {len(from_cache)} HMRC {kind} files in the window — using the copies "
+              "already downloaded")
     this_year = time.strftime("%Y")
-    paths = []
+    paths = list(from_cache)
     for (flow, key), url in sorted(files.items()):
         if key not in wanted:
             continue

@@ -107,7 +107,8 @@ jobs:
         run: |
           cd apps/web && node scripts/alerts-store.mjs put niches ../../lead-sourcer/niche_stats.json
           node scripts/alerts-store.mjs put deals ../../lead-sourcer/deals.json
-          node scripts/alerts-store.mjs put moments ../../lead-sourcer/moments.json
+          # no file when the customs history was cut short (niche_hits.py): the last good moments stay
+          if [ -f ../../lead-sourcer/moments.json ]; then node scripts/alerts-store.mjs put moments ../../lead-sourcer/moments.json; fi
       - name: Rank every lead
         run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json
       # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
