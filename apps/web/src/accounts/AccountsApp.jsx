@@ -1,6 +1,7 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { pitchFor, pitchLine } from "./pitch.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
@@ -141,6 +142,7 @@ function Accounts({ data, password }) {
                           [signals, moves, data.made_at]);
   // Zac's Good lead / Not a fit verdicts: declared before the rows that read them
   const [verdicts, setVerdicts] = useState(data.verdicts || {});
+  const [lists, setLists] = useState(data.lists || {});   // Zac's call / chocolate-mailing / email lists
   const rows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
     ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
   [baseRows, leadCtx, verdicts]);
@@ -207,6 +209,7 @@ function Accounts({ data, password }) {
       if (body.notes) setNotes(body.notes);
       if (body.checks) setChecks(body.checks);
       if (body.emails) setEmails(body.emails);
+      if (body.lists) setLists(body.lists);
     });
     queue.current = run;
     return run;
@@ -289,7 +292,16 @@ function Accounts({ data, password }) {
       setSaveError(`Couldn't save the verdict (${e.message}).`);
     }
   }, [save, verdicts]);
-  const verdictCtx = useMemo(() => ({ verdicts, setVerdict }), [verdicts, setVerdict]);
+  const setList = useCallback(async (number, list) => {
+    setSaveError("");
+    const before = lists;
+    setLists((l) => { const next = { ...l }; if (list) next[number] = { list, at: new Date().toISOString() }; else delete next[number]; return next; });
+    try { await save(number, { list: list || null }); } catch (e) {
+      setLists(before);
+      setSaveError(`Couldn't save the list (${e.message}).`);
+    }
+  }, [save, lists]);
+  const verdictCtx = useMemo(() => ({ verdicts, setVerdict, lists, setList }), [verdicts, setVerdict, lists, setList]);
 
   const saveNote = useCallback(async (number, text) => {
     setSaveError("");
@@ -342,8 +354,8 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), industry: industryOf(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
-      reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text }));
+    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), industry: industryOf(r), what_to_pitch: pitchLine(r), my_list: LIST_NAMES[lists[r.company_number]?.list] || "",
+      lead_checklist: checklistLine(leadChecklist(r, checks)), reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text }));
     downloadSheet(out, columnsFor(EXPORT_FIELDS, { company_and_fd: "Company – Finance Director" }, NUMBER_FIELDS), `fx-accounts-${new Date().toISOString().slice(0, 10)}.xlsx`, "Accounts");
   };
 
@@ -390,6 +402,11 @@ function Accounts({ data, password }) {
                   title="Filed lately with an FX loss — and a new finance director, buying companies or a private-equity deal"
                   onClick={() => set({ section: "", view: "hits" })}>
             Hit list <span className="tab-n">{open.filter((r) => r.lead_flags?.hit && !isOut(r)).length}</span>
+          </button>
+          <button role="tab" aria-selected={filters.view === "lists"} className={`tab${filters.view === "lists" ? " on" : ""}`}
+                  title="Your call list, chocolate / mailing list and email list — added from any card or company page"
+                  onClick={() => set({ section: "", view: "lists" })}>
+            My lists <span className="tab-n">{Object.keys(lists).length}</span>
           </button>
           <button role="tab" aria-selected={filters.view === "fit"} className={`tab${filters.view === "fit" ? " on" : ""}`}
                   title={`The right companies, whatever the news: FX proof and FX pain, £20m–£300m, a good niche, ownership — Fit ${FIT.min}+, best first`}
@@ -447,7 +464,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "lists"].includes(filters.view) && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -501,6 +518,7 @@ function Accounts({ data, password }) {
 
       {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view === "lists" ? <MyLists rows={rows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "fit" || filters.view === "now" ? <FitTiming mode={filters.view} rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} rows={rows} />
@@ -1484,7 +1502,94 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
 
 // Zac's review of a lead: Good lead, or Not a fit with a reason (stored as his own verdict — never a bank record).
 const VerdictContext = createContext({ verdicts: {}, setVerdict: () => {} });
+// What we can pitch them: Investec's products matched to the company's filed facts (pitch.js), each with its reason.
+function PitchPanel({ r }) {
+  const pitches = pitchFor(r);
+  if (!pitches.length) return null;
+  return (
+    <section className="panel">
+      <h2 className="panel-h">What we can pitch them</h2>
+      <ul className="pitch-list">
+        {pitches.map((p) => (
+          <li key={p.key}><b>{p.name}</b> <span className="chip">{p.group}</span>
+            <div>{p.why}</div>
+            <div className="muted">{p.what}. <a href={p.source} target="_blank" rel="noreferrer">Investec page</a></div></li>
+        ))}
+      </ul>
+      <p className="muted panel-p">Matched from the company's filed accounts and the public registers — check current rates and appetite with the desk before quoting.</p>
+    </section>
+  );
+}
+
+// My lists: the companies Zac put on his call, chocolate / mailing and email lists, newest first, each with an export
+// (the mailing list's carries the addressee and registered office).
+function MyLists({ rows, lists, onOpen, onContact, onEmail }) {
+  const byNumber = useMemo(() => Object.fromEntries(rows.map((r) => [r.company_number, r])), [rows]);
+  const [which, setWhich] = useState("call");
+  const list = Object.entries(lists).filter(([, v]) => v.list === which).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)))
+    .map(([n, v]) => ({ ...(byNumber[n] || { company_number: n, company_name: n }), added_at: v.at }));
+  const exportList = () => downloadSheet(list.map((r, i) => ({
+    rank: i + 1, company_name: r.company_name, company_number: r.company_number, addressee: letterAddressee(r),
+    address: r.registered_address || "", postcode: r.postcode || "", lead_score: r.lead_score ?? "", why_now: timelyReason(r),
+    what_to_pitch: pitchLine(r), added: String(r.added_at || "").slice(0, 10), companies_house_url: chCompanyUrl(r.company_number),
+  })), columnsFor(["rank", "company_name", "company_number", "addressee", "address", "postcode", "lead_score", "why_now", "what_to_pitch", "added",
+    "companies_house_url"], {}, ["rank", "lead_score"]), `${which}-list-${new Date().toISOString().slice(0, 10)}.xlsx`, LIST_NAMES[which]);
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        {Object.entries(LIST_NAMES).map(([k, name]) => (
+          <button key={k} className={`btn-sm${which === k ? " on" : ""}`} aria-pressed={which === k} onClick={() => setWhich(k)}>
+            {name} ({Object.values(lists).filter((v) => v.list === k).length})</button>
+        ))}
+        <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
+      </div>
+      {list.map((r, i) => (
+        <article className="card loss-card" key={r.company_number}>
+          <div className="card-top">
+            <div className="card-name">
+              <span className="call-n">{i + 1}</span>
+              <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
+              <span className="chip">{industryOf(r)}</span>
+            </div>
+            <div className="loss-fig"><span className="muted">added {filedWhen(String(r.added_at || "").slice(0, 10))}</span></div>
+          </div>
+          {which === "post" && <p className="panel-p"><b>{letterAddressee(r)}</b>{r.registered_address ? ` · ${r.registered_address}${r.postcode ? `, ${r.postcode}` : ""}` : " · address: see Companies House"}</p>}
+          {pitchLine(r) && <p className="panel-p"><b>Pitch:</b> {pitchLine(r)}</p>}
+          <LeadScore r={r} />
+          <div className="card-foot">
+            <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>
+            <EmailButton r={r} onEmail={onEmail} />
+            <span className="loss-contacted"><ContactedButton number={r.company_number} name={r.company_name} mark={null} onContact={onContact} /></span>
+            <VerdictButtons number={r.company_number} />
+          </div>
+        </article>
+      ))}
+      {!list.length && <div className="empty">Nothing on your {LIST_NAMES[which].toLowerCase()} yet — use the “+ {LIST_NAMES[which]}” button on any card or company page.</div>}
+    </div>
+  );
+}
+
+// Zac's own lists: call list, chocolate / mailing list, email list — one each company; clicking the chosen one again
+// takes it off. Shown beside the verdict buttons wherever they are.
+const LIST_NAMES = { call: "Call list", post: "Chocolate / mailing list", email: "Email list" };
+function ListButtons({ number }) {
+  const { lists, setList } = useContext(VerdictContext);
+  const on = lists?.[number]?.list;
+  return (
+    <span className="list-btns" role="group" aria-label="Add to a list">
+      {Object.entries(LIST_NAMES).map(([key, name]) => (
+        <button key={key} className={`btn-sm${on === key ? " on" : ""}`} aria-pressed={on === key}
+                title={on === key ? `On your ${name.toLowerCase()} — click to take it off` : `Add to your ${name.toLowerCase()}`}
+                onClick={() => setList(number, on === key ? null : key)}>{on === key ? "✓ " : "+ "}{name}</button>
+      ))}
+    </span>
+  );
+}
+
 function VerdictButtons({ number }) {
+  return <><ListButtons number={number} /><VerdictOnly number={number} /></>;
+}
+function VerdictOnly({ number }) {
   const { verdicts, setVerdict } = useContext(VerdictContext);
   const [asking, setAsking] = useState(false);
   const v = verdicts[number];
@@ -1665,14 +1770,35 @@ function NewMoney({ password, listed, onOpen, rows: listRows = [] }) {
 }
 
 // The lead score as a chip with its reasons on one line (format.js leadScore: LEAD_POINTS).
+// The lead score's reasons as bullets: why it fits, why now, and what counts against it (Zac, 15 Nov 2026: "clean up
+// the section which justifies why it got that score — bullet points").
+function ScoreBreakdown({ r, open = false }) {
+  const parts = r.lead_parts || [];
+  const groups = [["Fits because", parts.filter(([, p, c]) => p > 0 && c !== "timing")],
+                  ["Why now", parts.filter(([, p, c]) => p > 0 && c === "timing")],
+                  ["Counts against", parts.filter(([, p]) => p < 0)]].filter(([, g]) => g.length);
+  if (!groups.length) return null;
+  return (
+    <div className={`score-groups${open ? " open" : ""}`}>
+      {groups.map(([title, g]) => (
+        <div className="score-group" key={title}>
+          <h4>{title}</h4>
+          <ul>{g.map(([why, p]) => <li key={why}><span className={`lead-p${p < 0 ? " neg" : ""}`}>{p > 0 ? "+" : "−"}{Math.abs(p)}</span>{why}</li>)}</ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function LeadScore({ r }) {
   if (r.lead_score === undefined) return null;
   const line = leadLine({ score: r.lead_score, fit: r.lead_fit, timing: r.lead_timing, parts: r.lead_parts || [] });
   return (
-    <div className="lead-line" title={line}>
-      <span className="chip lead-chip">Score {r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</span>
-      <span className="muted">{(r.lead_parts || []).map(([why, p]) => `${why.replace(/ \(.*\)$/, "")} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ")}</span>
-    </div>
+    <details className="lead-line" title={line}>
+      <summary><span className="chip lead-chip">Score {r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</span>
+        <span className="muted">Why this score</span></summary>
+      <ScoreBreakdown r={r} />
+    </details>
   );
 }
 
@@ -2024,12 +2150,11 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
 
       {r.lead_parts?.length > 0 && (
         <section className="panel">
-          <h2 className="panel-h">Why it ranks: lead score {r.lead_score}</h2>
-          <ul className="lead-parts">
-            {r.lead_parts.map(([why, p]) => <li key={why}><span className={`lead-p${p < 0 ? " neg" : ""}`}>{p > 0 ? "+" : "−"}{Math.abs(p)}</span> {why}</li>)}
-          </ul>
+          <h2 className="panel-h">Why it ranks: lead score {r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</h2>
+          <ScoreBreakdown r={r} open />
         </section>
       )}
+      <PitchPanel r={r} />
 
       {fxFacts(r).length > 0 && (
         <section className="panel">
@@ -2363,8 +2488,20 @@ a{color:var(--accent)}
 .linkish{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;font:inherit;text-align:left}
 .linkish:hover{text-decoration:underline}
 .sheet tr.muted-row td{color:var(--muted)}
-.lead-line{display:flex;gap:8px;align-items:baseline;margin:6px 0;font-size:12px;line-height:1.5;min-width:0}
-.lead-line .muted{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.lead-line{margin:6px 0;font-size:12px;line-height:1.5;min-width:0}
+.lead-line>summary{display:flex;gap:8px;align-items:baseline;cursor:pointer;list-style:none}
+.lead-line>summary::-webkit-details-marker{display:none}
+.lead-line>summary .muted::after{content:" ▸"}
+.lead-line[open]>summary .muted::after{content:" ▾"}
+.score-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 16px;margin-top:6px}
+.score-group h4{margin:0 0 2px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted, #9aa0a6)}
+.score-group ul{margin:0;padding:0;list-style:none}
+.score-group li{display:flex;gap:6px;align-items:baseline;padding:1px 0}
+.score-groups.open{font-size:13px}
+.list-btns{display:inline-flex;flex-wrap:wrap;gap:4px;margin-right:6px}
+.list-btns .btn-sm.on,.filters .btn-sm.on{background:rgba(138,180,248,.18);color:var(--accent)}
+.pitch-list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.pitch-list li{line-height:1.45}
 .chip.lead-chip{background:rgba(138,180,248,.16);color:var(--accent);font-weight:600;flex:none;font-variant-numeric:tabular-nums}
 .lead-parts{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}
 .lead-p{display:inline-block;min-width:38px;font-weight:600;color:var(--gain);font-variant-numeric:tabular-nums}

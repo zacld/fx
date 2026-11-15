@@ -589,6 +589,22 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   notes, verdict, CRM tick, email) is also written to the database at once (`setMark`), never failing the save. Next:
   the other tabs and the main list served the same way. **Stage 3**: the writers
   go straight to the database and the store's list, detail shards and month items retire.
+- **My lists, score bullets, What we can pitch them** (Zac, 15 Nov 2026): every card and company page has **+ Call list
+  / + Chocolate / mailing list / + Email list** (`ListButtons`, beside the verdicts; one list a company, store key `lists`,
+  POST `{company_number, list: "call" | "post" | "email" | null}`, mirrored to the database as mark `list`); the **My lists**
+  tab shows each list with an Excel export (the mailing list's with addressee and registered office). The lead score's
+  reasons are bullets grouped Fits because / Why now / Counts against (`ScoreBreakdown`; folded under "Why this score" on
+  cards, open on the company page). **What we can pitch them** (`src/accounts/pitch.js`, `PRODUCTS` / `pitchFor` /
+  `pitchLine`): Investec UK's public corporate products (investec.com/en_gb, read 15 Nov 2026 — corporate deposits:
+  notice 32/65/95-day, fixed-term, instant access in GBP/USD/EUR for £5m+; FX spot/forwards/options; interest-rate and
+  commodity hedging; invoice finance, ABL, RCF, term loans, growth, acquisition/leveraged and asset finance) matched by
+  rule to the company's filed facts (cash £5m+ → deposits, £2m+ asks; foreign balances → currency deposits; a currency
+  with no hedging → forwards, already hedging → a competing quote; an FX loss £100k+ or a sensitivity → options; bank
+  debt £5m+ → rate hedging; commodity niches; buying companies / PE-backed → acquisition finance; facility ending or
+  lending changing → refinance; growth 20%+ → working capital (+ growth finance abroad); plant-heavy industries → asset
+  finance), each with the fact that triggers it and the product page. No rates quoted, nothing from the bank's records,
+  no AI. Company page panel, a Pitch line on My lists cards, export column `what_to_pitch`. FX filings rows now keep
+  `cash_gbp` / `bank_borrowings_gbp` (new and re-read filings).
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
   Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,

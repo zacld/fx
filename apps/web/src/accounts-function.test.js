@@ -117,6 +117,20 @@ describe("/api/accounts", () => {
     expect((await (await post({ company_number: "01234567", verdict: null })).json()).verdicts).toEqual({});
   });
 
+  it("keeps Zac's call / chocolate-mailing / email lists, one list a company", async () => {
+    const s = memory();
+    s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }] };
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const post = (body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer s3cret" }, body: JSON.stringify(body) }), opts);
+    expect((await post({ company_number: "01234567", list: "spam" })).status).toBe(400);
+    await post({ company_number: "01234567", list: "call" });
+    const moved = await (await post({ company_number: "01234567", list: "post" })).json();
+    expect(moved.lists["01234567"].list).toBe("post");
+    const got = await (await handle(new Request("https://x/api/accounts", { headers: { authorization: "Bearer s3cret" } }), opts)).json();
+    expect(Object.keys(got.lists)).toEqual(["01234567"]);
+    expect((await (await post({ company_number: "01234567", list: null })).json()).lists).toEqual({});
+  });
+
   it("serves the alerts and the leads they found", async () => {
     const s = memory();
     const opts = { password: "s3cret", store: s, delay: 0 };

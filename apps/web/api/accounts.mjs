@@ -23,6 +23,8 @@ export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
 export const VERDICTS_KEY = "verdicts";     // {company_number: {verdict: "good" | "not_fit", reason, at}} — Zac's review
 export const VERDICT_REASONS = ["Too small", "Too big", "No real FX", "Wrong sector", "FX run abroad", "Other"];
+export const LISTS_KEY = "lists";           // {company_number: {list: "call" | "post" | "email", at}} — Zac's own lists
+export const LISTS = ["call", "post", "email"];   // call list, chocolate / mailing list, email list
 export const CHECKS_KEY = "checks";         // {company_number: {crm: iso}} — the lead checklist's "CRM checked" tick
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index
@@ -221,6 +223,15 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       await mirror(db, number, "email", emails[number]);
       return reply({ emails }, 200);
     }
+    if ("list" in body) {   // Zac's own call / chocolate-mailing / email list; one list a company, null takes it off
+      if (body.list !== null && !LISTS.includes(body.list)) return reply({ error: `send {company_number, list: ${LISTS.join(" | ")} | null}` }, 400);
+      const lists = (await blobs.get(LISTS_KEY, { type: "json" })) || {};
+      if (body.list) lists[number] = { list: body.list, at: new Date().toISOString() };
+      else delete lists[number];
+      await blobs.setJSON(LISTS_KEY, lists);
+      await mirror(db, number, "list", lists[number]);
+      return reply({ lists }, 200);
+    }
     if ("verdict" in body) {   // Zac's review of a lead: good / not a fit (with a reason) / cleared — never a bank record
       const ok = body.verdict === null || body.verdict === "good" ||
         (body.verdict === "not_fit" && (!body.reason || VERDICT_REASONS.includes(body.reason)));
@@ -331,8 +342,8 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, files_rescanned_r3: _r3, files_rescanned_r4: _r4, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
-  const [data, marks, noted, status, emails, checks, verdicts] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY, CHECKS_KEY, VERDICTS_KEY]
+  const [data, marks, noted, status, emails, checks, verdicts, lists] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY, CHECKS_KEY, VERDICTS_KEY, LISTS_KEY]
     .map((k) => blobs.get(k, { type: "json" })));
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);
-  return reply({ ...data, contacted: marks || {}, notes: noted || {}, status: status || {}, emails: emails || {}, checks: checks || {}, verdicts: verdicts || {} }, 200);
+  return reply({ ...data, contacted: marks || {}, notes: noted || {}, status: status || {}, emails: emails || {}, checks: checks || {}, verdicts: verdicts || {}, lists: lists || {} }, 200);
 }
