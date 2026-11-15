@@ -3,7 +3,8 @@ import { FILINGS_SECTION } from "./ranking.js";
 import { FIT, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
-import { GRID_COLUMNS, SEQUENCE, gridCells, nextStep, plan, sequenceRank } from "./sequence.js";
+import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
+import { firstName } from "./email.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
@@ -320,6 +321,7 @@ function Accounts({ data, password }) {
       setSaveError(`Couldn't save the sequence (${e.message}).`);
     }
   }, [save, lists]);
+  const todayDue = useMemo(() => { const q = todayQueue(allRows, lists, { perDay: 0 }); return q.calls.length + q.emails.length + q.linkedin.length; }, [allRows, lists]);
   const verdictCtx = useMemo(() => ({ verdicts, setVerdict, lists, setList, setSequence, moves }), [verdicts, setVerdict, lists, setList, setSequence, moves]);
 
   const saveNote = useCallback(async (number, text) => {
@@ -422,6 +424,11 @@ function Accounts({ data, password }) {
                   onClick={() => set({ section: "", view: "hits" })}>
             Hit list <span className="tab-n">{open.filter((r) => r.lead_flags?.hit && !isOut(r)).length}</span>
           </button>
+          <button role="tab" aria-selected={filters.view === "today"} className={`tab${filters.view === "today" ? " on" : ""}`}
+                  title="The day's sequence work across your lists: calls, emails, LinkedIn, and the companies to start today"
+                  onClick={() => set({ section: "", view: "today" })}>
+            Today <span className="tab-n">{todayDue}</span>
+          </button>
           {Object.entries(LIST_NAMES).map(([key, name]) => (
             <button key={key} role="tab" aria-selected={filters.view === `list-${key}`} className={`tab${filters.view === `list-${key}` ? " on" : ""}`}
                     title={`Your ${name.toLowerCase()} — sent here from any card's “+ ${name}” button`}
@@ -490,7 +497,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk", "today"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -545,6 +552,7 @@ function Accounts({ data, password }) {
       {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={allRows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view === "today" ? <Today rows={allRows} lists={lists} onOpen={openCompany} />
        : filters.view === "uk" ? <FitTiming mode="uk" rows={ukRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "fit" || filters.view === "now" ? <FitTiming mode={filters.view} rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -1592,12 +1600,86 @@ function SequencePanel({ r, which }) {
             <label><input type="checkbox" checked={Boolean(s.done)} onChange={() => toggle(s.step)} />
               <span className="seq-due">{filedWhen(s.due)}</span> <span className={`seq-kind ${s.kind}`}>{s.kind}</span> Step {s.step}: {s.label}</label>
             {s.kind === "email" && <button className="btn-link" onClick={() => setDraft(draft === s.step ? null : s.step)}>{draft === s.step ? "hide email" : "email"}</button>}
+            {s.step === 1 && which !== "post" && <RolePicker r={r} seq={seq} />}
+            {s.kind === "call" && !s.done && s.step === next?.step && <CallLine r={r} seq={seq} />}
             {draft === s.step && <StepEmail r={r} which={which} step={s.step} />}
           </li>
         ))}
       </ul>
       <button className="btn-link" onClick={() => { if (confirm("Clear this company's sequence?")) setSequence(r.company_number, null); }}>Clear sequence</button>
     </details>
+  );
+}
+
+// Who got the first email: tick the Finance Director, Financial Controller and Finance Manager (Zac's rule of thumb —
+// email the finance team, call the next day).
+function RolePicker({ r, seq }) {
+  const { setSequence } = useContext(VerdictContext);
+  const roles = seq.roles || [];
+  const flip = (k) => setSequence(r.company_number, { ...seq, roles: roles.includes(k) ? roles.filter((x) => x !== k) : [...roles, k].sort((a, b) => Object.keys(ROLES).indexOf(a) - Object.keys(ROLES).indexOf(b)) });
+  return (
+    <span className="role-pick"> emailed:
+      {Object.entries(ROLES).map(([k, name]) => (
+        <label key={k} className="check"><input type="checkbox" checked={roles.includes(k)} onChange={() => flip(k)} /> {name.split(" / ")[0]}</label>
+      ))}
+    </span>
+  );
+}
+
+// The call after the email: who to ask for and the opening line.
+function CallLine({ r, seq }) {
+  const c = callScript(r, seq, firstName(r));
+  return <div className="call-line"><b>{c.ask}</b>{c.emailed.length > 0 && <span className="muted"> · emailed: {c.emailed.join(", ")}</span>}<div>“{c.line}”</div></div>;
+}
+
+// Today: every list's sequence steps due today or overdue — calls (with who to ask for and the line), emails (the
+// draft one click away), LinkedIn — then the companies to start today: email the FD, FC and finance manager today,
+// call tomorrow. Best leads first; nothing is sent.
+function Today({ rows, lists, onOpen }) {
+  const { setList, setSequence } = useContext(VerdictContext);
+  const q = useMemo(() => todayQueue(rows, lists, { fitMin: FIT.min, skip: (r) => isOut(r) || ukNamed(r) }), [rows, lists]);
+  const today = new Date().toISOString().slice(0, 10);
+  const link = (r) => <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>;
+  const tick = (x) => setSequence(x.r.company_number, { ...x.seq, done: { ...(x.seq.done || {}), [x.step.step]: today } });
+  const start = async (x) => {
+    if (!x.list) await setList(x.r.company_number, "email");
+    await setSequence(x.r.company_number, { start: today, done: {}, ...(x.list === "post" ? { gift: today } : {}) });
+  };
+  const Item = ({ x, children }) => (
+    <article className="card loss-card">
+      <div className="card-top"><div className="card-name">{link(x.r)} <span className="chip">{LIST_NAMES[x.list] || "Not on a list"}</span>
+        {x.r.lead_score !== undefined && <span className="chip lead-chip">Score {x.r.lead_score}</span>}</div>
+        {x.step && <div className="loss-fig"><b className={`seq-when ${x.step.when}`}>{x.step.when === "overdue" ? `Overdue (${filedWhen(x.step.due)})` : "Today"}</b>
+          <span className="muted">Step {x.step.step}: {x.step.label}</span></div>}</div>
+      {children}
+    </article>
+  );
+  const Section = ({ title, items, render, empty }) => (
+    <section className="today-sec"><h3 className="panel-h">{title} <span className="tab-n">{items.length}</span></h3>
+      {items.length ? items.map(render) : <div className="empty">{empty}</div>}</section>
+  );
+  return (
+    <div className="list">
+      <div className="filters filings-bar"><span className="muted">The day's work: calls first (each the day after its email — ask if they saw it), then
+        the emails due, then LinkedIn, then up to {START_PER_DAY} new companies to start — email the FD, FC and finance manager today, call tomorrow.</span></div>
+      <Section title="Calls" items={q.calls} empty="No calls due." render={(x) => (
+        <Item key={x.r.company_number} x={x}><CallLine r={x.r} seq={x.seq} />
+          <div className="card-foot"><button className="btn-sm" onClick={() => tick(x)}>Done</button></div></Item>)} />
+      <Section title="Emails" items={q.emails} empty="No emails due." render={(x) => (
+        <Item key={x.r.company_number} x={x}>
+          {x.step.step === 1 && x.list !== "post" && <p className="panel-p">Email the Finance Director, the Financial Controller and the Finance Manager.</p>}
+          <details><summary className="btn-link">Draft</summary><StepEmail r={x.r} which={x.list} step={x.step.step} /></details>
+          <div className="card-foot"><button className="btn-sm" onClick={() => tick(x)}>Sent</button></div></Item>)} />
+      <Section title="LinkedIn" items={q.linkedin} empty="Nothing on LinkedIn today." render={(x) => (
+        <Item key={x.r.company_number} x={x}><div className="card-foot"><button className="btn-sm" onClick={() => tick(x)}>Done</button></div></Item>)} />
+      <Section title="Start today" items={q.start} empty="Nothing waiting — add companies to a list." render={(x) => (
+        <Item key={x.r.company_number} x={x}>
+          {pitchLine(x.r) && <p className="panel-p"><b>Pitch:</b> {pitchLine(x.r)}</p>}
+          <LeadScore r={x.r} />
+          <div className="card-foot"><button className="btn-sm" onClick={() => start(x)}
+            title="Day 0 today: email the FD, FC and finance manager; the call to ask if they saw it is due tomorrow">
+            {x.list === "post" ? "Gift sent today — start" : "Email today, call tomorrow"}</button></div></Item>)} />
+    </div>
   );
 }
 
@@ -2637,6 +2719,9 @@ a{color:var(--accent)}
 .seq-kind{display:inline-block;min-width:64px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;opacity:.75}
 .seq-steps .btn-link{margin-left:8px}
 .step-email{margin:6px 0 10px 24px;display:grid;gap:6px;max-width:720px}
+.role-pick{margin-left:8px;display:inline-flex;gap:8px;flex-wrap:wrap;font-size:12px}
+.call-line{margin:4px 0 6px 24px;font-size:13px}
+.today-sec{margin:12px 0}
 .step-email textarea{width:100%;font:inherit}
 .pitch-list li{line-height:1.45}
 .chip.lead-chip{background:rgba(138,180,248,.16);color:var(--accent);font-weight:600;flex:none;font-variant-numeric:tabular-nums}

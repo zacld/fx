@@ -4,8 +4,8 @@
 // Days count working days (Mon–Fri), so Day 1 after a Wednesday is the Thursday, as in the grid.
 
 export const SEQUENCE = [
-  { step: 1, day: 0, kind: "email", label: "Gift sent / cold email" },
-  { step: 2, day: 1, kind: "call", label: "Call 1" },
+  { step: 1, day: 0, kind: "email", label: "Gift sent / email the FD, FC and finance manager" },
+  { step: 2, day: 1, kind: "call", label: "Call 1 — did you see my email?" },
   { step: 3, day: 1, kind: "email", label: "Follow-up email" },
   { step: 4, day: 2, kind: "call", label: "Call 2" },
   { step: 5, day: 2, kind: "email", label: "Email 2 — intro" },
@@ -69,11 +69,54 @@ export function gridCells(seq = {}) {
   return out;
 }
 
+// Who in finance got the first email (Zac's rule of thumb, 15 Nov 2026: "always send an email to the FD, the FC, maybe
+// even the finance manager, then call them the next day asking if they saw it").
+export const ROLES = { fd: "Finance Director / CFO", fc: "Financial Controller", fm: "Finance Manager" };
+
+// The call after the email: who to ask for (the most senior emailed) and the opening line.
+export function callScript(r = {}, seq = {}, first = "", today = new Date()) {
+  const emailed = (seq.roles || []).filter((k) => ROLES[k]);
+  const who = emailed.length ? ROLES[emailed[0]] : "Finance Director";
+  const name = first ? `${first}` : `the ${who}`;
+  const sentOn = seq.done?.[1] || seq.start;
+  const ago = sentOn ? (asDate(iso(today)) - asDate(sentOn)) / 864e5 : 99;
+  const sent = ago >= 1 && ago <= 3 ? "yesterday" : ago < 1 ? "this morning" : "the other day";   // a Monday call follows a Friday email
+  return {
+    ask: first ? `Ask for ${first} (${who})` : `Ask for the ${who}`,
+    line: `Hi ${first || "there"}, it's Zac from Investec — I sent ${emailed.length > 1 ? "you and the finance team" : "you"} an email ${sent} ` +
+      "introducing our FX risk desk; did you get a chance to see it?",
+    emailed: emailed.map((k) => ROLES[k]), name,
+  };
+}
+
+// Today's work across the lists: every sequence step due today or overdue (calls, emails, LinkedIn), the overdue and
+// best leads first; and the companies to start today — on a list but not started, then the best leads on no list —
+// up to `perDay`, best lead score first.
+export const START_PER_DAY = 5;
+export function todayQueue(rows = [], lists = {}, { today = new Date(), perDay = START_PER_DAY, fitMin = 30, skip = () => false } = {}) {
+  const byNumber = new Map(rows.map((r) => [r.company_number, r]));
+  const due = [];
+  for (const [n, v] of Object.entries(lists)) {
+    if (v.missing || !v.seq?.start) continue;
+    const next = nextStep(v.seq, today);
+    if (next && next.when !== "upcoming") due.push({ r: byNumber.get(n) || { company_number: n, company_name: n }, list: v.list, seq: v.seq, step: next });
+  }
+  const score = (x) => x.r.lead_score || 0;
+  due.sort((a, b) => (a.step.when === b.step.when ? 0 : a.step.when === "overdue" ? -1 : 1) || score(b) - score(a));
+  const listed = Object.entries(lists).filter(([, v]) => !v.missing && !v.seq?.start)
+    .map(([n, v]) => ({ r: byNumber.get(n), list: v.list })).filter((x) => x.r).sort((a, b) => score(b) - score(a));
+  const fresh = listed.length >= perDay ? [] : rows.filter((r) => !lists[r.company_number] && !r.dropped && !skip(r) && (r.lead_fit ?? 100) >= fitMin)
+    .sort((a, b) => (b.lead_score || 0) - (a.lead_score || 0)).slice(0, perDay).map((r) => ({ r, list: "" }));
+  return { calls: due.filter((x) => x.step.kind === "call"), emails: due.filter((x) => x.step.kind === "email"),
+    linkedin: due.filter((x) => x.step.kind === "linkedin"), start: [...listed, ...fresh].slice(0, perDay) };
+}
+
 // Server-side check of a saved sequence: {start, gift?, done: {step: iso}} with sane dates.
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 export function validSequence(seq) {
   if (seq === null) return true;
   if (!seq || typeof seq !== "object" || !DAY.test(seq.start || "")) return false;
   if (seq.gift && !DAY.test(seq.gift)) return false;
+  if (seq.roles && (!Array.isArray(seq.roles) || !seq.roles.every((k) => ROLES[k]))) return false;
   return Object.entries(seq.done || {}).every(([k, v]) => SEQUENCE.some((s) => String(s.step) === k) && DAY.test(String(v).slice(0, 10)));
 }

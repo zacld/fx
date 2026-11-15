@@ -609,7 +609,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   with generic / personal / fxdesk (`STEP_TEMPLATES`); case study, money, Investec and break-up have none yet (any
   template can be picked). Filled from the records only (first name of a presented contact, the company's name, growth,
   own currency's 3-month move), with where each part came from; gaps stay [placeholders]; the originals' prospect and
-  colleague names aren't kept; signed Zac. Editable, Copy; nothing is sent. The lead score's
+  colleague names aren't kept; signed Zac. Editable, Copy; nothing is sent. **Email the finance team, call the next
+  day** (Zac's rule of thumb, 15 Nov 2026): Step 1 on the cold route ticks who got the email — Finance Director /
+  Financial Controller / Finance Manager (`ROLES`, saved as `seq.roles`) — and Call 1 ("did you see my email?") shows
+  who to ask for (the most senior emailed) and the opening line (`callScript`: "…I sent you and the finance team an
+  email yesterday introducing our FX risk desk; did you get a chance to see it?"; a Monday call after a Friday email
+  still says yesterday). **Today tab** (`todayQueue`): every list's steps due today or overdue — calls first (with the
+  line), then emails (draft one click away), then LinkedIn — overdue and best leads first, each with Done / Sent; then
+  "Start today", up to `START_PER_DAY` (5): companies on a list not started, then the best-scoring leads on no list (Fit
+  30+, not out, no "UK" name) — "Email today, call tomorrow" puts it on the Email list and starts Day 0. The lead score's
   reasons are bullets grouped Fits because / Why now / Counts against (`ScoreBreakdown`; folded under "Why this score" on
   cards, open on the company page). **What we can pitch them** (`src/accounts/pitch.js`, `PRODUCTS` / `pitchFor` /
   `pitchLine`): Investec UK's public corporate products (investec.com/en_gb, read 15 Nov 2026 — corporate deposits:
