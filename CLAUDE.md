@@ -552,7 +552,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   index entry counts as a row, and every company was rewritten): `SCHEMA_VERSION` 2 — tables `WITHOUT ROWID`, no
   secondary indexes (one row written per record; a version change drops and remakes them, refilled by the next sync);
   the hash ignores figures in the lead score's reasons (a currency's % move, a fading moment) so a company is rewritten
-  only when something real changes; each sync keeps to `DAILY_WRITES` (60,000 a day, counted from D1's own
+  only when something real changes; each sync keeps to `DAILY_WRITES` (40,000 a day — 60,000 until 15 Nov 2026, when the rebuild's table drops cost writes D1 counted but didn't report back and the limit was met at 45,000 by our count, counted from D1's own
   `rows_written`, meta `writes`), marks and signals first, then companies best lead score first, the rest `deferred` to
   the next sync; a sync that meets Cloudflare's limit says so and stops cleanly; only runs on main copy (a branch push runs Niche hits in
   full — 15 Nov 2026 its copy spent 19,600 writes); each sync logs which fields differ on a sample of the records it
