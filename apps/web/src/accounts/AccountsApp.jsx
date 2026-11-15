@@ -292,11 +292,16 @@ function Accounts({ data, password }) {
       setSaveError(`Couldn't save the verdict (${e.message}).`);
     }
   }, [save, verdicts]);
-  const setList = useCallback(async (number, list) => {
+  const setList = useCallback(async (number, list, missing = false) => {
     setSaveError("");
     const before = lists;
-    setLists((l) => { const next = { ...l }; if (list) next[number] = { list, at: new Date().toISOString() }; else delete next[number]; return next; });
-    try { await save(number, { list: list || null }); } catch (e) {
+    setLists((l) => {
+      const next = { ...l };
+      if (list) next[number] = { list, at: l[number]?.list === list ? l[number].at : new Date().toISOString(), ...(missing ? { missing: true } : {}) };
+      else delete next[number];
+      return next;
+    });
+    try { await save(number, { list: list || null, ...(missing ? { missing: true } : {}) }); } catch (e) {
       setLists(before);
       setSaveError(`Couldn't save the list (${e.message}).`);
     }
@@ -403,11 +408,13 @@ function Accounts({ data, password }) {
                   onClick={() => set({ section: "", view: "hits" })}>
             Hit list <span className="tab-n">{open.filter((r) => r.lead_flags?.hit && !isOut(r)).length}</span>
           </button>
-          <button role="tab" aria-selected={filters.view === "lists"} className={`tab${filters.view === "lists" ? " on" : ""}`}
-                  title="Your call list, chocolate / mailing list and email list — added from any card or company page"
-                  onClick={() => set({ section: "", view: "lists" })}>
-            My lists <span className="tab-n">{Object.keys(lists).length}</span>
-          </button>
+          {Object.entries(LIST_NAMES).map(([key, name]) => (
+            <button key={key} role="tab" aria-selected={filters.view === `list-${key}`} className={`tab${filters.view === `list-${key}` ? " on" : ""}`}
+                    title={`Your ${name.toLowerCase()} — sent here from any card's “+ ${name}” button`}
+                    onClick={() => set({ section: "", view: `list-${key}` })}>
+              {name} <span className="tab-n">{Object.values(lists).filter((v) => v.list === key).length}</span>
+            </button>
+          ))}
           <button role="tab" aria-selected={filters.view === "fit"} className={`tab${filters.view === "fit" ? " on" : ""}`}
                   title={`The right companies, whatever the news: FX proof and FX pain, £20m–£300m, a good niche, ownership — Fit ${FIT.min}+, best first`}
                   onClick={() => set({ section: "", view: "fit" })}>
@@ -464,7 +471,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "lists"].includes(filters.view) && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -518,7 +525,7 @@ function Accounts({ data, password }) {
 
       {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
-       : filters.view === "lists" ? <MyLists rows={rows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
+       : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={rows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "fit" || filters.view === "now" ? <FitTiming mode={filters.view} rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} rows={rows} />
@@ -1523,11 +1530,15 @@ function PitchPanel({ r }) {
 
 // My lists: the companies Zac put on his call, chocolate / mailing and email lists, newest first, each with an export
 // (the mailing list's carries the addressee and registered office).
-function MyLists({ rows, lists, onOpen, onContact, onEmail }) {
+function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
   const byNumber = useMemo(() => Object.fromEntries(rows.map((r) => [r.company_number, r])), [rows]);
-  const [which, setWhich] = useState("call");
-  const list = Object.entries(lists).filter(([, v]) => v.list === which).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)))
-    .map(([n, v]) => ({ ...(byNumber[n] || { company_number: n, company_name: n }), added_at: v.at }));
+  const { setList } = useContext(VerdictContext);
+  const [missingOnly, setMissingOnly] = useState(false);
+  const mine = Object.entries(lists).filter(([, v]) => v.list === which);
+  const missingCount = mine.filter(([, v]) => v.missing).length;
+  const list = mine.filter(([, v]) => Boolean(v.missing) === missingOnly).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)))
+    .map(([n, v]) => ({ ...(byNumber[n] || { company_number: n, company_name: n }), added_at: v.at, missing: v.missing }));
+  const need = { call: "a number or the finance director's name", email: "an email address", post: "a name or address" }[which] || "the details";
   const exportList = () => downloadSheet(list.map((r, i) => ({
     rank: i + 1, company_name: r.company_name, company_number: r.company_number, addressee: letterAddressee(r),
     address: r.registered_address || "", postcode: r.postcode || "", lead_score: r.lead_score ?? "", why_now: timelyReason(r),
@@ -1537,10 +1548,10 @@ function MyLists({ rows, lists, onOpen, onContact, onEmail }) {
   return (
     <div className="list">
       <div className="filters filings-bar">
-        {Object.entries(LIST_NAMES).map(([k, name]) => (
-          <button key={k} className={`btn-sm${which === k ? " on" : ""}`} aria-pressed={which === k} onClick={() => setWhich(k)}>
-            {name} ({Object.values(lists).filter((v) => v.list === k).length})</button>
-        ))}
+        <button className={`btn-sm${!missingOnly ? " on" : ""}`} aria-pressed={!missingOnly} onClick={() => setMissingOnly(false)}>
+          Ready ({mine.length - missingCount})</button>
+        <button className={`btn-sm${missingOnly ? " on" : ""}`} aria-pressed={missingOnly} onClick={() => setMissingOnly(true)}
+                title={`Companies where you couldn't find ${need}`}>Can't find info ({missingCount})</button>
         <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
       </div>
       {list.map((r, i) => (
@@ -1556,6 +1567,11 @@ function MyLists({ rows, lists, onOpen, onContact, onEmail }) {
           {which === "post" && <p className="panel-p"><b>{letterAddressee(r)}</b>{r.registered_address ? ` · ${r.registered_address}${r.postcode ? `, ${r.postcode}` : ""}` : " · address: see Companies House"}</p>}
           {pitchLine(r) && <p className="panel-p"><b>Pitch:</b> {pitchLine(r)}</p>}
           <LeadScore r={r} />
+          <p className="panel-p">
+            <button className="btn-sm" onClick={() => setList(r.company_number, which, !r.missing)}
+                    title={r.missing ? "Found it — back to Ready" : `Couldn't find ${need} — park it under Can't find info`}>
+              {r.missing ? "Found it — move to Ready" : "Can't find info"}</button>
+          </p>
           <div className="card-foot">
             <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>
             <EmailButton r={r} onEmail={onEmail} />
@@ -1564,14 +1580,14 @@ function MyLists({ rows, lists, onOpen, onContact, onEmail }) {
           </div>
         </article>
       ))}
-      {!list.length && <div className="empty">Nothing on your {LIST_NAMES[which].toLowerCase()} yet — use the “+ {LIST_NAMES[which]}” button on any card or company page.</div>}
+      {!list.length && <div className="empty">{missingOnly ? "Nothing parked here." : `Nothing on your ${LIST_NAMES[which].toLowerCase()} yet — use the “+ ${LIST_NAMES[which]}” button on any card or company page.`}</div>}
     </div>
   );
 }
 
 // Zac's own lists: call list, chocolate / mailing list, email list — one each company; clicking the chosen one again
 // takes it off. Shown beside the verdict buttons wherever they are.
-const LIST_NAMES = { call: "Call list", post: "Chocolate / mailing list", email: "Email list" };
+const LIST_NAMES = { call: "Call list", email: "Email list", post: "Mail list" };   // post: the chocolate / letter mailing
 function ListButtons({ number }) {
   const { lists, setList } = useContext(VerdictContext);
   const on = lists?.[number]?.list;
