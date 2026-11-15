@@ -77,7 +77,7 @@ export const googleFd = (r) =>
 // view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
 export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
                                    showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
-                                   contacted = {}, notes = {}, role = "", peOnly = false, newFdOnly = false } = {}) {
+                                   contacted = {}, notes = {}, role = "", peOnly = false, newFdOnly = false, industry = "" } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
     (view === "contacted") === Boolean(contacted[r.company_number]) &&
@@ -90,6 +90,7 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!pair || parts(r.currency_pairs).includes(pair)) &&
     (!triggersOnly || Boolean(r.triggers)) &&
     (!peOnly || Boolean(peBackedOf(r))) &&
+    (!industry || industryOf(r) === industry) &&
     (!newFdOnly || Boolean(r.lead_flags?.newFd)) &&
     (showOut || !isOut(r)) &&
     (!q || [r.company_name, r.finance_contact, r.finance_contact_clues, r.fx_niche, r.main_bank, r.postcode, r.company_number, notes[r.company_number]?.text]
@@ -351,7 +352,7 @@ export function cognismCompanyRows(rows) {
 export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
 
 export const EXPORT_FIELDS = [
-  "company_and_fd", "lead_score", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
+  "company_and_fd", "industry", "lead_score", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
   "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
   "finance_contact", "finance_contact_role",
@@ -687,8 +688,38 @@ export const SIZE_SCALE = [1e6, 1e9];
 export const sizePosition = (gbp) => (gbp > 0 ? Math.min(1, Math.max(0, Math.log10(gbp / SIZE_SCALE[0]) / Math.log10(SIZE_SCALE[1] / SIZE_SCALE[0]))) : null);
 
 // The sheet view's columns: [key, header, value(r), sort key(r), number?]
+// --- Industry (Zac, 15 Nov 2026: "a type of company section, ie what industry") ------------------------------------
+// From the company's own sector codes (SIC 2007, first code): the register's division, wholesale split by what it sells.
+export const INDUSTRY_OTHER = "Other / not known";
+const WHOLESALE = { 461: "Trade agents & brokers", 462: "Wholesale: agricultural goods & live animals",
+  463: "Wholesale: food, drink & tobacco", 464: "Wholesale: household & consumer goods", 465: "Wholesale: IT & electronics",
+  466: "Wholesale: machinery & equipment", 467: "Wholesale: fuel, metals, chemicals & materials", 469: "Wholesale: general" };
+const DIVISIONS = [
+  [1, 3, "Farming, forestry & fishing"], [5, 9, "Mining & quarrying"], [10, 12, "Manufacturing: food, drink & tobacco"],
+  [13, 15, "Manufacturing: textiles & clothing"], [16, 18, "Manufacturing: wood, paper & print"],
+  [19, 22, "Manufacturing: chemicals, pharma & plastics"], [23, 25, "Manufacturing: metals & minerals"],
+  [26, 27, "Manufacturing: electronics & electrical"], [28, 28, "Manufacturing: machinery"],
+  [29, 30, "Manufacturing: vehicles & transport equipment"], [31, 33, "Manufacturing: furniture & other"],
+  [35, 39, "Energy, water & waste"], [41, 43, "Construction"], [45, 45, "Motor trade"], [46, 46, "Wholesale"],
+  [47, 47, "Retail"], [49, 53, "Transport, logistics & freight"], [55, 56, "Hotels & food service"],
+  [58, 63, "Media, telecoms & IT"], [64, 66, "Finance & insurance"], [68, 68, "Property"],
+  [69, 75, "Professional services"], [77, 82, "Business support & rental"], [84, 88, "Public sector, education & health"],
+  [90, 99, "Leisure & other services"],
+];
+export const sicCodes = (r) => String(Array.isArray(r.sic) ? r.sic.join(" ") : r.sic || r.sic_codes || "").match(/\d{4,5}/g) || [];
+export function industryOf(r) {
+  const code = sicCodes(r)[0];
+  if (!code) return INDUSTRY_OTHER;
+  const n = code.padStart(5, "0");
+  const div = Number(n.slice(0, 2));
+  if (div === 46) return WHOLESALE[Number(n.slice(0, 3))] || "Wholesale: general";
+  return DIVISIONS.find(([a, b]) => div >= a && div <= b)?.[2] || INDUSTRY_OTHER;
+}
+export const INDUSTRIES = [...new Set([...DIVISIONS.flatMap(([, , l]) => (l === "Wholesale" ? Object.values(WHOLESALE) : [l])), INDUSTRY_OTHER])];
+
 export const SHEET_COLUMNS = [
   ["company", "Company", (r) => r.company_name, (r) => r.company_name || ""],
+  ["industry", "Industry", (r) => industryOf(r), (r) => industryOf(r)],
   ["lead", "Score", (r) => (r.lead_score !== undefined ? String(r.lead_score) : ""), (r) => -(r.lead_score || 0), true],
   ["turnover", "Turnover", (r) => (r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""),
    (r) => -(Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0), true],

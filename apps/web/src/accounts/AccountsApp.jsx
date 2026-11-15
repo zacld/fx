@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
@@ -146,7 +146,7 @@ function Accounts({ data, password }) {
   [baseRows, leadCtx, verdicts]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
-                                            peOnly: false, newFdOnly: false });
+                                            peOnly: false, newFdOnly: false, industry: "" });
   const [sort, setSort] = useState("lead");
   // Sheet (a dense, sortable grid) or Cards; remembered in this browser
   const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
@@ -317,6 +317,11 @@ function Accounts({ data, password }) {
     const base = filterRows(rows, { ...ctx, role: "" });
     return Object.fromEntries(ROLE_GROUPS.map((g) => [g, base.filter((r) => roleGroup(r) === g).length]));
   }, [rows, filters, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const industryCounts = useMemo(() => {
+    const counts = {};
+    for (const r of filterRows(rows, { ...ctx, industry: "" })) counts[industryOf(r)] = (counts[industryOf(r)] || 0) + 1;
+    return counts;
+  }, [rows, filters, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const contactedCount = rows.length - open.length;
   const followUpsDue = rows.filter((r) => ["overdue", "due", "replied"].includes(followUp(contacted[r.company_number], r)?.state)).length;
   const stats = [
@@ -337,7 +342,7 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
+    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), industry: industryOf(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
       reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text }));
     downloadSheet(out, columnsFor(EXPORT_FIELDS, { company_and_fd: "Company – Finance Director" }, NUMBER_FIELDS), `fx-accounts-${new Date().toISOString().slice(0, 10)}.xlsx`, "Accounts");
   };
@@ -448,6 +453,11 @@ function Accounts({ data, password }) {
           <select className="input" value={filters.pair} onChange={(e) => set({ pair: e.target.value })} aria-label="Currency pair">
             <option value="">Any currency</option>
             {pairs.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <select className="input" value={filters.industry} onChange={(e) => set({ industry: e.target.value })} aria-label="Industry">
+            <option value="">Any industry</option>
+            {INDUSTRIES.filter((g) => industryCounts[g]).sort((a, b) => industryCounts[b] - industryCounts[a])
+              .map((g) => <option key={g} value={g}>{g} ({industryCounts[g]})</option>)}
           </select>
           <select className="input" value={filters.role} onChange={(e) => set({ role: e.target.value })} aria-label="Job role">
             <option value="">Any job role</option>
@@ -852,6 +862,7 @@ function Chips({ r }) {
       {r.main_bank && <Src className="chip" href={bankUrl(r)} title="Open where this bank is named">{r.main_bank}{r.bank_type ? ` · ${r.bank_type}` : ""}</Src>}
       {r.facility_ends && <Src className="chip trig" href={r.accounts_url} title={r.facility_ends_evidence}>Facility ends {r.facility_ends}</Src>}
       {r.own_bank_client && <span className="chip own">Existing client</span>}
+      <span className="chip" title={`Sector code ${(r.sic || r.sic_codes || "").toString() || "not known"}`}>{industryOf(r)}</span>
       {peBackedOf(r) && <span className="chip warn" title={peBackedOf(r).why}>PE-backed: {peBackedOf(r).name}</span>}
       {r.lead_flags?.newFd && <span className="chip trig" title={r.lead_flags.fdWhy}>New FD</span>}
       {r.run_from_abroad && <span className="chip warn" title={r.run_from_abroad}>Owned abroad: pitch the UK team</span>}
@@ -1666,7 +1677,7 @@ const CALL_EXPORT = ["company_and_fd", "lead_checklist", "reasons_not_to_progres
   "finance_contact", "finance_contact_role", "finance_contact_confidence", "incumbent_bank", "accounts_url", "companies_house_url", "email_draft"];
 function exportCalls(rows, checks) {
   const out = rows.map((r, i) => ({
-    company_and_fd: companyAndFd(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
+    company_and_fd: companyAndFd(r), industry: industryOf(r), lead_checklist: checklistLine(leadChecklist(r, checks)),
     reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), rank: i + 1, company_name: r.company_name, company_number: r.company_number,
     on_list: r.onList ? "yes" : "", why_today: r.why.join(" | "), turnover_gbp: r.turnover_gbp || "", filed_fx_score: r.filed_fx_score || "",
     finance_contact: presentedContact(r) ? r.finance_contact : "", finance_contact_role: presentedContact(r) ? r.finance_contact_role || "" : "",

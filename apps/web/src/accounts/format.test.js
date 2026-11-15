@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -484,6 +484,18 @@ describe("Private equity and new finance directors (15 Nov 2026)", () => {
     expect(s.parts).toContainEqual(["Hiring a finance director (Finance Director, 2026-11-10)", 20]);
     expect(timelyReason({ lead_flags: s.flags })).toBe("Hiring a finance director (Finance Director, 2026-11-10)");
     expect(filterRows([{ company_number: "F1", lead_flags: s.flags }, { company_number: "F2", lead_flags: {} }], { newFdOnly: true }).length).toBe(1);
+  });
+});
+
+describe("Industry from the sector code", () => {
+  it("names the industry, wholesale by what it sells, for list and filings rows", () => {
+    expect(industryOf({ sic_codes: "46310 | 10890" })).toBe("Wholesale: food, drink & tobacco");
+    expect(industryOf({ sic: ["28290"] })).toBe("Manufacturing: machinery");
+    expect(industryOf({ sic: ["01110"] })).toBe("Farming, forestry & fishing");
+    expect(industryOf({ sic_codes: "52290" })).toBe("Transport, logistics & freight");
+    expect(industryOf({})).toBe("Other / not known");
+    expect(filterRows([{ company_number: "1", sic: ["28290"] }, { company_number: "2", sic: ["47110"] }], { industry: "Retail" })
+      .map((r) => r.company_number)).toEqual(["2"]);
   });
 });
 
