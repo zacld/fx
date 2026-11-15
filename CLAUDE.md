@@ -478,7 +478,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Industry** (Zac, 15 Nov 2026: "a type of company section, ie what industry"): `industryOf` in `format.js` from the
   company's first sector code (`sic_codes` on list rows, `sic` on filings rows) — the register's divisions in ~25 plain
   groups, wholesale split by what it sells (food & drink, machinery, fuel & metals …) — an "Any industry" filter with
-  counts on the Accounts list, an Industry column in the Sheet, a chip on cards, and an `industry` export column.
+  counts on the Accounts list and the New money tab (deals carry their own sector codes from the ownership pass; news
+  items take the list row's), an Industry column in the Sheet and New money, a chip on cards, and an `industry` export
+  column.
 - **Groups: one lead per group** (Zac, 14 Nov 2026: Cognism files people under the group or brand, not the subsidiary
   we list, and one group showed up as several leads): the daily "Niche hits" run's ownership-snapshot pass
   (`tools/psc_deals.py --groups-out groups.json`, same single read of the file: `owners.tee_parents`) walks every

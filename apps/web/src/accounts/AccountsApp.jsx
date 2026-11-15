@@ -492,7 +492,7 @@ function Accounts({ data, password }) {
       {filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
-       : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} />
+       : filters.view === "money" ? <NewMoney password={password} listed={listedNumbers} onOpen={openCompany} rows={rows} />
        : filters.view === "alerts" ? <Alerts password={password} listed={listedNumbers} onOpen={openCompany} />
        : filters.view === "calls" ? <CallToday password={password} listRows={open} lead={leadCtx} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail}
                                              checks={checks} onCrm={setCrm} />
@@ -1525,10 +1525,12 @@ const MONEY_KINDS = { pe_buyout: "Bought by PE", news_pe: "PE deal (news)", pe_d
   overseas_buyer: "New overseas owner", eot: "Employee ownership trust" };
 const MONEY_FILTERS = [["", "All"], ["pe", "Private equity"], ["acquired", "Buying companies"], ["news_funding", "Just funded"],
   ["overseas_buyer", "Overseas owner"], ["eot", "EOT"]];
-function NewMoney({ password, listed, onOpen }) {
+function NewMoney({ password, listed, onOpen, rows: listRows = [] }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("");
+  const [industry, setIndustry] = useState("");
+  const byNumber = useMemo(() => new Map(listRows.map((r) => [r.company_number, r])), [listRows]);
   const [mine, setMine] = useState(false);
   useEffect(() => {
     let live = true;
@@ -1542,10 +1544,14 @@ function NewMoney({ password, listed, onOpen }) {
     const items = [...(data?.items || []).map((d) => ({ ...d, at: d.date, signs: (d.fx_signs || []).join(" · "),
       url: `https://find-and-update.company-information.service.gov.uk/company/${d.company_number}/persons-with-significant-control` })),
       ...(data?.news || []).map((a) => ({ kind: a.kind, at: String(a.at).slice(0, 10), company_number: a.company_number, company_name: a.company_name,
-        detail: a.detail, signs: a.tracked ? "on your lists" : "", tracked: a.tracked, url: a.url }))];
+        detail: a.detail, signs: a.tracked ? "on your lists" : "", tracked: a.tracked, url: a.url }))]
+      // the deal's own sector codes (ownership register pass), else the list row's
+      .map((d) => ({ ...d, industry: industryOf(d.sic?.length ? d : byNumber.get(d.company_number) || {}) }));
     return items.filter((d) => (!filter || (filter === "pe" ? /pe/.test(d.kind) : d.kind === filter)) && (!mine || d.tracked || listed.has(d.company_number)))
       .sort((a, b) => String(b.at).localeCompare(String(a.at)));
-  }, [data, filter, mine, listed]);
+  }, [data, filter, mine, listed, byNumber]);
+  const industryCounts = rows.reduce((c, d) => ({ ...c, [d.industry]: (c[d.industry] || 0) + 1 }), {});
+  const shown = industry ? rows.filter((d) => d.industry === industry) : rows;
   if (!data) return <div className="list"><div className="empty">Loading new money…</div></div>;
   const open = (d) => (e) => { if (listed.has(d.company_number) && e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(d.company_number); } };
   return (
@@ -1556,19 +1562,24 @@ function NewMoney({ password, listed, onOpen }) {
           {MONEY_FILTERS.map(([k, label]) => <button key={k || "all"} aria-pressed={filter === k} className={`grp${filter === k ? " on" : ""}`} onClick={() => setFilter(k)}>{label}</button>)}
         </div>
         <label className="check"><input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} /> On my lists only</label>
-        <span className="muted">{rows.length} · ownership register {data.made_at ? `read ${filedWhen(data.made_at.slice(0, 10))}` : "not read yet"} (last {data.window_days || 120} days, with an FX sign)</span>
+        <select className="input" value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Industry">
+          <option value="">Any industry</option>
+          {Object.entries(industryCounts).sort((a, b) => b[1] - a[1]).map(([g, n]) => <option key={g} value={g}>{g} ({n})</option>)}
+        </select>
+        <span className="muted">{shown.length} · ownership register {data.made_at ? `read ${filedWhen(data.made_at.slice(0, 10))}` : "not read yet"} (last {data.window_days || 120} days, with an FX sign)</span>
       </div>
       <div className="sheet-wrap">
         <table className="sheet">
-          <thead><tr><th>When</th><th>What</th><th>Company</th><th>Detail</th><th>FX sign</th></tr></thead>
+          <thead><tr><th>When</th><th>What</th><th>Company</th><th>Industry</th><th>Detail</th><th>FX sign</th></tr></thead>
           <tbody>
-            {rows.slice(0, 500).map((d, i) => (
+            {shown.slice(0, 500).map((d, i) => (
               <tr key={`${d.kind}:${d.company_number}:${i}`}>
                 <td className="num">{d.at ? filedWhen(d.at) : ""}</td>
                 <td><span className={`chip${/pe|acquired/.test(d.kind) ? " warn" : ""}`}>{MONEY_KINDS[d.kind] || d.kind}</span></td>
                 <td><a href={listed.has(d.company_number) ? companyPath(d.company_number) : chCompanyUrl(d.company_number)} onClick={open(d)}
                        target={listed.has(d.company_number) ? undefined : "_blank"} rel="noreferrer">{d.company_name || d.company_number}</a>
                   {!listed.has(d.company_number) && <span className="muted"> · new lead</span>}</td>
+                <td className="muted">{d.industry}</td>
                 <td>{d.detail} <a href={d.url} target="_blank" rel="noreferrer" className="muted">{/^news/.test(d.kind) ? "Article ↗" : "Owners ↗"}</a></td>
                 <td className="muted">{d.signs}</td>
               </tr>
@@ -1576,7 +1587,7 @@ function NewMoney({ password, listed, onOpen }) {
           </tbody>
         </table>
       </div>
-      {!rows.length && <div className="empty">Nothing yet — the ownership register is read each morning, and the news of funding rounds and PE deals daily.</div>}
+      {!shown.length && <div className="empty">Nothing yet — the ownership register is read each morning, and the news of funding rounds and PE deals daily.</div>}
     </div>
   );
 }
