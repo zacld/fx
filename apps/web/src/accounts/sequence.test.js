@@ -26,3 +26,22 @@ describe("Outreach sequence (Zac's follow-up grid)", () => {
     expect(validSequence({ start: "2026-11-11", done: { 99: "2026-11-12" } })).toBe(false);
   });
 });
+
+import { callScript, todayQueue } from "./sequence.js";
+describe("Email the finance team, call the next day", () => {
+  it("asks for the most senior person emailed, and says the email went yesterday", () => {
+    const c = callScript({}, { start: "2026-11-12", roles: ["fd", "fc", "fm"], done: { 1: "2026-11-12" } }, "Jane", new Date("2026-11-13T09:00:00Z"));
+    expect(c.ask).toBe("Ask for Jane (Finance Director / CFO)");
+    expect(c.line).toMatch(/^Hi Jane, it's Zac from Investec — I sent you and the finance team an email yesterday/);
+    expect(callScript({}, { start: "2026-11-13", done: { 1: "2026-11-13" } }, "", new Date("2026-11-16T09:00:00Z")).line).toMatch(/yesterday/);   // Fri → Mon
+    expect(callScript({}, {}, "").ask).toBe("Ask for the Finance Director");
+  });
+  it("puts today's calls, emails and new starts in order", () => {
+    const rows = [{ company_number: "A", lead_score: 50 }, { company_number: "B", lead_score: 80 }, { company_number: "C", lead_score: 90, lead_fit: 60 },
+      { company_number: "D", lead_score: 95, lead_fit: 10 }];
+    const lists = { A: { list: "email", seq: { start: "2026-11-12", done: { 1: "2026-11-12" } } }, B: { list: "call" } };
+    const q = todayQueue(rows, lists, { today: new Date("2026-11-13T09:00:00Z") });
+    expect(q.calls.map((x) => [x.r.company_number, x.step.step])).toEqual([["A", 2]]);
+    expect(q.start.map((x) => x.r.company_number)).toEqual(["B", "C"]);   // listed but not started first, then the best fit
+  });
+});
