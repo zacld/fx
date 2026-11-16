@@ -305,7 +305,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     const [niches, alerts, deals, domains, moments, owners] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY, DOMAINS_KEY, MOMENTS_KEY, OWNERS_KEY].map((k) => blobs.get(k, { type: "json" })));
     const websites = Object.fromEntries(Object.entries(domains?.sites || {}).map(([n, s]) => [n, s.website]));
     const owners_search = Object.fromEntries(Object.entries(owners?.companies || {}).filter(([, o]) => o.owner)
-      .map(([n, o]) => [n, { owner: o.owner, kind: o.kind, country: o.country || "", quote: o.quote || "", url: o.url || "" }]));
+      .map(([n, o]) => [n, { owner: o.owner, kind: o.kind, country: o.country || "", quote: o.quote || "", url: o.url || "", chain: (o.chain || []).map((c) => c.owner) }]));
     return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [], websites, owners_search,
                    alerts_summary: alertsSummary(alerts?.items || []),
                    signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) }, 200);

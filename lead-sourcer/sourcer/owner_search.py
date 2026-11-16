@@ -23,7 +23,10 @@ from typing import Callable, Optional
 
 from . import pe, profiles
 
-QUERY = '"{name}" owned by OR "subsidiary of" OR "acquired by" OR "parent company" OR "portfolio company"'
+# the question a person types (Zac, 16 Nov 2026: "I open a tab, type who owns it, and if it gives me another company I
+# ask who owns that one")
+QUERY = 'who owns {name}'
+MAX_HOPS = 4
 
 _WORD = r"(?:[A-Z][\w&'’.\-]*|&|of|and|de|du|la|von|van|der)"
 _NAME = rf"((?:[A-Z][\w&'’.\-]*)(?:\s+{_WORD}){{0,6}})"
@@ -278,7 +281,32 @@ def _groq_once(body: dict, key: str):
 
 
 def search(number: str, company_name: str, fetch: Callable[[str], Optional[str]] = profiles.fetch_any) -> dict:
-    """{owner, kind, country, sites, quote, url} or {none: True}; {error: True} when no search could be made."""
+    """Who owns it, asked again of each owner that is a company until a person, a private-equity firm, a loop or
+    MAX_HOPS: {owner, kind, country, quote, url, chain: [{owner, kind, country}]} (owner = the top), {none: True},
+    or {error: True} when no search could be made."""
+    chain, seen, name, num = [], {_key(company_name)}, company_name, number
+    for _ in range(MAX_HOPS):
+        r = _one(num, name, fetch)
+        if r.get("error"):
+            if chain:
+                break
+            return r
+        if r.get("none") or _key(r["owner"]) in seen:
+            break
+        chain.append(r)
+        seen.add(_key(r["owner"]))
+        if r.get("kind") in ("person", "pe"):
+            break
+        name, num = r["owner"], ""
+    if not chain:
+        return {"none": True}
+    top = dict(chain[-1])
+    top["country"] = top.get("country") or ""
+    top["chain"] = [{"owner": c["owner"], "kind": c.get("kind", ""), "country": c.get("country", "")} for c in chain]
+    return top
+
+
+def _one(number: str, company_name: str, fetch: Callable[[str], Optional[str]]) -> dict:
     name = profiles.plain_name(company_name)
     query = QUERY.format(name=name)
     raw = profiles._cached(query)
@@ -307,4 +335,7 @@ def _panel(raw: str) -> list[tuple[str, str, str]]:
         return []
     facts = "; ".join(f"{k}: {v}" for k, v in (p.get("attributes") or {}).items()
                       if re.search(r"parent|owner|subsidiar", k, re.I))
-    return [("knowledge-panel", p.get("title", ""), facts)] if facts else []
+    out = [("knowledge-panel", p.get("title", ""), facts)] if facts else []
+    if p.get("answer"):
+        out.insert(0, (p.get("answer_link") or "knowledge-panel", "Google answer", p["answer"]))
+    return out

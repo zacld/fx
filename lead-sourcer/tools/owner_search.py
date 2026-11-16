@@ -44,6 +44,9 @@ def shown(e: dict) -> str:
     if not e.get("owner"):
         return "nothing found"
     who = "a person" if e.get("kind") == "person" else e["owner"]
+    path = " → ".join("a person" if c.get("kind") == "person" else c["owner"] for c in e.get("chain") or [])
+    if path and " → " in path:
+        who = path
     return f"{who}{' (' + e['country'] + ')' if e.get('country') else ''} [{e.get('kind')}, {e.get('sites')} site(s), read by {e.get('read_by', 'rules')}]"
 
 

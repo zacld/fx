@@ -278,10 +278,15 @@ def check_providers(query: str = "Companies House") -> dict:
 def _panel_of(answer: str) -> Optional[dict]:
     """{title, attributes} of a knowledge panel in the provider's answer, or None."""
     try:
-        kg = json.loads(answer or "").get("knowledgeGraph")
+        data = json.loads(answer or "")
+        kg, box = data.get("knowledgeGraph"), data.get("answerBox")
     except (ValueError, AttributeError):
         return None
-    return {"title": kg.get("title", ""), "attributes": kg.get("attributes") or {}} if isinstance(kg, dict) else None
+    out = {"title": kg.get("title", ""), "attributes": kg.get("attributes") or {}} if isinstance(kg, dict) else {}
+    if isinstance(box, dict) and (box.get("answer") or box.get("snippet")):   # Google's answer at the top of the page
+        out["answer"] = " ".join(str(box.get(k) or "") for k in ("title", "answer", "snippet")).strip()
+        out["answer_link"] = box.get("link") or ""
+    return out or None
 
 
 def _normalise(answer: Optional[str]) -> Optional[list[dict]]:
