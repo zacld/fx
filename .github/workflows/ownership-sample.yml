@@ -12,6 +12,8 @@ on:
       - apps/web/scripts/ownership-sample.mjs
       - lead-sourcer/sourcer/gleif.py
       - lead-sourcer/tools/gleif_owners.py
+      - lead-sourcer/sourcer/owner_search.py
+      - lead-sourcer/tools/owner_search.py
       - .github/workflows/ownership-sample.yml
 concurrency:
   group: ownership-sample
@@ -41,5 +43,19 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
         run: python3 tools/gleif_owners.py --tracked tracked.json --out gleif.json
+      # the web search for the sample's companies (kept in the store's owner-search item, as the daily run does)
+      - name: Who owns them — web search
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+          SEARCH1API_KEY: ${{ secrets.SEARCH1API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+        run: |
+          cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
+          NUMBERS=$(node scripts/ownership-sample.mjs ../../lead-sourcer/gleif.json "${{ github.event.inputs.count || '30' }}" --numbers | tail -1)
+          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --cache owners_cache.json --out owners.json --numbers "$NUMBERS"
+          cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json
       - name: The best leads, side by side
-        run: cd apps/web && node scripts/ownership-sample.mjs ../../lead-sourcer/gleif.json "${{ github.event.inputs.count || '30' }}"
+        run: cd apps/web && node scripts/ownership-sample.mjs ../../lead-sourcer/gleif.json "${{ github.event.inputs.count || '30' }}" ../../lead-sourcer/owners.json

@@ -89,7 +89,9 @@ export const SEAT_LABEL = { "uk-owned": "UK-owned", uk: "Decides in UK", abroad:
 // registered abroad above it); the company's own owners list. {status: "uk" | "foreign" | "unknown", owner, country,
 // chain, source, searches: [[label, url]]} — the searches are Google links to check it by hand, never fetched.
 const google = (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-export function ownershipOf(r = {}, group = null, lei = null) {
+// `search`: the web search's answer (lead-sourcer/sourcer/owner_search.py — {owner, kind, country, quote, url}): the owner a
+// person would name (TowerBrook, Investindustrial, a founder) where the registers stop at a holding company.
+export function ownershipOf(r = {}, group = null, lei = null, search = null) {
   const name = r.company_name || "";
   // what each source says: {from, status, owner, country}
   const says = [];
@@ -118,22 +120,31 @@ export function ownershipOf(r = {}, group = null, lei = null) {
     else if (/^Owned by \d+ individual/.test(r.owner || "")) says.push({ from: "Companies House", status: "unknown", owner: "", country: "", note: "owned by individuals, where they live not read yet" });
     else if (group?.hops) says.push({ from: "Companies House", status: "unknown", owner: group.top_name, country: "", note: "top UK parent; who owns it isn't on the register" });
   }
+  if (search?.owner) {
+    const c = search.country || "";
+    says.push({ from: "web search", status: c ? (UK.test(c) ? "uk" : "foreign") : "unknown", owner: search.owner, country: c,
+      kind: search.kind, quote: search.quote, url: search.url,
+      note: `${search.kind === "pe" ? "private equity" : search.kind === "person" ? "a person" : "a company"}${c ? "" : ", country not stated"}` });
+  }
   // a foreign owner named anywhere wins (the register can stop at a UK holding company the accounts or LEI see past);
   // then any definite answer; "not known" only when nothing is definite
   const known = says.filter((x) => x.status !== "unknown");
   const best = known.find((x) => x.status === "foreign") || known.find((x) => x.owner) || known[0] || says[0];
   const status = best ? best.status : "unknown";
-  const owner = best?.owner || (group?.hops ? group.top_name : "");
+  // the owner shown: the search's (the name a person would give) when it found one, else the best source's
+  const found = says.find((x) => x.from === "web search");
+  const owner = found?.owner || best?.owner || (group?.hops ? group.top_name : "");
   const country = best?.country || "";
   const agree = known.length > 1 && known.every((x) => x.status === status);
   const chain = [name];
   if (group?.hops && group.top_name) chain.push(`${group.top_name} (UK)`);
-  if (owner && owner !== chain[chain.length - 1] && owner !== name) chain.push(status === "foreign" ? `${owner} (${country})` : owner);
+  if (best?.owner && best.owner !== chain[chain.length - 1] && best.owner !== name && best.owner !== owner) chain.push(best.status === "foreign" ? `${best.owner} (${best.country})` : best.owner);
+  if (owner && owner !== chain[chain.length - 1] && owner !== name) chain.push(found?.country || (status === "foreign" && !found) ? `${owner} (${found?.country || country})` : owner);
   const searches = [[`Who owns ${name}?`, google(`who owns ${name}`)]];
   const top = owner && owner !== name ? owner : group?.top_name;
   if (top && top !== name) searches.push([`Where is ${top} based?`, google(`${top} headquarters`)]);
   searches.push([`${name} parent company`, google(`"${name}" parent company`)]);
   const source = best ? `${best.from}${known.length > 1 ? (agree ? ` (${known.length} sources agree)` : " (sources differ — check)") : ""}` : "";
-  return { status, owner, country, chain, source, says, agree, searches };
+  return { status, owner, country, chain, source, says, agree, searches, kind: found?.kind || "", evidence: found ? { quote: found.quote, url: found.url } : null };
 }
 export const OWNERSHIP_LABEL = { uk: "UK-owned", foreign: "Foreign-owned", unknown: "Owner not known" };

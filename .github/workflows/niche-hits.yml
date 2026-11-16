@@ -134,3 +134,18 @@ jobs:
           cd apps/web && (node scripts/alerts-store.mjs get domains ../../lead-sourcer/domains_cache.json || echo '{}' > ../../lead-sourcer/domains_cache.json)
           cd ../../lead-sourcer && PYTHONUNBUFFERED=1 python3 tools/find_domains.py --tracked tracked.json --order lead_order.json --cache domains_cache.json --out domains.json --groups groups.json --budget 2400
           cd ../apps/web && node scripts/alerts-store.mjs put domains ../../lead-sourcer/domains.json
+      # Who really owns each lead (a PE house, a founder, the group abroad) by web search, best leads first — the registers
+      # stop at the UK holding company. One search a company within the search APIs' free allowances (~50 a day);
+      # found owners kept 180 days. Rule-based reading of titles and snippets, no AI.
+      - name: Owners by web search
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+          SEARCH1API_KEY: ${{ secrets.SEARCH1API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+        run: |
+          cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
+          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max 50
+          cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json

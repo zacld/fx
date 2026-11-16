@@ -672,7 +672,19 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   its direct and ultimate accounting parent and their countries, or why none ("owned by individuals" …); a company that
   trades FX forwards must hold an LEI. `rank-leads.mjs` saves it in `leads/ranked` as `gleif_of`; `ownershipOf(r, group,
   lei)` weighs the accounts, the LEI register and Companies House (a foreign owner any of them names wins — the register
-  can stop at a UK holding company), lists what each says and whether they agree. **Ownership sample** workflow
+  can stop at a UK holding company), lists what each says and whether they agree. **Web search for the real owner** (Zac, 16 Nov 2026, after checking the
+  sample by hand: "CH is not reliable enough, we NEED a search" — the register stopped at Txo Delta Topco, NLC Group,
+  Investindustrial Advisors; the owners were TowerBrook, Paul Rosen, Investindustrial): `lead-sourcer/sourcer/
+  owner_search.py` + `tools/owner_search.py`, in the daily "Niche hits" run after Websites — one search a company
+  (`QUERY`: "<name>" owned by / subsidiary of / acquired by / parent company / portfolio company) through the finder's
+  search APIs within their allowances (`profiles.fetch_any`; secrets `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`,
+  `SERPER_API_KEY`, the month's usage carried in the store item so the caps hold), best leads first, `--max` 50 a day;
+  titles and snippets naming the company read by rules ("owned by X", "subsidiary of X", "acquired by X", "part of the X
+  group", "portfolio company of X", "X acquires …", Serper's knowledge panel "Parent organization: X" counting double),
+  one owner under several spellings merged, a person / PE house / company, the country only when stated. Store key
+  `owners` (found kept 180 days, nothing found retried after 60); `?view=signals` gives `owners_search`; `ownershipOf`
+  takes it as a fourth source and shows its owner (the name a person would give) with the quote and link. The
+  Ownership sample workflow searches its 30 too; logs print "a person" for a person. **Ownership sample** workflow
   (`scripts/ownership-sample.mjs`, read-only, on a push of its files or by hand): the best 30 leads with each source's
   answer side by side, for checking by hand.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):

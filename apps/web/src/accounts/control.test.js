@@ -69,4 +69,13 @@ describe("Who owns it, up the chain (16 Nov 2026)", () => {
     expect(ownershipOf({ company_name: "X LIMITED" }).status).toBe("unknown");
     expect(ownershipOf({ company_name: "Y LIMITED", owners: "J SMITH (individual, England)" }).status).toBe("uk");
   });
+  it("names the owner the web search found over the holding company", () => {
+    const o = ownershipOf({ company_name: "TXO SYSTEMS LTD" }, { top: "1", top_name: "Txo Delta Topco Ltd", hops: 2, abroad: "" }, null,
+      { owner: "TowerBrook Capital Partners", kind: "pe", country: "United States", quote: "acquired by TowerBrook", url: "https://x" });
+    expect([o.status, o.owner, o.kind]).toEqual(["foreign", "TowerBrook Capital Partners", "pe"]);
+    expect(o.chain.join(" → ")).toBe("TXO SYSTEMS LTD → Txo Delta Topco Ltd (UK) → TowerBrook Capital Partners (United States)");
+    const p = ownershipOf({ company_name: "SENZA GROUP LIMITED" }, { top: "2", top_name: "NLC GROUP OF COMPANIES LIMITED", hops: 1, abroad: "" }, null,
+      { owner: "NLC Group", kind: "company", country: "" });
+    expect([p.status, p.owner]).toEqual(["unknown", "NLC Group"]);
+  });
 });
