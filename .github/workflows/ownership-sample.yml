@@ -1,0 +1,45 @@
+# Who owns the best 30 leads: the accounts, the Global LEI register (free daily files) and Companies House side by side,
+# printed for checking by hand. Read-only: nothing saved. Runs on a push of these files, or by hand.
+name: Ownership sample
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: How many of the best leads
+        default: "30"
+  push:
+    paths:
+      - apps/web/scripts/ownership-sample.mjs
+      - lead-sourcer/sourcer/gleif.py
+      - lead-sourcer/tools/gleif_owners.py
+      - .github/workflows/ownership-sample.yml
+concurrency:
+  group: ownership-sample
+  cancel-in-progress: true
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Tracked companies
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web && node scripts/alerts-store.mjs tracked ../../lead-sourcer/tracked.json
+      - name: Owners from the LEI register
+        working-directory: lead-sourcer
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python3 tools/gleif_owners.py --tracked tracked.json --out gleif.json
+      - name: The best leads, side by side
+        run: cd apps/web && node scripts/ownership-sample.mjs ../../lead-sourcer/gleif.json "${{ github.event.inputs.count || '30' }}"

@@ -665,7 +665,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   GmbH (Germany)"), its source, and Google links to check it by hand ("Who owns X?", "Where is <parent> based?", "X
   parent company" — links only, never fetched). Accounts list "Any owner" filter with counts, Sheet column Owner, the
   card's Owner key point with "Who owns it? ↗", a company page Ownership panel, exports `ownership` / `ultimate_owner` /
-  `owner_country`; `foreignOwner` (and so `financeSeat`) reads the accounts' ultimate parent too.
+  `owner_country`; `foreignOwner` (and so `financeSeat`) reads the accounts' ultimate parent too. **The Global LEI register**
+  (Zac: "automated, ideally without API usage"): `lead-sourcer/sourcer/gleif.py` + `tools/gleif_owners.py` read GLEIF's
+  free daily golden-copy files (lei2 / rr / repex, zipped CSV, no key, standard library only) in the daily "Niche hits"
+  run — every tracked company holding an LEI (matched by Companies House number, registration authority RA000585) with
+  its direct and ultimate accounting parent and their countries, or why none ("owned by individuals" …); a company that
+  trades FX forwards must hold an LEI. `rank-leads.mjs` saves it in `leads/ranked` as `gleif_of`; `ownershipOf(r, group,
+  lei)` weighs the accounts, the LEI register and Companies House (a foreign owner any of them names wins — the register
+  can stop at a UK holding company), lists what each says and whether they agree. **Ownership sample** workflow
+  (`scripts/ownership-sample.mjs`, read-only, on a push of its files or by hand): the best 30 leads with each source's
+  answer side by side, for checking by hand.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own

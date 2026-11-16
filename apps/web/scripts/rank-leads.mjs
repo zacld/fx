@@ -11,7 +11,16 @@ import { filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/
 import { openStore } from "./store.mjs";
 
 // orderPath: company numbers, best lead first (find_domains.py); groupsPath: each company's top UK parent (psc_deals.py)
-const [enrichPath, orderPath, groupsPath] = process.argv.slice(2);
+const [enrichPath, orderPath, groupsPath, gleifPath] = process.argv.slice(2);
+// each tracked company's owner from the Global LEI register (tools/gleif_owners.py), slimmed for the page
+let gleifOf = {};
+try {
+  const all = gleifPath ? (JSON.parse(await readFile(gleifPath, "utf8")).companies || {}) : {};
+  for (const [n, v] of Object.entries(all)) {
+    gleifOf[n] = Object.fromEntries(Object.entries({ ultimate: v.ultimate, ultimate_country: v.ultimate_country, direct: v.direct,
+      direct_country: v.direct_country, exception: v.exception }).filter(([, x]) => x));
+  }
+} catch { /* no LEI owners this run */ }
 let groupOf = {};
 try { groupOf = groupsPath ? (JSON.parse(await readFile(groupsPath, "utf8")).groups || {}) : {}; } catch { /* no groups this run */ }
 const enrich = enrichPath ? (JSON.parse(await readFile(enrichPath, "utf8")).companies || {}) : {};
@@ -29,7 +38,7 @@ const learn = nicheLearnings(scored);
 const verdicts = (await store.get(VERDICTS_KEY, "json")) || {};
 const reviewed = verdictLearnings(scored, verdicts, { shyOf: shy_of });
 const made_at = new Date().toISOString();
-await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, niches: learn, verdicts: reviewed });
+await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, gleif_of: gleifOf, niches: learn, verdicts: reviewed });
 
 const live = scored.filter((s) => !s.absurd);
 if (orderPath) await writeFile(orderPath, JSON.stringify(live.map((s) => s.company_number)));

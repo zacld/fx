@@ -92,7 +92,7 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!triggersOnly || Boolean(r.triggers)) &&
     (!peOnly || Boolean(peBackedOf(r))) &&
     (!industry || industryOf(r) === industry) &&
-    (!ownership || ownershipOf(r, groupOf(r)).status === ownership) &&
+    (!ownership || ownershipOf(r, groupOf(r), knownLei[r.company_number] || null).status === ownership) &&
     (!newFdOnly || Boolean(r.lead_flags?.newFd)) &&
     (showOut || !isOut(r)) &&
     (!q || [r.company_name, r.finance_contact, r.finance_contact_clues, r.fx_niche, r.main_bank, r.postcode, r.company_number, notes[r.company_number]?.text]
@@ -1045,7 +1045,7 @@ export function keyPoints(r, pitch = "") {
     r.fx_forwards ? "uses forwards" : /^Uses/.test(r.fx_today || "") ? cut(r.fx_today.toLowerCase(), 40) : (cur || loss) ? "no hedging named" : "",
     r.overseas_turnover_share ? `${r.overseas_turnover_share} of sales abroad` : ""].filter(Boolean);
   out.push(["FX", fx.length ? fx.join(" · ") : r.hmrc_trade ? cut(r.hmrc_trade) : "Nothing in the filings yet"]);
-  const own = ownershipOf(r, groupOf(r));
+  const own = ownershipOf(r, groupOf(r), knownLei[r.company_number] || null);
   const seat = financeSeat(r);
   const who = own.status === "unknown" ? "Owner not known — check who owns it"
     : `${OWNERSHIP_LABEL[own.status]}${own.owner && own.owner !== r.company_name ? ` — ${cut(own.owner, 40)}${own.status === "foreign" ? ` (${own.country})` : ""}` : ""}`;
@@ -1056,4 +1056,6 @@ export function keyPoints(r, pitch = "") {
 }
 
 export { financeSeat, SEAT_LABEL, ownershipOf, OWNERSHIP_LABEL };
-export const ownership = (r) => ownershipOf(r, groupOf(r));
+let knownLei = {};
+export const setKnownLei = (map) => { knownLei = map || {}; };
+export const ownership = (r) => ownershipOf(r, groupOf(r), knownLei[r.company_number] || null);

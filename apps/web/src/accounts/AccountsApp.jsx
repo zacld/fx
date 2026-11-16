@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, setKnownLei, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -105,7 +105,7 @@ function Accounts({ data, password }) {
   useEffect(() => {
     let live = true;
     fetch(`${API}?view=ranked`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) { setKnownGroups(body.group_of); setRanked(body); } }).catch(() => {});
+      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) { setKnownGroups(body.group_of); setKnownLei(body.gleif_of); setRanked(body); } }).catch(() => {});
     return () => { live = false; };
   }, [password]);
   const baseRows = useMemo(() => {
@@ -1573,7 +1573,8 @@ function OwnershipPanel({ r }) {
     <section className="panel">
       <h2 className="panel-h">Ownership: {OWNERSHIP_LABEL[o.status]}{o.status === "foreign" ? ` (${o.country})` : ""}</h2>
       <p className="panel-p"><b>{o.chain.join(" → ")}</b></p>
-      {o.source && <p className="muted panel-p">From {o.source}.{r.ultimate_parent_evidence ? ` “${r.ultimate_parent_evidence}”` : ""}</p>}
+      {o.says.length > 0 && <ul className="call-why">{o.says.map((x) => <li key={x.from}><b>{x.from}:</b> {x.status === "uk" ? "UK-owned" : "Foreign-owned"}{x.owner ? ` — ${x.owner}` : ""}{x.status === "foreign" ? ` (${x.country})` : ""}{x.note ? ` (${x.note})` : ""}</li>)}</ul>}
+      {o.source && <p className="muted panel-p">Answer from {o.source}.{r.ultimate_parent_evidence ? ` Accounts: “${r.ultimate_parent_evidence}”` : ""}</p>}
       <p className="panel-p">{o.searches.map(([label, url]) => <a key={url} className="chip" href={url} target="_blank" rel="noreferrer">{label} ↗</a>)}</p>
     </section>
   );
