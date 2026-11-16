@@ -140,7 +140,7 @@ export function ownershipOf(r = {}, group = null, lei = null, search = null) {
   if (group?.hops && group.top_name) chain.push(`${group.top_name} (UK)`);
   if (best?.owner && best.owner !== chain[chain.length - 1] && best.owner !== name && best.owner !== owner) chain.push(best.status === "foreign" ? `${best.owner} (${best.country})` : best.owner);
   // the search's own steps up the chain ("who owns X?" → a company → "who owns that?")
-  for (const step of (found ? (search?.chain || []).slice(0, -1) : [])) if (step && !chain.some((c) => c.startsWith(step))) chain.push(step);
+  for (const step of (found ? (search?.chain || []).map((c) => (typeof c === "string" ? c : c?.owner || "")).slice(0, -1) : [])) if (step && !chain.some((c) => c.startsWith(step))) chain.push(step);
   if (owner && owner !== chain[chain.length - 1] && owner !== name) chain.push(found?.country || (status === "foreign" && !found) ? `${owner} (${found?.country || country})` : owner);
   const searches = [[`Who owns ${name}?`, google(`who owns ${name}`)]];
   const top = owner && owner !== name ? owner : group?.top_name;
