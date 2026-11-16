@@ -1028,4 +1028,24 @@ export function outreachWhy(r, list, { letters = OUTREACH.letters, total = 0 } =
 }
 export const outreachWhyLine = (r) => (r.outreach_why || []).map((w) => `${w.label}: ${w.text}`).join(" | ");
 
+// The card's summary (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of
+// info"): at most four one-line points — why call now, the FX in its records, who decides, what to pitch — each [label,
+// text]; everything else stays one click away.
+export function keyPoints(r, pitch = "") {
+  const out = [];
+  const cut = (t, n = 90) => (String(t).length > n ? `${String(t).slice(0, n - 1).trimEnd()}…` : String(t));
+  const why = timelyReason(r);
+  out.push(["Why now", why ? cut(why) : "Nothing timely — a good fit to work in the sequence"]);
+  const loss = -Number(r.fx_gain_loss_gbp) || 0;
+  const cur = r.main_currency && !/niche default/.test(r.currency_source || "") ? r.main_currency : "";
+  const fx = [loss >= 10000 ? `FX loss ${money(loss)}` : "", cur || (r.currencies_in_accounts ? cut(r.currencies_in_accounts, 40) : ""),
+    r.fx_forwards ? "uses forwards" : /^Uses/.test(r.fx_today || "") ? cut(r.fx_today.toLowerCase(), 40) : (cur || loss) ? "no hedging named" : "",
+    r.overseas_turnover_share ? `${r.overseas_turnover_share} of sales abroad` : ""].filter(Boolean);
+  out.push(["FX", fx.length ? fx.join(" · ") : r.hmrc_trade ? cut(r.hmrc_trade) : "Nothing in the filings yet"]);
+  const seat = financeSeat(r);
+  out.push(["Decides", seat.lean === "uk-owned" ? `UK-owned${r.pe_backed ? ` — PE-backed (${cut(r.pe_backed, 40)})` : ""}` : seat.verdict]);
+  if (pitch) out.push(["Pitch", cut(pitch)]);
+  return out;
+}
+
 export { financeSeat, SEAT_LABEL };
