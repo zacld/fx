@@ -182,7 +182,9 @@ def ai_read(results: list[tuple[str, str, str]], company_name: str, number: str 
         return None
     shown = results[:8]
     listing = "\n".join(f"[{i + 1}] {t[:160]} — {s[:320]}" for i, (_, t, s) in enumerate(shown))
-    body = {"model": GROQ_MODEL, "temperature": 0, "max_tokens": 200, "response_format": {"type": "json_object"},
+    # no JSON mode: a reasoning model (gpt-oss) thinks first, and a short JSON-mode limit cut it off ("Failed to
+    # validate JSON", 16 Nov 2026) — room to think, and the JSON is read out of the reply
+    body = {"model": GROQ_MODEL, "temperature": 0, "max_tokens": 1500,
             "messages": [{"role": "user", "content": _PROMPT.format(name=company_name, number=number, results=listing)}]}
     data = post(body) if post else _groq(body, key)
     if not data:
@@ -191,8 +193,9 @@ def ai_read(results: list[tuple[str, str, str]], company_name: str, number: str 
     AI_USAGE["calls"] += 1
     AI_USAGE["tokens"] += int((data.get("usage") or {}).get("total_tokens") or 0)
     try:
-        ans = json.loads(data["choices"][0]["message"]["content"])
-    except (KeyError, IndexError, ValueError, TypeError):
+        content = data["choices"][0]["message"]["content"] or ""
+        ans = json.loads(re.search(r"\{.*\}", content, re.S).group(0))
+    except (KeyError, IndexError, ValueError, TypeError, AttributeError):
         AI_USAGE["failed"] += 1
         return None
     owner = str(ans.get("owner") or "").strip()
@@ -234,7 +237,8 @@ _model: list = []
 def _groq(body: dict, key: str) -> Optional[dict]:
     global GROQ_MODEL
     for model in ([_model[0]] if _model else [GROQ_MODEL] + [m for m in GROQ_FALLBACKS if m != GROQ_MODEL]):
-        out = _groq_once({**body, "model": model}, key)
+        extra = {"reasoning_effort": "low", "reasoning_format": "hidden"} if model.startswith("openai/gpt-oss") else {}
+        out = _groq_once({**body, "model": model, **extra}, key)
         if out == "model_gone":
             continue
         if out is not None and not _model:
