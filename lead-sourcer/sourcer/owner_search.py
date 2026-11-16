@@ -293,7 +293,8 @@ def _groq_once(body: dict, key: str):
 # then who owns that owner — and answers from them; the answer counts only when Google's grounding backs the owner's
 # name (groundingSupports) and a source is returned. Its daily allowance used → the older route (search APIs + Groq).
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-GEMINI_MODELS = [m for m in [os.environ.get("GEMINI_MODEL", "")] if m] + ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash"]
+GEMINI_MODELS = [m for m in [os.environ.get("GEMINI_MODEL", "")] if m] + ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest",
+                                                                      "gemini-flash-lite-latest", "gemini-2.0-flash"]
 GEMINI_USAGE = {"calls": 0, "tokens": 0, "dropped": 0, "failed": 0}
 GEMINI_SPENT: list = []
 _gemini_model: list = []
@@ -371,9 +372,16 @@ def _gemini(body: dict, key: str) -> Optional[dict]:
                 if e.code == 404 or (e.code == 400 and re.search(r"not found|not supported|unknown name", text, re.I)):
                     break                                   # this model isn't available: the next one
                 if e.code == 429:
+                    full = e.read(3000).decode("utf-8", "replace") if e.fp else ""
+                    text = text + full
+                    # no free allowance for this model at all ("limit: 0"): try the next model
+                    if re.search(r"limit:\s*0\b|free_tier", text, re.I) and model != (_gemini_model[:1] or GEMINI_MODELS)[-1]:
+                        print(f"  Gemini: {model} has no free allowance on this key — trying the next model")
+                        break
                     if re.search(r"per day|PerDay|daily|quota", text, re.I) or attempt == 2:
                         GEMINI_SPENT.append(text[:160])
-                        print(f"  Gemini: today's free allowance used — {re.sub(r'[^ -~]', '', text)[:140]}")
+                        quota = re.findall(r'"quotaId":\s*"([^"]+)"|"quotaValue":\s*"([^"]+)"|limit:\s*\d+', text)
+                        print(f"  Gemini: today's free allowance used ({model}) — {re.sub(r'[^ -~]', '', ' '.join(text.split()))[:400]}")
                         return None
                     time.sleep(20)                         # requests a minute
                     continue
