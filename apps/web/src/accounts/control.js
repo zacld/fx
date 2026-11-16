@@ -115,7 +115,7 @@ export function ownershipOf(r = {}, group = null, lei = null) {
     if (f) says.push({ from: "Companies House", status: "foreign", owner: f.name, country: f.country });
     else if (people.length && people.every((c) => !UK.test(c))) says.push({ from: "Companies House", status: "foreign", owner: "", country: people[0], note: "owned by individuals living abroad" });
     else if (people.length) says.push({ from: "Companies House", status: "uk", owner: group?.hops ? group.top_name : "", country: "UK", note: "owned by individuals in the UK" });
-    else if (/^Owned by \d+ individual/.test(r.owner || "")) says.push({ from: "Companies House", status: "uk", owner: "", country: "UK", note: "owned by individuals" });
+    else if (/^Owned by \d+ individual/.test(r.owner || "")) says.push({ from: "Companies House", status: "unknown", owner: "", country: "", note: "owned by individuals, where they live not read yet" });
     else if (group?.hops) says.push({ from: "Companies House", status: "unknown", owner: group.top_name, country: "", note: "top UK parent; who owns it isn't on the register" });
   }
   // a foreign owner named anywhere wins (the register can stop at a UK holding company the accounts or LEI see past);

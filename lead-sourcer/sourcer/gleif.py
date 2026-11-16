@@ -160,7 +160,7 @@ def owners(paths: dict, tracked: set[str]) -> dict:
     ours = set(lei_of.values())
     why: dict[str, str] = {}
     for row in _table(paths["repex"], {"lei": ("LEI",), "category": ("ExceptionCategory", "Category", "Exception.Category"),
-                                       "reason": ("ExceptionReason", "ExceptionReason1", "Reason", "Exception.Reason", "ExceptionReasons")}):
+                                       "reason": ("Exception.Reason.1", "ExceptionReason", "ExceptionReason1", "Reason", "Exception.Reason", "ExceptionReasons")}):
         if row.get("lei") in ours and "ULTIMATE" in row.get("category", "").upper():
             reason = row.get("reason", "").upper()
             why[row["lei"]] = REASONS.get(reason, reason.replace("_", " ").lower())

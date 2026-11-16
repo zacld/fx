@@ -32,7 +32,7 @@ top.forEach((s, i) => {
   if (o.says.length > 1) { multi += 1; if (o.agree) agree += 1; }
   const said = (from) => {
     const x = o.says.find((y) => y.from === from);
-    return x ? `${x.status === "uk" ? "UK" : "Foreign"}${x.owner ? ` — ${x.owner}` : ""}${x.status === "foreign" ? ` (${x.country})` : ""}${x.note ? ` (${x.note})` : ""}` : "—";
+    return x ? `${x.status === "uk" ? "UK" : x.status === "foreign" ? "Foreign" : "Not known"}${x.owner ? ` — ${x.owner}` : ""}${x.status === "foreign" ? ` (${x.country})` : ""}${x.note ? ` (${x.note})` : ""}` : "—";
   };
   console.log(`${String(i + 1).padStart(2)}. ${r.company_name} (${s.company_number})`);
   console.log(`    ANSWER: ${OWNERSHIP_LABEL[o.status]}${o.owner ? ` — ${o.owner}` : ""}${o.status === "foreign" ? ` (${o.country})` : ""}   [${o.source || "no source"}]`);
