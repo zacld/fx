@@ -655,6 +655,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (signs for / against, the questions to ask — "Is FX decided here, or by group treasury in Germany?", own facilities,
   who signs off a hedge, who sets the policy), a chip on cards, Sheet column "Decided", export `finance_decided`. A
   lean, never a fact: checked on the call and against the CRM.
+- **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
+  `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
+  the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own
+  currency, forwards / no hedging named, share of sales abroad — else the customs record), Decides (`financeSeat`;
+  "UK-owned", PE sponsor), Pitch (the first two of `pitchLine`), plus Score / Fit / Now. The FX strip, score breakdown,
+  chips, call prep and notes editor sit behind "More detail" (a saved note stays shown).
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
   Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,

@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, keyPoints, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -690,6 +690,8 @@ function FilingCard({ r, listed, onOpen, onEmail }) {
           {r.period_end && <span className="muted">year to {filedWhen(r.period_end)}</span>}
         </div>
       </div>
+      <KeyPoints r={filingRow(r)} />
+      <details className="more-detail"><summary>More detail</summary>
       <FxStrip r={filingRow(r)} />
       {r.size_estimate && !r.turnover_gbp && <div className="filing-note">No turnover filed: size {r.size_estimate_basis}.</div>}
       {r.hmrc_trade && <div className="filing-note customs">{r.hmrc_trade}</div>}
@@ -725,8 +727,20 @@ function FilingCard({ r, listed, onOpen, onEmail }) {
         {!r.turnover_gbp && <a className="chip" href={turnoverSearch(r.company_name)} target="_blank" rel="noreferrer"
                                 title="Google their turnover: press, the group's accounts, their site (check it's not an estimate)">Search turnover ↗</a>}
       </div>
+      </details>
       <div className="card-foot"><EmailButton r={filingRow(r)} onEmail={onEmail} /></div>
     </article>
+  );
+}
+
+// The card's four key points (keyPoints in format.js): why now, FX, who decides, what to pitch — plus the score.
+function KeyPoints({ r }) {
+  const points = keyPoints(r, pitchLine(r).split(" · ").slice(0, 2).join(" · "));
+  return (
+    <ul className="key-points">
+      {points.map(([label, text]) => <li key={label}><span className="kp-l">{label}</span>{text}</li>)}
+      {r.lead_score !== undefined && <li><span className="kp-l">Score</span>{r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</li>}
+    </ul>
   );
 }
 
@@ -2289,13 +2303,16 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen, o
           <VerdictButtons number={r.company_number} />
         </div>
       </div>
-      <FxStrip r={r} />
-      <LeadScore r={r} />
+      <KeyPoints r={r} />
       <ContactLine r={r} />
       {mark && <FollowUpPanel r={r} mark={mark} onContact={onContact} />}
-      <Chips r={r} />
-      <CallPrep r={r} />
-      <Notes note={note} onSave={onSaveNote} />
+      {(open || note?.text) && <Notes note={note} onSave={onSaveNote} />}
+      {open && <>
+        <FxStrip r={r} />
+        <LeadScore r={r} />
+        <Chips r={r} />
+        <CallPrep r={r} />
+      </>}
       <div className="card-foot">
         <button className="more-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Less" : "More detail"}</button>
         {r.company_number && <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>Open company page →</a>}
@@ -2378,6 +2395,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
         </div>
       )}
 
+      <section className="panel"><h2 className="panel-h">Key points</h2><KeyPoints r={r} /></section>
       {r.lead_parts?.length > 0 && (
         <section className="panel">
           <h2 className="panel-h">Why it ranks: lead score {r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</h2>
@@ -2733,6 +2751,10 @@ a{color:var(--accent)}
 .list-btns .btn-sm.on,.filters .btn-sm.on{background:rgba(138,180,248,.18);color:var(--accent)}
 .pitch-list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
 .seq{margin:6px 0;font-size:13px}
+.key-points{list-style:none;margin:8px 0;padding:0;display:grid;gap:3px;font-size:13px;line-height:1.45}
+.key-points li{display:flex;gap:10px;min-width:0}
+.kp-l{flex:none;width:64px;color:var(--muted, #9aa0a6);font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.more-detail>summary{cursor:pointer;font-size:12px;color:var(--accent);margin:4px 0}
 .seq>summary{cursor:pointer}
 .seq-when.overdue{color:var(--loss, #f28b82)}
 .seq-when.today{color:var(--accent)}

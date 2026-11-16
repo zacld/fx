@@ -33,3 +33,18 @@ describe("Where finance decisions sit (16 Nov 2026)", () => {
     expect(here.parts.find(([w]) => w.startsWith("Owned abroad, but decides in the UK"))[1]).toBe(5);
   });
 });
+
+import { keyPoints } from "./format.js";
+describe("Key points on a card (16 Nov 2026: summarise)", () => {
+  it("gives at most four short lines: why now, FX, who decides, pitch", () => {
+    const r = { company_number: "1", company_name: "ACME LIMITED", fx_gain_loss_gbp: "-320000", main_currency: "USD",
+      currency_source: "forward contracts in the accounts", overseas_turnover_share: "40%", owners: "J SMITH (individual, England)",
+      lead_flags: { newFd: true, fdWhy: "New finance director appointed 3 March 2026" } };
+    const k = keyPoints(r, "Corporate deposits · FX spot and forwards");
+    expect(k.map(([l]) => l)).toEqual(["Why now", "FX", "Decides", "Pitch"]);
+    expect(k[0][1]).toBe("New finance director appointed 3 March 2026");
+    expect(k[1][1]).toBe("FX loss £320k · USD · no hedging named · 40% of sales abroad");
+    expect(k[2][1]).toBe("UK-owned");
+    expect(keyPoints({ company_number: "2" }).map(([l]) => l)).toEqual(["Why now", "FX", "Decides"]);
+  });
+});
