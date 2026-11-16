@@ -126,13 +126,18 @@ export function ownershipOf(r = {}, group = null, lei = null, search = null) {
       kind: search.kind, quote: search.quote, url: search.url,
       note: `${search.kind === "pe" ? "private equity" : search.kind === "person" ? "a person" : "a company"}${c ? "" : ", country not stated"}` });
   }
+  // the owner shown: the search's (the name a person would give) when it found one, else the best source's
+  let found = says.find((x) => x.from === "web search");
+  // a register (accounts, LEI, Companies House) naming a foreign parent outranks a search that names another country
+  // (16 Nov 2026: the search gave Motorola UK an Israeli sister company; the register says Motorola Solutions Inc, US)
+  const registered = says.find((x) => x.from !== "web search" && x.status === "foreign" && x.owner);
+  if (found && registered && found.country && registered.country && found.country !== registered.country
+      && !UK.test(found.country)) found = null;
   // a foreign owner named anywhere wins (the register can stop at a UK holding company the accounts or LEI see past);
   // then any definite answer; "not known" only when nothing is definite
-  const known = says.filter((x) => x.status !== "unknown");
-  const best = known.find((x) => x.status === "foreign") || known.find((x) => x.owner) || known[0] || says[0];
+  const known = says.filter((x) => x.status !== "unknown" && (found || x.from !== "web search"));
+  const best = (registered && !found ? registered : null) || known.find((x) => x.status === "foreign") || known.find((x) => x.owner) || known[0] || says[0];
   const status = best ? best.status : "unknown";
-  // the owner shown: the search's (the name a person would give) when it found one, else the best source's
-  const found = says.find((x) => x.from === "web search");
   const owner = found?.owner || best?.owner || (group?.hops ? group.top_name : "");
   const country = best?.country || "";
   const agree = known.length > 1 && known.every((x) => x.status === status);

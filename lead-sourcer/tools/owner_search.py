@@ -104,6 +104,9 @@ def main() -> None:
             continue
         searched += 1
         entry = {k: v for k, v in r.items() if k != "none"}
+        if not entry.get("owner") and (found.get(n) or {}).get("owner"):
+            # nothing this time but an owner found before: keep it (the same question can bring back other results)
+            entry = {**found[n], "rechecked": today.isoformat()}
         entry["searched"] = today.isoformat()
         found[n] = entry
         owners += bool(entry.get("owner"))

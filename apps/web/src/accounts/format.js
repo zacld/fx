@@ -579,6 +579,7 @@ export function reasonsNotToProgress(r, { today = new Date(), signals = knownSig
   const t = Number(r.turnover_gbp) || 0;
   const trouble = (signals[r.company_number] || []).find((s) => HOLD_OFF_KINDS.includes(s.kind));
   if (ukNamed(r)) add("“UK” in its name — kept in the UK in name tab, out of the other lists", true);
+  else if (foreignOwned(r)) add(`Owned from abroad${ownership(r).owner ? ` (${ownership(r).owner}${ownership(r).country ? `, ${ownership(r).country}` : ""})` : ""} — kept in the Foreign-owned tab, out of the other lists`, true);
   if (trouble) add(`${trouble.title}${trouble.at ? ` (${String(trouble.at).slice(0, 10)})` : ""} — hold off`, true);
   if (r.qualified === "Out") add(`Qualified out${r.qualify_reason ? `: ${r.qualify_reason}` : ""}`, true);
   if (t > CORE_BAND[1]) add(`Turnover ${money(t)} — above £300m (check the desk's upper limit)`, true);
@@ -1061,4 +1062,8 @@ export const setKnownLei = (map) => { knownLei = map || {}; };
 // the daily owner search's answers (store key `owners`, via ?view=signals): {number: {owner, kind, country, quote, url}}
 let knownOwnerSearch = {};
 export const setKnownOwnerSearch = (map) => { knownOwnerSearch = map || {}; };
+// owned from abroad by any source (accounts, LEI register, Companies House, the owner search): the Foreign-owned tab
+export const foreignOwned = (r) => ownership(r).status === "foreign";
+// in a tab of its own, out of every other list
+export const elsewhere = (r) => ukNamed(r) || foreignOwned(r);
 export const ownership = (r) => ownershipOf(r, groupOf(r), knownLei[r.company_number] || null, knownOwnerSearch[r.company_number] || null);

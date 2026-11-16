@@ -270,7 +270,7 @@ def _groq_once(body: dict, key: str):
             if e.code == 400 and re.search(r"decommissioned|not supported", text, re.I):
                 return "model_gone"
             if e.code == 429 and attempt < 2:      # free tier: requests a minute
-                time.sleep(float(e.headers.get("retry-after") or 10))
+                time.sleep(min(30.0, float(e.headers.get("retry-after") or 10)))   # a day's quota used: don't stall the run
                 continue
             print(f"  Groq refused ({e.code}): {re.sub(r'[^ -~]', '', text)[:160]}")
             return None

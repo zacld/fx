@@ -78,4 +78,9 @@ describe("Who owns it, up the chain (16 Nov 2026)", () => {
       { owner: "NLC Group", kind: "company", country: "" });
     expect([p.status, p.owner]).toEqual(["unknown", "NLC Group"]);
   });
+  it("keeps the register's foreign parent when the search names another country", () => {
+    const o = ownershipOf({ company_name: "MOTOROLA SOLUTIONS UK LIMITED" }, { top: "1", top_name: "MOTOROLA SOLUTIONS UK HOLDING ONE LIMITED", hops: 1, abroad: "Motorola Solutions, Inc (Delaware)" }, null,
+      { owner: "Motorola Solutions Israel Limited", kind: "company", country: "Israel" });
+    expect([o.status, o.owner, o.country]).toEqual(["foreign", "Motorola Solutions, Inc", "Delaware"]);
+  });
 });

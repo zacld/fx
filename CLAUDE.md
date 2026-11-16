@@ -676,15 +676,25 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   sample by hand: "CH is not reliable enough, we NEED a search" — the register stopped at Txo Delta Topco, NLC Group,
   Investindustrial Advisors; the owners were TowerBrook, Paul Rosen, Investindustrial): `lead-sourcer/sourcer/
   owner_search.py` + `tools/owner_search.py`, in the daily "Niche hits" run after Websites — one search a company
-  (`QUERY`: "<name>" owned by / subsidiary of / acquired by / parent company / portfolio company) through the finder's
-  search APIs within their allowances (`profiles.fetch_any`; secrets `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`,
-  `SERPER_API_KEY`, the month's usage carried in the store item so the caps hold), best leads first, `--max` 50 a day;
+  (`QUERY` "who owns <name>" — what a person types; Google's answer box and knowledge panel read too — and, Zac's
+  method, "who owns <that company>" again for each owner that is a company, up to `MAX_HOPS` 4, stopping at a person, a
+  PE firm or a loop: `chain`) through the finder's search APIs within their allowances (`profiles.fetch_any`; secrets
+  `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `SERPER_API_KEY`, the month's usage carried in the store item so the
+  caps hold), best leads first, `--max` 200 companies a day (Zac, 16 Nov 2026: "check at least 200 a day" — more than
+  the free search allowances cover, so a provider with paid credit takes the rest; a run that runs out stops cleanly);
+  an owner found before is kept when a later search finds nothing;
   the results read by one checked AI call (Groq — the Priority 1 exception; `ai_read`, the owner and quote must be in
   the result it names) or, with no key or a failed call, by rules ("owned by X", "subsidiary of X", "acquired by X", "part of the X
   group", "portfolio company of X", "X acquires …", Serper's knowledge panel "Parent organization: X" counting double),
   one owner under several spellings merged, a person / PE house / company, the country only when stated. Store key
   `owners` (found kept 180 days, nothing found retried after 60); `?view=signals` gives `owners_search`; `ownershipOf`
-  takes it as a fourth source and shows its owner (the name a person would give) with the quote and link. The
+  takes it as a fourth source and shows its owner (the name a person would give) with the quote and link — but a
+  register (accounts, LEI, Companies House) naming a foreign parent outranks a search naming another country (the
+  search gave Motorola UK an Israeli sister company). **Foreign-owned tab** (Zac, 16 Nov 2026: "if it's owned by an
+  American company or something like that put it in a different section"): `foreignOwned` / `elsewhere` in
+  `format.js` — every company any source says is owned from abroad lives only in that tab (like UK in name: out of the
+  Accounts list, Best fit / Call now, FX filings, FX losses, Today; a serious reason not to progress, so Outreach and
+  Call today drop it too), highest lead score first, industry filter, Excel export. The
   Ownership sample workflow searches its 30 too; logs print "a person" for a person. **Ownership sample** workflow
   (`scripts/ownership-sample.mjs`, read-only, on a push of its files or by hand): the best 30 leads with each source's
   answer side by side, for checking by hand.

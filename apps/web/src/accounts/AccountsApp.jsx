@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, setKnownLei, setKnownOwnerSearch, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, setKnownLei, setKnownOwnerSearch, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -151,7 +151,10 @@ function Accounts({ data, password }) {
   [baseRows, leadCtx, verdicts]);
   // Companies with "UK" in the name live in their own tab only (contacted ones stay in Contacted).
   const ukRows = useMemo(() => allRows.filter(ukNamed), [allRows]);
-  const rows = useMemo(() => allRows.filter((r) => !ukNamed(r) || contacted[r.company_number]), [allRows, contacted]);
+  // Owned from abroad (an American parent, a German group …): their own tab too (Zac, 16 Nov 2026: "if it's owned by an
+  // American company or something like that put it in a different section"); `signals` brings the owner search's answers
+  const foreignRows = useMemo(() => allRows.filter((r) => !ukNamed(r) && foreignOwned(r)), [allRows, signals]);
+  const rows = useMemo(() => allRows.filter((r) => !elsewhere(r) || contacted[r.company_number]), [allRows, contacted, signals]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
                                             peOnly: false, newFdOnly: false, industry: "", ownership: "" });
@@ -441,6 +444,11 @@ function Accounts({ data, password }) {
               {name} <span className="tab-n">{Object.values(lists).filter((v) => v.list === key).length}</span>
             </button>
           ))}
+          <button role="tab" aria-selected={filters.view === "foreign"} className={`tab${filters.view === "foreign" ? " on" : ""}`}
+                  title="Owned by a company or person abroad (the accounts, the LEI register, Companies House or the owner search say so) — kept here, out of every other list"
+                  onClick={() => set({ section: "", view: "foreign" })}>
+            Foreign-owned <span className="tab-n">{foreignRows.filter((r) => !contacted[r.company_number] && !isOut(r)).length}</span>
+          </button>
           <button role="tab" aria-selected={filters.view === "uk"} className={`tab${filters.view === "uk" ? " on" : ""}`}
                   title="Companies with “UK” in their name — usually a foreign group's UK arm; kept here, out of every other list"
                   onClick={() => set({ section: "", view: "uk" })}>
@@ -502,7 +510,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk", "today"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -563,6 +571,7 @@ function Accounts({ data, password }) {
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={allRows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "today" ? <Today rows={allRows} lists={lists} onOpen={openCompany} />
+       : filters.view === "foreign" ? <FitTiming mode="foreign" rows={foreignRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "uk" ? <FitTiming mode="uk" rows={ukRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "fit" || filters.view === "now" ? <FitTiming mode={filters.view} rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "shy" ? <HardToBroker rows={open} shyOf={ranked.shy_of || {}} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -639,7 +648,7 @@ function Filings({ password, listed, onOpen, onEmail }) {
       .catch((e) => { if (live) setError(e.message); });
     return () => { live = false; };
   }, [month, monthRows, get]);
-  const all = (data?.rows || monthRows[month] || []).filter((r) => !ukNamed(r));   // data.rows: the first, single-item version; "UK" names have their own tab
+  const all = (data?.rows || monthRows[month] || []).filter((r) => !elsewhere(r));   // data.rows: the first, single-item version; "UK" names have their own tab
   const rows = useMemo(() => sortFilings(filterFilings(all, { query, strongOnly, lossOnly, movedOnly, band }), order),
                        [all, query, strongOnly, lossOnly, movedOnly, band, order]);
   if (error) return <div className="list"><div className="empty">{error}</div></div>;
@@ -984,7 +993,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
       .catch((e) => { if (live) { setError(e.message === "Failed to fetch" ? "Couldn't reach the site — check your connection." : e.message); setFilingLosses([]); } });
     return () => { live = false; };
   }, [password]);
-  const all = useMemo(() => lossRows(listRows.filter((r) => !contacted[r.company_number]), (filingLosses || []).filter((r) => !ukNamed(r))), [listRows, contacted, filingLosses]);
+  const all = useMemo(() => lossRows(listRows.filter((r) => !contacted[r.company_number]), (filingLosses || []).filter((r) => !elsewhere(r))), [listRows, contacted, filingLosses]);
   const rows = useMemo(() => sortLosses(filterLosses(all, { min, query, recentDays: recent ? 183 : 0, unhedged, grew, band }), order),
                        [all, min, query, recent, unhedged, grew, band, order]);
   const reset = (fn) => (v) => { fn(v); setShown(PAGE); };
@@ -1503,7 +1512,8 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
 // Best fit (mode "fit": who to call at all — sorted by Fit) and Call now (mode "now": those that fit, with a reason to
 // call now — sorted by Timing, then Fit). Each card shows that half's reasons; the export carries both.
 function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
-  const uk = mode === "uk";
+  const foreign = mode === "foreign";
+  const uk = mode === "uk" || foreign;
   const fitOnly = mode === "fit" || uk;
   const key = uk ? "lead_score" : fitOnly ? "lead_fit" : "lead_timing";
   const [industry, setIndustry] = useState("");
@@ -1520,12 +1530,14 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
     turnover_gbp: r.turnover_gbp || "", companies_house_url: chCompanyUrl(r.company_number),
   })), columnsFor(["rank", "company_name", "company_number", "industry", "lead_fit", "lead_timing", "lead_score", "fit_reasons", "timing_reasons",
     "turnover_gbp", "companies_house_url"], { lead_fit: "Fit", lead_timing: "Now", turnover_gbp: "Turnover (£)" },
-    ["rank", "lead_fit", "lead_timing", "lead_score", "turnover_gbp"]), `${uk ? "uk-in-name" : fitOnly ? "best-fit" : "call-now"}-${new Date().toISOString().slice(0, 10)}.xlsx`,
-    uk ? "UK in name" : fitOnly ? "Best fit" : "Call now");
+    ["rank", "lead_fit", "lead_timing", "lead_score", "turnover_gbp"]), `${foreign ? "foreign-owned" : uk ? "uk-in-name" : fitOnly ? "best-fit" : "call-now"}-${new Date().toISOString().slice(0, 10)}.xlsx`,
+    foreign ? "Foreign-owned" : uk ? "UK in name" : fitOnly ? "Best fit" : "Call now");
   return (
     <div className="list">
       <div className="filters filings-bar">
-        <span className="muted">{uk
+        <span className="muted">{foreign
+          ? `${list.length} companies owned from abroad — ask whether FX is decided in the UK or by the parent. Out of every other list; highest lead score first.`
+          : uk
           ? `${list.length} companies with “UK” in their name — usually a foreign group's UK arm (ask whether FX is run here or by the parent). Out of every other list; highest lead score first.`
           : fitOnly
           ? `${list.length} companies with Fit ${FIT.min}+ — the right company for the desk (FX proof and FX pain, size, niche, ownership), whatever the news. Best fit first.`
@@ -1699,7 +1711,7 @@ function CallLine({ r, seq }) {
 // call tomorrow. Best leads first; nothing is sent.
 function Today({ rows, lists, onOpen }) {
   const { setList, setSequence } = useContext(VerdictContext);
-  const q = useMemo(() => todayQueue(rows, lists, { fitMin: FIT.min, skip: (r) => isOut(r) || ukNamed(r) }), [rows, lists]);
+  const q = useMemo(() => todayQueue(rows, lists, { fitMin: FIT.min, skip: (r) => isOut(r) || elsewhere(r) }), [rows, lists]);
   const today = new Date().toISOString().slice(0, 10);
   const link = (r) => <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>;
   const tick = (x) => setSequence(x.r.company_number, { ...x.seq, done: { ...(x.seq.done || {}), [x.step.step]: today } });
