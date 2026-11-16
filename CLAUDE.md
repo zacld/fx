@@ -655,6 +655,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (signs for / against, the questions to ask — "Is FX decided here, or by group treasury in Germany?", own facilities,
   who signs off a hedge, who sets the policy), a chip on cards, Sheet column "Decided", export `finance_decided`. A
   lean, never a fact: checked on the call and against the CRM.
+- **Who owns it** (Zac, 16 Nov 2026: "who owns XYZ company … figure out if they are based in the UK — our primary
+  targets"): `ownershipOf` in `src/accounts/control.js` (page: `ownership(r)` with `groupOf`) — best first: the accounts'
+  own "ultimate parent … incorporated in X" sentence (`lead-sourcer/sourcer/control.py` `ultimate_parent` →
+  `ultimate_parent` / `_country` / `_evidence`, `FACTS_VERSION` 2026-11-16b and the FX filings scan; an immediate parent
+  only when no ultimate one is named), else the daily ownership pass's walk up the register (`group_of`: top UK parent,
+  and the owner registered abroad above it), else the owners list. Status UK-owned / Foreign-owned (with country) /
+  Owner not known (Jersey, Guernsey, Isle of Man count as UK), the chain ("ACME LIMITED → ACME UK HOLDINGS (UK) → Acme
+  GmbH (Germany)"), its source, and Google links to check it by hand ("Who owns X?", "Where is <parent> based?", "X
+  parent company" — links only, never fetched). Accounts list "Any owner" filter with counts, Sheet column Owner, the
+  card's Owner key point with "Who owns it? ↗", a company page Ownership panel, exports `ownership` / `ultimate_owner` /
+  `owner_country`; `foreignOwner` (and so `financeSeat`) reads the accounts' ultimate parent too.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own

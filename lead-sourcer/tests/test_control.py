@@ -38,5 +38,16 @@ class TestControlClues(unittest.TestCase):
         self.assertEqual(control.board_line([]), "")
 
 
+class TestUltimateParent(unittest.TestCase):
+    def test_reads_the_top_owner_and_country(self):
+        got = control.ultimate_parent("The company's immediate parent is Acme Group Limited, a company registered in England. "
+                                      "The ultimate parent company is Acme Inc., incorporated in the United States of America.")
+        self.assertEqual((got["ultimate_parent"], got["ultimate_parent_country"]), ("Acme Inc.", "United States of America"))
+        got = control.ultimate_parent("The ultimate parent undertaking and controlling party is Acme Holding GmbH, a company incorporated in Germany.")
+        self.assertEqual(got["ultimate_parent_country"], "Germany")
+        self.assertEqual(control.ultimate_parent("The ultimate controlling party is Mr J Smith.")["ultimate_parent"], "")
+        self.assertIn("ultimate_parent", control.text_evidence("nothing"))
+
+
 if __name__ == "__main__":
     unittest.main()

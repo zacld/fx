@@ -1,4 +1,4 @@
-import { financeSeat, SEAT_LABEL } from "./control.js";
+import { financeSeat, SEAT_LABEL, ownershipOf, OWNERSHIP_LABEL } from "./control.js";
 // Helpers for the Accounts page: money, filters and CSV export over the
 // finder's rows (lead-sourcer/tools/to_accounts_json.py).
 
@@ -78,7 +78,7 @@ export const googleFd = (r) =>
 // view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
 export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
                                    showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
-                                   contacted = {}, notes = {}, role = "", peOnly = false, newFdOnly = false, industry = "" } = {}) {
+                                   contacted = {}, notes = {}, role = "", peOnly = false, newFdOnly = false, industry = "", ownership = "" } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
     (view === "contacted") === Boolean(contacted[r.company_number]) &&
@@ -92,6 +92,7 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!triggersOnly || Boolean(r.triggers)) &&
     (!peOnly || Boolean(peBackedOf(r))) &&
     (!industry || industryOf(r) === industry) &&
+    (!ownership || ownershipOf(r, groupOf(r)).status === ownership) &&
     (!newFdOnly || Boolean(r.lead_flags?.newFd)) &&
     (showOut || !isOut(r)) &&
     (!q || [r.company_name, r.finance_contact, r.finance_contact_clues, r.fx_niche, r.main_bank, r.postcode, r.company_number, notes[r.company_number]?.text]
@@ -353,7 +354,7 @@ export function cognismCompanyRows(rows) {
 export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
 
 export const EXPORT_FIELDS = [
-  "company_and_fd", "industry", "finance_decided", "what_to_pitch", "my_list", "lead_score", "lead_fit", "lead_timing", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
+  "company_and_fd", "industry", "ownership", "ultimate_owner", "owner_country", "finance_decided", "what_to_pitch", "my_list", "lead_score", "lead_fit", "lead_timing", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
   "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
   "finance_contact", "finance_contact_role",
@@ -724,6 +725,8 @@ export const SHEET_COLUMNS = [
   ["industry", "Industry", (r) => industryOf(r), (r) => industryOf(r)],
   ["lead", "Score", (r) => (r.lead_score !== undefined ? String(r.lead_score) : ""), (r) => -(r.lead_score || 0), true],
   ["fit", "Fit", (r) => (r.lead_fit !== undefined ? String(r.lead_fit) : ""), (r) => -(r.lead_fit || 0), true],
+  ["owner", "Owner", (r) => { const o = ownership(r); return o.status === "unknown" ? "?" : `${OWNERSHIP_LABEL[o.status]}${o.status === "foreign" ? ` (${o.country})` : ""}`; },
+   (r) => ({ uk: 0, unknown: 1, foreign: 2 }[ownership(r).status]), false],
   ["seat", "Decided", (r) => SEAT_LABEL[financeSeat(r).lean], (r) => ({ abroad: 3, unclear: 2, uk: 1, "uk-owned": 0 }[financeSeat(r).lean]), false],
   ["timing", "Now", (r) => (r.lead_timing !== undefined ? String(r.lead_timing) : ""), (r) => -(r.lead_timing || 0), true],
   ["turnover", "Turnover", (r) => (r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""),
@@ -1042,10 +1045,15 @@ export function keyPoints(r, pitch = "") {
     r.fx_forwards ? "uses forwards" : /^Uses/.test(r.fx_today || "") ? cut(r.fx_today.toLowerCase(), 40) : (cur || loss) ? "no hedging named" : "",
     r.overseas_turnover_share ? `${r.overseas_turnover_share} of sales abroad` : ""].filter(Boolean);
   out.push(["FX", fx.length ? fx.join(" · ") : r.hmrc_trade ? cut(r.hmrc_trade) : "Nothing in the filings yet"]);
+  const own = ownershipOf(r, groupOf(r));
   const seat = financeSeat(r);
-  out.push(["Decides", seat.lean === "uk-owned" ? `UK-owned${r.pe_backed ? ` — PE-backed (${cut(r.pe_backed, 40)})` : ""}` : seat.verdict]);
+  const who = own.status === "unknown" ? "Owner not known — check who owns it"
+    : `${OWNERSHIP_LABEL[own.status]}${own.owner && own.owner !== r.company_name ? ` — ${cut(own.owner, 40)}${own.status === "foreign" ? ` (${own.country})` : ""}` : ""}`;
+  const extra = own.status === "foreign" ? ` · ${seat.verdict}` : r.pe_backed ? ` · PE-backed (${cut(r.pe_backed, 30)})` : "";
+  out.push(["Owner", who + extra, own.searches[0][1]]);
   if (pitch) out.push(["Pitch", cut(pitch)]);
   return out;
 }
 
-export { financeSeat, SEAT_LABEL };
+export { financeSeat, SEAT_LABEL, ownershipOf, OWNERSHIP_LABEL };
+export const ownership = (r) => ownershipOf(r, groupOf(r));

@@ -64,8 +64,10 @@ def text_clues(text: str) -> list[dict]:
 
 
 def text_evidence(text: str) -> dict:
-    """{control_clues}: 'side|kind|quote' entries joined by ' ‖ ' for the list row (blank when none)."""
-    return {"control_clues": " ‖ ".join(f"{c['side']}|{c['kind']}|{c['quote'].replace('‖', ' ')}" for c in text_clues(text))}
+    """{control_clues, ultimate_parent…}: 'side|kind|quote' entries joined by ' ‖ ' for the list row, and the ultimate
+    parent the accounts name (blank when none)."""
+    return {"control_clues": " ‖ ".join(f"{c['side']}|{c['kind']}|{c['quote'].replace('‖', ' ')}" for c in text_clues(text)),
+            **ultimate_parent(text)}
 
 
 def _is_uk(place: str) -> bool:
@@ -80,3 +82,32 @@ def board_line(directors: list[dict]) -> str:
         return ""
     uk = sum(1 for d in known if _is_uk(d["country_of_residence"]))
     return f"{uk} of {len(known)} directors live in the UK"
+
+
+# "The ultimate parent undertaking is Acme Holding GmbH, a company incorporated in Germany." / "The company's ultimate
+# controlling party is Acme Inc., registered in the United States." — who owns it at the top, and where (Zac, 16 Nov
+# 2026: "figure out who owns them and whether they're based in the UK — our primary targets").
+_ULTIMATE = re.compile(
+    r"\b(ultimate (?:parent(?: undertaking| company| entity)?|holding company|controlling (?:party|entity|undertaking))|"
+    r"immediate (?:parent(?: undertaking| company)?|holding company))\b[^.]{0,60}?\b(?:is|was|are|being)\s+"
+    r"(?:the\s+)?([A-Z][\w&'’.\- ]{2,80}?)\s*(?:,|\(|\bwhich\b|\ba company\b|\bincorporated\b|\bregistered\b|\bdomiciled\b|\bbased\b)"
+    r"[^.]{0,100}?\b(?:incorporated|registered|domiciled|based|established)\s+(?:and\s+\w+\s+)?in\s+(?:the\s+)?"
+    r"([A-Z][A-Za-z.]+(?:\s+(?:of\s+)?[A-Z][A-Za-z.]+){0,3})", re.S)
+
+
+def ultimate_parent(text: str) -> dict:
+    """{ultimate_parent, ultimate_parent_country, ultimate_parent_evidence} — the ultimate parent the accounts name and
+    where it's incorporated (an immediate parent only when no ultimate one is named); blank when none."""
+    best = None
+    for m in _ULTIMATE.finditer(text or ""):
+        kind, name, country = m.group(1).lower(), m.group(2).strip(" ,"), m.group(3).strip(" .")
+        if re.match(r"(?:the company|the group|this company)$", name, re.I):
+            continue
+        quote = _sentence(text, m.start(), m.end())
+        if _POLICY.search(quote):
+            continue
+        found = {"ultimate_parent": name[:100], "ultimate_parent_country": country[:40], "ultimate_parent_evidence": quote}
+        if kind.startswith("ultimate"):
+            return found
+        best = best or found
+    return best or {"ultimate_parent": "", "ultimate_parent_country": "", "ultimate_parent_evidence": ""}

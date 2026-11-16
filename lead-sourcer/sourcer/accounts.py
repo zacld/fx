@@ -480,7 +480,7 @@ def _regions(scanner: "_IxbrlScanner", turnover: Optional[float], period_end: st
 
 
 # Bump when what extract_facts / extract_facts_from_text read changes, so cached facts are read again.
-FACTS_VERSION = "2026-11-16a"   # + where finance decisions sit (control clues); 2026-11-15a: + a PE sponsor named as controlling party, a finance director appointed; 2026-11-14a: + last year's overseas share (tagged filings); 2026-11-10a: accounts kept in another
+FACTS_VERSION = "2026-11-16b"   # + the ultimate parent and its country (control.ultimate_parent); 2026-11-16a: where finance decisions sit (control clues); 2026-11-15a: + a PE sponsor named as controlling party, a finance director appointed; 2026-11-14a: + last year's overseas share (tagged filings); 2026-11-10a: accounts kept in another
                                 # currency, subsidiaries abroad, foreign-currency borrowings
 
 
