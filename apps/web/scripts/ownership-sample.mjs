@@ -1,4 +1,4 @@
-// The ownership check on the best 30 leads, for Zac to compare by hand (16 Nov 2026: "use 30 leads and I will compare to
+// The ownership check (Gemini + Google Search first) on the best 30 leads, for Zac to compare by hand (16 Nov 2026: "use 30 leads and I will compare to
 // see if it's actually accurate"):  node scripts/ownership-sample.mjs gleif.json [count]
 // For each: what the accounts, the LEI register and Companies House each say, and the combined answer. Read-only; prints
 // company names and their owners' (company) names only — a person found as the owner prints as "a person" (the repo is
