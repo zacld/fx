@@ -64,7 +64,7 @@ from typing import Optional, Union
 from sourcer import (
     accounts, banks, bulk, companies_house, currency, excel, filings, fx_notes, group as groups, hmrc, hooks, incumbent,
     matching, niches as niche_rules,
-    news, pdf, pe, people, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
+    news, pdf, pe, people, control, profiles, qualify, register_cache, registries, roles, signals, timing, triggers, website)
 
 CSV_FIELDS = [
     "section",
@@ -133,6 +133,8 @@ CSV_FIELDS = [
     "pe_backed_evidence",
     "new_fd_in_accounts",
     "new_fd_in_accounts_evidence",
+    "control_clues",
+    "board_line",
     "group_parent",
     "group_companies_in_list",
     "group_fx_wallet_high_gbp",
@@ -779,6 +781,8 @@ def company_row(
         pe_backed_evidence=pe_evidence,
         new_fd_in_accounts=f.get("new_fd_in_accounts", ""),
         new_fd_in_accounts_evidence=f.get("new_fd_in_accounts_evidence", ""),
+        control_clues=f.get("control_clues", ""),
+        board_line=control.board_line(directors),
         fx_gain_loss_prior_gbp=_money(f.get("fx_gain_loss_prior")),
         fx_gain_loss_check=f.get("fx_gain_loss_check", ""),
         fx_gain_loss_evidence=f.get("fx_gain_loss_evidence", ""),

@@ -638,6 +638,23 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   export); the Accounts list, Best fit / Call now, Hit list, Hard to broker, FX filings, FX losses and New money leave
   them out, and `reasonsNotToProgress` gives them a serious reason, so Outreach (browser and database), Call today and
   the database's `held` column drop them too. Contacted ones stay in Contacted; lists and company pages still find them.
+- **Where finance decisions sit** (Zac, 16 Nov 2026: "come up with indicators that can qualify or disqualify … whether
+  the decisions in terms of finances happen in the UK"): `src/accounts/control.js` `financeSeat` weighs, each with its
+  points and reason — owned from abroad (the owners list / run-from-abroad line / the filings research's owner, −15),
+  the lender (a UK clearing or mid-market bank holding its own facility +20; a US / European / Asian bank −15 — "Goldman
+  Sachs: probably US-run"), its own forward contracts (+25) or FX handled itself (+20), borrowing in its own name in
+  another currency (+10), the board (`board_line`, current directors' country of residence from the officers already
+  read: mostly UK +15 when owned abroad, mostly abroad −15), and the accounts' own words (`lead-sourcer/sourcer/
+  control.py` `text_clues` → `control_clues`, `FACTS_VERSION` 2026-11-16a and the FX filings scan): treasury run
+  centrally by the group −30, FX managed by the group / parent −35, a group cash pool −20, the parent's letter of
+  support −20, funded through the group's facilities −20, amounts owed to the parent −10, its own revolving credit
+  facility +20, a UK-based treasury team +30 (policy boilerplate skipped). Lean: UK-owned (no foreign owner, nothing
+  saying the group runs it), "Owned abroad, but decides in the UK" (owned abroad, net +5), "Likely run from abroad"
+  (net −20 or less), else "Unclear — ask where FX is decided". Lead score (Fit): run from abroad −20, owned abroad but
+  decides in the UK +5, owned abroad unclear −10 (`LEAD_POINTS` runAbroad / decidesHere / ownedAbroad). Company page panel
+  (signs for / against, the questions to ask — "Is FX decided here, or by group treasury in Germany?", own facilities,
+  who signs off a hedge, who sets the policy), a chip on cards, Sheet column "Decided", export `finance_decided`. A
+  lean, never a fact: checked on the call and against the CRM.
 - **Your verdicts** (14 Nov 2026, from the discovery review: the lead score's weights had never been tested against
   real outcomes): "Good lead" / "Not a fit" (+ reason: Too small, Too big, No real FX, Wrong sector, FX run abroad,
   Other — `VERDICT_REASONS`; never "client" or anything from the bank's records) on every card, the company page,

@@ -34,7 +34,7 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import date
 from typing import Iterable, Optional
 
-from sourcer import accounts, deals, fx_notes, hooks, incumbent, pe
+from sourcer import accounts, control, deals, fx_notes, hooks, incumbent, pe
 
 DOWNLOADS = "https://download.companieshouse.gov.uk/"
 LIST_PAGES = {"daily": DOWNLOADS + "en_accountsdata.html", "monthly": DOWNLOADS + "en_monthlyaccountsdata.html"}
@@ -577,6 +577,7 @@ def assess(document: bytes, number: str, made_up: str, filed: str,
     }
     row.update(deals.columns(plain_text))   # who it bought, a finance director appointed (triggers)
     row.update(pe.text_evidence(plain_text))   # a PE house or fund named as controlling party
+    row.update(control.text_evidence(plain_text))   # where finance decisions sit: group treasury, parent support, own RCF
     mentions, mention_count = fx_mentions(plain_text)
     row.update(fx_mentions=mentions, fx_mention_count=mention_count)
     row["fx_in_filing"] = shows_fx(facts, today["fx_today"])

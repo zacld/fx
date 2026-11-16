@@ -1,3 +1,4 @@
+import { financeSeat, SEAT_LABEL } from "./control.js";
 // Helpers for the Accounts page: money, filters and CSV export over the
 // finder's rows (lead-sourcer/tools/to_accounts_json.py).
 
@@ -352,7 +353,7 @@ export function cognismCompanyRows(rows) {
 export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
 
 export const EXPORT_FIELDS = [
-  "company_and_fd", "industry", "what_to_pitch", "my_list", "lead_score", "lead_fit", "lead_timing", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
+  "company_and_fd", "industry", "finance_decided", "what_to_pitch", "my_list", "lead_score", "lead_fit", "lead_timing", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
   "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
   "finance_contact", "finance_contact_role",
@@ -723,6 +724,7 @@ export const SHEET_COLUMNS = [
   ["industry", "Industry", (r) => industryOf(r), (r) => industryOf(r)],
   ["lead", "Score", (r) => (r.lead_score !== undefined ? String(r.lead_score) : ""), (r) => -(r.lead_score || 0), true],
   ["fit", "Fit", (r) => (r.lead_fit !== undefined ? String(r.lead_fit) : ""), (r) => -(r.lead_fit || 0), true],
+  ["seat", "Decided", (r) => SEAT_LABEL[financeSeat(r).lean], (r) => ({ abroad: 3, unclear: 2, uk: 1, "uk-owned": 0 }[financeSeat(r).lean]), false],
   ["timing", "Now", (r) => (r.lead_timing !== undefined ? String(r.lead_timing) : ""), (r) => -(r.lead_timing || 0), true],
   ["turnover", "Turnover", (r) => (r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""),
    (r) => -(Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0), true],
@@ -752,7 +754,7 @@ export const LEAD_POINTS = {
   justFiled: 10, justFiledDays: 90, newOnList: 5,
   nicheByTier: [0, 3, 8, 15],
   newFd: 20, newFdDays: 120, trigger: 10, abroadNews: 8, hiring: 5, signalDays: 120,
-  subsidiaries: 10, open: 5, ownedAbroad: -10,
+  subsidiaries: 10, open: 5, ownedAbroad: -10, runAbroad: -20, decidesHere: 5,
   // Zac, 13 Nov 2026: "if a company is NAME then UK, score it lower — it's obviously got an overseas owner"
   ukArmName: -10,
   // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
@@ -937,7 +939,12 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   add(r.subsidiaries_abroad ? rules.subsidiaries : 0, `Subsidiaries abroad: ${r.subsidiaries_abroad}`);
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
-  add(r.run_from_abroad ? rules.ownedAbroad : 0, "Owned abroad: FX may be run by the parent");
+  // where finance decisions sit (control.js): owned abroad counts against it unless its own records show the UK decides
+  const seat = financeSeat(r);
+  const topSign = (side) => seat.signs.filter((x) => (side > 0 ? x.points > 0 : x.points < 0)).sort((a, b) => Math.abs(b.points) - Math.abs(a.points))[0]?.text.split(":")[0] || "";
+  if (seat.lean === "abroad") add(rules.runAbroad, `Likely run from abroad — ${topSign(-1)}`);
+  else if (seat.lean === "uk" && seat.owner) add(rules.decidesHere, `Owned abroad, but decides in the UK — ${topSign(1)}`);
+  else if (seat.owner) add(rules.ownedAbroad, "Owned abroad: ask where FX is decided");
   add(!r.run_from_abroad && ukArmName(r) ? rules.ukArmName : 0, "Name ends in UK — probably a foreign group's UK arm");
   const recentLoss = loss >= rules.lossMin && Boolean(filedOn) && filedOn >= day(rules.recentDays);
   const change = newFd ? "a new FD" : buying ? "buying companies" : pe ? "a private-equity deal" : "";
@@ -1020,3 +1027,5 @@ export function outreachWhy(r, list, { letters = OUTREACH.letters, total = 0 } =
   return out;
 }
 export const outreachWhyLine = (r) => (r.outreach_why || []).map((w) => `${w.label}: ${w.text}`).join(" | ");
+
+export { financeSeat, SEAT_LABEL };
