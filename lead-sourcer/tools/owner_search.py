@@ -44,7 +44,7 @@ def shown(e: dict) -> str:
     if not e.get("owner"):
         return "nothing found"
     who = "a person" if e.get("kind") == "person" else e["owner"]
-    return f"{who}{' (' + e['country'] + ')' if e.get('country') else ''} [{e.get('kind')}, {e.get('sites')} site(s)]"
+    return f"{who}{' (' + e['country'] + ')' if e.get('country') else ''} [{e.get('kind')}, {e.get('sites')} site(s), read by {e.get('read_by', 'rules')}]"
 
 
 def main() -> None:
@@ -109,6 +109,10 @@ def main() -> None:
     json.dump({"made_at": today.isoformat(), "companies": found, "usage": {month: profiles.usage()}}, open(args.out, "w"))
     total = sum(1 for e in found.values() if e.get("owner"))
     print(f"Owner search: {searched} searched this run, {owners} owners found; {total} companies with an owner on file")
+    u = owner_search.AI_USAGE
+    print(f"AI reader (Groq {owner_search.GROQ_MODEL}): {u['calls']} calls, {u['tokens']:,} tokens, "
+          f"{u['dropped']} answers dropped (not in the results), {u['failed']} failed"
+          + ("" if os.environ.get("GROQ_API_KEY") else " — no GROQ_API_KEY: read by rules"))
 
 
 if __name__ == "__main__":

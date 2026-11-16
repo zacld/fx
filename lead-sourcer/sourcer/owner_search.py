@@ -16,6 +16,7 @@ Kept with its quote and link; a person, a private-equity house or a company; the
 from __future__ import annotations
 
 import json
+import os
 import re
 from collections import defaultdict
 from typing import Callable, Optional
@@ -147,6 +148,105 @@ def answer(results: list[tuple[str, str, str]], company_name: str) -> Optional[d
     return best
 
 
+# ── The AI reader (Zac, 16 Nov 2026: the rules read "Who", "Renshaw" — a company Bakels bought — and a person for NCR;
+# "yes fine" to one capped AI call a company for this check only — the exception to Priority 1 in CLAUDE.md). One Groq
+# call per company (free tier, llama-3.3-70b-versatile, key GROQ_API_KEY), given the search results already fetched; it
+# must name the result it read and quote it, and the quote and owner are checked against that result — an answer the
+# results don't contain is dropped (no owner rather than an invented one). Calls and tokens are counted and logged.
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = os.environ.get("GROQ_MODEL") or "llama-3.3-70b-versatile"
+AI_USAGE = {"calls": 0, "tokens": 0, "dropped": 0, "failed": 0}
+_PROMPT = """You read web search results to find who OWNS a UK company. Answer only from the results below.
+Company: {name} (Companies House {number})
+
+Results:
+{results}
+
+Who owns {name}? Give the ultimate owner a person would name: the parent company, the private equity firm, or the
+person/family who owns it. Not a company it bought, not a customer, not a brand it sells, not a different company with a
+similar name. If the results don't say, answer none.
+Reply with JSON only: {{"owner": "<name or none>", "type": "company|private_equity|person|none",
+"country": "<country where the owner is based, only if the results say, else empty>",
+"result": <the number of the result that says it>, "quote": "<the exact words from that result>"}}"""
+
+
+def _norm_text(t: str) -> str:
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", (t or "").lower()).split())
+
+
+def ai_read(results: list[tuple[str, str, str]], company_name: str, number: str = "",
+            post: Optional[Callable[[dict], Optional[dict]]] = None) -> Optional[dict]:
+    """{owner, kind, country, quote, url, sites} | {none: True} from one AI call, or None when no call could be made."""
+    key = os.environ.get("GROQ_API_KEY", "").strip()
+    if not results or (not key and post is None):
+        return None
+    shown = results[:8]
+    listing = "\n".join(f"[{i + 1}] {t[:160]} — {s[:320]}" for i, (_, t, s) in enumerate(shown))
+    body = {"model": GROQ_MODEL, "temperature": 0, "max_tokens": 200, "response_format": {"type": "json_object"},
+            "messages": [{"role": "user", "content": _PROMPT.format(name=company_name, number=number, results=listing)}]}
+    data = post(body) if post else _groq(body, key)
+    if not data:
+        AI_USAGE["failed"] += 1
+        return None
+    AI_USAGE["calls"] += 1
+    AI_USAGE["tokens"] += int((data.get("usage") or {}).get("total_tokens") or 0)
+    try:
+        ans = json.loads(data["choices"][0]["message"]["content"])
+    except (KeyError, IndexError, ValueError, TypeError):
+        AI_USAGE["failed"] += 1
+        return None
+    owner = str(ans.get("owner") or "").strip()
+    if not owner or owner.lower() == "none" or ans.get("type") == "none":
+        return {"none": True}
+    try:
+        i = int(ans.get("result")) - 1
+        url, title, snippet = shown[i]
+    except (TypeError, ValueError, IndexError):
+        AI_USAGE["dropped"] += 1
+        return {"none": True}
+    text = _norm_text(f"{title} {snippet}")
+    words = [w for w in _norm_text(owner).split() if w not in ("the", "of", "and", "limited", "ltd", "plc", "inc")]
+    quote = str(ans.get("quote") or "")
+    # the owner must be in the result it named, and the quote mostly its words: else it isn't the results' answer
+    q = _norm_text(quote).split()
+    if not words or not all(w in text for w in words) or (q and sum(w in text.split() for w in q) < 0.8 * len(q)):
+        AI_USAGE["dropped"] += 1
+        return {"none": True}
+    if _key(owner) and (_key(owner) == _key(company_name)):
+        return {"none": True}
+    kind = {"private_equity": "pe", "person": "person", "company": "company"}.get(ans.get("type"), kind_of(owner))
+    sites = sum(1 for u, t, sn in results if all(w in _norm_text(f"{t} {sn}") for w in words))
+    country = str(ans.get("country") or "").strip()
+    country = _ADJ.get(country, country)
+    if country and _norm_text(country) not in _norm_text(" ".join(f"{t} {sn}" for _, t, sn in results)) \
+            and not any(k for k, v in _ADJ.items() if v == country and _norm_text(k) in text):
+        country = ""   # a country the results don't say is a guess
+    return {"owner": owner[:120], "kind": kind, "country": country, "quote": " ".join(f"{title} — {snippet}".split())[:240],
+            "url": "" if url == "knowledge-panel" else url, "sites": max(1, sites), "read_by": "ai"}
+
+
+def _groq(body: dict, key: str) -> Optional[dict]:
+    import time
+    import urllib.error
+    import urllib.request
+    for attempt in range(3):
+        req = urllib.request.Request(GROQ_URL, data=json.dumps(body).encode(), headers={
+            "Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": profiles.USER_AGENT})
+        try:
+            with urllib.request.urlopen(req, timeout=60) as res:
+                return json.load(res)
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < 2:      # free tier: requests a minute
+                time.sleep(float(e.headers.get("retry-after") or 10))
+                continue
+            print(f"  Groq refused ({e.code})")
+            return None
+        except Exception:  # noqa: BLE001
+            if attempt < 2:
+                time.sleep(5)
+    return None
+
+
 def search(number: str, company_name: str, fetch: Callable[[str], Optional[str]] = profiles.fetch_any) -> dict:
     """{owner, kind, country, sites, quote, url} or {none: True}; {error: True} when no search could be made."""
     name = profiles.plain_name(company_name)
@@ -159,8 +259,11 @@ def search(number: str, company_name: str, fetch: Callable[[str], Optional[str]]
         profiles._store(query, raw)
     results = profiles.parse(raw) or []
     results = _panel(raw) + results
-    best = answer(results, company_name)
-    return best if best else {"none": True}
+    read = ai_read(results, company_name, number)
+    if read is not None:          # the AI read it (an owner checked against the results, or none)
+        return read
+    best = answer(results, company_name)          # no AI key or the call failed: the rules
+    return {**best, "read_by": "rules"} if best else {"none": True}
 
 
 def _panel(raw: str) -> list[tuple[str, str, str]]:

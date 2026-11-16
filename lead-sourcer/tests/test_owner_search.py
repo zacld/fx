@@ -28,5 +28,28 @@ class OwnerSearch(unittest.TestCase):
         self.assertEqual(o.kind_of("Axalta Coating Systems Ltd"), "company")
 
 
+class AiReader(unittest.TestCase):
+    R = [("https://a.com", "Bakels acquires Renshaw", "British Bakels is part of the Bakels Group, the Swiss-based bakery firm.")]
+
+    def reply(self, ans):
+        import json
+        return lambda body: {"usage": {"total_tokens": 400}, "choices": [{"message": {"content": json.dumps(ans)}}]}
+
+    def test_checked_answer(self):
+        a = o.ai_read(self.R, "BRITISH BAKELS LIMITED", post=self.reply(
+            {"owner": "Bakels Group", "type": "company", "country": "Switzerland", "result": 1, "quote": "part of the Bakels Group"}))
+        self.assertEqual((a["owner"], a["read_by"]), ("Bakels Group", "ai"))
+
+    def test_answer_not_in_results_dropped(self):
+        a = o.ai_read(self.R, "BRITISH BAKELS LIMITED", post=self.reply(
+            {"owner": "Unilever", "type": "company", "result": 1, "quote": "owned by Unilever"}))
+        self.assertEqual(a, {"none": True})
+
+    def test_country_not_stated_is_blank(self):
+        a = o.ai_read(self.R, "BRITISH BAKELS LIMITED", post=self.reply(
+            {"owner": "Bakels Group", "type": "company", "country": "Germany", "result": 1, "quote": "part of the Bakels Group"}))
+        self.assertEqual(a["country"], "")
+
+
 if __name__ == "__main__":
     unittest.main()

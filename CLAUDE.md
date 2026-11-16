@@ -679,7 +679,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`QUERY`: "<name>" owned by / subsidiary of / acquired by / parent company / portfolio company) through the finder's
   search APIs within their allowances (`profiles.fetch_any`; secrets `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`,
   `SERPER_API_KEY`, the month's usage carried in the store item so the caps hold), best leads first, `--max` 50 a day;
-  titles and snippets naming the company read by rules ("owned by X", "subsidiary of X", "acquired by X", "part of the X
+  the results read by one checked AI call (Groq — the Priority 1 exception; `ai_read`, the owner and quote must be in
+  the result it names) or, with no key or a failed call, by rules ("owned by X", "subsidiary of X", "acquired by X", "part of the X
   group", "portfolio company of X", "X acquires …", Serper's knowledge panel "Parent organization: X" counting double),
   one owner under several spellings merged, a person / PE house / company, the country only when stated. Store key
   `owners` (found kept 180 days, nothing found retried after 60); `?view=signals` gives `owners_search`; `ownershipOf`
@@ -876,6 +877,13 @@ Rules that cannot be broken:
 - AI is only used for event-level reasoning
 
 Any feature that would require per-company or per-lead AI calls must be redesigned to be rule-based.
+
+**One exception, agreed by Zac on 16 Nov 2026** ("yes fine" — after the rule-based reading of ownership searches named
+"Who", a company Bakels had bought, and a person for NCR): the **ownership check** (`lead-sourcer/sourcer/owner_search.py`
+`ai_read`) makes one AI call per company to read that company's search results — Groq's free tier
+(`llama-3.3-70b-versatile`, `GROQ_API_KEY`), capped by the run's `--max` (50 companies a day), every call and its
+tokens logged. The answer must name the result it read and quote it; an owner or country the results don't contain is
+dropped. No other per-company AI.
 
 ---
 
