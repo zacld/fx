@@ -225,7 +225,28 @@ def ai_read(results: list[tuple[str, str, str]], company_name: str, number: str 
             "url": "" if url == "knowledge-panel" else url, "sites": max(1, sites), "read_by": "ai"}
 
 
+# a retired model answers 404 model_not_found: the next of these is tried and kept for the run (as packages/pipeline's
+# sources/ai.ts does for the event call)
+GROQ_FALLBACKS = ["openai/gpt-oss-120b", "meta-llama/llama-4-scout-17b-16e-instruct", "llama-3.1-8b-instant"]
+_model: list = []
+
+
 def _groq(body: dict, key: str) -> Optional[dict]:
+    global GROQ_MODEL
+    for model in ([_model[0]] if _model else [GROQ_MODEL] + [m for m in GROQ_FALLBACKS if m != GROQ_MODEL]):
+        out = _groq_once({**body, "model": model}, key)
+        if out == "model_gone":
+            continue
+        if out is not None and not _model:
+            _model.append(model)
+            if model != GROQ_MODEL:
+                print(f"  Groq: {GROQ_MODEL} not available, using {model}")
+                GROQ_MODEL = model
+        return out if isinstance(out, dict) else None
+    return None
+
+
+def _groq_once(body: dict, key: str):
     import time
     import urllib.error
     import urllib.request
@@ -236,10 +257,15 @@ def _groq(body: dict, key: str) -> Optional[dict]:
             with urllib.request.urlopen(req, timeout=60) as res:
                 return json.load(res)
         except urllib.error.HTTPError as e:
+            text = e.read(400).decode("utf-8", "replace") if e.fp else ""
+            if e.code == 404 and re.search(r"model_not_found|does not exist|decommissioned", text, re.I):
+                return "model_gone"
+            if e.code == 400 and re.search(r"decommissioned|not supported", text, re.I):
+                return "model_gone"
             if e.code == 429 and attempt < 2:      # free tier: requests a minute
                 time.sleep(float(e.headers.get("retry-after") or 10))
                 continue
-            print(f"  Groq refused ({e.code})")
+            print(f"  Groq refused ({e.code}): {re.sub(r'[^ -~]', '', text)[:160]}")
             return None
         except Exception:  # noqa: BLE001
             if attempt < 2:
