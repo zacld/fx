@@ -126,7 +126,7 @@ def main() -> None:
     print(f"Gemini + Google Search: {g['calls']} calls, {g['tokens']:,} tokens, {g['dropped']} answers dropped "
           f"(not backed by Google's sources), {g['failed']} failed"
           + ("" if os.environ.get("GEMINI_API_KEY") else " — no GEMINI_API_KEY"))
-        u = owner_search.AI_USAGE
+    u = owner_search.AI_USAGE
     print(f"AI reader (Groq {owner_search.GROQ_MODEL}): {u['calls']} calls, {u['tokens']:,} tokens, "
           f"{u['dropped']} answers dropped (not in the results), {u['failed']} failed"
           + ("" if os.environ.get("GROQ_API_KEY") else " — no GROQ_API_KEY: read by rules"))
