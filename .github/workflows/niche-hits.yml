@@ -109,8 +109,17 @@ jobs:
           node scripts/alerts-store.mjs put deals ../../lead-sourcer/deals.json
           # no file when the customs history was cut short (niche_hits.py): the last good moments stay
           if [ -f ../../lead-sourcer/moments.json ]; then node scripts/alerts-store.mjs put moments ../../lead-sourcer/moments.json; fi
+      # Who owns each tracked company, from the Global LEI register's free daily files (direct and ultimate parent, or why
+      # none): one read of three files, no searching. Never fails the run.
+      - name: Owners from the LEI register
+        working-directory: lead-sourcer
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python3 tools/gleif_owners.py --tracked tracked.json --out gleif.json
       - name: Rank every lead
-        run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json
+        run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json ../../lead-sourcer/gleif.json
       # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
       # until the Cloudflare token may use D1; never fails the run.
       # Only from main: a branch push runs this workflow in full, and its copy would spend the database's daily writes

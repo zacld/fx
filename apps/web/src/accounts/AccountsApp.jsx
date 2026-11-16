@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, keyPoints, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, setKnownLei, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -105,7 +105,7 @@ function Accounts({ data, password }) {
   useEffect(() => {
     let live = true;
     fetch(`${API}?view=ranked`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) { setKnownGroups(body.group_of); setRanked(body); } }).catch(() => {});
+      .then((res) => (res.ok ? res.json() : null)).then((body) => { if (live && body) { setKnownGroups(body.group_of); setKnownLei(body.gleif_of); setRanked(body); } }).catch(() => {});
     return () => { live = false; };
   }, [password]);
   const baseRows = useMemo(() => {
@@ -154,7 +154,7 @@ function Accounts({ data, password }) {
   const rows = useMemo(() => allRows.filter((r) => !ukNamed(r) || contacted[r.company_number]), [allRows, contacted]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
-                                            peOnly: false, newFdOnly: false, industry: "" });
+                                            peOnly: false, newFdOnly: false, industry: "", ownership: "" });
   const [sort, setSort] = useState("lead");
   // Sheet (a dense, sortable grid) or Cards; remembered in this browser
   const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
@@ -350,6 +350,11 @@ function Accounts({ data, password }) {
     const base = filterRows(rows, { ...ctx, role: "" });
     return Object.fromEntries(ROLE_GROUPS.map((g) => [g, base.filter((r) => roleGroup(r) === g).length]));
   }, [rows, filters, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const ownCounts = useMemo(() => {
+    const counts = {};
+    for (const r of filterRows(rows, { ...ctx, ownership: "" })) { const k = ownership(r).status; counts[k] = (counts[k] || 0) + 1; }
+    return counts;
+  }, [rows, filters, contacted, notes, data.made_at]);   // eslint-disable-line react-hooks/exhaustive-deps
   const industryCounts = useMemo(() => {
     const counts = {};
     for (const r of filterRows(rows, { ...ctx, industry: "" })) counts[industryOf(r)] = (counts[industryOf(r)] || 0) + 1;
@@ -375,7 +380,7 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), industry: industryOf(r), finance_decided: financeSeat(r).verdict, what_to_pitch: pitchLine(r), my_list: LIST_NAMES[lists[r.company_number]?.list] || "",
+    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), industry: industryOf(r), finance_decided: financeSeat(r).verdict, ...(() => { const o = ownership(r); return { ownership: OWNERSHIP_LABEL[o.status], ultimate_owner: o.owner, owner_country: o.country }; })(), what_to_pitch: pitchLine(r), my_list: LIST_NAMES[lists[r.company_number]?.list] || "",
       lead_checklist: checklistLine(leadChecklist(r, checks)), reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text }));
     downloadSheet(out, columnsFor(EXPORT_FIELDS, { company_and_fd: "Company – Finance Director" }, NUMBER_FIELDS), `fx-accounts-${new Date().toISOString().slice(0, 10)}.xlsx`, "Accounts");
   };
@@ -518,6 +523,11 @@ function Accounts({ data, password }) {
             <option value="">Any industry</option>
             {INDUSTRIES.filter((g) => industryCounts[g]).sort((a, b) => industryCounts[b] - industryCounts[a])
               .map((g) => <option key={g} value={g}>{g} ({industryCounts[g]})</option>)}
+          </select>
+          <select className="input" value={filters.ownership} onChange={(e) => set({ ownership: e.target.value })} aria-label="Ownership"
+                  title="Who owns it at the top: the accounts' ultimate parent, else the register's chain of owners">
+            <option value="">Any owner</option>
+            {Object.entries(OWNERSHIP_LABEL).map(([k, label]) => <option key={k} value={k}>{label} ({ownCounts[k] || 0})</option>)}
           </select>
           <select className="input" value={filters.role} onChange={(e) => set({ role: e.target.value })} aria-label="Job role">
             <option value="">Any job role</option>
@@ -738,7 +748,8 @@ function KeyPoints({ r }) {
   const points = keyPoints(r, pitchLine(r).split(" · ").slice(0, 2).join(" · "));
   return (
     <ul className="key-points">
-      {points.map(([label, text]) => <li key={label}><span className="kp-l">{label}</span>{text}</li>)}
+      {points.map(([label, text, href]) => <li key={label}><span className="kp-l">{label}</span>
+        <span>{text}{href && <> <a href={href} target="_blank" rel="noreferrer" title="Google: who owns it?">Who owns it? ↗</a></>}</span></li>)}
       {r.lead_score !== undefined && <li><span className="kp-l">Score</span>{r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</li>}
     </ul>
   );
@@ -1555,6 +1566,20 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
 
 // Zac's review of a lead: Good lead, or Not a fit with a reason (stored as his own verdict — never a bank record).
 const VerdictContext = createContext({ verdicts: {}, setVerdict: () => {} });
+// Who owns it, up the chain, and where — with Google searches to check it (never fetched).
+function OwnershipPanel({ r }) {
+  const o = ownership(r);
+  return (
+    <section className="panel">
+      <h2 className="panel-h">Ownership: {OWNERSHIP_LABEL[o.status]}{o.status === "foreign" ? ` (${o.country})` : ""}</h2>
+      <p className="panel-p"><b>{o.chain.join(" → ")}</b></p>
+      {o.says.length > 0 && <ul className="call-why">{o.says.map((x) => <li key={x.from}><b>{x.from}:</b> {x.status === "uk" ? "UK-owned" : "Foreign-owned"}{x.owner ? ` — ${x.owner}` : ""}{x.status === "foreign" ? ` (${x.country})` : ""}{x.note ? ` (${x.note})` : ""}</li>)}</ul>}
+      {o.source && <p className="muted panel-p">Answer from {o.source}.{r.ultimate_parent_evidence ? ` Accounts: “${r.ultimate_parent_evidence}”` : ""}</p>}
+      <p className="panel-p">{o.searches.map(([label, url]) => <a key={url} className="chip" href={url} target="_blank" rel="noreferrer">{label} ↗</a>)}</p>
+    </section>
+  );
+}
+
 // Where finance decisions sit (control.js): the lean, every sign for and against with its points, and what to ask.
 function SeatPanel({ r }) {
   const seat = financeSeat(r);
@@ -2402,6 +2427,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
           <ScoreBreakdown r={r} open />
         </section>
       )}
+      <OwnershipPanel r={r} />
       <SeatPanel r={r} />
       <PitchPanel r={r} />
 
