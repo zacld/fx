@@ -53,11 +53,12 @@ jobs:
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # Gemini + Google Search: one call a company
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || secrets.GROQ_API }}   # the AI reader: one call a company, capped by --max
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
           NUMBERS=$(node scripts/ownership-sample.mjs ../../lead-sourcer/gleif.json "${{ github.event.inputs.count || '30' }}" --numbers | tail -1)
-          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --cache owners_cache.json --out owners.json --check --numbers "$NUMBERS"
+          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --cache owners_cache.json --out owners.json --numbers "$NUMBERS"
           cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json
       - name: The best leads, side by side
         run: cd apps/web && node scripts/ownership-sample.mjs ../../lead-sourcer/gleif.json "${{ github.event.inputs.count || '30' }}" ../../lead-sourcer/owners.json

@@ -77,7 +77,7 @@ def main() -> None:
         os.makedirs(profiles.CACHE_DIR, exist_ok=True)
         merged = {k: max(v, profiles.usage().get(k, 0)) for k, v in carried.items()}
         json.dump({**profiles.usage(), **merged}, open(profiles._usage_path(), "w"))
-    if not profiles.api_key():
+    if not profiles.api_key() and not os.environ.get("GEMINI_API_KEY"):
         print("Owner search: no search key set (SEARCH1API_KEY / TAVILY_API_KEY / EXA_API_KEY / SERPER_API_KEY) — skipped")
         json.dump({"made_at": today.isoformat(), "companies": found, "usage": {month: carried}}, open(args.out, "w"))
         return
@@ -98,7 +98,7 @@ def main() -> None:
         name = names.get(n) or ""
         if not name:
             continue
-        if owner_search.AI_SPENT and os.environ.get("GROQ_API_KEY"):
+        if owner_search.AI_SPENT and os.environ.get("GROQ_API_KEY") and (owner_search.GEMINI_SPENT or not os.environ.get("GEMINI_API_KEY")):
             print("Owner search: the AI reader's free allowance is used for today — stopping; the rest wait for tomorrow")
             break
         r = owner_search.search(n, name)
@@ -122,7 +122,11 @@ def main() -> None:
     json.dump({"made_at": today.isoformat(), "companies": found, "usage": {month: profiles.usage()}}, open(args.out, "w"))
     total = sum(1 for e in found.values() if e.get("owner"))
     print(f"Owner search: {searched} searched this run, {owners} owners found; {total} companies with an owner on file")
-    u = owner_search.AI_USAGE
+    g = owner_search.GEMINI_USAGE
+    print(f"Gemini + Google Search: {g['calls']} calls, {g['tokens']:,} tokens, {g['dropped']} answers dropped "
+          f"(not backed by Google's sources), {g['failed']} failed"
+          + ("" if os.environ.get("GEMINI_API_KEY") else " — no GEMINI_API_KEY"))
+        u = owner_search.AI_USAGE
     print(f"AI reader (Groq {owner_search.GROQ_MODEL}): {u['calls']} calls, {u['tokens']:,} tokens, "
           f"{u['dropped']} answers dropped (not in the results), {u['failed']} failed"
           + ("" if os.environ.get("GROQ_API_KEY") else " — no GROQ_API_KEY: read by rules"))

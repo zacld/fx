@@ -681,7 +681,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   PE firm or a loop: `chain`) through the finder's search APIs within their allowances (`profiles.fetch_any`; secrets
   `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `BRAVE_API_KEY` — Brave's free plan, added 16 Nov 2026 when Zac chose
   free allowances over paid credit ("$50 is a waste for a simple Google search"), `BRAVE_MONTHLY` 1,000 — `SERPER_API_KEY`, the month's usage carried in the store item so the
-  caps hold), best leads first, `--max` 200 companies a day (Zac, 16 Nov 2026: "check at least 200 a day" — more than
+  caps hold), best leads first, `--max` 100 companies a day (Zac, 16 Nov 2026: "we want 100 per day"; first route Gemini + Google Search, `gemini_read` — more than
   the free search allowances cover, so a provider with paid credit takes the rest; a run that runs out stops cleanly);
   an owner found before is kept when a later search finds nothing;
   the results read by one checked AI call (Groq — the Priority 1 exception; `ai_read`, the owner and quote must be in
@@ -894,7 +894,10 @@ Any feature that would require per-company or per-lead AI calls must be redesign
 `ai_read`) makes one AI call per company to read that company's search results — Groq's free tier
 (`llama-3.3-70b-versatile`, `GROQ_API_KEY`), capped by the run's `--max` (50 companies a day), every call and its
 tokens logged. The answer must name the result it read and quote it; an owner or country the results don't contain is
-dropped. No other per-company AI.
+dropped. **Gemini with Grounding with Google Search** (Zac, 16 Nov 2026: "the most reliable way is through Google";
+`GEMINI_API_KEY`, AI Studio's free tier) is now the first route: one call a company runs the Google searches itself —
+"who owns X", then who owns that owner — and counts only when Google's grounding backs the owner's name; `--max` 100 a
+day; Groq + the search APIs only when Gemini's daily allowance is used. No other per-company AI.
 
 ---
 
