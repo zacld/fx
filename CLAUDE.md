@@ -679,7 +679,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`QUERY` "who owns <name>" — what a person types; Google's answer box and knowledge panel read too — and, Zac's
   method, "who owns <that company>" again for each owner that is a company, up to `MAX_HOPS` 4, stopping at a person, a
   PE firm or a loop: `chain`) through the finder's search APIs within their allowances (`profiles.fetch_any`; secrets
-  `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `SERPER_API_KEY`, the month's usage carried in the store item so the
+  `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `BRAVE_API_KEY` — Brave's free plan, added 16 Nov 2026 when Zac chose
+  free allowances over paid credit ("$50 is a waste for a simple Google search"), `BRAVE_MONTHLY` 1,000 — `SERPER_API_KEY`, the month's usage carried in the store item so the
   caps hold), best leads first, `--max` 200 companies a day (Zac, 16 Nov 2026: "check at least 200 a day" — more than
   the free search allowances cover, so a provider with paid credit takes the rest; a run that runs out stops cleanly);
   an owner found before is kept when a later search finds nothing;

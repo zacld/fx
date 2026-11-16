@@ -57,8 +57,12 @@ def main() -> None:
     ap.add_argument("--cache", default="")
     ap.add_argument("--out", required=True)
     ap.add_argument("--max", type=int, default=150)
+    ap.add_argument("--check", action="store_true", help="one search with each provider's key first: which work")
     ap.add_argument("--numbers", default="", help="comma-separated company numbers: search just these")
     args = ap.parse_args()
+    if args.check:
+        for name, state in profiles.check_providers("who owns Walker Books").items():
+            print(f"  search provider {name}: {state}")
 
     tracked = _load(args.tracked, {})
     tracked = tracked.get("companies", tracked) if isinstance(tracked, dict) else {}
