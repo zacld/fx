@@ -101,6 +101,9 @@ async function whyRewritten(db, table, records, key, sample = 300) {
   console.log(`Database ${table}: of ${changed.length} changed records sampled, the fields that differ — ${top || "none (only the hash)"}`);
 }
 export const LIMIT_HIT = /limit exceeded|too many requests|daily.*limit|7429|exceeded/i;
+// 7429 "exceeded its CPU time limit" is one heavy statement, not the day's writes: said as such, so it isn't mistaken
+// for the write limit (16 Nov 2026).
+export const limitWhat = (msg = "") => (/CPU time/i.test(msg) ? "a statement ran over D1's CPU time limit" : "Cloudflare's daily write limit reached");
 
 async function main() {
   let db;
@@ -146,7 +149,7 @@ async function main() {
     }
   } catch (e) {
     if (!LIMIT_HIT.test(e.message)) throw e;
-    console.log(`Database: Cloudflare's daily write limit reached part-way (${e.message.slice(0, 120)}) — the rest goes on the next sync after midnight UTC`);
+    console.log(`Database: ${limitWhat(e.message)} part-way (${e.message.slice(0, 120)}) — the rest goes on the next sync`);
   }
   const total = usedToday + db.used.written;
   try {

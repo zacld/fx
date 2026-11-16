@@ -158,3 +158,21 @@ describe("Database (D1) mirror", () => {
     expect(changedFields(before, after).sort()).toEqual(["row.b", "timely"]);
   });
 });
+
+import { DELETE_BATCH } from "../api/db.mjs";
+describe("Deletes by key, in batches (16 Nov 2026: one big json_each scan ran over D1's CPU limit)", () => {
+  it("deletes more stale signals than one batch holds, and keeps the rest", async () => {
+    const { DatabaseSync } = await import("node:sqlite");
+    const sqlite = new DatabaseSync(":memory:");
+    const query = async (sql, params = []) => sqlite.prepare(sql).all(...params);
+    const { applySchema, syncTable } = await import("../api/db.mjs");
+    await applySchema(query);
+    const n = DELETE_BATCH + 250;
+    const all = Array.from({ length: n }, (_, i) => ({ id: `s${i}`, number: "1", kind: "k", at: "", title: "", detail: "", hot: 0, tracked: 1, source: "", hash: "h", data: "{}" }));
+    await syncTable(query, "signals", all);
+    const kept = all.slice(0, 10);
+    const r = await syncTable(query, "signals", kept);
+    expect(r.deleted).toBe(n - 10);
+    expect((await query("SELECT COUNT(*) AS c FROM signals"))[0].c).toBe(10);
+  });
+});
