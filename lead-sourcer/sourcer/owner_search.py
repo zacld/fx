@@ -159,6 +159,7 @@ def answer(results: list[tuple[str, str, str]], company_name: str) -> Optional[d
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = os.environ.get("GROQ_MODEL") or "llama-3.3-70b-versatile"
 AI_USAGE = {"calls": 0, "tokens": 0, "dropped": 0, "failed": 0}
+AI_SPENT: list = []   # set when Groq says the day's free allowance is used
 _PROMPT = """You read web search results to find who OWNS a UK company. Answer only from the results below.
 Company: {name} (Companies House {number})
 
@@ -181,7 +182,7 @@ def ai_read(results: list[tuple[str, str, str]], company_name: str, number: str 
             post: Optional[Callable[[dict], Optional[dict]]] = None) -> Optional[dict]:
     """{owner, kind, country, quote, url, sites} | {none: True} from one AI call, or None when no call could be made."""
     key = os.environ.get("GROQ_API_KEY", "").strip()
-    if not results or (not key and post is None):
+    if not results or (not key and post is None) or (AI_SPENT and post is None):
         return None
     shown = results[:8]
     listing = "\n".join(f"[{i + 1}] {t[:160]} — {s[:320]}" for i, (_, t, s) in enumerate(shown))
@@ -269,8 +270,15 @@ def _groq_once(body: dict, key: str):
                 return "model_gone"
             if e.code == 400 and re.search(r"decommissioned|not supported", text, re.I):
                 return "model_gone"
-            if e.code == 429 and attempt < 2:      # free tier: requests a minute
-                time.sleep(min(30.0, float(e.headers.get("retry-after") or 10)))   # a day's quota used: don't stall the run
+            if e.code == 429:
+                wait = float(e.headers.get("retry-after") or 10)
+                # the day's allowance used (a long wait, or the error says per day): no more AI this run — the run stops
+                # and keeps its search credit for tomorrow, rather than stall on waits or fall back to the rules
+                if wait > 60 or re.search(r"per day|\bTPD\b|\bRPD\b|daily", text, re.I) or attempt == 2:
+                    AI_SPENT.append(text[:160])
+                    print(f"  Groq: today's free allowance used — {re.sub(r'[^ -~]', '', text)[:140]}")
+                    return None
+                time.sleep(wait)                    # requests a minute: a short wait
                 continue
             print(f"  Groq refused ({e.code}): {re.sub(r'[^ -~]', '', text)[:160]}")
             return None

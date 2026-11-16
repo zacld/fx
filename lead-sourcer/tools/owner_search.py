@@ -98,6 +98,9 @@ def main() -> None:
         name = names.get(n) or ""
         if not name:
             continue
+        if owner_search.AI_SPENT and os.environ.get("GROQ_API_KEY"):
+            print("Owner search: the AI reader's free allowance is used for today — stopping; the rest wait for tomorrow")
+            break
         r = owner_search.search(n, name)
         if r.get("error"):
             errors += 1
