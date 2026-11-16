@@ -428,7 +428,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Tabs **Best fit** (Fit 30+, by Fit) and **Call now** (Fit 30+ with Timing > 0, by Timing), each with its half's
   reasons, an industry filter and Excel export; Sheet columns Fit / Now; exports `lead_fit` / `lead_timing`. The Niches
   tab's "Fit 60+" counts leads by Fit. The weights are logged here to be
-  recalibrated against what Sales takes.
+  recalibrated against what Sales takes. **First recalibration — Zac's review of ranks 35–77 (16 Nov 2026)**: his best
+  lead, Global Charter, ranked 77th (growing 54%, a USD loss of £96k, no hedging named, a new equipment-finance lender),
+  so Fit adds growth 20%+ 10 / 40%+ 15 (`growth`, `fastGrowth`) and an FX loss with no hedging named 10 (`lossNoHedge`),
+  and a new charge (new borrowing / a new lender) counts 15 in Timing (`newLender`, a plain change stays 10); a **"Like
+  Global Charter"** filter (`lookalike`: UK-owned, £20m–£100m, FX loss £50k+, no hedging named, still growing). The same
+  review: 22 of 43 were already with the bank (the CRM check — not detectable from public records, and never stored
+  here), 7 were owned abroad though marked UK-owned (what the owner search fixes), and holding companies (Topco, Holdings)
+  were labelled "Finance & insurance" from their holding-company sector code.
 - **Every lead ranked** (Zac, 11 Nov 2026: "scan all the leads, rank them in our scoring system, add them to the
   Accounts page, learn which niches are better — you'll come across some absurd ones"): the "Niche hits" workflow
   (daily 04:23 UTC) also tags every company on the Accounts and FX filings lists (`alerts-store.mjs tracked`) with its

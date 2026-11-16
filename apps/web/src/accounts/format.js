@@ -78,7 +78,7 @@ export const googleFd = (r) =>
 // view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
 export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
                                    showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
-                                   contacted = {}, notes = {}, role = "", peOnly = false, newFdOnly = false, industry = "", ownership = "" } = {}) {
+                                   contacted = {}, notes = {}, role = "", peOnly = false, newFdOnly = false, industry = "", ownership = "", lookalikeOnly = false } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
     (view === "contacted") === Boolean(contacted[r.company_number]) &&
@@ -91,6 +91,7 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!pair || parts(r.currency_pairs).includes(pair)) &&
     (!triggersOnly || Boolean(r.triggers)) &&
     (!peOnly || Boolean(peBackedOf(r))) &&
+    (!lookalikeOnly || lookalike(r)) &&
     (!industry || industryOf(r) === industry) &&
     (!ownership || ownership(r).status === ownership) &&
     (!newFdOnly || Boolean(r.lead_flags?.newFd)) &&
@@ -450,6 +451,15 @@ export function filedIso(r) {
 }
 
 // Hedging named in the company's own accounts: its forward contracts, or "Uses …" (forwards, options, a provider).
+// turnover growth on last year in % ("+54%" → 54), NaN when not known
+export const growthPct = (r) => parseFloat(String(r?.turnover_growth || "").replace(/[+%,\s]/g, ""));
+// "Like Global Charter" (Zac's best lead from his first review, 16 Nov 2026): UK-owned, £20m–£100m, an FX loss of £50k+,
+// no hedging named, still growing — the closest matches to the profile that converts
+export function lookalike(r) {
+  const t = Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0;
+  return t >= 20e6 && t <= 100e6 && (-Number(r.fx_gain_loss_gbp) || 0) >= 50000 && !hedgingNamed(r)
+    && growthPct(r) > 0 && !foreignOwned(r) && !ukNamed(r);
+}
 export const hedgingNamed = (r) => Boolean(r.fx_forwards) || /^Uses\b/.test(r.fx_today || "");
 
 // Every company with an FX loss in its latest accounts: the main list's (full research, finance contact) first, then
@@ -780,6 +790,10 @@ export const LEAD_POINTS = {
   currencyMoved: 10, moveWeek: 3, moveMonth: 5,
   // an insolvency filing or case, or a winding-up petition: hold off
   insolvency: -60,
+  // From Zac's first review (16 Nov 2026 — Global Charter, "the best so far", ranked 77th: growing 54%, a USD loss, no
+  // hedging named, a new equipment-finance lender): growth 20%+ 10 (40%+ 15), an FX loss with no hedging named 10, and
+  // a new charge — new borrowing or a new lender — 15 rather than a plain change's 10.
+  growth: 10, fastGrowth: 15, growthMin: 20, fastGrowthMin: 40, lossNoHedge: 10, newLender: 15,
 };
 // Fit and Timing (Zac, 15 Nov 2026: "do the fit and timing split"): each lead's reasons count in Fit (the right
 // company — FX proof and pain, size, niche, ownership; 0–100) or Timing (why call now — moments, deals, a new FD, a
@@ -934,7 +948,8 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   cat = "timing";
   const other = triggers.find((t) => !NEW_FD.test(t)) ||
     recent.find((s) => /^(new_owner|new_charge|charge_paid|fx_charge)$/.test(s.kind) && !(switched && /charge/.test(s.kind)))?.title;
-  add(other && !owner ? rules.trigger : 0, `Change: ${other}`);
+  const lender = other && /new charge|new borrowing|new lender|new bank/i.test(other);
+  add(other && !owner ? (lender ? rules.newLender : rules.trigger) : 0, lender ? `New borrowing / lender: ${other}` : `Change: ${other}`);
   const abroad = recent.find((s) => s.kind === "news_abroad");
   add(abroad ? rules.abroadNews : 0, `In the news: ${abroad?.title || ""}`);
   const hiring = recent.find((s) => s.kind === "hiring");
@@ -943,6 +958,9 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   add(r.subsidiaries_abroad ? rules.subsidiaries : 0, `Subsidiaries abroad: ${r.subsidiaries_abroad}`);
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
+  add(loss >= rules.lossMin && !hedgingNamed(r) ? rules.lossNoHedge : 0, "FX loss with no hedging named — the clearest need");
+  const growth = growthPct(r);
+  add(growth >= rules.fastGrowthMin ? rules.fastGrowth : growth >= rules.growthMin ? rules.growth : 0, `Growing fast: turnover ${r.turnover_growth} on last year`);
   // where finance decisions sit (control.js): owned abroad counts against it unless its own records show the UK decides
   const seat = financeSeat(r);
   const topSign = (side) => seat.signs.filter((x) => (side > 0 ? x.points > 0 : x.points < 0)).sort((a, b) => Math.abs(b.points) - Math.abs(a.points))[0]?.text.split(":")[0] || "";

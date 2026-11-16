@@ -157,7 +157,7 @@ function Accounts({ data, password }) {
   const rows = useMemo(() => allRows.filter((r) => !elsewhere(r) || contacted[r.company_number]), [allRows, contacted, signals]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
-                                            peOnly: false, newFdOnly: false, industry: "", ownership: "" });
+                                            peOnly: false, newFdOnly: false, industry: "", ownership: "", lookalikeOnly: false });
   const [sort, setSort] = useState("lead");
   // Sheet (a dense, sortable grid) or Cards; remembered in this browser
   const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
@@ -548,6 +548,7 @@ function Accounts({ data, password }) {
           <label className="check"><input type="checkbox" checked={filters.fxLossOnly} onChange={(e) => set({ fxLossOnly: e.target.checked })} /> Recent FX loss</label>
           <label className="check"><input type="checkbox" checked={filters.fdOnly} onChange={(e) => set({ fdOnly: e.target.checked })} /> FD named</label>
           <label className="check"><input type="checkbox" checked={filters.triggersOnly} onChange={(e) => set({ triggersOnly: e.target.checked })} /> Triggers</label>
+          <label className="check" title="Like Global Charter, the best lead so far: UK-owned, £20m–£100m, an FX loss of £50k+, no hedging named, still growing"><input type="checkbox" checked={filters.lookalikeOnly} onChange={(e) => set({ lookalikeOnly: e.target.checked })} /> Like Global Charter</label>
           <label className="check" title="A private-equity owner anywhere up the chain, a PE house or fund named in the accounts, or buyout-style debt"><input type="checkbox" checked={filters.peOnly} onChange={(e) => set({ peOnly: e.target.checked })} /> PE-backed</label>
           <label className="check" title="A new finance director: appointed (accounts, alerts, news) or being hired (job adverts)"><input type="checkbox" checked={filters.newFdOnly} onChange={(e) => set({ newFdOnly: e.target.checked })} /> New FD</label>
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>
