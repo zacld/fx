@@ -358,6 +358,7 @@ describe("Call today", () => {
     const r = { turnover_gbp: "40000000", filed_fx_score: 60, own_bank_client: "yes", fx_today: "Uses an FX provider: Ebury",
       accounts_filed_on: "2025-06-01", group_companies_in_list: "2", run_from_abroad: "Owned from Sweden (CLOETTA AB) — pitch the UK team" };
     expect(reasonsNotToProgress(r, { today }).map((x) => x.text)).toEqual([
+      "Owned from abroad (CLOETTA AB, Sweden) — kept in the Foreign-owned tab, out of the other lists",
       "Owned from Sweden (CLOETTA AB) — FX may be run by the parent",
       "Already banks with Investec — check the CRM owner before contact",
       "Already uses an FX provider: Ebury — a competitive pitch",

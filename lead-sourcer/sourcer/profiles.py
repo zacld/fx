@@ -180,7 +180,8 @@ def fetch_any(query: str, _key: str = "") -> Optional[str]:
             if results is not None:
                 _count(name)
                 _strikes[name] = 0
-                return json.dumps({"results": results, "provider": name})
+                kg = _panel_of(text)     # Google's knowledge panel (Serper): "Parent organization", "Owner"
+                return json.dumps({"results": results, "provider": name, **({"panel": kg} if kg else {})})
             if code in (401, 402, 403) or code == 200:
                 _failed.add(name)       # bad key or out of credits (an error answer): done for this run
                 _why[name] = describe_failure(code, text)
@@ -272,6 +273,20 @@ def check_providers(query: str = "Companies House") -> dict:
         else:
             status[name] = describe_failure(code, text)
     return status
+
+
+def _panel_of(answer: str) -> Optional[dict]:
+    """{title, attributes} of a knowledge panel in the provider's answer, or None."""
+    try:
+        data = json.loads(answer or "")
+        kg, box = data.get("knowledgeGraph"), data.get("answerBox")
+    except (ValueError, AttributeError):
+        return None
+    out = {"title": kg.get("title", ""), "attributes": kg.get("attributes") or {}} if isinstance(kg, dict) else {}
+    if isinstance(box, dict) and (box.get("answer") or box.get("snippet")):   # Google's answer at the top of the page
+        out["answer"] = " ".join(str(box.get(k) or "") for k in ("title", "answer", "snippet")).strip()
+        out["answer_link"] = box.get("link") or ""
+    return out or None
 
 
 def _normalise(answer: Optional[str]) -> Optional[list[dict]]:

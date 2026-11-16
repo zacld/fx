@@ -92,7 +92,7 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!triggersOnly || Boolean(r.triggers)) &&
     (!peOnly || Boolean(peBackedOf(r))) &&
     (!industry || industryOf(r) === industry) &&
-    (!ownership || ownershipOf(r, groupOf(r), knownLei[r.company_number] || null).status === ownership) &&
+    (!ownership || ownership(r).status === ownership) &&
     (!newFdOnly || Boolean(r.lead_flags?.newFd)) &&
     (showOut || !isOut(r)) &&
     (!q || [r.company_name, r.finance_contact, r.finance_contact_clues, r.fx_niche, r.main_bank, r.postcode, r.company_number, notes[r.company_number]?.text]
@@ -579,6 +579,7 @@ export function reasonsNotToProgress(r, { today = new Date(), signals = knownSig
   const t = Number(r.turnover_gbp) || 0;
   const trouble = (signals[r.company_number] || []).find((s) => HOLD_OFF_KINDS.includes(s.kind));
   if (ukNamed(r)) add("“UK” in its name — kept in the UK in name tab, out of the other lists", true);
+  else if (foreignOwned(r)) add(`Owned from abroad${ownership(r).owner ? ` (${ownership(r).owner}${ownership(r).country ? `, ${ownership(r).country}` : ""})` : ""} — kept in the Foreign-owned tab, out of the other lists`, true);
   if (trouble) add(`${trouble.title}${trouble.at ? ` (${String(trouble.at).slice(0, 10)})` : ""} — hold off`, true);
   if (r.qualified === "Out") add(`Qualified out${r.qualify_reason ? `: ${r.qualify_reason}` : ""}`, true);
   if (t > CORE_BAND[1]) add(`Turnover ${money(t)} — above £300m (check the desk's upper limit)`, true);
@@ -1045,7 +1046,7 @@ export function keyPoints(r, pitch = "") {
     r.fx_forwards ? "uses forwards" : /^Uses/.test(r.fx_today || "") ? cut(r.fx_today.toLowerCase(), 40) : (cur || loss) ? "no hedging named" : "",
     r.overseas_turnover_share ? `${r.overseas_turnover_share} of sales abroad` : ""].filter(Boolean);
   out.push(["FX", fx.length ? fx.join(" · ") : r.hmrc_trade ? cut(r.hmrc_trade) : "Nothing in the filings yet"]);
-  const own = ownershipOf(r, groupOf(r), knownLei[r.company_number] || null);
+  const own = ownership(r);
   const seat = financeSeat(r);
   const who = own.status === "unknown" ? "Owner not known — check who owns it"
     : `${OWNERSHIP_LABEL[own.status]}${own.owner && own.owner !== r.company_name ? ` — ${cut(own.owner, 40)}${own.status === "foreign" ? ` (${own.country})` : ""}` : ""}`;
@@ -1058,4 +1059,11 @@ export function keyPoints(r, pitch = "") {
 export { financeSeat, SEAT_LABEL, ownershipOf, OWNERSHIP_LABEL };
 let knownLei = {};
 export const setKnownLei = (map) => { knownLei = map || {}; };
-export const ownership = (r) => ownershipOf(r, groupOf(r), knownLei[r.company_number] || null);
+// the daily owner search's answers (store key `owners`, via ?view=signals): {number: {owner, kind, country, quote, url}}
+let knownOwnerSearch = {};
+export const setKnownOwnerSearch = (map) => { knownOwnerSearch = map || {}; };
+// owned from abroad by any source (accounts, LEI register, Companies House, the owner search): the Foreign-owned tab
+export const foreignOwned = (r) => ownership(r).status === "foreign";
+// in a tab of its own, out of every other list
+export const elsewhere = (r) => ukNamed(r) || foreignOwned(r);
+export const ownership = (r) => ownershipOf(r, groupOf(r), knownLei[r.company_number] || null, knownOwnerSearch[r.company_number] || null);

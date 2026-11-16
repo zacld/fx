@@ -129,6 +129,7 @@ export function splitDetails(rows = []) {
   return { rows: slim, shards };
 }
 export const RANKED_KEY = "leads/ranked";   // {made_at, rows, ruled_out, niches}: every scanned lead ranked (scripts/rank-leads.mjs)
+export const OWNERS_KEY = "owners";     // {made_at, companies: {number: {owner, kind, country, quote, url, searched}}, usage}: tools/owner_search.py
 export const DOMAINS_KEY = "domains";   // {made_at, sites: {number: {website, confidence, found}}, none}: tools/find_domains.py
 export const DEALS_KEY = "deals";   // {made_at, items}: purchases from the ownership register (tools/psc_deals.py)
 // {made_at, latest, items: [{company_number, kind, at, title, detail, tracked}]}: customs moments (tools/niche_hits.py) —
@@ -301,9 +302,11 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
   }
   // For the lead score: each measured niche's numbers (niche_hits) and each company's recent alerts (kind, date, title).
   if (params.get("view") === "signals") {
-    const [niches, alerts, deals, domains, moments] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY, DOMAINS_KEY, MOMENTS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    const [niches, alerts, deals, domains, moments, owners] = await Promise.all([NICHES_KEY, ALERTS_KEY, DEALS_KEY, DOMAINS_KEY, MOMENTS_KEY, OWNERS_KEY].map((k) => blobs.get(k, { type: "json" })));
     const websites = Object.fromEntries(Object.entries(domains?.sites || {}).map(([n, s]) => [n, s.website]));
-    return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [], websites,
+    const owners_search = Object.fromEntries(Object.entries(owners?.companies || {}).filter(([, o]) => o.owner)
+      .map(([n, o]) => [n, { owner: o.owner, kind: o.kind, country: o.country || "", quote: o.quote || "", url: o.url || "", chain: (o.chain || []).map((c) => c.owner) }]));
+    return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [], websites, owners_search,
                    alerts_summary: alertsSummary(alerts?.items || []),
                    signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) }, 200);
   }
