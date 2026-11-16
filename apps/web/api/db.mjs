@@ -124,6 +124,7 @@ const keyOf = (table, r) => TABLES[table].key.map((k) => r[k]).join("\u0001");
 // {written, deleted, unchanged, deferred, total}. `scope` (SQL condition on the table) limits what a sync owns and may
 // delete. `budget` caps the rows written this time (writes first, in the records' order — pass the best first — then
 // deletes); what's left over is `deferred` and goes on the next sync (its stored hash is still the old one).
+export const DELETE_BATCH = 1000;
 export async function syncTable(query, table, records, { now = new Date().toISOString(), scope = "", maxBytes, budget = Infinity } = {}) {
   const have = new Map((await query(`SELECT ${TABLES[table].key.join(", ")}, hash FROM ${table}${scope ? ` WHERE ${scope}` : ""}`))
     .map((r) => [keyOf(table, r), r.hash]));
@@ -140,11 +141,14 @@ export async function syncTable(query, table, records, { now = new Date().toISOS
   const gone = allGone.slice(0, Math.max(0, budget - write.length));
   for (const b of batches(write, maxBytes)) await query(upsertSql(table), [JSON.stringify(b)]);
   const { key } = TABLES[table];
-  for (const b of batches(gone.map((k) => k.split("\u0001")), maxBytes)) {
-    // the table's own column, by name: json_each has an `id` column too, and a bare `id` meant that one (15 Nov 2026:
-    // the signals table's deletes matched nothing, so stale signals stayed)
-    const match = key.map((c, i) => `${table}.${c} = j.value ->> '$[${i}]'`).join(" AND ");
-    await query(`DELETE FROM ${table} WHERE EXISTS (SELECT 1 FROM json_each(?1) AS j WHERE ${match})`, [JSON.stringify(b)]);
+  // Deletes look each key up by the primary key, DELETE_BATCH at a time (16 Nov 2026: one DELETE … WHERE EXISTS over
+  // json_each scanned the whole table once per key — ~17,000 stale signals in one batch ran over D1's CPU time limit,
+  // error 7429). The key columns by name: json_each has an `id` column too (15 Nov 2026: a bare `id` matched nothing).
+  const cols = key.length > 1 ? `(${key.map((c) => `${table}.${c}`).join(", ")})` : `${table}.${key[0]}`;
+  const picks = key.map((_, i) => `j.value ->> '$[${i}]'`).join(", ");
+  const keys = gone.map((k) => k.split("\u0001"));
+  for (let i = 0; i < keys.length; i += DELETE_BATCH) {
+    await query(`DELETE FROM ${table} WHERE ${cols} IN (SELECT ${picks} FROM json_each(?1) AS j)`, [JSON.stringify(keys.slice(i, i + DELETE_BATCH))]);
   }
   return { written: write.length, deleted: gone.length, unchanged: seen.size - changed.length,
            deferred: changed.length - write.length + allGone.length - gone.length, total: seen.size };

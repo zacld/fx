@@ -569,7 +569,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   only when something real changes; each sync keeps to `DAILY_WRITES` (40,000 a day — 60,000 until 15 Nov 2026, when the rebuild's table drops cost writes D1 counted but didn't report back and the limit was met at 45,000 by our count, counted from D1's own
   `rows_written`, meta `writes`), marks and signals first, then companies best lead score first, the rest `deferred` to
   the next sync; a sync that meets Cloudflare's limit says so and stops cleanly; only runs on main copy (a branch push runs Niche hits in
-  full — 15 Nov 2026 its copy spent 19,600 writes); each sync logs which fields differ on a sample of the records it
+  full — 15 Nov 2026 its copy spent 19,600 writes); deletes look each key up by the primary key, `DELETE_BATCH` (1,000) at a time (16 Nov 2026: one DELETE over json_each scanned the
+  whole table per key and ~17,000 stale signals ran over D1's CPU time limit, error 7429 — logged as that, not as the write limit);
+  each sync logs which fields differ on a sample of the records it
   rewrites (`changedFields`, names and counts only), to find what makes records churn. The Outreach view takes Contacted and Not
   a fit from the store (right even when the database can't be written; contacted groups by key lookups, group members
   in one GROUP BY, so rows read stay low) and isn't served until a full copy exists (`complete`): the page ranks in the
