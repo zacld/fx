@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -375,7 +375,7 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), industry: industryOf(r), what_to_pitch: pitchLine(r), my_list: LIST_NAMES[lists[r.company_number]?.list] || "",
+    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), industry: industryOf(r), finance_decided: financeSeat(r).verdict, what_to_pitch: pitchLine(r), my_list: LIST_NAMES[lists[r.company_number]?.list] || "",
       lead_checklist: checklistLine(leadChecklist(r, checks)), reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text }));
     downloadSheet(out, columnsFor(EXPORT_FIELDS, { company_and_fd: "Company – Finance Director" }, NUMBER_FIELDS), `fx-accounts-${new Date().toISOString().slice(0, 10)}.xlsx`, "Accounts");
   };
@@ -928,6 +928,7 @@ function Chips({ r }) {
       {r.own_bank_client && <span className="chip own">Existing client</span>}
       <span className="chip" title={`Sector code ${(r.sic || r.sic_codes || "").toString() || "not known"}`}>{industryOf(r)}</span>
       {peBackedOf(r) && <span className="chip warn" title={peBackedOf(r).why}>PE-backed: {peBackedOf(r).name}</span>}
+      {(() => { const seat = financeSeat(r); return seat.lean !== "uk-owned" && <span className={`chip${seat.lean === "abroad" ? " warn" : ""}`} title={seat.signs.map((x) => x.text).join("\n")}>{seat.verdict}</span>; })()}
       {r.lead_flags?.newFd && <span className="chip trig" title={r.lead_flags.fdWhy}>New FD</span>}
       {r.run_from_abroad && <span className="chip warn" title={r.run_from_abroad}>Owned abroad: pitch the UK team</span>}
       {r.family_run && <span className="chip">Family-run</span>}
@@ -1540,6 +1541,28 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
 
 // Zac's review of a lead: Good lead, or Not a fit with a reason (stored as his own verdict — never a bank record).
 const VerdictContext = createContext({ verdicts: {}, setVerdict: () => {} });
+// Where finance decisions sit (control.js): the lean, every sign for and against with its points, and what to ask.
+function SeatPanel({ r }) {
+  const seat = financeSeat(r);
+  const forUk = seat.signs.filter((x) => x.points > 0);
+  const against = seat.signs.filter((x) => x.points < 0);
+  return (
+    <section className="panel">
+      <h2 className="panel-h">Where finance decisions sit: {seat.verdict}</h2>
+      <div className="score-groups open">
+        {forUk.length > 0 && <div className="score-group"><h4>Decided in the UK</h4><ul>{forUk.map((x) => <li key={x.text}><span className="lead-p">+{x.points}</span>{x.text}</li>)}</ul></div>}
+        {against.length > 0 && <div className="score-group"><h4>Run from abroad</h4><ul>{against.map((x) => <li key={x.text}><span className="lead-p neg">−{-x.points}</span>{x.text}</li>)}</ul></div>}
+        {!seat.signs.length && <p className="muted panel-p">Nothing in the records points either way.</p>}
+      </div>
+      {seat.questions.length > 0 && <>
+        <h4 className="panel-h">Ask on the call</h4>
+        <ul className="call-why">{seat.questions.map((q) => <li key={q}>{q}</li>)}</ul>
+      </>}
+      <p className="muted panel-p">A lean from the register, the lender and the accounts' own words — check it with them, and against the CRM before calling.</p>
+    </section>
+  );
+}
+
 // What we can pitch them: Investec's products matched to the company's filed facts (pitch.js), each with its reason.
 function PitchPanel({ r }) {
   const pitches = pitchFor(r);
@@ -2361,6 +2384,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
           <ScoreBreakdown r={r} open />
         </section>
       )}
+      <SeatPanel r={r} />
       <PitchPanel r={r} />
 
       {fxFacts(r).length > 0 && (
