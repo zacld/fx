@@ -386,6 +386,8 @@ def _gemini(body: dict, key: str) -> Optional[dict]:
                     time.sleep(20)                         # requests a minute
                     continue
                 print(f"  Gemini refused ({e.code}): {re.sub(r'[^ -~]', '', text)[:160]}")
+                if e.code in (401, 402, 403):          # no credit / key refused: not again this run
+                    GEMINI_SPENT.append(text[:160])
                 return None
             except Exception:  # noqa: BLE001
                 if attempt < 2:
