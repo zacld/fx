@@ -113,7 +113,7 @@ def _table(path: str, wanted: dict) -> Iterator[dict]:
                     index[field] = hit
                     break
         print(f"  {os.path.basename(path)}: {len(header)} columns; found {', '.join(f'{k}={header[i]}' for k, i in index.items())}"
-              f"{'; MISSING ' + ', '.join(k for k in wanted if k not in index) if len(index) < len(wanted) else ''}")
+              f"{'; MISSING ' + ', '.join(k for k in wanted if k not in index) + ' — columns: ' + ', '.join(header) if len(index) < len(wanted) else ''}")
         for row in reader:
             yield {k: (row[i] if i < len(row) else "") for k, i in index.items()}
     if zipfile.is_zipfile(path):
@@ -159,7 +159,8 @@ def owners(paths: dict, tracked: set[str]) -> dict:
     # pass 3 — reporting exceptions for our LEIs (why no ultimate parent is given)
     ours = set(lei_of.values())
     why: dict[str, str] = {}
-    for row in _table(paths["repex"], {"lei": ("LEI",), "category": ("ExceptionCategory",), "reason": ("ExceptionReason",)}):
+    for row in _table(paths["repex"], {"lei": ("LEI",), "category": ("ExceptionCategory", "Category", "Exception.Category"),
+                                       "reason": ("ExceptionReason", "ExceptionReason1", "Reason", "Exception.Reason", "ExceptionReasons")}):
         if row.get("lei") in ours and "ULTIMATE" in row.get("category", "").upper():
             reason = row.get("reason", "").upper()
             why[row["lei"]] = REASONS.get(reason, reason.replace("_", " ").lower())

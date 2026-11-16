@@ -59,8 +59,12 @@ describe("Who owns it, up the chain (16 Nov 2026)", () => {
     expect(fromAccounts.chain).toEqual(["ACME LIMITED", "ACME UK HOLDINGS LIMITED (UK)", "Acme Holding GmbH (Germany)"]);
     const viaRegister = ownershipOf({ company_name: "WIDGETS LIMITED" }, { top: "2", top_name: "WIDGET GROUP LIMITED", hops: 2, abroad: "WIDGET INC (United States)" });
     expect([viaRegister.status, viaRegister.owner, viaRegister.country]).toEqual(["foreign", "WIDGET INC", "United States"]);
-    const home = ownershipOf({ company_name: "BRICKS LIMITED" }, { top: "3", top_name: "BRICK HOLDINGS LIMITED", hops: 1, abroad: "" });
+    const home = ownershipOf({ company_name: "BRICKS LIMITED", owners: "J SMITH (individual, England)" }, { top: "3", top_name: "BRICK HOLDINGS LIMITED", hops: 1, abroad: "" });
     expect([home.status, home.owner]).toEqual(["uk", "BRICK HOLDINGS LIMITED"]);
+    // nothing on the register above it: not known (was read as UK-owned)
+    expect(ownershipOf({ company_name: "MANGO LIMITED" }, { top: "4", hops: 0, abroad: "" }).status).toBe("unknown");
+    expect(ownershipOf({ company_name: "SEA LIMITED" }, { top: "5", hops: 0, abroad: "SEA HOLDINGS LIMITED" }).status).toBe("unknown");
+    expect(ownershipOf({ company_name: "P LIMITED", owners: "A PERSON (individual, Spain)" }).status).toBe("foreign");
     expect(home.searches.map(([l]) => l)).toEqual(["Who owns BRICKS LIMITED?", "Where is BRICK HOLDINGS LIMITED based?", "BRICKS LIMITED parent company"]);
     expect(ownershipOf({ company_name: "X LIMITED" }).status).toBe("unknown");
     expect(ownershipOf({ company_name: "Y LIMITED", owners: "J SMITH (individual, England)" }).status).toBe("uk");

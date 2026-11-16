@@ -102,22 +102,30 @@ export function ownershipOf(r = {}, group = null, lei = null) {
     if (top) says.push({ from: "LEI register", status: UK.test(country) ? "uk" : "foreign", owner: top, country });
     else if (/individuals/.test(lei.exception || "")) says.push({ from: "LEI register", status: "uk", owner: "", country: "UK", note: lei.exception });
   }
+  // Companies House: an owner registered abroad above the top UK parent; else a foreign corporate owner; else people as
+  // owners and where they live; a UK parent alone is only "UK" when something says who owns that parent (16 Nov 2026
+  // sample: a company with no owner on the register was read as UK-owned — Mango, BoomBit — so that's "not known" now)
+  const people = [...String(r.owners || "").matchAll(/\(individual,\s*([^)]+)\)/gi)].map((m) => m[1].trim());
   if (group?.abroad) {
     const m = /^(.*?)(?:\s*\(([^)]+)\))?$/.exec(group.abroad);
-    says.push({ from: "Companies House", status: UK.test(m[2] || "") ? "uk" : "foreign", owner: m[1], country: m[2] || "abroad" });
+    if (!m[2]) says.push({ from: "Companies House", status: "unknown", owner: m[1], country: "", note: "registered outside the UK register, country not given" });
+    else says.push({ from: "Companies House", status: UK.test(m[2]) ? "uk" : "foreign", owner: m[1], country: m[2] });
   } else {
     const f = foreignOwner({ ...r, ultimate_parent: "" });
     if (f) says.push({ from: "Companies House", status: "foreign", owner: f.name, country: f.country });
-    else if (group) says.push({ from: "Companies House", status: "uk", owner: group.hops ? group.top_name : "", country: "UK" });
-    else if (/\((?:individual|corporate, (?:England|Scotland|Wales|Northern Ireland|United Kingdom))/i.test(r.owners || "")
-             || /^Owned by \d+ individual|\(UK\b/.test(r.owner || "")) says.push({ from: "Companies House", status: "uk", owner: "", country: "UK" });
+    else if (people.length && people.every((c) => !UK.test(c))) says.push({ from: "Companies House", status: "foreign", owner: "", country: people[0], note: "owned by individuals living abroad" });
+    else if (people.length) says.push({ from: "Companies House", status: "uk", owner: group?.hops ? group.top_name : "", country: "UK", note: "owned by individuals in the UK" });
+    else if (/^Owned by \d+ individual/.test(r.owner || "")) says.push({ from: "Companies House", status: "uk", owner: "", country: "UK", note: "owned by individuals" });
+    else if (group?.hops) says.push({ from: "Companies House", status: "unknown", owner: group.top_name, country: "", note: "top UK parent; who owns it isn't on the register" });
   }
-  const best = says.find((x) => x.owner && x.status === "foreign") || says.find((x) => x.owner) || says[0];
-  // a foreign owner named anywhere wins: the register can stop at a UK holding company the accounts or LEI see past
+  // a foreign owner named anywhere wins (the register can stop at a UK holding company the accounts or LEI see past);
+  // then any definite answer; "not known" only when nothing is definite
+  const known = says.filter((x) => x.status !== "unknown");
+  const best = known.find((x) => x.status === "foreign") || known.find((x) => x.owner) || known[0] || says[0];
   const status = best ? best.status : "unknown";
   const owner = best?.owner || (group?.hops ? group.top_name : "");
   const country = best?.country || "";
-  const agree = says.length > 1 && says.every((x) => x.status === status);
+  const agree = known.length > 1 && known.every((x) => x.status === status);
   const chain = [name];
   if (group?.hops && group.top_name) chain.push(`${group.top_name} (UK)`);
   if (owner && owner !== chain[chain.length - 1] && owner !== name) chain.push(status === "foreign" ? `${owner} (${country})` : owner);
@@ -125,7 +133,7 @@ export function ownershipOf(r = {}, group = null, lei = null) {
   const top = owner && owner !== name ? owner : group?.top_name;
   if (top && top !== name) searches.push([`Where is ${top} based?`, google(`${top} headquarters`)]);
   searches.push([`${name} parent company`, google(`"${name}" parent company`)]);
-  const source = best ? `${best.from}${says.length > 1 ? (agree ? ` (${says.length} sources agree)` : " (sources differ — check)") : ""}` : "";
+  const source = best ? `${best.from}${known.length > 1 ? (agree ? ` (${known.length} sources agree)` : " (sources differ — check)") : ""}` : "";
   return { status, owner, country, chain, source, says, agree, searches };
 }
 export const OWNERSHIP_LABEL = { uk: "UK-owned", foreign: "Foreign-owned", unknown: "Owner not known" };
