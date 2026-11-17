@@ -23,8 +23,13 @@ def main() -> None:
     ap.add_argument("--cache", default=os.path.expanduser("~/.cache/fx-lead-sourcer/gleif"))
     a = ap.parse_args()
     tracked = set(json.load(open(a.tracked)))
-    paths = gleif.download(a.cache)
-    out = gleif.owners(paths, tracked)
+    try:
+        paths = gleif.download(a.cache)
+        out = gleif.owners(paths, tracked)
+    except Exception as e:  # noqa: BLE001 — GLEIF's site refusing a download (403, 17 Nov 2026) skips this one source
+        print(f"GLEIF: the LEI files couldn't be read today ({e}) — this source is skipped")
+        gleif.save({}, a.out)
+        return
     gleif.save(out, a.out)
     with_parent = sum(1 for v in out.values() if v["ultimate"] or v["direct"])
     foreign = sum(1 for v in out.values() if v["uk"] is False)

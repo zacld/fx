@@ -57,8 +57,13 @@ def main() -> None:
     ap.add_argument("--cache", default="")
     ap.add_argument("--out", required=True)
     ap.add_argument("--max", type=int, default=150)
+    ap.add_argument("--parents", default="", help="parents.json (tools/parents_from_accounts.py): companies whose accounts name the owner aren't searched")
+    ap.add_argument("--check", action="store_true", help="one search with each provider's key first: which work")
     ap.add_argument("--numbers", default="", help="comma-separated company numbers: search just these")
     args = ap.parse_args()
+    if args.check:
+        for name, state in profiles.check_providers("who owns Walker Books").items():
+            print(f"  search provider {name}: {state}")
 
     tracked = _load(args.tracked, {})
     tracked = tracked.get("companies", tracked) if isinstance(tracked, dict) else {}
@@ -73,7 +78,7 @@ def main() -> None:
         os.makedirs(profiles.CACHE_DIR, exist_ok=True)
         merged = {k: max(v, profiles.usage().get(k, 0)) for k, v in carried.items()}
         json.dump({**profiles.usage(), **merged}, open(profiles._usage_path(), "w"))
-    if not profiles.api_key():
+    if not profiles.api_key() and not os.environ.get("GEMINI_API_KEY"):
         print("Owner search: no search key set (SEARCH1API_KEY / TAVILY_API_KEY / EXA_API_KEY / SERPER_API_KEY) — skipped")
         json.dump({"made_at": today.isoformat(), "companies": found, "usage": {month: carried}}, open(args.out, "w"))
         return
@@ -85,7 +90,10 @@ def main() -> None:
         order = order.get("order", order) if isinstance(order, dict) else order
         seen = set()
         queue = [n for n in list(order) + list(names) if not (n in seen or seen.add(n))]
-        queue = [n for n in queue if names.get(n) and due(found.get(n), today)]
+        answered = {n for n, p in ((_load(args.parents, {}) or {}).get("companies", {}) or {}).items() if p.get("ultimate_parent")}
+        queue = [n for n in queue if names.get(n) and due(found.get(n), today) and n not in answered]
+        if answered:
+            print(f"Owner search: {len(answered)} companies' own accounts already name the owner — not searched")
 
     searched = owners = errors = 0
     for n in queue:
@@ -94,6 +102,9 @@ def main() -> None:
         name = names.get(n) or ""
         if not name:
             continue
+        if owner_search.AI_SPENT and os.environ.get("GROQ_API_KEY") and (owner_search.GEMINI_SPENT or not os.environ.get("GEMINI_API_KEY")):
+            print("Owner search: the AI reader's free allowance is used for today — stopping; the rest wait for tomorrow")
+            break
         r = owner_search.search(n, name)
         if r.get("error"):
             errors += 1
@@ -115,6 +126,10 @@ def main() -> None:
     json.dump({"made_at": today.isoformat(), "companies": found, "usage": {month: profiles.usage()}}, open(args.out, "w"))
     total = sum(1 for e in found.values() if e.get("owner"))
     print(f"Owner search: {searched} searched this run, {owners} owners found; {total} companies with an owner on file")
+    g = owner_search.GEMINI_USAGE
+    print(f"Gemini + Google Search: {g['calls']} calls, {g['tokens']:,} tokens, {g['dropped']} answers dropped "
+          f"(not backed by Google's sources), {g['failed']} failed"
+          + ("" if os.environ.get("GEMINI_API_KEY") else " — no GEMINI_API_KEY"))
     u = owner_search.AI_USAGE
     print(f"AI reader (Groq {owner_search.GROQ_MODEL}): {u['calls']} calls, {u['tokens']:,} tokens, "
           f"{u['dropped']} answers dropped (not in the results), {u['failed']} failed"

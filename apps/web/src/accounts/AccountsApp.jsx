@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, setKnownLei, setKnownOwnerSearch, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -129,7 +129,7 @@ function Accounts({ data, password }) {
     let live = true;
     fetch(`${API}?view=signals`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null)).then((body) => {
-        if (live && body) { setKnownSites(body.websites); setKnownOwnerSearch(body.owners_search); setKnownSignals(body.signals); setSignals(body); }
+        if (live && body) { setKnownSites(body.websites); setKnownOwnerSearch(body.owners_search); setKnownParents(body.parents_of); setKnownSignals(body.signals); setSignals(body); }
       }).catch(() => {});
     return () => { live = false; };
   }, [password]);
@@ -157,7 +157,7 @@ function Accounts({ data, password }) {
   const rows = useMemo(() => allRows.filter((r) => !elsewhere(r) || contacted[r.company_number]), [allRows, contacted, signals]);
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
-                                            peOnly: false, newFdOnly: false, industry: "", ownership: "" });
+                                            peOnly: false, newFdOnly: false, industry: "", ownership: "", lookalikeOnly: false });
   const [sort, setSort] = useState("lead");
   // Sheet (a dense, sortable grid) or Cards; remembered in this browser
   const [layout, setLayout] = useState(() => { try { return localStorage.getItem("fx-layout") || "sheet"; } catch { return "sheet"; } });
@@ -548,6 +548,7 @@ function Accounts({ data, password }) {
           <label className="check"><input type="checkbox" checked={filters.fxLossOnly} onChange={(e) => set({ fxLossOnly: e.target.checked })} /> Recent FX loss</label>
           <label className="check"><input type="checkbox" checked={filters.fdOnly} onChange={(e) => set({ fdOnly: e.target.checked })} /> FD named</label>
           <label className="check"><input type="checkbox" checked={filters.triggersOnly} onChange={(e) => set({ triggersOnly: e.target.checked })} /> Triggers</label>
+          <label className="check" title="Like Global Charter, the best lead so far: UK-owned, £20m–£100m, an FX loss of £50k+, no hedging named, still growing"><input type="checkbox" checked={filters.lookalikeOnly} onChange={(e) => set({ lookalikeOnly: e.target.checked })} /> Like Global Charter</label>
           <label className="check" title="A private-equity owner anywhere up the chain, a PE house or fund named in the accounts, or buyout-style debt"><input type="checkbox" checked={filters.peOnly} onChange={(e) => set({ peOnly: e.target.checked })} /> PE-backed</label>
           <label className="check" title="A new finance director: appointed (accounts, alerts, news) or being hired (job adverts)"><input type="checkbox" checked={filters.newFdOnly} onChange={(e) => set({ newFdOnly: e.target.checked })} /> New FD</label>
           <label className="check"><input type="checkbox" checked={filters.showOut} onChange={(e) => set({ showOut: e.target.checked })} /> Show qualified out ({rows.filter(isOut).length})</label>

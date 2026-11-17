@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -414,11 +414,12 @@ describe("Lead score", () => {
     const s = leadScore(r, { today, niches, signals });
     expect(Object.fromEntries(s.parts.map(([why, p]) => [why.split(" (")[0].split(":")[0], p]))).toEqual({
       "Strong FX proof in its filings": 20, "FX loss of £320k": 30, "… in accounts filed 1 Oct 2026": 10, "Niche": 15,
+      "FX loss with no hedging named — the clearest need": 10,
       "New finance director": 20, "Subsidiaries abroad": 10, "Turnover £20m–£300m": 10, "No hedging named — probably on the bank's rate": 5,
       "Hit list": 15 });
-    expect([s.fit, s.timing, s.score]).toEqual([90, 45, 70]);   // fit 20+30+15+10+10+5, now 10+20+15; 20 + 0.3×90 + 0.5×45
+    expect([s.fit, s.timing, s.score]).toEqual([100, 45, 73]);   // fit 20+30+15+10+10+5+10 (capped 100), now 10+20+15; 20 + 0.3×100 + 0.5×45
     expect(s.flags).toMatchObject({ recentLoss: true, newFd: true, hit: true });
-    expect(leadLine(s)).toMatch(/^Lead score 70 \(Fit 90 · Now 45\): Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
+    expect(leadLine(s)).toMatch(/^Lead score 73 \(Fit 100 · Now 45\): Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
   });
   it("counts a new FD from the triggers, other changes once, and owned abroad lower", () => {
     const r = { company_number: "N2", filed_fx_score: 20, triggers: "New finance director appointed 2026-10-12 | new charge to HSBC (2026-09)",
@@ -426,7 +427,7 @@ describe("Lead score", () => {
     const s = leadScore(r, { today, niches });
     const why = s.parts.map(([w]) => w);
     expect(why).toContain("New finance director: New finance director appointed 2026-10-12");
-    expect(why).toContain("Change: new charge to HSBC (2026-09)");
+    expect(why).toContain("New borrowing / lender: new charge to HSBC (2026-09)");   // a new lender counts 15 (16 Nov 2026)
     expect(why).toContain(`Accounts just filed (${filedWhen("2026-09-20")})`);
     expect(s.parts.find(([w]) => w.startsWith("Owned abroad"))[1]).toBe(-10);
     expect(s.parts.some(([w]) => w.startsWith("Niche"))).toBe(false);   // a poorly measured niche adds nothing
@@ -463,10 +464,10 @@ describe("Fit and Timing (15 Nov 2026)", () => {
   it("splits the reasons: who fits ranks on timing, one that doesn't fit ranks below them all", () => {
     const fits = { company_number: "A", filed_fx_score: 60, turnover_gbp: "50000000", fx_gain_loss_gbp: "-80000" };
     const s = leadScore(fits, { today });
-    expect([s.fit, s.timing]).toEqual([55, 0]);   // strong proof 20, loss 20, band 10, no hedging named 5
+    expect([s.fit, s.timing]).toEqual([65, 0]);   // strong proof 20, loss 20, band 10, no hedging named 5, loss + no hedging 10
     expect(s.parts.every(([, , c]) => c === "fit")).toBe(true);
     const now = leadScore({ ...fits, accounts_filed_on: "2026-10-20" }, { today });
-    expect(now.fit).toBe(55);
+    expect(now.fit).toBe(65);
     expect(now.timing).toBe(10);   // the FX loss filed lately
     expect(now.score).toBeGreaterThan(s.score);
     const news = leadScore({ company_number: "B" }, { today, signals: { B: [{ kind: "news_fd", at: "2026-11-10T07:00:00", title: "new FD" }] } });
@@ -653,5 +654,18 @@ describe("Outreach plan", () => {
     expect(letterAddressee({})).toBe("The Finance Director");
     expect(letterAddressee({ no_fd_likely: "yes" })).toBe("The Managing Director");
     expect(timelyReason({ lead_flags: { newFd: true } })).toBe("New finance director");
+  });
+});
+
+describe("From Zac's first review (16 Nov 2026)", () => {
+  it("lifts a Global Charter-like lead: growing fast, an FX loss with no hedging named, a new lender", () => {
+    const gc = { company_number: "G1", turnover_gbp: "46800000", turnover_growth: "+54%", fx_gain_loss_gbp: "-96000", filed_fx_score: 65,
+      triggers: "new charge to Bpce Equipment Solutions UK Limited (2026-03) — new borrowing or a new bank" };
+    const s = leadScore(gc, { today: new Date("2026-11-16T12:00:00Z") });
+    const why = Object.fromEntries(s.parts.map(([w, p]) => [w.split(":")[0], p]));
+    expect(why).toMatchObject({ "Growing fast": 15, "FX loss with no hedging named — the clearest need": 10, "New borrowing / lender": 15 });
+    expect(lookalike(gc)).toBe(true);
+    expect(lookalike({ ...gc, fx_today: "Uses forward contracts" })).toBe(false);
+    expect(lookalike({ ...gc, turnover_gbp: "150000000" })).toBe(false);
   });
 });

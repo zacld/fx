@@ -101,6 +101,11 @@ PROVIDERS = [
     ("exa", "EXA_API_KEY", "EXA_MONTHLY", 500, "https://api.exa.ai/search",
      lambda q, k: ({"x-api-key": k}, {"query": q, "numResults": 10, "userLocation": "GB",
                                               "contents": {"highlights": True}})),
+    # Brave Search (16 Nov 2026, for the owner search): its own index, GET with the key in a header; free plan's monthly
+    # allowance (BRAVE_MONTHLY, 1,000 by default), one request a second — the owner search's pace is well under that
+    ("brave", "BRAVE_API_KEY", "BRAVE_MONTHLY", 1000, "https://api.search.brave.com/res/v1/web/search",
+     lambda q, k: ({"X-Subscription-Token": k, "Accept": "application/json"},
+                   {"_get": {"q": q, "country": "gb", "count": 10}})),
     ("serper", "SERPER_API_KEY", "SERPER_MONTHLY", 0, "https://google.serper.dev/search",
      lambda q, k: ({"X-API-KEY": k}, {"q": q, "gl": "uk", "num": 10})),
 ]
@@ -113,8 +118,11 @@ def api_key() -> str:
 
 def _post(url: str, headers: dict, body: dict) -> tuple[int, str]:
     """(HTTP status, body) — status 0 for a network error or timeout."""
-    req = urllib.request.Request(url, data=json.dumps(body).encode(),
-                                 headers={"Content-Type": "application/json", "User-Agent": USER_AGENT, **headers})
+    if "_get" in body:      # a GET API (Brave): the body is the query string
+        req = urllib.request.Request(f"{url}?{urllib.parse.urlencode(body['_get'])}", headers={"User-Agent": USER_AGENT, **headers})
+    else:
+        req = urllib.request.Request(url, data=json.dumps(body).encode(),
+                                     headers={"Content-Type": "application/json", "User-Agent": USER_AGENT, **headers})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
             return resp.status, resp.read(2_000_000).decode("utf-8", "replace")
@@ -296,11 +304,13 @@ def _normalise(answer: Optional[str]) -> Optional[list[dict]]:
     except ValueError:
         return None
     items = data.get("results", data.get("organic")) if isinstance(data, dict) else None
+    if items is None and isinstance(data, dict) and isinstance(data.get("web"), dict):   # Brave: {web: {results: [...]}}
+        items = data["web"].get("results")
     if not isinstance(items, list):
         return None
     out = []
     for r in items:
-        snippet = (r.get("snippet") or r.get("content") or (r.get("metadata") or {}).get("snippet")
+        snippet = (r.get("snippet") or r.get("content") or r.get("description") or (r.get("metadata") or {}).get("snippet")
                    or " ".join(r.get("highlights") or []) or r.get("text") or "")
         out.append({"title": r.get("title") or "", "link": r.get("link") or r.get("url") or "", "snippet": snippet})
     return out

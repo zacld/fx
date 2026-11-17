@@ -428,7 +428,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Tabs **Best fit** (Fit 30+, by Fit) and **Call now** (Fit 30+ with Timing > 0, by Timing), each with its half's
   reasons, an industry filter and Excel export; Sheet columns Fit / Now; exports `lead_fit` / `lead_timing`. The Niches
   tab's "Fit 60+" counts leads by Fit. The weights are logged here to be
-  recalibrated against what Sales takes.
+  recalibrated against what Sales takes. **First recalibration — Zac's review of ranks 35–77 (16 Nov 2026)**: his best
+  lead, Global Charter, ranked 77th (growing 54%, a USD loss of £96k, no hedging named, a new equipment-finance lender),
+  so Fit adds growth 20%+ 10 / 40%+ 15 (`growth`, `fastGrowth`) and an FX loss with no hedging named 10 (`lossNoHedge`),
+  and a new charge (new borrowing / a new lender) counts 15 in Timing (`newLender`, a plain change stays 10); a **"Like
+  Global Charter"** filter (`lookalike`: UK-owned, £20m–£100m, FX loss £50k+, no hedging named, still growing). The same
+  review: 22 of 43 were already with the bank (the CRM check — not detectable from public records, and never stored
+  here), 7 were owned abroad though marked UK-owned (what the owner search fixes), and holding companies (Topco, Holdings)
+  were labelled "Finance & insurance" from their holding-company sector code.
 - **Every lead ranked** (Zac, 11 Nov 2026: "scan all the leads, rank them in our scoring system, add them to the
   Accounts page, learn which niches are better — you'll come across some absurd ones"): the "Niche hits" workflow
   (daily 04:23 UTC) also tags every company on the Accounts and FX filings lists (`alerts-store.mjs tracked`) with its
@@ -679,8 +686,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`QUERY` "who owns <name>" — what a person types; Google's answer box and knowledge panel read too — and, Zac's
   method, "who owns <that company>" again for each owner that is a company, up to `MAX_HOPS` 4, stopping at a person, a
   PE firm or a loop: `chain`) through the finder's search APIs within their allowances (`profiles.fetch_any`; secrets
-  `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `SERPER_API_KEY`, the month's usage carried in the store item so the
-  caps hold), best leads first, `--max` 200 companies a day (Zac, 16 Nov 2026: "check at least 200 a day" — more than
+  `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `BRAVE_API_KEY` — Brave's free plan, added 16 Nov 2026 when Zac chose
+  free allowances over paid credit ("$50 is a waste for a simple Google search"), `BRAVE_MONTHLY` 1,000 — `SERPER_API_KEY`, the month's usage carried in the store item so the
+  caps hold), best leads first, `--max` 100 companies a day (Zac, 16 Nov 2026: "we want 100 per day"; first route Gemini + Google Search, `gemini_read` — more than
   the free search allowances cover, so a provider with paid credit takes the rest; a run that runs out stops cleanly);
   an owner found before is kept when a later search finds nothing;
   the results read by one checked AI call (Groq — the Priority 1 exception; `ai_read`, the owner and quote must be in
@@ -690,7 +698,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `owners` (found kept 180 days, nothing found retried after 60); `?view=signals` gives `owners_search`; `ownershipOf`
   takes it as a fourth source and shows its owner (the name a person would give) with the quote and link — but a
   register (accounts, LEI, Companies House) naming a foreign parent outranks a search naming another country (the
-  search gave Motorola UK an Israeli sister company). **Foreign-owned tab** (Zac, 16 Nov 2026: "if it's owned by an
+  search gave Motorola UK an Israeli sister company). **Owners from the accounts first** (Zac, 17 Nov 2026: "who owns it" is 80% of his checking time and paid Google
+  search isn't available): `tools/parents_from_accounts.py`, in the daily "Niche hits" run before the owner search —
+  the top leads' latest accounts read best first (Companies House's free API, `accounts.facts_from_latest_accounts`,
+  `--max` 400 a day) for the "ultimate parent … incorporated in X" sentence (`control.ultimate_parent`); store key
+  `parents` (found kept a year, none re-read after 120 days); `?view=signals` gives `parents_of`, `ownership(r)` uses it
+  when the row has no parent of its own, and the owner search skips every company these answer (`--parents`). **Foreign-owned tab** (Zac, 16 Nov 2026: "if it's owned by an
   American company or something like that put it in a different section"): `foreignOwned` / `elsewhere` in
   `format.js` — every company any source says is owned from abroad lives only in that tab (like UK in name: out of the
   Accounts list, Best fit / Call now, FX filings, FX losses, Today; a serious reason not to progress, so Outreach and
@@ -893,7 +906,10 @@ Any feature that would require per-company or per-lead AI calls must be redesign
 `ai_read`) makes one AI call per company to read that company's search results — Groq's free tier
 (`llama-3.3-70b-versatile`, `GROQ_API_KEY`), capped by the run's `--max` (50 companies a day), every call and its
 tokens logged. The answer must name the result it read and quote it; an owner or country the results don't contain is
-dropped. No other per-company AI.
+dropped. **Gemini with Grounding with Google Search** (Zac, 16 Nov 2026: "the most reliable way is through Google";
+`GEMINI_API_KEY`, AI Studio's free tier) is now the first route: one call a company runs the Google searches itself —
+"who owns X", then who owns that owner — and counts only when Google's grounding backs the owner's name; `--max` 100 a
+day; Groq + the search APIs only when Gemini's daily allowance is used. No other per-company AI.
 
 ---
 
