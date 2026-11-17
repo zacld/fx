@@ -1078,10 +1078,18 @@ export { financeSeat, SEAT_LABEL, ownershipOf, OWNERSHIP_LABEL };
 let knownLei = {};
 export const setKnownLei = (map) => { knownLei = map || {}; };
 // the daily owner search's answers (store key `owners`, via ?view=signals): {number: {owner, kind, country, quote, url}}
+// the ultimate parent each lead's own latest accounts name (tools/parents_from_accounts.py, best leads first): used when
+// the row itself doesn't carry one yet
+let knownParents = {};
+export const setKnownParents = (map) => { knownParents = map || {}; };
+const withParent = (r) => {
+  const p = knownParents[r?.company_number];
+  return p && !r.ultimate_parent ? { ...r, ultimate_parent: p.ultimate_parent, ultimate_parent_country: p.country, ultimate_parent_evidence: p.evidence } : r;
+};
 let knownOwnerSearch = {};
 export const setKnownOwnerSearch = (map) => { knownOwnerSearch = map || {}; };
 // owned from abroad by any source (accounts, LEI register, Companies House, the owner search): the Foreign-owned tab
 export const foreignOwned = (r) => ownership(r).status === "foreign";
 // in a tab of its own, out of every other list
 export const elsewhere = (r) => ukNamed(r) || foreignOwned(r);
-export const ownership = (r) => ownershipOf(r, groupOf(r), knownLei[r.company_number] || null, knownOwnerSearch[r.company_number] || null);
+export const ownership = (r) => ownershipOf(withParent(r), groupOf(r), knownLei[r.company_number] || null, knownOwnerSearch[r.company_number] || null);

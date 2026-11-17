@@ -134,6 +134,17 @@ jobs:
           cd apps/web && (node scripts/alerts-store.mjs get domains ../../lead-sourcer/domains_cache.json || echo '{}' > ../../lead-sourcer/domains_cache.json)
           cd ../../lead-sourcer && PYTHONUNBUFFERED=1 python3 tools/find_domains.py --tracked tracked.json --order lead_order.json --cache domains_cache.json --out domains.json --groups groups.json --budget 2400
           cd ../apps/web && node scripts/alerts-store.mjs put domains ../../lead-sourcer/domains.json
+      # Who owns each lead, from its own latest accounts ("the ultimate parent is X, incorporated in Y") — best leads first,
+      # Companies House's free API; the owner search below skips the companies these answer (Zac, 17 Nov 2026).
+      - name: Owners from the accounts
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+        run: |
+          cd apps/web && (node scripts/alerts-store.mjs get parents ../../lead-sourcer/parents_cache.json || echo '{}' > ../../lead-sourcer/parents_cache.json)
+          cd ../../lead-sourcer && python3 tools/parents_from_accounts.py --tracked tracked.json --order lead_order.json --cache parents_cache.json --out parents.json --max 400
+          cd ../apps/web && node scripts/alerts-store.mjs put parents ../../lead-sourcer/parents.json
       # Who really owns each lead (a PE house, a founder, the group abroad) by web search, best leads first — the registers
       # stop at the UK holding company. "Who owns X", asked again up the chain; 200 companies a day (Zac, 16 Nov 2026);
       # found owners kept 180 days. Rule-based reading of titles and snippets, no AI.
@@ -150,5 +161,5 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || secrets.GROQ_API }}   # the AI reader: one call a company, capped by --max
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
-          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max 100
+          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max 100 --parents parents.json
           cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json

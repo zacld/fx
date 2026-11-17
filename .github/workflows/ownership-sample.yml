@@ -14,6 +14,7 @@ on:
       - lead-sourcer/tools/gleif_owners.py
       - lead-sourcer/sourcer/owner_search.py
       - lead-sourcer/tools/owner_search.py
+      - lead-sourcer/tools/parents_from_accounts.py
       - .github/workflows/ownership-sample.yml
 concurrency:
   group: ownership-sample
@@ -58,7 +59,10 @@ jobs:
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
           NUMBERS=$(node scripts/ownership-sample.mjs ../../lead-sourcer/gleif.json "${{ github.event.inputs.count || '30' }}" --numbers | tail -1)
-          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --cache owners_cache.json --out owners.json --numbers "$NUMBERS"
+          cd ../../lead-sourcer && (cd ../apps/web && node scripts/alerts-store.mjs get parents ../../lead-sourcer/parents_cache.json || echo '{}' > ../../lead-sourcer/parents_cache.json)
+          COMPANIES_HOUSE_API_KEY="${{ secrets.COMPANIES_HOUSE_API_KEY }}" python3 tools/parents_from_accounts.py --tracked tracked.json --cache parents_cache.json --out parents.json --numbers "$NUMBERS"
+          (cd ../apps/web && node scripts/alerts-store.mjs put parents ../../lead-sourcer/parents.json)
+          python3 tools/owner_search.py --tracked tracked.json --cache owners_cache.json --out owners.json --numbers "$NUMBERS" --parents parents.json
           cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json
       - name: The best leads, side by side
         run: cd apps/web && node scripts/ownership-sample.mjs ../../lead-sourcer/gleif.json "${{ github.event.inputs.count || '30' }}" ../../lead-sourcer/owners.json

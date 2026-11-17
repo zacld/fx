@@ -57,6 +57,7 @@ def main() -> None:
     ap.add_argument("--cache", default="")
     ap.add_argument("--out", required=True)
     ap.add_argument("--max", type=int, default=150)
+    ap.add_argument("--parents", default="", help="parents.json (tools/parents_from_accounts.py): companies whose accounts name the owner aren't searched")
     ap.add_argument("--check", action="store_true", help="one search with each provider's key first: which work")
     ap.add_argument("--numbers", default="", help="comma-separated company numbers: search just these")
     args = ap.parse_args()
@@ -89,7 +90,10 @@ def main() -> None:
         order = order.get("order", order) if isinstance(order, dict) else order
         seen = set()
         queue = [n for n in list(order) + list(names) if not (n in seen or seen.add(n))]
-        queue = [n for n in queue if names.get(n) and due(found.get(n), today)]
+        answered = {n for n, p in ((_load(args.parents, {}) or {}).get("companies", {}) or {}).items() if p.get("ultimate_parent")}
+        queue = [n for n in queue if names.get(n) and due(found.get(n), today) and n not in answered]
+        if answered:
+            print(f"Owner search: {len(answered)} companies' own accounts already name the owner — not searched")
 
     searched = owners = errors = 0
     for n in queue:

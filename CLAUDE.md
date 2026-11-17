@@ -698,7 +698,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `owners` (found kept 180 days, nothing found retried after 60); `?view=signals` gives `owners_search`; `ownershipOf`
   takes it as a fourth source and shows its owner (the name a person would give) with the quote and link — but a
   register (accounts, LEI, Companies House) naming a foreign parent outranks a search naming another country (the
-  search gave Motorola UK an Israeli sister company). **Foreign-owned tab** (Zac, 16 Nov 2026: "if it's owned by an
+  search gave Motorola UK an Israeli sister company). **Owners from the accounts first** (Zac, 17 Nov 2026: "who owns it" is 80% of his checking time and paid Google
+  search isn't available): `tools/parents_from_accounts.py`, in the daily "Niche hits" run before the owner search —
+  the top leads' latest accounts read best first (Companies House's free API, `accounts.facts_from_latest_accounts`,
+  `--max` 400 a day) for the "ultimate parent … incorporated in X" sentence (`control.ultimate_parent`); store key
+  `parents` (found kept a year, none re-read after 120 days); `?view=signals` gives `parents_of`, `ownership(r)` uses it
+  when the row has no parent of its own, and the owner search skips every company these answer (`--parents`). **Foreign-owned tab** (Zac, 16 Nov 2026: "if it's owned by an
   American company or something like that put it in a different section"): `foreignOwned` / `elsewhere` in
   `format.js` — every company any source says is owned from abroad lives only in that tab (like UK in name: out of the
   Accounts list, Best fit / Call now, FX filings, FX losses, Today; a serious reason not to progress, so Outreach and
