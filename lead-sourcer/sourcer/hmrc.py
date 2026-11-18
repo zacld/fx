@@ -17,6 +17,7 @@ uktradeinfo pages rather than built.
 from __future__ import annotations
 
 import io
+import json
 import os
 import re
 import time
@@ -31,6 +32,13 @@ LATEST_PAGE = "https://www.uktradeinfo.com/trade-data/latest-bulk-data-sets/"
 ARCHIVE_PAGE = "https://www.uktradeinfo.com/trade-data/latest-bulk-data-sets/bulk-data-sets-archive/"
 DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser("~"), ".cache", "fx-lead-sourcer", "hmrc")
 USER_AGENT = "fx-lead-sourcer/1.0 (+https://github.com/zacld/fx)"
+# The same importer/exporter records through uktradeinfo's own data API (OData, free, no key; found 18 Nov 2026 by
+# recording the site's traffic): Trader (name, address), Import / Export (trader, 8-digit code, month). Used only for
+# months the bulk files don't cover — the archive page failing (15 Nov 2026) — and saved as an ordinary monthly file.
+API_ROOT = "https://api.uktradeinfo.com"
+API_MONTHS_MAX = int(os.environ.get("HMRC_API_MONTHS", "6"))   # months filled from the API a run (~25 calls each)
+API_PAUSE = 1.5                                                 # seconds between calls: the API rate-limits
+API_TRADERS_DAYS = 7
 
 # Trader detail files ("importers"/"exporters") and the national trade statistics
 # by goods x country ("bdsimp"/"bdsexp") share naming patterns.
@@ -119,7 +127,10 @@ def download(months: int = 12, cache_dir: str = DEFAULT_CACHE_DIR, kind: str = "
             raise RuntimeError(f"no HMRC {kind} files found on uktradeinfo, and none cached")
         print(f"WARNING: uktradeinfo unreachable — using the {len(cached)} HMRC {kind} files already downloaded")
         since, wanted = window((k for _, k in cached), months)
-        return [p for (_, k), p in sorted(cached.items()) if k in wanted], since
+        paths = [p for (_, k), p in sorted(cached.items()) if k in wanted]
+        if kind == "traders":
+            paths += fill_from_api(paths, since, cache_dir)
+        return paths, since
     # The site's archive page can fail while its latest page works (15 Nov 2026: 502s on the archive): the history it
     # didn't list comes from the files already downloaded, so a run never reads a few months as if they were 24 (every
     # company then looked like a brand-new importer, and the lead scores swung).
@@ -144,6 +155,8 @@ def download(months: int = 12, cache_dir: str = DEFAULT_CACHE_DIR, kind: str = "
                 out.write(_get(url))
             os.replace(path + ".part", path)
         paths.append(path)
+    if kind == "traders":
+        paths += fill_from_api(paths, since, cache_dir)
     print(f"  HMRC {kind} files: {len(paths)}, keeping {since[:4]}-{since[4:]} onwards")
     return paths, since
 
@@ -159,6 +172,108 @@ def cached_files(cache_dir: str, kind: str = "traders") -> dict[tuple[str, str],
         if m and bool(m.group(2)) == (kind == "stats"):
             out[(m.group(1), m.group(3))] = os.path.join(cache_dir, name)
     return out
+
+
+def _key_months(key: str) -> set[str]:
+    """The months ("YYYYMM") a file key covers: M2609 one, A2025 a year, A2025-H1 / -H2 a half."""
+    if key.startswith("M"):
+        return {"20" + key[1:]}
+    year, half = key[1:5], key[5:]
+    span = range(1, 7) if half == "-H1" else range(7, 13) if half == "-H2" else range(1, 13)
+    return {f"{year}{m:02d}" for m in span}
+
+
+def gaps(paths: Iterable[str], since: str) -> list[tuple[str, str]]:
+    """(flow, "YYYYMM") months from `since` to the latest month any file covers that no file of that flow covers,
+    newest first."""
+    covered: dict[str, set[str]] = {"import": set(), "export": set()}
+    for path in paths:
+        m = _CACHED_RE.match(os.path.basename(path))
+        if m and not m.group(2):
+            covered[m.group(1)] |= _key_months(m.group(3))
+    monthly = [p for c in covered.values() for p in c]
+    if not monthly or not since:
+        return []
+    latest, out = max(monthly), []
+    period = latest
+    while period >= since:
+        out += [(flow, period) for flow in ("import", "export") if period not in covered[flow]]
+        period = months_back(period, 1)
+    return out
+
+
+def _api_json(url: str, tries: int = 3) -> dict:
+    for attempt in range(tries):
+        time.sleep(API_PAUSE)
+        try:
+            body = _get(url)
+            return json.loads(body.decode("utf-8-sig"))
+        except (urllib.error.URLError, OSError, ValueError) as e:  # ValueError: the API's plain-text "rejected" reply
+            if attempt == tries - 1:
+                raise
+            print(f"    uktradeinfo API: {type(e).__name__} — waiting {20 * (attempt + 1)}s")
+            time.sleep(20 * (attempt + 1))
+    return {}
+
+
+def _api_rows(query: str) -> Iterator[dict]:
+    url = f"{API_ROOT}/{query}"
+    while url:
+        page = _api_json(url)
+        yield from page.get("value", [])
+        url = page.get("@odata.nextLink", "")
+
+
+def api_traders(cache_dir: str) -> dict[str, list[str]]:
+    """{TraderId: [name, address 1-5, postcode]} — every trader (~650,000, ~22 calls), kept a week in the cache."""
+    path = os.path.join(cache_dir, "api-traders.json")
+    if os.path.exists(path) and time.time() - os.path.getmtime(path) < API_TRADERS_DAYS * 86_400:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    fields = ("CompanyName", "Address1", "Address2", "Address3", "Address4", "Address5", "PostCode")
+    traders = {str(r["TraderId"]): [r.get(f) or "" for f in fields] for r in _api_rows("Trader")}
+    with open(path + ".part", "w", encoding="utf-8") as f:
+        json.dump(traders, f)
+    os.replace(path + ".part", path)
+    return traders
+
+
+def api_month(flow: str, period: str, cache_dir: str, traders: dict) -> str:
+    """One month's importers or exporters from the API, saved in the bulk files' own layout as imports-M2609.zip
+    (period, flag, name, address 1-5, postcode, codes), so everything downstream reads it unchanged."""
+    entity = "Import" if flow == "import" else "Export"
+    codes: dict[str, set[str]] = {}
+    for r in _api_rows(f"{entity}?$filter=MonthId%20eq%20{period}&$expand=Commodity($select=Cn8Code)"):
+        code = ((r.get("Commodity") or {}).get("Cn8Code") or "").strip()
+        codes.setdefault(str(r["TraderId"]), set()).update([code] if code.isdigit() else [])
+    lines = []
+    for tid, cs in codes.items():
+        t = traders.get(tid)
+        if t and t[0]:
+            lines.append("\t".join([period, "", *(x.replace("\t", " ") for x in t), *sorted(cs)]))
+    path = os.path.join(cache_dir, f"{flow}s-M{period[2:]}.zip")
+    with zipfile.ZipFile(path + ".part", "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(f"{flow}s{period[2:]}.txt", "\r\n".join(lines).encode("latin-1", "replace"))
+    os.replace(path + ".part", path)
+    return path
+
+
+def fill_from_api(paths: Iterable[str], since: str, cache_dir: str, limit: Optional[int] = None) -> list[str]:
+    """Paths of monthly files made from the API for the newest months the files leave out (at most `limit`,
+    API_MONTHS_MAX, a run — the rest the next run: they're cached like downloaded files). Never fails the run."""
+    missing = gaps(paths, since)[: API_MONTHS_MAX if limit is None else limit]
+    if not missing:
+        return []
+    print(f"  HMRC: {len(gaps(paths, since))} trader months not in the files — filling {len(missing)} from the uktradeinfo API")
+    made = []
+    try:
+        traders = api_traders(cache_dir)
+        for flow, period in missing:
+            made.append(api_month(flow, period, cache_dir, traders))
+            print(f"    {flow}s {period}: from the API")
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        print(f"WARNING: uktradeinfo API failed ({type(e).__name__}: {e}) — {len(made)} months filled")
+    return made
 
 
 def _clean(field: str) -> str:
