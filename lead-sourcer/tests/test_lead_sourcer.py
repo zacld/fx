@@ -3360,7 +3360,8 @@ class TestHmrcOffline(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             for name in ("imports-M2609.zip", "exports-M2609.zip", "imports-A2025-H2.zip", "imports-stats-M2609.zip", "notes.txt"):
                 open(os.path.join(tmp, name), "wb").close()
-            with mock.patch.object(hmrc, "list_files", return_value={}):
+            with mock.patch.object(hmrc, "list_files", return_value={}), \
+                    mock.patch.object(hmrc, "fill_from_api", return_value=[]):
                 paths, since = hmrc.download(12, cache_dir=tmp)
                 self.assertEqual(sorted(os.path.basename(p) for p in paths),
                                  ["exports-M2609.zip", "imports-A2025-H2.zip", "imports-M2609.zip"])
@@ -3378,11 +3379,38 @@ class TestHmrcOffline(unittest.TestCase):
                 open(os.path.join(tmp, name), "wb").close()
             listed = {("import", "M2609"): "u9", ("import", "M2608"): "u8"}
             with mock.patch.object(hmrc, "list_files", return_value=listed), \
-                    mock.patch.object(hmrc, "_get", return_value=b"zip"):
+                    mock.patch.object(hmrc, "_get", return_value=b"zip"), \
+                    mock.patch.object(hmrc, "fill_from_api", return_value=[]):
                 paths, since = hmrc.download(12, cache_dir=tmp)
             self.assertEqual(sorted(os.path.basename(p) for p in paths),
                              ["imports-A2025-H2.zip", "imports-M2607.zip", "imports-M2608.zip", "imports-M2609.zip"])
             self.assertEqual(since, "202510")
+
+    def test_months_the_files_leave_out_come_from_the_api(self):
+        # 18 Nov 2026: uktradeinfo's own data API (Trader / Import / Export) carries the same records as the bulk files
+        paths = ["/c/imports-A2025-H2.zip", "/c/imports-M2609.zip", "/c/exports-A2025.zip", "/c/exports-M2609.zip",
+                 "/c/imports-M2608.zip", "/c/exports-M2608.zip"]
+        missing = hmrc.gaps(paths, "202510")
+        self.assertEqual(missing[:2], [("import", "202607"), ("export", "202607")])   # newest first
+        self.assertNotIn(("import", "202512"), missing)                                 # in the half-year archive
+        self.assertEqual(len(missing), 14)                                              # Jan–Jul 2026, both flows
+        pages = {"Import?$filter=MonthId%20eq%20202607&$expand=Commodity($select=Cn8Code)": [
+                     {"TraderId": 7, "MonthId": 202607, "Commodity": {"Cn8Code": "09012100"}},
+                     {"TraderId": 7, "MonthId": 202607, "Commodity": {"Cn8Code": "17049099"}},
+                     {"TraderId": 8, "MonthId": 202607, "Commodity": {"Cn8Code": "84713000"}}]}
+        traders = {"7": ["ACME COFFEE LTD", "1 HIGH ST", "", "LEEDS", "", "", "LS1 1AA"]}
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(hmrc, "_api_rows", side_effect=lambda q: iter(pages.get(q, []))), \
+                mock.patch.object(hmrc, "api_traders", return_value=traders):
+            made = hmrc.fill_from_api(paths, "202510", tmp, limit=1)
+            self.assertEqual([os.path.basename(p) for p in made], ["imports-M2607.zip"])
+            recs = list(hmrc.iter_records(made[0]))
+            self.assertEqual([(r["flow"], r["period"], r["name"], r["postcode"], r["codes"]) for r in recs],
+                             [("import", "202607", "ACME COFFEE LTD", "LS1 1AA", ["09012100", "17049099"])])
+            self.assertEqual(recs[0]["address"], "1 HIGH ST, LEEDS")
+            self.assertEqual(hmrc.cached_files(tmp), {("import", "M2607"): made[0]})   # kept like a downloaded file
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(hmrc, "api_traders", side_effect=OSError("502")):
+            self.assertEqual(hmrc.fill_from_api(paths, "202510", tmp), [])            # never fails the run
 
     def test_no_moments_from_a_short_history(self):
         spec = importlib.util.spec_from_file_location("niche_hits", os.path.join(ROOT, "tools", "niche_hits.py"))
