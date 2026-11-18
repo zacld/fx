@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -444,6 +444,11 @@ function Accounts({ data, password }) {
               {name} <span className="tab-n">{Object.values(lists).filter((v) => v.list === key).length}</span>
             </button>
           ))}
+          <button role="tab" aria-selected={filters.view === "new"} className={`tab${filters.view === "new" ? " on" : ""}`}
+                  title="Companies that joined the lists in the last 7 days (the finder's new finds and fresh FX filings), best lead score first"
+                  onClick={() => set({ section: "", view: "new" })}>
+            New leads <span className="tab-n">{rows.filter((r) => !contacted[r.company_number] && !isOut(r) && newLead(r, 7)).length}</span>
+          </button>
           <button role="tab" aria-selected={filters.view === "foreign"} className={`tab${filters.view === "foreign" ? " on" : ""}`}
                   title="Owned by a company or person abroad (the accounts, the LEI register, Companies House or the owner search say so) — kept here, out of every other list"
                   onClick={() => set({ section: "", view: "foreign" })}>
@@ -510,7 +515,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -572,6 +577,7 @@ function Accounts({ data, password }) {
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={allRows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "today" ? <Today rows={allRows} lists={lists} onOpen={openCompany} />
+       : filters.view === "new" ? <FitTiming mode="new" rows={rows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "foreign" ? <FitTiming mode="foreign" rows={foreignRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "uk" ? <FitTiming mode="uk" rows={ukRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "fit" || filters.view === "now" ? <FitTiming mode={filters.view} rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -1513,12 +1519,14 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
 // Best fit (mode "fit": who to call at all — sorted by Fit) and Call now (mode "now": those that fit, with a reason to
 // call now — sorted by Timing, then Fit). Each card shows that half's reasons; the export carries both.
 function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
+  const fresh = mode === "new";
+  const [days, setDays] = useState(7);
   const foreign = mode === "foreign";
-  const uk = mode === "uk" || foreign;
+  const uk = mode === "uk" || foreign || fresh;
   const fitOnly = mode === "fit" || uk;
   const key = uk ? "lead_score" : fitOnly ? "lead_fit" : "lead_timing";
   const [industry, setIndustry] = useState("");
-  const base = rows.filter((r) => !isOut(r) && !r.dropped && (uk || ((r.lead_fit || 0) >= FIT.min && (fitOnly || (r.lead_timing || 0) > 0))));
+  const base = rows.filter((r) => !isOut(r) && !r.dropped && (!fresh || newLead(r, days)) && (uk || ((r.lead_fit || 0) >= FIT.min && (fitOnly || (r.lead_timing || 0) > 0))));
   const counts = {};
   for (const r of base) { const k = industryOf(r); counts[k] = (counts[k] || 0) + 1; }
   const list = base.filter((r) => !industry || industryOf(r) === industry)
@@ -1526,23 +1534,28 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
   const half = (r, cat) => (r.lead_parts || []).filter(([, , c]) => c === cat);
   const line = (parts) => parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ");
   const exportList = () => downloadSheet(list.map((r, i) => ({
-    rank: i + 1, company_name: r.company_name, company_number: r.company_number, industry: industryOf(r), lead_fit: r.lead_fit,
+    rank: i + 1, company_name: r.company_name, company_number: r.company_number, added_on: addedOn(r), industry: industryOf(r), lead_fit: r.lead_fit,
     lead_timing: r.lead_timing, lead_score: r.lead_score, fit_reasons: line(half(r, "fit")), timing_reasons: line(half(r, "timing")),
     turnover_gbp: r.turnover_gbp || "", companies_house_url: chCompanyUrl(r.company_number),
-  })), columnsFor(["rank", "company_name", "company_number", "industry", "lead_fit", "lead_timing", "lead_score", "fit_reasons", "timing_reasons",
+  })), columnsFor(["rank", "company_name", "company_number", ...(fresh ? ["added_on"] : []), "industry", "lead_fit", "lead_timing", "lead_score", "fit_reasons", "timing_reasons",
     "turnover_gbp", "companies_house_url"], { lead_fit: "Fit", lead_timing: "Now", turnover_gbp: "Turnover (£)" },
-    ["rank", "lead_fit", "lead_timing", "lead_score", "turnover_gbp"]), `${foreign ? "foreign-owned" : uk ? "uk-in-name" : fitOnly ? "best-fit" : "call-now"}-${new Date().toISOString().slice(0, 10)}.xlsx`,
-    foreign ? "Foreign-owned" : uk ? "UK in name" : fitOnly ? "Best fit" : "Call now");
+    ["rank", "lead_fit", "lead_timing", "lead_score", "turnover_gbp"]), `${fresh ? "new-leads" : foreign ? "foreign-owned" : uk ? "uk-in-name" : fitOnly ? "best-fit" : "call-now"}-${new Date().toISOString().slice(0, 10)}.xlsx`,
+    fresh ? "New leads" : foreign ? "Foreign-owned" : uk ? "UK in name" : fitOnly ? "Best fit" : "Call now");
   return (
     <div className="list">
       <div className="filters filings-bar">
-        <span className="muted">{foreign
+        <span className="muted">{fresh
+          ? `${list.length} companies new to the lists in the last ${days} days — the finder's new finds and fresh FX filings. Highest lead score first.`
+          : foreign
           ? `${list.length} companies owned from abroad — ask whether FX is decided in the UK or by the parent. Out of every other list; highest lead score first.`
           : uk
           ? `${list.length} companies with “UK” in their name — usually a foreign group's UK arm (ask whether FX is run here or by the parent). Out of every other list; highest lead score first.`
           : fitOnly
           ? `${list.length} companies with Fit ${FIT.min}+ — the right company for the desk (FX proof and FX pain, size, niche, ownership), whatever the news. Best fit first.`
           : `${list.length} of those with a reason to call now — a new FD, a deal, funding, a fresh filing, a customs or bank change. Most timely first (moments fade over 120 days).`}</span>
+        {fresh && <select value={days} onChange={(e) => setDays(Number(e.target.value))} aria-label="Added in the last">
+          {NEW_LEAD_DAYS.map((d) => <option key={d} value={d}>Last {d} days</option>)}
+        </select>}
         <select value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Industry">
           <option value="">Any industry ({base.length})</option>
           {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
@@ -1556,6 +1569,7 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
               <span className="call-n">{i + 1}</span>
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
               <span className="chip">{industryOf(r)}</span>
+              {fresh && <span className="new">Added {addedOn(r)}</span>}
             </div>
             <div className="loss-fig">
               <b className="call-turnover">{uk ? `Score ${r.lead_score}` : fitOnly ? `Fit ${r.lead_fit}` : `Now ${r.lead_timing}`}</b>

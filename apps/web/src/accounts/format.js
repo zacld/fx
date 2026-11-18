@@ -443,6 +443,16 @@ export function monthLabel(month = "") {
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
   "November", "December"];
 // "2026-11-04" for a filing's date: the main list's accounts_filed_on, a day file's date, or the 1st of a month's archive.
+// New leads (Zac, 18 Nov 2026: "make a section which is new leads"): the day a company joined our lists — the finder's
+// upload stamps first_seen; the FX filings scan lists a company the day its accounts are filed, so its filing date.
+export const NEW_LEAD_DAYS = [3, 7, 14, 30];
+export const addedOn = (r) => (/^\d{4}-\d{2}-\d{2}/.test(r.first_seen || "") ? r.first_seen.slice(0, 10) : filedIso(r));
+export function newLead(r, days, today = new Date()) {
+  const on = addedOn(r);
+  if (!on) return false;
+  return (today - new Date(`${on}T00:00:00Z`)) / 86_400_000 <= days;
+}
+
 export function filedIso(r) {
   const f = r.accounts_filed_on || r.filed || "";
   if (/^\d{4}-\d{2}-\d{2}/.test(f)) return f.slice(0, 10);
