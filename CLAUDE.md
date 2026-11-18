@@ -711,6 +711,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Ownership sample workflow searches its 30 too; logs print "a person" for a person. **Ownership sample** workflow
   (`scripts/ownership-sample.mjs`, read-only, on a push of its files or by hand): the best 30 leads with each source's
   answer side by side, for checking by hand.
+- **New leads tab** (Zac, 18 Nov 2026: "make a section which is new leads"; `newLead` / `addedOn` / `NEW_LEAD_DAYS` in
+  `format.js`): every company that joined the lists in the last 3 / 7 / 14 / 30 days (7 by default) — the finder's upload
+  stamps `first_seen`; an FX filings row counts from its filing date — not contacted, not out, UK-in-name and foreign-owned
+  left in their own tabs; highest lead score first, industry filter, Excel export with `added_on`.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own

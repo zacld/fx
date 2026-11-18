@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -667,5 +667,20 @@ describe("From Zac's first review (16 Nov 2026)", () => {
     expect(lookalike(gc)).toBe(true);
     expect(lookalike({ ...gc, fx_today: "Uses forward contracts" })).toBe(false);
     expect(lookalike({ ...gc, turnover_gbp: "150000000" })).toBe(false);
+  });
+});
+
+describe("new leads", () => {
+  const today = new Date("2026-11-18T12:00:00Z");
+  it("dates a company by when it joined the lists", () => {
+    expect(addedOn({ first_seen: "2026-11-15T19:43:00Z", accounts_filed_on: "2026-01-02" })).toBe("2026-11-15");
+    expect(addedOn({ filed: "2026-11-16" })).toBe("2026-11-16");     // an FX filings row: the day its accounts were filed
+    expect(addedOn({})).toBe("");
+  });
+  it("keeps those added within the window", () => {
+    expect(newLead({ first_seen: "2026-11-12" }, 7, today)).toBe(true);
+    expect(newLead({ first_seen: "2026-11-05" }, 7, today)).toBe(false);
+    expect(newLead({ filed: "2026-11-01" }, 30, today)).toBe(true);
+    expect(newLead({}, 30, today)).toBe(false);
   });
 });
