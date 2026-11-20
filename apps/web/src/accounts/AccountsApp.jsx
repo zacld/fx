@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -444,6 +444,11 @@ function Accounts({ data, password }) {
               {name} <span className="tab-n">{Object.values(lists).filter((v) => v.list === key).length}</span>
             </button>
           ))}
+          <button role="tab" aria-selected={filters.view === "simple"} className={`tab${filters.view === "simple" ? " on" : ""}`}
+                  title="The same leads as a plain P&L-style sheet: company, Companies House number, type of company and the filed figures"
+                  onClick={() => set({ section: "", view: "simple" })}>
+            Simplified dash
+          </button>
           <button role="tab" aria-selected={filters.view === "new"} className={`tab${filters.view === "new" ? " on" : ""}`}
                   title="Companies that joined the lists in the last 7 days (the finder's new finds and fresh FX filings), best lead score first"
                   onClick={() => set({ section: "", view: "new" })}>
@@ -515,7 +520,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -577,6 +582,7 @@ function Accounts({ data, password }) {
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={allRows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "today" ? <Today rows={allRows} lists={lists} onOpen={openCompany} />
+       : filters.view === "simple" ? <SimpleDash rows={rows} onOpen={openCompany} contacted={contacted} />
        : filters.view === "new" ? <FitTiming mode="new" rows={rows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "foreign" ? <FitTiming mode="foreign" rows={foreignRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "uk" ? <FitTiming mode="uk" rows={ukRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -1059,16 +1065,16 @@ function exportLosses(rows) {
 
 // The list as a sheet: a dense grid, sticky header and company column, row numbers, click a header to sort (again
 // to reverse), click a company to open its page. The same rows and filters as the cards.
-function SheetView({ rows, onOpen, contacted }) {
+function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS }) {
   const [by, setBy] = useState("");
   const [desc, setDesc] = useState(false);
   const sorted = useMemo(() => {
     if (!by) return rows;
-    const col = SHEET_COLUMNS.find(([k]) => k === by);
+    const col = columns.find(([k]) => k === by);
     const key = col[3];
     const out = [...rows].sort((a, b) => { const x = key(a), y = key(b); return x < y ? -1 : x > y ? 1 : 0; });
     return desc ? out.reverse() : out;
-  }, [rows, by, desc]);
+  }, [rows, by, desc, columns]);
   const sortBy = (k) => { if (by === k) setDesc(!desc); else { setBy(k); setDesc(false); } };
   const open = (n) => (e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
   return (
@@ -1077,7 +1083,7 @@ function SheetView({ rows, onOpen, contacted }) {
         <thead>
           <tr>
             <th className="rownum" aria-label="Row" />
-            {SHEET_COLUMNS.map(([k, header, , , num]) => (
+            {columns.map(([k, header, , , num]) => (
               <th key={k} className={`${num ? "num" : ""}${k === "company" ? " sticky-col" : ""}`} aria-sort={by === k ? (desc ? "descending" : "ascending") : "none"}>
                 <button onClick={() => sortBy(k)}>{header}{by === k ? (desc ? " ▾" : " ▴") : ""}</button>
               </th>
@@ -1088,17 +1094,48 @@ function SheetView({ rows, onOpen, contacted }) {
           {sorted.map((r, i) => (
             <tr key={r.company_number || i} className={contacted[r.company_number] ? "done" : ""}>
               <td className="rownum">{i + 1}</td>
-              {SHEET_COLUMNS.map(([k, , value, , num]) => {
+              {columns.map(([k, , value, , num]) => {
                 const v = value(r);
                 return k === "company"
                   ? <td key={k} className="sticky-col"><a href={companyPath(r.company_number)} onClick={open(r.company_number)}>{v}</a></td>
-                  : <td key={k} className={`${num ? "num" : ""}${k === "fxloss" && Number(r.fx_gain_loss_gbp) < 0 ? " neg" : ""}${k === "fxloss" && Number(r.fx_gain_loss_gbp) > 0 ? " pos" : ""}`}
+                  : <td key={k} className={`${num ? "num" : ""}${(k === "fxloss" || k === "fx") && Number(r.fx_gain_loss_gbp) < 0 ? " neg" : ""}${(k === "fxloss" || k === "fx") && Number(r.fx_gain_loss_gbp) > 0 ? " pos" : ""}`}
                         title={typeof v === "string" && v.length > 28 ? v : undefined}>{v}</td>;
               })}
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+// The Simplified dash: the Accounts list's own leads (not contacted, not out — the same filtering, nothing re-scored)
+// as a P&L-style sheet with a search, an industry filter and an Excel export of exactly what's shown.
+function SimpleDash({ rows, onOpen, contacted }) {
+  const [query, setQuery] = useState("");
+  const [industry, setIndustry] = useState("");
+  const base = useMemo(() => rows.filter((r) => !contacted[r.company_number] && !isOut(r) && !r.dropped)
+    .sort((a, b) => (b.lead_score || 0) - (a.lead_score || 0)), [rows, contacted]);
+  const counts = {};
+  for (const r of base) { const k = industryOf(r); counts[k] = (counts[k] || 0) + 1; }
+  const q = query.trim().toLowerCase();
+  const list = base.filter((r) => (!industry || industryOf(r) === industry)
+    && (!q || `${r.company_name} ${r.company_number}`.toLowerCase().includes(q)));
+  const exportList = () => downloadSheet(list.map((r) => Object.fromEntries(SIMPLE_COLUMNS.map(([k, , , , , out]) => [k, out(r)]))),
+    SIMPLE_COLUMNS.map(([k, header, , , numeric]) => ({ key: k, header, number: Boolean(numeric) && !["growth", "margin"].includes(k) })),
+    `simplified-dash-${new Date().toISOString().slice(0, 10)}.xlsx`, "Simplified dash");
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <input type="search" placeholder="Search company or number" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search" />
+        <select value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Type of company">
+          <option value="">Any type of company ({base.length})</option>
+          {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
+        </select>
+        <span className="muted">{list.length} companies · figures from their latest filed accounts · click a header to sort</span>
+        <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
+      </div>
+      <SheetView rows={list} onOpen={onOpen} contacted={contacted} columns={SIMPLE_COLUMNS} />
     </div>
   );
 }

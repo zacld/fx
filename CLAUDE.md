@@ -715,6 +715,13 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `format.js`): every company that joined the lists in the last 3 / 7 / 14 / 30 days (7 by default) — the finder's upload
   stamps `first_seen`; an FX filings row counts from its filing date — not contacted, not out, UK-in-name and foreign-owned
   left in their own tabs; highest lead score first, industry filter, Excel export with `added_on`.
+- **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
+  in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
+  own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead
+  score first, as a P&L-style grid — Company, CH number, Type of company (`industryOf`), Turnover, Prior year, Growth,
+  Cost of sales, Gross profit (turnover − cost of sales, only when both filed), Gross margin, FX gain/loss, Cash, Bank
+  borrowing, Net assets, Staff, Score; blanks where the accounts don't say; search, type-of-company filter, sortable
+  headers, Excel export of what's shown.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own

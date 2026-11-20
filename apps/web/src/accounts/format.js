@@ -765,6 +765,35 @@ export const SHEET_COLUMNS = [
   ["trigger", "Trigger", (r) => parts(r.triggers)[0] || r.recent_fx_loss || "", (r) => (r.triggers || r.recent_fx_loss ? 0 : 1)],
 ];
 
+// The Simplified dash (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style — change nothing in
+// how it works, just how it looks"): the same leads as the Accounts list laid out like a profit and loss sheet. Each
+// column: [key, header, display, sort key, numeric, export value]. Gross profit is turnover less cost of sales, and
+// shown only when both were filed.
+const num = (v) => (v === undefined || v === null || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
+const grossProfit = (r) => { const t = num(r.turnover_gbp), c = num(r.cost_of_sales_gbp); return t !== null && c !== null && c > 0 ? t - c : null; };
+const signed = (v) => (v === null ? "" : `${v < 0 ? "−" : "+"}${money(Math.abs(v))}`);
+const figure = (key, header, get, fmt = money) => [key, header, (r) => { const v = get(r); return v === null ? "" : fmt(v); },
+  (r) => { const v = get(r); return v === null ? 1e18 : -v; }, true, (r) => get(r) ?? ""];
+export const SIMPLE_COLUMNS = [
+  ["company", "Company", (r) => r.company_name, (r) => r.company_name || "", false, (r) => r.company_name || ""],
+  ["number", "CH number", (r) => r.company_number || "", (r) => r.company_number || "", false, (r) => r.company_number || ""],
+  ["industry", "Type of company", (r) => industryOf(r), (r) => industryOf(r), false, (r) => industryOf(r)],
+  figure("turnover", "Turnover", (r) => num(r.turnover_gbp) ?? num(r.turnover_foreign_gbp)),
+  figure("prior", "Prior year", (r) => turnoverYears(r).prior || null),
+  ["growth", "Growth", (r) => r.turnover_growth || "", (r) => -(parseFloat(r.turnover_growth) || -1e9), true, (r) => r.turnover_growth || ""],
+  figure("cos", "Cost of sales", (r) => num(r.cost_of_sales_gbp)),
+  figure("gp", "Gross profit", grossProfit),
+  ["margin", "Gross margin", (r) => { const g = grossProfit(r); return g === null ? "" : `${Math.round((g / Number(r.turnover_gbp)) * 100)}%`; },
+   (r) => { const g = grossProfit(r); return g === null ? 1e9 : -(g / Number(r.turnover_gbp)); }, true,
+   (r) => { const g = grossProfit(r); return g === null ? "" : `${Math.round((g / Number(r.turnover_gbp)) * 100)}%`; }],
+  figure("fx", "FX gain/loss", (r) => num(r.fx_gain_loss_gbp), signed),
+  figure("cash", "Cash", (r) => num(r.cash_gbp)),
+  figure("debt", "Bank borrowing", (r) => num(r.bank_borrowings_gbp)),
+  figure("assets", "Net assets", (r) => num(r.net_assets_gbp)),
+  figure("staff", "Staff", (r) => num(r.employees), (v) => v.toLocaleString("en-GB")),
+  figure("score", "Score", (r) => num(r.lead_score), String),
+];
+
 // --- Lead score: which companies rank first (Zac's steer, 10 Nov 2026) ------------------------------------------------
 // Points, each with its reason, so the order explains itself and the weights can be recalibrated against what Sales
 // takes: an FX loss (bigger and more recent, more), proof of FX in the filings, a measured good niche, a new finance

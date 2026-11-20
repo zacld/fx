@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -682,5 +682,24 @@ describe("new leads", () => {
     expect(newLead({ first_seen: "2026-11-05" }, 7, today)).toBe(false);
     expect(newLead({ filed: "2026-11-01" }, 30, today)).toBe(true);
     expect(newLead({}, 30, today)).toBe(false);
+  });
+});
+
+describe("simplified dash", () => {
+  const cell = (r, key) => SIMPLE_COLUMNS.find(([k]) => k === key)[2](r);
+  const r = { company_name: "ACME LIMITED", company_number: "01234567", sic_codes: "46310", turnover_gbp: "40000000",
+              turnover_growth: "+25%", cost_of_sales_gbp: "30000000", fx_gain_loss_gbp: "-96000", employees: "120", lead_score: 61 };
+  it("lays the filed figures out like a P&L", () => {
+    expect(cell(r, "number")).toBe("01234567");
+    expect(cell(r, "turnover")).toBe("£40.0m");
+    expect(cell(r, "prior")).toBe("£32.0m");                      // worked back from the growth
+    expect(cell(r, "gp")).toBe("£10.0m");
+    expect(cell(r, "margin")).toBe("25%");
+    expect(cell(r, "fx")).toBe("−£96k");
+    expect(cell(r, "staff")).toBe("120");
+  });
+  it("leaves blanks rather than guessing", () => {
+    const bare = { company_name: "BARE LTD", company_number: "02" };
+    expect(["turnover", "prior", "gp", "margin", "fx", "cash"].map((k) => cell(bare, k))).toEqual(["", "", "", "", "", ""]);
   });
 });
