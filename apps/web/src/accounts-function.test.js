@@ -103,6 +103,21 @@ describe("/api/accounts", () => {
     expect((await (await post({ company_number: "01234567", crm_checked: false })).json()).checks).toEqual({});
   });
 
+  it("keeps the Simplified dash's review (open lead / added to mine / owned abroad) beside the CRM tick", async () => {
+    const s = memory();
+    s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }] };
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const post = (body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer s3cret" }, body: JSON.stringify(body) }), opts);
+    expect((await post({ company_number: "01234567", review: "client" })).status).toBe(400);
+    await post({ company_number: "01234567", crm_checked: true });
+    const marked = (await (await post({ company_number: "01234567", review: "abroad" })).json()).checks["01234567"];
+    expect(marked.review).toBe("abroad");
+    expect(marked.crm).toBeTruthy();                                       // the CRM tick is kept
+    const cleared = (await (await post({ company_number: "01234567", crm_checked: false })).json()).checks["01234567"];
+    expect(cleared).toEqual({ review: "abroad", review_at: marked.review_at });   // and the review survives the tick going
+    expect((await (await post({ company_number: "01234567", review: null })).json()).checks).toEqual({});
+  });
+
   it("keeps Zac's verdicts (good / not a fit with a listed reason) and returns them with the list", async () => {
     const s = memory();
     s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }] };

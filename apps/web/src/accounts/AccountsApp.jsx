@@ -153,8 +153,10 @@ function Accounts({ data, password }) {
   const ukRows = useMemo(() => allRows.filter(ukNamed), [allRows]);
   // Owned from abroad (an American parent, a German group …): their own tab too (Zac, 16 Nov 2026: "if it's owned by an
   // American company or something like that put it in a different section"); `signals` brings the owner search's answers
-  const foreignRows = useMemo(() => allRows.filter((r) => !ukNamed(r) && foreignOwned(r)), [allRows, signals]);
-  const rows = useMemo(() => allRows.filter((r) => !elsewhere(r) || contacted[r.company_number]), [allRows, contacted, signals]);
+  const [checks, setChecks] = useState(data.checks || {});
+  const markedAbroad = (r) => checks[r.company_number]?.review === "abroad";   // Zac's own "Owned abroad" button
+  const foreignRows = useMemo(() => allRows.filter((r) => !ukNamed(r) && (foreignOwned(r) || markedAbroad(r))), [allRows, signals, checks]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const rows = useMemo(() => allRows.filter((r) => (!elsewhere(r) && !markedAbroad(r)) || contacted[r.company_number]), [allRows, contacted, signals, checks]);   // eslint-disable-line react-hooks/exhaustive-deps
   const [filters, setFilters] = useState({ section: "", view: "", query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
                                             peOnly: false, newFdOnly: false, industry: "", ownership: "", lookalikeOnly: false });
@@ -164,7 +166,6 @@ function Accounts({ data, password }) {
   const pickLayout = (v) => { setLayout(v); try { localStorage.setItem("fx-layout", v); } catch { /* storage off */ } };
   const [shown, setShown] = useState(PAGE);
   const [notes, setNotes] = useState(data.notes || {});
-  const [checks, setChecks] = useState(data.checks || {});
   const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
   // When the Alerts tab was last opened (this browser): the banner counts hot alerts newer than that.
@@ -283,10 +284,23 @@ function Accounts({ data, password }) {
   const setCrm = useCallback(async (number, value) => {
     setSaveError("");
     const before = checks;
-    setChecks((c) => { const next = { ...c }; if (value) next[number] = { crm: new Date().toISOString() }; else delete next[number]; return next; });
+    setChecks((c) => { const next = { ...c, [number]: { ...(c[number] || {}) } }; if (value) next[number].crm = new Date().toISOString(); else delete next[number].crm; return next; });
     try { await save(number, { crm_checked: value }); } catch (e) {
       setChecks(before);
       setSaveError(`Couldn't save the CRM tick (${e.message}).`);
+    }
+  }, [save, checks]);
+
+  // The Simplified dash's buttons — Open lead / Added to mine / Owned abroad (one at a time; again clears it). Owned abroad
+  // moves the company to the Foreign-owned tab. Shown at once, undone if the save fails.
+  const setReview = useCallback(async (number, review) => {
+    setSaveError("");
+    const before = checks;
+    const value = checks[number]?.review === review ? null : review;
+    setChecks((c) => { const e = { ...(c[number] || {}) }; if (value) { e.review = value; e.review_at = new Date().toISOString(); } else { delete e.review; delete e.review_at; } return { ...c, [number]: e }; });
+    try { await save(number, { review: value }); } catch (e) {
+      setChecks(before);
+      setSaveError(`Couldn't save that (${e.message}).`);
     }
   }, [save, checks]);
 
@@ -582,7 +596,7 @@ function Accounts({ data, password }) {
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={allRows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "today" ? <Today rows={allRows} lists={lists} onOpen={openCompany} />
-       : filters.view === "simple" ? <SimpleDash rows={rows} onOpen={openCompany} contacted={contacted} />
+       : filters.view === "simple" ? <SimpleDash rows={[...rows, ...allRows.filter((r) => markedAbroad(r) && !elsewhere(r) && !contacted[r.company_number])]} onOpen={openCompany} contacted={contacted} checks={checks} onReview={setReview} />
        : filters.view === "new" ? <FitTiming mode="new" rows={rows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "foreign" ? <FitTiming mode="foreign" rows={foreignRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "uk" ? <FitTiming mode="uk" rows={ukRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -1065,7 +1079,7 @@ function exportLosses(rows) {
 
 // The list as a sheet: a dense grid, sticky header and company column, row numbers, click a header to sort (again
 // to reverse), click a company to open its page. The same rows and filters as the cards.
-function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS }) {
+function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS, actions = null }) {
   const [by, setBy] = useState("");
   const [desc, setDesc] = useState(false);
   const sorted = useMemo(() => {
@@ -1088,6 +1102,7 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS }) {
                 <button onClick={() => sortBy(k)}>{header}{by === k ? (desc ? " ▾" : " ▴") : ""}</button>
               </th>
             ))}
+            {actions && <th className="actions-col">{actions.header}</th>}
           </tr>
         </thead>
         <tbody>
@@ -1101,6 +1116,7 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS }) {
                   : <td key={k} className={`${num ? "num" : ""}${(k === "fxloss" || k === "fx") && Number(r.fx_gain_loss_gbp) < 0 ? " neg" : ""}${(k === "fxloss" || k === "fx") && Number(r.fx_gain_loss_gbp) > 0 ? " pos" : ""}`}
                         title={typeof v === "string" && v.length > 28 ? v : undefined}>{v}</td>;
               })}
+              {actions && <td className="actions-col">{actions.cell(r)}</td>}
             </tr>
           ))}
         </tbody>
@@ -1111,7 +1127,10 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS }) {
 
 // The Simplified dash: the Accounts list's own leads (not contacted, not out — the same filtering, nothing re-scored)
 // as a P&L-style sheet with a search, an industry filter and an Excel export of exactly what's shown.
-function SimpleDash({ rows, onOpen, contacted }) {
+const REVIEW_BUTTONS = [["open", "Open lead", "Checked: nobody has it — a lead to work"], ["mine", "Added to mine", "Added to your own book"],
+  ["abroad", "Owned abroad", "Owned from abroad — moves it to the Foreign-owned tab"]];
+function SimpleDash({ rows, onOpen, contacted, checks = {}, onReview }) {
+  const [review, setReview] = useState("");
   const [query, setQuery] = useState("");
   const [industry, setIndustry] = useState("");
   const base = useMemo(() => rows.filter((r) => !contacted[r.company_number] && !isOut(r) && !r.dropped)
@@ -1119,10 +1138,15 @@ function SimpleDash({ rows, onOpen, contacted }) {
   const counts = {};
   for (const r of base) { const k = industryOf(r); counts[k] = (counts[k] || 0) + 1; }
   const q = query.trim().toLowerCase();
+  const reviewOf = (r) => checks[r.company_number]?.review || "";
+  const reviewed = (k) => base.filter((r) => reviewOf(r) === k).length;
   const list = base.filter((r) => (!industry || industryOf(r) === industry)
+    && (!review || (review === "none" ? !reviewOf(r) : reviewOf(r) === review))
     && (!q || `${r.company_name} ${r.company_number}`.toLowerCase().includes(q)));
-  const exportList = () => downloadSheet(list.map((r) => Object.fromEntries(SIMPLE_COLUMNS.map(([k, , , , , out]) => [k, out(r)]))),
-    SIMPLE_COLUMNS.map(([k, header, , , numeric]) => ({ key: k, header, number: Boolean(numeric) && !["growth", "margin"].includes(k) })),
+  const exportList = () => downloadSheet(list.map((r) => ({ ...Object.fromEntries(SIMPLE_COLUMNS.map(([k, , , , , out]) => [k, out(r)])),
+    review: (REVIEW_BUTTONS.find(([k]) => k === reviewOf(r)) || [])[1] || "" })),
+    [...SIMPLE_COLUMNS.map(([k, header, , , numeric]) => ({ key: k, header, number: Boolean(numeric) && !["growth", "margin"].includes(k) })),
+     { key: "review", header: "Status" }],
     `simplified-dash-${new Date().toISOString().slice(0, 10)}.xlsx`, "Simplified dash");
   return (
     <div className="list">
@@ -1132,10 +1156,27 @@ function SimpleDash({ rows, onOpen, contacted }) {
           <option value="">Any type of company ({base.length})</option>
           {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
         </select>
+        <select value={review} onChange={(e) => setReview(e.target.value)} aria-label="Status">
+          <option value="">Any status</option>
+          <option value="none">Not marked yet ({base.length - reviewed("open") - reviewed("mine") - reviewed("abroad")})</option>
+          <option value="open">Open lead ({reviewed("open")})</option>
+          <option value="mine">Added to mine ({reviewed("mine")})</option>
+          <option value="abroad">Owned abroad ({reviewed("abroad")})</option>
+        </select>
         <span className="muted">{list.length} companies · figures from their latest filed accounts · click a header to sort</span>
         <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
       </div>
-      <SheetView rows={list} onOpen={onOpen} contacted={contacted} columns={SIMPLE_COLUMNS} />
+      <SheetView rows={list} onOpen={onOpen} contacted={contacted} columns={SIMPLE_COLUMNS} actions={{
+        header: "Status",
+        cell: (r) => (
+          <span className="review-btns">
+            {REVIEW_BUTTONS.map(([k, label, hint]) => (
+              <button key={k} className={`btn-sm review-${k}${reviewOf(r) === k ? " on" : ""}`} title={reviewOf(r) === k ? "Click again to clear" : hint}
+                      aria-pressed={reviewOf(r) === k} onClick={() => onReview(r.company_number, k)}>{label}</button>
+            ))}
+          </span>
+        ),
+      }} />
     </div>
   );
 }
@@ -2541,6 +2582,13 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
 }
 
 const CSS = `
+.sheet .actions-col { white-space: nowrap; }
+.review-btns { display: inline-flex; gap: 4px; }
+.review-btns .btn-sm { opacity: .7; }
+.review-btns .btn-sm.on { opacity: 1; font-weight: 600; }
+.review-btns .review-open.on { background: #14532d; border-color: #22c55e; color: #dcfce7; }
+.review-btns .review-mine.on { background: #1e3a8a; border-color: #60a5fa; color: #dbeafe; }
+.review-btns .review-abroad.on { background: #78350f; border-color: #f59e0b; color: #fef3c7; }
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:#07090F;color:#E2E8F0;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}

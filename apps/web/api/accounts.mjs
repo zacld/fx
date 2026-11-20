@@ -26,7 +26,9 @@ export const VERDICTS_KEY = "verdicts";     // {company_number: {verdict: "good"
 export const VERDICT_REASONS = ["Too small", "Too big", "No real FX", "Wrong sector", "FX run abroad", "Other"];
 export const LISTS_KEY = "lists";           // {company_number: {list: "call" | "post" | "email", at, missing?}} — Zac's own lists
 export const LISTS = ["call", "post", "email"];   // call list, chocolate / mailing list, email list
-export const CHECKS_KEY = "checks";         // {company_number: {crm: iso}} — the lead checklist's "CRM checked" tick
+export const CHECKS_KEY = "checks";         // {company_number: {crm: iso, review, review_at}} — the "CRM checked" tick and
+                                             // the Simplified dash's review: open lead / added to mine / owned abroad
+export const REVIEWS = ["open", "mine", "abroad"];
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index
 export const filingsMonthKey = (month) => `filings/${month}`;   // {month, rows}: the companies filed that month
@@ -266,7 +268,20 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       }
       const checks = (await blobs.get(CHECKS_KEY, { type: "json" })) || {};
       if (body.crm_checked) checks[number] = { ...(checks[number] || {}), crm: new Date().toISOString() };
-      else delete checks[number];
+      else if (checks[number]) { delete checks[number].crm; if (!Object.keys(checks[number]).length) delete checks[number]; }
+      await blobs.setJSON(CHECKS_KEY, checks);
+      await mirror(db, number, "check", checks[number]);
+      return reply({ checks }, 200);
+    }
+    if ("review" in body) {   // the Simplified dash's buttons: Zac's own read of the lead (no reason, nothing from the CRM)
+      if (!COMPANY_NUMBER.test(number || "") || !(body.review === null || REVIEWS.includes(body.review))) {
+        return reply({ error: `send {company_number, review: ${REVIEWS.map((r) => `"${r}"`).join(" | ")} | null}` }, 400);
+      }
+      const checks = (await blobs.get(CHECKS_KEY, { type: "json" })) || {};
+      const entry = { ...(checks[number] || {}) };
+      if (body.review) Object.assign(entry, { review: body.review, review_at: new Date().toISOString() });
+      else { delete entry.review; delete entry.review_at; }
+      if (Object.keys(entry).length) checks[number] = entry; else delete checks[number];
       await blobs.setJSON(CHECKS_KEY, checks);
       await mirror(db, number, "check", checks[number]);
       return reply({ checks }, 200);
