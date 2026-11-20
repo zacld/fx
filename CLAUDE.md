@@ -724,8 +724,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   headers, Excel export of what's shown. **Status buttons** on each row (Zac, 20 Nov 2026: "add a button, open lead, added
   to mine and owned abroad"; `REVIEW_BUTTONS`, POST `{company_number, review: "open" | "mine" | "abroad" | null}`, kept
   in the `checks` store item beside the CRM tick as `review` + `review_at` — his own read, no reason and nothing from
-  the CRM): one at a time, click again to clear; a Status filter and export column; **Owned abroad** also puts the company
-  in the Foreign-owned tab and out of the Accounts list (it stays on the Simplified dash, marked, so it can be undone).
+  the CRM): one at a time, beside the CH number (Zac, 20 Nov 2026: "put the buttons next to the ch number and when i click
+  the button take it off the main sheet and put it on its own list"; `SheetView`'s `actions.after`). The dash opens on **To
+  check** (nothing marked); a button moves the company to its own list — **Open lead / Added to mine / Owned abroad** tabs
+  with counts, each exported on its own; clicking the lit button sends it back to To check. **Owned abroad** also puts the
+  company in the Foreign-owned tab and out of the Accounts list.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own

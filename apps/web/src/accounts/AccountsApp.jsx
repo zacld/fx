@@ -1098,11 +1098,14 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS, actions =
           <tr>
             <th className="rownum" aria-label="Row" />
             {columns.map(([k, header, , , num]) => (
-              <th key={k} className={`${num ? "num" : ""}${k === "company" ? " sticky-col" : ""}`} aria-sort={by === k ? (desc ? "descending" : "ascending") : "none"}>
-                <button onClick={() => sortBy(k)}>{header}{by === k ? (desc ? " ▾" : " ▴") : ""}</button>
-              </th>
+              <Fragment key={k}>
+                <th className={`${num ? "num" : ""}${k === "company" ? " sticky-col" : ""}`} aria-sort={by === k ? (desc ? "descending" : "ascending") : "none"}>
+                  <button onClick={() => sortBy(k)}>{header}{by === k ? (desc ? " ▾" : " ▴") : ""}</button>
+                </th>
+                {actions && actions.after === k && <th className="actions-col">{actions.header}</th>}
+              </Fragment>
             ))}
-            {actions && <th className="actions-col">{actions.header}</th>}
+            {actions && !actions.after && <th className="actions-col">{actions.header}</th>}
           </tr>
         </thead>
         <tbody>
@@ -1111,12 +1114,13 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS, actions =
               <td className="rownum">{i + 1}</td>
               {columns.map(([k, , value, , num]) => {
                 const v = value(r);
-                return k === "company"
-                  ? <td key={k} className="sticky-col"><a href={companyPath(r.company_number)} onClick={open(r.company_number)}>{v}</a></td>
-                  : <td key={k} className={`${num ? "num" : ""}${(k === "fxloss" || k === "fx") && Number(r.fx_gain_loss_gbp) < 0 ? " neg" : ""}${(k === "fxloss" || k === "fx") && Number(r.fx_gain_loss_gbp) > 0 ? " pos" : ""}`}
+                const cell = k === "company"
+                  ? <td className="sticky-col"><a href={companyPath(r.company_number)} onClick={open(r.company_number)}>{v}</a></td>
+                  : <td className={`${num ? "num" : ""}${(k === "fxloss" || k === "fx") && Number(r.fx_gain_loss_gbp) < 0 ? " neg" : ""}${(k === "fxloss" || k === "fx") && Number(r.fx_gain_loss_gbp) > 0 ? " pos" : ""}`}
                         title={typeof v === "string" && v.length > 28 ? v : undefined}>{v}</td>;
+                return <Fragment key={k}>{cell}{actions && actions.after === k && <td className="actions-col">{actions.cell(r)}</td>}</Fragment>;
               })}
-              {actions && <td className="actions-col">{actions.cell(r)}</td>}
+              {actions && !actions.after && <td className="actions-col">{actions.cell(r)}</td>}
             </tr>
           ))}
         </tbody>
@@ -1130,7 +1134,7 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS, actions =
 const REVIEW_BUTTONS = [["open", "Open lead", "Checked: nobody has it — a lead to work"], ["mine", "Added to mine", "Added to your own book"],
   ["abroad", "Owned abroad", "Owned from abroad — moves it to the Foreign-owned tab"]];
 function SimpleDash({ rows, onOpen, contacted, checks = {}, onReview }) {
-  const [review, setReview] = useState("");
+  const [review, setReview] = useState("none");   // "none" = the main sheet (not marked yet); else that button's own list
   const [query, setQuery] = useState("");
   const [industry, setIndustry] = useState("");
   const base = useMemo(() => rows.filter((r) => !contacted[r.company_number] && !isOut(r) && !r.dropped)
@@ -1141,33 +1145,37 @@ function SimpleDash({ rows, onOpen, contacted, checks = {}, onReview }) {
   const reviewOf = (r) => checks[r.company_number]?.review || "";
   const reviewed = (k) => base.filter((r) => reviewOf(r) === k).length;
   const list = base.filter((r) => (!industry || industryOf(r) === industry)
-    && (!review || (review === "none" ? !reviewOf(r) : reviewOf(r) === review))
+    && (review === "none" ? !reviewOf(r) : reviewOf(r) === review)
     && (!q || `${r.company_name} ${r.company_number}`.toLowerCase().includes(q)));
   const exportList = () => downloadSheet(list.map((r) => ({ ...Object.fromEntries(SIMPLE_COLUMNS.map(([k, , , , , out]) => [k, out(r)])),
     review: (REVIEW_BUTTONS.find(([k]) => k === reviewOf(r)) || [])[1] || "" })),
     [...SIMPLE_COLUMNS.map(([k, header, , , numeric]) => ({ key: k, header, number: Boolean(numeric) && !["growth", "margin"].includes(k) })),
      { key: "review", header: "Status" }],
-    `simplified-dash-${new Date().toISOString().slice(0, 10)}.xlsx`, "Simplified dash");
+    `simplified-dash-${review === "none" ? "to-check" : review}-${new Date().toISOString().slice(0, 10)}.xlsx`, "Simplified dash");
   return (
     <div className="list">
+      <div className="filters filings-bar review-lists" role="tablist" aria-label="Simplified dash lists">
+        {[["none", "To check", base.length - reviewed("open") - reviewed("mine") - reviewed("abroad")],
+          ...REVIEW_BUTTONS.map(([k, label]) => [k, label, reviewed(k)])].map(([k, label, n]) => (
+          <button key={k} role="tab" aria-selected={review === k} className={`tab${review === k ? " on" : ""}`} onClick={() => setReview(k)}>
+            {label} <span className="tab-n">{n}</span>
+          </button>
+        ))}
+      </div>
       <div className="filters filings-bar">
         <input type="search" placeholder="Search company or number" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search" />
         <select value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Type of company">
           <option value="">Any type of company ({base.length})</option>
           {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
         </select>
-        <select value={review} onChange={(e) => setReview(e.target.value)} aria-label="Status">
-          <option value="">Any status</option>
-          <option value="none">Not marked yet ({base.length - reviewed("open") - reviewed("mine") - reviewed("abroad")})</option>
-          <option value="open">Open lead ({reviewed("open")})</option>
-          <option value="mine">Added to mine ({reviewed("mine")})</option>
-          <option value="abroad">Owned abroad ({reviewed("abroad")})</option>
-        </select>
-        <span className="muted">{list.length} companies · figures from their latest filed accounts · click a header to sort</span>
+        <span className="muted">{review === "none"
+          ? `${list.length} companies to check · a button moves the company to its own list`
+          : `${list.length} companies · click the lit button to send one back to To check`} · figures from their latest filed accounts</span>
         <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
       </div>
       <SheetView rows={list} onOpen={onOpen} contacted={contacted} columns={SIMPLE_COLUMNS} actions={{
         header: "Status",
+        after: "number",
         cell: (r) => (
           <span className="review-btns">
             {REVIEW_BUTTONS.map(([k, label, hint]) => (
@@ -2851,6 +2859,7 @@ a{color:var(--accent)}
 .sheet tbody tr:hover .sticky-col{background:#25272a}
 .sheet tr.done td{opacity:.55}
 .sheet tr.hot td{background:rgba(253,214,99,.06)}
+.sheet th.actions-col,.sheet td.actions-col{max-width:none;overflow:visible;text-overflow:clip;padding:4px 8px}
 .sheet td.neg{color:var(--loss)}
 .sheet td.pos{color:var(--good)}
 .sheet a{color:var(--text);text-decoration:none}
