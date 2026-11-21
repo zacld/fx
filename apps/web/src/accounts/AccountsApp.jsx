@@ -539,12 +539,16 @@ function Accounts({ data, password }) {
                   title="Type a product or trade — every UK company whose customs records show it trading those goods" onClick={() => set({ section: "", view: "search" })}>
             Niche search
           </button>
+          <button role="tab" aria-selected={filters.view === "emerging"} className={`tab niches-tab${filters.view === "emerging" ? " on" : ""}`}
+                  title="Every full / medium / group-accounts company in this week's emerging niches — check them off" onClick={() => set({ section: "", view: "emerging" })}>
+            Emerging leads
+          </button>
           <button role="tab" aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
                   title="The Investec email for each company you send here" onClick={() => set({ section: "", view: "email" })}>
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "search", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -621,6 +625,7 @@ function Accounts({ data, password }) {
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []} verdicts={ranked.verdicts}
                                              headings={signals.headings || []} codes={signals.codes || []} onPick={(name) => set({ section: "", view: "", query: name })} />
+       : filters.view === "emerging" ? <EmergingLeads password={password} listed={listedNumbers} onOpen={openCompany} checks={checks} onReview={setReview} />
        : filters.view === "search" ? <NicheSearch password={password} listed={listedNumbers} onOpen={openCompany} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
@@ -1473,6 +1478,89 @@ function Niches({ measured, madeAt, learned, headings, codes = [], onPick, verdi
         <p className="filings-note">Customs headings no goods niche covers yet, best first: {headings.filter((h) => !h.covered).slice(0, 12)
           .map((h) => `${h.heading} ${h.chapter} (${h.hit_rate}% prove FX, ${h.strong} companies)`).join(" · ")}</p>
       )}
+    </div>
+  );
+}
+
+// The Emerging leads tab (Zac, 21 Nov 2026: "sort all of these new leads into a column — I'll check them all today"):
+// every full / medium / group-accounts company in this week's emerging niches (niche_hits --emerging-out), strongest FX
+// proof first, with the Simplified dash's buttons — Open lead / Added to mine / Owned abroad — so each one checked moves
+// off To check (and feeds the lookalikes and the feedback loop).
+function EmergingLeads({ password, listed, onOpen, checks, onReview }) {
+  const [data, setData] = useState(null);
+  const [niche, setNiche] = useState("");
+  const [strongOnly, setStrongOnly] = useState(false);
+  const [tab, setTab] = useState("");
+  const [q, setQ] = useState("");
+  useEffect(() => {
+    fetch(`${API}?view=emerging`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null)).then((body) => setData(body || { rows: [] })).catch(() => setData({ rows: [] }));
+  }, [password]);
+  if (!data) return <div className="list"><div className="empty">Loading…</div></div>;
+  const reviewOf = (r) => checks[r.company_number]?.review || "";
+  const rows = data.rows || [];
+  const base = rows.filter((r) => (!niche || r.niches.includes(niche)) && (!strongOnly || r.fx_proof === "strong")
+    && (!q || `${r.company_name} ${r.company_number}`.toLowerCase().includes(q.toLowerCase())));
+  const list = base.filter((r) => reviewOf(r) === tab);
+  const counts = {};
+  for (const r of rows) for (const n of r.niches) counts[n] = (counts[n] || 0) + 1;
+  const short = (n) => n.replace(/^Emerging: /, "");
+  const open = (r) => (listed.has(r.company_number) ? onOpen(r.company_number) : window.open(chCompanyUrl(r.company_number), "_blank", "noopener"));
+  const exportList = () => downloadSheet(list.map((r, i) => ({ rank: i + 1, company_name: r.company_name, company_number: r.company_number,
+      niche: r.niches.map(short).join("; "), accounts_category: r.accounts_category, industry: industryOf({ sic_codes: r.sic_codes }),
+      fx_proof: r.fx_proof === "strong" ? "Strong" : r.fx_proof === "some" ? "Some" : "", open: r.open ? "No hedging named" : "",
+      customs_months: r.customs_months || "", on_list: listed.has(r.company_number) ? "Yes" : "", postcode: r.postcode,
+      status: (REVIEW_BUTTONS.find(([k]) => k === reviewOf(r)) || [])[1] || "", companies_house_url: chCompanyUrl(r.company_number) })),
+    columnsFor(["rank", "company_name", "company_number", "status", "niche", "accounts_category", "industry", "fx_proof", "open", "customs_months", "on_list", "postcode", "companies_house_url"],
+      { customs_months: "Months in customs records", on_list: "On the lists", fx_proof: "FX proof in filings", open: "Hedging" }, ["rank", "customs_months"]),
+    `emerging-leads-${new Date().toISOString().slice(0, 10)}.xlsx`, "Emerging leads");
+  if (!rows.length) return <div className="list"><div className="empty">No emerging-niche companies yet — they arrive with the next Niche hits run.</div></div>;
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <span className="muted">{rows.length} companies (full / medium / group accounts) in this week's {data.niches?.length || 0} emerging niches · strongest FX proof in their filings first · updated {data.made_at ? filedWhen(data.made_at.slice(0, 10)) : ""}</span>
+      </div>
+      <div className="groups" role="group" aria-label="Status">
+        {[["", "To check"], ...REVIEW_BUTTONS.map(([k, label]) => [k, label])].map(([k, label]) => (
+          <button key={k || "todo"} className={`btn-sm${tab === k ? " on" : ""}`} onClick={() => setTab(k)}>
+            {label} <span className="tab-n">{base.filter((r) => reviewOf(r) === k).length}</span>
+          </button>
+        ))}
+      </div>
+      <div className="filters filings-bar">
+        <input className="input search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search company or number" aria-label="Search" />
+        <select className="input" value={niche} onChange={(e) => setNiche(e.target.value)} aria-label="Emerging niche">
+          <option value="">Every emerging niche ({rows.length})</option>
+          {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([n, c]) => <option key={n} value={n}>{short(n)} ({c})</option>)}
+        </select>
+        <label className="check"><input type="checkbox" checked={strongOnly} onChange={(e) => setStrongOnly(e.target.checked)} /> Strong FX proof only ({rows.filter((r) => r.fx_proof === "strong").length})</label>
+        <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
+      </div>
+      <div className="sheet-wrap">
+        <table className="sheet">
+          <thead><tr><th className="num">#</th><th>Company</th><th>CH number</th><th className="actions-col">Status</th><th>Niche</th><th>Accounts</th><th>Industry</th>
+            <th title="From the FX filings scan of its own accounts">FX proof</th><th className="num" title="Months with customs records in the last year">Customs months</th><th>On the lists</th></tr></thead>
+          <tbody>
+            {list.slice(0, 1500).map((r, i) => (
+              <tr key={r.company_number}>
+                <td className="num">{i + 1}</td>
+                <td><button className="linkish" onClick={() => open(r)}>{r.company_name}</button></td>
+                <td><a href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer">{r.company_number}</a></td>
+                <td className="actions-col"><span className="review-btns">
+                  {REVIEW_BUTTONS.map(([k, label, hint]) => (
+                    <button key={k} className={`btn-sm review-${k}${reviewOf(r) === k ? " on" : ""}`} title={reviewOf(r) === k ? "Click again to clear" : hint}
+                            aria-pressed={reviewOf(r) === k} onClick={() => onReview(r.company_number, k)}>{label}</button>
+                  ))}
+                </span></td>
+                <td>{r.niches.map(short).join("; ")}</td><td>{r.accounts_category}</td><td>{industryOf({ sic_codes: r.sic_codes })}</td>
+                <td>{r.fx_proof === "strong" ? <span className="chip good">Strong{r.open ? " · no hedging named" : ""}</span> : r.fx_proof === "some" ? "Some" : ""}</td>
+                <td className="num">{r.customs_months || ""}</td><td>{listed.has(r.company_number) ? "Yes" : ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!list.length && <div className="empty">{tab ? "None marked here yet." : "All checked — nice."}</div>}
     </div>
   );
 }

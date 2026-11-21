@@ -144,6 +144,7 @@ export const SEARCHES_KEY = "searches";              // {searches: [{id, text, a
 export const SEARCH_RESULTS_KEY = "search_results";  // {made_at, results: {id: {text, codes, rows, counts, done_at}}}
 export const SEARCHES_MAX = 30;
 export const SEARCH_TEXT_MAX = 200;
+export const EMERGING_KEY = "emerging/companies";   // {made_at, niches, rows}: every sized company in an emerging niche (niche_hits)
 export const LOOKALIKES_KEY = "lookalikes";   // {made_at, good, leads, count, items}: like Zac's good leads (niche_hits)
 export const NICHES_KEY = "niches/stats";   // {made_at, niches: {id: measured numbers}, headings}: tools/niche_hits.py
 export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
@@ -333,6 +334,9 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     return reply({ contacted: marks, notes: noted }, 200);
   }
   const params = new URL(req.url).searchParams;
+  if (params.get("view") === "emerging") {
+    return reply((await blobs.get(EMERGING_KEY, { type: "json" })) || { rows: [], niches: [] }, 200);
+  }
   if (params.get("view") === "search") {
     const [asked, results, alike] = await Promise.all([SEARCHES_KEY, SEARCH_RESULTS_KEY, LOOKALIKES_KEY].map((k) => blobs.get(k, { type: "json" })));
     return reply({ searches: asked?.searches || [], results: results?.results || {}, results_made_at: results?.made_at || "",

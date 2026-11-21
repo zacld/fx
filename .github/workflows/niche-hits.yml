@@ -91,7 +91,7 @@ jobs:
           zip=$(ls -t ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip 2>/dev/null | head -1 || true)
           python3 tools/niche_hits.py --filings fx-filings.json --out niche_stats.json --tracked tracked.json \
             --enrich-out enrich.json --traders-out traders.json --moments-out moments.json ${zip:+--bulk "$zip"} \
-            --checks checks.json --verdicts verdicts.json --lookalikes-out lookalikes.json
+            --checks checks.json --verdicts verdicts.json --lookalikes-out lookalikes.json --emerging-out emerging.json
       # 24 months of HMRC trader files (the customs moments: new importers / exporters, trade growing), once a month
       - name: Keep the HMRC trader files
         uses: actions/cache/save@v4
@@ -113,6 +113,7 @@ jobs:
           cd apps/web && node scripts/alerts-store.mjs put niches ../../lead-sourcer/niche_stats.json
           node scripts/alerts-store.mjs put deals ../../lead-sourcer/deals.json
           node scripts/alerts-store.mjs put lookalikes ../../lead-sourcer/lookalikes.json
+          node scripts/alerts-store.mjs put emerging ../../lead-sourcer/emerging.json
           # no file when the customs history was cut short (niche_hits.py): the last good moments stay
           if [ -f ../../lead-sourcer/moments.json ]; then node scripts/alerts-store.mjs put moments ../../lead-sourcer/moments.json; fi
       # Who owns each tracked company, from the Global LEI register's free daily files (direct and ultimate parent, or why
