@@ -3341,6 +3341,30 @@ class TestChAlerts(unittest.TestCase):
         self.assertGreaterEqual(found[0]["filed_fx_score"], 50)       # the finder's priority floor
         self.assertNotIn("Acme Trading", looked)
 
+    def test_adverts_naming_currency_work_find_new_companies(self):
+        # 19 Nov 2026 (Zac's brief): an employer not on the lists whose advert names currency work is a new lead, with
+        # the advert's own words; the same employer is looked up once, and a plain advert at an unknown employer isn't
+        m = self.m
+        ads = [{"employer": "Brightbloom Flowers Ltd", "title": "Purchase Ledger Clerk", "date": "2026-11-18", "link": "j1",
+                "text": "<p>Busy team.</p> You will pay our growers in the Netherlands in EUR and USD each week."},
+               {"employer": "Brightbloom Flowers Ltd", "title": "Accounts Assistant", "date": "2026-11-17", "link": "j2",
+                "text": "Manage multi-currency bank accounts."},
+               {"employer": "Quiet Widgets Ltd", "title": "Office Manager", "date": "2026-11-18", "link": "j3",
+                "text": "Run the office."},
+               {"employer": "Green Gardens Ltd", "title": "Gardener", "date": "2026-11-18", "link": "j4",
+                "text": "Hedge trimming and lawn care."}]
+        looked = []
+        lookup = lambda name: (looked.append(name) or {"company_number": "07654321", "company_name": "BRIGHTBLOOM FLOWERS LTD"}) \
+            if "Brightbloom" in name else None
+        alerts, found = m.job_signals(self.TRACKED, "", ads, lookup=lookup)
+        self.assertEqual(looked, ["Brightbloom Flowers Ltd"])                      # once, and nobody else looked up
+        self.assertEqual([r["company_number"] for r in found], ["07654321"])
+        self.assertEqual(found[0]["source"], "job_advert")
+        self.assertIn("in EUR and USD", found[0]["discovered_by"])
+        self.assertEqual(found[0]["filed_fx_score"], 55)
+        self.assertEqual(m.fx_wording(ads[3]), "")                                  # gardening isn't hedging
+        self.assertEqual(m.fx_wording({"title": "Clerk", "text": "Our client is a multi-currency business."}), "")
+
     def test_job_adverts_skip_recruiters_and_need_keys(self):
         m = self.m
         with mock.patch.dict(os.environ, {"ADZUNA_APP_ID": "", "ADZUNA_APP_KEY": "", "REED_API_KEY": ""}):

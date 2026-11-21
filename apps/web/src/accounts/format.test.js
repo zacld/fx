@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -701,5 +701,17 @@ describe("simplified dash", () => {
   it("leaves blanks rather than guessing", () => {
     const bare = { company_name: "BARE LTD", company_number: "02" };
     expect(["turnover", "prior", "gp", "margin", "fx", "cash"].map((k) => cell(bare, k))).toEqual(["", "", "", "", "", ""]);
+  });
+});
+
+describe("lead source", () => {
+  it("says where a new lead came from", () => {
+    expect(leadSource({ found_via: "job advert: Purchase Ledger Clerk — “pay growers in EUR and USD”" })).toBe("Job advert");
+    expect(leadSource({ found_via: "news: Acme raises £20m" })).toBe("News");
+    expect(leadSource({ found_via: "New charge to an FX provider" })).toBe("Charge / owner alert");
+    expect(leadSource({ from_filings: true })).toBe("FX filings");
+    expect(leadSource({ fx_niche: "Supply chain abroad (modern slavery statement)" })).toBe("Modern slavery register");
+    expect(leadSource({ hmrc_import_months: 8 })).toBe("Customs records");
+    expect(leadSource({ fx_niche: "Coffee importers" })).toBe("Niche search");
   });
 });

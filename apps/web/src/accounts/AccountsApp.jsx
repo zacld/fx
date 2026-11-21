@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, LEAD_SOURCES, leadSource, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -1607,12 +1607,13 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
 function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
   const fresh = mode === "new";
   const [days, setDays] = useState(7);
+  const [source, setSource] = useState("");
   const foreign = mode === "foreign";
   const uk = mode === "uk" || foreign || fresh;
   const fitOnly = mode === "fit" || uk;
   const key = uk ? "lead_score" : fitOnly ? "lead_fit" : "lead_timing";
   const [industry, setIndustry] = useState("");
-  const base = rows.filter((r) => !isOut(r) && !r.dropped && (!fresh || newLead(r, days)) && (uk || ((r.lead_fit || 0) >= FIT.min && (fitOnly || (r.lead_timing || 0) > 0))));
+  const base = rows.filter((r) => !isOut(r) && !r.dropped && (!fresh || (newLead(r, days) && (!source || leadSource(r) === source))) && (uk || ((r.lead_fit || 0) >= FIT.min && (fitOnly || (r.lead_timing || 0) > 0))));
   const counts = {};
   for (const r of base) { const k = industryOf(r); counts[k] = (counts[k] || 0) + 1; }
   const list = base.filter((r) => !industry || industryOf(r) === industry)
@@ -1620,10 +1621,10 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
   const half = (r, cat) => (r.lead_parts || []).filter(([, , c]) => c === cat);
   const line = (parts) => parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ");
   const exportList = () => downloadSheet(list.map((r, i) => ({
-    rank: i + 1, company_name: r.company_name, company_number: r.company_number, added_on: addedOn(r), industry: industryOf(r), lead_fit: r.lead_fit,
+    rank: i + 1, company_name: r.company_name, company_number: r.company_number, added_on: addedOn(r), found_via: fresh ? `${leadSource(r)}${r.found_via ? ` — ${r.found_via}` : ""}` : "", industry: industryOf(r), lead_fit: r.lead_fit,
     lead_timing: r.lead_timing, lead_score: r.lead_score, fit_reasons: line(half(r, "fit")), timing_reasons: line(half(r, "timing")),
     turnover_gbp: r.turnover_gbp || "", companies_house_url: chCompanyUrl(r.company_number),
-  })), columnsFor(["rank", "company_name", "company_number", ...(fresh ? ["added_on"] : []), "industry", "lead_fit", "lead_timing", "lead_score", "fit_reasons", "timing_reasons",
+  })), columnsFor(["rank", "company_name", "company_number", ...(fresh ? ["added_on", "found_via"] : []), "industry", "lead_fit", "lead_timing", "lead_score", "fit_reasons", "timing_reasons",
     "turnover_gbp", "companies_house_url"], { lead_fit: "Fit", lead_timing: "Now", turnover_gbp: "Turnover (£)" },
     ["rank", "lead_fit", "lead_timing", "lead_score", "turnover_gbp"]), `${fresh ? "new-leads" : foreign ? "foreign-owned" : uk ? "uk-in-name" : fitOnly ? "best-fit" : "call-now"}-${new Date().toISOString().slice(0, 10)}.xlsx`,
     fresh ? "New leads" : foreign ? "Foreign-owned" : uk ? "UK in name" : fitOnly ? "Best fit" : "Call now");
@@ -1642,6 +1643,10 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
         {fresh && <select value={days} onChange={(e) => setDays(Number(e.target.value))} aria-label="Added in the last">
           {NEW_LEAD_DAYS.map((d) => <option key={d} value={d}>Last {d} days</option>)}
         </select>}
+        {fresh && <select value={source} onChange={(e) => setSource(e.target.value)} aria-label="Found via">
+          <option value="">Any source</option>
+          {LEAD_SOURCES.map((k) => <option key={k} value={k}>{k} ({rows.filter((r) => !isOut(r) && newLead(r, days) && leadSource(r) === k).length})</option>)}
+        </select>}
         <select value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Industry">
           <option value="">Any industry ({base.length})</option>
           {Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
@@ -1656,6 +1661,7 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
               <span className="chip">{industryOf(r)}</span>
               {fresh && <span className="new">Added {addedOn(r)}</span>}
+              {fresh && <span className="chip" title={r.found_via || undefined}>{leadSource(r)}</span>}
             </div>
             <div className="loss-fig">
               <b className="call-turnover">{uk ? `Score ${r.lead_score}` : fitOnly ? `Fit ${r.lead_fit}` : `Now ${r.lead_timing}`}</b>
@@ -1663,6 +1669,8 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
             </div>
           </div>
           <ul className="call-why">{half(r, fitOnly ? "fit" : "timing").map(([why, p]) => <li key={why}>{why} <b>{p > 0 ? "+" : "−"}{Math.abs(p)}</b></li>)}</ul>
+          {fresh && r.found_via && <p className="panel-p muted">Found via {r.found_via_url
+            ? <a href={r.found_via_url} target="_blank" rel="noreferrer">{r.found_via}</a> : r.found_via}</p>}
           {!fitOnly && <p className="panel-p muted">Fits because: {half(r, "fit").map(([w]) => w.replace(/ \(.*\)$/, "")).join(" · ")}</p>}
           <div className="card-foot">
             <a className="more-btn" href={companyPath(r.company_number)} onClick={(e) => { e.preventDefault(); onOpen(r.company_number); }}>Open company page →</a>

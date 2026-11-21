@@ -841,6 +841,18 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`DISCOVER_FROM_NEWS`) is looked up on Companies House by its exact registered name (active, `LOOKUPS_MAX` 40 a
   run) and becomes a discovery (filed FX score 50–55) — a new FD, expansion abroad or job advert elsewhere isn't. King's Award and UKEF lists come in
   through the headlines (their gov.uk lists' formats weren't verifiable from here).
+  **Job adverts that name currency work** (Zac's brief, 19 Nov 2026: "the bottleneck is companies not already
+  prospected" — a mid-sized company advertising a role "paying suppliers in EUR and USD" shows real FX flows decided in
+  the UK and is rarely on anyone's list): `FX_JOB_QUERIES` (multi-currency / foreign-currency / overseas-supplier
+  payments, hedging, forward contracts, letters of credit … two pages each on Adzuna, Reed's keyword search) and
+  `fx_wording` (the advert's title and text, `FX_WORDING`; recruiter pitches and gardening "hedge" skipped) — an
+  employer not on the lists, found by exact registered name (`JOB_LOOKUPS_MAX` 60 a run, currency-worded and FD adverts
+  first), becomes a discovery with the quote (`discovered_by`, `source` job_advert, `source_url`, filed FX score 55);
+  the finder checks it (niche "FX work in a job advert", `main.JOBS_NICHE`) and every discovery's row carries
+  `found_via` / `found_via_url` (`main.FOUND_VIA`). The New leads tab shows each lead's source (`leadSource` /
+  `LEAD_SOURCES` in `format.js`: Job advert, News, Charge / owner alert, FX filings, Modern slavery register, Customs
+  records, Niche search), a source filter and a `found_via` export column; the company page lists "Found via" with
+  the advert's link.
 - **Look** (Nov 2026: "clean dark theme, Google-Sheet professional vibe, finances Zint-style"): neutral dark greys,
   gridlines, flat panels, tabular figures (the theme block at the end of `CSS` in `AccountsApp.jsx`). The Accounts list
   defaults to a **Sheet** — a dense sortable grid (`SHEET_COLUMNS` in `format.js`: company, turnover, growth, FX proof,

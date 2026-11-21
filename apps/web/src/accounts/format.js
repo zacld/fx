@@ -154,7 +154,7 @@ export function detailSections(r) {
       ["Main currency", [r.main_currency, r.currency_direction, r.currency_confidence && `${r.currency_confidence} confidence`, r.currency_source].filter(Boolean).join(" · ")],
       ["Currency evidence", r.currency_evidence], ["Imports in", r.import_currencies], ["Exports in", r.export_currencies],
       ["Trade", r.trade_countries], ["Customs goods", r.hmrc_goods], ["Why FX", r.fx_evidence], ["Niche", r.fx_niche],
-      ["Exposure", r.fx_exposure], ["Why untapped", r.untapped_reasons],
+      ["Found via", r.found_via, r.found_via_url], ["Exposure", r.fx_exposure], ["Why untapped", r.untapped_reasons],
     ]],
     ["People", [
       ["Contact source", presentedContact(r) && r.finance_contact_source], ["Probably no FD", r.no_fd_likely],
@@ -443,6 +443,21 @@ export function monthLabel(month = "") {
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
   "November", "December"];
 // "2026-11-04" for a filing's date: the main list's accounts_filed_on, a day file's date, or the 1st of a month's archive.
+// Where a lead came from (Zac's brief, 19 Nov 2026: measure which sources find companies not already prospected):
+// the finder's `found_via` (tools/ch_alerts.py discoveries — a job advert naming currency work, a news story, a charge
+// alert), else the FX filings scan, the modern slavery register, the customs records or a niche.
+export const LEAD_SOURCES = ["Job advert", "News", "Charge / owner alert", "FX filings", "Modern slavery register", "Customs records", "Niche search"];
+export function leadSource(r) {
+  const via = String(r.found_via || "");
+  if (/^job advert/i.test(via)) return "Job advert";
+  if (/^news/i.test(via)) return "News";
+  if (via) return "Charge / owner alert";
+  if (r.from_filings || r.fx_niche === "FX in their filed accounts") return "FX filings";
+  if (/modern slavery/i.test(r.fx_niche || "")) return "Modern slavery register";
+  if (r.hmrc_import_months || r.hmrc_export_months) return "Customs records";
+  return "Niche search";
+}
+
 // New leads (Zac, 18 Nov 2026: "make a section which is new leads"): the day a company joined our lists — the finder's
 // upload stamps first_seen; the FX filings scan lists a company the day its accounts are filed, so its filing date.
 export const NEW_LEAD_DAYS = [3, 7, 14, 30];
