@@ -125,7 +125,9 @@ def search(trade: dict, codes: Iterable[str], tracked: Optional[dict] = None, fi
         flows = [f for f, k in (("import", "import_codes"), ("export", "export_codes"))
                  if any(str(c).startswith(prefixes) for c in (e.get(k) or {}))]
         months = len(e["import_months"] | e["export_months"])
-        if min(weight, months) < SEARCH_MIN_MONTHS:
+        # the records keep months per code, not codes per month: one code seen in SEARCH_MIN_MONTHS+ months is the
+        # proof of that many distinct months (two codes in the same month must not add up to two)
+        if max(hits.values()) < SEARCH_MIN_MONTHS:
             continue
         c = e["company"]
         f = filings.get(number) or {}

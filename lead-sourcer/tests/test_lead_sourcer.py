@@ -3590,7 +3590,8 @@ class TestNiches(unittest.TestCase):
         trade = {"001": co("001", "small", ["202601", "202602", "202603"], {"25151100": 3}),
                  "002": co("002", "full", ["202601", "202602", "202603"], {"25151100": 3, "84713000": 3}),
                  "003": co("003", "full", ["202601"], {"25151100": 1}),               # one month: not trading it
-                 "004": co("004", "group", ["202601", "202602"], {"39231090": 2})}    # other goods
+                 "004": co("004", "group", ["202601", "202602"], {"39231090": 2}),    # other goods
+                 "005": co("005", "full", ["202601", "202602"], {"25151100": 1, "25151200": 1, "39231090": 2})}   # two codes, one month
         rows = discover.search(trade, ["2515"], tracked={"002": "CO 002"}, filings={"002": {"filed_fx_score": 60}})
         self.assertEqual([r["company_number"] for r in rows], ["002", "001"])   # sized first
         self.assertEqual(rows[0]["share"], 50)
