@@ -14,6 +14,8 @@ Published a few days into each month at download.companieshouse.gov.uk.
 
 from __future__ import annotations
 
+from collections import Counter
+
 import csv
 import io
 import os
@@ -135,6 +137,7 @@ def scan(
     names: Optional[set[str]] = None,
     numbers: Optional[set[str]] = None,
     registry: Optional[dict] = None,
+    sectors: Optional[dict] = None,
 ) -> tuple[list[dict], dict[str, list[dict]], dict[str, list[dict]]]:
     """
     One pass over the bulk file:
@@ -147,6 +150,9 @@ def scan(
     category (the FX filings scan's strongest finds).
     `registry`: when given, filled with {number: {status, type, sic_codes, name}} for every company in `numbers`,
     whatever its status or type (tools/niche_hits.py: dissolved and not-for-profit companies among the leads).
+    `sectors`: when given ({"strong": set, "open": set} of company numbers), filled with Counters "sized" / "strong_n" /
+    "open_n" per SIC code over every active sized company, and "names" {code: description} — the whole register's
+    sectors, for emerging-sector niches (tools/niche_hits.py).
     """
     from sourcer.matching import normalise_name, normalise_postcode
 
@@ -183,6 +189,18 @@ def scan(
             continue
         sics = [code for code in (sic_code(values[i]) for i in sic_cols) if code]
         category = normalise_category(values[col["Accounts.AccountCategory"]])
+        if sectors is not None and category in categories:
+            number = values[col["CompanyNumber"]].strip()
+            sectors.setdefault("sized", Counter()).update(sics)
+            if number in sectors.get("strong", ()):
+                sectors.setdefault("strong_n", Counter()).update(sics)
+                if number in sectors.get("open", ()):
+                    sectors.setdefault("open_n", Counter()).update(sics)
+            names = sectors.setdefault("names", {})
+            for i in sic_cols:
+                code = sic_code(values[i])
+                if code and code not in names:
+                    names[code] = values[i].split(" - ", 1)[-1].strip()
         in_frame = (bool(sic_codes.intersection(sics)) and category in categories) or \
             bool(numbers and values[col["CompanyNumber"]].strip() in numbers)
         postcode = normalise_postcode(values[col["RegAddress.PostCode"]]) if postcodes else ""

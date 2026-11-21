@@ -109,6 +109,61 @@ def measure(sized: int, strong: int, open_: int) -> dict:
             "score": score, "verdict": verdict}
 
 
+# Emerging niches (Zac's origination ideas, 21 Nov 2026: "continuously investigate emerging industries … discover
+# pockets of demand before they become saturated"): every week the measuring run looks for customs headings and sector
+# codes no niche covers whose companies prove FX in their filings at least as often as a good niche (EMERGING_MIN_SCORE,
+# tier 2), and turns each into a trial niche the finder searches like any other. Re-derived every week from the latest
+# numbers, so one that stops hitting drops out on its own; a good one is worth adding to config/fx_niches.json for good.
+EMERGING_MIN_SCORE = 4.0
+EMERGING_MIN_STRONG = 5
+EMERGING_MAX = 15           # of each kind, best first
+
+
+def emerging_niches(headings: list[dict], sectors: dict, niches: list[dict], names: Optional[dict] = None) -> list[dict]:
+    """Trial niches: uncovered customs headings (from the measured `headings`) and uncovered sector codes (`sectors`:
+    Counters sized / strong_n / open_n per SIC and their names) scoring EMERGING_MIN_SCORE+. Each carries its numbers."""
+    names = names or {}
+    out = []
+    goods = [h for h in headings if not h.get("covered") and h["strong"] >= EMERGING_MIN_STRONG
+             and h["score"] >= EMERGING_MIN_SCORE]
+    for h in sorted(goods, key=lambda h: -h["score"])[:EMERGING_MAX]:
+        label = names.get(h["heading"]) or h.get("chapter") or f"customs heading {h['heading']}"
+        out.append({"id": f"emerging-goods-{h['heading']}", "name": f"Emerging: {label} (customs {h['heading']})",
+                    "hmrc_codes": [h["heading"]], "flow": "import", "currency_pairs": [], "emerging": "goods",
+                    "exposure_reason": f"Regular importers of customs heading {h['heading']} prove FX in their own filings "
+                                       f"{h['hit_rate']}% of the time — a pocket no niche covered yet (measured weekly).",
+                    "call_angle": "", "stats": {k: h[k] for k in ("sized", "strong", "open", "hit_rate", "open_share", "score", "verdict")}})
+    covered = {str(c) for n in niches for c in n.get("sic_codes") or []}
+    catch_all = catch_all_codes(niches)
+    sized, strong, open_ = (sectors.get(k) or Counter() for k in ("sized", "strong_n", "open_n"))
+    picks = []
+    for sic, n in strong.items():
+        if sic in covered or sic in catch_all or n < EMERGING_MIN_STRONG or sized[sic] < MIN_MEASURED:
+            continue
+        m = measure(sized[sic], n, open_[sic])
+        if m["score"] >= EMERGING_MIN_SCORE:
+            picks.append((sic, m))
+    for sic, m in sorted(picks, key=lambda x: -x[1]["score"])[:EMERGING_MAX]:
+        label = (sectors.get("names") or {}).get(sic) or f"sector {sic}"
+        out.append({"id": f"emerging-sector-{sic}", "name": f"Emerging: {label} (SIC {sic})", "sic_codes": [sic],
+                    "currency_pairs": [], "emerging": "sector",
+                    "exposure_reason": f"Sized companies in sector {sic} prove FX in their own filings {m['hit_rate']}% of the "
+                                       "time — a sector no niche covered yet (measured weekly).",
+                    "call_angle": "", "stats": m})
+    return out
+
+
+def load_emerging(path: str) -> list[dict]:
+    """The trial niches tools/niche_hits.py found (its file's "emerging"); [] when there's none."""
+    if not path:
+        return []
+    try:
+        with open(path, encoding="utf-8") as f:
+            return [n for n in (json.load(f) or {}).get("emerging") or [] if n.get("id")]
+    except (OSError, ValueError):
+        return []
+
+
 def load_stats(path: str) -> dict:
     """{niche id: measured numbers} from tools/niche_hits.py's file; {} when there's none."""
     if not path:
