@@ -3,7 +3,7 @@
 // sector — tools/niche_hits.py) and an absurd check (banks, insurers, funds, FX providers themselves, public bodies,
 // not-for-profits, dissolved companies: sourcer/absurd.py) that qualifies it Out. Shared by scripts/rank-leads.mjs
 // (which saves the result as leads/ranked and prints what it learns per niche) and the Accounts page.
-import { filingRow, filedIso, leadScore, nicheTiers } from "./format.js";
+import { filingRow, filedIso, industryOf, leadScore, nicheTiers, sicCodes } from "./format.js";
 
 export const FILINGS_SECTION = "From FX filings";
 // What a filings row keeps on the Accounts page (the full row stays in the Recent FX filings tab).
@@ -106,4 +106,19 @@ export function verdictLearnings(scored = [], verdicts = {}, { shyOf = {} } = {}
   const done = (o) => Object.values(o).map((g) => ({ ...g, reviewed: g.good + g.not_fit, good_share: Math.round((100 * g.good) / (g.good + g.not_fit)) }))
     .sort((a, b) => b.reviewed - a.reviewed);
   return { reviewed, source: done(groups.source), niche: done(groups.niche), band: done(groups.band), sector: done(groups.sector), reasons };
+}
+
+// The Power Automate feed (Zac, 21 Nov 2026: "take all of the accounts in our site and we'll check them all"): every lead
+// on the site — the Accounts list and the FX filings companies not on it — one flat row each, best lead score first, saved
+// by the daily ranking as feed/all and served by GET /api/feed (api/feed.mjs) with its own read-only key.
+export function feedRows(scored = [], listRows = [], filingRows = []) {
+  const by = new Map([...filingRows, ...listRows].filter((r) => r.company_number).map((r) => [r.company_number, r]));
+  return scored.map((s) => {
+    const r = by.get(s.company_number) || {};
+    const sic = sicCodes(r);
+    return { company_number: s.company_number, company_name: s.company_name, source: s.onList ? "Accounts list" : "FX filings",
+             lead_score: s.score, fit: s.fit, now: s.timing, niche: s.niche || "", industry: industryOf(r), sic: sic.join(" "),
+             turnover_gbp: Number(r.turnover_gbp) || "", postcode: r.postcode || r.registered_postcode || "",
+             website: r.website || "", ruled_out: s.absurd || "" };
+  });
 }

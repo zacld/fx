@@ -69,6 +69,7 @@ export default function AccountsApp() {
           {data && <span className="tb-time">list made {ago(data.made_at)}</span>}
           <a className="btn-sm" href="/moves">Market moves</a>
           <a className="btn-sm" href="/">Event leads</a>
+          {data && <FeedButton password={password} />}
           {data && <button className="btn-sm" onClick={lock}>Lock</button>}
         </div>
       </div>
@@ -1479,6 +1480,47 @@ function Niches({ measured, madeAt, learned, headings, codes = [], onPick, verdi
           .map((h) => `${h.heading} ${h.chapter} (${h.hit_rate}% prove FX, ${h.strong} companies)`).join(" · ")}</p>
       )}
     </div>
+  );
+}
+
+// The Power Automate feed (api/feed.mjs): the URL with its own read-only key, to paste into a flow's HTTP step; a new
+// key retires the old one. Every lead on the site, flat rows, best lead score first, each with its status here.
+function FeedButton({ password }) {
+  const [open, setOpen] = useState(false);
+  const [key, setKey] = useState("");
+  const [note, setNote] = useState("");
+  const auth = { authorization: `Bearer ${password}` };
+  const load = () => fetch(`${API}?view=feedkey`, { headers: auth, cache: "no-store" })
+    .then((res) => (res.ok ? res.json() : null)).then((b) => setKey(b?.key || "")).catch(() => setKey(""));
+  const rotate = async () => {
+    if (!window.confirm("Make a new feed key? Flows using the old URL stop working until you paste the new one.")) return;
+    const res = await fetch(API, { method: "POST", headers: { ...auth, "content-type": "application/json" }, body: JSON.stringify({ feed_key: "new" }) }).catch(() => null);
+    const b = res?.ok ? await res.json() : null;
+    if (b?.key) { setKey(b.key); setNote("New key made — paste the new URL into your flow."); }
+  };
+  const url = key ? `${window.location.origin}/api/feed?key=${key}` : "";
+  const copy = (text) => navigator.clipboard?.writeText(text).then(() => setNote("Copied."), () => setNote("Select and copy it by hand."));
+  return (
+    <>
+      <button className="btn-sm" onClick={() => { setOpen(!open); if (!open) load(); }} title="The URL a Power Automate flow reads every lead from">Power Automate feed</button>
+      {open && (
+        <div className="feed-panel" role="dialog" aria-label="Power Automate feed">
+          <b>Power Automate feed</b>
+          <p className="muted">Every lead on the site, best lead score first, with its status here (To check / Contacted / Open lead …). Read-only. In your flow: an <b>HTTP</b> step, Method GET, this URL; then <b>Parse JSON</b> on the body; then <b>Apply to each</b> over <code>rows</code>.</p>
+          {url ? <>
+            <input className="input" readOnly value={url} onFocus={(e) => e.target.select()} aria-label="Feed URL" />
+            <div className="feed-actions">
+              <button className="btn-sm" onClick={() => copy(url)}>Copy URL</button>
+              <button className="btn-sm" onClick={() => copy(`${url}&format=csv`)}>Copy CSV URL</button>
+              <button className="btn-sm" onClick={rotate}>New key</button>
+              <button className="btn-sm" onClick={() => setOpen(false)}>Close</button>
+            </div>
+          </> : <p className="muted">Loading…</p>}
+          {note && <p className="muted">{note}</p>}
+          <p className="muted">Keep the URL inside your flow — it reads the whole list. Nothing from the CRM ever goes back through it.</p>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -3206,4 +3248,5 @@ a{color:var(--accent)}
 .lead-parts{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}
 .lead-p{display:inline-block;min-width:38px;font-weight:600;color:var(--gain);font-variant-numeric:tabular-nums}
 .lead-p.neg{color:var(--loss)}
+.feed-panel{position:absolute;right:16px;top:56px;z-index:50;width:min(560px,calc(100vw - 32px));background:var(--bg2,#1e1f22);border:1px solid var(--line,#33353a);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);text-align:left}.feed-panel p{margin:0;font-size:12px}.feed-actions{display:flex;gap:6px;flex-wrap:wrap}.tb-r{position:relative}
 `;
