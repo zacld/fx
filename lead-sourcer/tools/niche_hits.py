@@ -121,6 +121,50 @@ def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches
     return out
 
 
+EMERGING_COMPANIES_MAX = 6000
+
+
+def emerging_companies(emerging: list[dict], companies: dict, trade_by_company: dict, filings: dict, tracked: dict,
+                       sector_rows: list[dict]) -> list[dict]:
+    """Every full / medium / group-accounts company in an emerging niche (Zac, 21 Nov 2026: "sort all of these new leads
+    into a column — I'll check them all today"): goods niches from its customs records (the measured rule), sector niches
+    from its sector codes (sector_rows: a pass over the bulk file for those codes). Strong FX proof in its filings first."""
+    goods = [n for n in emerging if n.get("hmrc_codes")]
+    sectors = {str(c): n for n in emerging for c in n.get("sic_codes") or []}
+    found: dict[str, dict] = {}
+
+    def add(c: dict, niche: dict, months: int = 0) -> None:
+        number = c["company_number"]
+        e = found.setdefault(number, {
+            "company_number": number, "company_name": c.get("company_name", ""), "accounts_category": c.get("accounts_category", ""),
+            "sic_codes": c.get("sic_codes", []), "postcode": c.get("postcode", ""), "niches": [], "customs_months": months,
+            "filed_fx_score": (filings.get(number) or {}).get("filed_fx_score") or "", "tracked": number in tracked})
+        if niche["name"] not in e["niches"]:
+            e["niches"].append(niche["name"])
+        e["customs_months"] = max(e["customs_months"], months)
+
+    for number, c in companies.items():
+        if c.get("accounts_category") not in niche_rules.SIZED:
+            continue
+        trade = trade_by_company.get(number)
+        if trade and len(trade["import_months"] | trade["export_months"]) >= REGULAR_MONTHS:
+            for _, n in niche_rules.goods_niches(trade, goods):
+                add(c, n, len(trade["import_months"] | trade["export_months"]))
+    for c in sector_rows:
+        for code in c.get("sic_codes", []):
+            if code in sectors:
+                add(c, sectors[code], len((trade_by_company.get(c["company_number"]) or {}).get("import_months", set())
+                                         | (trade_by_company.get(c["company_number"]) or {}).get("export_months", set())))
+    for e in found.values():
+        f = filings.get(e["company_number"]) or {}
+        score = float(f.get("filed_fx_score") or 0)
+        e["fx_proof"] = "strong" if score >= niche_rules.STRONG else "some" if score else ""
+        e["open"] = bool(score >= niche_rules.STRONG and niche_rules.is_open(f))
+    order = {"strong": 0, "some": 1, "": 2}
+    rows = sorted(found.values(), key=lambda e: (order[e["fx_proof"]], not e["open"], -e["customs_months"], e["company_name"]))
+    return rows[:EMERGING_COMPANIES_MAX]
+
+
 def _json(path: str) -> dict:
     try:
         with open(path, encoding="utf-8") as f:
@@ -181,6 +225,7 @@ def main() -> None:
     parser.add_argument("--moments-out", default="", help="customs moments: the lists' companies, and new traders to check")
     parser.add_argument("--checks", default="", help="the store's checks (Simplified dash marks) — for the lookalikes")
     parser.add_argument("--verdicts", default="", help="the store's verdicts (Good lead / Not a fit) — for the lookalikes")
+    parser.add_argument("--emerging-out", default="", help="every sized company in an emerging niche, for the page's Emerging leads tab")
     parser.add_argument("--lookalikes-out", default="", help="sized companies trading what Zac's good leads trade")
     args = parser.parse_args()
 
@@ -233,6 +278,16 @@ def main() -> None:
     emerging = niche_rules.emerging_niches(result["headings"], sectors, niches, hmrc.heading_names(picks[:niche_rules.EMERGING_MAX]),
                                            codes=result["codes"], code_names=hmrc.code_names(code_picks))
     result["emerging"] = emerging
+    if args.emerging_out:
+        sector_codes = {str(c) for n in emerging for c in n.get("sic_codes") or []}
+        sector_rows = bulk.find_candidates(args.bulk or bulk.download(), sector_codes, set(niche_rules.SIZED)) if sector_codes else []
+        rows = emerging_companies(emerging, companies, trade_by_company, filings, tracked, sector_rows)
+        with open(args.emerging_out, "w", encoding="utf-8") as f:
+            json.dump({"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "count": len(rows),
+                       "niches": [{"name": n["name"], **n["stats"]} for n in emerging], "rows": rows}, f)
+        print(f"Emerging niche companies: {len(rows):,} (full / medium / group accounts), "
+              f"{sum(1 for r in rows if r['fx_proof'] == 'strong'):,} with strong FX proof, "
+              f"{sum(1 for r in rows if not r['tracked']):,} not on the lists")
     for n in emerging:
         result["niches"][n["id"]] = {"name": n["name"], "kind": f"emerging {n['emerging']}", **n["stats"]}
     if args.lookalikes_out:

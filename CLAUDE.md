@@ -410,7 +410,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      `niches/stats` as `emerging` with their numbers under `niches` (kind "emerging goods" / "emerging sector"). The
      finder adds them to its niches (`niches.load_emerging`, NICHE_STATS_FILE) and searches them like any other, in their
      measured tier; re-derived weekly, so one that stops hitting drops out (a lasting one belongs in fx_niches.json). The
-     Niches tab marks them and has an "Emerging only" filter; the run prints them.
+     Niches tab marks them and has an "Emerging only" filter; the run prints them. **Emerging leads tab** (Zac, 21 Nov 2026: "sort all of
+     these new leads into a column — I'll check them all today"): every full / medium / group-accounts company in an
+     emerging niche (`niche_hits --emerging-out` → `emerging_companies`: goods niches by the measured customs rule, sector
+     niches by a bulk-file pass for their codes; store key `emerging/companies`, GET `?view=emerging`), strong FX proof
+     first, with the Simplified dash's Open lead / Added to mine / Owned abroad buttons (To check and a list per button),
+     a niche filter, Strong FX proof only, search and Excel export.
 - **Scores:** every score and estimate lists its evidence or basis. Weights
   and wallet bands get recalibrated against real outcomes, so log them.
 - **Not public, not scraped:** credit-reference data (Creditsafe etc.) only

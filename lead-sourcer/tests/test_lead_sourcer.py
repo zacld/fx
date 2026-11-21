@@ -3562,6 +3562,29 @@ class TestNiches(unittest.TestCase):
         trade = {"import_codes": Counter({"03061792": 6, "03061799": 1}), "export_codes": Counter(), "import_months": {"202601"}, "export_months": set()}
         self.assertEqual(nr.goods_niche(trade, got)["id"], "emerging-code-03061792")
 
+    def test_emerging_niche_companies_for_the_page(self):
+        # 21 Nov 2026 (Zac: "sort all of these new leads into a column"): every sized company in an emerging niche
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("niche_hits", os.path.join(os.path.dirname(__file__), "..", "tools", "niche_hits.py"))
+        tool = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tool)
+        emerging = [{"name": "Emerging: Tomatoes (customs 2002)", "hmrc_codes": ["2002"], "flow": "import", "stats": {}},
+                    {"name": "Emerging: Footwear (SIC 15200)", "sic_codes": ["15200"], "stats": {}}]
+
+        def co(n, cat, sic="46900"):
+            return {"company_number": n, "company_name": f"CO {n}", "accounts_category": cat, "sic_codes": [sic]}
+        months = {"202601", "202602", "202603", "202604"}
+        trade = {"A": {"import_months": months, "export_months": set(), "import_codes": Counter({"20021000": 4}), "export_codes": Counter()},
+                 "B": {"import_months": months, "export_months": set(), "import_codes": Counter({"20021000": 4}), "export_codes": Counter()}}
+        companies = {"A": co("A", "full"), "B": co("B", "small")}
+        rows = tool.emerging_companies(emerging, companies, trade, {"C": {"filed_fx_score": 70}}, {"A": "CO A"},
+                                       [co("C", "medium", "15200")])
+        self.assertEqual([r["company_number"] for r in rows], ["C", "A"])   # strong FX proof first; small B left out
+        self.assertEqual(rows[0]["fx_proof"], "strong")
+        self.assertEqual(rows[0]["niches"], ["Emerging: Footwear (SIC 15200)"])
+        self.assertTrue(rows[1]["tracked"])
+        self.assertEqual(rows[1]["customs_months"], 4)
+
     def test_niche_search_codes_and_companies(self):
         # 21 Nov 2026 (Zac: "focus on finding niche companies"): words -> customs codes -> every company trading them
         from sourcer import discover
