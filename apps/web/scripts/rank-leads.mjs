@@ -4,10 +4,10 @@
 // Reads the Accounts list, the Recent FX filings list, the measured niches and the alerts from the site's private store.
 // Prints counts, company names, scores and niche learnings — no people's names (the repo is public).
 import { readFile, writeFile } from "node:fs/promises";
-import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, FILINGS_KEY, KEY, MOMENTS_KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, FEED_KEY, FILINGS_KEY, KEY, MOMENTS_KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
 import { movesByCurrency, reviewLearnings } from "../src/accounts/format.js";
-import { filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
+import { feedRows, filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
 // orderPath: company numbers, best lead first (find_domains.py); groupsPath: each company's top UK parent (psc_deals.py)
@@ -43,6 +43,9 @@ const learn = nicheLearnings(scored);
 const reviewed = verdictLearnings(scored, verdicts, { shyOf: shy_of });
 const made_at = new Date().toISOString();
 await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, gleif_of: gleifOf, niches: learn, verdicts: reviewed, reviews });
+const feed = feedRows(scored, listRows, filingRows);
+await store.set(FEED_KEY, { made_at, count: feed.length, rows: feed });
+console.log(`Power Automate feed: ${feed.length.toLocaleString()} companies saved (feed/all)`);
 
 const live = scored.filter((s) => !s.absurd);
 if (orderPath) await writeFile(orderPath, JSON.stringify(live.map((s) => s.company_number)));

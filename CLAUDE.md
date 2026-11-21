@@ -785,6 +785,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`LEAD_POINTS.hidden`: fewer people calling them); the **Hidden from filters** tab (FitTiming mode "hidden": a reason
   filter with counts, each card's reasons, Excel with `hidden_because`) and the Accounts export's `hidden_from_filters`.
   A Zint export as a suppression list would be the direct test — only once Zint's licence and the bank's policy allow it.
+- **Power Automate feed** (Zac, 21 Nov 2026: "take all of the accounts in our site and we'll check them all" — his CRM
+  check runs in Investec's Power Automate): GET `/api/feed?key=…` (`api/feed.mjs`, `functions/api/feed.js`) — every lead on
+  the site, flat, best lead score first: the daily ranking's `feed/all` (`ranking.js` `feedRows`, saved by
+  `rank-leads.mjs`: Accounts list + FX filings companies, lead score / fit / now, niche, industry, SIC, turnover, postcode,
+  website) then the Emerging leads companies not in it, each with its status from the page's own marks (`statusOf`:
+  Contacted / Open lead / Added to mine / Owned abroad / Good lead / Not a fit / To check); ruled-out leads left out unless
+  `include_out=1`; `offset` / `limit` (≤ 20,000, `next_offset`), `format=csv`. **Its own read-only key**, never the
+  Accounts password: `feedKey` = HMAC of the password and the store's `feed/salt`; the page's **Power Automate feed**
+  button (`FeedButton`, GET `?view=feedkey`) shows the URL to paste into the flow's HTTP step, and **New key** (POST
+  `{feed_key}`) retires the old one. Data only goes out: nothing from the CRM comes back through it.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own

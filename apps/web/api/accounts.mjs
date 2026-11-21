@@ -145,7 +145,10 @@ export const SEARCH_RESULTS_KEY = "search_results";  // {made_at, results: {id: 
 export const SEARCHES_MAX = 30;
 export const SEARCH_TEXT_MAX = 200;
 export const EMERGING_KEY = "emerging/companies";   // {made_at, niches, rows}: every sized company in an emerging niche (niche_hits)
-export const LOOKALIKES_KEY = "lookalikes";   // {made_at, good, leads, count, items}: like Zac's good leads (niche_hits)
+export const LOOKALIKES_KEY = "lookalikes";
+// The Power Automate feed (api/feed.mjs): feed/all is written by the daily ranking; feed/salt makes its key (rotatable)
+export const FEED_KEY = "feed/all";
+export const FEED_SALT_KEY = "feed/salt";   // {made_at, good, leads, count, items}: like Zac's good leads (niche_hits)
 export const NICHES_KEY = "niches/stats";   // {made_at, niches: {id: measured numbers}, headings}: tools/niche_hits.py
 export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
 export const CALLS_KEY = "filings/calls";   // {made_at, count, rows}: the Call today tab's candidates from the filings list
@@ -183,6 +186,14 @@ const reply = (body, status) =>
       "x-robots-tag": "noindex",
     },
   });
+
+// The Power Automate feed's key: an HMAC of the Accounts password and the store's salt — read-only, rotated by a new salt.
+export async function feedKey(password, salt = "v1") {
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey("raw", enc.encode(password), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", k, enc.encode(`fx-feed:${salt}`)));
+  return [...mac].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 40);
+}
 
 // Compares SHA-256 digests byte by byte, so the time taken doesn't reveal how much of a guess was right.
 export async function samePassword(given, expected) {
@@ -223,6 +234,11 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
   if (req.method === "POST") {
     const body = await req.json().catch(() => ({}));
     const { company_number: number, notes } = body;
+    if ("feed_key" in body) {   // a new Power Automate feed key: the old one stops working
+      const salt = crypto.randomUUID();
+      await blobs.setJSON(FEED_SALT_KEY, { salt, at: new Date().toISOString() });
+      return reply({ key: await feedKey(password, salt), path: "/api/feed" }, 200);
+    }
     if ("niche_search" in body || "niche_search_remove" in body || "niche_search_again" in body) {
       const stored = (await blobs.get(SEARCHES_KEY, { type: "json" })) || {};
       let searches = stored.searches || [];
@@ -334,6 +350,10 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     return reply({ contacted: marks, notes: noted }, 200);
   }
   const params = new URL(req.url).searchParams;
+  if (params.get("view") === "feedkey") {
+    const salt = (await blobs.get(FEED_SALT_KEY, { type: "json" }))?.salt || "v1";
+    return reply({ key: await feedKey(password, salt), path: "/api/feed" }, 200);
+  }
   if (params.get("view") === "emerging") {
     return reply((await blobs.get(EMERGING_KEY, { type: "json" })) || { rows: [], niches: [] }, 200);
   }
