@@ -138,6 +138,13 @@ export const DEALS_KEY = "deals";   // {made_at, items}: purchases from the owne
 // {made_at, latest, items: [{company_number, kind, at, title, detail, tracked}]}: customs moments (tools/niche_hits.py) —
 // new to importing / exporting, a flow started, trade growing — signals like the alerts
 export const MOMENTS_KEY = "moments";
+// The Niche search (Zac, 21 Nov 2026: "focus on finding niche companies"): the page asks, the Niche search workflow
+// answers (tools/niche_search.py) — two items so neither writer overwrites the other.
+export const SEARCHES_KEY = "searches";              // {searches: [{id, text, asked_at}]} — written only by the page
+export const SEARCH_RESULTS_KEY = "search_results";  // {made_at, results: {id: {text, codes, rows, counts, done_at}}}
+export const SEARCHES_MAX = 30;
+export const SEARCH_TEXT_MAX = 200;
+export const LOOKALIKES_KEY = "lookalikes";   // {made_at, good, leads, count, items}: like Zac's good leads (niche_hits)
 export const NICHES_KEY = "niches/stats";   // {made_at, niches: {id: measured numbers}, headings}: tools/niche_hits.py
 export const STREAM_KEY = "ch/stream";      // {officers, charges, psc}: the streams' last timepoints
 export const CALLS_KEY = "filings/calls";   // {made_at, count, rows}: the Call today tab's candidates from the filings list
@@ -215,6 +222,26 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
   if (req.method === "POST") {
     const body = await req.json().catch(() => ({}));
     const { company_number: number, notes } = body;
+    if ("niche_search" in body || "niche_search_remove" in body || "niche_search_again" in body) {
+      const stored = (await blobs.get(SEARCHES_KEY, { type: "json" })) || {};
+      let searches = stored.searches || [];
+      const at = new Date().toISOString();
+      if ("niche_search" in body) {
+        const text = typeof body.niche_search === "string" ? body.niche_search.replace(/\s+/g, " ").trim() : "";
+        if (!text || text.length > SEARCH_TEXT_MAX) return reply({ error: `send {niche_search: "words or customs codes"} (at most ${SEARCH_TEXT_MAX} characters)` }, 400);
+        const same = searches.find((s) => s.text.toLowerCase() === text.toLowerCase());
+        if (same) same.asked_at = at;
+        else searches = [{ id: `s${Date.now().toString(36)}`, text, asked_at: at }, ...searches].slice(0, SEARCHES_MAX);
+      } else if ("niche_search_again" in body) {
+        const s = searches.find((x) => x.id === body.niche_search_again);
+        if (!s) return reply({ error: "no such search" }, 400);
+        s.asked_at = at;
+      } else {
+        searches = searches.filter((x) => x.id !== body.niche_search_remove);
+      }
+      await blobs.setJSON(SEARCHES_KEY, { searches });
+      return reply({ searches }, 200);
+    }
     if ("email" in body) {
       const e = body.email;
       if (!COMPANY_NUMBER.test(number || "") || (e !== null && (typeof e !== "object" || (!e.row && !("text" in e))))) {
@@ -306,6 +333,11 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     return reply({ contacted: marks, notes: noted }, 200);
   }
   const params = new URL(req.url).searchParams;
+  if (params.get("view") === "search") {
+    const [asked, results, alike] = await Promise.all([SEARCHES_KEY, SEARCH_RESULTS_KEY, LOOKALIKES_KEY].map((k) => blobs.get(k, { type: "json" })));
+    return reply({ searches: asked?.searches || [], results: results?.results || {}, results_made_at: results?.made_at || "",
+                   lookalikes: alike || { items: [] } }, 200);
+  }
   if (params.get("view") === "losses") {
     return reply((await blobs.get(LOSSES_KEY, { type: "json" })) || { rows: [] }, 200);
   }
@@ -322,7 +354,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     const websites = Object.fromEntries(Object.entries(domains?.sites || {}).map(([n, s]) => [n, s.website]));
     const owners_search = Object.fromEntries(Object.entries(owners?.companies || {}).filter(([, o]) => o.owner)
       .map(([n, o]) => [n, { owner: o.owner, kind: o.kind, country: o.country || "", quote: o.quote || "", url: o.url || "", chain: (o.chain || []).map((c) => c.owner) }]));
-    return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [], websites, owners_search, parents_of: Object.fromEntries(Object.entries(parents?.companies || {}).filter(([, p]) => p.ultimate_parent)
+    return reply({ niches: niches?.niches || {}, niches_made_at: niches?.made_at || "", headings: niches?.headings || [], codes: (niches?.codes || []).slice(0, 60), websites, owners_search, parents_of: Object.fromEntries(Object.entries(parents?.companies || {}).filter(([, p]) => p.ultimate_parent)
                      .map(([n, p]) => [n, { ultimate_parent: p.ultimate_parent, country: p.country || "", evidence: p.evidence || "", accounts_url: p.accounts_url || "" }])),
                    alerts_summary: alertsSummary(alerts?.items || []),
                    signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) }, 200);

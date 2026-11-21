@@ -119,11 +119,30 @@ EMERGING_MIN_STRONG = 5
 EMERGING_MAX = 15           # of each kind, best first
 
 
-def emerging_niches(headings: list[dict], sectors: dict, niches: list[dict], names: Optional[dict] = None) -> list[dict]:
-    """Trial niches: uncovered customs headings (from the measured `headings`) and uncovered sector codes (`sectors`:
-    Counters sized / strong_n / open_n per SIC and their names) scoring EMERGING_MIN_SCORE+. Each carries its numbers."""
-    names = names or {}
+CODE_BEATS = 1.25           # an 8-digit code must score this many times its heading to be a niche of its own
+
+
+def emerging_codes(codes: list[dict]) -> list[dict]:
+    """Uncovered 8-digit customs codes scoring EMERGING_MIN_SCORE+ and CODE_BEATS × their heading, best first."""
+    picks = [c for c in codes if not c.get("covered") and c["strong"] >= EMERGING_MIN_STRONG
+             and c["score"] >= EMERGING_MIN_SCORE and c["score"] >= CODE_BEATS * float(c.get("heading_score") or 0)]
+    return sorted(picks, key=lambda c: -c["score"])[:EMERGING_MAX]
+
+
+def emerging_niches(headings: list[dict], sectors: dict, niches: list[dict], names: Optional[dict] = None,
+                    codes: Optional[list[dict]] = None, code_names: Optional[dict] = None) -> list[dict]:
+    """Trial niches: uncovered customs headings (from the measured `headings`), uncovered 8-digit codes beating their
+    heading (`codes`) and uncovered sector codes (`sectors`: Counters sized / strong_n / open_n per SIC and their
+    names) scoring EMERGING_MIN_SCORE+. Each carries its numbers."""
+    names, code_names = names or {}, code_names or {}
     out = []
+    for c in emerging_codes(codes or []):
+        label = code_names.get(c["code"]) or f"customs code {c['code']}"
+        out.append({"id": f"emerging-code-{c['code']}", "name": f"Emerging: {label} (customs {c['code']})",
+                    "hmrc_codes": [c["code"]], "flow": "both", "currency_pairs": [], "emerging": "code",
+                    "exposure_reason": f"Regular traders of customs code {c['code']} prove FX in their own filings "
+                                       f"{c['hit_rate']}% of the time — better than its heading as a whole (measured weekly).",
+                    "call_angle": "", "stats": {k: c[k] for k in ("sized", "strong", "open", "hit_rate", "open_share", "score", "verdict")}})
     goods = [h for h in headings if not h.get("covered") and h["strong"] >= EMERGING_MIN_STRONG
              and h["score"] >= EMERGING_MIN_SCORE]
     for h in sorted(goods, key=lambda h: -h["score"])[:EMERGING_MAX]:

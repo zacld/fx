@@ -118,6 +118,31 @@ describe("/api/accounts", () => {
     expect((await (await post({ company_number: "01234567", review: null })).json()).checks).toEqual({});
   });
 
+  it("keeps the Niche search's requests and serves them with the workflow's results and the lookalikes", async () => {
+    const s = memory();
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const post = (body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer s3cret" }, body: JSON.stringify(body) }), opts);
+    const view = () => handle(new Request("https://x/api/accounts?view=search", { headers: { authorization: "Bearer s3cret" } }), opts);
+    expect((await post({ niche_search: "  " })).status).toBe(400);
+    expect((await post({ niche_search: "x".repeat(201) })).status).toBe(400);
+    const first = (await (await post({ niche_search: "  Marble,   granite " })).json()).searches;
+    expect(first).toHaveLength(1);
+    expect(first[0].text).toBe("Marble, granite");
+    const again = (await (await post({ niche_search: "marble, GRANITE" })).json()).searches;   // the same search: asked again
+    expect(again).toHaveLength(1);
+    expect(again[0].asked_at >= first[0].asked_at).toBe(true);
+    await post({ niche_search: "saffron" });
+    s.blobs.search_results = { made_at: "x", results: { [first[0].id]: { text: "Marble, granite", rows: [{ company_number: "01" }] } } };
+    s.blobs.lookalikes = { made_at: "y", items: [{ company_number: "02", like: "01" }] };
+    const got = await (await view()).json();
+    expect(got.searches.map((x) => x.text)).toEqual(["saffron", "Marble, granite"]);
+    expect(got.results[first[0].id].rows).toHaveLength(1);
+    expect(got.lookalikes.items[0].company_number).toBe("02");
+    expect((await post({ niche_search_again: "nope" })).status).toBe(400);
+    const left = (await (await post({ niche_search_remove: first[0].id })).json()).searches;
+    expect(left.map((x) => x.text)).toEqual(["saffron"]);
+  });
+
   it("keeps Zac's verdicts (good / not a fit with a listed reason) and returns them with the list", async () => {
     const s = memory();
     s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }] };

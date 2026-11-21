@@ -152,6 +152,9 @@ jobs:
           node scripts/alerts-store.mjs get deals ../../lead-sourcer/deals.json || true
           # companies new to importing / exporting (niche-hits.yml, HMRC's monthly lists): a brand-new currency flow
           node scripts/alerts-store.mjs get moments ../../lead-sourcer/moments.json || true
+          # companies found by what they trade: the page's Niche search, and lookalikes of Zac's good leads
+          node scripts/alerts-store.mjs get search_results ../../lead-sourcer/search_results.json || true
+          node scripts/alerts-store.mjs get lookalikes ../../lead-sourcer/lookalikes.json || true
 
       - name: Find companies
         working-directory: lead-sourcer
@@ -161,6 +164,8 @@ jobs:
           NICHE_STATS_FILE: niche_stats.json
           DEALS_FILE: deals.json
           MOMENTS_FILE: moments.json
+          NICHE_SEARCH_FILE: search_results.json
+          LOOKALIKES_FILE: lookalikes.json
           # the modern slavery statement registry (£36m+, supply chain abroad / goods sector): checked with the
           # FX filings scan's finds (sourcer/mss.py; the yearly files cached with the gov.uk registry files)
           MSS_DISCOVERY: "1"
@@ -186,6 +191,12 @@ jobs:
           # 3,500 -> 5,000 the same day: the first such run checked its 3,750 in 104 of 180 minutes (1,433 new) and the
           # list's long text moved to separate detail items (upload-accounts.mjs), so the list item fits more companies.
           DEFAULT_ENRICH: "5000"
+          # 21 Nov 2026 (Zac: "focus on finding niche companies — I have paid services for contacts and exact
+          # financials"): less time on exact figures, more on new companies. The FX gain/loss line's OCR on scanned
+          # filings 1,800s -> 900s a run, and cached accounts read again for newer fields 300 -> 100 a run; turnover
+          # (the size test) and the currency notes (the FX proof) keep their budgets.
+          OCR_FX_BUDGET_SECONDS: "900"
+          FINDER_REREAD_MAX: "100"
         run: |
           priority=""; [ -s fx-filings.json ] && priority="--priority-file fx-filings.json"
           python main.py --niches "$NICHES" --max-enrich "${MAX_ENRICH:-$DEFAULT_ENRICH}" --output fx_companies.csv --no-contacts $priority

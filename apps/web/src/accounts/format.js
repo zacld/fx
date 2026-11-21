@@ -447,9 +447,11 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
 // Where a lead came from (Zac's brief, 19 Nov 2026: measure which sources find companies not already prospected):
 // the finder's `found_via` (tools/ch_alerts.py discoveries — a job advert naming currency work, a news story, a charge
 // alert), else the FX filings scan, the modern slavery register, the customs records or a niche.
-export const LEAD_SOURCES = ["Job advert", "News", "Charge / owner alert", "FX filings", "Modern slavery register", "Customs records", "Niche search"];
+export const LEAD_SOURCES = ["Your niche search", "Like your good leads", "Job advert", "News", "Charge / owner alert", "FX filings", "Modern slavery register", "Customs records", "Niche search"];
 export function leadSource(r) {
   const via = String(r.found_via || "");
+  if (/^niche search:/i.test(via)) return "Your niche search";
+  if (/^like /i.test(via)) return "Like your good leads";
   if (/^job advert/i.test(via)) return "Job advert";
   if (/^news/i.test(via)) return "News";
   if (via) return "Charge / owner alert";

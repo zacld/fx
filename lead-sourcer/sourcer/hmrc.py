@@ -274,6 +274,22 @@ def heading_names(headings: Iterable[str]) -> dict[str, str]:
     return out
 
 
+def code_names(codes: Iterable[str]) -> dict[str, str]:
+    """{8-digit code: its description, shortened} from the Commodity table — for naming code-level emerging niches.
+    Never fails: a code it can't name is left out."""
+    out = {}
+    for c in codes:
+        try:
+            rows = list(_api_rows(f"Commodity?$filter=Cn8Code%20eq%20'{c}'&$top=1&$select=Cn8LongDescription"))
+        except (urllib.error.URLError, OSError, ValueError):
+            continue
+        text = re.sub(r"\s+", " ", (rows[0].get("Cn8LongDescription") or "") if rows else "").strip()
+        if text:
+            short = re.split(r"[;(]", text)[0].strip().rstrip(",")
+            out[c] = short[:60].rstrip() + ("…" if len(short) > 60 else "")
+    return out
+
+
 def fill_from_api(paths: Iterable[str], since: str, cache_dir: str, limit: Optional[int] = None) -> list[str]:
     """Paths of monthly files made from the API for the newest months the files leave out (at most `limit`,
     API_MONTHS_MAX, a run — the rest the next run: they're cached like downloaded files). Never fails the run."""

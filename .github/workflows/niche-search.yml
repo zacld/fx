@@ -1,0 +1,84 @@
+name: Niche search
+# The Accounts page's Niche search (Zac, 21 Nov 2026: "focus on finding niche companies"): a product or trade typed on
+# the page ("marble", "saffron", "drone", customs codes) -> the customs codes whose official description names it
+# (uktradeinfo's free Commodity table) -> every company whose HMRC importer / exporter records carry them, matched to
+# Companies House (tools/niche_search.py, sourcer/discover.py). Hourly: a quick look at the store, and only when a search
+# is waiting the caches are restored and the search run. Sized companies not on the lists are the finder's discoveries
+# (NICHE_SEARCH_FILE). The log holds the search words, counts and company names only (public repo). No paid calls.
+
+on:
+  schedule:
+    - cron: '41 * * * *'
+  workflow_dispatch:
+  push:
+    branches: ['main']
+    paths:
+      - .github/workflows/niche-search.yml
+      - lead-sourcer/tools/niche_search.py
+      - lead-sourcer/sourcer/discover.py
+
+concurrency:
+  group: niche-search
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Any search waiting?
+        id: check
+        run: |
+          npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+          cd apps/web && node scripts/alerts-store.mjs get searches ../../lead-sourcer/searches.json
+          node scripts/alerts-store.mjs get search_results ../../lead-sourcer/search_results.json
+          cd ../../lead-sourcer && python3 tools/niche_search.py --requests searches.json --results search_results.json --check | tee -a "$GITHUB_OUTPUT"
+      - name: Month
+        if: steps.check.outputs.pending != '0'
+        id: month
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+      - name: Restore the Companies House bulk file
+        if: steps.check.outputs.pending != '0'
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip
+          key: ch-bulk-v2-${{ steps.month.outputs.month }}
+          restore-keys: ch-bulk-v2-
+      - name: Restore the HMRC trader files
+        if: steps.check.outputs.pending != '0'
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/fx-lead-sourcer/hmrc
+          key: hmrc-24m-${{ steps.month.outputs.month }}
+          restore-keys: |
+            hmrc-24m-
+            hmrc-v2-
+            hmrc-traders-
+      - name: Search
+        if: steps.check.outputs.pending != '0'
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/fx-filings.json
+          node scripts/alerts-store.mjs tracked ../../lead-sourcer/tracked.json
+          cd ../../lead-sourcer
+          zip=$(ls -t ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip 2>/dev/null | head -1 || true)
+          python3 tools/niche_search.py --requests searches.json --results search_results.json \
+            --filings fx-filings.json --tracked tracked.json ${zip:+--bulk "$zip"}
+          cd ../apps/web && node scripts/alerts-store.mjs put search_results ../../lead-sourcer/search_results.json

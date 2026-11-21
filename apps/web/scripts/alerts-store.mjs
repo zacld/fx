@@ -3,15 +3,17 @@
 //   node scripts/alerts-store.mjs get alerts|stream|discoveries file.json
 //   node scripts/alerts-store.mjs put alerts|stream|discoveries file.json
 //   node scripts/alerts-store.mjs get|put niches file.json      each niche's measured numbers (tools/niche_hits.py)
+//   node scripts/alerts-store.mjs get checks|verdicts|searches file.json; put search_results|lookalikes file.json
 // Counts only in the log (public repo).
 import { readFile, writeFile } from "node:fs/promises";
-import { ALERTS_KEY, DEALS_KEY, DISCOVERIES_KEY, DOMAINS_KEY, FILINGS_KEY, KEY, MOMENTS_KEY, NICHES_KEY, OWNERS_KEY, PARENTS_KEY, STORE, STREAM_KEY, filingsMonthKey } from "../api/accounts.mjs";
+import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, LOOKALIKES_KEY, SEARCHES_KEY, SEARCH_RESULTS_KEY, VERDICTS_KEY, DISCOVERIES_KEY, DOMAINS_KEY, FILINGS_KEY, KEY, MOMENTS_KEY, NICHES_KEY, OWNERS_KEY, PARENTS_KEY, STORE, STREAM_KEY, filingsMonthKey } from "../api/accounts.mjs";
 import { openStore } from "./store.mjs";
 
-const KEYS = { alerts: ALERTS_KEY, stream: STREAM_KEY, discoveries: DISCOVERIES_KEY, niches: NICHES_KEY, deals: DEALS_KEY, domains: DOMAINS_KEY, moments: MOMENTS_KEY, owners: OWNERS_KEY, parents: PARENTS_KEY };
+const KEYS = { alerts: ALERTS_KEY, stream: STREAM_KEY, discoveries: DISCOVERIES_KEY, niches: NICHES_KEY, deals: DEALS_KEY, domains: DOMAINS_KEY, moments: MOMENTS_KEY, owners: OWNERS_KEY, parents: PARENTS_KEY,
+  checks: CHECKS_KEY, verdicts: VERDICTS_KEY, searches: SEARCHES_KEY, search_results: SEARCH_RESULTS_KEY, lookalikes: LOOKALIKES_KEY };
 const [command, name, file] = process.argv.slice(2);
 if (command === "tracked" ? !name : !(["get", "put"].includes(command) && KEYS[name] && file)) {
-  console.error("usage: node alerts-store.mjs tracked out.json | get|put alerts|stream|discoveries|niches|deals|domains|moments|owners|parents file.json");
+  console.error("usage: node alerts-store.mjs tracked out.json | get|put alerts|stream|discoveries|niches|deals|domains|moments|owners|parents|checks|verdicts|searches|search_results|lookalikes file.json");
   process.exit(2);
 }
 const store = await openStore(STORE);
