@@ -846,7 +846,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the UK and is rarely on anyone's list): `FX_JOB_QUERIES` (multi-currency / foreign-currency / overseas-supplier
   payments, hedging, forward contracts, letters of credit … two pages each on Adzuna, Reed's keyword search) and
   `fx_wording` (the advert's title and text, `FX_WORDING`; recruiter pitches and gardening "hedge" skipped) — an
-  employer not on the lists, found by exact registered name (`JOB_LOOKUPS_MAX` 60 a run, currency-worded and FD adverts
+  employer not on the lists, found by exact registered name (`JOB_LOOKUPS_MAX` 150 a run — 60 until 21 Nov 2026, when the first run used them all and Reed was added, currency-worded and FD adverts
   first), becomes a discovery with the quote (`discovered_by`, `source` job_advert, `source_url`, filed FX score 55);
   the finder checks it (niche "FX work in a job advert", `main.JOBS_NICHE`) and every discovery's row carries
   `found_via` / `found_via_url` (`main.FOUND_VIA`). The New leads tab shows each lead's source (`leadSource` /
