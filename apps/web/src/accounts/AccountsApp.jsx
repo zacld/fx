@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, LEAD_SOURCES, leadSource, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { FIT, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -141,10 +141,13 @@ function Accounts({ data, password }) {
       .then((body) => { if (live && body) setMoves(movesByCurrency(body)); }).catch(() => {});
     return () => { live = false; };
   }, []);
-  const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, moves, madeAt: data.made_at }),
-                          [signals, moves, data.made_at]);
-  // Zac's Good lead / Not a fit verdicts: declared before the rows that read them
+  // Zac's own marks (verdicts, the Simplified dash's review buttons): read by the lead score's feedback loop
   const [verdicts, setVerdicts] = useState(data.verdicts || {});
+  const [checks, setChecks] = useState(data.checks || {});
+  const reviews = useMemo(() => reviewLearnings(baseRows, checks, verdicts), [baseRows, checks, verdicts]);
+  const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, moves, madeAt: data.made_at, reviews }),
+                          [signals, moves, data.made_at, reviews]);
+  // Zac's Good lead / Not a fit verdicts: declared before the rows that read them
   const [lists, setLists] = useState(data.lists || {});   // Zac's call / chocolate-mailing / email lists
   const allRows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
     ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
@@ -153,7 +156,6 @@ function Accounts({ data, password }) {
   const ukRows = useMemo(() => allRows.filter(ukNamed), [allRows]);
   // Owned from abroad (an American parent, a German group …): their own tab too (Zac, 16 Nov 2026: "if it's owned by an
   // American company or something like that put it in a different section"); `signals` brings the owner search's answers
-  const [checks, setChecks] = useState(data.checks || {});
   const markedAbroad = (r) => checks[r.company_number]?.review === "abroad";   // Zac's own "Owned abroad" button
   const foreignRows = useMemo(() => allRows.filter((r) => !ukNamed(r) && (foreignOwned(r) || markedAbroad(r))), [allRows, signals, checks]);   // eslint-disable-line react-hooks/exhaustive-deps
   const rows = useMemo(() => allRows.filter((r) => (!elsewhere(r) && !markedAbroad(r)) || contacted[r.company_number]), [allRows, contacted, signals, checks]);   // eslint-disable-line react-hooks/exhaustive-deps
@@ -596,7 +598,7 @@ function Accounts({ data, password }) {
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={allRows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "today" ? <Today rows={allRows} lists={lists} onOpen={openCompany} />
-       : filters.view === "simple" ? <SimpleDash rows={[...rows, ...allRows.filter((r) => markedAbroad(r) && !elsewhere(r) && !contacted[r.company_number])]} onOpen={openCompany} contacted={contacted} checks={checks} onReview={setReview} />
+       : filters.view === "simple" ? <SimpleDash rows={[...rows, ...allRows.filter((r) => markedAbroad(r) && !elsewhere(r) && !contacted[r.company_number])]} onOpen={openCompany} contacted={contacted} checks={checks} onReview={setReview} reviews={reviews} />
        : filters.view === "new" ? <FitTiming mode="new" rows={rows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "foreign" ? <FitTiming mode="foreign" rows={foreignRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "uk" ? <FitTiming mode="uk" rows={ukRows.filter((r) => !contacted[r.company_number])} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -1133,7 +1135,26 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS, actions =
 // as a P&L-style sheet with a search, an industry filter and an Excel export of exactly what's shown.
 const REVIEW_BUTTONS = [["open", "Open lead", "Checked: nobody has it — a lead to work"], ["mine", "Added to mine", "Added to your own book"],
   ["abroad", "Owned abroad", "Owned from abroad — moves it to the Foreign-owned tab"]];
-function SimpleDash({ rows, onOpen, contacted, checks = {}, onReview }) {
+// What Zac's own checks are teaching the lead score (the feedback loop, `reviewLearnings`): good-lead rate by source,
+// niche and industry, and the lean each gets once 5+ are marked.
+function ReviewLearnings({ reviews }) {
+  if (!reviews?.reviewed) return <p className="filings-note">As you mark companies Open lead, Added to mine or Owned abroad, this shows which sources and niches give genuinely open leads — and the lead score leans towards them once 5+ in a group are marked.</p>;
+  const table = (title, list) => list.length > 0 && (
+    <div className="verdict-table"><b>{title}</b>
+      {list.slice(0, 6).map((g) => (
+        <div key={g.key}><span className="num">{g.good_share}%</span> good ({g.good}/{g.reviewed}) · {g.key}
+          {g.points ? <span className={`chip${g.points < 0 ? " warn" : ""}`}>{g.points > 0 ? "+" : ""}{g.points} to its leads</span> : null}</div>))}
+    </div>);
+  return (
+    <div className="panel verdict-panel">
+      <b>What your checks are teaching the score: {reviews.reviewed} marked</b>
+      <span className="muted"> — good = Open lead, Added to mine or Good lead; not = Owned abroad or Not a fit. Only your clicks here, nothing from the CRM.</span>
+      <div className="verdict-tables">{table("By source", reviews.source)}{table("By niche", reviews.niche)}{table("By industry", reviews.industry)}</div>
+    </div>
+  );
+}
+
+function SimpleDash({ rows, onOpen, contacted, checks = {}, onReview, reviews }) {
   const [review, setReview] = useState("none");   // "none" = the main sheet (not marked yet); else that button's own list
   const [query, setQuery] = useState("");
   const [industry, setIndustry] = useState("");
@@ -1154,6 +1175,7 @@ function SimpleDash({ rows, onOpen, contacted, checks = {}, onReview }) {
     `simplified-dash-${review === "none" ? "to-check" : review}-${new Date().toISOString().slice(0, 10)}.xlsx`, "Simplified dash");
   return (
     <div className="list">
+      <ReviewLearnings reviews={reviews} />
       <div className="filters filings-bar review-lists" role="tablist" aria-label="Simplified dash lists">
         {[["none", "To check", base.length - reviewed("open") - reviewed("mine") - reviewed("abroad")],
           ...REVIEW_BUTTONS.map(([k, label]) => [k, label, reviewed(k)])].map(([k, label, n]) => (

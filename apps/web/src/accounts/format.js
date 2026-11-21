@@ -458,6 +458,33 @@ export function leadSource(r) {
   return "Niche search";
 }
 
+// What Zac's own checks say (the feedback loop): for each source, niche and industry, how many leads he marked good
+// (Open lead / Added to mine on the Simplified dash, or Good lead) against not (Owned abroad, or Not a fit), and the
+// lean the lead score takes from it (LEAD_POINTS review*). `checks` / `verdicts` are the page's own store items.
+export function reviewLearnings(rows = [], checks = {}, verdicts = {}, rules = LEAD_POINTS) {
+  const groups = { source: {}, niche: {}, industry: {} };
+  let reviewed = 0;
+  for (const r of rows) {
+    const mark = checks[r.company_number]?.review, v = verdicts[r.company_number]?.verdict;
+    const good = mark === "open" || mark === "mine" || (!mark && v === "good");
+    const bad = mark === "abroad" || (!mark && v === "not_fit");
+    if (!good && !bad) continue;
+    reviewed += 1;
+    for (const [kind, key] of [["source", leadSource(r)], ["niche", r.fx_niche || "(no niche)"], ["industry", industryOf(r)]]) {
+      const g = (groups[kind][key] ||= { key, good: 0, not: 0 });
+      g[good ? "good" : "not"] += 1;
+    }
+  }
+  const lean = { source: {}, niche: {} };
+  const done = (kind) => Object.values(groups[kind]).map((g) => {
+    const n = g.good + g.not, share = Math.round((100 * g.good) / n);
+    const points = n < rules.reviewMin ? 0 : share >= rules.reviewGoodShare ? rules.reviewGood : share <= rules.reviewPoorShare ? rules.reviewPoor : 0;
+    if (points && lean[kind] && g.key !== "(no niche)") lean[kind][g.key] = { key: g.key, share, reviewed: n, points };
+    return { ...g, reviewed: n, good_share: share, points };
+  }).sort((a, b) => b.reviewed - a.reviewed);
+  return { reviewed, source: done("source"), niche: done("niche"), industry: done("industry"), lean };
+}
+
 // New leads (Zac, 18 Nov 2026: "make a section which is new leads"): the day a company joined our lists — the finder's
 // upload stamps first_seen; the FX filings scan lists a company the day its accounts are filed, so its filing date.
 export const NEW_LEAD_DAYS = [3, 7, 14, 30];
@@ -825,6 +852,11 @@ export const LEAD_POINTS = {
   subsidiaries: 10, open: 5, ownedAbroad: -10, runAbroad: -20, decidesHere: 5,
   // Zac, 13 Nov 2026: "if a company is NAME then UK, score it lower — it's obviously got an overseas owner"
   ukArmName: -10,
+  // The feedback loop (Zac's origination ideas, 21 Nov 2026: "use previously identified successful prospects to teach
+  // the scanner"): his own marks — Open lead / Added to mine / Good lead count good, Owned abroad / Not a fit count not —
+  // give each niche and source a good-lead rate (`reviewLearnings`); with reviewMin+ checked, one mostly good lifts its
+  // leads, one mostly not lowers them. Nothing from the CRM: only his clicks on this page.
+  reviewGood: 8, reviewPoor: -8, reviewMin: 5, reviewGoodShare: 60, reviewPoorShare: 25,
   // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
   // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
   // employee ownership trust 10, and the hit-list combo — a recent FX loss with a new FD / a purchase / a PE deal — 15.
@@ -924,7 +956,7 @@ export function nicheTiers(stats = {}) {
   return Object.fromEntries(Object.values(stats).filter((s) => s?.name).map((s) => [s.name, { ...s, tier: tierOf(s) }]));
 }
 
-export function leadScore(r, { today = new Date(), niches = {}, signals = {}, moves = {}, madeAt = "", rules = LEAD_POINTS } = {}) {
+export function leadScore(r, { today = new Date(), niches = {}, signals = {}, moves = {}, madeAt = "", reviews = null, rules = LEAD_POINTS } = {}) {
   const out = [];
   let cat = "fit";   // which half each reason counts in: "fit" (the right company), "timing" (why now), "stop"
   const add = (points, why) => { if (points) out.push([why, points, cat]); };
@@ -945,6 +977,8 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   cat = "fit";
   const niche = niches[r.fx_niche];
   if (niche) add(rules.nicheByTier[niche.tier] || 0, `Niche: ${r.fx_niche} (${niche.hit_rate}% of its companies prove FX)`);
+  const lean = reviews?.lean?.niche?.[r.fx_niche] || reviews?.lean?.source?.[leadSource(r)];
+  if (lean) add(lean.points, `Your checks: ${lean.share}% of ${lean.key} leads were good (${lean.reviewed} checked)`);
   const recent = (signals[r.company_number] || []).filter((s) => String(s.at || "").slice(0, 10) >= day(rules.signalDays));
   const fdSignal = recent.find((s) => /^(new|news)_fd$|^hiring_fd$/.test(s.kind));
   const triggers = parts(r.triggers);

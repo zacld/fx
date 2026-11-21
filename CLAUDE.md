@@ -752,7 +752,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `null` clears). Not a fit qualifies the lead Out everywhere. The daily ranking (`ranking.js` `verdictLearnings`,
   `leads/ranked.verdicts`) splits them by source (finder / FX filings scan), lead-score band, niche and hard-to-broker
   sector, printed in the run and shown at the top of the Niches tab — the evidence for re-weighting `LEAD_POINTS` and
-  the niches.
+  the niches. **The feedback loop** (Zac's origination ideas, 21 Nov 2026: "use previously identified successful
+  prospects to teach the scanner which company profiles produce genuinely new opportunities"; `reviewLearnings` in
+  `format.js`): his own marks — Open lead / Added to mine (Simplified dash) or Good lead count good, Owned abroad or
+  Not a fit count not — give each source (`leadSource`), niche and industry a good-lead rate; with `reviewMin` (5)+
+  marked, a niche (else the lead's source) at `reviewGoodShare` 60%+ lifts its leads `reviewGood` +8 and one at 25% or
+  under lowers them −8 (Fit; the reason "Your checks: 83% of Cut flowers leads were good (6 checked)"). The page and the
+  daily ranking (`rank-leads.mjs` reads `checks` + `verdicts`; `leads/ranked.reviews`, printed) both apply it; the
+  Simplified dash shows "What your checks are teaching the score". Only his clicks — nothing from the CRM.
 - **Hard to broker** (Zac, 13 Nov 2026: "a separate section where we go after sectors brokers can't — mining,
   recyclables etc — no firearms, no gambling"): niches carrying `broker_shy` (the reason payment firms — non-bank FX
   brokers — often decline or restrict them) in `fx_niches.json`: scrap metal, bullion, jewellery, watches, art &
