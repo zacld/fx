@@ -3363,6 +3363,9 @@ class TestChAlerts(unittest.TestCase):
         self.assertIn("in EUR and USD", found[0]["discovered_by"])
         self.assertEqual(found[0]["filed_fx_score"], 55)
         self.assertEqual(m.fx_wording(ads[3]), "")                                  # gardening isn't hedging
+        # teams abroad (idea 2): overseas payroll and offshore teams count as currency work
+        self.assertIn("international payroll", m.fx_wording({"title": "Payroll Manager", "text": "Run international payroll for our UK and Polish teams."}))
+        self.assertIn("developers in India", m.fx_wording({"title": "Finance Assistant", "text": "Support our developers in India each month."}))
         self.assertEqual(m.fx_wording({"title": "Clerk", "text": "Our client is a multi-currency business."}), "")
 
     def test_job_adverts_skip_recruiters_and_need_keys(self):

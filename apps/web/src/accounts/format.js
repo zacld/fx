@@ -78,7 +78,7 @@ export const googleFd = (r) =>
 // view "contacted" shows only the companies marked contacted; otherwise they are left out of the list.
 export function filterRows(rows, { section = "", query = "", contact = "", fdOnly = false, pair = "", triggersOnly = false,
                                    showOut = false, newOnly = false, fxLossOnly = false, madeAt = "", view = "",
-                                   contacted = {}, notes = {}, role = "", peOnly = false, newFdOnly = false, industry = "", ownership = "", lookalikeOnly = false } = {}) {
+                                   contacted = {}, notes = {}, role = "", peOnly = false, opsOnly = false, newFdOnly = false, industry = "", ownership = "", lookalikeOnly = false } = {}) {
   const q = query.trim().toLowerCase();
   return rows.filter((r) =>
     (view === "contacted") === Boolean(contacted[r.company_number]) &&
@@ -91,6 +91,7 @@ export function filterRows(rows, { section = "", query = "", contact = "", fdOnl
     (!pair || parts(r.currency_pairs).includes(pair)) &&
     (!triggersOnly || Boolean(r.triggers)) &&
     (!peOnly || Boolean(peBackedOf(r))) &&
+    (!opsOnly || Boolean(overseasOps(r))) &&
     (!lookalikeOnly || lookalike(r)) &&
     (!industry || industryOf(r) === industry) &&
     (!ownership || ownership(r).status === ownership) &&
@@ -485,6 +486,23 @@ export function reviewLearnings(rows = [], checks = {}, verdicts = {}, rules = L
   return { reviewed, source: done("source"), niche: done("niche"), industry: done("industry"), lean };
 }
 
+// Teams abroad (the feedback-loop brief's idea 2): subsidiaries the accounts place in an offshore delivery hub — software
+// and engineering teams in Eastern Europe or India, call centres in South Africa or the Philippines … — or a job advert
+// naming a team, office or payroll there. {countries, text} or null.
+export const OFFSHORE_HUBS = ["Poland", "Romania", "Bulgaria", "Ukraine", "Serbia", "Czech Republic", "Czechia", "Hungary",
+  "Slovakia", "Lithuania", "Latvia", "Estonia", "Croatia", "North Macedonia", "Bosnia", "Moldova", "Belarus", "Georgia",
+  "Armenia", "India", "Sri Lanka", "Pakistan", "Bangladesh", "Philippines", "Vietnam", "Malaysia", "Indonesia",
+  "South Africa", "Egypt", "Morocco", "Tunisia", "Kenya", "Nigeria", "Mexico", "Colombia", "Argentina", "Brazil", "Costa Rica"];
+const HUB_RE = new RegExp(`\\b(${OFFSHORE_HUBS.join("|")})\\b`, "i");
+const OPS_WORDS = /\b(offshore|nearshore|overseas payroll|international payroll|global payroll|(?:team|office|centre|center|hub|developers?|engineers?|operations) (?:in|based in) (?:Poland|Romania|Bulgaria|Ukraine|India|Philippines|South Africa|Sri Lanka|Vietnam|Egypt|Mexico|Colombia))\b/i;
+export function overseasOps(r) {
+  const countries = [...new Set(String(r.subsidiaries_abroad || "").split(",").map((c) => c.replace(/\(.*\)/, "").trim())
+    .filter((c) => HUB_RE.test(c)))];
+  const advert = OPS_WORDS.test(String(r.found_via || "")) ? "a job advert names a team or payroll abroad" : "";
+  if (!countries.length && !advert) return null;
+  return { countries, text: [countries.length ? `teams in ${countries.join(", ")}` : "", advert].filter(Boolean).join("; ") };
+}
+
 // New leads (Zac, 18 Nov 2026: "make a section which is new leads"): the day a company joined our lists — the finder's
 // upload stamps first_seen; the FX filings scan lists a company the day its accounts are filed, so its filing date.
 export const NEW_LEAD_DAYS = [3, 7, 14, 30];
@@ -856,6 +874,10 @@ export const LEAD_POINTS = {
   // the scanner"): his own marks — Open lead / Added to mine / Good lead count good, Owned abroad / Not a fit count not —
   // give each niche and source a good-lead rate (`reviewLearnings`); with reviewMin+ checked, one mostly good lifts its
   // leads, one mostly not lowers them. Nothing from the CRM: only his clicks on this page.
+  // Overseas operations (Zac's origination ideas, 21 Nov 2026: "UK software companies paying developers in Poland,
+  // call centres in South Africa, outsourcing to the Philippines or Eastern Europe"): teams in an offshore hub mean
+  // payroll and supplier payments abroad every month — FX found through what a company does, not its sector code.
+  overseasOps: 8,
   reviewGood: 8, reviewPoor: -8, reviewMin: 5, reviewGoodShare: 60, reviewPoorShare: 25,
   // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
   // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
@@ -1044,6 +1066,8 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   add(hiring ? rules.hiring : 0, `${hiring?.title || ""}`);
   cat = "fit";
   add(r.subsidiaries_abroad ? rules.subsidiaries : 0, `Subsidiaries abroad: ${r.subsidiaries_abroad}`);
+  const ops = overseasOps(r);
+  if (ops) add(rules.overseasOps, `Overseas operations: ${ops.text}`);
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
   add(loss >= rules.lossMin && !hedgingNamed(r) ? rules.lossNoHedge : 0, "FX loss with no hedging named — the clearest need");
