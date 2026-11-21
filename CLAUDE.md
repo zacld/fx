@@ -770,6 +770,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`emerging-code-…`, named from the Commodity table, `hmrc.code_names`). **Less time on exact figures**: the finder's
   FX-line OCR 1,800s → 900s a run and re-reads 300 → 100 (`OCR_FX_BUDGET_SECONDS`, `FINDER_REREAD_MAX` in its workflow);
   turnover (the size test) and the currency notes (the FX proof) keep theirs, so the time budget checks more new companies.
+- **Hidden from the usual filters** (Zac, 21 Nov 2026: "everyone uses Market IQ or Zint — we want companies that aren't
+  on there"): those tools are built on the same register, so nobody is missing from them, but a standard search (turnover
+  £20m+, a manufacturing / wholesale sector code, an importer flag) can't see some companies. `hiddenFromFilters` /
+  `HIDDEN_KINDS` in `format.js` say which filter drops each lead: no turnover in the filing (filleted / no profit and loss
+  account — not ours still to read), sized by its group, accounts in another currency, a scanned filing, only hiding
+  sector codes (`HIDING_SIC`: head office, holding company, other business support, dormant, property), too new (moved up
+  from small accounts, incorporated within 3 years), or found by its goods / a job advert / a good lead's goods. +8 Fit
+  (`LEAD_POINTS.hidden`: fewer people calling them); the **Hidden from filters** tab (FitTiming mode "hidden": a reason
+  filter with counts, each card's reasons, Excel with `hidden_because`) and the Accounts export's `hidden_from_filters`.
+  A Zint export as a suppression list would be the direct test — only once Zint's licence and the bank's policy allow it.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own
