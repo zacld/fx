@@ -355,7 +355,7 @@ export function cognismCompanyRows(rows) {
 }
 export const cognismCsv = (rows) => toCsv(rows.map(cognismRow), COGNISM_FIELDS);
 
-export const EXPORT_FIELDS = [
+export const EXPORT_FIELDS = ["hidden_from_filters", 
   "company_and_fd", "industry", "ownership", "ultimate_owner", "owner_country", "finance_decided", "what_to_pitch", "my_list", "lead_score", "lead_fit", "lead_timing", "lead_reasons", "lead_checklist", "reasons_not_to_progress", "rank", "section", "qualified", "qualify_reason", "warm_route", "company_name", "company_number",
   "filed_fx_score", "filed_fx", "currencies_in_accounts", "fx_forwards", "fx_sensitivity", "fx_balances", "turnover_regions",
   "currency_source", "group_parent_accounts", "group_fx", "run_from_abroad",
@@ -503,6 +503,40 @@ export function overseasOps(r) {
   const advert = OPS_WORDS.test(String(r.found_via || "")) ? "a job advert names a team or payroll abroad" : "";
   if (!countries.length && !advert) return null;
   return { countries, text: [countries.length ? `teams in ${countries.join(", ")}` : "", advert].filter(Boolean).join("; ") };
+}
+
+// Hidden from the usual filters (Zac, 21 Nov 2026: "everyone uses Market IQ or Zint — we want companies that aren't on
+// there"): every company is on the register those tools are built from, but a standard search (turnover £20m+, a
+// manufacturing / wholesale sector code, an importer flag) can't see some of them. Each reason says which filter drops it.
+export const HIDDEN_KINDS = [
+  ["no_turnover", "No turnover filed"], ["group", "Sized by its group"], ["foreign", "Accounts in another currency"],
+  ["scanned", "Scanned accounts"], ["sector", "Sector code hides it"], ["new", "Too new for the filters"],
+  ["found", "Found by goods or wording"],
+];
+const HIDING_SIC = { "70100": "head office", "64209": "holding company", "64205": "holding company", "64201": "holding company",
+  "64202": "holding company", "64203": "holding company", "64204": "holding company", "82990": "other business support",
+  "74909": "other professional activities", "74990": "non-trading", "96090": "other services", "99999": "dormant",
+  "68209": "letting property", "68100": "property dealing" };
+export function hiddenFromFilters(r, today = new Date()) {
+  const out = [];
+  const add = (key, text) => out.push({ key, label: HIDDEN_KINDS.find(([k]) => k === key)[1], text });
+  const turnover = Number(r.turnover_gbp) || 0;
+  if (r.turnover_basis === "group") add("group", "its own accounts look small — the group's turnover sizes it, so a turnover filter on the company drops it");
+  // only when the filing really has none (filleted / no profit and loss account), not when we just haven't read it
+  else if (!turnover && !Number(r.turnover_foreign_gbp) && !/not read|not checked/i.test(r.turnover_check || "")
+           && (r.turnover_check || r.size_estimate)) add("no_turnover", `no turnover in its filed accounts${r.size_estimate ? ` (${r.size_estimate})` : ""} — a turnover filter drops it`);
+  if (r.reporting_currency || Number(r.turnover_foreign_gbp)) add("foreign", `accounts kept in ${String(r.reporting_currency || "another currency").replace(/^(\w{3}).*$/, "$1")} — a sterling turnover filter misses it`);
+  if (r.accounts_format && r.accounts_format !== "ixbrl") add("scanned", "accounts filed as a scanned document — no figures in the databases' feeds (we read them by OCR)");
+  const codes = sicCodes(r);
+  if (codes.length && codes.every((c) => HIDING_SIC[c.padStart(5, "0")])) {
+    add("sector", `filed as ${HIDING_SIC[codes[0].padStart(5, "0")]} (${codes[0]}) — a sector search for traders or makers misses it`);
+  }
+  const inc = /^\d{4}-\d{2}-\d{2}/.test(r.incorporated_on || "") ? new Date(`${r.incorporated_on.slice(0, 10)}T00:00:00Z`) : null;
+  if (r.moved_up) add("new", "moved up from small accounts this year — last year it was below every size filter");
+  else if (inc && (today - inc) / 86_400_000 < 3 * 365) add("new", `incorporated ${r.incorporated_on.slice(0, 4)} — too new for most size filters`);
+  const src = leadSource(r);
+  if (["Job advert", "Your niche search", "Like your good leads"].includes(src)) add("found", `found through ${src === "Job advert" ? "a job advert naming currency work" : src === "Your niche search" ? "the goods in its customs records" : "the goods your good leads trade"}, not a database filter`);
+  return out;
 }
 
 // New leads (Zac, 18 Nov 2026: "make a section which is new leads"): the day a company joined our lists — the finder's
@@ -880,6 +914,7 @@ export const LEAD_POINTS = {
   // call centres in South Africa, outsourcing to the Philippines or Eastern Europe"): teams in an offshore hub mean
   // payroll and supplier payments abroad every month — FX found through what a company does, not its sector code.
   overseasOps: 8,
+  hidden: 8,           // hidden from the usual database filters (hiddenFromFilters): fewer people calling them
   reviewGood: 8, reviewPoor: -8, reviewMin: 5, reviewGoodShare: 60, reviewPoorShare: 25,
   // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
   // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
@@ -1070,6 +1105,8 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   add(r.subsidiaries_abroad ? rules.subsidiaries : 0, `Subsidiaries abroad: ${r.subsidiaries_abroad}`);
   const ops = overseasOps(r);
   if (ops) add(rules.overseasOps, `Overseas operations: ${ops.text}`);
+  const hid = hiddenFromFilters(r);
+  if (hid.length) add(rules.hidden, `Hidden from the usual filters: ${hid.map((h) => h.label.toLowerCase()).join(", ")}`);
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
   add(loss >= rules.lossMin && !hedgingNamed(r) ? rules.lossNoHedge : 0, "FX loss with no hedging named — the clearest need");

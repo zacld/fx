@@ -751,3 +751,25 @@ describe("overseas operations", () => {
     expect(s.parts.some(([w, p]) => /Overseas operations: teams in Philippines/.test(w) && p === 8)).toBe(true);
   });
 });
+
+describe("hidden from the usual filters", () => {
+  it("says which standard database filter drops a company", async () => {
+    const { hiddenFromFilters, leadScore } = await import("./format.js");
+    const today = new Date("2026-11-21T00:00:00Z");
+    const keys = (r) => hiddenFromFilters(r, today).map((h) => h.key);
+    expect(keys({ turnover_gbp: "45000000", sic_codes: ["46310"], accounts_format: "ixbrl", incorporated_on: "2001-01-01" })).toEqual([]);
+    expect(keys({ turnover_basis: "group", turnover_gbp: "90000000" })).toEqual(["group"]);
+    expect(keys({ turnover_check: "turnover not disclosed: no profit and loss account", size_estimate: "Size likely £16m–£26m — estimate" })).toEqual(["no_turnover"]);
+    expect(keys({ turnover_check: "turnover not read yet: this run's OCR time for scanned accounts was used up" })).toEqual([]);   // ours, not theirs
+    expect(keys({ turnover_gbp: "30000000", reporting_currency: "USD (functional currency)", turnover_foreign_gbp: "30000000" })).toEqual(["foreign"]);
+    expect(keys({ turnover_gbp: "30000000", accounts_format: "pdf" })).toEqual(["scanned"]);
+    expect(keys({ turnover_gbp: "30000000", sic_codes: ["70100"] })).toEqual(["sector"]);
+    expect(keys({ turnover_gbp: "30000000", sic_codes: ["70100", "46310"] })).toEqual([]);          // a trading code too
+    expect(keys({ turnover_gbp: "30000000", moved_up: "Moved up from small accounts" })).toEqual(["new"]);
+    expect(keys({ turnover_gbp: "30000000", incorporated_on: "2025-02-01" })).toEqual(["new"]);
+    expect(keys({ turnover_gbp: "30000000", found_via: "Niche search: marble" })).toEqual(["found"]);
+    const scored = leadScore({ turnover_gbp: "30000000", accounts_format: "pdf" }, { today });
+    expect(scored.parts.some(([why, p, cat]) => /Hidden from the usual filters: scanned accounts/.test(why) && p === 8 && cat === "fit")).toBe(true);
+  });
+});
+
