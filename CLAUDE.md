@@ -739,6 +739,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   check** (nothing marked); a button moves the company to its own list — **Open lead / Added to mine / Owned abroad** tabs
   with counts, each exported on its own; clicking the lit button sends it back to To check. **Owned abroad** also puts the
   company in the Foreign-owned tab and out of the Accounts list.
+- **Teams abroad** (Zac's origination ideas, 21 Nov 2026, idea 2: "UK software companies paying developers in Poland,
+  call centres in South Africa, outsourcing to the Philippines or Eastern Europe"; `overseasOps` / `OFFSHORE_HUBS` in
+  `format.js`): subsidiaries the accounts place in an offshore delivery hub (Eastern Europe, India, the Philippines,
+  South Africa, Latin America … — from `subsidiaries_abroad`, on both lists), or a job advert naming a team or payroll
+  there (`found_via`); +8 Fit (`overseasOps`), a "Teams abroad" chip and filter on the Accounts list. The job-advert
+  scan searches for it too (`FX_JOB_QUERIES` international / overseas / global payroll, offshore team; `FX_WORDING`
+  offshore / nearshore / payroll abroad / "developers in India"). **Foreign-owned, decided here** (idea 3): the
+  Foreign-owned tab's "Wherever finance is decided" filter by `financeSeat`'s lean (Decides in the UK / Unclear / Likely
+  run from abroad, with counts) and a chip on each card — foreign-owned companies whose own records show finance run in
+  the UK are back in play without leaving their tab.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own
@@ -752,7 +762,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `null` clears). Not a fit qualifies the lead Out everywhere. The daily ranking (`ranking.js` `verdictLearnings`,
   `leads/ranked.verdicts`) splits them by source (finder / FX filings scan), lead-score band, niche and hard-to-broker
   sector, printed in the run and shown at the top of the Niches tab — the evidence for re-weighting `LEAD_POINTS` and
-  the niches.
+  the niches. **The feedback loop** (Zac's origination ideas, 21 Nov 2026: "use previously identified successful
+  prospects to teach the scanner which company profiles produce genuinely new opportunities"; `reviewLearnings` in
+  `format.js`): his own marks — Open lead / Added to mine (Simplified dash) or Good lead count good, Owned abroad or
+  Not a fit count not — give each source (`leadSource`), niche and industry a good-lead rate; with `reviewMin` (5)+
+  marked, a niche (else the lead's source) at `reviewGoodShare` 60%+ lifts its leads `reviewGood` +8 and one at 25% or
+  under lowers them −8 (Fit; the reason "Your checks: 83% of Cut flowers leads were good (6 checked)"). The page and the
+  daily ranking (`rank-leads.mjs` reads `checks` + `verdicts`; `leads/ranked.reviews`, printed) both apply it; the
+  Simplified dash shows "What your checks are teaching the score". Only his clicks — nothing from the CRM.
 - **Hard to broker** (Zac, 13 Nov 2026: "a separate section where we go after sectors brokers can't — mining,
   recyclables etc — no firearms, no gambling"): niches carrying `broker_shy` (the reason payment firms — non-bank FX
   brokers — often decline or restrict them) in `fx_niches.json`: scrap metal, bullion, jewellery, watches, art &

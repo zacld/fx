@@ -392,12 +392,17 @@ JOB_QUERIES = ["treasury analyst", "treasury manager", "foreign exchange", "FX h
 # exact registered name, becomes a new lead with the advert's own words as evidence (`fx_wording`).
 FX_JOB_QUERIES = ["multi-currency payments", "foreign currency payments", "overseas supplier payments",
                   "international payments accounts", "FX payments", "currency hedging", "forward contracts finance",
-                  "letters of credit", "multi currency accounts payable", "EUR USD payments"]
+                  "letters of credit", "multi currency accounts payable", "EUR USD payments",
+                  # teams abroad (the origination brief's idea 2): payroll and suppliers paid abroad every month
+                  "international payroll", "overseas payroll", "offshore team finance", "global payroll accountant"]
 FX_WORDING = re.compile(r"\b(?:multi[- ]?currenc\w*|foreign (?:currency|exchange)|FX\b|forex|currency (?:payments?|"
                         r"accounts?|risk|exposure|hedg\w*|transactions?)|forward (?:contracts?|currency)|"
                         r"letters? of credit|international payments?|overseas (?:payments?|suppliers?)|"
                         r"(?:EUR|USD|euro|dollar|€|\$)\s*(?:and|&|/|,)\s*(?:EUR|USD|GBP|euro|dollar|€|\$)|"
-                        r"(?:in|into) (?:euros?|dollars?|EUR|USD))", re.I)
+                        r"(?:in|into) (?:euros?|dollars?|EUR|USD)|"
+                        r"(?:international|overseas|global|multi[- ]country) payroll|offshore (?:team|centre|center|delivery)|"
+                        r"nearshore|(?:teams?|office|centre|center|developers?|engineers?) (?:in|based in) (?:Poland|Romania|"
+                        r"Bulgaria|Ukraine|India|the Philippines|Philippines|South Africa|Sri Lanka|Vietnam|Egypt|Mexico|Colombia))", re.I)
 JOB_LOOKUPS_MAX = 150       # Companies House name searches a run for advert employers not on the lists
 STATS: dict[str, int] = {}   # counts for the log (public repo: no names)
 LOOKUPS_MAX = 40            # Companies House name searches a run, for subjects not on the lists

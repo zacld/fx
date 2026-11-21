@@ -21,7 +21,7 @@ const slim = (r) => Object.fromEntries(RANKED_FIELDS.filter((k) => r[k] !== unde
 // {rows (filings companies not on the list, slim, with fx_niche / section / qualified), ruled_out ({number: reason}
 // for both lists), niche_of ({number: corrected niche} for list companies), shy_of ({number: {niche, why}}: hard to
 // broker, both lists), scored (every lead with its score)}.
-export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, moves = {}, today = new Date() } = {}) {
+export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, moves = {}, today = new Date(), reviews = null } = {}) {
   const tiers = nicheTiers(niches);
   const onList = new Set(listRows.map((r) => r.company_number));
   // A list company's niche: the corrected one (customs goods, else a sector code that really names a niche) wins over
@@ -49,7 +49,7 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
              ...(e.absurd ? { qualified: "Out", qualify_reason: e.absurd } : {}) };
   });
   listRows.forEach(tag);
-  const ctx = { niches: tiers, signals, moves, today };
+  const ctx = { niches: tiers, signals, moves, today, reviews };
   const scored = [...listRows.map((r) => ({ ...r, onList: true, fx_niche: nicheOf[r.company_number] ?? r.fx_niche })),
     ...rows.map((r) => ({ ...filingRow(r), onList: false }))]
     .map((r) => {
