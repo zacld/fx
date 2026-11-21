@@ -398,7 +398,7 @@ FX_WORDING = re.compile(r"\b(?:multi[- ]?currenc\w*|foreign (?:currency|exchange
                         r"letters? of credit|international payments?|overseas (?:payments?|suppliers?)|"
                         r"(?:EUR|USD|euro|dollar|€|\$)\s*(?:and|&|/|,)\s*(?:EUR|USD|GBP|euro|dollar|€|\$)|"
                         r"(?:in|into) (?:euros?|dollars?|EUR|USD))", re.I)
-JOB_LOOKUPS_MAX = 60        # Companies House name searches a run for advert employers not on the lists
+JOB_LOOKUPS_MAX = 150       # Companies House name searches a run for advert employers not on the lists
 STATS: dict[str, int] = {}   # counts for the log (public repo: no names)
 LOOKUPS_MAX = 40            # Companies House name searches a run, for subjects not on the lists
 # 14 Nov 2026 (discovery review: news and job adverts were the noisiest source — low volume, name-matching): headlines
