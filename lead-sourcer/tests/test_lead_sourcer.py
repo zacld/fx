@@ -3493,6 +3493,34 @@ class TestCustomsMoments(unittest.TestCase):
 
 
 class TestNiches(unittest.TestCase):
+    def test_emerging_niches_from_uncovered_headings_and_sectors(self):
+        # 21 Nov 2026 (Zac's idea 5): uncovered headings / sectors hitting like a good niche become trial niches
+        from collections import Counter
+        from sourcer import niches as nr
+        config = [{"id": "coffee", "sic_codes": ["46370"], "hmrc_codes": []}]
+        headings = [
+            {"heading": "0603", "chapter": "Live trees, plants", "covered": False, "sized": 40, "strong": 8, "open": 6,
+             "hit_rate": 20.0, "open_share": 0.75, "score": 17.5, "verdict": "keep"},
+            {"heading": "0901", "chapter": "Coffee", "covered": True, "sized": 40, "strong": 9, "open": 9,
+             "hit_rate": 22.5, "open_share": 1.0, "score": 22.5, "verdict": "keep"},
+            {"heading": "8471", "chapter": "Machinery", "covered": False, "sized": 400, "strong": 6, "open": 1,
+             "hit_rate": 1.5, "open_share": 0.17, "score": 0.88, "verdict": "keep"}]
+        sectors = {"sized": Counter({"62012": 60, "46370": 50, "70100": 20}),
+                   "strong_n": Counter({"62012": 9, "46370": 10, "70100": 2}),
+                   "open_n": Counter({"62012": 7, "46370": 8}), "names": {"62012": "Business and domestic software development"}}
+        got = nr.emerging_niches(headings, sectors, config, {"0603": "Cut flowers and flower buds of a kind suitable for bouquets"})
+        self.assertEqual([n["id"] for n in got], ["emerging-goods-0603", "emerging-sector-62012"])   # covered / weak / few left out
+        self.assertEqual(got[0]["hmrc_codes"], ["0603"])
+        self.assertIn("Cut flowers", got[0]["name"])
+        self.assertEqual(got[1]["sic_codes"], ["62012"])
+        self.assertGreaterEqual(got[1]["stats"]["score"], nr.EMERGING_MIN_SCORE)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "stats.json")
+            with open(path, "w") as f:
+                json.dump({"niches": {}, "emerging": got}, f)
+            self.assertEqual([n["id"] for n in nr.load_emerging(path)], [n["id"] for n in got])
+        self.assertEqual(nr.load_emerging(""), [])
+
     """sourcer/niches.py: goods niches from customs codes, measured scores, the finder's order."""
 
     FLOWERS = {"id": "goods-cut-flowers-plants", "hmrc_codes": ["0602", "0603"]}

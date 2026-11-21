@@ -258,6 +258,22 @@ def api_month(flow: str, period: str, cache_dir: str, traders: dict) -> str:
     return path
 
 
+def heading_names(headings: Iterable[str]) -> dict[str, str]:
+    """{4-digit heading: its description, shortened} from the uktradeinfo API's Commodity table — for naming emerging
+    goods niches. Never fails: a heading it can't name is left out (the chapter name stands in)."""
+    out = {}
+    for h in headings:
+        try:
+            rows = list(_api_rows(f"Commodity?$filter=Hs4Code%20eq%20'{h}'&$top=1&$select=Hs4Description"))
+        except (urllib.error.URLError, OSError, ValueError):
+            continue
+        text = (rows[0].get("Hs4Description") or "") if rows else ""
+        if text:
+            short = re.split(r"[;,(]", text)[0].strip()
+            out[h] = short[:60].rstrip() + ("…" if len(short) > 60 else "")
+    return out
+
+
 def fill_from_api(paths: Iterable[str], since: str, cache_dir: str, limit: Optional[int] = None) -> list[str]:
     """Paths of monthly files made from the API for the newest months the files leave out (at most `limit`,
     API_MONTHS_MAX, a run — the rest the next run: they're cached like downloaded files). Never fails the run."""

@@ -401,6 +401,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
      `tools/sector_hits.py` (workflow "Sector hits", read-only) counts the FX filings scan's strong finds per SIC
      code against each sector's full / medium / group-accounts companies and lists the best-hitting sectors the
      niches don't cover.
+     **Emerging niches** (Zac's origination ideas, 21 Nov 2026, his priority: "continuously investigate emerging
+     industries … discover pockets of demand before they become saturated"): the weekly measuring run also counts every
+     sized active company's sector codes across the whole register (`bulk.scan(sectors=…)`) and turns uncovered customs
+     headings and uncovered, non-catch-all sector codes whose companies prove FX as often as a good niche (score
+     `EMERGING_MIN_SCORE` 4.0, 5+ strong finds, `EMERGING_MAX` 15 of each) into **trial niches**
+     (`niches.emerging_niches`; headings named from uktradeinfo's Commodity table, `hmrc.heading_names`), saved in
+     `niches/stats` as `emerging` with their numbers under `niches` (kind "emerging goods" / "emerging sector"). The
+     finder adds them to its niches (`niches.load_emerging`, NICHE_STATS_FILE) and searches them like any other, in their
+     measured tier; re-derived weekly, so one that stops hitting drops out (a lasting one belongs in fx_niches.json). The
+     Niches tab marks them and has an "Emerging only" filter; the run prints them.
 - **Scores:** every score and estimate lists its evidence or basis. Weights
   and wallet bands get recalibrated against real outcomes, so log them.
 - **Not public, not scraped:** credit-reference data (Creditsafe etc.) only

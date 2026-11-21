@@ -1388,8 +1388,12 @@ function VerdictLearnings({ v }) {
 
 function Niches({ measured, madeAt, learned, headings, onPick, verdicts }) {
   const [by, setBy] = useState("score");
+  const [onlyEmerging, setOnlyEmerging] = useState(false);
   const learnedBy = Object.fromEntries(learned.map((n) => [n.niche, n]));
-  const rows = Object.values(measured).filter((m) => m?.name).map((m) => ({ ...m, ...(learnedBy[m.name] || {}) }));
+  const isEmerging = (m) => String(m.kind || "").startsWith("emerging");
+  const all = Object.values(measured).filter((m) => m?.name);
+  const rows = all.filter((m) => !onlyEmerging || isEmerging(m)).map((m) => ({ ...m, ...(learnedBy[m.name] || {}) }));
+  const emergingCount = all.filter(isEmerging).length;
   const key = { score: (r) => -(r.score || 0), avg: (r) => -(r.avg || 0), leads: (r) => -(r.leads || 0), open: (r) => -(r.open_share || 0) }[by];
   rows.sort((a, b) => key(a) - key(b));
   const pct = (v) => (v === undefined ? "" : `${Math.round(v * (v > 1 ? 1 : 100))}%`);
@@ -1404,6 +1408,9 @@ function Niches({ measured, madeAt, learned, headings, onPick, verdicts }) {
           <option value="leads">Sort: most leads</option>
           <option value="open">Sort: most still open (no hedging named)</option>
         </select>
+        <label className="check" title="Customs goods and sectors no niche covered, found by this week's measuring because their companies prove FX as often as a good niche — the finder searches them until they stop hitting">
+          <input type="checkbox" checked={onlyEmerging} onChange={(e) => setOnlyEmerging(e.target.checked)} /> Emerging only ({emergingCount})
+        </label>
         <span className="muted">{rows.length} niches · measured {madeAt ? filedWhen(madeAt.slice(0, 10)) : ""} · hit rate = share of the niche's
           full / medium / group-accounts companies whose filings prove FX; open = of those, none naming forwards or an FX provider</span>
       </div>
@@ -1415,7 +1422,7 @@ function Niches({ measured, madeAt, learned, headings, onPick, verdicts }) {
             {rows.map((r) => (
               <tr key={r.name} className={r.verdict === "drop" ? "muted-row" : ""}>
                 <td><button className="linkish" onClick={() => onPick(r.name)} title="Show its companies">{r.name}</button></td>
-                <td>{r.kind}</td><td className="num">{r.hit_rate}%</td><td className="num">{pct(r.open_share)}</td><td className="num">{r.score}</td>
+                <td>{isEmerging(r) ? <span className="chip warn" title="A trial niche found by this week's measuring">{r.kind}</span> : r.kind}</td><td className="num">{r.hit_rate}%</td><td className="num">{pct(r.open_share)}</td><td className="num">{r.score}</td>
                 <td>{r.verdict === "drop" ? "Skipped by the finder" : r.verdict === "few" ? "Too few to tell" : ""}</td>
                 <td className="num">{r.leads ?? ""}</td><td className="num">{r.avg ?? ""}</td><td className="num">{r.strong ?? ""}</td>
                 <td className="num">{r.band ?? ""}</td><td className="num">{r.loss ?? ""}</td><td className="num">{r.ruled_out || ""}</td>

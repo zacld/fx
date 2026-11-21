@@ -959,6 +959,12 @@ def run_pipeline(
     if not os.path.exists(niches_path):
         raise FileNotFoundError(f"FX niches file not found: {niches_path}")
     niches = load_niches(niches_path, niche_ids)
+    if not niche_ids:   # the trial niches the weekly measuring found (tools/niche_hits.py "emerging")
+        emerging = niche_rules.load_emerging(os.environ.get("NICHE_STATS_FILE", ""))
+        known = {n["id"] for n in niches}
+        niches += [n for n in emerging if n["id"] not in known]
+        if emerging:
+            print(f"  Emerging niches (trial): {len(emerging)} — " + "; ".join(n["name"] for n in emerging[:8]))
     api_key = companies_house.get_api_key()
     if source == "api" and not api_key:
         raise ValueError("the search API source needs COMPANIES_HOUSE_API_KEY")

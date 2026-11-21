@@ -171,10 +171,12 @@ def main() -> None:
         with open(args.tracked, encoding="utf-8") as f:
             tracked = json.load(f) or {}
     registry: dict = {}
+    strong_rows = {n: r for n, r in filings.items() if float(r.get("filed_fx_score") or 0) >= niche_rules.STRONG}
+    sectors: dict = {"strong": set(strong_rows), "open": {n for n, r in strong_rows.items() if niche_rules.is_open(r)}}
     candidates, by_postcode, by_name = bulk.scan(
         args.bulk or bulk.download(), sics, set(niche_rules.SIZED),
         postcodes={pc for _, pc in traders}, names={n for n, _ in traders},
-        numbers=set(tracked) or None, registry=registry if tracked else None)
+        numbers=set(tracked) or None, registry=registry if tracked else None, sectors=sectors)
     trade_full = matching.match_all(traders, by_postcode, by_name)
     if args.moments_out:
         write_moments(args.moments_out, trade_full, latest, tracked, history)
@@ -191,6 +193,12 @@ def main() -> None:
     print(f"Matched traders: {len(trade_by_company):,}; companies measured: {len(companies):,}")
 
     result = measure_all(niches, list(companies.values()), trade_by_company, filings)   # sized ones only, inside
+    # emerging niches: uncovered headings and sectors hitting like a good niche — trial niches for the finder
+    picks = [h["heading"] for h in result["headings"] if not h["covered"] and h["score"] >= niche_rules.EMERGING_MIN_SCORE]
+    emerging = niche_rules.emerging_niches(result["headings"], sectors, niches, hmrc.heading_names(picks[:niche_rules.EMERGING_MAX]))
+    result["emerging"] = emerging
+    for n in emerging:
+        result["niches"][n["id"]] = {"name": n["name"], "kind": f"emerging {n['emerging']}", **n["stats"]}
     if args.traders_out:
         with open(args.traders_out, "w", encoding="utf-8") as f:
             json.dump({n: len(e["import_months"] | e["export_months"]) for n, e in trade_by_company.items()
@@ -217,6 +225,11 @@ def main() -> None:
               f"{s['verdict']:<7}  {s['kind']:<6}  {s['name'][:70]}")
     print(f"\nKeep {sum(s['verdict'] == 'keep' for _, s in rows)}, drop {sum(s['verdict'] == 'drop' for _, s in rows)}, "
           f"too few to tell {sum(s['verdict'] == 'few' for _, s in rows)}")
+    print(f"\nEmerging niches (trial, searched by the finder until they stop hitting): {len(emerging)}")
+    for n in emerging:
+        st = n["stats"]
+        print(f"  {st['score']:>6} {st['hit_rate']:>5}% open {round(100 * st['open_share'])}% strong {st['strong']} "
+              f"sized {st['sized']}  {n['name'][:80]}")
     print(f"\nCustoms headings ({HEADING_MIN_STRONG}+ strong finds), best first — * = not in a goods niche yet:")
     for h in result["headings"][:60]:
         print(f"  {'*' if not h['covered'] else ' '} {h['heading']}  {h['score']:>6} {h['hit_rate']:>5}% open {round(100 * h['open_share'])}% "
