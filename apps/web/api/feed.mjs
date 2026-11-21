@@ -4,7 +4,8 @@
 // companies not already in it (emerging/companies) — each with its status from the page's own marks (contacted, Open lead
 // / Added to mine / Owned abroad, Good lead / Not a fit). Read-only: its own key (the page's "Power Automate feed"
 // button shows it; a new key retires the old), never the Accounts password. Nothing is ever written through it.
-//   GET /api/feed?key=…[&offset=0&limit=5000][&include_out=1][&format=csv]   (or header x-feed-key: …)
+//   GET /api/feed?key=…[&status=To check][&offset=0&limit=5000][&include_out=1][&format=csv]   (or header x-feed-key: …)
+// status keeps only that status (any case; "to-check" works too) — so a flow can loop over body('HTTP')?['rows'] directly.
 import { CHECKS_KEY, CONTACTED_KEY, EMERGING_KEY, FEED_KEY, FEED_SALT_KEY, VERDICTS_KEY, feedKey, samePassword } from "./accounts.mjs";
 import { industryOf } from "../src/accounts/format.js";
 
@@ -56,6 +57,8 @@ export async function handle(req, { password = "", store, delay = WRONG_KEY_DELA
   if (url.searchParams.get("include_out") !== "1") rows = rows.filter((r) => !r.ruled_out);
   rows = rows.map((r) => ({ ...r, status: statusOf(r.company_number, marks),
     companies_house_url: `https://find-and-update.company-information.service.gov.uk/company/${r.company_number}` }));
+  const want = (url.searchParams.get("status") || "").toLowerCase().replace(/[-_]+/g, " ").trim();
+  if (want) rows = rows.filter((r) => r.status.toLowerCase() === want);
   const total = rows.length;
   const offset = Math.max(Number(url.searchParams.get("offset")) || 0, 0);
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || MAX_LIMIT, 1), MAX_LIMIT);

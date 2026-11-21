@@ -33,6 +33,8 @@ describe("/api/feed (Power Automate)", () => {
     expect(body.rows[0].companies_house_url).toContain("/company/01234567");
     const all = await (await handle(feedGet(`?key=${key}&include_out=1&limit=1&offset=1`), { password: "s3cret", store, delay: 0 })).json();
     expect([all.total, all.count, all.next_offset]).toEqual([3, 1, 2]);
+    const todo = await (await handle(feedGet(`?key=${key}&status=to-check&include_out=1`), { password: "s3cret", store, delay: 0 })).json();
+    expect(todo.rows.map((r) => r.company_number)).toEqual(["07654321"]);   // only the ones still to check
     const csv = await (await handle(feedGet(`?key=${key}&format=csv`), { password: "s3cret", store, delay: 0 })).text();
     expect(csv.split("\r\n")[0]).toMatch(/^company_number,company_name,source,status/);
   });

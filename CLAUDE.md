@@ -791,7 +791,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `rank-leads.mjs`: Accounts list + FX filings companies, lead score / fit / now, niche, industry, SIC, turnover, postcode,
   website) then the Emerging leads companies not in it, each with its status from the page's own marks (`statusOf`:
   Contacted / Open lead / Added to mine / Owned abroad / Good lead / Not a fit / To check); ruled-out leads left out unless
-  `include_out=1`; `offset` / `limit` (≤ 20,000, `next_offset`), `format=csv`. **Its own read-only key**, never the
+  `include_out=1`; `status=To check` (or `to-check`) keeps one status, so a flow loops over `body('HTTP')?['rows']` with no Parse JSON / Filter array; `offset` / `limit` (≤ 20,000, `next_offset`), `format=csv`. **Its own read-only key**, never the
   Accounts password: `feedKey` = HMAC of the password and the store's `feed/salt`; the page's **Power Automate feed**
   button (`FeedButton`, GET `?view=feedkey`) shows the URL to paste into the flow's HTTP step, and **New key** (POST
   `{feed_key}`) retires the old one. Data only goes out: nothing from the CRM comes back through it.
