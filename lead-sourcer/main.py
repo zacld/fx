@@ -502,6 +502,17 @@ JOBS_NICHE = {
     "exposure_reason": "It is advertising a role that names currency work (foreign-currency payments, hedging, "
                        "multi-currency accounts) — FX handled in the UK.", "call_angle": "",
 }
+# Companies found by what they trade (sourcer/discover.py): the Accounts page's Niche search (NICHE_SEARCH_FILE, the
+# store's search_results) and lookalikes of Zac's good leads (LOOKALIKES_FILE, from niche_hits) — sized ones not on the
+# lists yet are checked first, under the search's words or "Like <lead>" when no measured niche names them.
+SEARCH_FOUND: dict[str, dict] = {}
+
+
+def _search_niche(name: str, why: str) -> dict:
+    return {"id": "_niche_search", "name": name[:90], "sic_codes": [], "currency_pairs": [], "exposure_reason": why,
+            "call_angle": ""}
+
+
 FX_LOSS_PRIORITY = 100_000   # an FX loss this big in the filings list: checked first in the finder, whatever its score
 
 
@@ -545,6 +556,35 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
                     rows.append({"company_number": m.get("company_number", ""), "company_name": m.get("company_name", ""),
                                  "filed_fx_score": 55 if m["kind"] == "new_trader" else 50})
     except (OSError, ValueError):
+        pass
+    try:
+        with open(os.environ.get("NICHE_SEARCH_FILE", "") or os.devnull, encoding="utf-8") as f:
+            for res in ((json.load(f) or {}).get("results") or {}).values():
+                for r in res.get("rows") or []:
+                    n = r.get("company_number", "")
+                    if not n or r.get("tracked") or r.get("accounts_category") not in ("full", "medium", "group"):
+                        continue
+                    rows.append({"company_number": n, "company_name": r.get("company_name", ""), "filed_fx_score": 55})
+                    SEARCH_FOUND.setdefault(n, _search_niche(
+                        f"Niche search: {res.get('text', '')}",
+                        f"Its customs records carry the goods searched for ({res.get('text', '')}) in {r.get('months')} "
+                        f"months — {r.get('share')}% of what it declares."))
+                    FOUND_VIA.setdefault(n, {"by": f"Niche search: {res.get('text', '')}", "url": hmrc.LATEST_PAGE, "source": "niche_search"})
+    except (OSError, ValueError, AttributeError):
+        pass
+    try:
+        with open(os.environ.get("LOOKALIKES_FILE", "") or os.devnull, encoding="utf-8") as f:
+            for r in (json.load(f) or {}).get("items") or []:
+                n = r.get("company_number", "")
+                if not n or r.get("tracked"):
+                    continue
+                rows.append({"company_number": n, "company_name": r.get("company_name", ""), "filed_fx_score": 55})
+                SEARCH_FOUND.setdefault(n, _search_niche(
+                    f"Like {r.get('like_name', '')}",
+                    f"Trades {r.get('shared_n')} of the same goods as {r.get('like_name', '')}, a lead you marked good."))
+                FOUND_VIA.setdefault(n, {"by": f"Like {r.get('like_name', '')} ({r.get('shared_n')} goods in common)",
+                                         "url": "", "source": "lookalike"})
+    except (OSError, ValueError, AttributeError):
         pass
     if os.environ.get("MSS_DISCOVERY", "0") == "1":   # on in the finder workflow (a network download)
         from sourcer import mss
@@ -1027,6 +1067,8 @@ def run_pipeline(
             niche = None
         if niche:
             pass   # a goods or sector niche
+        elif company["company_number"] in SEARCH_FOUND:
+            niche = SEARCH_FOUND[company["company_number"]]   # Niche search / a lookalike of a good lead
         elif trade:
             niche = trader_niche(trade)
         elif company["company_number"] in (priority or {}):

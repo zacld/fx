@@ -24,6 +24,7 @@ on:
       - lead-sourcer/sourcer/absurd.py
       - lead-sourcer/sourcer/owners.py
       - lead-sourcer/sourcer/hmrc.py
+      - lead-sourcer/sourcer/discover.py
       - lead-sourcer/tools/psc_deals.py
       - apps/web/scripts/rank-leads.mjs
       - apps/web/src/accounts/ranking.js
@@ -79,6 +80,9 @@ jobs:
           npm ci --workspace apps/web --no-audit --no-fund > /dev/null
           cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/fx-filings.json
           node scripts/alerts-store.mjs tracked ../../lead-sourcer/tracked.json
+          # Zac's marks (Simplified dash, Good lead / Not a fit): the leads whose goods the lookalikes match
+          node scripts/alerts-store.mjs get checks ../../lead-sourcer/checks.json
+          node scripts/alerts-store.mjs get verdicts ../../lead-sourcer/verdicts.json
       - name: Measure the niches
         working-directory: lead-sourcer
         env:
@@ -86,7 +90,8 @@ jobs:
         run: |
           zip=$(ls -t ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip 2>/dev/null | head -1 || true)
           python3 tools/niche_hits.py --filings fx-filings.json --out niche_stats.json --tracked tracked.json \
-            --enrich-out enrich.json --traders-out traders.json --moments-out moments.json ${zip:+--bulk "$zip"}
+            --enrich-out enrich.json --traders-out traders.json --moments-out moments.json ${zip:+--bulk "$zip"} \
+            --checks checks.json --verdicts verdicts.json --lookalikes-out lookalikes.json
       # 24 months of HMRC trader files (the customs moments: new importers / exporters, trade growing), once a month
       - name: Keep the HMRC trader files
         uses: actions/cache/save@v4
@@ -107,6 +112,7 @@ jobs:
         run: |
           cd apps/web && node scripts/alerts-store.mjs put niches ../../lead-sourcer/niche_stats.json
           node scripts/alerts-store.mjs put deals ../../lead-sourcer/deals.json
+          node scripts/alerts-store.mjs put lookalikes ../../lead-sourcer/lookalikes.json
           # no file when the customs history was cut short (niche_hits.py): the last good moments stay
           if [ -f ../../lead-sourcer/moments.json ]; then node scripts/alerts-store.mjs put moments ../../lead-sourcer/moments.json; fi
       # Who owns each tracked company, from the Global LEI register's free daily files (direct and ultimate parent, or why

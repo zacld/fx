@@ -749,6 +749,27 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Foreign-owned tab's "Wherever finance is decided" filter by `financeSeat`'s lean (Decides in the UK / Unclear / Likely
   run from abroad, with counts) and a chip on each card — foreign-owned companies whose own records show finance run in
   the UK are back in play without leaving their tab.
+- **Finding niche companies** (Zac, 21 Nov 2026: "we want to focus on finding niche companies — I have paid services to
+  find contacts and exact financials"; `sourcer/discover.py`, no paid calls, no AI). **Niche search** (Accounts page tab;
+  POST `{niche_search: "marble, saffron"}` / `{niche_search_again: id}` / `{niche_search_remove: id}` to store key
+  `searches`, page-only; GET `?view=search`): the words become customs codes — uktradeinfo's Commodity table, the 8-digit
+  descriptions first (what they exclude, "(excl. unmanned …)", not counted), then the 6- / 4-digit headings'; everyday
+  words customs puts another way tried as `CUSTOMS_WORDS` (drone → unmanned aircraft); digits are codes — and
+  `tools/niche_search.py` (workflow "Niche search", hourly: a quick look at the store, the caches restored only when a
+  search waits) lists every company whose HMRC records carry them in 2+ months (`search`: sized first, months, share of
+  its declared trade, the codes, on the lists, FX proof), store key `search_results` (written only there). **Lookalikes**
+  (daily "Niche hits", `discover.lookalikes`, store key `lookalikes`): the leads Zac marked good (`good_leads`: Open lead /
+  Added to mine, Good lead; not since Owned abroad / Not a fit) give their goods at the 6-digit heading, weighted by
+  rarity among sized traders (a heading `LOOKALIKE_COMMON_DF`+ carry isn't searched); sized companies covering
+  `LOOKALIKE_MIN_SCORE` (0.4) of that with 2+ goods in common (+0.1 same sector) are listed, 15 a lead. Both feed the
+  finder (`NICHE_SEARCH_FILE`, `LOOKALIKES_FILE`: sized, not on the lists, 55, niche "Niche search: …" / "Like …" when no
+  measured niche names them; `found_via` → the New leads tab's sources "Your niche search" / "Like your good leads").
+  **Narrower niches**: `niche_hits.measure_all` also measures every 8-digit customs code (both flows, 5%+ of a company's
+  declared code-months, `CODE_MIN_SHARE`; top `CODES_MAX` 200 in `niches/stats.codes`, the Niches tab's "Narrower" line);
+  an uncovered code scoring `EMERGING_MIN_SCORE`+ and `CODE_BEATS` (1.25) × its heading becomes an emerging niche
+  (`emerging-code-…`, named from the Commodity table, `hmrc.code_names`). **Less time on exact figures**: the finder's
+  FX-line OCR 1,800s → 900s a run and re-reads 300 → 100 (`OCR_FX_BUDGET_SECONDS`, `FINDER_REREAD_MAX` in its workflow);
+  turnover (the size test) and the currency notes (the FX proof) keep theirs, so the time budget checks more new companies.
 - **Key points** (Zac, 16 Nov 2026: "the key points on the cards need to be summarised — looks like a lot of info"):
   `keyPoints` in `format.js` / `KeyPoints` — at most four one-line points on every Accounts and FX filings card and at
   the top of the company page: Why now (`timelyReason`, else "a good fit to work in the sequence"), FX (loss, own

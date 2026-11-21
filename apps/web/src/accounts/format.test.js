@@ -709,6 +709,8 @@ describe("lead source", () => {
     expect(leadSource({ found_via: "job advert: Purchase Ledger Clerk — “pay growers in EUR and USD”" })).toBe("Job advert");
     expect(leadSource({ found_via: "news: Acme raises £20m" })).toBe("News");
     expect(leadSource({ found_via: "New charge to an FX provider" })).toBe("Charge / owner alert");
+    expect(leadSource({ found_via: "Niche search: marble" })).toBe("Your niche search");
+    expect(leadSource({ found_via: "Like ACME LTD (3 goods in common)" })).toBe("Like your good leads");
     expect(leadSource({ from_filings: true })).toBe("FX filings");
     expect(leadSource({ fx_niche: "Supply chain abroad (modern slavery statement)" })).toBe("Modern slavery register");
     expect(leadSource({ hmrc_import_months: 8 })).toBe("Customs records");

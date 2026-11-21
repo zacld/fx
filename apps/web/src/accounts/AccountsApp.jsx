@@ -531,12 +531,16 @@ function Accounts({ data, password }) {
                   title="Which niches prove FX most often, and how their leads score" onClick={() => set({ section: "", view: "niches" })}>
             Niches
           </button>
+          <button role="tab" aria-selected={filters.view === "search"} className={`tab niches-tab${filters.view === "search" ? " on" : ""}`}
+                  title="Type a product or trade — every UK company whose customs records show it trading those goods" onClick={() => set({ section: "", view: "search" })}>
+            Niche search
+          </button>
           <button role="tab" aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
                   title="The Investec email for each company you send here" onClick={() => set({ section: "", view: "email" })}>
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "search", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -611,7 +615,8 @@ function Accounts({ data, password }) {
                                              checks={checks} onCrm={setCrm} />
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []} verdicts={ranked.verdicts}
-                                             headings={signals.headings || []} onPick={(name) => set({ section: "", view: "", query: name })} />
+                                             headings={signals.headings || []} codes={signals.codes || []} onPick={(name) => set({ section: "", view: "", query: name })} />
+       : filters.view === "search" ? <NicheSearch password={password} listed={listedNumbers} onOpen={openCompany} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
        : filters.view === "filings" ? <Filings password={password} listed={listedNumbers} onOpen={openCompany} onEmail={toEmail} /> : (
       <div className="list">
@@ -1410,7 +1415,7 @@ function VerdictLearnings({ v }) {
   );
 }
 
-function Niches({ measured, madeAt, learned, headings, onPick, verdicts }) {
+function Niches({ measured, madeAt, learned, headings, codes = [], onPick, verdicts }) {
   const [by, setBy] = useState("score");
   const [onlyEmerging, setOnlyEmerging] = useState(false);
   const learnedBy = Object.fromEntries(learned.map((n) => [n.niche, n]));
@@ -1455,10 +1460,141 @@ function Niches({ measured, madeAt, learned, headings, onPick, verdicts }) {
           </tbody>
         </table>
       </div>
+      {codes.some((c) => !c.covered) && (
+        <p className="filings-note">Narrower: 8-digit customs codes no goods niche covers, best first (the heading's own score in brackets): {codes.filter((c) => !c.covered).slice(0, 12)
+          .map((c) => `${c.code} (${c.hit_rate}% prove FX, ${c.strong} companies; heading ${c.heading} ${c.heading_score})`).join(" · ")}</p>
+      )}
       {headings.some((h) => !h.covered) && (
         <p className="filings-note">Customs headings no goods niche covers yet, best first: {headings.filter((h) => !h.covered).slice(0, 12)
           .map((h) => `${h.heading} ${h.chapter} (${h.hit_rate}% prove FX, ${h.strong} companies)`).join(" · ")}</p>
       )}
+    </div>
+  );
+}
+
+// The Niche search tab (Zac, 21 Nov 2026: "focus on finding niche companies — I have paid services for contacts and exact
+// financials"): a product or trade typed here is answered by the Niche search workflow within the hour (customs codes
+// whose description names it -> every company whose HMRC records carry them, matched to Companies House; sized ones not
+// on the lists go to the finder). Below, lookalikes: sized companies trading the same goods as the leads Zac marked good.
+const SEARCH_EXPORT = ["company_name", "company_number", "accounts_category", "industry", "flow", "months", "share", "codes", "on_list", "filed_fx_score", "postcode"];
+function NicheSearch({ password, listed, onOpen }) {
+  const [data, setData] = useState(null);
+  const [text, setText] = useState("");
+  const [pick, setPick] = useState("");
+  const [sizedOnly, setSizedOnly] = useState(true);
+  const [newOnly, setNewOnly] = useState(false);
+  const [error, setError] = useState("");
+  const auth = { authorization: `Bearer ${password}` };
+  const load = () => fetch(`${API}?view=search`, { headers: auth, cache: "no-store" })
+    .then((res) => (res.ok ? res.json() : null)).then((body) => { if (body) setData(body); }).catch(() => {});
+  useEffect(() => { load(); }, [password]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const post = async (body) => {
+    setError("");
+    const res = await fetch(API, { method: "POST", headers: { ...auth, "content-type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
+    const got = res && (await res.json().catch(() => null));
+    if (!res?.ok) { setError(got?.error || "Couldn't save the search — try again."); return; }
+    setData((d) => ({ ...(d || {}), searches: got.searches }));
+  };
+  const searches = data?.searches || [];
+  const results = data?.results || {};
+  const current = pick || searches[0]?.id || "";
+  const result = results[current];
+  const waiting = (s) => (results[s.id]?.asked_at || "") !== s.asked_at;
+  const isListed = (n) => listed.has(n);
+  const sized = (r) => ["full", "medium", "group"].includes(r.accounts_category);
+  const shown = (result?.rows || []).filter((r) => (!sizedOnly || sized(r)) && (!newOnly || !isListed(r.company_number)));
+  const alike = (data?.lookalikes?.items || []).filter((r) => !newOnly || !isListed(r.company_number));
+  const open = (r) => (isListed(r.company_number) ? onOpen(r.company_number) : window.open(chCompanyUrl(r.company_number), "_blank", "noopener"));
+  const exportRows = (rows, name) => downloadSheet(rows.map((r) => ({ ...r, industry: industryOf({ sic_codes: r.sic_codes }), codes: (r.codes || r.shared || []).join(" "),
+      on_list: isListed(r.company_number) ? "Yes" : "" })),
+    columnsFor(name === "lookalikes" ? ["company_name", "company_number", "like_name", "score", "shared_n", "codes", "accounts_category", "industry", "on_list", "postcode"] : SEARCH_EXPORT,
+      { share: "Share of its trade (%)", months: "Months trading", like_name: "Like", score: "Similarity", shared_n: "Goods in common", codes: "Customs codes", on_list: "On the lists" },
+      ["months", "share", "score", "shared_n", "filed_fx_score"]),
+    `fx-${name}-${new Date().toISOString().slice(0, 10)}.xlsx`, name === "lookalikes" ? "Lookalikes" : "Niche search");
+  return (
+    <div className="list">
+      <form className="filters filings-bar" onSubmit={(e) => { e.preventDefault(); if (text.trim()) { post({ niche_search: text.trim() }); setText(""); setPick(""); } }}>
+        <input className="input search" value={text} onChange={(e) => setText(e.target.value)} maxLength={200}
+               placeholder="A product or trade — marble, saffron, drone, cut flowers… (commas for several; customs codes work too)" aria-label="Niche search" />
+        <button className="btn-sm" type="submit" disabled={!text.trim()}>Search</button>
+        <span className="muted">Answered within the hour (the Niche search workflow) · from HMRC's importer / exporter lists, last 12 months</span>
+      </form>
+      {error && <div className="save-error" role="alert">{error}</div>}
+      {!data && <div className="empty">Loading…</div>}
+      {data && !searches.length && <div className="empty">No searches yet — type a product or trade above.</div>}
+      {searches.length > 0 && (
+        <div className="groups" role="group" aria-label="Your searches">
+          {searches.map((s) => {
+            const r = results[s.id];
+            return (
+              <span key={s.id} className={`btn-sm${current === s.id ? " on" : ""}`} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                <button className="linkish" onClick={() => setPick(s.id)}>{s.text}</button>
+                <span className="muted">{waiting(s) ? "searching…" : `${r.counts.sized} sized · ${r.counts.new_sized} new`}</span>
+                {!waiting(s) && <button className="linkish" title="Search again with the latest customs files" onClick={() => post({ niche_search_again: s.id })}>↻</button>}
+                <button className="linkish" title="Remove this search" onClick={() => post({ niche_search_remove: s.id })}>×</button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {current && !result && <div className="empty">Searching — the results arrive with the next Niche search run (hourly).</div>}
+      {result && (
+        <>
+          <div className="filters filings-bar">
+            <b>{result.text}</b>
+            <span className="muted">{result.counts.companies} companies trade it · {result.counts.sized} file full / medium / group accounts · {result.counts.new_sized} of those not on the lists (the finder checks them next) · searched {filedWhen(String(result.done_at).slice(0, 10))}</span>
+            <label className="check"><input type="checkbox" checked={sizedOnly} onChange={(e) => setSizedOnly(e.target.checked)} /> Full / medium / group accounts only</label>
+            <label className="check"><input type="checkbox" checked={newOnly} onChange={(e) => setNewOnly(e.target.checked)} /> Not on the lists only</label>
+            <button className="btn-sm" onClick={() => exportRows(shown, "niche-search")} disabled={!shown.length}>Excel</button>
+          </div>
+          {result.note && <p className="filings-note">{result.note}</p>}
+          {result.codes?.length > 0 && (
+            <details className="filings-note"><summary>{result.codes.length} customs codes searched</summary>
+              {result.codes.map((c) => <div key={c.code}><b>{c.code}</b> {c.description}</div>)}</details>
+          )}
+          <div className="sheet-wrap">
+            <table className="sheet">
+              <thead><tr><th>Company</th><th>Accounts</th><th>Industry</th><th>Trades</th><th className="num">Months</th>
+                <th className="num" title="Share of everything it declares to customs">Share of its trade</th><th>Codes</th><th className="num">FX proof</th><th>On the lists</th></tr></thead>
+              <tbody>
+                {shown.map((r) => (
+                  <tr key={r.company_number}>
+                    <td><button className="linkish" onClick={() => open(r)}>{r.company_name}</button> <span className="muted">{r.company_number}</span></td>
+                    <td>{r.accounts_category}</td><td>{industryOf({ sic_codes: r.sic_codes })}</td><td>{r.flow}</td>
+                    <td className="num">{r.months}</td><td className="num">{r.share}%</td><td>{(r.codes || []).join(" ")}</td>
+                    <td className="num">{r.filed_fx_score || ""}</td><td>{isListed(r.company_number) ? "Yes" : ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {!shown.length && <div className="empty">None match these filters.</div>}
+        </>
+      )}
+      <h2 className="group-h" style={{ marginTop: 28 }}>Like your good leads <span>{alike.length} · companies trading the same goods as the leads you marked Open lead / Added to mine / Good lead (rarer goods count more)</span></h2>
+      {alike.length > 0 ? (
+        <>
+          <div className="filters filings-bar">
+            <span className="muted">{data.lookalikes.good} leads marked good, {data.lookalikes.leads} with customs records to compare · updated {data.lookalikes.made_at ? filedWhen(data.lookalikes.made_at.slice(0, 10)) : ""} (daily, Niche hits)</span>
+            <button className="btn-sm" onClick={() => exportRows(alike, "lookalikes")}>Excel</button>
+          </div>
+          <div className="sheet-wrap">
+            <table className="sheet">
+              <thead><tr><th>Company</th><th>Like</th><th className="num">Similarity</th><th className="num">Goods in common</th><th>Accounts</th><th>Industry</th><th>On the lists</th></tr></thead>
+              <tbody>
+                {alike.map((r) => (
+                  <tr key={r.company_number}>
+                    <td><button className="linkish" onClick={() => open(r)}>{r.company_name}</button> <span className="muted">{r.company_number}</span></td>
+                    <td><button className="linkish" onClick={() => onOpen(r.like)}>{r.like_name}</button></td>
+                    <td className="num">{Math.round(100 * r.score)}%</td><td className="num" title={(r.shared || []).join(" ")}>{r.shared_n} of {r.of}</td>
+                    <td>{r.accounts_category}</td><td>{industryOf({ sic_codes: r.sic_codes })}</td><td>{isListed(r.company_number) ? "Yes" : ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : <div className="empty">{data?.lookalikes?.made_at ? "None yet — mark leads Open lead / Added to mine (Simplified dash) or Good lead; the ones with customs records find their lookalikes in the next daily run." : "Arrives with the next daily Niche hits run."}</div>}
     </div>
   );
 }

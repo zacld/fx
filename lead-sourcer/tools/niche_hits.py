@@ -26,10 +26,12 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from sourcer import absurd, bulk, hmrc, matching, niches as niche_rules  # noqa: E402
+from sourcer import absurd, bulk, discover, hmrc, matching, niches as niche_rules  # noqa: E402
 
 REGULAR_MONTHS = 3          # customs records in this many months: a regular trader
 HEADING_MIN_STRONG = 5      # headings listed as suggestions need this many strong finds
+CODE_MIN_SHARE = 0.05       # an 8-digit code this share of a company's declared code-months: it trades in that code
+CODES_MAX = 200             # 8-digit codes kept in the stats, best first
 
 
 def measure_all(niches: list[dict], companies: list[dict], trade_by_company: dict, filings: dict) -> dict:
@@ -79,7 +81,28 @@ def measure_all(niches: list[dict], companies: list[dict], trade_by_company: dic
             headings.append({"heading": heading, "chapter": hmrc.CHAPTER_NAMES.get(heading[:2], ""),
                              "covered": heading.startswith(covered) or any(c.startswith(heading) for c in covered), **n})
     headings.sort(key=lambda h: -h["score"])
-    return {"niches": stats, "headings": headings}
+
+    # Narrower niches (Zac, 21 Nov 2026): every 8-digit customs code regular sized traders deal in, both flows — a hot
+    # code inside a lukewarm heading ("frozen prawns" in "crustaceans") is a niche of its own.
+    heading_scores = {h: numbers(g)["score"] for h, g in heading_members.items()}
+    code_members: dict[str, set[str]] = defaultdict(set)
+    for number in sized_numbers:
+        trade = trade_by_company.get(number)
+        if not trade or len(trade["import_months"] | trade["export_months"]) < REGULAR_MONTHS:
+            continue
+        both = Counter(trade["import_codes"]) + Counter(trade["export_codes"])
+        total = sum(both.values()) or 1
+        for code, m in both.items():
+            if len(str(code)) == 8 and m >= niche_rules.GOODS_MIN_MONTHS and m / total >= CODE_MIN_SHARE:
+                code_members[str(code)].add(number)
+    codes = []
+    for code, group in code_members.items():
+        n = numbers(group)
+        if n["strong"] >= HEADING_MIN_STRONG:
+            codes.append({"code": code, "heading": code[:4], "heading_score": heading_scores.get(code[:4], 0),
+                          "covered": code.startswith(covered) if covered else False, **n})
+    codes.sort(key=lambda c: -c["score"])
+    return {"niches": stats, "headings": headings, "codes": codes[:CODES_MAX]}
 
 
 def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches: list[dict]) -> dict:
@@ -96,6 +119,14 @@ def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches
                        "shy": niche_rules.broker_shy(trade_by_company.get(number), sics, name, niches) or "",
                        "address": (record or {}).get("address", ""), "postcode": (record or {}).get("postcode", "")}
     return out
+
+
+def _json(path: str) -> dict:
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f) or {}
+    except (OSError, ValueError):
+        return {}
 
 
 MOMENT_MIN_MONTHS = 15   # months of customs records needed before anyone can be called a new trader
@@ -148,6 +179,9 @@ def main() -> None:
     parser.add_argument("--history-months", type=int, default=24,
                         help="customs months read for the moments (new importers / exporters, trade growing)")
     parser.add_argument("--moments-out", default="", help="customs moments: the lists' companies, and new traders to check")
+    parser.add_argument("--checks", default="", help="the store's checks (Simplified dash marks) — for the lookalikes")
+    parser.add_argument("--verdicts", default="", help="the store's verdicts (Good lead / Not a fit) — for the lookalikes")
+    parser.add_argument("--lookalikes-out", default="", help="sized companies trading what Zac's good leads trade")
     args = parser.parse_args()
 
     with open(args.filings, encoding="utf-8") as f:
@@ -195,10 +229,23 @@ def main() -> None:
     result = measure_all(niches, list(companies.values()), trade_by_company, filings)   # sized ones only, inside
     # emerging niches: uncovered headings and sectors hitting like a good niche — trial niches for the finder
     picks = [h["heading"] for h in result["headings"] if not h["covered"] and h["score"] >= niche_rules.EMERGING_MIN_SCORE]
-    emerging = niche_rules.emerging_niches(result["headings"], sectors, niches, hmrc.heading_names(picks[:niche_rules.EMERGING_MAX]))
+    code_picks = [c["code"] for c in niche_rules.emerging_codes(result["codes"])]
+    emerging = niche_rules.emerging_niches(result["headings"], sectors, niches, hmrc.heading_names(picks[:niche_rules.EMERGING_MAX]),
+                                           codes=result["codes"], code_names=hmrc.code_names(code_picks))
     result["emerging"] = emerging
     for n in emerging:
         result["niches"][n["id"]] = {"name": n["name"], "kind": f"emerging {n['emerging']}", **n["stats"]}
+    if args.lookalikes_out:
+        good = discover.good_leads(_json(args.checks), _json(args.verdicts))
+        rows, info = discover.lookalikes({n: tracked.get(n, "") for n in good}, trade_by_company, tracked)
+        with open(args.lookalikes_out, "w", encoding="utf-8") as f:
+            json.dump({"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "good": len(good), **info,
+                       "count": len(rows), "items": rows}, f)
+        print(f"\nLookalikes of your good leads: {len(good)} marked good, {info['leads']} with customs records "
+              f"({info['without']} without — nothing to compare); {len(rows)} companies trade the same goods, "
+              f"{sum(1 for r in rows if not r['tracked'])} not on the lists")
+        for r in rows[:15]:
+            print(f"  {r['score']:.2f}  {r['company_name'][:45]:<45} like {r['like_name'][:40]} ({r['shared_n']} goods in common)")
     if args.traders_out:
         with open(args.traders_out, "w", encoding="utf-8") as f:
             json.dump({n: len(e["import_months"] | e["export_months"]) for n, e in trade_by_company.items()
@@ -230,6 +277,10 @@ def main() -> None:
         st = n["stats"]
         print(f"  {st['score']:>6} {st['hit_rate']:>5}% open {round(100 * st['open_share'])}% strong {st['strong']} "
               f"sized {st['sized']}  {n['name'][:80]}")
+    print(f"\nCustoms codes, 8-digit ({HEADING_MIN_STRONG}+ strong finds), best first — * = no goods niche covers it:")
+    for c in result["codes"][:30]:
+        print(f"  {'*' if not c['covered'] else ' '} {c['code']}  {c['score']:>6} {c['hit_rate']:>5}% strong {c['strong']} "
+              f"sized {c['sized']}  (its heading {c['heading']}: {c['heading_score']})")
     print(f"\nCustoms headings ({HEADING_MIN_STRONG}+ strong finds), best first — * = not in a goods niche yet:")
     for h in result["headings"][:60]:
         print(f"  {'*' if not h['covered'] else ' '} {h['heading']}  {h['score']:>6} {h['hit_rate']:>5}% open {round(100 * h['open_share'])}% "

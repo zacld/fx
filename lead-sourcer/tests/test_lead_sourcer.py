@@ -502,6 +502,27 @@ class TestFxFilingsFirst(PipelineTestCase):
         with mock.patch.dict(os.environ, {"MOMENTS_FILE": moments}):
             self.assertEqual(main.priority_from_filings(path), {"11": 55.0, "12": 50.0})
 
+    def test_priority_from_niche_search_and_lookalikes(self):
+        # 21 Nov 2026: sized companies found by the Niche search or as lookalikes of good leads, not on the lists yet
+        path = os.path.join(self.tmp.name, "filings.json")
+        found = os.path.join(self.tmp.name, "search_results.json")
+        alike = os.path.join(self.tmp.name, "lookalikes.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"rows": []}, f)
+        with open(found, "w", encoding="utf-8") as f:
+            json.dump({"results": {"s1": {"text": "marble", "rows": [
+                {"company_number": "21", "accounts_category": "full", "tracked": False, "months": 8, "share": 40},
+                {"company_number": "22", "accounts_category": "small", "tracked": False},
+                {"company_number": "23", "accounts_category": "group", "tracked": True}]}}}, f)
+        with open(alike, "w", encoding="utf-8") as f:
+            json.dump({"items": [{"company_number": "31", "like_name": "ACME LTD", "shared_n": 3, "tracked": False},
+                                 {"company_number": "32", "like_name": "ACME LTD", "tracked": True}]}, f)
+        with mock.patch.dict(os.environ, {"NICHE_SEARCH_FILE": found, "LOOKALIKES_FILE": alike}):
+            self.assertEqual(main.priority_from_filings(path), {"21": 55.0, "31": 55.0})
+        self.assertEqual(main.SEARCH_FOUND["21"]["name"], "Niche search: marble")
+        self.assertEqual(main.FOUND_VIA["31"]["source"], "lookalike")
+        self.assertIn("ACME LTD", main.SEARCH_FOUND["31"]["name"])
+
     def test_fx_probably_run_abroad_ranks_lower(self):
         path = os.path.join(self.tmp.name, "filings.json")
         abroad = "Owned by CLOETTA AB (Sweden) — overseas parent"
@@ -3523,6 +3544,94 @@ class TestNiches(unittest.TestCase):
                 json.dump({"niches": {}, "emerging": got}, f)
             self.assertEqual([n["id"] for n in nr.load_emerging(path)], [n["id"] for n in got])
         self.assertEqual(nr.load_emerging(""), [])
+
+    def test_code_level_emerging_niche_beats_its_heading(self):
+        # 21 Nov 2026 (Zac: narrower niches): a hot 8-digit code inside a lukewarm heading is a niche of its own
+        from sourcer import niches as nr
+        codes = [{"code": "03061792", "heading": "0306", "heading_score": 3.0, "covered": False, "sized": 30, "strong": 6,
+                  "open": 5, "hit_rate": 20.0, "open_share": 0.8, "score": 18.0, "verdict": "keep"},
+                 {"code": "03061799", "heading": "0306", "heading_score": 20.0, "covered": False, "sized": 30, "strong": 6,
+                  "open": 5, "hit_rate": 20.0, "open_share": 0.8, "score": 18.0, "verdict": "keep"},   # no better than its heading
+                 {"code": "09011100", "heading": "0901", "heading_score": 2.0, "covered": True, "sized": 30, "strong": 9,
+                  "open": 9, "hit_rate": 30.0, "open_share": 1.0, "score": 30.0, "verdict": "keep"}]   # a niche covers it
+        got = nr.emerging_niches([], {}, [], codes=codes, code_names={"03061792": "Frozen shrimps and prawns"})
+        self.assertEqual([n["id"] for n in got], ["emerging-code-03061792"])
+        self.assertEqual(got[0]["hmrc_codes"], ["03061792"])
+        self.assertEqual(got[0]["flow"], "both")
+        self.assertIn("Frozen shrimps", got[0]["name"])
+        trade = {"import_codes": Counter({"03061792": 6, "03061799": 1}), "export_codes": Counter(), "import_months": {"202601"}, "export_months": set()}
+        self.assertEqual(nr.goods_niche(trade, got)["id"], "emerging-code-03061792")
+
+    def test_niche_search_codes_and_companies(self):
+        # 21 Nov 2026 (Zac: "focus on finding niche companies"): words -> customs codes -> every company trading them
+        from sourcer import discover
+        asked = []
+
+        def fetch(query):
+            asked.append(query)
+            if "Cn8LongDescription" in query.split("$filter=")[1] and "drone" in query:
+                return [{"Cn8Code": "88021100", "Cn8LongDescription": "Helicopters (excl. unmanned drone aircraft)"}]
+            if "unmanned" in query and "Cn8LongDescription" in query.split("$filter=")[1]:
+                return [{"Cn8Code": "88062110", "Cn8LongDescription": "Unmanned multi rotor aircraft"}]
+            if "marble" in query and "Cn8LongDescription" in query.split("$filter=")[1]:
+                return [{"Cn8Code": "25151100", "Cn8LongDescription": "Marble and travertine, crude"}]
+            return []
+
+        self.assertEqual(discover.terms("Marble, 6802;  drone"), ["marble", "6802", "drone"])
+        got = discover.commodity_codes("marble, 6802, drone", fetch=fetch)
+        self.assertEqual([c["code"] for c in got], ["25151100", "6802", "88062110"])   # "(excl. … drone)" isn't a drone
+        self.assertEqual(discover.commodity_codes("", fetch=fetch), [])
+
+        def co(number, cat, months, codes, exports=None):
+            return {"company": {"company_number": number, "company_name": f"CO {number}", "accounts_category": cat,
+                                "sic_codes": ["46900"], "postcode": "AB1 2CD"},
+                    "import_months": set(months), "export_months": set(), "import_codes": Counter(codes),
+                    "export_codes": Counter(exports or {})}
+        trade = {"001": co("001", "small", ["202601", "202602", "202603"], {"25151100": 3}),
+                 "002": co("002", "full", ["202601", "202602", "202603"], {"25151100": 3, "84713000": 3}),
+                 "003": co("003", "full", ["202601"], {"25151100": 1}),               # one month: not trading it
+                 "004": co("004", "group", ["202601", "202602"], {"39231090": 2})}    # other goods
+        rows = discover.search(trade, ["2515"], tracked={"002": "CO 002"}, filings={"002": {"filed_fx_score": 60}})
+        self.assertEqual([r["company_number"] for r in rows], ["002", "001"])   # sized first
+        self.assertEqual(rows[0]["share"], 50)
+        self.assertTrue(rows[0]["tracked"])
+        self.assertEqual(rows[0]["filed_fx_score"], 60)
+        self.assertEqual(rows[0]["flow"], "import")
+        self.assertEqual(discover.search(trade, []), [])
+
+    def test_niche_search_tool_pending(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("niche_search", os.path.join(os.path.dirname(__file__), "..", "tools", "niche_search.py"))
+        tool = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tool)
+        requests = {"searches": [{"id": "a", "text": "marble", "asked_at": "2"}, {"id": "b", "text": "saffron", "asked_at": "1"}]}
+        results = {"results": {"a": {"asked_at": "1"}, "b": {"asked_at": "1"}}}
+        self.assertEqual([r["id"] for r in tool.pending(requests, results)], ["a"])   # asked again since
+
+    def test_lookalikes_of_good_leads(self):
+        # 21 Nov 2026: Zac's good leads' goods find the next batch (rarer goods count more; small companies left out)
+        from sourcer import discover
+
+        def co(number, cat, codes, sic="46900"):
+            return {"company": {"company_number": number, "company_name": f"CO {number}", "accounts_category": cat,
+                                "sic_codes": [sic]}, "import_months": {"202601"}, "export_months": set(),
+                    "import_codes": Counter(codes), "export_codes": Counter()}
+        trade = {"G1": co("G1", "full", {"25151100": 4, "68029100": 4, "84713000": 2}),
+                 "L1": co("L1", "full", {"25151190": 3, "68029190": 2}),              # same two goods (6-digit)
+                 "L2": co("L2", "small", {"25151100": 3, "68029100": 3}),              # too small
+                 "L3": co("L3", "medium", {"84713000": 5}),                            # one common good only
+                 "L4": co("L4", "group", {"25151100": 2, "84713000": 2}, sic="23700")}
+        for i in range(30):   # laptops: everyone imports them
+            trade[f"X{i}"] = co(f"X{i}", "full", {"84713000": 1})
+        rows, info = discover.lookalikes({"G1": "MARBLE CO"}, trade, tracked={"L4": "CO L4"})
+        self.assertEqual(info, {"leads": 1, "without": 0})
+        self.assertEqual(rows[0]["company_number"], "L1")
+        self.assertEqual(rows[0]["like_name"], "MARBLE CO")
+        self.assertNotIn("L2", [r["company_number"] for r in rows])
+        self.assertNotIn("L3", [r["company_number"] for r in rows])
+        self.assertNotIn("G1", [r["company_number"] for r in rows])
+        self.assertEqual(discover.good_leads({"A": {"review": "open"}, "B": {"review": "abroad"}, "C": {"crm": "x"}},
+                                             {"D": {"verdict": "good"}, "A": {"verdict": "not_fit"}}), {"D"})
 
     """sourcer/niches.py: goods niches from customs codes, measured scores, the finder's order."""
 
