@@ -386,6 +386,19 @@ FD_JOB_TITLE = re.compile(r"\b(?:finance director|director of finance|financial 
                           r"head of finance|finance (?:and|&) operations director)\b", re.I)
 JOB_QUERIES = ["treasury analyst", "treasury manager", "foreign exchange", "FX hedging", "import export coordinator",
                "international trade manager", "export sales manager", "currency risk"]
+# Adverts that describe the FX work itself (Zac's brief, 19 Nov 2026: companies not already prospected — a mid-sized
+# company advertising an accounts role "paying suppliers in EUR and USD" shows real currency flows, decided in the UK,
+# and is rarely on anyone's list). Searched on the advert's whole text; the employer, found on Companies House by its
+# exact registered name, becomes a new lead with the advert's own words as evidence (`fx_wording`).
+FX_JOB_QUERIES = ["multi-currency payments", "foreign currency payments", "overseas supplier payments",
+                  "international payments accounts", "FX payments", "currency hedging", "forward contracts finance",
+                  "letters of credit", "multi currency accounts payable", "EUR USD payments"]
+FX_WORDING = re.compile(r"\b(?:multi[- ]?currenc\w*|foreign (?:currency|exchange)|FX\b|forex|currency (?:payments?|"
+                        r"accounts?|risk|exposure|hedg\w*|transactions?)|forward (?:contracts?|currency)|"
+                        r"letters? of credit|international payments?|overseas (?:payments?|suppliers?)|"
+                        r"(?:EUR|USD|euro|dollar|€|\$)\s*(?:and|&|/|,)\s*(?:EUR|USD|GBP|euro|dollar|€|\$)|"
+                        r"(?:in|into) (?:euros?|dollars?|EUR|USD))", re.I)
+JOB_LOOKUPS_MAX = 60        # Companies House name searches a run for advert employers not on the lists
 STATS: dict[str, int] = {}   # counts for the log (public repo: no names)
 LOOKUPS_MAX = 40            # Companies House name searches a run, for subjects not on the lists
 # 14 Nov 2026 (discovery review: news and job adverts were the noisiest source — low volume, name-matching): headlines
@@ -568,21 +581,22 @@ def job_adverts(fetch_json=None) -> list[dict]:
     out = []
     app_id, app_key = os.environ.get("ADZUNA_APP_ID", "").strip(), os.environ.get("ADZUNA_APP_KEY", "").strip()
     reed = os.environ.get("REED_API_KEY", "").strip()
-    for q in JOB_QUERIES + FD_JOB_QUERIES:
-        pages = 2 if q in FD_JOB_QUERIES else 1
+    for q in JOB_QUERIES + FD_JOB_QUERIES + FX_JOB_QUERIES:
+        pages = 2 if q in FD_JOB_QUERIES + FX_JOB_QUERIES else 1
         for page in range(1, pages + 1) if app_id and app_key else ():
             url = (f"https://api.adzuna.com/v1/api/jobs/gb/search/{page}?" + urllib.parse.urlencode(
                 {"app_id": app_id, "app_key": app_key, "what": q, "max_days_old": 14, "results_per_page": 50}))
             for j in (fetch_json(url, None) or {}).get("results") or []:
                 out.append({"employer": (j.get("company") or {}).get("display_name", ""), "title": j.get("title", ""),
-                            "date": (j.get("created") or "")[:10], "link": j.get("redirect_url", "")})
+                            "date": (j.get("created") or "")[:10], "link": j.get("redirect_url", ""),
+                            "text": j.get("description", "")})
         if reed:
             url = "https://www.reed.co.uk/api/1.0/search?" + urllib.parse.urlencode({"keywords": q, "resultsToTake": 100})
             for j in (fetch_json(url, reed) or {}).get("results") or []:
                 d = j.get("date") or ""
                 iso = f"{d[6:10]}-{d[3:5]}-{d[0:2]}" if re.match(r"\d\d/\d\d/\d{4}", d) else d[:10]
                 out.append({"employer": j.get("employerName", ""), "title": j.get("jobTitle", ""), "date": iso,
-                            "link": j.get("jobUrl", "")})
+                            "link": j.get("jobUrl", ""), "text": j.get("jobDescription", "")})
     return [j for j in out if j["employer"] and not RECRUITERS.search(j["employer"])]
 
 
@@ -597,6 +611,16 @@ def _fetch_json(url: str, basic_user: Optional[str]):
         return None
 
 
+def fx_wording(advert: dict) -> str:
+    """The sentence of an advert (title, then its text) that names currency work — "paying suppliers in EUR and USD",
+    "multi-currency bank accounts", "FX hedging" — or "". Sentences about the recruiter's own pitch are skipped."""
+    text = re.sub(r"<[^>]+>", " ", f"{advert.get('title', '')}. {advert.get('text', '')}")
+    for sentence in re.split(r"(?<=[.!?])\s+|\s*[•·\n]\s*", text):
+        if FX_WORDING.search(sentence) and not re.search(r"\b(?:our client|we are recruiting|on behalf of)\b", sentence, re.I):
+            return re.sub(r"\s+", " ", sentence).strip()[:240]
+    return ""
+
+
 def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], lookup=None,
                 discover: bool = False) -> tuple[list[dict], list[dict]]:
     """(alerts, discovery rows): an employer on the lists hiring for treasury / FX / import-export is an alert, and one
@@ -605,15 +629,18 @@ def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], look
     index = tracked_index(tracked)
     lookup = lookup or (lambda name: find_company(name, api_key) if api_key else None)
     alerts, found, lookups, seen = [], [], 0, {}
-    done = set()
+    done, found_numbers = set(), set()
+    # adverts naming currency work and FD adverts are looked up first, so the name searches go to the best leads
+    adverts = sorted(adverts, key=lambda j: (not fx_wording(j), not FD_JOB_TITLE.search(j["title"])))
     for j in adverts:
         fd = bool(FD_JOB_TITLE.search(j["title"])) and not re.search(r"\b(?:interim|assistant|deputy|part[- ]time)\b", j["title"], re.I)
+        quote = fx_wording(j)
         number = match_tracked(j["employer"], index)
         if not number:
-            if not (discover or fd):
+            if not (discover or fd or quote):
                 continue
             key = matching.normalise_name(j["employer"])
-            if key not in seen and lookups < LOOKUPS_MAX:
+            if key not in seen and lookups < JOB_LOOKUPS_MAX:
                 lookups += 1
                 seen[key] = lookup(j["employer"])
             company = seen.get(key)
@@ -630,10 +657,16 @@ def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], look
                        "company_number": company["company_number"], "company_name": company["company_name"],
                        "tracked": bool(number), "hot": fd,
                        "title": f"Hiring a finance director: {j['title'][:60]}" if fd else f"Hiring: {j['title'][:60]}",
-                       "detail": f"advertised {j['date']}", "url": j["link"] or company_url(company["company_number"])})
-        if not number:
+                       "detail": f"advertised {j['date']}" + (f" — “{quote}”" if quote else ""),
+                       "url": j["link"] or company_url(company["company_number"])})
+        if not number and company["company_number"] not in found_numbers:
+            found_numbers.add(company["company_number"])
             found.append({"company_number": company["company_number"], "company_name": company["company_name"],
-                          "discovered": j["date"], "discovered_by": f"job advert: {j['title']}", "filed_fx_score": 50})
+                          "discovered": j["date"], "discovered_by": f"job advert: {j['title']}"
+                          + (f" — “{quote}”" if quote else ""), "source": "job_advert", "source_url": j["link"],
+                          "filed_fx_score": 55 if quote else 50})
+    STATS.update({"job adverts": len(adverts), "adverts naming currency work": sum(1 for j in adverts if fx_wording(j)),
+                  "advert name lookups": lookups, "new leads from adverts": len(found)})
     return alerts, found
 
 
@@ -767,7 +800,8 @@ def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
     print(f"Signals: headlines read {STATS.get('headlines', 0)}, Companies House name lookups {STATS.get('name lookups', 0)}; "
           f"news alerts {len(news_alerts)} (new leads {len(news_found)}), job adverts read {len(adverts)} ({keys}), "
           f"hiring alerts {len(job_alerts)} (finance director / CFO adverts {sum(a['kind'] == 'hiring_fd' for a in job_alerts)}; "
-          f"new leads {len(job_found)}); Gazette winding-up notices read {notices}, on the "
+          f"new leads {len(job_found)}; adverts naming currency work {STATS.get('adverts naming currency work', 0)}, "
+          f"advert name lookups {STATS.get('advert name lookups', 0)}); Gazette winding-up notices read {notices}, on the "
           f"lists {len(petitions)}; new alerts {len(fresh)}; sent: {sent}")
 
 

@@ -150,6 +150,8 @@ CSV_FIELDS = [
     "untapped_reasons",
     "family_run",
     "fx_niche",
+    "found_via",
+    "found_via_url",
     "fx_exposure",
     "call_angle",
     "hmrc_import_months",
@@ -491,6 +493,15 @@ MSS_NICHE = {
                        "sector.", "call_angle": "",
 }
 MSS_FOUND: dict[str, dict] = {}
+# How each discovery was found (tools/ch_alerts.py's discoveries: a job advert naming currency work, a news story, a
+# charge to an FX provider …) — carried onto the company's row as `found_via` / `found_via_url`, so the page can say
+# where a new lead came from (Zac's brief, 19 Nov 2026: measure which sources find companies not already prospected).
+FOUND_VIA: dict[str, dict] = {}
+JOBS_NICHE = {
+    "id": "_job_adverts", "name": "FX work in a job advert", "sic_codes": [], "currency_pairs": [],
+    "exposure_reason": "It is advertising a role that names currency work (foreign-currency payments, hedging, "
+                       "multi-currency accounts) — FX handled in the UK.", "call_angle": "",
+}
 FX_LOSS_PRIORITY = 100_000   # an FX loss this big in the filings list: checked first in the finder, whatever its score
 
 
@@ -508,9 +519,14 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
             continue
         try:
             with open(p, encoding="utf-8") as f:
-                rows += (json.load(f) or {}).get("rows") or []
+                got = (json.load(f) or {}).get("rows") or []
         except (OSError, ValueError):
             continue
+        rows += got
+        for r in got:
+            if r.get("discovered_by") and r.get("company_number"):
+                FOUND_VIA.setdefault(r["company_number"], {"by": r["discovered_by"], "url": r.get("source_url", ""),
+                                                           "source": r.get("source", "")})
     # purchases from the ownership register (tools/psc_deals.py, DEALS_FILE): a PE buyout or a company buying
     # subsidiaries is checked first (60), an overseas buyer or an employee ownership trust next (50)
     try:
@@ -818,6 +834,8 @@ def company_row(
         untapped_reasons=" | ".join(un_lines),
         family_run=family_reason if is_family else "",
         fx_niche=niche.get("name", ""),
+        found_via=FOUND_VIA.get(number, {}).get("by", ""),
+        found_via_url=FOUND_VIA.get(number, {}).get("url", ""),
         currency_pairs="|".join(pairs),
         fx_exposure=niche.get("exposure_reason", ""),
         call_angle=niche.get("call_angle", ""),
@@ -1006,7 +1024,9 @@ def run_pipeline(
         elif trade:
             niche = trader_niche(trade)
         elif company["company_number"] in (priority or {}):
-            niche = MSS_NICHE if company["company_number"] in MSS_FOUND else FILINGS_NICHE
+            niche = (MSS_NICHE if company["company_number"] in MSS_FOUND
+                     else JOBS_NICHE if FOUND_VIA.get(company["company_number"], {}).get("source") == "job_advert"
+                     else FILINGS_NICHE)
         elif matching_niches:
             niche = BROAD_SECTOR_NICHE   # only catch-all codes: a candidate, but no niche claimed
         else:
