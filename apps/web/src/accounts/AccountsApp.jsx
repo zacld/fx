@@ -2390,7 +2390,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
               <span className="daily-sub">{[industryOf(r), r.turnover_gbp ? `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}` : "no turnover filed",
                 `score ${r.lead_score}`].join(" · ")}</span>
               <span className="daily-links">
-                <a href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer" title="Its Companies House page">{r.company_number} ↗</a>
+                <span className="daily-number" title="Companies House number">{r.company_number}</span>
                 <a href={googleCompany(r)} target="_blank" rel="noreferrer">Google it ↗</a>
                 <a href={googleFd(r)} target="_blank" rel="noreferrer">Check for FD ↗</a>
               </span>
@@ -3648,6 +3648,7 @@ a{color:var(--accent)}
 .daily-links{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px}
 .daily-links a{color:var(--accent);text-decoration:none}
 .daily-links a:hover{text-decoration:underline}
+.daily-number{color:var(--text-2);font-variant-numeric:tabular-nums;user-select:all}
 .daily-btns{flex:0 0 auto;display:flex;gap:8px}
 .dot-btn{--c:#9aa0a6;width:36px;height:36px;border-radius:50%;border:2px solid var(--c);background:transparent;color:var(--c);font:700 16px/1 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
 .dot-btn:hover,.dot-btn:focus-visible{background:var(--c);color:var(--bg);outline:none}
