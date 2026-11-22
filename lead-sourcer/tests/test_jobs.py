@@ -123,6 +123,8 @@ class TestJobSignals(unittest.TestCase):
         self.assertIn("consultancy", why["LANE CLARK AND PEACOCK"])
         self.assertIn("by its name", why["SMITH PERSONNEL"])               # no search spent on it
         # an employer advertising many kinds of finance role at once is an agency whatever its name
+        self.assertIn("bank or financial group", jobs.excluded({"employer": "Citi"}, "CITIGROUP LIMITED", ["64209"]))
+        self.assertEqual(jobs.excluded({"employer": "Chasewater Foods"}, "CHASEWATER FOODS LIMITED", ["10890"]), "")
         spread = {"employer": "Quiet Co", "kinds": ["fd", "currency", "trade", "treasury"], "adverts": [{}] * 4}
         self.assertIn("probably an agency", jobs.excluded(spread))
 

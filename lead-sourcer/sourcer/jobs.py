@@ -122,6 +122,15 @@ EXCLUDED_SIC = (("78", "a recruitment agency"), ("692", "an accountancy practice
 PAYMENTS_NAME = re.compile(r"\b(?:payments?|pay|fx|forex|currency|currencies|exchange|money|remit\w*|transfers?)\b", re.I)
 AGENCY_NAME = re.compile(r"\b(?:people|personnel|careers?|jobs|talent|recruit\w*|resourcing|staffing|appointments|search|"
                          r"selection|headhunt\w*|angels)\b", re.I)
+# Banks and financial groups advertise treasury / FX roles for their own markets business; their name matches a UK entity
+# (a holding or service company) whose sector codes may not say bank.
+BIG_FINANCE = re.compile(r"\b(?:citi(?:group|bank)?|wells fargo|j\.? ?p\.? ?morgan|jpmorgan|goldman sachs|morgan stanley|barclays|"
+                         r"hsbc|lloyds|natwest|royal bank|santander|deutsche bank|bnp paribas|societe generale|soci[ée]t[ée] g[ée]n[ée]rale|"
+                         r"ubs|credit suisse|bank of america|merrill|nomura|mizuho|mufg|smbc|sumitomo mitsui|standard chartered|"
+                         r"investec|rothschild|lazard|jefferies|blackrock|state street|bny|mellon|northern trust|macquarie|"
+                         r"natixis|ing bank|rabobank|abn amro|commerzbank|unicredit|intesa|nordea|danske|handelsbanken|"
+                         r"close brothers|metro bank|virgin money|tsb|coutts|schroders|aviva|legal (?:and|&) general|"
+                         r"prudential|m ?& ?g|phoenix group|lseg|london stock exchange|ice futures|cme group)\b", re.I)
 AGENCY_SPREAD = {"kinds": 4, "adverts": 8}   # this many kinds of role, or adverts, in DAYS days: an agency, not an employer
 LOOKUP_MIN = 30             # an employer not on the lists is looked up when its best advert scores this
 LEAD_MIN = 40               # … and becomes a new lead when it scores this, or names currency work, or advertises an FD
@@ -352,6 +361,8 @@ def excluded(employer: dict, name: str = "", sic: Optional[list] = None, status:
             return f"A payments / FX firm (sector {codes[0]}) — a competitor"
     if RECRUITERS.search(name) or AGENCY_NAME.search(name) or RECRUITERS.search(employer.get("employer", "")):
         return "A recruitment agency or job board, by its name"
+    if BIG_FINANCE.search(name) or BIG_FINANCE.search(employer.get("employer", "")):
+        return "A bank or financial group — its treasury / FX roles are its own markets business"
     if sic is not None or status:
         why = absurd.reason(name, {"status": status or "active", "type": kind, "sic_codes": codes, "name": name})
         if why:
