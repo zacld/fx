@@ -722,6 +722,35 @@ export function freshFind(r, today = new Date()) {
   return out;
 }
 
+// Today's list (Zac, 22 Nov 2026: "just the best ranked companies — company name, Companies House, Google it, check for
+// FD, and small buttons: tick good lead, X not enough revenue, orange open, blue call list"): the best leads he hasn't
+// marked, best lead score first — not contacted, no review / verdict / list on it or on any company in its group (he has
+// judged the group), not out, no serious reason not to progress, Fit FIT.min+, one per group. A mark takes a lead off
+// and the next one moves up.
+export const TODAYS_LIST = 25;
+export const TODAYS_MARKS = [
+  ["good", "✓", "Good lead"], ["small", "✕", "Not enough revenue"], ["open", "●", "Open lead"], ["call", "☎", "Call list"],
+];
+export function todaysList(rows, { contacted = {}, checks = {}, verdicts = {}, lists = {} } = {}) {
+  const marked = (n) => contacted[n] || checks[n]?.review || verdicts[n] || lists[n];
+  const judged = new Set(rows.filter((r) => marked(r.company_number)).map(groupKey));
+  const seen = new Set();
+  return rows
+    .filter((r) => !r.dropped && !isOut(r) && (r.lead_fit || 0) >= FIT.min && !judged.has(groupKey(r))
+      && !reasonsNotToProgress(r).some((x) => x.serious))
+    .sort((a, b) => (b.lead_score || 0) - (a.lead_score || 0) || (b.lead_fit || 0) - (a.lead_fit || 0))
+    .filter((r) => { const k = groupKey(r); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+// How many leads he marked today (any of the four buttons, or a mark made elsewhere).
+export function markedToday({ checks = {}, verdicts = {}, lists = {} } = {}, today = new Date().toISOString().slice(0, 10)) {
+  const n = new Set();
+  for (const [k, v] of Object.entries(checks)) if (String(v?.review_at || "").startsWith(today)) n.add(k);
+  for (const [k, v] of Object.entries(verdicts)) if (String(v?.at || "").startsWith(today)) n.add(k);
+  for (const [k, v] of Object.entries(lists)) if (String(v?.at || "").startsWith(today)) n.add(k);
+  return n.size;
+}
+export const googleCompany = (r) => "https://www.google.com/search?" + new URLSearchParams({ q: r.company_name || "" });
+
 export function filedIso(r) {
   const f = r.accounts_filed_on || r.filed || "";
   if (/^\d{4}-\d{2}-\d{2}/.test(f)) return f.slice(0, 10);

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { SORTS, freshFind, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
+import { SORTS, freshFind, markedToday, todaysList, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
   setKnownGroups, sortRows } from "./accounts/format.js";
 import { rankLeads } from "./accounts/ranking.js";
 
@@ -135,5 +135,23 @@ describe("Fresh finds", () => {
   });
   it("doesn't count a fresh FX filing as new — every bank reads those", () => {
     expect(freshFind({ company_number: "3", from_filings: true, accounts_filed_on: "2026-11-18", sic_codes: ["46390"], turnover_gbp: 40e6 }, today)).toEqual([]);
+  });
+});
+
+describe("Today's list", () => {
+  const lead = (n, score, extra = {}) => ({ company_number: n, company_name: `CO ${n} LIMITED`, lead_score: score, lead_fit: 80, filed_fx_score: 60,
+    turnover_gbp: 40e6, ...extra });
+  it("the best unmarked leads first, one per group, a judged group left out", () => {
+    setKnownGroups({ 3: { top: "9", top_name: "G", hops: 1 }, 4: { top: "9", top_name: "G", hops: 1 }, 5: { top: "8", hops: 1 }, 6: { top: "8", hops: 1 } });
+    const rows = [lead("1", 50), lead("2", 70), lead("3", 65), lead("4", 60), lead("5", 90), lead("6", 40), lead("7", 99, { qualified: "Out" }),
+      lead("10", 95, { lead_fit: 10 })];
+    // 6 is marked (Not enough revenue), so its group — 5 too — is done; 3 and 4 share a group: only the better shows
+    const got = todaysList(rows, { verdicts: { 6: { verdict: "not_fit", reason: "Too small" } } });
+    expect(got.map((r) => r.company_number)).toEqual(["2", "3", "1"]);
+    expect(todaysList(rows, { lists: { 2: { list: "call" } }, checks: { 1: { review: "open" } } }).map((r) => r.company_number)).toEqual(["5", "3"]);
+  });
+  it("counts the marks made today", () => {
+    expect(markedToday({ checks: { 1: { review: "open", review_at: "2026-11-22T09:00:00Z" } }, verdicts: { 2: { verdict: "good", at: "2026-11-21T09:00:00Z" } },
+      lists: { 1: { list: "call", at: "2026-11-22T10:00:00Z" }, 3: { list: "call", at: "2026-11-22T11:00:00Z" } } }, "2026-11-22")).toBe(2);
   });
 });

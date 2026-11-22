@@ -762,8 +762,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   stamps `first_seen`; an FX filings row counts from its filing date — not contacted, not out, UK-in-name and foreign-owned
   left in their own tabs; highest lead score first, industry filter, Excel export with `added_on`.
 - **Sections and Fresh finds** (Zac, 22 Nov 2026, from the architecture review: ~30 tabs were too many on a phone;
-  `TAB_SECTIONS` in `AccountsApp.jsx`): a bar over the tabs — **Today** (Today, Call today, Outreach, Alerts, Contacted,
-  Email generator), **Fresh finds** (Fresh finds, New leads, Hidden from filters, New money, Niche search, Emerging
+  `TAB_SECTIONS` in `AccountsApp.jsx`): a bar over the tabs — **Today** (Today's list, Today, Call today, Outreach, Alerts,
+  Contacted, Email generator), **Fresh finds** (Fresh finds, New leads, Hidden from filters, New money, Niche search, Emerging
   leads, Job adverts), **My lists** (Call / Email / Mail list, Simplified dash), **Learn** (Scoreboard, Niches) and **All
   tabs** (every tab, as before) — remembered in the browser; a phone with none remembered opens on Today; a tab opened
   from elsewhere brings its section. On a phone the bar sticks under the top bar and the tabs scroll sideways. **Fresh
@@ -772,6 +772,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   count: every bank reads those), found by a job advert / his Niche search / a lookalike / an emerging niche, in a quiet
   niche, or hidden from the usual filters — with a why-fresh filter, a source filter, Fit first, Excel export with
   `fresh_because`, and links to Job adverts, Emerging leads and Niche search.
+- **Today's list** (Zac, 22 Nov 2026: "a button … today's list … just the best ranked companies — company name, next to
+  it the Companies House, Google it, check for FD, then small buttons: a tick to add to good leads, an X for not enough
+  revenue, an orange in the middle which is open and a blue which is call list"; `todaysList` / `TODAYS_MARKS` /
+  `markedToday` / `googleCompany` in `format.js`, `TodaysList` in `AccountsApp.jsx`): the first tab of the Today section
+  (so a phone opens on it) — the best leads by lead score he hasn't marked, `TODAYS_LIST` (25) at a time with "Show 25
+  more": not contacted, no review / verdict / list on it or on any company in its group, not out, no serious reason not
+  to progress, Fit 30+, one per group. Each line: name (company page), industry · turnover · score, the Companies House
+  number (its page), "Google it" (the registered name) and "Check for FD" (`googleFd`), then four round buttons —
+  ✓ green Good lead (verdict good), ✕ red Not enough revenue (Not a fit: Too small), ● orange Open lead (review open),
+  ☎ blue Call list (list call). A mark takes the company off and the next moves up; Undo for the last one; "N marked
+  today". The marks feed the feedback loop and lookalikes like any other.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead
