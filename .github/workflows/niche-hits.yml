@@ -47,6 +47,10 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      # Only main's runs (the morning schedule, a push to main, a run by hand on main) write the live store and the
+      # database. A push to a working branch is a test: it reads the live data, runs every step on a small sample and
+      # writes nothing (apps/web/scripts/store.mjs, readOnly) — 22 Nov 2026, a branch run had rewritten the ranking.
+      STORE_READ_ONLY: ${{ github.ref != 'refs/heads/main' && '1' || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -129,9 +133,9 @@ jobs:
         run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json ../../lead-sourcer/gleif.json
       # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
       # until the Cloudflare token may use D1; never fails the run.
-      # Only from main: a branch push runs this workflow in full, and its copy would spend the database's daily writes
+      # Only from main: a branch run's copy would spend the database's daily writes
       - name: Database
-        if: github.ref == 'refs/heads/main'
+        if: env.STORE_READ_ONLY != '1'
         continue-on-error: true
         run: cd apps/web && node scripts/db-sync.mjs
       # Every lead's own website (best leads first), confirmed by its company number or registered name on the site:
@@ -139,7 +143,7 @@ jobs:
       - name: Websites
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get domains ../../lead-sourcer/domains_cache.json || echo '{}' > ../../lead-sourcer/domains_cache.json)
-          cd ../../lead-sourcer && PYTHONUNBUFFERED=1 python3 tools/find_domains.py --tracked tracked.json --order lead_order.json --cache domains_cache.json --out domains.json --groups groups.json --budget 2400
+          cd ../../lead-sourcer && PYTHONUNBUFFERED=1 python3 tools/find_domains.py --tracked tracked.json --order lead_order.json --cache domains_cache.json --out domains.json --groups groups.json --budget $([ "$STORE_READ_ONLY" = 1 ] && echo 120 || echo 2400)
           cd ../apps/web && node scripts/alerts-store.mjs put domains ../../lead-sourcer/domains.json
       # Who owns each lead, from its own latest accounts ("the ultimate parent is X, incorporated in Y") — best leads first,
       # Companies House's free API; the owner search below skips the companies these answer (Zac, 17 Nov 2026).
@@ -150,7 +154,7 @@ jobs:
           COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get parents ../../lead-sourcer/parents_cache.json || echo '{}' > ../../lead-sourcer/parents_cache.json)
-          cd ../../lead-sourcer && python3 tools/parents_from_accounts.py --tracked tracked.json --order lead_order.json --cache parents_cache.json --out parents.json --max 400
+          cd ../../lead-sourcer && python3 tools/parents_from_accounts.py --tracked tracked.json --order lead_order.json --cache parents_cache.json --out parents.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 10 || echo 400)
           cd ../apps/web && node scripts/alerts-store.mjs put parents ../../lead-sourcer/parents.json
       # Who really owns each lead (a PE house, a founder, the group abroad) by web search, best leads first — the registers
       # stop at the UK holding company. "Who owns X", asked again up the chain; 200 companies a day (Zac, 16 Nov 2026);
@@ -168,5 +172,5 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || secrets.GROQ_API }}   # the AI reader: one call a company, capped by --max
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
-          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max 100 --parents parents.json
+          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 2 || echo 100) --parents parents.json
           cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json

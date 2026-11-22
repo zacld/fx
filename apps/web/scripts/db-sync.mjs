@@ -11,7 +11,7 @@ import { companyRecord, markRecord, signalRecord, syncTable } from "../api/db.mj
 import { filingRow, groupKey, leadScore, movesByCurrency, nicheTiers, reasonsNotToProgress, setKnownGroups, timelyReason } from "../src/accounts/format.js";
 import { RANKED_FIELDS } from "../src/accounts/ranking.js";
 import { openD1 } from "./d1.mjs";
-import { openStore } from "./store.mjs";
+import { openStore, readOnly } from "./store.mjs";
 
 // The records the database should hold, from the store's items (pure: tested on Node's SQLite).
 export function buildRecords({ list, details = [], filingRows = [], ranked = {}, niches = {}, alerts = {}, deals = {}, moments = {},
@@ -107,6 +107,10 @@ export const LIMIT_HIT = /limit exceeded|too many requests|daily.*limit|7429|exc
 export const limitWhat = (msg = "") => (/CPU time/i.test(msg) ? "a statement ran over D1's CPU time limit" : "Cloudflare's daily write limit reached");
 
 async function main() {
+  if (readOnly()) {
+    console.log("Database: test run (STORE_READ_ONLY) — not copied; only main's runs write the database");
+    return;
+  }
   let db;
   try {
     db = await openD1();

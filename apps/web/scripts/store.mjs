@@ -104,7 +104,28 @@ async function netlifyStore(name) {
   };
 }
 
+// A test run (a push to a working branch) reads the live store but must never write it: STORE_READ_ONLY=1 turns every
+// write into a line in the log. 22 Nov 2026: a branch push of "Niche hits" rewrote leads/ranked, feed/all and the
+// lookup caches with the branch's code.
+export const readOnly = () => /^(1|true|yes)$/i.test(process.env.STORE_READ_ONLY || "");
+
+export function guardWrites(store, name) {
+  if (!readOnly()) return store;
+  return {
+    ...store,
+    readOnly: true,
+    async set(key, value) {
+      const size = Buffer.isBuffer(value) || value instanceof Uint8Array ? value.length : JSON.stringify(value).length;
+      console.log(`test run (STORE_READ_ONLY): ${name}/${key} not written (${(size / 1e6).toFixed(2)} MB)`);
+    },
+  };
+}
+
 export async function openStore(name) {
+  return guardWrites(await openLiveStore(name), name);
+}
+
+async function openLiveStore(name) {
   if (cloudflareConfigured()) {
     const primary = cloudflareStore(name);
     const old = netlifyConfigured() ? await netlifyStore(name) : null;

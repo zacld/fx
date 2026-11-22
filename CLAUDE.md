@@ -457,7 +457,13 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   codes that hide them 38% v 23% (other business support 19% v 6%), emerging / customs-trader niches 20% v 7%, from the
   FX filings scan 0% v 11%. So: `FIT.timingWeight` 0.5 → 0.3 (simulated on the day's ranking: his picks' median rank
   383 → 275), `LEAD_POINTS.hidden` 8 → 10, and `quietNiche` +6 Fit for an emerging or customs-trader niche ("A niche
-  few bankers search"). The CRM status itself can't be scored from public records, so the lever is his marks:
+  few bankers search"). Both groups sat at Fit 91–100, where the cap made them equal, so the **quiet signs** (hidden from
+  the usual filters, a quiet niche, like one of his good leads, his checks' lean — `addQuiet` in `leadScore`) count over
+  the cap in the ranking: `rankFit` = the rest of Fit capped at 100 + the quiet signs (up to `FIT.quietMax` 30);
+  `lead_fit` as shown stays 0–100, and "Fit first" breaks ties on the lead score. The finder follows
+  (`main.FRESH_LIFT` 100): finds from a job advert, his Niche search, a lookalike of a good lead or new to customs are
+  checked before the FX filings scan's strong finds, and within a niche tier emerging niches go first.
+  The CRM status itself can't be scored from public records, so the lever is his marks:
   **Mark leads in bulk** on the Scoreboard tab (`matchCompanies` in `format.js`: paste names — a unique prefix or
   a name cut short with "…" will do — or company numbers; heading lines set the mark for the names under them,
   `markSections`: "Added to mine:" (the default), "Open lead:", "Owned abroad:", "Good lead:", "Not a fit (No real FX):"
@@ -605,7 +611,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   only when something real changes; each sync keeps to `DAILY_WRITES` (40,000 a day — 60,000 until 15 Nov 2026, when the rebuild's table drops cost writes D1 counted but didn't report back and the limit was met at 45,000 by our count, counted from D1's own
   `rows_written`, meta `writes`), marks and signals first, then companies best lead score first, the rest `deferred` to
   the next sync; a sync that meets Cloudflare's limit says so and stops cleanly; only runs on main copy (a branch push runs Niche hits in
-  full — 15 Nov 2026 its copy spent 19,600 writes); deletes look each key up by the primary key, `DELETE_BATCH` (1,000) at a time (16 Nov 2026: one DELETE over json_each scanned the
+  full — 15 Nov 2026 its copy spent 19,600 writes; since 22 Nov 2026 a branch run is a test that writes nothing at all:
+  `STORE_READ_ONLY` in "Niche hits" off main and in "Alerts" on a push turns every store write into a log line —
+  `store.mjs` `readOnly` / `guardWrites`, db-sync skips — and its website / parents / owner lookups run on a small sample); deletes look each key up by the primary key, `DELETE_BATCH` (1,000) at a time (16 Nov 2026: one DELETE over json_each scanned the
   whole table per key and ~17,000 stale signals ran over D1's CPU time limit, error 7429 — logged as that, not as the write limit);
   each sync logs which fields differ on a sample of the records it
   rewrites (`changedFields`, names and counts only), to find what makes records churn. The Outreach view takes Contacted and Not
@@ -744,6 +752,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `format.js`): every company that joined the lists in the last 3 / 7 / 14 / 30 days (7 by default) — the finder's upload
   stamps `first_seen`; an FX filings row counts from its filing date — not contacted, not out, UK-in-name and foreign-owned
   left in their own tabs; highest lead score first, industry filter, Excel export with `added_on`.
+- **Sections and Fresh finds** (Zac, 22 Nov 2026, from the architecture review: ~30 tabs were too many on a phone;
+  `TAB_SECTIONS` in `AccountsApp.jsx`): a bar over the tabs — **Today** (Today, Call today, Outreach, Alerts, Contacted,
+  Email generator), **Fresh finds** (Fresh finds, New leads, Hidden from filters, New money, Niche search, Emerging
+  leads, Job adverts), **My lists** (Call / Email / Mail list, Simplified dash), **Learn** (Scoreboard, Niches) and **All
+  tabs** (every tab, as before) — remembered in the browser; a phone with none remembered opens on Today; a tab opened
+  from elsewhere brings its section. On a phone the bar sticks under the top bar and the tabs scroll sideways. **Fresh
+  finds** (`freshFind` / `FRESH_KINDS` / `QUIET_SOURCES` in `format.js`; FitTiming mode "fresh"): the leads few bankers
+  have seen, not contacted and not marked yet — new on the lists in the last `FRESH_DAYS` (14; a fresh FX filing doesn't
+  count: every bank reads those), found by a job advert / his Niche search / a lookalike / an emerging niche, in a quiet
+  niche, or hidden from the usual filters — with a why-fresh filter, a source filter, Fit first, Excel export with
+  `fresh_because`, and links to Job adverts, Emerging leads and Niche search.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead

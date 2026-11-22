@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { SORTS, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
+import { SORTS, freshFind, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
   setKnownGroups, sortRows } from "./accounts/format.js";
 import { rankLeads } from "./accounts/ranking.js";
 
@@ -89,6 +89,20 @@ describe("second recalibration (22 Nov 2026)", () => {
     const s = leadScore({ company_number: "1", filed_fx_score: 60, turnover_gbp: 30e6, fx_niche: "Emerging: Non-scheduled passenger air transport" });
     expect(s.parts.find(([w]) => w.startsWith("A niche few bankers search"))).toEqual([expect.any(String), 6, "fit"]);
   });
+  it("counts the quiet signs over Fit's cap in the ranking", () => {
+    // two leads at Fit 100: the one few bankers see (a quiet niche, sized by its group) ranks higher
+    const strong = { company_number: "1", filed_fx_score: 80, turnover_gbp: 60e6, fx_gain_loss_gbp: -300000, turnover_growth: "45%",
+      subsidiaries_abroad: "ACME GMBH (Germany)", fx_currencies: "USD" };
+    const loud = leadScore(strong);
+    const quiet = leadScore({ ...strong, fx_niche: "Emerging: Charter airlines", turnover_basis: "group" });
+    expect(loud.fit).toBe(100);
+    expect(quiet.fit).toBe(100);
+    expect(quiet.rankFit - loud.rankFit).toBeGreaterThanOrEqual(6);
+    expect(quiet.score).toBeGreaterThan(loud.score);
+    // under the cap nothing changes: the ranking's Fit is Fit
+    const small = leadScore({ company_number: "2", filed_fx_score: 30, turnover_gbp: 30e6, fx_niche: "Emerging: Charter airlines" });
+    expect(small.rankFit).toBe(small.fit);
+  });
   it("matches pasted names and numbers to the lists", () => {
     const rows = [{ company_number: "10303149", company_name: "VOLANTEUS LIMITED" }, { company_number: "13582451", company_name: "ITS GROUP HOLDINGS LIMITED" },
       { company_number: "02532281", company_name: "LIMBS & THINGS LIMITED" }, { company_number: "1", company_name: "PROJECT TWENTY TOPCO LIMITED" }];
@@ -108,5 +122,18 @@ describe("marking in bulk", () => {
       ["Added to mine", { review: "mine" }, "VOLANTEUS LIMITED"], ["Open lead", { review: "open" }, "TXO SYSTEMS LTD"],
       ["Owned abroad", { review: "abroad" }, "SEASALT LIMITED"], ["Not a fit (No real FX)", { verdict: "not_fit", reason: "No real FX" }, "CNC GROUP HOLDINGS LIMITED"],
       ["Not a fit", { verdict: "not_fit", reason: "" }, "X LTD"]]);
+  });
+});
+
+describe("Fresh finds", () => {
+  const today = new Date("2026-11-22T12:00:00Z");
+  it("says why a lead is fresh", () => {
+    expect(freshFind({ company_number: "1", found_via: "Job advert — Accounts assistant, EUR payments", first_seen: "2026-11-20", sic_codes: ["46390"] }, today))
+      .toEqual(["new", "source", "hidden"]);   // found by a job advert: no standard filter sees it either
+    expect(freshFind({ company_number: "2", fx_niche: "Emerging: Charter airlines", first_seen: "2026-01-01", sic_codes: ["51101"] }, today))
+      .toEqual(["source", "niche"]);
+  });
+  it("doesn't count a fresh FX filing as new — every bank reads those", () => {
+    expect(freshFind({ company_number: "3", from_filings: true, accounts_filed_on: "2026-11-18", sic_codes: ["46390"], turnover_gbp: 40e6 }, today)).toEqual([]);
   });
 });
