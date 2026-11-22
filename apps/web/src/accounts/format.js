@@ -242,7 +242,7 @@ export const SORTS = {
   lead: { label: "Lead score (best first)", key: (r) => -(r.lead_score || 0) * 1e6 + r.rank },
   // Discovery days (Zac's five good finds of 20 Nov 2026 were all Fit 100 but ranked 37th–52nd on timing): the right
   // company first, the timely ones first among equals.
-  fitFirst: { label: "Fit first, then Now", key: (r) => -(r.lead_fit || 0) * 1e9 - (r.lead_timing || 0) * 1e6 + (r.rank || 0) },
+  fitFirst: { label: "Fit first, then Now", key: (r) => -(r.lead_fit || 0) * 1e9 - (r.lead_score || 0) * 1e6 - (r.lead_timing || 0) * 1e3 + (r.rank || 0) },
   hot: { label: "Hottest (strongest FX proof)", key: (r) => FX_GROUPS.indexOf(fxGroup(r)) * 1e9 - rankedFx(r) * 1e6 + r.rank },
   rank: { label: "Our score", key: (r) => r.rank },
   // Most senior finance role first (CFO/FD, head of finance, controller, manager…); within a role, hottest first.
@@ -1116,7 +1116,10 @@ export const LEAD_POINTS = {
 // Second recalibration (Zac's review of 22 Nov 2026): of the top 300 by lead score he took 9 — the rest were already
 // known to the bank. The 21 he took had a lower Now (median 20 v 30: a freshly filed FX loss draws every bank) at the
 // same Fit, so Timing weighs 0.3, not 0.5 (simulated on the day's ranking: his picks' median rank 383 → 275).
-export const FIT = { min: 30, base: 20, fitWeight: 0.3, timingWeight: 0.3 };
+// The same review: his picks and the leads already known to the bank were both at Fit ~91–100, where the cap made them
+// equal — so the signs of a lead few bankers see (hidden from the usual filters, a quiet niche, like a good lead of his,
+// his checks' lean) count over the cap in the ranking, up to quietMax (lead_fit as shown stays 0–100).
+export const FIT = { min: 30, base: 20, fitWeight: 0.3, timingWeight: 0.3, quietMax: 30 };
 // The signal kinds that are moments (above), each with its points key; the strongest of a group counts once.
 export const MOMENT_KINDS = {
   funding_round: "fundingRound", shares_allotted: "sharesAllotted", articles_changed: "articles", bank_switch: "bankSwitch",
@@ -1191,6 +1194,9 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const out = [];
   let cat = "fit";   // which half each reason counts in: "fit" (the right company), "timing" (why now), "stop"
   const add = (points, why) => { if (points) out.push([why, points, cat]); };
+  // the signs of a lead few bankers have seen (FIT.quietMax): counted in Fit, and over its 100 cap in the ranking
+  let quiet = 0;
+  const addQuiet = (points, why) => { if (points) { add(points, why); quiet += points; } };
   const day = (n) => new Date(today.getTime() - n * 864e5).toISOString().slice(0, 10);
   const fx = fxScore(r);
   add(fx >= 50 ? rules.strongFx : fx > 0 ? rules.someFx : 0, fx >= 50 ? `Strong FX proof in its filings (${fx})` : `Some FX proof (${fx})`);
@@ -1209,9 +1215,9 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const niche = niches[r.fx_niche];
   if (niche) add(rules.nicheByTier[niche.tier] || 0, `Niche: ${r.fx_niche} (${niche.hit_rate}% of its companies prove FX)`);
   const lean = reviews?.lean?.niche?.[r.fx_niche] || reviews?.lean?.source?.[leadSource(r)];
-  if (lean) add(lean.points, `Your checks: ${lean.share}% of ${lean.key} leads were good (${lean.reviewed} checked)`);
+  if (lean) addQuiet(lean.points, `Your checks: ${lean.share}% of ${lean.key} leads were good (${lean.reviewed} checked)`);
   const like = likes?.[r.company_number];
-  if (like) add(rules.likeGood, `Like your good lead ${like.like_name} (${like.same.slice(0, 4).join(", ")})`);
+  if (like) addQuiet(rules.likeGood, `Like your good lead ${like.like_name} (${like.same.slice(0, 4).join(", ")})`);
   const recent = (signals[r.company_number] || []).filter((s) => String(s.at || "").slice(0, 10) >= day(rules.signalDays));
   const fdSignal = recent.find((s) => /^(new|news)_fd$|^hiring_fd$/.test(s.kind));
   const triggers = parts(r.triggers);
@@ -1279,9 +1285,9 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   add(r.subsidiaries_abroad ? rules.subsidiaries : 0, `Subsidiaries abroad: ${r.subsidiaries_abroad}`);
   const ops = overseasOps(r);
   if (ops) add(rules.overseasOps, `Overseas operations: ${ops.text}`);
-  if (/^(?:Emerging|Proven trader)\b/i.test(r.fx_niche || "")) add(rules.quietNiche, `A niche few bankers search: ${r.fx_niche}`);
+  if (/^(?:Emerging|Proven trader)\b/i.test(r.fx_niche || "")) addQuiet(rules.quietNiche, `A niche few bankers search: ${r.fx_niche}`);
   const hid = hiddenFromFilters(r);
-  if (hid.length) add(rules.hidden, `Hidden from the usual filters: ${hid.map((h) => h.label.toLowerCase()).join(", ")}`);
+  if (hid.length) addQuiet(rules.hidden, `Hidden from the usual filters: ${hid.map((h) => h.label.toLowerCase()).join(", ")}`);
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
   add(loss >= rules.lossMin && !hedgingNamed(r) ? rules.lossNoHedge : 0, "FX loss with no hedging named — the clearest need");
@@ -1303,8 +1309,11 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const sum = (c) => out.filter((p) => p[2] === c).reduce((n, [, p]) => n + p, 0);
   const fit = Math.max(0, Math.min(100, sum("fit")));
   const timing = Math.max(0, Math.min(100, sum("timing")));
-  const score = (fit >= FIT.min ? Math.round(FIT.base + FIT.fitWeight * fit + FIT.timingWeight * timing) : Math.round(fit / 2)) + sum("stop");
-  return { score, fit, timing, parts: out,
+  // The ranking's Fit: the rest of Fit capped at 100, then the quiet signs on top (up to FIT.quietMax more), so two
+  // leads at Fit 100 still part on whether other bankers can see them.
+  const rankFit = Math.max(0, Math.min(100, sum("fit") - quiet) + Math.min(FIT.quietMax, quiet));
+  const score = (fit >= FIT.min ? Math.round(FIT.base + FIT.fitWeight * rankFit + FIT.timingWeight * timing) : Math.round(fit / 2)) + sum("stop");
+  return { score, fit, timing, rankFit, parts: out,
            flags: { recentLoss, newFd, fdWhy, buying, pe: Boolean(pe), peBacked: Boolean(pe || backedBy), funded: Boolean(funded), hit: Boolean(recentLoss && change),
                     moment: moments[0] ? moments[0].s.title : "", holdOff: holdOff ? holdOff.title : "" } };
 }

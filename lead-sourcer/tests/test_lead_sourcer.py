@@ -500,7 +500,8 @@ class TestFxFilingsFirst(PipelineTestCase):
                                  {"company_number": "13", "kind": "trade_up", "tracked": False},
                                  {"company_number": "14", "kind": "new_trader", "tracked": True}]}, f)
         with mock.patch.dict(os.environ, {"MOMENTS_FILE": moments}):
-            self.assertEqual(main.priority_from_filings(path), {"11": 55.0, "12": 50.0})
+            # new to customs: a source few bankers see, ahead of the FX filings scan's finds (FRESH_LIFT)
+            self.assertEqual(main.priority_from_filings(path), {"11": 155.0, "12": 150.0})
 
     def test_priority_from_niche_search_and_lookalikes(self):
         # 21 Nov 2026: sized companies found by the Niche search or as lookalikes of good leads, not on the lists yet
@@ -518,10 +519,26 @@ class TestFxFilingsFirst(PipelineTestCase):
             json.dump({"items": [{"company_number": "31", "like_name": "ACME LTD", "shared_n": 3, "tracked": False},
                                  {"company_number": "32", "like_name": "ACME LTD", "tracked": True}]}, f)
         with mock.patch.dict(os.environ, {"NICHE_SEARCH_FILE": found, "LOOKALIKES_FILE": alike}):
-            self.assertEqual(main.priority_from_filings(path), {"21": 55.0, "31": 55.0})
+            self.assertEqual(main.priority_from_filings(path), {"21": 155.0, "31": 155.0})
         self.assertEqual(main.SEARCH_FOUND["21"]["name"], "Niche search: marble")
         self.assertEqual(main.FOUND_VIA["31"]["source"], "lookalike")
         self.assertIn("ACME LTD", main.SEARCH_FOUND["31"]["name"])
+
+    def test_job_advert_finds_come_before_the_filings_scan(self):
+        # 22 Nov 2026: Zac's picks came from sources few bankers see, none from the FX filings scan
+        path = os.path.join(self.tmp.name, "filings.json")
+        found = os.path.join(self.tmp.name, "discoveries.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"rows": [{"company_number": "41", "filed_fx_score": 95, "fx_gain_loss_gbp": "-400000"},
+                                {"company_number": "42", "filed_fx_score": 60}]}, f)
+        with open(found, "w", encoding="utf-8") as f:
+            json.dump({"rows": [{"company_number": "43", "filed_fx_score": 55, "discovered_by": "Job advert", "source": "job_advert"},
+                                {"company_number": "44", "filed_fx_score": 55, "discovered_by": "News", "source": "news"},
+                                {"company_number": "42", "filed_fx_score": 50, "discovered_by": "Charge", "source": "charge"}]}, f)
+        with mock.patch.dict(os.environ, {"DISCOVERIES_FILE": found}):
+            got = main.priority_from_filings(path)
+        self.assertEqual(sorted(got, key=lambda n: -got[n]), ["43", "41", "42", "44"])
+        self.assertEqual(got["42"], 60.0)   # in two sources: its best
 
     def test_fx_probably_run_abroad_ranks_lower(self):
         path = os.path.join(self.tmp.name, "filings.json")

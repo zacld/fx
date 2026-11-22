@@ -131,6 +131,23 @@ describe("the workflows' store (scripts/store.mjs)", () => {
     expect(fetched).not.toHaveBeenCalled();
   });
 
+  it("reads but never writes on a test run (STORE_READ_ONLY)", async () => {
+    Object.assign(process.env, { CLOUDFLARE_API_TOKEN: "t", CLOUDFLARE_ACCOUNT_ID: "0123456789abcdef0123456789abcdef", STORE_READ_ONLY: "1" });
+    delete process.env.NETLIFY_SITE_ID;
+    const methods = [];
+    vi.stubGlobal("fetch", async (url, init = {}) => {
+      methods.push(init.method || "GET");
+      if (new URL(url).pathname.endsWith("/storage/kv/namespaces")) return Response.json({ success: true, result: [{ id: "ns1", title: "fx-dashboard-store" }] });
+      return new Response(JSON.stringify({ rows: [1] }));
+    });
+    const { openStore } = await import("../scripts/store.mjs");
+    const store = await openStore("fx-accounts");
+    expect((await store.get("latest")).rows).toEqual([1]);
+    await store.set("latest", { rows: [] });
+    expect(store.readOnly).toBe(true);
+    expect(methods).not.toContain("PUT");
+  });
+
   it("refuses to run with no store configured", async () => {
     for (const k of ["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID", "NETLIFY_SITE_ID", "NETLIFY_AUTH_TOKEN"]) delete process.env[k];
     const { openStore } = await import("../scripts/store.mjs");

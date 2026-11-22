@@ -514,6 +514,12 @@ def _search_niche(name: str, why: str) -> dict:
 
 
 FX_LOSS_PRIORITY = 100_000   # an FX loss this big in the filings list: checked first in the finder, whatever its score
+# Finds from the sources few bankers see (Zac's review of 22 Nov 2026: of the top 300 he took 9, the rest already known
+# to the bank; none of his 21 came from the FX filings scan, a big recent FX loss draws every bank) — a job advert naming
+# currency work, his Niche search, a lookalike of a lead he marked good, a company new to customs — are checked before
+# the FX filings scan's strong finds: FRESH_LIFT on top of their score puts them first in the priority queue.
+FRESH_LIFT = 100
+FRESH_SOURCES = ("job_advert",)   # discoveries (DISCOVERIES_FILE) by source; the Niche search, lookalikes and customs moments below count too
 
 
 def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE) -> dict[str, float]:
@@ -523,6 +529,7 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
     {} when the file is missing or unreadable.
     """
     rows = []
+    fresh: set[str] = set()   # found by a source few bankers see: FRESH_LIFT
     # the FX filings list, plus the companies the alerts job found holding a charge to an FX provider or for trade
     # finance (tools/ch_alerts.py: discoveries, DISCOVERIES_FILE) — checked like the filings list's strong finds
     for p in [path, os.environ.get("DISCOVERIES_FILE", "")]:
@@ -538,6 +545,8 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
             if r.get("discovered_by") and r.get("company_number"):
                 FOUND_VIA.setdefault(r["company_number"], {"by": r["discovered_by"], "url": r.get("source_url", ""),
                                                            "source": r.get("source", "")})
+                if r.get("source") in FRESH_SOURCES:
+                    fresh.add(r["company_number"])
     # purchases from the ownership register (tools/psc_deals.py, DEALS_FILE): a PE buyout or a company buying
     # subsidiaries is checked first (60), an overseas buyer or an employee ownership trust next (50)
     try:
@@ -555,6 +564,7 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
                 if not m.get("tracked") and m.get("kind") in ("new_trader", "new_import", "new_export"):
                     rows.append({"company_number": m.get("company_number", ""), "company_name": m.get("company_name", ""),
                                  "filed_fx_score": 55 if m["kind"] == "new_trader" else 50})
+                    fresh.add(m.get("company_number", ""))
     except (OSError, ValueError):
         pass
     try:
@@ -565,6 +575,7 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
                     if not n or r.get("tracked") or r.get("accounts_category") not in ("full", "medium", "group"):
                         continue
                     rows.append({"company_number": n, "company_name": r.get("company_name", ""), "filed_fx_score": 55})
+                    fresh.add(n)
                     SEARCH_FOUND.setdefault(n, _search_niche(
                         f"Niche search: {res.get('text', '')}",
                         f"Its customs records carry the goods searched for ({res.get('text', '')}) in {r.get('months')} "
@@ -579,6 +590,7 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
                 if not n or r.get("tracked"):
                     continue
                 rows.append({"company_number": n, "company_name": r.get("company_name", ""), "filed_fx_score": 55})
+                fresh.add(n)
                 SEARCH_FOUND.setdefault(n, _search_niche(
                     f"Like {r.get('like_name', '')}",
                     f"Trades {r.get('shared_n')} of the same goods as {r.get('like_name', '')}, a lead you marked good."))
@@ -595,16 +607,22 @@ def priority_from_filings(path: str, min_score: int = FILINGS_PRIORITY_MIN_SCORE
     if not rows:
         return {}
     # ranked by filed FX proof (less ABROAD_RULES points when the FX is probably run abroad), moved up +25, an FX loss
-    # of FX_LOSS_PRIORITY+ +20 — such a loss brings a company in whatever its score (the desk calls FX losses first)
+    # of FX_LOSS_PRIORITY+ +20 — such a loss brings a company in whatever its score — and a find from a source few
+    # bankers see FRESH_LIFT, ahead of them all
     def big_loss(r: dict) -> bool:
         try:
             return float(r.get("fx_gain_loss_gbp") or 0) <= -FX_LOSS_PRIORITY
         except ValueError:
             return False
-    return {r["company_number"]: float(filings.rank_score(r)) + (25 if r.get("moved_up") else 0)
-            + (20 if big_loss(r) else 0)
-            for r in rows if r.get("company_number")
-            and (filings.rank_score(r) >= min_score or r.get("moved_up") or big_loss(r))}
+    out: dict[str, float] = {}
+    for r in rows:
+        n = r.get("company_number")
+        if not n or not (filings.rank_score(r) >= min_score or r.get("moved_up") or big_loss(r)):
+            continue
+        score = (float(filings.rank_score(r)) + (25 if r.get("moved_up") else 0) + (20 if big_loss(r) else 0)
+                 + (FRESH_LIFT if n in fresh else 0))
+        out[n] = max(score, out.get(n, score))   # a company in two sources keeps its best
+    return out
 
 
 def trader_niche(trade: dict) -> dict:
@@ -1087,8 +1105,10 @@ def run_pipeline(
               + f"; {sum(skipped_niches.values()):,} candidates in {len(skipped_niches)} poor niches skipped")
     # Best-measured niches first, then proven traders (most months of customs records), then niche order and
     # sweet-spot accounts category, so a capped run spends its API budget where the evidence is.
+    # Within a tier, emerging niches (trial niches few bankers search, niches.emerging_niches) first.
     queue.sort(key=lambda q: (
         -niche_rules.tier(q[0]["id"], niche_stats),
+        not str(q[0]["id"]).startswith("emerging-"),
         -(len(q[2]["import_months"] | q[2]["export_months"]) if q[2] else 0),
         niche_position.get(q[0]["id"], len(niches)),
         _CATEGORY_ORDER.get(q[1]["accounts_category"], 99),
