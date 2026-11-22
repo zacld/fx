@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -309,17 +309,22 @@ function Accounts({ data, password }) {
     }
   }, [save, checks]);
 
-  // Many at once (the Scoreboard's "Mark as Added to mine"): sets the mark, never clears one; one save each, in turn
-  const markMine = useCallback(async (numbers) => {
+  // Many at once (the Scoreboard's paste box): a review mark (mine / open / abroad) or a verdict (good / not_fit +
+  // reason) for each company; sets it, never toggles it off; one save each, in turn
+  const markMany = useCallback(async (numbers, mark) => {
     setSaveError("");
-    const todo = numbers.filter((n) => checks[n]?.review !== "mine");
+    const has = (n) => (mark.review ? checks[n]?.review === mark.review : verdicts[n]?.verdict === mark.verdict && (verdicts[n]?.reason || "") === (mark.reason || ""));
+    const todo = numbers.filter((n) => !has(n));
     const at = new Date().toISOString();
-    setChecks((c) => ({ ...c, ...Object.fromEntries(todo.map((n) => [n, { ...(c[n] || {}), review: "mine", review_at: at }])) }));
+    if (mark.review) setChecks((c) => ({ ...c, ...Object.fromEntries(todo.map((n) => [n, { ...(c[n] || {}), review: mark.review, review_at: at }])) }));
+    else setVerdicts((v) => ({ ...v, ...Object.fromEntries(todo.map((n) => [n, { verdict: mark.verdict, ...(mark.reason ? { reason: mark.reason } : {}), at }])) }));
     let failed = 0;
-    for (const n of todo) { try { await save(n, { review: "mine" }); } catch { failed += 1; } }
+    for (const n of todo) {
+      try { await save(n, mark.review ? { review: mark.review } : { verdict: mark.verdict, ...(mark.reason ? { reason: mark.reason } : {}) }); } catch { failed += 1; }
+    }
     if (failed) setSaveError(`${failed} of ${todo.length} marks didn't save — try again.`);
     return { saved: todo.length - failed, already: numbers.length - todo.length, failed };
-  }, [save, checks]);
+  }, [save, checks, verdicts]);
 
   // Zac's review of a lead (Good lead / Not a fit + reason): shown at once, undone if the save fails. Not a fit drops it
   // from every list like "qualified Out"; the daily ranking measures each source and niche against these.
@@ -649,7 +654,7 @@ function Accounts({ data, password }) {
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []} verdicts={ranked.verdicts}
                                              headings={signals.headings || []} codes={signals.codes || []} onPick={(name) => set({ section: "", view: "", query: name })} />
-       : filters.view === "scoreboard" ? <Scoreboard rows={allRows} checks={checks} verdicts={verdicts} likes={likes} onOpen={openCompany} onMarkMine={markMine}
+       : filters.view === "scoreboard" ? <Scoreboard rows={allRows} checks={checks} verdicts={verdicts} likes={likes} onOpen={openCompany} onMarkMany={markMany}
                                                      onPick={(name) => set({ section: "", view: "", query: name })} />
        : filters.view === "jobs" ? <JobAdverts password={password} rowsByNumber={rowsByNumber} onOpen={openCompany} checks={checks} onReview={setReview} />
        : filters.view === "emerging" ? <EmergingLeads password={password} listed={listedNumbers} onOpen={openCompany} checks={checks} onReview={setReview} />
@@ -1636,15 +1641,26 @@ function EmergingLeads({ password, listed, onOpen, checks, onReview }) {
 // The Scoreboard tab (Zac, 22 Nov 2026: put the finding effort where the good leads come from): his marks (Open lead /
 // Added to mine / Good lead count good; Owned abroad / Not a fit count not) against each source, niche and industry,
 // the well-fitting leads still waiting there, and each good lead's lookalikes by profile (format.js likeGoodLeads).
-function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick, onMarkMine }) {
+function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick, onMarkMany }) {
   const [kind, setKind] = useState("source");
   const [open, setOpen] = useState("");
   const [paste, setPaste] = useState("");
   const [done, setDone] = useState("");
-  const found = useMemo(() => (paste.trim() ? matchCompanies(paste, rows.filter((r) => !r.dropped)) : null), [paste, rows]);
+  const live = useMemo(() => rows.filter((r) => !r.dropped), [rows]);
+  const sections = useMemo(() => (paste.trim() ? markSections(paste).map((s) => ({ ...s, ...matchCompanies(s.text, live) })) : []), [paste, live]);
+  const total = sections.reduce((n, s) => n + s.matched.length, 0);
+  const found = paste.trim() ? { matched: sections.flatMap((s) => s.matched), unmatched: sections.flatMap((s) => s.unmatched) } : null;
   const markAll = async () => {
-    const res = await onMarkMine(found.matched.map((m) => m.row.company_number));
-    setDone(`Marked ${res.saved} as Added to mine${res.already ? ` (${res.already} already were)` : ""}${res.failed ? ` — ${res.failed} didn't save` : ""}.`);
+    const said = [];
+    for (const s of sections) {
+      if (!s.matched.length) continue;
+      // a pasted reason in any case ("no real fx") becomes the page's own wording; one it doesn't know is Other
+      const mark = s.mark.verdict === "not_fit" && s.mark.reason
+        ? { ...s.mark, reason: VERDICT_REASONS.find((r) => r.toLowerCase() === s.mark.reason.toLowerCase()) || "Other" } : s.mark;
+      const res = await onMarkMany(s.matched.map((m) => m.row.company_number), mark);
+      said.push(`${s.label} ${res.saved}${res.already ? ` (+${res.already} already)` : ""}${res.failed ? `, ${res.failed} didn't save` : ""}`);
+    }
+    setDone(`Marked: ${said.join(" · ")}.`);
     setPaste("");
   };
   const board = useMemo(() => scoreboard(rows, checks, verdicts), [rows, checks, verdicts]);
@@ -1664,16 +1680,16 @@ function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick, onMarkMine 
           {" "}Every Open lead / Added to mine / Good lead mark teaches the score: with 5+ checked, a source or niche that's mostly good lifts its leads (+8), and every lead that shares most of a good lead's profile is lifted too (+8, “Like your good lead …”). About 20 marks a day is enough.</span>
       </div>
       <details className="bulk-mark" open={!good.length}>
-        <summary>Mark leads you've taken as Added to mine — paste names or numbers</summary>
-        <textarea className="input" rows={5} value={paste} onChange={(e) => { setPaste(e.target.value); setDone(""); }}
-                  placeholder={"One per line (or comma-separated): registered names or company numbers\nVOLANTEUS LIMITED\n13582451"} aria-label="Companies to mark" />
+        <summary>Mark leads in bulk — paste names or numbers (Added to mine, Open lead, Owned abroad, Not a fit)</summary>
+        <textarea className="input" rows={6} value={paste} onChange={(e) => { setPaste(e.target.value); setDone(""); }}
+                  placeholder={"One per line (or comma-separated): registered names or company numbers. A heading line sets the mark for the names under it:\nAdded to mine:\nVOLANTEUS LIMITED\nOpen lead:\n13582451\nNot a fit (No real FX):\nACME LIMITED"} aria-label="Companies to mark" />
         {found && <div className="muted">
-          {found.matched.length} found{found.unmatched.length ? ` · not on our lists: ${found.unmatched.slice(0, 8).join("; ")}${found.unmatched.length > 8 ? " …" : ""}` : ""}
-          {found.matched.length > 0 && <div className="chips">{found.matched.slice(0, 40).map((m) => <span key={m.row.company_number} className="chip">{m.row.company_name}</span>)}</div>}
+          {sections.map((s) => `${s.label}: ${s.matched.length}`).join(" · ")}{found.unmatched.length ? ` · not on our lists: ${found.unmatched.slice(0, 8).join("; ")}${found.unmatched.length > 8 ? " …" : ""}` : ""}
+          {sections.filter((s) => s.matched.length).map((s) => <div key={s.label} className="chips"><b>{s.label}</b>{s.matched.slice(0, 40).map((m) => <span key={m.row.company_number} className="chip">{m.row.company_name}</span>)}</div>)}
         </div>}
-        <button className="btn-sm" disabled={!found?.matched.length} onClick={markAll}>Mark {found?.matched.length || 0} as Added to mine</button>
+        <button className="btn-sm" disabled={!total} onClick={markAll}>Mark {total}</button>
         {done && <span className="muted"> {done}</span>}
-        <div className="muted">Only your own mark is kept (Added to mine, with the date) — nothing else from where you copied them.</div>
+        <div className="muted">Only your own mark is kept (with the date) — nothing else from where you copied them.</div>
       </details>
       {good.length > 0 && <>
         <h2 className="group-h">Your good leads <span>{good.length} · lookalikes by profile: {Object.keys(likes || {}).length}</span></h2>

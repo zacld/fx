@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { SORTS, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
+import { SORTS, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
   setKnownGroups, sortRows } from "./accounts/format.js";
 import { rankLeads } from "./accounts/ranking.js";
 
@@ -95,5 +95,15 @@ describe("second recalibration (22 Nov 2026)", () => {
     const { matched, unmatched } = matchCompanies("VOLANTEUS LIMITED £67.2m\n13582451, Limbs and Things Ltd\nPROJECT TWENTY TOPCO LIMIT…\nNOBODY LTD", rows);
     expect(matched.map((m) => m.row.company_number)).toEqual(["10303149", "13582451", "02532281", "1"]);
     expect(unmatched).toEqual(["NOBODY LTD"]);
+  });
+});
+
+describe("marking in bulk", () => {
+  it("splits a paste into headed sections", () => {
+    const s = markSections("VOLANTEUS LIMITED\nOpen lead:\nTXO SYSTEMS LTD\nOwned abroad\nSEASALT LIMITED\nNot a fit (No real FX):\nCNC GROUP HOLDINGS LIMITED\nNot a fit:\nX LTD");
+    expect(s.map((x) => [x.label, x.mark, x.text.trim()])).toEqual([
+      ["Added to mine", { review: "mine" }, "VOLANTEUS LIMITED"], ["Open lead", { review: "open" }, "TXO SYSTEMS LTD"],
+      ["Owned abroad", { review: "abroad" }, "SEASALT LIMITED"], ["Not a fit (No real FX)", { verdict: "not_fit", reason: "No real FX" }, "CNC GROUP HOLDINGS LIMITED"],
+      ["Not a fit", { verdict: "not_fit", reason: "" }, "X LTD"]]);
   });
 });

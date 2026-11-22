@@ -587,6 +587,30 @@ export function matchCompanies(text = "", rows = []) {
   return { matched, unmatched };
 }
 
+// Several marks in one paste: a heading line names the mark for the names under it — "Added to mine:", "Open lead:",
+// "Owned abroad:", "Not a fit:" or "Not a fit (No real FX):" (the reason one of VERDICT_REASONS' words); names before
+// any heading take `fallback`. [{mark: {review} | {verdict: "not_fit", reason}, label, text}] in the order given.
+export const MARK_HEADINGS = [[/^added to mine$/i, { review: "mine" }, "Added to mine"], [/^open lead$/i, { review: "open" }, "Open lead"],
+  [/^owned abroad$/i, { review: "abroad" }, "Owned abroad"], [/^good lead$/i, { verdict: "good" }, "Good lead"]];
+export function markSections(text = "", fallback = { review: "mine" }) {
+  const out = [];
+  let cur = { mark: fallback, label: MARK_HEADINGS.find(([, m]) => JSON.stringify(m) === JSON.stringify(fallback))?.[2] || "Added to mine", text: "" };
+  for (const line of String(text).split(/\n/)) {
+    const h = line.trim().replace(/:$/, "").trim();
+    const known = MARK_HEADINGS.find(([re]) => re.test(h));
+    const notFit = /^not a fit(?:\s*[(—-]\s*([^)]*?)\s*\)?)?$/i.exec(h);
+    if (known || notFit) {
+      if (cur.text.trim()) out.push(cur);
+      cur = known ? { mark: known[1], label: known[2], text: "" }
+        : { mark: { verdict: "not_fit", reason: notFit[1] || "" }, label: `Not a fit${notFit[1] ? ` (${notFit[1]})` : ""}`, text: "" };
+      continue;
+    }
+    cur.text += `${line}\n`;
+  }
+  if (cur.text.trim()) out.push(cur);
+  return out;
+}
+
 // The scoreboard (Zac, 22 Nov 2026): for each source, niche and industry, how many live leads it has, how many fit well
 // (Fit 60+), how many he has checked and how many of those were good — so the finding effort goes where his good leads
 // come from — and the well-fitting leads still waiting for a look. [{key, leads, fit60, checked, good, not, good_share,
