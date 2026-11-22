@@ -176,3 +176,82 @@ describe("Deletes by key, in batches (16 Nov 2026: one big json_each scan ran ov
     expect((await query("SELECT COUNT(*) AS c FROM signals"))[0].c).toBe(10);
   });
 });
+
+import { adoptMarks, marksLive, readMarks } from "../api/db.mjs";
+import { healMarks } from "../scripts/db-sync.mjs";
+describe("Zac's marks live in the database (stage 2, 22 Nov 2026)", () => {
+  const list = { made_at: "2026-11-22", rows: [{ company_number: "00000001", company_name: "A LTD" }] };
+  // a store whose reads can be frozen: Workers KV serves another location a copy up to a minute old
+  const kv = () => {
+    const items = { latest: list };
+    let frozen = null;
+    const fn = () => ({ get: async (k) => structuredClone((frozen || items)[k] ?? null), setJSON: async (k, v) => { items[k] = structuredClone(v); } });
+    return Object.assign(fn, { items, freeze: () => { frozen = structuredClone(items); }, thaw: () => { frozen = null; } });
+  };
+  const send = (store, db, body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer pw" }, body: JSON.stringify(body) }),
+    { password: "pw", store, db, delay: 0 }).then(async (r) => ({ status: r.status, body: await r.json() }));
+  const load = (store, db) => handle(new Request("https://x/api/accounts", { headers: { authorization: "Bearer pw" } }),
+    { password: "pw", store, db, delay: 0 }).then((r) => r.json());
+
+  it("before the hand-over: the store is the source, the database gets a copy", async () => {
+    const { query } = memoryDb();
+    await applySchema(query);
+    const store = kv();
+    expect(await marksLive(query)).toBe(false);
+    expect((await send(store, query, { company_number: "00000001", review: "open" })).status).toBe(200);
+    expect(store.items.checks["00000001"].review).toBe("open");
+    expect((await readMarks(query, "check")).check["00000001"].review).toBe("open");
+  });
+
+  it("after it: a save from another device can't wipe a mark the store's stale copy hasn't seen", async () => {
+    const { query } = memoryDb();
+    await applySchema(query);
+    await adoptMarks(query, "2026-11-22T20:00:00Z");
+    const store = kv();
+    store.freeze();   // every read serves the store as it was a minute ago (another Cloudflare location)
+    await send(store, query, { company_number: "00000001", review: "mine" });   // the laptop
+    await send(store, query, { company_number: "00000002", verdict: "not_fit", reason: "Too small" });
+    await send(store, query, { company_number: "00000003", review: "open" });   // the phone: its copy of checks hasn't 01
+    store.thaw();
+    expect(Object.keys(store.items.checks)).toEqual(["00000003"]);   // the store's copy lost 01 — as KV did on 22 Nov
+    const page = await load(store, query);
+    expect(Object.keys(page.checks).sort()).toEqual(["00000001", "00000003"]);   // the database didn't
+    expect(page.verdicts["00000002"]).toMatchObject({ verdict: "not_fit", reason: "Too small" });
+    // the sync makes the store's copy equal to the database again
+    const healed = await healMarks(query, { get: async (k) => store.items[k] ?? null, set: async (k, v) => { store.items[k] = v; } },
+      { check: store.items.checks, verdict: store.items.verdicts });
+    expect(Object.keys(healed.check).sort()).toEqual(["00000001", "00000003"]);
+    expect(Object.keys(store.items.checks).sort()).toEqual(["00000001", "00000003"]);
+  });
+
+  it("a save the database couldn't take goes to the store, shows at once, and the sync carries it over", async () => {
+    const { query } = memoryDb();
+    await applySchema(query);
+    await adoptMarks(query);
+    const store = kv();
+    let down = false;
+    const flaky = async (sql, params) => { if (down && !/^SELECT/.test(sql)) throw new Error("D1 unavailable"); return query(sql, params); };
+    down = true;
+    expect((await send(store, flaky, { company_number: "00000004", list: "call" })).status).toBe(200);
+    expect(store.items.lists["00000004"].list).toBe("call");
+    expect(Object.keys(store.items["marks/unsynced"])).toEqual(["list:00000004"]);
+    expect((await load(store, flaky)).lists["00000004"].list).toBe("call");   // read from the database, the missed save laid over it
+    down = false;
+    await healMarks(query, { get: async (k) => store.items[k] ?? null, set: async (k, v) => { store.items[k] = v; } }, { list: store.items.lists });
+    expect((await readMarks(query, "list")).list["00000004"].list).toBe("call");
+    expect(store.items["marks/unsynced"]).toEqual({});
+  });
+
+  it("bulk marks: one read and one write of each kind, within D1's 50 queries a request", async () => {
+    const { query, calls } = memoryDb();
+    await applySchema(query);
+    await adoptMarks(query);
+    const store = kv();
+    calls.length = 0;
+    const marks = Array.from({ length: 300 }, (_, i) => ({ company_number: String(10000000 + i), ...(i % 2 ? { review: "open" } : { verdict: "good" }) }));
+    const r = await send(store, query, { marks });
+    expect(r.body.saved).toBe(300);
+    expect(calls.length).toBeLessThanOrEqual(10);
+    expect(Object.keys((await readMarks(query)).check)).toHaveLength(150);
+  });
+});
