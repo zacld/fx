@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -307,6 +307,18 @@ function Accounts({ data, password }) {
       setChecks(before);
       setSaveError(`Couldn't save that (${e.message}).`);
     }
+  }, [save, checks]);
+
+  // Many at once (the Scoreboard's "Mark as Added to mine"): sets the mark, never clears one; one save each, in turn
+  const markMine = useCallback(async (numbers) => {
+    setSaveError("");
+    const todo = numbers.filter((n) => checks[n]?.review !== "mine");
+    const at = new Date().toISOString();
+    setChecks((c) => ({ ...c, ...Object.fromEntries(todo.map((n) => [n, { ...(c[n] || {}), review: "mine", review_at: at }])) }));
+    let failed = 0;
+    for (const n of todo) { try { await save(n, { review: "mine" }); } catch { failed += 1; } }
+    if (failed) setSaveError(`${failed} of ${todo.length} marks didn't save — try again.`);
+    return { saved: todo.length - failed, already: numbers.length - todo.length, failed };
   }, [save, checks]);
 
   // Zac's review of a lead (Good lead / Not a fit + reason): shown at once, undone if the save fails. Not a fit drops it
@@ -637,7 +649,7 @@ function Accounts({ data, password }) {
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []} verdicts={ranked.verdicts}
                                              headings={signals.headings || []} codes={signals.codes || []} onPick={(name) => set({ section: "", view: "", query: name })} />
-       : filters.view === "scoreboard" ? <Scoreboard rows={allRows} checks={checks} verdicts={verdicts} likes={likes} onOpen={openCompany}
+       : filters.view === "scoreboard" ? <Scoreboard rows={allRows} checks={checks} verdicts={verdicts} likes={likes} onOpen={openCompany} onMarkMine={markMine}
                                                      onPick={(name) => set({ section: "", view: "", query: name })} />
        : filters.view === "jobs" ? <JobAdverts password={password} rowsByNumber={rowsByNumber} onOpen={openCompany} checks={checks} onReview={setReview} />
        : filters.view === "emerging" ? <EmergingLeads password={password} listed={listedNumbers} onOpen={openCompany} checks={checks} onReview={setReview} />
@@ -1624,9 +1636,17 @@ function EmergingLeads({ password, listed, onOpen, checks, onReview }) {
 // The Scoreboard tab (Zac, 22 Nov 2026: put the finding effort where the good leads come from): his marks (Open lead /
 // Added to mine / Good lead count good; Owned abroad / Not a fit count not) against each source, niche and industry,
 // the well-fitting leads still waiting there, and each good lead's lookalikes by profile (format.js likeGoodLeads).
-function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick }) {
+function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick, onMarkMine }) {
   const [kind, setKind] = useState("source");
   const [open, setOpen] = useState("");
+  const [paste, setPaste] = useState("");
+  const [done, setDone] = useState("");
+  const found = useMemo(() => (paste.trim() ? matchCompanies(paste, rows.filter((r) => !r.dropped)) : null), [paste, rows]);
+  const markAll = async () => {
+    const res = await onMarkMine(found.matched.map((m) => m.row.company_number));
+    setDone(`Marked ${res.saved} as Added to mine${res.already ? ` (${res.already} already were)` : ""}${res.failed ? ` — ${res.failed} didn't save` : ""}.`);
+    setPaste("");
+  };
   const board = useMemo(() => scoreboard(rows, checks, verdicts), [rows, checks, verdicts]);
   const good = useMemo(() => goodLeads(rows, checks, verdicts), [rows, checks, verdicts]);
   const byNumber = useMemo(() => new Map(rows.map((r) => [r.company_number, r])), [rows]);
@@ -1643,6 +1663,18 @@ function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick }) {
         <span className="muted">{checked ? `${checked} lead${checked === 1 ? "" : "s"} checked, ${goodN} good${fromWhere ? ` — from ${fromWhere}` : ""}.` : "Nothing checked yet."}
           {" "}Every Open lead / Added to mine / Good lead mark teaches the score: with 5+ checked, a source or niche that's mostly good lifts its leads (+8), and every lead that shares most of a good lead's profile is lifted too (+8, “Like your good lead …”). About 20 marks a day is enough.</span>
       </div>
+      <details className="bulk-mark" open={!good.length}>
+        <summary>Mark leads you've taken as Added to mine — paste names or numbers</summary>
+        <textarea className="input" rows={5} value={paste} onChange={(e) => { setPaste(e.target.value); setDone(""); }}
+                  placeholder={"One per line (or comma-separated): registered names or company numbers\nVOLANTEUS LIMITED\n13582451"} aria-label="Companies to mark" />
+        {found && <div className="muted">
+          {found.matched.length} found{found.unmatched.length ? ` · not on our lists: ${found.unmatched.slice(0, 8).join("; ")}${found.unmatched.length > 8 ? " …" : ""}` : ""}
+          {found.matched.length > 0 && <div className="chips">{found.matched.slice(0, 40).map((m) => <span key={m.row.company_number} className="chip">{m.row.company_name}</span>)}</div>}
+        </div>}
+        <button className="btn-sm" disabled={!found?.matched.length} onClick={markAll}>Mark {found?.matched.length || 0} as Added to mine</button>
+        {done && <span className="muted"> {done}</span>}
+        <div className="muted">Only your own mark is kept (Added to mine, with the date) — nothing else from where you copied them.</div>
+      </details>
       {good.length > 0 && <>
         <h2 className="group-h">Your good leads <span>{good.length} · lookalikes by profile: {Object.keys(likes || {}).length}</span></h2>
         <div className="sheet-wrap">
@@ -3225,6 +3257,9 @@ select.input option{background:#0F141F}
 .adverts{margin:8px 0 0;padding-left:18px;line-height:1.6}
 .adverts .muted{font-size:12px}
 .sheet .sub-row td{font-size:12px;opacity:.9}
+.bulk-mark{margin:12px 0;padding:10px 12px;border:1px solid var(--line,#333);border-radius:6px}
+.bulk-mark summary{cursor:pointer;font-weight:600}
+.bulk-mark textarea{width:100%;margin:8px 0;font:inherit}
 .chip{font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.6)}
 .chip.fx{background:rgba(99,102,241,.12);color:#A5B4FC;font-family:'JetBrains Mono',monospace}
 .chip.trig{background:rgba(245,158,11,.1);color:#FBBF24}

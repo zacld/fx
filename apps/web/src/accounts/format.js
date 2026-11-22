@@ -560,6 +560,33 @@ export function likeGoodLeads(rows = [], checks = {}, verdicts = {}) {
   return out;
 }
 
+// Marking many at once (Zac, 22 Nov 2026: the leads he took, pasted from another screen): each line, or each comma-
+// separated part, is a company number or a registered name (Ltd / Limited / punctuation aside; a unique prefix will do).
+// {matched: [{text, row}], unmatched: [text]} — the page then marks the matched ones itself; nothing else is read.
+const nameKey = (s) => String(s || "").toUpperCase().replace(/&/g, " AND ").replace(/\b(?:LIMITED|LTD|PLC|LLP)\b\.?/g, " ")
+  .replace(/[^A-Z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+export function matchCompanies(text = "", rows = []) {
+  const items = String(text).split(/[\n;]+|,(?![^(]*\))/).map((t) => t.replace(/^[\s\d.)-]*(?=[A-Za-z])/, "").replace(/\s+£[\d.,]+m?.*$/i, "").trim()).filter(Boolean);
+  const byNumber = new Map(rows.map((r) => [String(r.company_number || "").toUpperCase(), r]));
+  const byName = new Map();
+  for (const r of rows) { const k = nameKey(r.company_name); if (k && !byName.has(k)) byName.set(k, r); }
+  const keys = [...byName.keys()];
+  const matched = [], unmatched = [], seen = new Set();
+  for (const text of items) {
+    const num = text.replace(/\s/g, "").toUpperCase();
+    let row = /^[A-Z]{0,2}\d{6,8}$/.test(num) ? byNumber.get(num.padStart(8, "0")) || byNumber.get(num) : null;
+    if (!row) {
+      // a name cut short on screen ("PROJECT TWENTY TOPCO LIMIT…"): its last, partial word dropped, then a unique prefix
+      const cut = /(?:…|\.\.\.)\s*$/.test(text);
+      const k = nameKey(cut ? text.replace(/\s*\S*(?:…|\.\.\.)\s*$/, "") : text);
+      row = byName.get(k) || null;
+      if (!row && (k.length >= 6 || cut)) { const hits = keys.filter((x) => x.startsWith(k)); if (hits.length === 1) row = byName.get(hits[0]); }
+    }
+    if (row && !seen.has(row.company_number)) { seen.add(row.company_number); matched.push({ text, row }); } else if (!row) unmatched.push(text);
+  }
+  return { matched, unmatched };
+}
+
 // The scoreboard (Zac, 22 Nov 2026): for each source, niche and industry, how many live leads it has, how many fit well
 // (Fit 60+), how many he has checked and how many of those were good — so the finding effort goes where his good leads
 // come from — and the well-fitting leads still waiting for a look. [{key, leads, fit60, checked, good, not, good_share,
@@ -1024,7 +1051,9 @@ export const LEAD_POINTS = {
   // call centres in South Africa, outsourcing to the Philippines or Eastern Europe"): teams in an offshore hub mean
   // payroll and supplier payments abroad every month — FX found through what a company does, not its sector code.
   overseasOps: 8,
-  hidden: 8,           // hidden from the usual database filters (hiddenFromFilters): fewer people calling them
+  hidden: 10,          // hidden from the usual database filters (hiddenFromFilters): fewer people calling them (8 until
+                       // 22 Nov 2026: 38% of the leads Zac took had a sector code that hides them, v 23% of the top 300)
+  quietNiche: 6,       // an emerging niche or a customs-goods trader niche: few bankers search them (his picks 20% v 7%)
   likeGood: 8,         // shares most of a good lead's profile (likeGoodLeads): industry / niche, size, FX proof, structure
   reviewGood: 8, reviewPoor: -8, reviewMin: 5, reviewGoodShare: 60, reviewPoorShare: 25,
   // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
@@ -1055,7 +1084,10 @@ export const LEAD_POINTS = {
 // company — FX proof and pain, size, niche, ownership; 0–100) or Timing (why call now — moments, deals, a new FD, a
 // recent filing; 0–100). The ranking (lead_score): a lead with Fit FIT.min+ scores base + fitWeight × Fit + timingWeight
 // × Timing (32–100), so among good fits the timely ones come first; one under it scores Fit ÷ 2 (under 15), below them all.
-export const FIT = { min: 30, base: 20, fitWeight: 0.3, timingWeight: 0.5 };
+// Second recalibration (Zac's review of 22 Nov 2026): of the top 300 by lead score he took 9 — the rest were already
+// known to the bank. The 21 he took had a lower Now (median 20 v 30: a freshly filed FX loss draws every bank) at the
+// same Fit, so Timing weighs 0.3, not 0.5 (simulated on the day's ranking: his picks' median rank 383 → 275).
+export const FIT = { min: 30, base: 20, fitWeight: 0.3, timingWeight: 0.3 };
 // The signal kinds that are moments (above), each with its points key; the strongest of a group counts once.
 export const MOMENT_KINDS = {
   funding_round: "fundingRound", shares_allotted: "sharesAllotted", articles_changed: "articles", bank_switch: "bankSwitch",
@@ -1218,6 +1250,7 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   add(r.subsidiaries_abroad ? rules.subsidiaries : 0, `Subsidiaries abroad: ${r.subsidiaries_abroad}`);
   const ops = overseasOps(r);
   if (ops) add(rules.overseasOps, `Overseas operations: ${ops.text}`);
+  if (/^(?:Emerging|Proven trader)\b/i.test(r.fx_niche || "")) add(rules.quietNiche, `A niche few bankers search: ${r.fx_niche}`);
   const hid = hiddenFromFilters(r);
   if (hid.length) add(rules.hidden, `Hidden from the usual filters: ${hid.map((h) => h.label.toLowerCase()).join(", ")}`);
   add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");

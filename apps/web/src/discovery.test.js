@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { SORTS, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
+import { SORTS, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
   setKnownGroups, sortRows } from "./accounts/format.js";
 import { rankLeads } from "./accounts/ranking.js";
 
@@ -81,5 +81,19 @@ describe("Fit first sort", () => {
       { rank: 3, lead_fit: 100, lead_timing: 30, lead_score: 65 }];
     expect(sortRows(rows, "fitFirst").map((r) => r.rank)).toEqual([3, 2, 1]);
     expect(SORTS.fitFirst.label).toMatch(/Fit first/);
+  });
+});
+
+describe("second recalibration (22 Nov 2026)", () => {
+  it("weighs timing at 0.3 and gives a quiet niche points", () => {
+    const s = leadScore({ company_number: "1", filed_fx_score: 60, turnover_gbp: 30e6, fx_niche: "Emerging: Non-scheduled passenger air transport" });
+    expect(s.parts.find(([w]) => w.startsWith("A niche few bankers search"))).toEqual([expect.any(String), 6, "fit"]);
+  });
+  it("matches pasted names and numbers to the lists", () => {
+    const rows = [{ company_number: "10303149", company_name: "VOLANTEUS LIMITED" }, { company_number: "13582451", company_name: "ITS GROUP HOLDINGS LIMITED" },
+      { company_number: "02532281", company_name: "LIMBS & THINGS LIMITED" }, { company_number: "1", company_name: "PROJECT TWENTY TOPCO LIMITED" }];
+    const { matched, unmatched } = matchCompanies("VOLANTEUS LIMITED £67.2m\n13582451, Limbs and Things Ltd\nPROJECT TWENTY TOPCO LIMIT…\nNOBODY LTD", rows);
+    expect(matched.map((m) => m.row.company_number)).toEqual(["10303149", "13582451", "02532281", "1"]);
+    expect(unmatched).toEqual(["NOBODY LTD"]);
   });
 });

@@ -438,8 +438,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   each reason counts in **Fit** (the right company — FX proof, the FX loss's size, niche, £20m–£300m, subsidiaries abroad,
   no hedging named, PE-backed, owned abroad / UK-arm name −; 0–100, `lead_fit`) or **Timing** (why now — the loss filed
   lately, just filed, new on the list, new FD, deals, funding, owner, moments, currency moved, triggers, news, hiring, the
-  hit-list combo; 0–100, `lead_timing`); an insolvency hold-off stays a stop. `lead_score` = 20 + 0.3 × Fit + 0.5 × Timing
-  when Fit ≥ `FIT.min` (30), else Fit ÷ 2 — so good fits rank on timing and news never lifts a poor fit above them.
+  hit-list combo; 0–100, `lead_timing`); an insolvency hold-off stays a stop. `lead_score` = 20 + 0.3 × Fit + 0.3 × Timing
+  (0.5 × Timing until 22 Nov 2026 — the second recalibration below) when Fit ≥ `FIT.min` (30), else Fit ÷ 2 — so good fits rank on timing and news never lifts a poor fit above them.
   Tabs **Best fit** (Fit 30+, by Fit) and **Call now** (Fit 30+ with Timing > 0, by Timing), each with its half's
   reasons, an industry filter and Excel export; Sheet columns Fit / Now; exports `lead_fit` / `lead_timing`. The Niches
   tab's "Fit 60+" counts leads by Fit. The weights are logged here to be
@@ -450,7 +450,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Global Charter"** filter (`lookalike`: UK-owned, £20m–£100m, FX loss £50k+, no hedging named, still growing). The same
   review: 22 of 43 were already with the bank (the CRM check — not detectable from public records, and never stored
   here), 7 were owned abroad though marked UK-owned (what the owner search fixes), and holding companies (Topco, Holdings)
-  were labelled "Finance & insurance" from their holding-company sector code.
+  were labelled "Finance & insurance" from their holding-company sector code. **Second recalibration — Zac's review of
+  22 Nov 2026** (the leads he took into his book, against the top 300 by lead score; aggregates only — which companies
+  the bank already knows is never kept here): he took 9 of the top 300 (the rest already known to the bank) and 21 in
+  all. Same Fit (median 91 both) but a lower Now (median 20 v 30 — a freshly filed FX loss draws every bank), sector
+  codes that hide them 38% v 23% (other business support 19% v 6%), emerging / customs-trader niches 20% v 7%, from the
+  FX filings scan 0% v 11%. So: `FIT.timingWeight` 0.5 → 0.3 (simulated on the day's ranking: his picks' median rank
+  383 → 275), `LEAD_POINTS.hidden` 8 → 10, and `quietNiche` +6 Fit for an emerging or customs-trader niche ("A niche
+  few bankers search"). The CRM status itself can't be scored from public records, so the lever is his marks:
+  **Mark leads you've taken** on the Scoreboard tab (`matchCompanies` in `format.js`: paste names — a unique prefix or
+  a name cut short with "…" will do — or company numbers; the matched ones are marked Added to mine, `markMine`, only
+  that mark and its date kept) feeds the profile lookalikes and the feedback loop.
 - **Every lead ranked** (Zac, 11 Nov 2026: "scan all the leads, rank them in our scoring system, add them to the
   Accounts page, learn which niches are better — you'll come across some absurd ones"): the "Niche hits" workflow
   (daily 04:23 UTC) also tags every company on the Accounts and FX filings lists (`alerts-store.mjs tracked`) with its

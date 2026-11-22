@@ -417,9 +417,9 @@ describe("Lead score", () => {
       "FX loss with no hedging named — the clearest need": 10,
       "New finance director": 20, "Subsidiaries abroad": 10, "Turnover £20m–£300m": 10, "No hedging named — probably on the bank's rate": 5,
       "Hit list": 15 });
-    expect([s.fit, s.timing, s.score]).toEqual([100, 45, 73]);   // fit 20+30+15+10+10+5+10 (capped 100), now 10+20+15; 20 + 0.3×100 + 0.5×45
+    expect([s.fit, s.timing, s.score]).toEqual([100, 45, 64]);   // fit 20+30+15+10+10+5+10 (capped 100), now 10+20+15; 20 + 0.3×100 + 0.3×45 (0.5 until 22 Nov 2026)
     expect(s.flags).toMatchObject({ recentLoss: true, newFd: true, hit: true });
-    expect(leadLine(s)).toMatch(/^Lead score 73 \(Fit 100 · Now 45\): Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
+    expect(leadLine(s)).toMatch(/^Lead score 64 \(Fit 100 · Now 45\): Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
   });
   it("counts a new FD from the triggers, other changes once, and owned abroad lower", () => {
     const r = { company_number: "N2", filed_fx_score: 20, triggers: "New finance director appointed 2026-10-12 | new charge to HSBC (2026-09)",
@@ -769,7 +769,7 @@ describe("hidden from the usual filters", () => {
     expect(keys({ turnover_gbp: "30000000", incorporated_on: "2025-02-01" })).toEqual(["new"]);
     expect(keys({ turnover_gbp: "30000000", found_via: "Niche search: marble" })).toEqual(["found"]);
     const scored = leadScore({ turnover_gbp: "30000000", accounts_format: "pdf" }, { today });
-    expect(scored.parts.some(([why, p, cat]) => /Hidden from the usual filters: scanned accounts/.test(why) && p === 8 && cat === "fit")).toBe(true);
+    expect(scored.parts.some(([why, p, cat]) => /Hidden from the usual filters: scanned accounts/.test(why) && p === 10 && cat === "fit")).toBe(true);
   });
 });
 
