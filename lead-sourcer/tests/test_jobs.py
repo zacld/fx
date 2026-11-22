@@ -128,6 +128,11 @@ class TestJobSignals(unittest.TestCase):
         self.assertIn("namesake", jobs.excluded({"employer": "Staffline"}, "STAFFLINE LIMITED", ["99999"]))
         self.assertIn("payments / FX firm", jobs.excluded({"employer": "IFX Payments"}, "IFX PAYMENTS LIMITED", ["74990", "62020"]))
         self.assertIn("staffing", jobs.excluded({"employer": "Sail"}, "SAILGLOBAL TECHNOLOGY LIMITED", ["62020", "78300"]))
+        # the third live run's stragglers: a fund manager, a housebuilder, a housing society
+        self.assertIn("financial services", jobs.excluded({"employer": "ICG"}, "ICG PLC", ["64999"]))
+        self.assertIn("property", jobs.excluded({"employer": "Vistry"}, "VISTRY HOMES LIMITED", ["68100"]))
+        self.assertIn("public body", jobs.excluded({"employer": "Albyn Housing Society"}, "ALBYN HOUSING SOCIETY LIMITED", None))
+        self.assertEqual(jobs.excluded({"employer": "Acme Holdings"}, "ACME HOLDINGS LIMITED", ["64209"]), "")   # a holdco stays
         self.assertIn("bank or financial group", jobs.excluded({"employer": "Citi"}, "CITIGROUP LIMITED", ["64209"]))
         self.assertEqual(jobs.excluded({"employer": "Chasewater Foods"}, "CHASEWATER FOODS LIMITED", ["10890"]), "")
         spread = {"employer": "Quiet Co", "kinds": ["fd", "currency", "trade", "treasury"], "adverts": [{}] * 4}

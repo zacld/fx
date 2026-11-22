@@ -797,7 +797,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Fargo" → a food company): the matched company's last accounts (profile, cached) — dormant / micro → left out as a
   namesake (`NAMESAKE_ACCOUNTS`), small / total exemption / unaudited abridged → "Matched" with a note to check, not sent
   to the finder (`SMALL_ACCOUNTS`); also left out: dormant / non-trading codes, any 78… code, schools, LLPs, payments / FX
-  names (`FX_FIRM_NAME`), banks and financial groups (`BIG_FINANCE`).
+  names (`FX_FIRM_NAME`), banks and financial groups (`BIG_FINANCE`), property (68…), lenders and financial services
+  (6491 / 6492 / 6499 / 66… — a holding company's 6420x stays), public bodies, housing associations and colleges by name.
+  Third live run: 2,437 adverts → 808 employers → 12 new leads (Raytec, Mercia Garden Products, Destination Sport …),
+  13 to check by hand, 92 left out (agencies 49, payments / FX firms 6, banks 6, consultancies 5 …).
   New lead (a discovery, filed FX score 50–60): an FD advert, `LEAD_MIN` (40)+, or currency wording beside a currency /
   treasury / trade role (payroll-abroad wording alone is mostly payroll bureaux). Store key `jobs`
   (GET `?view=jobs`, the cache left out): every employer of the last `KEEP_DAYS` (60) with its status (New lead / On our

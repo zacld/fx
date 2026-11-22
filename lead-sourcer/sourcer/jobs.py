@@ -120,7 +120,10 @@ ADVERT_POINTS = {"wording": 30, "currency": 8, "currency_max": 24, "country": 4,
 EXCLUDED_SIC = (("78", "a recruitment agency"), ("692", "an accountancy practice — its adverts are client work"),
                 ("7022", "a consultancy — its adverts are client work"), ("6312", "a job board or web portal"),
                 ("85", "a school or college"), ("99999", "dormant — a namesake of the advertiser"),
-                ("74990", "non-trading — a namesake of the advertiser"))
+                ("74990", "non-trading — a namesake of the advertiser"), ("68", "a property company"),
+                ("6491", "a lender"), ("6492", "a lender"), ("6499", "a financial services firm"), ("66", "a financial services firm"))
+PUBLIC_NAME = re.compile(r"\b(?:housing (?:association|society|trust|group)|nhs|council|university|college|school|academy trust|"
+                         r"police|fire (?:and|&) rescue|hospital)\b", re.I)
 # Payments / FX firms by name, whatever their codes (IFX Payments filed as non-trading): competitors, not clients.
 FX_FIRM_NAME = re.compile(r"\b(?:payments|fx|forex|currenc(?:y|ies)|remit\w*|money transfers?|bureau de change|eurochange|"
                           r"travelex|wise|revolut|monzo|starling|paypal|stripe|adyen|worldpay|checkout\.com|klarna|gocardless)\b", re.I)
@@ -373,6 +376,8 @@ def excluded(employer: dict, name: str = "", sic: Optional[list] = None, status:
             return f"A payments / FX firm (sector {codes[0]}) — a competitor"
     if FX_FIRM_NAME.search(name) or FX_FIRM_NAME.search(employer.get("employer", "")):
         return "A payments / FX firm, by its name — a competitor"
+    if PUBLIC_NAME.search(name) or PUBLIC_NAME.search(employer.get("employer", "")):
+        return "A public body, housing association or college, by its name"
     if "llp" in (kind or "").lower() or re.search(r"\bLLP\b", name):
         return "A partnership (LLP) — law, accountancy and consulting firms advertise their clients' work"
     if accounts in NAMESAKE_ACCOUNTS:
