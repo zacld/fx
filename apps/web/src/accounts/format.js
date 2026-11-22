@@ -704,6 +704,24 @@ export function newLead(r, days, today = new Date()) {
   return (today - new Date(`${on}T00:00:00Z`)) / 86_400_000 <= days;
 }
 
+// Fresh finds (Zac, 22 Nov 2026 — the phone layout's second section): the leads few bankers have seen, in one list.
+// Why each is fresh: new on the lists in the last FRESH_DAYS (not a fresh FX filing — every bank reads those), found by a
+// quiet source (a job advert, his Niche search, a lookalike of a good lead, an emerging niche), in a niche few bankers
+// search, or hidden from the usual Zint / Market IQ filters.
+export const FRESH_DAYS = 14;
+export const QUIET_SOURCES = ["Job advert", "Your niche search", "Like your good leads", "Emerging niche"];
+export const FRESH_KINDS = [["new", "New on the lists"], ["source", "Found by a quiet source"], ["niche", "A niche few bankers search"],
+  ["hidden", "Hidden from the usual filters"]];
+export function freshFind(r, today = new Date()) {
+  const source = leadSource(r);
+  const out = [];
+  if (source !== "FX filings" && newLead(r, FRESH_DAYS, today)) out.push("new");
+  if (QUIET_SOURCES.includes(source)) out.push("source");
+  if (/^(?:Emerging|Proven trader)\b/i.test(r.fx_niche || "")) out.push("niche");
+  if (hiddenFromFilters(r).length) out.push("hidden");
+  return out;
+}
+
 export function filedIso(r) {
   const f = r.accounts_filed_on || r.filed || "";
   if (/^\d{4}-\d{2}-\d{2}/.test(f)) return f.slice(0, 10);

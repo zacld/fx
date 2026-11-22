@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { SORTS, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
+import { SORTS, freshFind, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
   setKnownGroups, sortRows } from "./accounts/format.js";
 import { rankLeads } from "./accounts/ranking.js";
 
@@ -122,5 +122,18 @@ describe("marking in bulk", () => {
       ["Added to mine", { review: "mine" }, "VOLANTEUS LIMITED"], ["Open lead", { review: "open" }, "TXO SYSTEMS LTD"],
       ["Owned abroad", { review: "abroad" }, "SEASALT LIMITED"], ["Not a fit (No real FX)", { verdict: "not_fit", reason: "No real FX" }, "CNC GROUP HOLDINGS LIMITED"],
       ["Not a fit", { verdict: "not_fit", reason: "" }, "X LTD"]]);
+  });
+});
+
+describe("Fresh finds", () => {
+  const today = new Date("2026-11-22T12:00:00Z");
+  it("says why a lead is fresh", () => {
+    expect(freshFind({ company_number: "1", found_via: "Job advert — Accounts assistant, EUR payments", first_seen: "2026-11-20", sic_codes: ["46390"] }, today))
+      .toEqual(["new", "source", "hidden"]);   // found by a job advert: no standard filter sees it either
+    expect(freshFind({ company_number: "2", fx_niche: "Emerging: Charter airlines", first_seen: "2026-01-01", sic_codes: ["51101"] }, today))
+      .toEqual(["source", "niche"]);
+  });
+  it("doesn't count a fresh FX filing as new — every bank reads those", () => {
+    expect(freshFind({ company_number: "3", from_filings: true, accounts_filed_on: "2026-11-18", sic_codes: ["46390"], turnover_gbp: 40e6 }, today)).toEqual([]);
   });
 });

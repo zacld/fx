@@ -752,6 +752,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `format.js`): every company that joined the lists in the last 3 / 7 / 14 / 30 days (7 by default) — the finder's upload
   stamps `first_seen`; an FX filings row counts from its filing date — not contacted, not out, UK-in-name and foreign-owned
   left in their own tabs; highest lead score first, industry filter, Excel export with `added_on`.
+- **Sections and Fresh finds** (Zac, 22 Nov 2026, from the architecture review: ~30 tabs were too many on a phone;
+  `TAB_SECTIONS` in `AccountsApp.jsx`): a bar over the tabs — **Today** (Today, Call today, Outreach, Alerts, Contacted,
+  Email generator), **Fresh finds** (Fresh finds, New leads, Hidden from filters, New money, Niche search, Emerging
+  leads, Job adverts), **My lists** (Call / Email / Mail list, Simplified dash), **Learn** (Scoreboard, Niches) and **All
+  tabs** (every tab, as before) — remembered in the browser; a phone with none remembered opens on Today; a tab opened
+  from elsewhere brings its section. On a phone the bar sticks under the top bar and the tabs scroll sideways. **Fresh
+  finds** (`freshFind` / `FRESH_KINDS` / `QUIET_SOURCES` in `format.js`; FitTiming mode "fresh"): the leads few bankers
+  have seen, not contacted and not marked yet — new on the lists in the last `FRESH_DAYS` (14; a fresh FX filing doesn't
+  count: every bank reads those), found by a job advert / his Niche search / a lookalike / an emerging niche, in a quiet
+  niche, or hidden from the usual filters — with a why-fresh filter, a source filter, Fit first, Excel export with
+  `fresh_because`, and links to Job adverts, Emerging leads and Niche search.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead
