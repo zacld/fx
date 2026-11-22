@@ -458,9 +458,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   FX filings scan 0% v 11%. So: `FIT.timingWeight` 0.5 → 0.3 (simulated on the day's ranking: his picks' median rank
   383 → 275), `LEAD_POINTS.hidden` 8 → 10, and `quietNiche` +6 Fit for an emerging or customs-trader niche ("A niche
   few bankers search"). The CRM status itself can't be scored from public records, so the lever is his marks:
-  **Mark leads you've taken** on the Scoreboard tab (`matchCompanies` in `format.js`: paste names — a unique prefix or
-  a name cut short with "…" will do — or company numbers; the matched ones are marked Added to mine, `markMine`, only
-  that mark and its date kept) feeds the profile lookalikes and the feedback loop.
+  **Mark leads in bulk** on the Scoreboard tab (`matchCompanies` in `format.js`: paste names — a unique prefix or
+  a name cut short with "…" will do — or company numbers; heading lines set the mark for the names under them,
+  `markSections`: "Added to mine:" (the default), "Open lead:", "Owned abroad:", "Good lead:", "Not a fit (No real FX):"
+  — the reason mapped to `VERDICT_REASONS`, else Other; `markMany` sets each mark, never toggles one off; only the mark
+  and its date kept) feeds the profile lookalikes and the feedback loop.
 - **Every lead ranked** (Zac, 11 Nov 2026: "scan all the leads, rank them in our scoring system, add them to the
   Accounts page, learn which niches are better — you'll come across some absurd ones"): the "Niche hits" workflow
   (daily 04:23 UTC) also tags every company on the Accounts and FX filings lists (`alerts-store.mjs tracked`) with its
