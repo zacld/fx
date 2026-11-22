@@ -1,0 +1,124 @@
+import os
+import sys
+import unittest
+from datetime import date
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+
+from sourcer import jobs  # noqa: E402
+import ch_alerts  # noqa: E402
+
+
+class TestReadAdvert(unittest.TestCase):
+    def test_reads_currencies_countries_terms(self):
+        r = jobs.read_advert({"title": "Purchase Ledger Clerk", "text": "<p>You will pay our suppliers in China and Germany "
+                              "in USD and EUR.</p> Prepare letters of credit and check Incoterms. Our office is in Leeds."})
+        self.assertEqual(r["kind"], "currency")
+        self.assertEqual(r["currencies"], ["EUR", "USD"])
+        self.assertEqual(r["countries"], ["China", "Germany"])
+        self.assertEqual(r["terms"], ["letters of credit", "Incoterms"])
+        self.assertGreaterEqual(r["score"], 60)
+
+    def test_countries_only_beside_trade_words(self):
+        r = jobs.read_advert({"title": "Accountant", "text": "Our founder grew up in Spain. Great benefits."})
+        self.assertEqual(r["countries"], [])
+        self.assertEqual(r["score"], 0)
+
+    def test_kinds(self):
+        self.assertEqual(jobs.read_advert({"title": "Finance Director", "text": ""})["kind"], "fd")
+        self.assertFalse(jobs.read_advert({"title": "Interim Finance Director", "text": ""})["fd"])
+        self.assertEqual(jobs.read_advert({"title": "Treasury Analyst", "text": ""})["kind"], "treasury")
+        self.assertEqual(jobs.read_advert({"title": "Export Coordinator", "text": "Book freight."})["kind"], "trade")
+        self.assertEqual(jobs.read_advert({"title": "Payroll Officer", "text": "Run international payroll for our Polish team."})["kind"], "abroad")
+        # gardening isn't hedging
+        self.assertEqual(jobs.read_advert({"title": "Gardener", "text": "Hedge trimming and lawn care."})["terms"], [])
+
+    def test_agency_adverts_left_out(self):
+        self.assertTrue(jobs.agency_advert({"employer": "Smith Associates", "text": "Our client, a leading importer, seeks…"}))
+        self.assertTrue(jobs.agency_advert({"employer": "Pin Point Recruitment Ltd", "text": "Accounts role"}))
+        self.assertFalse(jobs.agency_advert({"employer": "Acme Foods Ltd", "text": "We import olive oil from Italy."}))
+
+
+class TestEmployers(unittest.TestCase):
+    ADS = [{"employer": "Acme Foods Ltd", "title": "Purchase Ledger Clerk", "date": "2026-11-18", "link": "a",
+            "text": "Pay our growers in Italy in EUR."},
+           {"employer": "ACME FOODS LIMITED", "title": "Accounts Assistant", "date": "2026-11-19", "link": "b",
+            "text": "Run multi-currency bank reconciliations."},
+           {"employer": "Acme Foods Ltd", "title": "Purchase Ledger Clerk", "date": "2026-11-18", "link": "a2",
+            "text": "Pay our growers in Italy in EUR."},   # the same role on another board
+           {"employer": "Agency X", "title": "Clerk", "date": "2026-11-18", "link": "c", "agency": True, "text": ""}]
+
+    def test_one_per_employer_repeat_adds(self):
+        by = jobs.employers(self.ADS)
+        self.assertEqual(list(by), ["ACME FOODS"])
+        e = by["ACME FOODS"]
+        self.assertEqual(len(e["adverts"]), 2)
+        self.assertEqual(e["score"], e["adverts"][0]["score"] + jobs.ADVERT_POINTS["repeat"])
+        self.assertEqual(e["currencies"], ["EUR"])
+        self.assertEqual(e["last_seen"], "2026-11-19")
+
+    def test_pick_company(self):
+        items = [{"title": "ACME FOODS (HOLDINGS) LIMITED", "company_number": "1", "company_status": "active"},
+                 {"title": "ACME FOODS LIMITED", "company_number": "2", "company_status": "dissolved"},
+                 {"title": "ACME FOODS GROUP LIMITED", "company_number": "3", "company_status": "active"}]
+        self.assertIsNone(jobs.pick_company("Acme Foods", items))          # two active with the same core: unmatched
+        self.assertEqual(jobs.pick_company("Acme Foods", items[1:])["company_number"], "3")
+        self.assertEqual(jobs.pick_company("Acme Foods Group Ltd", items)["match"], "exact")
+
+    def test_merge_keeps_first_seen_and_drops_old(self):
+        prev = {"employers": [{"key": "OLD CO", "employer": "Old Co", "adverts": [], "last_seen": "2026-08-01", "score": 90},
+                              {"key": "ACME FOODS", "employer": "Acme Foods Ltd", "first_seen": "2026-11-01", "score": 30,
+                               "adverts": [{"title": "Export Clerk", "date": "2026-11-01"}]}]}
+        out = jobs.merge(prev, jobs.employers(self.ADS), date(2026, 11, 22))
+        self.assertNotIn("OLD CO", out)
+        self.assertEqual(out["ACME FOODS"]["first_seen"], "2026-11-01")
+        self.assertIn("Export Clerk", [a["title"] for a in out["ACME FOODS"]["adverts"]])
+
+
+class TestJobSignals(unittest.TestCase):
+    def test_lookups_cached_and_statuses(self):
+        ads = [{"employer": "Brightbloom Flowers Ltd", "title": "Accounts Assistant", "date": "2026-11-18", "link": "j1",
+                "text": "Pay growers in the Netherlands in EUR and USD."},
+               {"employer": "Plain Co Ltd", "title": "Office Manager", "date": "2026-11-18", "link": "j2", "text": "Run the office."},
+               {"employer": "Nowhere Ltd", "title": "Treasury Analyst", "date": "2026-11-18", "link": "j3",
+                "text": "Manage FX hedging policy and forward contracts."}]
+        looked = []
+
+        def lookup(name):
+            looked.append(name)
+            return {"company_number": "07654321", "company_name": "BRIGHTBLOOM FLOWERS LTD"} if "Brightbloom" in name else None
+
+        cache, out = {}, {}
+        alerts, found = ch_alerts.job_signals({}, "", ads, lookup=lookup, cache=cache, employers_out=out, today=date(2026, 11, 22))
+        self.assertEqual(sorted(looked), ["Brightbloom Flowers Ltd", "Nowhere Ltd"])
+        self.assertEqual({k: v["status"] for k, v in out.items()},
+                         {"BRIGHTBLOOM FLOWERS": "new_lead", "PLAIN": "not_looked_up", "NOWHERE": "not_found"})
+        self.assertEqual(found[0]["currencies_in_adverts"], "EUR, USD")
+        # the next run uses the cache: no search for either
+        looked.clear()
+        ch_alerts.job_signals({}, "", ads, lookup=lookup, cache=cache, today=date(2026, 11, 23))
+        self.assertEqual(looked, [])
+        # a "not found" is tried again after LOOKUP_DAYS
+        ch_alerts.job_signals({}, "", ads, lookup=lookup, cache=cache, today=date(2026, 12, 30))
+        self.assertEqual(looked, ["Nowhere Ltd"])
+
+    def test_fetch_paces_and_counts(self):
+        calls, slept = [], []
+        payload = {"results": [{"employerName": "Acme Ltd", "jobTitle": "Export Clerk", "date": "18/11/2026", "jobId": 5,
+                                "jobUrl": "u", "jobDescription": "short"}]}
+        stats = {}
+        ads = jobs.fetch_adverts(lambda url, user: calls.append(url) or payload, reed="k", sleep=slept.append,
+                                 queries=[("export coordinator", "trade", 1), ("EUR USD payments", "currency", 2)], stats=stats)
+        self.assertEqual(len(calls), 3)
+        self.assertIn("postedByDirectEmployer=true", calls[0])
+        self.assertNotIn("postedByDirectEmployer", calls[1])
+        self.assertEqual(len(slept), 2)
+        self.assertEqual(stats["export coordinator"]["kept"], 1)
+        n = jobs.read_full_reed(ads, lambda url, user: {"jobDescription": "Pay suppliers in EUR."}, "k", sleep=lambda s: None)
+        self.assertEqual(n, 1)                      # one per employer and title
+        self.assertTrue(jobs.fx_wording(ads[0]))
+
+
+if __name__ == "__main__":
+    unittest.main()

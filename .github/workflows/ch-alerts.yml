@@ -19,6 +19,7 @@ on:
     paths:
       - .github/workflows/ch-alerts.yml
       - lead-sourcer/tools/ch_alerts.py
+      - lead-sourcer/sourcer/jobs.py
 
 concurrency:
   group: ch-alerts-${{ github.ref }}
@@ -51,7 +52,7 @@ jobs:
           npm ci --workspace apps/web --no-audit --no-fund > /dev/null
           cd apps/web
           node scripts/alerts-store.mjs tracked ../../lead-sourcer/tracked.json
-          for k in stream alerts discoveries; do node scripts/alerts-store.mjs get $k ../../lead-sourcer/$k.json; done
+          for k in stream alerts discoveries jobs; do node scripts/alerts-store.mjs get $k ../../lead-sourcer/$k.json; done
       - name: Read the streams
         if: github.event.schedule != '41 6 * * *'
         working-directory: lead-sourcer
@@ -81,13 +82,13 @@ jobs:
           PYTHONUNBUFFERED: '1'
         run: |
           tg=--telegram; [ "${{ github.event_name }}" = "push" ] && tg=
-          python3 tools/ch_alerts.py --tracked tracked.json --alerts alerts.json --discoveries discoveries.json --signals $tg
+          python3 tools/ch_alerts.py --tracked tracked.json --alerts alerts.json --discoveries discoveries.json --jobs jobs.json --signals $tg
       - name: Save
         if: github.event_name != 'push'
         id: save
         run: |
           cd apps/web
-          for k in stream alerts discoveries; do node scripts/alerts-store.mjs put $k ../../lead-sourcer/$k.json; done
+          for k in stream alerts discoveries jobs; do node scripts/alerts-store.mjs put $k ../../lead-sourcer/$k.json; done
       # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
       # until the Cloudflare token may use D1; never fails the run.
       - name: Database

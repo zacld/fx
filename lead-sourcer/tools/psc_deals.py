@@ -93,7 +93,8 @@ def main() -> None:
     p.add_argument("--window", type=int, default=owners.WINDOW_DAYS)
     p.add_argument("--out", default="deals.json")
     p.add_argument("--niche-stats", default="niche_stats.json")
-    p.add_argument("--groups-out", default="", help="each tracked company's top UK parent (owners.group_of)")
+    p.add_argument("--groups-out", default="", help="each tracked company's top UK parent (owners.group_of) and, for a holding "
+                   "company, what its trading subsidiaries do (owners.group_activity)")
     args = p.parse_args()
 
     STATS.update(niche_rules.load_stats(args.niche_stats))
@@ -112,11 +113,16 @@ def main() -> None:
         found = owners.pe_owner(n, parents)
         if found:
             g["pe"] = found
+    all_groups = groups
     groups = {n: g for n, g in groups.items() if g["hops"] or g["abroad"] or g.get("pe")}
+    # what holding companies' groups trade: every tracked company's subsidiaries, read down the same register
+    children = owners.children_index(parents) if args.groups_out else {}
+    subs_of = {n: owners.descendants(n, children) for n in tracked if n in children}
     print(f"Companies with a new corporate owner in the last {args.window} days: {len(changes):,}")
 
     # Names, status, size and sector codes of every company involved (targets and UK buyers), one bulk-file pass
     numbers = set(changes) | {g["top"] for g in groups.values() if g["hops"]}
+    numbers |= set(subs_of) | {d for ds in subs_of.values() for d in ds}
     for c in changes.values():
         for d in c["new"]:
             n = owners.ch_number((d.get("identification") or {}).get("registration_number") or "")
@@ -126,6 +132,15 @@ def main() -> None:
     bulk.scan(args.bulk or bulk.download(), set(), set(), numbers=numbers, registry=registry)
     names = {n: r.get("name", "") for n, r in registry.items()}
     if args.groups_out:
+        def niche_for(codes):
+            n = niche_rules.sector_niche(codes, niches, catch_all)
+            return n["name"] if n and not niche_rules.dropped(n["id"], STATS) else ""
+        relabelled = []
+        for n, subs in subs_of.items():
+            act = owners.group_activity((registry.get(n) or {}).get("sic_codes") or [], subs, registry, SIZED, niche_for)
+            if act:
+                groups.setdefault(n, all_groups[n])["activity"] = act
+                relabelled.append((n, act))
         for g in groups.values():
             g["top_name"] = names.get(g["top"]) or g["top_name"]
         with open(args.groups_out, "w", encoding="utf-8") as f:
@@ -135,6 +150,11 @@ def main() -> None:
               f"parent ({len(by_top):,} groups); {sum(1 for g in groups.values() if g['abroad']):,} owned from abroad at the top; "
               f"groups with 2+ tracked companies: {sum(1 for k in by_top.values() if k > 1):,}; private-equity backed "
               f"(a PE house, fund or buyout vehicle up the chain): {sum(1 for g in groups.values() if g.get('pe')):,}")
+        print(f"Holding companies read through to their trading subsidiaries: {len(relabelled):,} of {len(subs_of):,} tracked "
+              f"companies with subsidiaries (named a niche: {sum(1 for _, a in relabelled if a['niche']):,})")
+        for n, a in relabelled[:12]:
+            print(f"  {names.get(n, n)[:45]:<45} trades as {', '.join(a['sic'])} via {a['subs']} subsidiar{'y' if a['subs'] == 1 else 'ies'}"
+                  f"{' — ' + a['niche'] if a['niche'] else ''}")
         for top, k in by_top.most_common(10):
             if k > 1:
                 print(f"  {k:3}  {names.get(top) or next(g['top_name'] for g in groups.values() if g['top'] == top)}")

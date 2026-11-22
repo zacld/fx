@@ -240,6 +240,9 @@ export function fxFacts(r) {
 // within its group. Who to ask for is a quick Google: see "Contact confidence".
 export const SORTS = {
   lead: { label: "Lead score (best first)", key: (r) => -(r.lead_score || 0) * 1e6 + r.rank },
+  // Discovery days (Zac's five good finds of 20 Nov 2026 were all Fit 100 but ranked 37th–52nd on timing): the right
+  // company first, the timely ones first among equals.
+  fitFirst: { label: "Fit first, then Now", key: (r) => -(r.lead_fit || 0) * 1e9 - (r.lead_timing || 0) * 1e6 + (r.rank || 0) },
   hot: { label: "Hottest (strongest FX proof)", key: (r) => FX_GROUPS.indexOf(fxGroup(r)) * 1e9 - rankedFx(r) * 1e6 + r.rank },
   rank: { label: "Our score", key: (r) => r.rank },
   // Most senior finance role first (CFO/FD, head of finance, controller, manager…); within a role, hottest first.
@@ -447,7 +450,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
 // Where a lead came from (Zac's brief, 19 Nov 2026: measure which sources find companies not already prospected):
 // the finder's `found_via` (tools/ch_alerts.py discoveries — a job advert naming currency work, a news story, a charge
 // alert), else the FX filings scan, the modern slavery register, the customs records or a niche.
-export const LEAD_SOURCES = ["Your niche search", "Like your good leads", "Job advert", "News", "Charge / owner alert", "FX filings", "Modern slavery register", "Customs records", "Niche search"];
+export const LEAD_SOURCES = ["Your niche search", "Like your good leads", "Job advert", "News", "Charge / owner alert", "FX filings", "Emerging niche", "Modern slavery register", "Customs records", "Niche search"];
 export function leadSource(r) {
   const via = String(r.found_via || "");
   if (/^niche search:/i.test(via)) return "Your niche search";
@@ -456,6 +459,7 @@ export function leadSource(r) {
   if (/^news/i.test(via)) return "News";
   if (via) return "Charge / owner alert";
   if (r.from_filings || r.fx_niche === "FX in their filed accounts") return "FX filings";
+  if (/^Emerging/i.test(r.fx_niche || "")) return "Emerging niche";
   if (/modern slavery/i.test(r.fx_niche || "")) return "Modern slavery register";
   if (r.hmrc_import_months || r.hmrc_export_months) return "Customs records";
   return "Niche search";
@@ -486,6 +490,100 @@ export function reviewLearnings(rows = [], checks = {}, verdicts = {}, rules = L
     return { ...g, reviewed: n, good_share: share, points };
   }).sort((a, b) => b.reviewed - a.reviewed);
   return { reviewed, source: done("source"), niche: done("niche"), industry: done("industry"), lean };
+}
+
+// Lookalikes by profile (Zac, 22 Nov 2026: "make it incredible" — the customs lookalikes can't help holding companies,
+// which trade nothing themselves): each good lead's profile — industry (its group's for a holding company), niche, size
+// band, FX proof, holding company, PE-backed, an FX loss, growth, subsidiaries abroad, where we found it — and every other
+// lead scored on how much of that profile it shares (the good lead's traits only, weighted: PROFILE_WEIGHTS). One that
+// shares LIKE.min of it, its industry or niche among them, gets LEAD_POINTS.likeGood (Fit) with the traits named.
+const SIZE_BANDS = ["under £20m", "£20m–£50m", "£50m–£100m", "£100m–£300m", "£300m+"];
+export const PROFILE_WEIGHTS = { industry: 3, niche: 3, size: 2, fx: 2, holdco: 2, pe: 1, loss: 1, growth: 1, abroad: 1, source: 1 };
+export const LIKE = { min: 0.7, minTraits: 6, maxGood: 150, perLead: 1 };
+const GENERIC_NICHE = /^(?:FX in their filed accounts|Broad wholesale \/ trade sector|)$/;
+export function leadProfile(r) {
+  const t = Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0;
+  const fx = fxScore(r);
+  const codes = sicCodes(r);
+  const industry = industryOf(r);
+  return {
+    industry: industry === INDUSTRY_OTHER ? "" : industry,
+    niche: GENERIC_NICHE.test(r.fx_niche || "") ? "" : r.fx_niche,
+    size: !t ? "" : SIZE_BANDS[t < 20e6 ? 0 : t < 50e6 ? 1 : t < 100e6 ? 2 : t < 300e6 ? 3 : 4],
+    fx: fx >= 50 ? "strong FX proof" : fx > 0 ? "some FX proof" : "",
+    holdco: codes.length && codes.every(nonTradingCode) ? "a holding company" : "",
+    pe: peBackedOf(r) ? "PE-backed" : "",
+    loss: (-Number(r.fx_gain_loss_gbp) || 0) >= 50000 ? "an FX loss" : "",
+    growth: growthPct(r) >= 20 ? "growing 20%+" : "",
+    abroad: r.subsidiaries_abroad ? "subsidiaries abroad" : "",
+    source: leadSource(r),
+  };
+}
+// {score 0–1, same: [traits]} — how much of the good lead's profile the candidate shares (a neighbouring size band half).
+export function profileMatch(good, cand) {
+  let max = 0, got = 0;
+  const same = [];
+  for (const [k, w] of Object.entries(PROFILE_WEIGHTS)) {
+    if (!good[k]) continue;
+    max += w;
+    if (cand[k] === good[k]) { got += w; if (k !== "source") same.push(good[k]); }
+    else if (k === "size" && cand[k] && Math.abs(SIZE_BANDS.indexOf(cand[k]) - SIZE_BANDS.indexOf(good[k])) === 1) got += w / 2;
+  }
+  const core = (good.industry && cand.industry === good.industry) || (good.niche && cand.niche === good.niche);
+  return { score: max >= LIKE.minTraits && core ? got / max : 0, same };
+}
+const isGoodMark = (checks, verdicts, n) => { const m = checks[n]?.review, v = verdicts[n]?.verdict; return m === "open" || m === "mine" || (!m && v === "good"); };
+const isBadMark = (checks, verdicts, n) => { const m = checks[n]?.review, v = verdicts[n]?.verdict; return m === "abroad" || (!m && v === "not_fit"); };
+// The good leads among the rows (Zac's marks), newest mark first: [{company_number, company_name, profile}].
+export function goodLeads(rows = [], checks = {}, verdicts = {}) {
+  const at = (n) => String(checks[n]?.review_at || verdicts[n]?.at || "");
+  return rows.filter((r) => r.company_number && isGoodMark(checks, verdicts, r.company_number))
+    .sort((a, b) => at(b.company_number).localeCompare(at(a.company_number))).slice(0, LIKE.maxGood)
+    .map((r) => ({ company_number: r.company_number, company_name: r.company_name, profile: leadProfile(r) }));
+}
+// {company number: {like, like_name, score, same}} — each unmarked lead's closest good lead, when it shares LIKE.min.
+export function likeGoodLeads(rows = [], checks = {}, verdicts = {}) {
+  const good = goodLeads(rows, checks, verdicts);
+  const out = {};
+  if (!good.length) return out;
+  for (const r of rows) {
+    const n = r.company_number;
+    if (!n || isGoodMark(checks, verdicts, n) || isBadMark(checks, verdicts, n)) continue;
+    const p = leadProfile(r);
+    let best = null;
+    for (const g of good) {
+      const m = profileMatch(g.profile, p);
+      if (m.score >= LIKE.min && (!best || m.score > best.score)) best = { like: g.company_number, like_name: g.company_name, score: Math.round(m.score * 100) / 100, same: m.same };
+    }
+    if (best) out[n] = best;
+  }
+  return out;
+}
+
+// The scoreboard (Zac, 22 Nov 2026): for each source, niche and industry, how many live leads it has, how many fit well
+// (Fit 60+), how many he has checked and how many of those were good — so the finding effort goes where his good leads
+// come from — and the well-fitting leads still waiting for a look. [{key, leads, fit60, checked, good, not, good_share,
+// waiting}] per kind, most good first.
+export function scoreboard(rows = [], checks = {}, verdicts = {}) {
+  const kinds = { source: (r) => leadSource(r), niche: (r) => r.fx_niche || "(no niche)", industry: (r) => industryOf(r) };
+  const out = {};
+  for (const [kind, keyOf] of Object.entries(kinds)) {
+    const by = {};
+    for (const r of rows) {
+      if (!r.company_number || r.dropped) continue;
+      const g = (by[keyOf(r)] ||= { key: keyOf(r), leads: 0, fit60: 0, checked: 0, good: 0, not: 0, waiting: 0 });
+      const good = isGoodMark(checks, verdicts, r.company_number), bad = isBadMark(checks, verdicts, r.company_number);
+      if (good) g.good += 1;
+      if (bad) g.not += 1;
+      if (good || bad) g.checked += 1;
+      if (isOut(r) && !good) continue;
+      g.leads += 1;
+      if ((r.lead_fit || 0) >= 60) { g.fit60 += 1; if (!good && !bad) g.waiting += 1; }
+    }
+    out[kind] = Object.values(by).map((g) => ({ ...g, good_share: g.checked ? Math.round((100 * g.good) / g.checked) : null }))
+      .sort((a, b) => b.good - a.good || (b.good_share ?? -1) - (a.good_share ?? -1) || b.fit60 - a.fit60);
+  }
+  return out;
 }
 
 // Teams abroad (the feedback-loop brief's idea 2): subsidiaries the accounts place in an offshore delivery hub — software
@@ -529,7 +627,8 @@ export function hiddenFromFilters(r, today = new Date()) {
   if (r.accounts_format && r.accounts_format !== "ixbrl") add("scanned", "accounts filed as a scanned document — no figures in the databases' feeds (we read them by OCR)");
   const codes = sicCodes(r);
   if (codes.length && codes.every((c) => HIDING_SIC[c.padStart(5, "0")])) {
-    add("sector", `filed as ${HIDING_SIC[codes[0].padStart(5, "0")]} (${codes[0]}) — a sector search for traders or makers misses it`);
+    const act = groupActivity(r);
+    add("sector", `filed as ${HIDING_SIC[codes[0].padStart(5, "0")]} (${codes[0]}) — a sector search for traders or makers misses it${act ? `; the group trades as ${industryOf(r).toLowerCase()} through ${activityLine(act)}` : ""}`);
   }
   const inc = /^\d{4}-\d{2}-\d{2}/.test(r.incorporated_on || "") ? new Date(`${r.incorporated_on.slice(0, 10)}T00:00:00Z`) : null;
   if (r.moved_up) add("new", "moved up from small accounts this year — last year it was below every size filter");
@@ -827,8 +926,19 @@ const DIVISIONS = [
   [90, 99, "Leisure & other services"],
 ];
 export const sicCodes = (r) => String(Array.isArray(r.sic) ? r.sic.join(" ") : r.sic || r.sic_codes || "").match(/\d{4,5}/g) || [];
+// A holding company's own codes (head office, holding company, financial services, dormant) say nothing about what it
+// trades; its trading subsidiaries' do (the daily ownership pass reads down the register: group_of[number].activity =
+// {sic, subs, names, niche} — tools/psc_deals.py, sourcer/owners.group_activity). That group's activity, or null.
+const nonTradingCode = (c) => { const n = String(c).padStart(5, "0"); return Boolean(HIDING_SIC[n]) || ["64", "66"].includes(n.slice(0, 2)) || n.startsWith("701"); };
+export function groupActivity(r) {
+  const a = groupOf(r)?.activity;
+  if (!a?.sic?.length) return null;
+  const own = sicCodes(r);
+  return !own.length || own.every(nonTradingCode) ? a : null;
+}
+export const activityLine = (a) => (a ? `its ${a.subs} trading subsidiar${a.subs === 1 ? "y" : "ies"}${a.names?.length ? ` (${a.names.slice(0, 2).join(", ")}${a.subs > 2 ? " …" : ""})` : ""}` : "");
 export function industryOf(r) {
-  const code = sicCodes(r)[0];
+  const code = (groupActivity(r)?.sic || sicCodes(r))[0];
   if (!code) return INDUSTRY_OTHER;
   const n = code.padStart(5, "0");
   const div = Number(n.slice(0, 2));
@@ -915,6 +1025,7 @@ export const LEAD_POINTS = {
   // payroll and supplier payments abroad every month — FX found through what a company does, not its sector code.
   overseasOps: 8,
   hidden: 8,           // hidden from the usual database filters (hiddenFromFilters): fewer people calling them
+  likeGood: 8,         // shares most of a good lead's profile (likeGoodLeads): industry / niche, size, FX proof, structure
   reviewGood: 8, reviewPoor: -8, reviewMin: 5, reviewGoodShare: 60, reviewPoorShare: 25,
   // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
   // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
@@ -1015,7 +1126,7 @@ export function nicheTiers(stats = {}) {
   return Object.fromEntries(Object.values(stats).filter((s) => s?.name).map((s) => [s.name, { ...s, tier: tierOf(s) }]));
 }
 
-export function leadScore(r, { today = new Date(), niches = {}, signals = {}, moves = {}, madeAt = "", reviews = null, rules = LEAD_POINTS } = {}) {
+export function leadScore(r, { today = new Date(), niches = {}, signals = {}, moves = {}, madeAt = "", reviews = null, likes = null, rules = LEAD_POINTS } = {}) {
   const out = [];
   let cat = "fit";   // which half each reason counts in: "fit" (the right company), "timing" (why now), "stop"
   const add = (points, why) => { if (points) out.push([why, points, cat]); };
@@ -1038,6 +1149,8 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   if (niche) add(rules.nicheByTier[niche.tier] || 0, `Niche: ${r.fx_niche} (${niche.hit_rate}% of its companies prove FX)`);
   const lean = reviews?.lean?.niche?.[r.fx_niche] || reviews?.lean?.source?.[leadSource(r)];
   if (lean) add(lean.points, `Your checks: ${lean.share}% of ${lean.key} leads were good (${lean.reviewed} checked)`);
+  const like = likes?.[r.company_number];
+  if (like) add(rules.likeGood, `Like your good lead ${like.like_name} (${like.same.slice(0, 4).join(", ")})`);
   const recent = (signals[r.company_number] || []).filter((s) => String(s.at || "").slice(0, 10) >= day(rules.signalDays));
   const fdSignal = recent.find((s) => /^(new|news)_fd$|^hiring_fd$/.test(s.kind));
   const triggers = parts(r.triggers);

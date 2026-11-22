@@ -775,6 +775,44 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (`emerging-code-…`, named from the Commodity table, `hmrc.code_names`). **Less time on exact figures**: the finder's
   FX-line OCR 1,800s → 900s a run and re-reads 300 → 100 (`OCR_FX_BUDGET_SECONDS`, `FINDER_REREAD_MAX` in its workflow);
   turnover (the size test) and the currency notes (the FX proof) keep theirs, so the time budget checks more new companies.
+- **Job finder v2** (Zac, 22 Nov 2026: "make our job finder new"; `sourcer/jobs.py`, run by `tools/ch_alerts.py
+  --signals` each morning): Adzuna + Reed (free keys) searched for five kinds of role (`jobs.QUERIES`, ~65 Adzuna calls a
+  run paced under 25 a minute, `ADZUNA_CALLS_MAX` 80): currency work (accounts / payments roles naming it), treasury / FX,
+  import / export / shipping / customs / sourcing (Reed: direct employers only), finance director, teams / payroll abroad.
+  Agencies' adverts are left out (the name, or "our client …" in the text: the employer would be the agency). Reed's
+  snippet is read in full for the promising ones (`REED_DETAILS_MAX` 150). Each advert read (`read_advert`): the sentences
+  naming currency work, currencies named, countries named beside trade words (suppliers, customers, offices, payments),
+  trade terms (letters of credit, Incoterms, customs declarations …), an advert score (`ADVERT_POINTS`: wording 30, each
+  currency 8, country 4, term 6, FD role 20, treasury 15, trade role 8). One record per employer (`employers`; more adverts
+  naming FX +5 each). Matching: a company on the lists by name, else a Companies House name search — the registered name
+  exactly, else the only active company with the same core name (Group / Holdings / UK aside: `pick_company`, flagged
+  "Name matched loosely") — cached between runs in the `jobs` item (`lookups`; not found tried again after 30 days), best
+  employers first, `JOB_LOOKUPS_MAX` 250 new searches a run, those scoring `LOOKUP_MIN` (30)+ or naming FX or an FD.
+  New lead (a discovery, filed FX score 50–60): names currency work, an FD advert, or `LEAD_MIN` (40)+. Store key `jobs`
+  (GET `?view=jobs`, the cache left out): every employer of the last `KEEP_DAYS` (60) with its status (New lead / On our
+  lists / Matched / Not matched / Not looked up yet), score, currencies, countries, terms, quotes and adverts, plus each
+  search's yield (`queries`: adverts, kept, naming FX, leads). **Job adverts tab**: status buttons, kind / currency filters,
+  "Names currency work", the advert's words, Zac's review buttons, Excel export, "Which searches pay".
+- **Holding companies labelled by their group** (Zac's five good finds, 20 Nov 2026: three were holdcos filed as head
+  office / holding company / financial services, so a freight group read "Finance & insurance" with no niche): the daily
+  ownership pass (`psc_deals.py --groups-out`) reads down the register from every tracked company (`owners.children_index`,
+  `descendants`: 4 levels, 80 companies) and, for one whose own codes are all non-trading (`owners.non_trading`: 64… /
+  66… / 701… / head office / other business support / dormant / property letting), its active trading subsidiaries' codes
+  (a full / medium / group filer counts 3×) give `group_of[number].activity` = {sic, subs, names, numbers, niche}
+  (`owners.group_activity`). The page (`groupActivity`, `industryOf`) labels the industry from it, a "Group trades as …"
+  chip, the Hidden-from-filters reason says so, and `rankLeads` gives a generic niche (FX in their filed accounts, Broad
+  wholesale) the group's niche (`GENERIC_NICHES`). `rank-leads.mjs` now sets the known groups before scoring, so PE up the
+  chain counts in the daily ranking as on the page.
+- **Lookalikes by profile, the Scoreboard, Fit first** (Zac, 22 Nov 2026): `leadProfile` / `profileMatch` /
+  `likeGoodLeads` in `format.js` — each good lead's profile (industry with the group's for a holdco, niche, size band,
+  FX proof, holding company, PE-backed, FX loss, growth 20%+, subsidiaries abroad, source; `PROFILE_WEIGHTS`) against every
+  unmarked lead; one sharing `LIKE.min` (70%) of it, industry or niche among it, gets `LEAD_POINTS.likeGood` +8 Fit ("Like
+  your good lead X (…)"). Page and daily ranking both (`leads/ranked.likes`; the database sync uses it and `reviews` too).
+  **Scoreboard tab** (`scoreboard`): by source / niche / industry — leads, Fit 60+, checked, good, good %, Fit 60+ still
+  waiting — and each good lead with its profile and its lookalikes. "Emerging niche" is now a lead source. **Fit first,
+  then Now** (`SORTS.fitFirst`): the default order on New leads and Hidden from filters (a choice on those, Foreign-owned
+  and UK in name), and an Accounts list sort. The daily website / parents / owner lookups work through Fit 90+ leads first
+  (`lead_order.json`), so the best fits get a website for Cognism soonest.
 - **Hidden from the usual filters** (Zac, 21 Nov 2026: "everyone uses Market IQ or Zint — we want companies that aren't
   on there"): those tools are built on the same register, so nobody is missing from them, but a standard search (turnover
   £20m+, a manufacturing / wholesale sector code, an importer flag) can't see some companies. `hiddenFromFilters` /
@@ -920,7 +958,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   payments, hedging, forward contracts, letters of credit … two pages each on Adzuna, Reed's keyword search) and
   `fx_wording` (the advert's title and text, `FX_WORDING`; recruiter pitches and gardening "hedge" skipped) — an
   employer not on the lists, found by exact registered name (`JOB_LOOKUPS_MAX` 150 a run — 60 until 21 Nov 2026, when the first run used them all and Reed was added, currency-worded and FD adverts
-  first), becomes a discovery with the quote (`discovered_by`, `source` job_advert, `source_url`, filed FX score 55);
+  first), becomes a discovery with the quote (`discovered_by`, `source` job_advert, `source_url`, filed FX score 55; since 22 Nov 2026 the Job finder v2 rules below);
   the finder checks it (niche "FX work in a job advert", `main.JOBS_NICHE`) and every discovery's row carries
   `found_via` / `found_via_url` (`main.FOUND_VIA`). The New leads tab shows each lead's source (`leadSource` /
   `LEAD_SOURCES` in `format.js`: Job advert, News, Charge / owner alert, FX filings, Modern slavery register, Customs

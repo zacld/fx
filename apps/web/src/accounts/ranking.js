@@ -3,7 +3,7 @@
 // sector — tools/niche_hits.py) and an absurd check (banks, insurers, funds, FX providers themselves, public bodies,
 // not-for-profits, dissolved companies: sourcer/absurd.py) that qualifies it Out. Shared by scripts/rank-leads.mjs
 // (which saves the result as leads/ranked and prints what it learns per niche) and the Accounts page.
-import { filingRow, filedIso, industryOf, leadScore, nicheTiers, sicCodes } from "./format.js";
+import { filingRow, filedIso, groupActivity, industryOf, leadScore, nicheTiers, setKnownGroups, sicCodes } from "./format.js";
 
 export const FILINGS_SECTION = "From FX filings";
 // What a filings row keeps on the Accounts page (the full row stays in the Recent FX filings tab).
@@ -21,8 +21,13 @@ const slim = (r) => Object.fromEntries(RANKED_FIELDS.filter((k) => r[k] !== unde
 // {rows (filings companies not on the list, slim, with fx_niche / section / qualified), ruled_out ({number: reason}
 // for both lists), niche_of ({number: corrected niche} for list companies), shy_of ({number: {niche, why}}: hard to
 // broker, both lists), scored (every lead with its score)}.
-export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, moves = {}, today = new Date(), reviews = null } = {}) {
+// Niches that only say how we found a company, not what it trades: a holding company's group activity (its trading
+// subsidiaries' sector — groupActivity) names a real one instead.
+export const GENERIC_NICHES = new Set(["", "FX in their filed accounts", "Broad wholesale / trade sector"]);
+export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, moves = {}, today = new Date(), reviews = null, groups = null, likes = null } = {}) {
+  if (groups) setKnownGroups(groups);
   const tiers = nicheTiers(niches);
+  const viaGroup = (r, niche) => (GENERIC_NICHES.has(niche || "") && groupActivity(r)?.niche) || niche || "";
   const onList = new Set(listRows.map((r) => r.company_number));
   // A list company's niche: the corrected one (customs goods, else a sector code that really names a niche) wins over
   // the finder's older label; a sector niche the correction doesn't confirm (a catch-all code) is dropped.
@@ -31,7 +36,12 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
   for (const r of listRows) {
     const e = enrich[r.company_number];
     if (!e) continue;
-    const niche = e.niche || (sectorNames.has(r.fx_niche) ? "" : r.fx_niche || "");
+    const niche = viaGroup(r, e.niche || (sectorNames.has(r.fx_niche) ? "" : r.fx_niche || ""));
+    if (niche !== (r.fx_niche || "")) nicheOf[r.company_number] = niche;
+  }
+  for (const r of listRows) {   // a holding company on the list with no enrich record: its group's niche all the same
+    if (enrich[r.company_number] || nicheOf[r.company_number] !== undefined) continue;
+    const niche = viaGroup(r, r.fx_niche);
     if (niche !== (r.fx_niche || "")) nicheOf[r.company_number] = niche;
   }
   const ruledOut = {};
@@ -44,12 +54,12 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
   };
   const rows = filingRows.filter((r) => r.company_number && !onList.has(r.company_number)).map((r) => {
     const e = tag(r);
-    return { ...slim(r), section: FILINGS_SECTION, from_filings: true, fx_niche: e.niche || "", sic: e.sic || [],
+    return { ...slim(r), section: FILINGS_SECTION, from_filings: true, fx_niche: viaGroup({ ...r, sic: e.sic || [] }, e.niche), sic: e.sic || [],
              ...(e.address ? { registered_address: e.address, postcode: e.postcode || "" } : {}),
              ...(e.absurd ? { qualified: "Out", qualify_reason: e.absurd } : {}) };
   });
   listRows.forEach(tag);
-  const ctx = { niches: tiers, signals, moves, today, reviews };
+  const ctx = { niches: tiers, signals, moves, today, reviews, likes };
   const scored = [...listRows.map((r) => ({ ...r, onList: true, fx_niche: nicheOf[r.company_number] ?? r.fx_niche })),
     ...rows.map((r) => ({ ...filingRow(r), onList: false }))]
     .map((r) => {
