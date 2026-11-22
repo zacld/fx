@@ -1714,9 +1714,11 @@ function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
   const [showQueries, setShowQueries] = useState(false);
   useEffect(() => {
     fetch(`${API}?view=jobs`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null)).then((body) => setData(body || { employers: [] })).catch(() => setData({ employers: [] }));
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status))))).then((body) => setData(body || { employers: [] }))
+      .catch(() => setData({ employers: [], failed: true }));
   }, [password]);
   if (!data) return <div className="list"><div className="empty">Loading…</div></div>;
+  if (data.failed) return <div className="list"><div className="empty">Couldn't load the job adverts — refresh the page to try again.</div></div>;
   const all = (data.employers || []).filter((e) => e.status !== "not_looked_up");
   const statusOf = (e) => (e.company_number && rowsByNumber.has(e.company_number) ? "on_list" : e.status || "");
   const base = all.filter((e) => (!kind || (e.kinds || []).includes(kind)) && (!currency || (e.currencies || []).includes(currency))
@@ -1788,7 +1790,7 @@ function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
               <div className="card-name">
                 <span className="call-n">{i + 1}</span>
                 <button className="linkish co" onClick={() => go(e)} title={e.company_number ? "Open the company" : "Search Companies House for it"}>{e.company_name || e.employer}</button>
-                {e.company_name && matching(e) && <span className="muted">advertises as {e.employer}</span>}
+                {e.company_name && advertisesAs(e) && <span className="muted">advertises as {e.employer}</span>}
                 <span className={`chip${st === "new_lead" ? " good" : st === "not_found" ? " warn" : ""}`} title={JOB_STATUS[st]?.[1]}>{JOB_STATUS[st]?.[0] || st}</span>
                 {(e.kinds || []).map((k) => <span key={k} className="chip">{JOB_KINDS[k] || k}</span>)}
                 {e.first_seen && e.first_seen === data.made_at?.slice(0, 10) && <span className="new">New today</span>}
@@ -1829,7 +1831,8 @@ function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
     </div>
   );
 }
-const matching = (e) => e.employer && e.company_name && e.employer.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12) !== e.company_name.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+// the employer advertises under a name other than its registered one
+const advertisesAs = (e) => e.employer && e.company_name && e.employer.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12) !== e.company_name.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
 
 // The Niche search tab (Zac, 21 Nov 2026: "focus on finding niche companies — I have paid services for contacts and exact
 // financials"): a product or trade typed here is answered by the Niche search workflow within the hour (customs codes

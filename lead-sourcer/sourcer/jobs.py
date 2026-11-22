@@ -235,7 +235,9 @@ def fetch_adverts(fetch_json: Callable, adzuna: tuple[str, str] = ("", ""), reed
 def read_full_reed(adverts: list[dict], fetch_json: Callable, reed: str, sleep: Callable = time.sleep,
                    limit: int = REED_DETAILS_MAX) -> int:
     """Reads the whole advert (Reed's search gives a snippet) for promising Reed adverts with no currency wording in the
-    snippet — currency, treasury, trade and teams-abroad searches, one per employer and title. Returns how many."""
+    snippet — currency, treasury, trade and teams-abroad searches, one per employer and title. Updates the adverts in
+    place (`text` replaced by the full advert, `full` set, `agency` when the full text shows an agency's advert) and
+    returns how many were read."""
     if not reed or limit <= 0:
         return 0
     seen, done = set(), 0
