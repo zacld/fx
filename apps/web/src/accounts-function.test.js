@@ -143,6 +143,23 @@ describe("/api/accounts", () => {
     expect(left.map((x) => x.text)).toEqual(["saffron"]);
   });
 
+  it("saves many marks in one request without losing any", async () => {
+    const s = memory();
+    s.blobs.checks = { "00000001": { crm: "2026-11-01" } };
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const send = (body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer s3cret" }, body: JSON.stringify(body) }), opts);
+    const res = await send({ marks: [{ company_number: "00000001", review: "mine" }, { company_number: "00000002", review: "open" },
+      { company_number: "00000003", verdict: "not_fit", reason: "No real FX" }, { company_number: "00000004", verdict: "good" }] });
+    expect(res.status).toBe(200);
+    expect(s.blobs.checks["00000001"]).toMatchObject({ crm: "2026-11-01", review: "mine" });   // the CRM tick kept
+    expect(s.blobs.checks["00000002"].review).toBe("open");
+    expect(s.blobs.verdicts["00000003"]).toMatchObject({ verdict: "not_fit", reason: "No real FX" });
+    expect(s.blobs.verdicts["00000004"].verdict).toBe("good");
+    expect((await send({ marks: [{ company_number: "00000001", review: "maybe" }] })).status).toBe(400);
+    expect((await send({ marks: [{ company_number: "00000001", verdict: "not_fit", reason: "client" }] })).status).toBe(400);
+    expect((await send({ marks: [] })).status).toBe(400);
+  });
+
   it("keeps Zac's verdicts (good / not a fit with a listed reason) and returns them with the list", async () => {
     const s = memory();
     s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }] };

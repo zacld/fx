@@ -29,6 +29,7 @@ export const LISTS = ["call", "post", "email"];   // call list, chocolate / mail
 export const CHECKS_KEY = "checks";         // {company_number: {crm: iso, review, review_at}} — the "CRM checked" tick and
                                              // the Simplified dash's review: open lead / added to mine / owned abroad
 export const REVIEWS = ["open", "mine", "abroad"];
+export const MARKS_MAX = 500;   // marks in one bulk save (POST {marks})
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index
 export const filingsMonthKey = (month) => `filings/${month}`;   // {month, rows}: the companies filed that month
@@ -235,6 +236,29 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
   if (req.method === "POST") {
     const body = await req.json().catch(() => ({}));
     const { company_number: number, notes } = body;
+    if (Array.isArray(body.marks)) {   // many marks at once (the Scoreboard's paste box): one read and one write of each
+      // item, so rapid saves can't overwrite each other (KV serves a key's last value for up to a minute elsewhere)
+      const marks = body.marks;
+      const bad = marks.length > MARKS_MAX || marks.some((m) => !COMPANY_NUMBER.test(m?.company_number || "")
+        || !(("review" in m && REVIEWS.includes(m.review)) || ("verdict" in m && (m.verdict === "good"
+          || (m.verdict === "not_fit" && (!m.reason || VERDICT_REASONS.includes(m.reason)))))));
+      if (!marks.length || bad) {
+        return reply({ error: `send {marks: [{company_number, review: ${REVIEWS.join(" | ")}} | {company_number, verdict: "good" | "not_fit", reason?}]} (at most ${MARKS_MAX})` }, 400);
+      }
+      const at = new Date().toISOString();
+      const [checks, verdicts] = await Promise.all([CHECKS_KEY, VERDICTS_KEY].map(async (k) => (await blobs.get(k, { type: "json" })) || {}));
+      const touched = { check: new Set(), verdict: new Set() };
+      for (const m of marks) {
+        const n = m.company_number.toUpperCase();
+        if ("review" in m) { checks[n] = { ...(checks[n] || {}), review: m.review, review_at: at }; touched.check.add(n); }
+        else { verdicts[n] = { verdict: m.verdict, ...(m.reason ? { reason: m.reason } : {}), at }; touched.verdict.add(n); }
+      }
+      if (touched.check.size) await blobs.setJSON(CHECKS_KEY, checks);
+      if (touched.verdict.size) await blobs.setJSON(VERDICTS_KEY, verdicts);
+      for (const n of touched.check) await mirror(db, n, "check", checks[n]);
+      for (const n of touched.verdict) await mirror(db, n, "verdict", verdicts[n]);
+      return reply({ checks, verdicts, saved: marks.length }, 200);
+    }
     if ("feed_key" in body) {   // a new Power Automate feed key: the old one stops working
       const salt = crypto.randomUUID();
       await blobs.setJSON(FEED_SALT_KEY, { salt, at: new Date().toISOString() });
