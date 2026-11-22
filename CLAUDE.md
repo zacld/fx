@@ -461,7 +461,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   **Mark leads in bulk** on the Scoreboard tab (`matchCompanies` in `format.js`: paste names — a unique prefix or
   a name cut short with "…" will do — or company numbers; heading lines set the mark for the names under them,
   `markSections`: "Added to mine:" (the default), "Open lead:", "Owned abroad:", "Good lead:", "Not a fit (No real FX):"
-  — the reason mapped to `VERDICT_REASONS`, else Other; `markMany` sets each mark, never toggles one off; only the mark
+  — the reason mapped to `VERDICT_REASONS`, else Other; `markMany` sets each mark, never toggles one off, in **one bulk
+  save**, POST `{marks: [{company_number, review} | {company_number, verdict, reason?}]}` (≤ `MARKS_MAX` 500: one read and
+  one write of `checks` / `verdicts` — the first paste, saved one company at a time, kept 11 of 54 marks); only the mark
   and its date kept) feeds the profile lookalikes and the feedback loop.
 - **Every lead ranked** (Zac, 11 Nov 2026: "scan all the leads, rank them in our scoring system, add them to the
   Accounts page, learn which niches are better — you'll come across some absurd ones"): the "Niche hits" workflow

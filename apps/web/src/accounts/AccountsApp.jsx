@@ -309,22 +309,24 @@ function Accounts({ data, password }) {
     }
   }, [save, checks]);
 
-  // Many at once (the Scoreboard's paste box): a review mark (mine / open / abroad) or a verdict (good / not_fit +
-  // reason) for each company; sets it, never toggles it off; one save each, in turn
-  const markMany = useCallback(async (numbers, mark) => {
+  // Many at once (the Scoreboard's paste box): one bulk save (POST {marks}) — saving them one by one lost marks, each
+  // save reading the store before the last one's write had reached it. Sets marks, never toggles one off.
+  const markMany = useCallback(async (items) => {
     setSaveError("");
-    const has = (n) => (mark.review ? checks[n]?.review === mark.review : verdicts[n]?.verdict === mark.verdict && (verdicts[n]?.reason || "") === (mark.reason || ""));
-    const todo = numbers.filter((n) => !has(n));
-    const at = new Date().toISOString();
-    if (mark.review) setChecks((c) => ({ ...c, ...Object.fromEntries(todo.map((n) => [n, { ...(c[n] || {}), review: mark.review, review_at: at }])) }));
-    else setVerdicts((v) => ({ ...v, ...Object.fromEntries(todo.map((n) => [n, { verdict: mark.verdict, ...(mark.reason ? { reason: mark.reason } : {}), at }])) }));
-    let failed = 0;
-    for (const n of todo) {
-      try { await save(n, mark.review ? { review: mark.review } : { verdict: mark.verdict, ...(mark.reason ? { reason: mark.reason } : {}) }); } catch { failed += 1; }
+    const todo = items.filter(({ number, mark }) => (mark.review ? checks[number]?.review !== mark.review
+      : !(verdicts[number]?.verdict === mark.verdict && (verdicts[number]?.reason || "") === (mark.reason || ""))));
+    if (!todo.length) return { saved: 0, already: items.length, failed: 0 };
+    const res = await fetch(API, { method: "POST", headers: { authorization: `Bearer ${password}`, "content-type": "application/json" },
+      body: JSON.stringify({ marks: todo.map(({ number, mark }) => ({ company_number: number, ...mark })) }) }).catch(() => null);
+    const got = res && (await res.json().catch(() => null));
+    if (!res?.ok || !got) {
+      setSaveError(`The marks didn't save (${got?.error || (res ? res.status : "no connection")}) — try again.`);
+      return { saved: 0, already: items.length - todo.length, failed: todo.length };
     }
-    if (failed) setSaveError(`${failed} of ${todo.length} marks didn't save — try again.`);
-    return { saved: todo.length - failed, already: numbers.length - todo.length, failed };
-  }, [save, checks, verdicts]);
+    setChecks(got.checks || {});
+    setVerdicts(got.verdicts || {});
+    return { saved: todo.length, already: items.length - todo.length, failed: 0 };
+  }, [password, checks, verdicts]);
 
   // Zac's review of a lead (Good lead / Not a fit + reason): shown at once, undone if the save fails. Not a fit drops it
   // from every list like "qualified Out"; the daily ranking measures each source and niche against these.
@@ -1651,16 +1653,17 @@ function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick, onMarkMany 
   const total = sections.reduce((n, s) => n + s.matched.length, 0);
   const found = paste.trim() ? { matched: sections.flatMap((s) => s.matched), unmatched: sections.flatMap((s) => s.unmatched) } : null;
   const markAll = async () => {
-    const said = [];
+    // a pasted reason in any case ("no real fx") becomes the page's own wording; one it doesn't know is Other; a company
+    // under two headings takes the last
+    const items = new Map();
     for (const s of sections) {
-      if (!s.matched.length) continue;
-      // a pasted reason in any case ("no real fx") becomes the page's own wording; one it doesn't know is Other
       const mark = s.mark.verdict === "not_fit" && s.mark.reason
         ? { ...s.mark, reason: VERDICT_REASONS.find((r) => r.toLowerCase() === s.mark.reason.toLowerCase()) || "Other" } : s.mark;
-      const res = await onMarkMany(s.matched.map((m) => m.row.company_number), mark);
-      said.push(`${s.label} ${res.saved}${res.already ? ` (+${res.already} already)` : ""}${res.failed ? `, ${res.failed} didn't save` : ""}`);
+      for (const m of s.matched) items.set(m.row.company_number, { number: m.row.company_number, mark });
     }
-    setDone(`Marked: ${said.join(" · ")}.`);
+    const res = await onMarkMany([...items.values()]);
+    if (res.failed) { setDone(""); return; }
+    setDone(`Saved ${res.saved} mark${res.saved === 1 ? "" : "s"}${res.already ? ` (${res.already} already marked)` : ""}: ${sections.filter((s) => s.matched.length).map((s) => `${s.label} ${s.matched.length}`).join(" · ")}.`);
     setPaste("");
   };
   const board = useMemo(() => scoreboard(rows, checks, verdicts), [rows, checks, verdicts]);
