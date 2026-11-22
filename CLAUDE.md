@@ -793,7 +793,13 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   practices and consultancies by their sector codes (78… / 6312 / 692… / 7022…, from the matched company's profile —
   `JOB_PROFILES_MAX` 300 a run, cached with the lookup), payments / FX firms (64… / 66… and a payments word in the name),
   agency names, whatever `absurd.reason` rules out, and an employer advertising `AGENCY_SPREAD` (4 kinds / 8 roles) at once.
-  New lead (a discovery, filed FX score 50–60): names currency work, an FD advert, or `LEAD_MIN` (40)+. Store key `jobs`
+  The second live run showed brand names matching namesakes (an advert by "Citi" → CITIGROUP LIMITED, a builder; "Wells
+  Fargo" → a food company): the matched company's last accounts (profile, cached) — dormant / micro → left out as a
+  namesake (`NAMESAKE_ACCOUNTS`), small / total exemption / unaudited abridged → "Matched" with a note to check, not sent
+  to the finder (`SMALL_ACCOUNTS`); also left out: dormant / non-trading codes, any 78… code, schools, LLPs, payments / FX
+  names (`FX_FIRM_NAME`), banks and financial groups (`BIG_FINANCE`).
+  New lead (a discovery, filed FX score 50–60): an FD advert, `LEAD_MIN` (40)+, or currency wording beside a currency /
+  treasury / trade role (payroll-abroad wording alone is mostly payroll bureaux). Store key `jobs`
   (GET `?view=jobs`, the cache left out): every employer of the last `KEEP_DAYS` (60) with its status (New lead / On our
   lists / Matched / Not matched / Not looked up yet / Left out), score, currencies, countries, terms, quotes and adverts, plus each
   search's yield (`queries`: adverts, kept, naming FX, leads). **Job adverts tab**: status buttons, kind / currency filters,

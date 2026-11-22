@@ -120,13 +120,37 @@ class TestJobSignals(unittest.TestCase):
         why = {k: v.get("excluded", "") for k, v in out.items()}
         self.assertIn("recruitment agency", why["MORGAN MCKINLEY"])
         self.assertIn("payments / FX firm", why["IFX PAYMENTS"])
-        self.assertIn("consultancy", why["LANE CLARK AND PEACOCK"])
+        self.assertIn("consult", why["LANE CLARK AND PEACOCK"])
         self.assertIn("by its name", why["SMITH PERSONNEL"])               # no search spent on it
         # an employer advertising many kinds of finance role at once is an agency whatever its name
+        # the second live run: brand names matched namesakes (an advert by "Citi" -> CITIGROUP LIMITED, a builder)
+        self.assertIn("namesake", jobs.excluded({"employer": "Citi Ltd"}, "SOME BUILDER LIMITED", ["41202"], accounts="micro-entity"))
+        self.assertIn("namesake", jobs.excluded({"employer": "Staffline"}, "STAFFLINE LIMITED", ["99999"]))
+        self.assertIn("payments / FX firm", jobs.excluded({"employer": "IFX Payments"}, "IFX PAYMENTS LIMITED", ["74990", "62020"]))
+        self.assertIn("staffing", jobs.excluded({"employer": "Sail"}, "SAILGLOBAL TECHNOLOGY LIMITED", ["62020", "78300"]))
         self.assertIn("bank or financial group", jobs.excluded({"employer": "Citi"}, "CITIGROUP LIMITED", ["64209"]))
         self.assertEqual(jobs.excluded({"employer": "Chasewater Foods"}, "CHASEWATER FOODS LIMITED", ["10890"]), "")
         spread = {"employer": "Quiet Co", "kinds": ["fd", "currency", "trade", "treasury"], "adverts": [{}] * 4}
         self.assertIn("probably an agency", jobs.excluded(spread))
+
+    def test_small_accounts_are_checked_by_hand_and_payroll_wording_alone_is_no_lead(self):
+        ads = [{"employer": "Raytec Ltd", "title": "Accounts Assistant", "date": "2026-11-20", "link": "a",
+                "text": "Process multi-currency payments in USD."},
+               {"employer": "Tiny Widgets Ltd", "title": "Purchase Ledger", "date": "2026-11-20", "link": "b",
+                "text": "Pay suppliers in EUR and USD from Germany."},
+               {"employer": "Payroll Hub Ltd", "title": "Payroll Officer", "date": "2026-11-20", "link": "c",
+                "text": "Run international payroll."}]
+        numbers = {"Raytec Ltd": "1", "Tiny Widgets Ltd": "2", "Payroll Hub Ltd": "3"}
+        accounts = {"1": "full", "2": "small", "3": "full"}
+        out = {}
+        _, found = ch_alerts.job_signals({}, "", ads, employers_out=out, today=date(2026, 11, 22),
+                                         lookup=lambda n: {"company_number": numbers[n], "company_name": n.upper()},
+                                         profile=lambda n: {"sic_codes": ["27900"], "company_status": "active",
+                                                            "accounts": {"last_accounts": {"type": accounts[n]}}})
+        self.assertEqual([r["company_number"] for r in found], ["1"])
+        self.assertEqual(out["TINY WIDGETS"]["status"], "matched")
+        self.assertIn("small accounts", out["TINY WIDGETS"]["note"])
+        self.assertEqual(out["PAYROLL HUB"]["status"], "matched")
 
     def test_fetch_paces_and_counts(self):
         calls, slept = [], []

@@ -1796,7 +1796,7 @@ function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
                 <span className={`chip${st === "new_lead" ? " good" : st === "not_found" ? " warn" : ""}`} title={JOB_STATUS[st]?.[1]}>{JOB_STATUS[st]?.[0] || st}</span>
                 {(e.kinds || []).map((k) => <span key={k} className="chip">{JOB_KINDS[k] || k}</span>)}
                 {e.first_seen && e.first_seen === data.made_at?.slice(0, 10) && <span className="new">New today</span>}
-                {e.excluded && <span className="muted">{e.excluded}</span>}
+                {(e.excluded || e.note) && <span className="muted">{e.excluded || e.note}</span>}
               </div>
               <div className="loss-fig" title="Advert score: currency wording 30, each currency 8, each country beside trade words 4, trade terms 6, an FD role 20, treasury 15, an import / export role 8, more adverts naming FX 5 each">
                 <b>{e.score}</b><span className="muted"> advert score{r?.lead_score !== undefined ? ` · lead score ${r.lead_score}` : ""}</span>

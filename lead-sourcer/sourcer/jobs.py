@@ -118,10 +118,19 @@ ADVERT_POINTS = {"wording": 30, "currency": 8, "currency_max": 24, "country": 4,
 # payments firm and an actuarial consultancy): by the register's sector codes (all of them in these), else the name, else
 # an advert spread no single employer has.
 EXCLUDED_SIC = (("78", "a recruitment agency"), ("692", "an accountancy practice — its adverts are client work"),
-                ("7022", "a consultancy — its adverts are client work"), ("6312", "a job board or web portal"))
+                ("7022", "a consultancy — its adverts are client work"), ("6312", "a job board or web portal"),
+                ("85", "a school or college"), ("99999", "dormant — a namesake of the advertiser"),
+                ("74990", "non-trading — a namesake of the advertiser"))
+# Payments / FX firms by name, whatever their codes (IFX Payments filed as non-trading): competitors, not clients.
+FX_FIRM_NAME = re.compile(r"\b(?:payments|fx|forex|currenc(?:y|ies)|remit\w*|money transfers?|bureau de change|eurochange|"
+                          r"travelex|wise|revolut|monzo|starling|paypal|stripe|adyen|worldpay|checkout\.com|klarna|gocardless)\b", re.I)
+# The matched company's last accounts (its profile): a dormant or micro company is a namesake of the advertiser (an advert
+# by "Citi" matched CITIGROUP LIMITED, a construction company); a small one is shown to check, not sent to the finder.
+NAMESAKE_ACCOUNTS = {"dormant", "micro-entity"}
+SMALL_ACCOUNTS = {"small", "total-exemption-full", "total-exemption-small", "unaudited-abridged", "partial-exemption"}
 PAYMENTS_NAME = re.compile(r"\b(?:payments?|pay|fx|forex|currency|currencies|exchange|money|remit\w*|transfers?)\b", re.I)
-AGENCY_NAME = re.compile(r"\b(?:people|personnel|careers?|jobs|talent|recruit\w*|resourcing|staffing|appointments|search|"
-                         r"selection|headhunt\w*|angels)\b", re.I)
+AGENCY_NAME = re.compile(r"\b(?:people|personnel|careers?|jobs|talent|recruit\w*|resourcing|resource management|staffing|"
+                         r"appointments|search|selection|headhunt\w*|angels|workforce|teksystems|pontoon|staffline)\b", re.I)
 # Banks and financial groups advertise treasury / FX roles for their own markets business; their name matches a UK entity
 # (a holding or service company) whose sector codes may not say bank.
 BIG_FINANCE = re.compile(r"\b(?:citi(?:group|bank)?|wells fargo|j\.? ?p\.? ?morgan|jpmorgan|goldman sachs|morgan stanley|barclays|"
@@ -346,7 +355,8 @@ def pick_company(name: str, items: list[dict]) -> Optional[dict]:
     return None
 
 
-def excluded(employer: dict, name: str = "", sic: Optional[list] = None, status: str = "", kind: str = "") -> str:
+def excluded(employer: dict, name: str = "", sic: Optional[list] = None, status: str = "", kind: str = "",
+             accounts: str = "") -> str:
     """Why an employer's adverts don't make it a lead, or "": a recruitment agency, job board, accountancy practice,
     consultancy, payments / FX firm (sector codes, then name), anything sourcer/absurd.py rules out (a bank, insurer,
     fund, public body, not-for-profit, not trading), or an agency's spread of adverts (AGENCY_SPREAD)."""
@@ -357,8 +367,16 @@ def excluded(employer: dict, name: str = "", sic: Optional[list] = None, status:
         hits = [next((why for prefix, why in EXCLUDED_SIC if c.startswith(prefix)), "") for c in codes]
         if all(hits):
             return f"{hits[0][0].upper()}{hits[0][1:]} (sector {codes[0]})"
+        if any(c.startswith("78") for c in codes):
+            return f"A recruitment / staffing firm (sector {next(c for c in codes if c.startswith('78'))})"
         if all(c[:2] in ("64", "66") for c in codes) and PAYMENTS_NAME.search(name):
             return f"A payments / FX firm (sector {codes[0]}) — a competitor"
+    if FX_FIRM_NAME.search(name) or FX_FIRM_NAME.search(employer.get("employer", "")):
+        return "A payments / FX firm, by its name — a competitor"
+    if "llp" in (kind or "").lower() or re.search(r"\bLLP\b", name):
+        return "A partnership (LLP) — law, accountancy and consulting firms advertise their clients' work"
+    if accounts in NAMESAKE_ACCOUNTS:
+        return f"Files {accounts} accounts — a namesake of the advertiser, not the employer"
     if RECRUITERS.search(name) or AGENCY_NAME.search(name) or RECRUITERS.search(employer.get("employer", "")):
         return "A recruitment agency or job board, by its name"
     if BIG_FINANCE.search(name) or BIG_FINANCE.search(employer.get("employer", "")):

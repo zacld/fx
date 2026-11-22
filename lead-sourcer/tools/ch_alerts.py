@@ -639,24 +639,31 @@ def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], look
                 e["status"] = "not_found"
                 continue
             entry = cache.setdefault(e["key"], {"company_number": company["company_number"], "at": today.isoformat()})
-            if "sic" not in entry and profiles < JOB_PROFILES_MAX:
+            if "accounts" not in entry and profiles < JOB_PROFILES_MAX:
                 profiles += 1
                 prof = profile(company["company_number"])
                 if prof:                                  # a profile that didn't load is tried again next run
-                    entry.update(sic=prof.get("sic_codes") or [], status=prof.get("company_status") or "", type=prof.get("type") or "")
+                    entry.update(sic=prof.get("sic_codes") or [], status=prof.get("company_status") or "", type=prof.get("type") or "",
+                                 accounts=((prof.get("accounts") or {}).get("last_accounts") or {}).get("type") or "none")
                     STATS["advert profiles with sector codes"] = STATS.get("advert profiles with sector codes", 0) + bool(entry["sic"])
                 else:
                     STATS["advert profiles not loaded"] = STATS.get("advert profiles not loaded", 0) + 1
             e["sic"] = entry.get("sic") or []
-            why = jobs.excluded(e, company.get("company_name", ""), entry.get("sic"), entry.get("status", ""), entry.get("type", ""))
+            why = jobs.excluded(e, company.get("company_name", ""), entry.get("sic"), entry.get("status", ""), entry.get("type", ""),
+                                entry.get("accounts", ""))
             if why:
                 e.update(company_number=company["company_number"], company_name=company.get("company_name", ""),
                          status="excluded", excluded=why)
                 continue
-            lead = discover or e["fd"] or bool(e["quote"]) or e["score"] >= jobs.LEAD_MIN
+            # a new lead: an FD advert, a strong advert, or currency wording beside a currency / treasury / trade role —
+            # payroll-abroad wording alone is mostly payroll bureaux and staffing firms; small accounts: check by hand
+            small = entry.get("accounts") in jobs.SMALL_ACCOUNTS
+            lead = discover or e["fd"] or e["score"] >= jobs.LEAD_MIN or bool(e["quote"] and set(e["kinds"]) - {"abroad", "fd"})
+            lead = lead and not small
             e.update(company_number=company["company_number"], company_name=company.get("company_name", ""),
                      match=company.get("match") or cache.get(e["key"], {}).get("match", "exact"),
-                     status="new_lead" if lead else "matched")
+                     status="new_lead" if lead else "matched", accounts=entry.get("accounts", ""),
+                     **({"note": f"Files {entry['accounts']} accounts — check it's the advertiser"} if small else {}))
             if not lead:
                 continue
         done = set()
@@ -848,7 +855,7 @@ def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
                                                      if e.get("status") == "excluded").most_common()))
     for e in [e for e in by_employer.values() if e.get("status") == "new_lead"][:25]:
         print(f"  new lead  {e['score']:>3}  {e.get('company_name') or e['employer']}  [{', '.join(e['kinds'])}] {', '.join(e['currencies'])}"
-              f"  sector {', '.join(e.get('sic') or []) or '?'}")
+              f"  sector {', '.join(e.get('sic') or []) or '?'}  accounts {e.get('accounts') or '?'}")
 
 
 def main() -> None:
