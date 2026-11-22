@@ -39,6 +39,7 @@ Accounts page's Alerts tab and its hot-alerts banner — Zac, 14 Nov 2026: "just
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import base64
 import json
 import os
@@ -53,7 +54,7 @@ from typing import Iterable, Optional
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from sourcer import companies_house, news, pe, triggers  # noqa: E402
+from sourcer import jobs, companies_house, news, pe, triggers  # noqa: E402
 
 STREAM_BASE = "https://stream.companieshouse.gov.uk"
 STREAMS = {"officers": "/officers", "charges": "/charges", "psc": "/persons-with-significant-control",
@@ -375,35 +376,14 @@ _SUBJECT = re.compile(r"^(?:UK\s+|British\s+)?(.+?)\s+(?:has\s+)?(?:appoints|app
                       r"buys|opens|expands|wins|secures|signs|lands|launches|raises|closes|bags|completes)\b", re.I)
 _NOT_A_COMPANY = re.compile(r"^(?:the|a|an|how|why|what|who|uk|britain|government|council|nhs|police|university)\b|"
                             r"\b(?:ceo|chief|boss|founder|director|minister|chancellor)\b", re.I)
-RECRUITERS = re.compile(r"\b(?:hays|michael\s+page|robert\s+(?:half|walters)|reed|page\s+group|harvey\s+nash|"
-                        r"randstad|adecco|manpower|recruit|recruitment|resourcing|talent|search\s+partners|staffing|"
-                        r"selection|consult(?:ing|ancy)?\s+group)\b", re.I)
-# A finance director / CFO advertised (Zac, 15 Nov 2026: "improve the FD … companies"): the incoming FD reviews the
-# banking and FX in their first months — a hot alert for a company on the lists, and a new lead (exact registered name)
-# for one not on them. Two pages each: these roles are mostly advertised through recruiters, who are left out.
-FD_JOB_QUERIES = ["finance director", "chief financial officer", "CFO", "head of finance", "group finance director"]
-FD_JOB_TITLE = re.compile(r"\b(?:finance director|director of finance|financial director|chief financial officer|CFO|"
-                          r"head of finance|finance (?:and|&) operations director)\b", re.I)
-JOB_QUERIES = ["treasury analyst", "treasury manager", "foreign exchange", "FX hedging", "import export coordinator",
-               "international trade manager", "export sales manager", "currency risk"]
-# Adverts that describe the FX work itself (Zac's brief, 19 Nov 2026: companies not already prospected — a mid-sized
-# company advertising an accounts role "paying suppliers in EUR and USD" shows real currency flows, decided in the UK,
-# and is rarely on anyone's list). Searched on the advert's whole text; the employer, found on Companies House by its
-# exact registered name, becomes a new lead with the advert's own words as evidence (`fx_wording`).
-FX_JOB_QUERIES = ["multi-currency payments", "foreign currency payments", "overseas supplier payments",
-                  "international payments accounts", "FX payments", "currency hedging", "forward contracts finance",
-                  "letters of credit", "multi currency accounts payable", "EUR USD payments",
-                  # teams abroad (the origination brief's idea 2): payroll and suppliers paid abroad every month
-                  "international payroll", "overseas payroll", "offshore team finance", "global payroll accountant"]
-FX_WORDING = re.compile(r"\b(?:multi[- ]?currenc\w*|foreign (?:currency|exchange)|FX\b|forex|currency (?:payments?|"
-                        r"accounts?|risk|exposure|hedg\w*|transactions?)|forward (?:contracts?|currency)|"
-                        r"letters? of credit|international payments?|overseas (?:payments?|suppliers?)|"
-                        r"(?:EUR|USD|euro|dollar|€|\$)\s*(?:and|&|/|,)\s*(?:EUR|USD|GBP|euro|dollar|€|\$)|"
-                        r"(?:in|into) (?:euros?|dollars?|EUR|USD)|"
-                        r"(?:international|overseas|global|multi[- ]country) payroll|offshore (?:team|centre|center|delivery)|"
-                        r"nearshore|(?:teams?|office|centre|center|developers?|engineers?) (?:in|based in) (?:Poland|Romania|"
-                        r"Bulgaria|Ukraine|India|the Philippines|Philippines|South Africa|Sri Lanka|Vietnam|Egypt|Mexico|Colombia))", re.I)
-JOB_LOOKUPS_MAX = 150       # Companies House name searches a run for advert employers not on the lists
+# Job adverts (sourcer/jobs.py — the queries, the reading of each advert, the employer matching): kept here as names
+# the rest of this tool and its tests use.
+RECRUITERS = jobs.RECRUITERS
+FD_JOB_TITLE = jobs.FD_TITLE
+FD_JOB_QUERIES = [q for q, k, _ in jobs.QUERIES if k == "fd"]
+FX_JOB_QUERIES = [q for q, k, _ in jobs.QUERIES if k in ("currency", "abroad")]
+FX_WORDING = jobs.FX_WORDING
+JOB_LOOKUPS_MAX = 250       # new Companies House name searches a run for advert employers not on the lists (cached)
 STATS: dict[str, int] = {}   # counts for the log (public repo: no names)
 LOOKUPS_MAX = 40            # Companies House name searches a run, for subjects not on the lists
 # 14 Nov 2026 (discovery review: news and job adverts were the noisiest source — low volume, name-matching): headlines
@@ -505,13 +485,10 @@ def headline_kind(headline: str) -> str:
 
 
 def find_company(name: str, api_key: str) -> Optional[dict]:
-    """An active company whose registered name is the headline's name (Companies House name search), or None."""
-    data = companies_house._get(f"{companies_house.CH_BASE}/search/companies", {"q": name, "items_per_page": 5}, api_key) or {}
-    want = matching.normalise_name(name)
-    for item in data.get("items") or []:
-        if item.get("company_status") == "active" and matching.normalise_name(item.get("title", "")) == want:
-            return {"company_number": item.get("company_number", ""), "company_name": item.get("title", "")}
-    return None
+    """An active company whose registered name is the name (Companies House name search), else the only active one with the
+    same core name ("ACME GROUP LIMITED" for "Acme"; sourcer/jobs.py pick_company), or None."""
+    data = companies_house._get(f"{companies_house.CH_BASE}/search/companies", {"q": name, "items_per_page": 20}, api_key) or {}
+    return jobs.pick_company(name, data.get("items") or [])
 
 
 def news_items(query: str, fetcher=None, today: Optional[date] = None) -> list[dict]:
@@ -579,30 +556,19 @@ def news_signals(tracked: dict[str, str], api_key: str, fetcher=None, today: Opt
     return alerts, found
 
 
-def job_adverts(fetch_json=None) -> list[dict]:
-    """[{employer, title, date, link}] from Adzuna (ADZUNA_APP_ID + ADZUNA_APP_KEY) and Reed (REED_API_KEY), last 14
-    days; recruiters left out. Empty without keys."""
+def job_adverts(fetch_json=None, sleep=None, stats: Optional[dict] = None) -> list[dict]:
+    """Adverts from Adzuna (ADZUNA_APP_ID + ADZUNA_APP_KEY) and Reed (REED_API_KEY), last 14 days, agencies left out,
+    the promising Reed ones read in full (sourcer/jobs.py). Empty without keys."""
+    sleep = sleep or (time.sleep if fetch_json is None else (lambda s: None))
     fetch_json = fetch_json or _fetch_json
-    out = []
-    app_id, app_key = os.environ.get("ADZUNA_APP_ID", "").strip(), os.environ.get("ADZUNA_APP_KEY", "").strip()
+    adzuna = (os.environ.get("ADZUNA_APP_ID", "").strip(), os.environ.get("ADZUNA_APP_KEY", "").strip())
     reed = os.environ.get("REED_API_KEY", "").strip()
-    for q in JOB_QUERIES + FD_JOB_QUERIES + FX_JOB_QUERIES:
-        pages = 2 if q in FD_JOB_QUERIES + FX_JOB_QUERIES else 1
-        for page in range(1, pages + 1) if app_id and app_key else ():
-            url = (f"https://api.adzuna.com/v1/api/jobs/gb/search/{page}?" + urllib.parse.urlencode(
-                {"app_id": app_id, "app_key": app_key, "what": q, "max_days_old": 14, "results_per_page": 50}))
-            for j in (fetch_json(url, None) or {}).get("results") or []:
-                out.append({"employer": (j.get("company") or {}).get("display_name", ""), "title": j.get("title", ""),
-                            "date": (j.get("created") or "")[:10], "link": j.get("redirect_url", ""),
-                            "text": j.get("description", "")})
-        if reed:
-            url = "https://www.reed.co.uk/api/1.0/search?" + urllib.parse.urlencode({"keywords": q, "resultsToTake": 100})
-            for j in (fetch_json(url, reed) or {}).get("results") or []:
-                d = j.get("date") or ""
-                iso = f"{d[6:10]}-{d[3:5]}-{d[0:2]}" if re.match(r"\d\d/\d\d/\d{4}", d) else d[:10]
-                out.append({"employer": j.get("employerName", ""), "title": j.get("jobTitle", ""), "date": iso,
-                            "link": j.get("jobUrl", ""), "text": j.get("jobDescription", "")})
-    return [j for j in out if j["employer"] and not RECRUITERS.search(j["employer"])]
+    stats = stats if stats is not None else {}
+    adverts = jobs.fetch_adverts(fetch_json, adzuna=adzuna, reed=reed, sleep=sleep, stats=stats)
+    order = {"currency": 0, "abroad": 1, "treasury": 2, "trade": 3, "fd": 4}
+    adverts.sort(key=lambda a: order.get(a.get("query_kind"), 5))
+    stats["_full_reads"] = jobs.read_full_reed(adverts, fetch_json, reed, sleep=sleep)
+    return adverts
 
 
 def _fetch_json(url: str, basic_user: Optional[str]):
@@ -616,62 +582,116 @@ def _fetch_json(url: str, basic_user: Optional[str]):
         return None
 
 
-def fx_wording(advert: dict) -> str:
-    """The sentence of an advert (title, then its text) that names currency work — "paying suppliers in EUR and USD",
-    "multi-currency bank accounts", "FX hedging" — or "". Sentences about the recruiter's own pitch are skipped."""
-    text = re.sub(r"<[^>]+>", " ", f"{advert.get('title', '')}. {advert.get('text', '')}")
-    for sentence in re.split(r"(?<=[.!?])\s+|\s*[•·\n]\s*", text):
-        if FX_WORDING.search(sentence) and not re.search(r"\b(?:our client|we are recruiting|on behalf of)\b", sentence, re.I):
-            return re.sub(r"\s+", " ", sentence).strip()[:240]
-    return ""
+fx_wording = jobs.fx_wording
 
 
-def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], lookup=None,
-                discover: bool = False) -> tuple[list[dict], list[dict]]:
-    """(alerts, discovery rows): an employer on the lists hiring for treasury / FX / import-export is an alert, and one
-    advertising for a finance director / CFO a hot one (hiring_fd). One not on the lists, found on Companies House by its
-    exact name, is a new lead for a finance director advert (from 15 Nov 2026), and for any advert with `discover`."""
+JOB_PROFILES_MAX = 300      # company profiles read a run (sector codes: agencies, consultancies … left out), cached
+
+
+def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], lookup=None, discover: bool = False,
+                cache: Optional[dict] = None, employers_out: Optional[dict] = None,
+                today: Optional[date] = None, profile=None) -> tuple[list[dict], list[dict]]:
+    """(alerts, discovery rows) from the adverts, one employer at a time (sourcer/jobs.py `employers`, best first): one
+    on the lists hiring is an alert, a finance director / CFO advert a hot one (hiring_fd). One not on the lists is looked
+    up on Companies House when its adverts score jobs.LOOKUP_MIN+ (or name currency work, or advertise an FD) — the
+    search cached in `cache` between runs, JOB_LOOKUPS_MAX new searches a run — and becomes a new lead when it names
+    currency work, advertises an FD or scores jobs.LEAD_MIN+ (any match with `discover`). `employers_out` gets every
+    employer with its status (on_list / new_lead / matched / not_found / waiting / not_looked_up / excluded) for the Job
+    adverts tab. A matched employer's sector codes (its Companies House profile, `profile`, cached) leave out agencies,
+    job boards, accountancy practices, consultancies and payments firms (sourcer/jobs.py `excluded`)."""
+    today = today or date.today()
     index = tracked_index(tracked)
     lookup = lookup or (lambda name: find_company(name, api_key) if api_key else None)
-    alerts, found, lookups, seen = [], [], 0, {}
-    done, found_numbers = set(), set()
-    # adverts naming currency work and FD adverts are looked up first, so the name searches go to the best leads
-    adverts = sorted(adverts, key=lambda j: (not fx_wording(j), not FD_JOB_TITLE.search(j["title"])))
-    for j in adverts:
-        fd = bool(FD_JOB_TITLE.search(j["title"])) and not re.search(r"\b(?:interim|assistant|deputy|part[- ]time)\b", j["title"], re.I)
-        quote = fx_wording(j)
-        number = match_tracked(j["employer"], index)
-        if not number:
-            if not (discover or fd or quote):
-                continue
-            key = matching.normalise_name(j["employer"])
-            if key not in seen and lookups < JOB_LOOKUPS_MAX:
-                lookups += 1
-                seen[key] = lookup(j["employer"])
-            company = seen.get(key)
-        else:
+    cache = cache if cache is not None else {}
+    profile = profile or (lambda number: companies_house.get_company_profile(number, api_key) if api_key else None)
+    by = jobs.employers(adverts)
+    alerts, found, lookups, profiles = [], [], 0, 0
+    for e in sorted(by.values(), key=lambda e: (-e["score"], e["employer"])):
+        number = match_tracked(e["employer"], index)
+        company = None
+        if number:
             company = {"company_number": number, "company_name": tracked[number]}
-        if not company or not company.get("company_number"):
-            continue
-        kind = "hiring_fd" if fd else "hiring"
-        if (kind, company["company_number"]) in done:   # the same role advertised on several boards / pages
-            continue
-        done.add((kind, company["company_number"]))
-        alerts.append({"id": f"{kind}:{company['company_number']}:{matching.normalise_name(j['title'])[:40]}",
-                       "at": (j["date"] or date.today().isoformat()) + "T07:00:00", "kind": kind,
-                       "company_number": company["company_number"], "company_name": company["company_name"],
-                       "tracked": bool(number), "hot": fd,
-                       "title": f"Hiring a finance director: {j['title'][:60]}" if fd else f"Hiring: {j['title'][:60]}",
-                       "detail": f"advertised {j['date']}" + (f" — “{quote}”" if quote else ""),
-                       "url": j["link"] or company_url(company["company_number"])})
-        if not number and company["company_number"] not in found_numbers:
-            found_numbers.add(company["company_number"])
-            found.append({"company_number": company["company_number"], "company_name": company["company_name"],
-                          "discovered": j["date"], "discovered_by": f"job advert: {j['title']}"
-                          + (f" — “{quote}”" if quote else ""), "source": "job_advert", "source_url": j["link"],
-                          "filed_fx_score": 55 if quote else 50})
-    STATS.update({"job adverts": len(adverts), "adverts naming currency work": sum(1 for j in adverts if fx_wording(j)),
-                  "advert name lookups": lookups, "new leads from adverts": len(found)})
+            e.update(company_number=number, company_name=tracked[number], status="on_list", match="list")
+        else:
+            worth = discover or e["fd"] or bool(e["quote"]) or e["score"] >= jobs.LOOKUP_MIN
+            if not worth:
+                e["status"] = "not_looked_up"
+                continue
+            early = jobs.excluded(e)                      # an agency by its name or spread: no search spent on it
+            if early:
+                e.update(status="excluded", excluded=early)
+                continue
+            if not jobs.lookup_due(cache, e["key"], today):
+                hit = cache[e["key"]]
+                company = {"company_number": hit["company_number"], "company_name": hit.get("company_name", "")} \
+                    if hit.get("company_number") else None
+            elif lookups < JOB_LOOKUPS_MAX:
+                lookups += 1
+                company = lookup(e["employer"])
+                cache[e["key"]] = {**({k: company[k] for k in ("company_number", "company_name") if company.get(k)} if company else {}),
+                                   "at": today.isoformat()}
+                if company and company.get("match"):
+                    cache[e["key"]]["match"] = company["match"]
+            else:
+                e["status"] = "waiting"
+                continue
+            if not company or not company.get("company_number"):
+                e["status"] = "not_found"
+                continue
+            entry = cache.setdefault(e["key"], {"company_number": company["company_number"], "at": today.isoformat()})
+            if "accounts" not in entry and profiles < JOB_PROFILES_MAX:
+                profiles += 1
+                prof = profile(company["company_number"])
+                if prof:                                  # a profile that didn't load is tried again next run
+                    entry.update(sic=prof.get("sic_codes") or [], status=prof.get("company_status") or "", type=prof.get("type") or "",
+                                 accounts=((prof.get("accounts") or {}).get("last_accounts") or {}).get("type") or "none")
+                    STATS["advert profiles with sector codes"] = STATS.get("advert profiles with sector codes", 0) + bool(entry["sic"])
+                else:
+                    STATS["advert profiles not loaded"] = STATS.get("advert profiles not loaded", 0) + 1
+            e["sic"] = entry.get("sic") or []
+            why = jobs.excluded(e, company.get("company_name", ""), entry.get("sic"), entry.get("status", ""), entry.get("type", ""),
+                                entry.get("accounts", ""))
+            if why:
+                e.update(company_number=company["company_number"], company_name=company.get("company_name", ""),
+                         status="excluded", excluded=why)
+                continue
+            # a new lead: an FD advert, a strong advert, or currency wording beside a currency / treasury / trade role —
+            # payroll-abroad wording alone is mostly payroll bureaux and staffing firms; small accounts: check by hand
+            small = entry.get("accounts") in jobs.SMALL_ACCOUNTS
+            lead = discover or e["fd"] or e["score"] >= jobs.LEAD_MIN or bool(e["quote"] and set(e["kinds"]) - {"abroad", "fd"})
+            lead = lead and not small
+            e.update(company_number=company["company_number"], company_name=company.get("company_name", ""),
+                     match=company.get("match") or cache.get(e["key"], {}).get("match", "exact"),
+                     status="new_lead" if lead else "matched", accounts=entry.get("accounts", ""),
+                     **({"note": f"Files {entry['accounts']} accounts — check it's the advertiser"} if small else {}))
+            if not lead:
+                continue
+        done = set()
+        for a in e["adverts"]:
+            kind = "hiring_fd" if a["fd"] else "hiring"
+            if kind in done:            # the same company's role advertised on several boards / pages
+                continue
+            done.add(kind)
+            detail = [f"advertised {a['date']}"] + ([f"names {', '.join(a['currencies'])}"] if a["currencies"] else [])
+            alerts.append({"id": f"{kind}:{company['company_number']}:{matching.normalise_name(a['title'])[:40]}",
+                           "at": (a["date"] or today.isoformat()) + "T07:00:00", "kind": kind,
+                           "company_number": company["company_number"], "company_name": e.get("company_name", ""),
+                           "tracked": bool(number), "hot": a["fd"],
+                           "title": f"Hiring a finance director: {a['title'][:60]}" if a["fd"] else f"Hiring: {a['title'][:60]}",
+                           "detail": ", ".join(detail) + (f" — “{a['quote']}”" if a["quote"] else ""),
+                           "url": a["link"] or company_url(company["company_number"])})
+        if not number:
+            best = e["adverts"][0]
+            found.append({"company_number": company["company_number"], "company_name": e.get("company_name", ""),
+                          "discovered": best["date"], "discovered_by": f"job advert: {best['title']}"
+                          + (f" — “{e['quote']}”" if e["quote"] else ""), "source": "job_advert", "source_url": best["link"],
+                          "filed_fx_score": (55 if e["quote"] else 50) + (5 if e["score"] >= 60 else 0),
+                          "job_score": e["score"], **({"currencies_in_adverts": ", ".join(e["currencies"])} if e["currencies"] else {})})
+    if employers_out is not None:
+        employers_out.update(by)
+    STATS.update({"job adverts": len(adverts), "adverts naming currency work": sum(1 for a in adverts if fx_wording(a)),
+                  "advert name lookups": lookups, "new leads from adverts": len(found), "advert employers": len(by),
+                  "advert profiles read": profiles})
     return alerts, found
 
 
@@ -786,8 +806,25 @@ def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
     tracked = _load(args.tracked, {}) or {}
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
     news_alerts, news_found = news_signals(tracked, api_key, today=now.date())
-    adverts = job_adverts()
-    job_alerts, job_found = job_signals(tracked, api_key, adverts)
+    query_counts: dict = {}
+    adverts = job_adverts(stats=query_counts)
+    previous_jobs = _load(args.jobs, {}) or {}
+    cache = previous_jobs.get("lookups") or {}
+    by_employer: dict = {}
+    job_alerts, job_found = job_signals(tracked, api_key, adverts, cache=cache, employers_out=by_employer, today=now.date())
+    keep_from = (now.date() - timedelta(days=120)).isoformat()
+    employers = jobs.merge(previous_jobs, by_employer, now.date())
+    statuses: dict[str, int] = {}
+    for e in employers.values():
+        statuses[e.get("status", "")] = statuses.get(e.get("status", ""), 0) + 1
+    _save(args.jobs, {"made_at": now.isoformat(), "days": jobs.DAYS,
+                      "boards": [b for b, on in (("Adzuna", os.environ.get("ADZUNA_APP_ID")), ("Reed", os.environ.get("REED_API_KEY"))) if on],
+                      "counts": {"adverts": len(adverts), "employers_this_run": len(by_employer), "employers": len(employers),
+                                 "full_reads": query_counts.get("_full_reads", 0), "calls": query_counts.get("_calls", {}),
+                                 "statuses": statuses},
+                      "queries": jobs.query_stats(query_counts, by_employer),
+                      "employers": list(employers.values()),
+                      "lookups": {k: v for k, v in cache.items() if (v.get("at") or "") >= keep_from or v.get("company_number")}})
     discoveries = _load(args.discoveries, {}) or {}
     rows = {r["company_number"]: r for r in discoveries.get("rows") or []}
     for r in news_found + job_found:
@@ -808,6 +845,17 @@ def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
           f"new leads {len(job_found)}; adverts naming currency work {STATS.get('adverts naming currency work', 0)}, "
           f"advert name lookups {STATS.get('advert name lookups', 0)}); Gazette winding-up notices read {notices}, on the "
           f"lists {len(petitions)}; new alerts {len(fresh)}; sent: {sent}")
+    print(f"Job adverts: {len(by_employer)} employers this run ({', '.join(f'{k} {n}' for k, n in sorted(statuses.items()))} on the tab); "
+          f"full adverts read {query_counts.get('_full_reads', 0)}; board calls {query_counts.get('_calls', {})}")
+    for q in sorted(jobs.query_stats(query_counts, by_employer), key=lambda q: (-q["leads"], -q["worded"]))[:15]:
+        print(f"  {q['kind']:<9} {q['query'][:40]:<40} adverts {q['adverts']:>4} kept {q['kept']:>4} naming FX {q['worded']:>3} leads {q['leads']:>3}")
+    print(f"  company profiles read {STATS.get('advert profiles read', 0)} (with sector codes {STATS.get('advert profiles with sector codes', 0)}, "
+          f"not loaded {STATS.get('advert profiles not loaded', 0)}); left out: "
+          + ", ".join(f"{k} {n}" for k, n in Counter(e.get("excluded", "").split(" (")[0].split(",")[0] for e in by_employer.values()
+                                                     if e.get("status") == "excluded").most_common()))
+    for e in [e for e in by_employer.values() if e.get("status") == "new_lead"][:25]:
+        print(f"  new lead  {e['score']:>3}  {e.get('company_name') or e['employer']}  [{', '.join(e['kinds'])}] {', '.join(e['currencies'])}"
+              f"  sector {', '.join(e.get('sic') or []) or '?'}  accounts {e.get('accounts') or '?'}")
 
 
 def main() -> None:
@@ -816,6 +864,7 @@ def main() -> None:
     parser.add_argument("--state", default="stream.json")
     parser.add_argument("--alerts", default="alerts.json")
     parser.add_argument("--discoveries", default="discoveries.json")
+    parser.add_argument("--jobs", default="jobs.json", help="the Job adverts tab's employers (read and updated, --signals)")
     parser.add_argument("--seconds", type=float, default=240, help="per stream")
     parser.add_argument("--telegram", action="store_true",
                         help="send the new hot alerts to Telegram when its secrets are set")

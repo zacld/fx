@@ -6,7 +6,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, FEED_KEY, FILINGS_KEY, KEY, MOMENTS_KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
-import { movesByCurrency, reviewLearnings } from "../src/accounts/format.js";
+import { likeGoodLeads, movesByCurrency, reviewLearnings, setKnownGroups } from "../src/accounts/format.js";
 import { feedRows, filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
@@ -35,20 +35,34 @@ const listRows = list?.rows || [];
 // the feedback loop: Zac's own marks (Simplified dash review buttons, verdicts) lean the score by niche and source
 const verdicts = (await store.get(VERDICTS_KEY, "json")) || {};
 const checks = (await store.get(CHECKS_KEY, "json")) || {};
-const reviews = reviewLearnings([...listRows, ...filingRows.map((r) => ({ ...r, from_filings: true, fx_niche: enrich[r.company_number]?.niche || "" }))],
-  checks, verdicts);
-const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, moves, reviews,
+setKnownGroups(groupOf);   // PE up the chain, a holding company's group activity: read by the score as on the page
+const marked = [...listRows, ...filingRows.map((r) => ({ ...r, from_filings: true, fx_niche: enrich[r.company_number]?.niche || "", sic: enrich[r.company_number]?.sic || [] }))];
+const reviews = reviewLearnings(marked, checks, verdicts);
+// lookalikes by profile: the unmarked leads most like the ones Zac marked good (format.js likeGoodLeads)
+const likes = likeGoodLeads(marked, checks, verdicts);
+const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, moves, reviews, likes, groups: groupOf,
   signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) });
 const learn = nicheLearnings(scored);
 const reviewed = verdictLearnings(scored, verdicts, { shyOf: shy_of });
 const made_at = new Date().toISOString();
-await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, gleif_of: gleifOf, niches: learn, verdicts: reviewed, reviews });
+await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, gleif_of: gleifOf, niches: learn, verdicts: reviewed, reviews, likes });
 const feed = feedRows(scored, listRows, filingRows);
 await store.set(FEED_KEY, { made_at, count: feed.length, rows: feed });
 console.log(`Power Automate feed: ${feed.length.toLocaleString()} companies saved (feed/all)`);
 
 const live = scored.filter((s) => !s.absurd);
-if (orderPath) await writeFile(orderPath, JSON.stringify(live.map((s) => s.company_number)));
+// the order the website, parents and owner lookups work through: Fit 90+ first (the best-fitting companies, which
+// Cognism needs a website to match), best fit first, then everyone else by lead score
+const topFit = live.filter((s) => (s.fit || 0) >= 90).sort((a, b) => (b.fit || 0) - (a.fit || 0) || b.score - a.score);
+const topSet = new Set(topFit.map((s) => s.company_number));
+if (orderPath) await writeFile(orderPath, JSON.stringify([...topFit, ...live.filter((s) => !topSet.has(s.company_number))].map((s) => s.company_number)));
+console.log(`Lookup order: ${topFit.length.toLocaleString()} leads with Fit 90+ first, then ${(live.length - topFit.length).toLocaleString()} by lead score`);
+const likeCount = {};
+for (const l of Object.values(likes)) likeCount[l.like_name] = (likeCount[l.like_name] || 0) + 1;
+console.log(`Lookalikes by profile: ${Object.keys(likes).length.toLocaleString()} leads like your good ones — `
+  + (Object.entries(likeCount).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k, n]) => `${k} ${n}`).join("; ") || "mark some leads good first"));
+const groupNiches = Object.entries(groupOf).filter(([, g]) => g.activity).length;
+console.log(`Holding companies labelled by their group's trading subsidiaries: ${groupNiches.toLocaleString()}`);
 const bucket = (lo, hi) => live.filter((s) => s.score >= lo && s.score < hi).length;
 console.log(`Leads scanned: ${scored.length.toLocaleString()} (Accounts list ${listRows.length.toLocaleString()}, FX filings not on it ${rows.length.toLocaleString()}); ` +
             `ruled out as absurd ${Object.keys(ruled_out).length.toLocaleString()}; list companies relabelled ${Object.keys(niche_of).length.toLocaleString()}`);

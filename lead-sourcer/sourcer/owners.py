@@ -14,6 +14,8 @@ deal, and is skipped. Rule-based; no API calls.
 
 from __future__ import annotations
 
+from collections import Counter
+
 import io
 import json
 import os
@@ -204,6 +206,75 @@ def group_of(number: str, parents: dict, names: dict, max_hops: int = 8) -> dict
         hops += 1
     abroad = next((f"{p[1]} ({p[3]})" if p[3] else p[1] for p in parents.get(cur, []) if not p[2] and p[1]), "")
     return {"top": cur, "top_name": names.get(cur, "") if hops else "", "hops": hops, "abroad": abroad}
+
+
+# What a holding company's group does (Zac's five good finds, 20 Nov 2026: three were holding companies — head office /
+# holding company / financial-services sector codes — so the page called a freight group "Finance & insurance" and gave
+# it no niche). Its trading subsidiaries' own sector codes, read down the ownership register, say what the group trades.
+NON_TRADING_SIC = {"70100", "82990", "74909", "74990", "96090", "99999", "98000", "68209", "68100", "68320"}
+
+
+def non_trading(code: str) -> bool:
+    """A sector code that says nothing about what is traded: head office, holding company and other financial-services
+    codes (64… / 66…), dormant, other business support, property letting."""
+    code = str(code).zfill(5)
+    return code in NON_TRADING_SIC or code[:2] in ("64", "66") or code.startswith("701")
+
+
+def children_index(parents: dict) -> dict[str, list[str]]:
+    """{UK owner's number: [companies it currently owns]} from the snapshot's parents (tee_parents)."""
+    out: dict[str, list[str]] = {}
+    for child, ups in parents.items():
+        for p in ups:
+            if p[0] and p[2] and p[0] != child:
+                out.setdefault(p[0], []).append(child)
+    return out
+
+
+def descendants(number: str, children: dict, max_depth: int = 4, cap: int = 80) -> list[str]:
+    """Every company under it (subsidiaries, theirs …), nearest first, at most `cap`; loops stopped."""
+    out, seen, level = [], {number}, [number]
+    for _ in range(max_depth):
+        nxt = []
+        for n in level:
+            for c in sorted(children.get(n, [])):
+                if c not in seen:
+                    seen.add(c)
+                    out.append(c)
+                    nxt.append(c)
+                    if len(out) >= cap:
+                        return out
+        level = nxt
+        if not level:
+            break
+    return out
+
+
+def group_activity(own_sics: list[str], subs: list[str], registry: dict, sized: set, niche_for=None) -> Optional[dict]:
+    """{sic, subs, names, niche} for a company whose own sector codes say nothing about what it trades (non_trading) —
+    its active trading subsidiaries' codes, a full / medium / group-accounts subsidiary counting three times a small
+    one's; None when it trades itself or no subsidiary does. `niche_for(codes)` names the niche those codes fall in."""
+    if own_sics and not all(non_trading(c) for c in own_sics):
+        return None
+    weights: Counter = Counter()
+    trading = []
+    for d in subs:
+        rec = registry.get(d) or {}
+        if (rec.get("status") or "").lower() != "active" or "DORMANT" in (rec.get("category") or "").upper():
+            continue
+        codes = [c for c in rec.get("sic_codes") or [] if not non_trading(c)]
+        if not codes:
+            continue
+        w = 3 if rec.get("category") in sized else 1
+        for c in codes:
+            weights[c] += w
+        trading.append((w, rec.get("name") or d, d))
+    if not weights:
+        return None
+    top = [c for c, _ in weights.most_common(3)]
+    trading.sort(key=lambda t: -t[0])
+    return {"sic": top, "subs": len(trading), "names": [t[1] for t in trading[:3]], "numbers": [t[2] for t in trading[:3]],
+            "niche": (niche_for(top) if niche_for else "") or ""}
 
 
 def pe_owner(number: str, parents: dict, max_hops: int = 6) -> dict:

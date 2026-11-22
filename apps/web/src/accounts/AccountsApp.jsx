@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -146,8 +146,10 @@ function Accounts({ data, password }) {
   const [verdicts, setVerdicts] = useState(data.verdicts || {});
   const [checks, setChecks] = useState(data.checks || {});
   const reviews = useMemo(() => reviewLearnings(baseRows, checks, verdicts), [baseRows, checks, verdicts]);
-  const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, moves, madeAt: data.made_at, reviews }),
-                          [signals, moves, data.made_at, reviews]);
+  // lookalikes by profile: the unmarked leads most like the ones Zac marked good
+  const likes = useMemo(() => likeGoodLeads(baseRows, checks, verdicts), [baseRows, checks, verdicts]);
+  const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, moves, madeAt: data.made_at, reviews, likes }),
+                          [signals, moves, data.made_at, reviews, likes]);
   // Zac's Good lead / Not a fit verdicts: declared before the rows that read them
   const [lists, setLists] = useState(data.lists || {});   // Zac's call / chocolate-mailing / email lists
   const allRows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
@@ -362,6 +364,7 @@ function Accounts({ data, password }) {
   }, [rows, filters, sort, contacted, notes, data.made_at, ranked]);   // eslint-disable-line react-hooks/exhaustive-deps
   const open = rows.filter((r) => !contacted[r.company_number]);
   const listedNumbers = useMemo(() => new Set(allRows.filter((r) => !r.dropped).map((r) => r.company_number)), [allRows]);
+  const rowsByNumber = useMemo(() => new Map(allRows.filter((r) => !r.dropped).map((r) => [r.company_number, r])), [allRows]);
   const groupCounts = useMemo(() => {
     const base = filterRows(rows, { ...ctx, contact: "" });
     return Object.fromEntries(["", ...CONTACT_GROUPS].map((g) => [g, g ? base.filter((r) => contactGroup(r) === g).length : base.length]));
@@ -544,12 +547,20 @@ function Accounts({ data, password }) {
                   title="Every full / medium / group-accounts company in this week's emerging niches — check them off" onClick={() => set({ section: "", view: "emerging" })}>
             Emerging leads
           </button>
+          <button role="tab" aria-selected={filters.view === "scoreboard"} className={`tab niches-tab${filters.view === "scoreboard" ? " on" : ""}`}
+                  title="Where your good leads come from — by source, niche and industry — and the leads like them" onClick={() => set({ section: "", view: "scoreboard" })}>
+            Scoreboard
+          </button>
+          <button role="tab" aria-selected={filters.view === "jobs"} className={`tab niches-tab${filters.view === "jobs" ? " on" : ""}`}
+                  title="Employers whose job adverts name currency work, trade roles, treasury or a new finance director — most not on anyone's list" onClick={() => set({ section: "", view: "jobs" })}>
+            Job adverts
+          </button>
           <button role="tab" aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
                   title="The Investec email for each company you send here" onClick={() => set({ section: "", view: "email" })}>
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -626,6 +637,9 @@ function Accounts({ data, password }) {
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []} verdicts={ranked.verdicts}
                                              headings={signals.headings || []} codes={signals.codes || []} onPick={(name) => set({ section: "", view: "", query: name })} />
+       : filters.view === "scoreboard" ? <Scoreboard rows={allRows} checks={checks} verdicts={verdicts} likes={likes} onOpen={openCompany}
+                                                     onPick={(name) => set({ section: "", view: "", query: name })} />
+       : filters.view === "jobs" ? <JobAdverts password={password} rowsByNumber={rowsByNumber} onOpen={openCompany} checks={checks} onReview={setReview} />
        : filters.view === "emerging" ? <EmergingLeads password={password} listed={listedNumbers} onOpen={openCompany} checks={checks} onReview={setReview} />
        : filters.view === "search" ? <NicheSearch password={password} listed={listedNumbers} onOpen={openCompany} />
        : filters.view === "email" ? <EmailGenerator items={emailItems} onChange={editEmail} onRemove={removeEmail} onOpen={openCompany} />
@@ -1607,6 +1621,222 @@ function EmergingLeads({ password, listed, onOpen, checks, onReview }) {
   );
 }
 
+// The Scoreboard tab (Zac, 22 Nov 2026: put the finding effort where the good leads come from): his marks (Open lead /
+// Added to mine / Good lead count good; Owned abroad / Not a fit count not) against each source, niche and industry,
+// the well-fitting leads still waiting there, and each good lead's lookalikes by profile (format.js likeGoodLeads).
+function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick }) {
+  const [kind, setKind] = useState("source");
+  const [open, setOpen] = useState("");
+  const board = useMemo(() => scoreboard(rows, checks, verdicts), [rows, checks, verdicts]);
+  const good = useMemo(() => goodLeads(rows, checks, verdicts), [rows, checks, verdicts]);
+  const byNumber = useMemo(() => new Map(rows.map((r) => [r.company_number, r])), [rows]);
+  const likesOf = {};
+  for (const [n, l] of Object.entries(likes || {})) (likesOf[l.like] ||= []).push(n);
+  const checked = board.source.reduce((n, g) => n + g.checked, 0);
+  const goodN = board.source.reduce((n, g) => n + g.good, 0);
+  const fromWhere = board.source.filter((g) => g.good).map((g) => `${g.key} ${g.good}`).join(" · ");
+  const lines = board[kind].filter((g) => kind === "source" || g.leads >= 5 || g.checked).slice(0, kind === "source" ? 50 : 40);
+  const traits = (p) => Object.entries(p).filter(([k, v]) => v && k !== "source").map(([, v]) => v).join(" · ");
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <span className="muted">{checked ? `${checked} lead${checked === 1 ? "" : "s"} checked, ${goodN} good${fromWhere ? ` — from ${fromWhere}` : ""}.` : "Nothing checked yet."}
+          {" "}Every Open lead / Added to mine / Good lead mark teaches the score: with 5+ checked, a source or niche that's mostly good lifts its leads (+8), and every lead that shares most of a good lead's profile is lifted too (+8, “Like your good lead …”). About 20 marks a day is enough.</span>
+      </div>
+      {good.length > 0 && <>
+        <h2 className="group-h">Your good leads <span>{good.length} · lookalikes by profile: {Object.keys(likes || {}).length}</span></h2>
+        <div className="sheet-wrap">
+          <table className="sheet">
+            <thead><tr><th>Company</th><th>Found via</th><th>Profile</th><th className="num">Lookalikes</th></tr></thead>
+            <tbody>{good.map((g) => (
+              <Fragment key={g.company_number}>
+                <tr>
+                  <td><button className="linkish" onClick={() => onOpen(g.company_number)}>{g.company_name}</button></td>
+                  <td>{g.profile.source}</td><td>{traits(g.profile) || "—"}</td>
+                  <td className="num">{likesOf[g.company_number]?.length
+                    ? <button className="btn-sm" aria-expanded={open === g.company_number} onClick={() => setOpen(open === g.company_number ? "" : g.company_number)}>{likesOf[g.company_number].length} {open === g.company_number ? "▴" : "▾"}</button> : "0"}</td>
+                </tr>
+                {open === g.company_number && (likesOf[g.company_number] || []).map((n) => byNumber.get(n)).filter(Boolean)
+                  .sort((a, b) => (b.lead_fit || 0) - (a.lead_fit || 0) || (b.lead_score || 0) - (a.lead_score || 0)).slice(0, 30).map((r) => (
+                  <tr key={r.company_number} className="sub-row">
+                    <td>↳ <button className="linkish" onClick={() => onOpen(r.company_number)}>{r.company_name}</button></td>
+                    <td>{leadSource(r)}</td><td>{likes[r.company_number].same.join(" · ")}</td>
+                    <td className="num">Fit {r.lead_fit ?? "?"} · {r.lead_score ?? ""}</td>
+                  </tr>
+                ))}
+              </Fragment>
+            ))}</tbody>
+          </table>
+        </div>
+      </>}
+      <div className="groups" role="group" aria-label="Scoreboard by">
+        {[["source", "By source"], ["niche", "By niche"], ["industry", "By industry"]].map(([k, label]) => (
+          <button key={k} className={`btn-sm${kind === k ? " on" : ""}`} onClick={() => setKind(k)}>{label}</button>
+        ))}
+      </div>
+      <div className="sheet-wrap">
+        <table className="sheet">
+          <thead><tr><th>{kind === "source" ? "Source" : kind === "niche" ? "Niche" : "Industry"}</th><th className="num">Leads</th>
+            <th className="num" title="Leads with Fit 60+">Fit 60+</th><th className="num">Checked</th><th className="num">Good</th>
+            <th className="num">Good %</th><th className="num" title="Fit 60+ leads you haven't marked yet">Waiting</th></tr></thead>
+          <tbody>{lines.map((g) => (
+            <tr key={g.key}>
+              <td>{kind === "niche" ? <button className="linkish" onClick={() => onPick(g.key)}>{g.key}</button> : g.key}</td>
+              <td className="num">{g.leads.toLocaleString()}</td><td className="num">{g.fit60.toLocaleString()}</td><td className="num">{g.checked || ""}</td>
+              <td className="num">{g.good || ""}</td><td className="num">{g.good_share === null ? "" : `${g.good_share}%`}</td>
+              <td className="num">{g.waiting ? g.waiting.toLocaleString() : ""}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// The Job adverts tab (Zac, 22 Nov 2026: "make our job finder new"): every employer whose adverts on Adzuna and Reed name
+// currency work, a treasury / FX role, an import / export role, teams abroad or a new finance director — read by
+// sourcer/jobs.py (the sentence, currencies, countries, trade terms, a score), matched to Companies House (cached), the
+// strongest not on the lists already sent to the finder as new leads. Agencies' adverts are left out (their client is
+// unnamed). Status buttons as on the Simplified dash: his marks teach the score.
+const JOB_STATUS = { new_lead: ["New lead", "Matched on Companies House, not on our lists — sent to the finder"],
+  on_list: ["On our lists", "Already on the Accounts or FX filings list"], matched: ["Matched", "Found on Companies House; its adverts score under the lead bar"],
+  not_found: ["Not matched", "No company of that name on Companies House — search it by hand"],
+  waiting: ["Not looked up yet", "This run's name searches were used up — tried next run"],
+  excluded: ["Left out", "A recruitment agency, job board, accountancy practice, consultancy or payments firm — its adverts are other companies' work"],
+  not_looked_up: ["Weak", "Nothing FX-specific in its adverts"] };
+const JOB_KINDS = { currency: "Currency work", treasury: "Treasury / FX role", trade: "Import / export role", fd: "Finance director", abroad: "Teams abroad" };
+function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
+  const [data, setData] = useState(null);
+  const [status, setStatus] = useState("new_lead");
+  const [kind, setKind] = useState("");
+  const [currency, setCurrency] = useState("");
+  const [worded, setWorded] = useState(false);
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState("");
+  const [showQueries, setShowQueries] = useState(false);
+  useEffect(() => {
+    fetch(`${API}?view=jobs`, { headers: { authorization: `Bearer ${password}` }, cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status))))).then((body) => setData(body || { employers: [] }))
+      .catch(() => setData({ employers: [], failed: true }));
+  }, [password]);
+  if (!data) return <div className="list"><div className="empty">Loading…</div></div>;
+  if (data.failed) return <div className="list"><div className="empty">Couldn't load the job adverts — refresh the page to try again.</div></div>;
+  const all = (data.employers || []).filter((e) => e.status !== "not_looked_up");
+  const statusOf = (e) => (e.company_number && rowsByNumber.has(e.company_number) ? "on_list" : e.status || "");
+  const base = all.filter((e) => (!kind || (e.kinds || []).includes(kind)) && (!currency || (e.currencies || []).includes(currency))
+    && (!worded || e.quote) && (!q || `${e.employer} ${e.company_name || ""} ${e.company_number || ""} ${e.quote || ""}`.toLowerCase().includes(q.toLowerCase())));
+  const list = base.filter((e) => !status || statusOf(e) === status);
+  const counts = (fn) => { const c = {}; for (const e of all) for (const k of fn(e)) c[k] = (c[k] || 0) + 1; return c; };
+  const kindCounts = counts((e) => e.kinds || []), ccyCounts = counts((e) => e.currencies || []);
+  const reviewOf = (e) => (e.company_number ? checks[e.company_number]?.review || "" : "");
+  const go = (e) => (e.company_number && rowsByNumber.has(e.company_number) ? onOpen(e.company_number)
+    : window.open(e.company_number ? chCompanyUrl(e.company_number) : `https://find-and-update.company-information.service.gov.uk/search/companies?q=${encodeURIComponent(e.employer)}`, "_blank", "noopener"));
+  const exportList = () => downloadSheet(list.map((e, i) => {
+    const r = e.company_number && rowsByNumber.get(e.company_number);
+    return { rank: i + 1, employer: e.employer, company_name: e.company_name || "", company_number: e.company_number || "",
+      status: JOB_STATUS[statusOf(e)]?.[0] || "", job_score: e.score, what: (e.kinds || []).map((k) => JOB_KINDS[k] || k).join("; "),
+      currencies: (e.currencies || []).join(", "), countries: (e.countries || []).join(", "), terms: (e.terms || []).join(", "),
+      quote: e.quote || "", adverts: (e.adverts || []).map((a) => `${a.title} (${a.date}, ${a.source})`).join("; "),
+      latest_advert: e.adverts?.[0]?.link || "", last_seen: e.last_seen || "", lead_score: r?.lead_score ?? "", industry: r ? industryOf(r) : "",
+      my_status: (REVIEW_BUTTONS.find(([k]) => k === reviewOf(e)) || [])[1] || "",
+      companies_house_url: e.company_number ? chCompanyUrl(e.company_number) : "" };
+  }), columnsFor(["rank", "employer", "company_name", "company_number", "status", "my_status", "job_score", "what", "currencies", "countries", "terms", "quote", "adverts", "latest_advert", "last_seen", "lead_score", "industry", "companies_house_url"],
+    { job_score: "Advert score", what: "What the adverts show", quote: "In their words", latest_advert: "Advert link", last_seen: "Latest advert", my_status: "Your mark" }, ["rank", "job_score", "lead_score"]),
+    `job-adverts-${new Date().toISOString().slice(0, 10)}.xlsx`, "Job adverts");
+  const c = data.counts || {};
+  if (!all.length) return <div className="list"><div className="empty">No job adverts yet — they arrive with the next morning's Alerts run{data.boards?.length === 0 ? " (no job-board keys set: ADZUNA_APP_ID / ADZUNA_APP_KEY, REED_API_KEY)" : ""}.</div></div>;
+  return (
+    <div className="list">
+      <div className="filters filings-bar">
+        <span className="muted">{all.length} employers from the last {data.days || 14} days of adverts on {(data.boards || []).join(" and ") || "the job boards"}
+          {c.adverts ? ` (${c.adverts.toLocaleString()} adverts read this morning, ${c.full_reads || 0} in full)` : ""} — agencies' adverts left out.
+          Best first: the advert's own words about currency work, the currencies and countries it names, trade terms, a finance director role. Updated {data.made_at ? filedWhen(data.made_at.slice(0, 10)) : ""}.</span>
+      </div>
+      <div className="groups" role="group" aria-label="Status">
+        {[["", "All", "Every employer"], ...Object.entries(JOB_STATUS).filter(([k]) => k !== "not_looked_up").map(([k, [label, hint]]) => [k, label, hint])].map(([k, label, hint]) => (
+          <button key={k || "all"} title={hint} className={`btn-sm${status === k ? " on" : ""}`} onClick={() => setStatus(k)}>
+            {label} <span className="tab-n">{k ? base.filter((e) => statusOf(e) === k).length : base.length}</span>
+          </button>
+        ))}
+      </div>
+      <div className="filters filings-bar">
+        <input className="input search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search employer, company or words" aria-label="Search" />
+        <select className="input" value={kind} onChange={(e) => setKind(e.target.value)} aria-label="What the adverts show">
+          <option value="">Any kind of advert</option>
+          {Object.entries(JOB_KINDS).map(([k, label]) => <option key={k} value={k}>{label} ({kindCounts[k] || 0})</option>)}
+        </select>
+        <select className="input" value={currency} onChange={(e) => setCurrency(e.target.value)} aria-label="Currency named">
+          <option value="">Any currency</option>
+          {Object.entries(ccyCounts).sort((a, b) => b[1] - a[1]).map(([k, n]) => <option key={k} value={k}>{k} ({n})</option>)}
+        </select>
+        <label className="check"><input type="checkbox" checked={worded} onChange={(e) => setWorded(e.target.checked)} /> Names currency work ({all.filter((e) => e.quote).length})</label>
+        <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
+        <button className="btn-sm" onClick={() => setShowQueries((v) => !v)} aria-expanded={showQueries}>Which searches pay</button>
+      </div>
+      {showQueries && (
+        <div className="sheet-wrap">
+          <table className="sheet">
+            <thead><tr><th>Search</th><th>Kind</th><th className="num">Adverts</th><th className="num">Kept</th><th className="num" title="Adverts naming currency work">Naming FX</th><th className="num" title="Adverts whose employer became a new lead">Leads</th></tr></thead>
+            <tbody>{[...(data.queries || [])].sort((a, b) => b.leads - a.leads || b.worded - a.worded).map((x) => (
+              <tr key={x.query}><td>{x.query}</td><td>{JOB_KINDS[x.kind] || x.kind}</td><td className="num">{x.adverts}</td><td className="num">{x.kept}</td><td className="num">{x.worded}</td><td className="num">{x.leads}</td></tr>
+            ))}</tbody>
+          </table>
+        </div>
+      )}
+      {list.slice(0, 400).map((e, i) => {
+        const r = e.company_number && rowsByNumber.get(e.company_number);
+        const st = statusOf(e);
+        return (
+          <article className="card loss-card" key={e.key}>
+            <div className="card-top">
+              <div className="card-name">
+                <span className="call-n">{i + 1}</span>
+                <button className="linkish co" onClick={() => go(e)} title={e.company_number ? "Open the company" : "Search Companies House for it"}>{e.company_name || e.employer}</button>
+                {e.company_name && advertisesAs(e) && <span className="muted">advertises as {e.employer}</span>}
+                <span className={`chip${st === "new_lead" ? " good" : st === "not_found" ? " warn" : ""}`} title={JOB_STATUS[st]?.[1]}>{JOB_STATUS[st]?.[0] || st}</span>
+                {(e.kinds || []).map((k) => <span key={k} className="chip">{JOB_KINDS[k] || k}</span>)}
+                {e.first_seen && e.first_seen === data.made_at?.slice(0, 10) && <span className="new">New today</span>}
+                {(e.excluded || e.note) && <span className="muted">{e.excluded || e.note}</span>}
+              </div>
+              <div className="loss-fig" title="Advert score: currency wording 30, each currency 8, each country beside trade words 4, trade terms 6, an FD role 20, treasury 15, an import / export role 8, more adverts naming FX 5 each">
+                <b>{e.score}</b><span className="muted"> advert score{r?.lead_score !== undefined ? ` · lead score ${r.lead_score}` : ""}</span>
+              </div>
+            </div>
+            {e.quote && <p className="quote">“{e.quote}”</p>}
+            <div className="chips">
+              {(e.currencies || []).map((x) => <span key={x} className="chip good">{x}</span>)}
+              {(e.countries || []).slice(0, 6).map((x) => <span key={x} className="chip">{x}</span>)}
+              {(e.terms || []).map((x) => <span key={x} className="chip">{x}</span>)}
+              {e.company_number && <a className="chip" href={chCompanyUrl(e.company_number)} target="_blank" rel="noreferrer">{e.company_number}</a>}
+              {e.match === "core" && <span className="chip warn" title="Matched on the name without Group / Holdings / UK — check it's the same company">Name matched loosely</span>}
+            </div>
+            {e.company_number && <span className="review-btns">
+              {REVIEW_BUTTONS.map(([k, label, hint]) => (
+                <button key={k} className={`btn-sm review-${k}${reviewOf(e) === k ? " on" : ""}`} title={reviewOf(e) === k ? "Click again to clear" : hint}
+                        aria-pressed={reviewOf(e) === k} onClick={() => onReview(e.company_number, k)}>{label}</button>
+              ))}
+            </span>}
+            <button className="btn-sm" onClick={() => setOpen(open === e.key ? "" : e.key)} aria-expanded={open === e.key}>
+              {(e.adverts || []).length} advert{(e.adverts || []).length === 1 ? "" : "s"} {open === e.key ? "▴" : "▾"}</button>
+            {open === e.key && <ul className="adverts">
+              {(e.adverts || []).map((a) => (
+                <li key={`${a.title}${a.date}`}>
+                  {a.link ? <a href={a.link} target="_blank" rel="noreferrer">{a.title}</a> : a.title}
+                  <span className="muted"> · {a.date} · {a.source} · {JOB_KINDS[a.kind] || a.kind} · {a.score}{a.why?.length ? ` (${a.why.join("; ")})` : ""}</span>
+                  {a.quotes?.length > 1 && <div className="muted">{a.quotes.slice(1).map((x) => `“${x}”`).join(" ")}</div>}
+                </li>
+              ))}
+            </ul>}
+          </article>
+        );
+      })}
+      {!list.length && <div className="empty">No employers match these filters.</div>}
+    </div>
+  );
+}
+// the employer advertises under a name other than its registered one
+const advertisesAs = (e) => e.employer && e.company_name && e.employer.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12) !== e.company_name.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+
 // The Niche search tab (Zac, 21 Nov 2026: "focus on finding niche companies — I have paid services for contacts and exact
 // financials"): a product or trade typed here is answered by the Niche search workflow within the hour (customs codes
 // whose description names it -> every company whose HMRC records carry them, matched to Companies House; sized ones not
@@ -1917,12 +2147,15 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
   const uk = mode === "uk" || foreign || fresh || hidden;
   const fitOnly = mode === "fit" || uk;
   const key = uk ? "lead_score" : fitOnly ? "lead_fit" : "lead_timing";
+  // Discovery tabs open Fit first (the right company), the timely ones first among equals
+  const [order, setOrder] = useState(fresh || hidden ? "fit" : key);
   const [industry, setIndustry] = useState("");
   const base = rows.filter((r) => !isOut(r) && !r.dropped && (!fresh || (newLead(r, days) && (!source || leadSource(r) === source))) && (!foreign || !seat || financeSeat(r).lean === seat) && (!hidden || hiddenFromFilters(r).some((h) => !why || h.key === why)) && (uk || ((r.lead_fit || 0) >= FIT.min && (fitOnly || (r.lead_timing || 0) > 0))));
   const counts = {};
   for (const r of base) { const k = industryOf(r); counts[k] = (counts[k] || 0) + 1; }
   const list = base.filter((r) => !industry || industryOf(r) === industry)
-    .sort((a, b) => (b[key] || 0) - (a[key] || 0) || (b.lead_score || 0) - (a.lead_score || 0));
+    .sort(order === "fit" ? (a, b) => (b.lead_fit || 0) - (a.lead_fit || 0) || (b.lead_timing || 0) - (a.lead_timing || 0) || (b.lead_score || 0) - (a.lead_score || 0)
+      : (a, b) => (b[order] || 0) - (a[order] || 0) || (b.lead_score || 0) - (a.lead_score || 0));
   const half = (r, cat) => (r.lead_parts || []).filter(([, , c]) => c === cat);
   const line = (parts) => parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ");
   const exportList = () => downloadSheet(list.map((r, i) => ({
@@ -1937,9 +2170,9 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
     <div className="list">
       <div className="filters filings-bar">
         <span className="muted">{hidden
-          ? `${list.length} companies a standard Zint / Market IQ search can't see — no turnover filed, sized by their group, accounts in another currency or scanned, a sector code that hides what they trade, too new, or found by their goods or a job advert. Highest lead score first.`
+          ? `${list.length} companies a standard Zint / Market IQ search can't see — no turnover filed, sized by their group, accounts in another currency or scanned, a sector code that hides what they trade, too new, or found by their goods or a job advert. ${order === "fit" ? "Best fit first, then the most timely" : order === "lead_timing" ? "Most timely first" : "Highest lead score first"}.`
           : fresh
-          ? `${list.length} companies new to the lists in the last ${days} days — the finder's new finds and fresh FX filings. Highest lead score first.`
+          ? `${list.length} companies new to the lists in the last ${days} days — the finder's new finds and fresh FX filings. ${order === "fit" ? "Best fit first, then the most timely" : order === "lead_timing" ? "Most timely first" : "Highest lead score first"}.`
           : foreign
           ? `${list.length} companies owned from abroad — ask whether FX is decided in the UK or by the parent. Out of every other list; highest lead score first.`
           : uk
@@ -1963,6 +2196,11 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail }) {
         {fresh && <select value={source} onChange={(e) => setSource(e.target.value)} aria-label="Found via">
           <option value="">Any source</option>
           {LEAD_SOURCES.map((k) => <option key={k} value={k}>{k} ({rows.filter((r) => !isOut(r) && newLead(r, days) && leadSource(r) === k).length})</option>)}
+        </select>}
+        {uk && <select value={order} onChange={(e) => setOrder(e.target.value)} aria-label="Order">
+          <option value="fit">Fit first, then Now</option>
+          <option value="lead_score">Lead score</option>
+          <option value="lead_timing">Now first</option>
         </select>}
         <select value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Industry">
           <option value="">Any industry ({base.length})</option>
@@ -2333,10 +2571,12 @@ function VerdictOnly({ number }) {
 function GroupChips({ r }) {
   const name = groupName(r), abroad = groupOf(r)?.abroad;
   const members = r.group_members || [];
-  if (!name && !members.length && !abroad) return null;
+  if (!name && !members.length && !abroad && !groupActivity(r)) return null;
   return (<>
     {name && <span className="chip" title={`Top UK parent: ${name} (${groupOf(r).top})${abroad ? ` — owned by ${abroad}` : ""}`}>Group: {name}</span>}
     {!name && abroad && <span className="chip" title="Its corporate owner is registered abroad">Owner abroad: {abroad}</span>}
+    {groupActivity(r) && <span className="chip good" title={`A holding company: what its group trades, from ${activityLine(groupActivity(r))} (sector codes ${groupActivity(r).sic.join(", ")})${groupActivity(r).niche ? ` — niche ${groupActivity(r).niche}` : ""}`}>
+      Group trades as: {industryOf(r).replace(/^Manufacturing: /, "")}</span>}
     {members.length > 0 && <span className="chip" title={members.map((m) => m.company_name).join("\n")}>+{members.length} group compan{members.length === 1 ? "y" : "ies"}</span>}
   </>);
 }
@@ -2981,6 +3221,10 @@ select.input option{background:#0F141F}
 .badge{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:10px;border:1px solid}
 .links{display:flex;gap:12px;font-size:12px;margin-left:auto}
 .chips{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.card .quote{margin:8px 0 0;font-style:italic;color:var(--ink-2,inherit);line-height:1.45}
+.adverts{margin:8px 0 0;padding-left:18px;line-height:1.6}
+.adverts .muted{font-size:12px}
+.sheet .sub-row td{font-size:12px;opacity:.9}
 .chip{font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.6)}
 .chip.fx{background:rgba(99,102,241,.12);color:#A5B4FC;font-family:'JetBrains Mono',monospace}
 .chip.trig{background:rgba(245,158,11,.1);color:#FBBF24}

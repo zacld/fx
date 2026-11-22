@@ -144,6 +144,7 @@ export const SEARCHES_KEY = "searches";              // {searches: [{id, text, a
 export const SEARCH_RESULTS_KEY = "search_results";  // {made_at, results: {id: {text, codes, rows, counts, done_at}}}
 export const SEARCHES_MAX = 30;
 export const SEARCH_TEXT_MAX = 200;
+export const JOBS_KEY = "jobs";   // {made_at, counts, queries, employers, lookups}: the job-advert finder (tools/ch_alerts.py --signals, sourcer/jobs.py)
 export const EMERGING_KEY = "emerging/companies";   // {made_at, niches, rows}: every sized company in an emerging niche (niche_hits)
 export const LOOKALIKES_KEY = "lookalikes";
 // The Power Automate feed (api/feed.mjs): feed/all is written by the daily ranking; feed/salt makes its key (rotatable)
@@ -353,6 +354,11 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
   if (params.get("view") === "feedkey") {
     const salt = (await blobs.get(FEED_SALT_KEY, { type: "json" }))?.salt || "v1";
     return reply({ key: await feedKey(password, salt), path: "/api/feed" }, 200);
+  }
+  if (params.get("view") === "jobs") {
+    const jobs = (await blobs.get(JOBS_KEY, { type: "json" })) || { employers: [], queries: [] };
+    delete jobs.lookups;   // the name-search cache stays server-side
+    return reply(jobs, 200);
   }
   if (params.get("view") === "emerging") {
     return reply((await blobs.get(EMERGING_KEY, { type: "json" })) || { rows: [], niches: [] }, 200);

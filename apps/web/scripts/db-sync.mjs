@@ -18,7 +18,8 @@ export function buildRecords({ list, details = [], filingRows = [], ranked = {},
   moves = {}, marks = {}, today = new Date() }) {
   setKnownGroups(ranked.group_of || {});
   const signalItems = [...(alerts.items || []), ...dealSignals(deals.items || []), ...(moments.items || [])];
-  const ctx = { niches: nicheTiers(niches.niches || {}), signals: signalsByCompany(signalItems), moves, today };
+  const ctx = { niches: nicheTiers(niches.niches || {}), signals: signalsByCompany(signalItems), moves, today,
+                reviews: ranked.reviews || null, likes: ranked.likes || null };
   const detailOf = Object.assign({}, ...details.map((d) => d || {}));
   const shyOf = ranked.shy_of || {};
   // The outreach inputs the database ranks on (stage 2): the lead score with its parts, a serious reason not to
