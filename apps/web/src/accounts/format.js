@@ -566,22 +566,27 @@ export function likeGoodLeads(rows = [], checks = {}, verdicts = {}) {
 const nameKey = (s) => String(s || "").toUpperCase().replace(/&/g, " AND ").replace(/\b(?:LIMITED|LTD|PLC|LLP)\b\.?/g, " ")
   .replace(/[^A-Z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 export function matchCompanies(text = "", rows = []) {
-  const items = String(text).split(/[\n;]+|,(?![^(]*\))/).map((t) => t.replace(/^[\s\d.)-]*(?=[A-Za-z])/, "").replace(/\s+£[\d.,]+m?.*$/i, "").trim()).filter(Boolean);
+  // each line as written first ("360 BRAND GROUP LTD" is a name, not a numbered list), then with a list number dropped
+  // ("12. ACME LIMITED", "3) ACME")
+  const items = String(text).split(/[\n;]+|,(?![^(]*\))/).map((t) => t.replace(/\s+£[\d.,]+m?.*$/i, "").trim()).filter(Boolean);
   const byNumber = new Map(rows.map((r) => [String(r.company_number || "").toUpperCase(), r]));
   const byName = new Map();
   for (const r of rows) { const k = nameKey(r.company_name); if (k && !byName.has(k)) byName.set(k, r); }
   const keys = [...byName.keys()];
+  const find = (text) => {
+    const num = text.replace(/\s/g, "").toUpperCase();
+    if (/^[A-Z]{0,2}\d{6,8}$/.test(num)) return byNumber.get(num.padStart(8, "0")) || byNumber.get(num) || null;
+    // a name cut short on screen ("PROJECT TWENTY TOPCO LIMIT…"): its last, partial word dropped, then a unique prefix
+    const cut = /(?:…|\.\.\.)\s*$/.test(text);
+    const k = nameKey(cut ? text.replace(/\s*\S*(?:…|\.\.\.)\s*$/, "") : text);
+    let row = byName.get(k) || null;
+    if (!row && (k.length >= 6 || cut)) { const hits = keys.filter((x) => x.startsWith(k)); if (hits.length === 1) row = byName.get(hits[0]); }
+    return row;
+  };
   const matched = [], unmatched = [], seen = new Set();
   for (const text of items) {
-    const num = text.replace(/\s/g, "").toUpperCase();
-    let row = /^[A-Z]{0,2}\d{6,8}$/.test(num) ? byNumber.get(num.padStart(8, "0")) || byNumber.get(num) : null;
-    if (!row) {
-      // a name cut short on screen ("PROJECT TWENTY TOPCO LIMIT…"): its last, partial word dropped, then a unique prefix
-      const cut = /(?:…|\.\.\.)\s*$/.test(text);
-      const k = nameKey(cut ? text.replace(/\s*\S*(?:…|\.\.\.)\s*$/, "") : text);
-      row = byName.get(k) || null;
-      if (!row && (k.length >= 6 || cut)) { const hits = keys.filter((x) => x.startsWith(k)); if (hits.length === 1) row = byName.get(hits[0]); }
-    }
+    const listed = text.replace(/^\d{1,4}\s*[.)\-:]\s*(?=\S)/, "");
+    const row = find(text) || (listed !== text ? find(listed) : null);
     if (row && !seen.has(row.company_number)) { seen.add(row.company_number); matched.push({ text, row }); } else if (!row) unmatched.push(text);
   }
   return { matched, unmatched };
