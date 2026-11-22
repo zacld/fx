@@ -779,7 +779,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (so a phone opens on it) — the best leads by lead score he hasn't marked, `TODAYS_LIST` (25) at a time with "Show 25
   more": not contacted, no review / verdict / list on it or on any company in its group, not out, no serious reason not
   to progress, Fit 30+, one per group. Each line: name (company page), industry · turnover · score, the Companies House
-  number (its page), "Google it" (the registered name) and "Check for FD" (`googleFd`), then four round buttons —
+  number (plain text, one tap selects it — Zac, 22 Nov 2026: not a link), "Google it" (the registered name) and "Check for FD" (`googleFd`), then four round buttons —
   ✓ green Good lead (verdict good), ✕ red Not enough revenue (Not a fit: Too small), ● orange Open lead (review open),
   ☎ blue Call list (list call). A mark takes the company off and the next moves up; Undo for the last one; "N marked
   today". The marks feed the feedback loop and lookalikes like any other.
