@@ -5,9 +5,9 @@
 //   CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… node scripts/db-sync.mjs
 // Counts only in the log (public repo). Without D1 permission on the token it says so and stops, changing nothing.
 import { ALERTS_KEY, CHECKS_KEY, CONTACTED_KEY, DEALS_KEY, DETAIL_SHARDS, DETAILS_PREFIX, EMAILS_KEY, FILINGS_KEY, KEY,
-  MOMENTS_KEY, NICHES_KEY, NOTES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, LISTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+  MOMENTS_KEY, NICHES_KEY, NOTES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, LISTS_KEY, MARK_ITEMS, MARKS_UNSYNCED_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
-import { companyRecord, markRecord, signalRecord, syncTable } from "../api/db.mjs";
+import { adoptMarks, companyRecord, markRecord, marksLive, readMarks, sameMarks, setMark, signalRecord, syncTable } from "../api/db.mjs";
 import { filingRow, groupKey, leadScore, movesByCurrency, nicheTiers, reasonsNotToProgress, setKnownGroups, timelyReason } from "../src/accounts/format.js";
 import { RANKED_FIELDS } from "../src/accounts/ranking.js";
 import { openD1 } from "./d1.mjs";
@@ -106,6 +106,27 @@ export const LIMIT_HIT = /limit exceeded|too many requests|daily.*limit|7429|exc
 // for the write limit (16 Nov 2026).
 export const limitWhat = (msg = "") => (/CPU time/i.test(msg) ? "a statement ran over D1's CPU time limit" : "Cloudflare's daily write limit reached");
 
+// Marks the database holds: the saves it missed (MARKS_UNSYNCED_KEY: written to the store when it couldn't be reached)
+// put in, then each store copy that differs from it rewritten. Returns the database's marks, by kind.
+export async function healMarks(query, store, storeMarks) {
+  const missed = Object.keys((await store.get(MARKS_UNSYNCED_KEY, "json").catch(() => null)) || {});
+  for (const key of missed) {
+    const [kind, number] = [key.slice(0, key.indexOf(":")), key.slice(key.indexOf(":") + 1)];
+    if (MARK_ITEMS[kind]) await setMark(query, number, kind, storeMarks[kind]?.[number] ?? null);
+  }
+  if (missed.length) { await store.set(MARKS_UNSYNCED_KEY, {}); console.log(`Database: ${missed.length} saves made while it was out of reach put in`); }
+  const maps = await readMarks(query);
+  const out = Object.fromEntries(Object.keys(MARK_ITEMS).map((k) => [k, maps[k] || {}]));
+  const healed = [];
+  for (const [kind, key] of Object.entries(MARK_ITEMS)) {
+    if (sameMarks(out[kind], storeMarks[kind])) continue;
+    await store.set(key, out[kind]);
+    healed.push(`${kind} ${Object.keys(out[kind]).length}`);
+  }
+  console.log(`Database: Zac's marks live here${healed.length ? `; the store's copies brought up to date — ${healed.join(", ")}` : "; the store's copies match"}`);
+  return out;
+}
+
 async function main() {
   if (readOnly()) {
     console.log("Database: test run (STORE_READ_ONLY) — not copied; only main's runs write the database");
@@ -129,9 +150,14 @@ async function main() {
   for (const { month } of index?.months || []) filingRows = filingRows.concat((await get(filingsMonthKey(month)))?.rows || []);
   let moves = {};
   try { moves = movesByCurrency(await (await openStore(MARKET_STORE)).get(MARKET_KEY, "json")); } catch { /* no market data */ }
+  let marks = { contacted: contacted || {}, notes: notes || {}, verdict: verdicts || {}, check: checks || {}, email: emails || {}, list: lists || {} };
+  // Zac's marks: once the database holds them (api/db.mjs marksLive) it is their source — saves it missed go in, and
+  // the store's copies (what the workflows read) are made equal to it; until then the store's are copied in below.
+  let live = false;
+  try { live = await marksLive(db.query); } catch { live = false; }
+  if (live) marks = await healMarks(db.query, store, marks);
   const records = buildRecords({ list: list || {}, details, filingRows, ranked: ranked || {}, niches: niches || {}, alerts: alerts || {},
-    deals: deals || {}, moments: moments || {}, moves,
-    marks: { contacted: contacted || {}, notes: notes || {}, verdict: verdicts || {}, check: checks || {}, email: emails || {}, list: lists || {} } });
+    deals: deals || {}, moments: moments || {}, moves, marks });
   records.companies.sort((a, b) => (b.lead_score ?? -1e9) - (a.lead_score ?? -1e9));   // the best first, if the budget runs short
   try {
     await whyRewritten(db, "companies", records.companies, "number");
@@ -147,7 +173,7 @@ async function main() {
   console.log(`Database: ${usedToday.toLocaleString()} rows written today so far; this sync may write ${budget.toLocaleString()}`);
   const out = {};
   try {
-    for (const table of ["marks", "signals", "companies"]) {   // the small tables first: Zac's marks always fit
+    for (const table of [...(live ? [] : ["marks"]), "signals", "companies"]) {   // the small tables first: Zac's marks always fit
       const start = db.used.written;
       out[table] = await syncTable(db.query, table, records[table], { now, budget });
       budget = Math.max(0, budget - (db.used.written - start));
@@ -155,6 +181,13 @@ async function main() {
   } catch (e) {
     if (!LIMIT_HIT.test(e.message)) throw e;
     console.log(`Database: ${limitWhat(e.message)} part-way (${e.message.slice(0, 120)}) — the rest goes on the next sync`);
+  }
+  // The store's marks all copied in: from now on the database is their source (the Function saves there first).
+  if (!live && out.marks && !out.marks.deferred) {
+    try {
+      await adoptMarks(db.query, now);
+      console.log(`Database: Zac's marks now live in the database (${out.marks.total} copied in) — saves go there first, the store keeps a copy`);
+    } catch (e) { if (!LIMIT_HIT.test(e.message)) throw e; }
   }
   const total = usedToday + db.used.written;
   try {
@@ -172,7 +205,7 @@ async function main() {
   }
   console.log(`Database: ${db.used.written.toLocaleString()} rows written and ${db.used.read.toLocaleString()} read by this sync; ` +
               `${total.toLocaleString()} of the ${DAILY_WRITES.toLocaleString()} budget (Cloudflare's limit 100,000) used today`);
-  if (Object.values(out).some((r) => r.deferred) || Object.keys(out).length < 3) return;   // not a full copy: nothing to check yet
+  if (Object.values(out).some((r) => r.deferred) || Object.keys(out).length < (live ? 2 : 3)) return;   // not a full copy: nothing to check yet
   const bySource = await db.query("SELECT source, COUNT(*) AS n FROM companies GROUP BY source");
   const expect = { list: (list?.rows || []).length, filings: records.companies.filter((c) => c.source === "filings").length };
   const got = Object.fromEntries(bySource.map((r) => [r.source, Number(r.n)]));

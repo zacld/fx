@@ -632,7 +632,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   a fit left out, the top 40 the letter, then cold call / email by the timely reason — the same lists as `outreachPlan`,
   tested side by side) and the tab uses it when the site has the database ("Ranked in the database (copied …)"), else
   works it out in the browser as before; exports page through the whole list. Every save on the page (contacted,
-  notes, verdict, CRM tick, email) is also written to the database at once (`setMark`), never failing the save. Next:
+  notes, verdict, CRM tick, email) is also written to the database at once (`setMark`), never failing the save.
+  **Zac's marks live in the database** (22 Nov 2026, the architecture review's next step: the store keeps each kind of
+  mark as one item — read, change, write back — and KV can serve another location a minute-old copy, so a save from the
+  phone could wipe one made on the laptop): db-sync copies the store's marks in once and sets meta `marks`
+  (`adoptMarks`); from then every save (`openMarks` in `api/accounts.mjs`: `change(kind, fn)`) reads that kind from the
+  database and writes only the rows it changed (`markDiff` / `writeMarks`: one statement each for sets and deletes, so a
+  500-mark paste stays within D1's 50 queries a request), then copies the change into the store item; the page loads
+  its marks from the database (`readMarks`). A save the database can't take goes to the store and `marks/unsynced`;
+  each db-sync puts those in and rewrites any store copy that differs (`healMarks`), so the workflows reading `checks` /
+  `verdicts` stay right. Next:
   the other tabs and the main list served the same way. **Stage 3**: the writers
   go straight to the database and the store's list, detail shards and month items retire.
 - **My lists, score bullets, What we can pitch them** (Zac, 15 Nov 2026): every card and company page has **+ Call list

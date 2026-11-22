@@ -31,8 +31,10 @@ on:
       - apps/web/scripts/db-sync.mjs
       - apps/web/api/db.mjs
 
+# A branch's test runs queue apart from main's: GitHub keeps one waiting run per group, so a test waiting behind a
+# running job would otherwise replace main's waiting run (22 Nov 2026).
 concurrency:
-  group: niche-hits
+  group: niche-hits${{ github.ref != 'refs/heads/main' && '-test' || '' }}
   cancel-in-progress: false
 
 permissions:

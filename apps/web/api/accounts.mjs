@@ -16,7 +16,7 @@
 // Platform-free: functions/api/accounts.js passes the password and the store.
 import { validSequence } from "../src/accounts/sequence.js";
 import { applyContact, invalidChange } from "../src/accounts/followups.js";
-import { outreachPage, setMark } from "./db.mjs";
+import { markDiff, marksLive, outreachPage, readMarks, writeMarks } from "./db.mjs";
 import { OUTREACH, outreachWhy } from "../src/accounts/format.js";
 
 export const STORE = "fx-accounts";
@@ -37,6 +37,10 @@ export const STATUS_KEY = "status";   // {jobs: {finder|filings|market|audit: {a
 export const EMAILS_KEY = "emails";   // {company_number: {row, text, at}} — the Email generator tab's companies (Zac's)
 export const EMAILS_MAX = 100;
 export const EMAIL_TEXT_MAX = 8000;
+// Zac's marks by kind (the database's marks table, api/db.mjs) and the store item each kind is kept in.
+export const MARK_ITEMS = { contacted: CONTACTED_KEY, notes: NOTES_KEY, verdict: VERDICTS_KEY, check: CHECKS_KEY, email: EMAILS_KEY, list: LISTS_KEY };
+// {"<kind>:<number>": at} — saves the database couldn't take (written to the store only); db-sync puts them in.
+export const MARKS_UNSYNCED_KEY = "marks/unsynced";
 // What the Email generator needs of a company (src/accounts/email.js) and shows beside its draft.
 export const EMAIL_ROW_FIELDS = ["company_number", "company_name", "rank", "finance_contact", "finance_contact_role",
   "finance_contact_confidence", "no_fd_likely", "turnover_regions", "main_currency", "currency_source", "currency_direction",
@@ -217,11 +221,78 @@ export function markFirstSeen(previous, next) {
 // `store()` gives {get(key, {type: "json"}), setJSON(key, value)} (api/kv.mjs over the KV binding). A save reads the
 // marks the previous one wrote: KV shows a write at once to later requests in the same Cloudflare location, and the
 // page sends saves one at a time.
-// A save also goes to the database when the site has one (api/db.mjs) — never failing the save: the store is the
-// source until stage 3, and the next sync puts the database right.
-async function mirror(db, number, kind, value) {
-  if (!db) return;
-  try { await setMark(db, number, kind, value ?? null); } catch { /* the next sync catches up */ }
+// Zac's marks, read and changed. Once the database holds them (marksLive: db-sync copied the store's in), a save reads
+// that kind from the database, lets `fn` change it, and writes only the rows that changed — a mark saved meanwhile from
+// another device is never overwritten — then copies the change into the store item (the workflows read those; db-sync
+// heals any copy that missed). When the database can't be reached the save goes to the store and is noted in
+// MARKS_UNSYNCED_KEY for db-sync to carry over. Before that (no database, or not filled yet) the store is the source and
+// the database gets a copy, as before. `fn(map)` changes the map it's given and returns it.
+export async function openMarks(blobs, db) {
+  let live = false;
+  if (db) { try { live = await marksLive(db); } catch { live = false; } }
+  const fromStore = async (kind) => (await blobs.get(MARK_ITEMS[kind], { type: "json" })) || {};
+  const toStore = async (kind, sets, deletes) => {
+    const item = await fromStore(kind);
+    Object.assign(item, sets);
+    for (const n of deletes) delete item[n];
+    await blobs.setJSON(MARK_ITEMS[kind], item);
+  };
+  return {
+    live,
+    // {contacted, notes, verdict, check, email, list} maps: the database's (with any save it missed), else the store's
+    async all() {
+      if (live) {
+        try {
+          const maps = await readMarks(db);
+          const missed = Object.keys((await blobs.get(MARKS_UNSYNCED_KEY, { type: "json" })) || {});
+          for (const kind of new Set(missed.map((k) => k.split(":")[0]))) {
+            if (!MARK_ITEMS[kind]) continue;
+            const item = await fromStore(kind);
+            for (const n of missed.filter((k) => k.startsWith(`${kind}:`)).map((k) => k.slice(kind.length + 1))) {
+              if (n in item) (maps[kind] ||= {})[n] = item[n]; else if (maps[kind]) delete maps[kind][n];
+            }
+          }
+          return Object.fromEntries(Object.keys(MARK_ITEMS).map((k) => [k, maps[k] || {}]));
+        } catch { /* the store's copies */ }
+      }
+      return Object.fromEntries(await Promise.all(Object.keys(MARK_ITEMS).map(async (k) => [k, await fromStore(k)])));
+    },
+    async change(kind, fn) {
+      if (live) {
+        let written = false;
+        try {
+          const before = (await readMarks(db, kind))[kind] || {};
+          const after = fn(structuredClone(before)) || {};
+          const { sets, deletes } = markDiff(before, after);
+          if (!Object.keys(sets).length && !deletes.length) return after;
+          await writeMarks(db, kind, sets, deletes);
+          written = true;
+          try { await toStore(kind, sets, deletes); } catch { /* the next sync heals the store's copy */ }
+          return after;
+        } catch (e) {
+          if (written) throw e;
+        }
+        const before = await fromStore(kind);   // the database couldn't take it: the store, noted for db-sync
+        const after = fn(structuredClone(before)) || {};
+        const { sets, deletes } = markDiff(before, after);
+        await blobs.setJSON(MARK_ITEMS[kind], after);
+        const missed = (await blobs.get(MARKS_UNSYNCED_KEY, { type: "json" })) || {};
+        const at = new Date().toISOString();
+        for (const n of [...Object.keys(sets), ...deletes]) missed[`${kind}:${n}`] = at;
+        await blobs.setJSON(MARKS_UNSYNCED_KEY, missed);
+        return after;
+      }
+      const before = await fromStore(kind);
+      const after = fn(structuredClone(before)) || {};
+      const { sets, deletes } = markDiff(before, after);
+      if (!Object.keys(sets).length && !deletes.length) return after;
+      await blobs.setJSON(MARK_ITEMS[kind], after);
+      if (db) {   // a copy for the database, never failing the save: the next sync puts it right
+        try { await writeMarks(db, kind, sets, deletes); } catch { /* the next sync catches up */ }
+      }
+      return after;
+    },
+  };
 }
 
 export async function handle(req, { password = "", store, db = null, delay = WRONG_PASSWORD_DELAY_MS } = {}) {
@@ -246,17 +317,20 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
         return reply({ error: `send {marks: [{company_number, review: ${REVIEWS.join(" | ")}} | {company_number, verdict: "good" | "not_fit", reason?}]} (at most ${MARKS_MAX})` }, 400);
       }
       const at = new Date().toISOString();
-      const [checks, verdicts] = await Promise.all([CHECKS_KEY, VERDICTS_KEY].map(async (k) => (await blobs.get(k, { type: "json" })) || {}));
-      const touched = { check: new Set(), verdict: new Set() };
-      for (const m of marks) {
-        const n = m.company_number.toUpperCase();
-        if ("review" in m) { checks[n] = { ...(checks[n] || {}), review: m.review, review_at: at }; touched.check.add(n); }
-        else { verdicts[n] = { verdict: m.verdict, ...(m.reason ? { reason: m.reason } : {}), at }; touched.verdict.add(n); }
-      }
-      if (touched.check.size) await blobs.setJSON(CHECKS_KEY, checks);
-      if (touched.verdict.size) await blobs.setJSON(VERDICTS_KEY, verdicts);
-      for (const n of touched.check) await mirror(db, n, "check", checks[n]);
-      for (const n of touched.verdict) await mirror(db, n, "verdict", verdicts[n]);
+      const io = await openMarks(blobs, db);
+      const checks = await io.change("check", (checks) => {
+        for (const m of marks.filter((x) => "review" in x)) {
+          const n = m.company_number.toUpperCase();
+          checks[n] = { ...(checks[n] || {}), review: m.review, review_at: at };
+        }
+        return checks;
+      });
+      const verdicts = await io.change("verdict", (verdicts) => {
+        for (const m of marks.filter((x) => !("review" in x))) {
+          verdicts[m.company_number.toUpperCase()] = { verdict: m.verdict, ...(m.reason ? { reason: m.reason } : {}), at };
+        }
+        return verdicts;
+      });
       return reply({ checks, verdicts, saved: marks.length }, 200);
     }
     if ("feed_key" in body) {   // a new Power Automate feed key: the old one stops working
@@ -292,30 +366,30 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       if (e && "text" in e && e.text !== null && (typeof e.text !== "string" || e.text.length > EMAIL_TEXT_MAX)) {
         return reply({ error: `an email's text is a string of at most ${EMAIL_TEXT_MAX} characters` }, 400);
       }
-      const emails = applyEmail((await blobs.get(EMAILS_KEY, { type: "json" })) || {}, number, e, new Date().toISOString());
-      await blobs.setJSON(EMAILS_KEY, emails);
-      await mirror(db, number, "email", emails[number]);
+      const emails = await (await openMarks(blobs, db)).change("email", (emails) => applyEmail(emails, number, e, new Date().toISOString()));
       return reply({ emails }, 200);
     }
     if ("sequence" in body) {   // the outreach sequence of a company on a list: {start, gift?, done: {step: date}} or null
       if (!validSequence(body.sequence)) return reply({ error: "send {company_number, sequence: {start: YYYY-MM-DD, gift?, done: {step: YYYY-MM-DD}} | null}" }, 400);
-      const lists = (await blobs.get(LISTS_KEY, { type: "json" })) || {};
-      if (!lists[number]) return reply({ error: "put the company on a list first" }, 400);
-      if (body.sequence) lists[number] = { ...lists[number], seq: body.sequence };
-      else { const { seq: _gone, ...rest } = lists[number]; lists[number] = rest; }
-      await blobs.setJSON(LISTS_KEY, lists);
-      await mirror(db, number, "list", lists[number]);
+      let onList = true;
+      const lists = await (await openMarks(blobs, db)).change("list", (lists) => {
+        if (!lists[number]) { onList = false; return lists; }
+        if (body.sequence) lists[number] = { ...lists[number], seq: body.sequence };
+        else { const { seq: _gone, ...rest } = lists[number]; lists[number] = rest; }
+        return lists;
+      });
+      if (!onList) return reply({ error: "put the company on a list first" }, 400);
       return reply({ lists }, 200);
     }
     if ("list" in body) {   // Zac's own call / chocolate-mailing / email list; one list a company, null takes it off
       if (body.list !== null && !LISTS.includes(body.list)) return reply({ error: `send {company_number, list: ${LISTS.join(" | ")} | null}` }, 400);
-      const lists = (await blobs.get(LISTS_KEY, { type: "json" })) || {};
-      const kept = lists[number]?.list === body.list ? lists[number].at : null;   // marking "can't find info" keeps its place
-      const seq = lists[number]?.seq;   // the outreach sequence carries over when the company moves list
-      if (body.list) lists[number] = { list: body.list, at: kept || new Date().toISOString(), ...(body.missing ? { missing: true } : {}), ...(seq ? { seq } : {}) };
-      else delete lists[number];
-      await blobs.setJSON(LISTS_KEY, lists);
-      await mirror(db, number, "list", lists[number]);
+      const lists = await (await openMarks(blobs, db)).change("list", (lists) => {
+        const kept = lists[number]?.list === body.list ? lists[number].at : null;   // marking "can't find info" keeps its place
+        const seq = lists[number]?.seq;   // the outreach sequence carries over when the company moves list
+        if (body.list) lists[number] = { list: body.list, at: kept || new Date().toISOString(), ...(body.missing ? { missing: true } : {}), ...(seq ? { seq } : {}) };
+        else delete lists[number];
+        return lists;
+      });
       return reply({ lists }, 200);
     }
     if ("verdict" in body) {   // Zac's review of a lead: good / not a fit (with a reason) / cleared — never a bank record
@@ -324,35 +398,35 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       if (!COMPANY_NUMBER.test(number || "") || !ok) {
         return reply({ error: `send {company_number, verdict: "good" | "not_fit" | null, reason?: ${VERDICT_REASONS.join(" | ")}}` }, 400);
       }
-      const verdicts = (await blobs.get(VERDICTS_KEY, { type: "json" })) || {};
-      if (body.verdict) verdicts[number] = { verdict: body.verdict, ...(body.reason ? { reason: body.reason } : {}), at: new Date().toISOString() };
-      else delete verdicts[number];
-      await blobs.setJSON(VERDICTS_KEY, verdicts);
-      await mirror(db, number, "verdict", verdicts[number]);
+      const verdicts = await (await openMarks(blobs, db)).change("verdict", (verdicts) => {
+        if (body.verdict) verdicts[number] = { verdict: body.verdict, ...(body.reason ? { reason: body.reason } : {}), at: new Date().toISOString() };
+        else delete verdicts[number];
+        return verdicts;
+      });
       return reply({ verdicts }, 200);
     }
     if ("crm_checked" in body) {   // the lead checklist's own tick: Zac checked the bank's CRM (kept here as a date only)
       if (!COMPANY_NUMBER.test(number || "") || typeof body.crm_checked !== "boolean") {
         return reply({ error: "send {company_number, crm_checked: true | false}" }, 400);
       }
-      const checks = (await blobs.get(CHECKS_KEY, { type: "json" })) || {};
-      if (body.crm_checked) checks[number] = { ...(checks[number] || {}), crm: new Date().toISOString() };
-      else if (checks[number]) { delete checks[number].crm; if (!Object.keys(checks[number]).length) delete checks[number]; }
-      await blobs.setJSON(CHECKS_KEY, checks);
-      await mirror(db, number, "check", checks[number]);
+      const checks = await (await openMarks(blobs, db)).change("check", (checks) => {
+        if (body.crm_checked) checks[number] = { ...(checks[number] || {}), crm: new Date().toISOString() };
+        else if (checks[number]) { delete checks[number].crm; if (!Object.keys(checks[number]).length) delete checks[number]; }
+        return checks;
+      });
       return reply({ checks }, 200);
     }
     if ("review" in body) {   // the Simplified dash's buttons: Zac's own read of the lead (no reason, nothing from the CRM)
       if (!COMPANY_NUMBER.test(number || "") || !(body.review === null || REVIEWS.includes(body.review))) {
         return reply({ error: `send {company_number, review: ${REVIEWS.map((r) => `"${r}"`).join(" | ")} | null}` }, 400);
       }
-      const checks = (await blobs.get(CHECKS_KEY, { type: "json" })) || {};
-      const entry = { ...(checks[number] || {}) };
-      if (body.review) Object.assign(entry, { review: body.review, review_at: new Date().toISOString() });
-      else { delete entry.review; delete entry.review_at; }
-      if (Object.keys(entry).length) checks[number] = entry; else delete checks[number];
-      await blobs.setJSON(CHECKS_KEY, checks);
-      await mirror(db, number, "check", checks[number]);
+      const checks = await (await openMarks(blobs, db)).change("check", (checks) => {
+        const entry = { ...(checks[number] || {}) };
+        if (body.review) Object.assign(entry, { review: body.review, review_at: new Date().toISOString() });
+        else { delete entry.review; delete entry.review_at; }
+        if (Object.keys(entry).length) checks[number] = entry; else delete checks[number];
+        return checks;
+      });
       return reply({ checks }, 200);
     }
     const change = Object.fromEntries(["contacted", "channel", "response", "follow_up_at", "company_name"]
@@ -364,14 +438,13 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     const invalid = invalidChange(change);
     if (invalid) return reply({ error: invalid }, 400);
     if (typeof notes === "string" && notes.length > NOTES_MAX) return reply({ error: `notes are limited to ${NOTES_MAX} characters` }, 400);
-    const [stored, noted] = await Promise.all([CONTACTED_KEY, NOTES_KEY].map(async (k) => (await blobs.get(k, { type: "json" })) || {}));
     const at = new Date().toISOString();
-    const marks = touchesContact ? applyContact(stored, number, change, at) : stored;
-    if (typeof notes === "string") { if (notes.trim()) noted[number] = { text: notes.trim(), at }; else delete noted[number]; }
-    if (touchesContact) await blobs.setJSON(CONTACTED_KEY, marks);
-    if (typeof notes === "string") await blobs.setJSON(NOTES_KEY, noted);
-    if (touchesContact) await mirror(db, number, "contacted", marks[number]);
-    if (typeof notes === "string") await mirror(db, number, "notes", noted[number]);
+    const io = await openMarks(blobs, db);
+    const marks = await io.change("contacted", (stored) => (touchesContact ? applyContact(stored, number, change, at) : stored));
+    const noted = await io.change("notes", (noted) => {
+      if (typeof notes === "string") { if (notes.trim()) noted[number] = { text: notes.trim(), at }; else delete noted[number]; }
+      return noted;
+    });
     return reply({ contacted: marks, notes: noted }, 200);
   }
   const params = new URL(req.url).searchParams;
@@ -426,7 +499,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     const list = ["letter", "call", "email"].includes(params.get("list")) ? params.get("list") : "letter";
     const limit = Math.min(Math.max(Number(params.get("limit")) || 50, 1), 500);
     const offset = Math.max(Number(params.get("offset")) || 0, 0);
-    const [contacted, verdicts] = await Promise.all([CONTACTED_KEY, VERDICTS_KEY].map((k) => blobs.get(k, { type: "json" })));
+    const { contacted, verdict: verdicts } = await (await openMarks(blobs, db)).all();
     const notFit = Object.entries(verdicts || {}).filter(([, v]) => v?.verdict === "not_fit").map(([n]) => n);
     const page = await outreachPage(db, { list, offset, limit, letters: OUTREACH.letters, contacted: Object.keys(contacted || {}), notFit });
     if (!page.complete) return reply({ error: "the database is still being filled" }, 404);   // the page ranks in the browser
@@ -461,8 +534,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     const { files_done: _done, files_rescanned: _rescanned, files_rescanned_r2: _r2, files_rescanned_r3: _r3, files_rescanned_r4: _r4, ...rest } = filings;
     return reply(rest, 200);   // the index (months and counts); the first version carried its rows here too
   }
-  const [data, marks, noted, status, emails, checks, verdicts, lists] = await Promise.all([KEY, CONTACTED_KEY, NOTES_KEY, STATUS_KEY, EMAILS_KEY, CHECKS_KEY, VERDICTS_KEY, LISTS_KEY]
-    .map((k) => blobs.get(k, { type: "json" })));
+  const [data, status, m] = await Promise.all([blobs.get(KEY, { type: "json" }), blobs.get(STATUS_KEY, { type: "json" }), openMarks(blobs, db).then((io) => io.all())]);
   if (!data) return reply({ error: "no account list uploaded yet — it arrives with the next finder run" }, 404);
-  return reply({ ...data, contacted: marks || {}, notes: noted || {}, status: status || {}, emails: emails || {}, checks: checks || {}, verdicts: verdicts || {}, lists: lists || {} }, 200);
+  return reply({ ...data, contacted: m.contacted, notes: m.notes, status: status || {}, emails: m.email, checks: m.check, verdicts: m.verdict, lists: m.list }, 200);
 }

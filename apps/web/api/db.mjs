@@ -179,6 +179,47 @@ export async function setMark(query, number, kind, value) {
     [m.number, m.kind, m.value, m.hash, m.updated_at]);
 }
 
+// Zac's marks live here (stage 2, 22 Nov 2026): one row per company and kind, so a save from the phone and one from the
+// laptop never overwrite each other — the store keeps each kind as one item (read, change, write back), and Workers KV
+// can serve another Cloudflare location a copy up to a minute old. meta 'marks' = {source: "db", at} once db-sync has
+// copied the store's marks in; from then the Function saves here first and the store keeps a copy (healed each sync).
+export async function marksLive(query) {
+  const [m] = await query("SELECT value FROM meta WHERE key = 'marks'", []);
+  return Boolean(m) && JSON.parse(m.value).source === "db";
+}
+export async function adoptMarks(query, at = new Date().toISOString()) {
+  await query("INSERT INTO meta (key, value) VALUES ('marks', ?1) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
+    [JSON.stringify({ source: "db", at })]);
+}
+// {kind: {number: value}} — every kind, or the one asked for.
+export async function readMarks(query, kind = "") {
+  const rows = kind ? await query("SELECT number, kind, value FROM marks WHERE kind = ?1", [kind])
+    : await query("SELECT number, kind, value FROM marks", []);
+  const out = {};
+  for (const r of rows) (out[r.kind] ||= {})[r.number] = JSON.parse(r.value);
+  return out;
+}
+// What one change did to a kind's map: the companies set (new or changed) and the ones taken off.
+export function markDiff(before = {}, after = {}) {
+  const sets = {};
+  for (const [n, v] of Object.entries(after || {})) if (JSON.stringify(v) !== JSON.stringify((before || {})[n])) sets[n] = v;
+  const deletes = Object.keys(before || {}).filter((n) => !(after && n in after));
+  return { sets, deletes };
+}
+// Writes only those rows: one statement for the sets, one for the deletes (D1 allows 50 queries a request on the free plan).
+export async function writeMarks(query, kind, sets = {}, deletes = []) {
+  const records = Object.entries(sets).map(([n, v]) => markRecord(n, kind, v));
+  for (const b of batches(records)) await query(upsertSql("marks"), [JSON.stringify(b)]);
+  if (deletes.length) {
+    await query("DELETE FROM marks WHERE kind = ?1 AND number IN (SELECT j.value FROM json_each(?2) AS j)", [kind, JSON.stringify(deletes.map(String))]);
+  }
+}
+// Two maps hold the same marks, whatever their key order.
+export function sameMarks(a = {}, b = {}) {
+  const ka = Object.keys(a || {}), kb = Object.keys(b || {});
+  return ka.length === kb.length && ka.every((k) => JSON.stringify(a[k]) === JSON.stringify((b || {})[k]));
+}
+
 // The Outreach tab from the database: every lead not contacted (nor any company in its group), not ruled out,
 // qualified out or marked Not a fit, and with no serious reason not to progress; one per group (its best lead);
 // ranked by lead score. The top `letters` are the letter; past them, cold call when there's a timely reason, else the
