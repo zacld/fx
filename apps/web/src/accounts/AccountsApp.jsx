@@ -1701,7 +1701,9 @@ function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick }) {
 const JOB_STATUS = { new_lead: ["New lead", "Matched on Companies House, not on our lists — sent to the finder"],
   on_list: ["On our lists", "Already on the Accounts or FX filings list"], matched: ["Matched", "Found on Companies House; its adverts score under the lead bar"],
   not_found: ["Not matched", "No company of that name on Companies House — search it by hand"],
-  waiting: ["Not looked up yet", "This run's name searches were used up — tried next run"], not_looked_up: ["Weak", "Nothing FX-specific in its adverts"] };
+  waiting: ["Not looked up yet", "This run's name searches were used up — tried next run"],
+  excluded: ["Left out", "A recruitment agency, job board, accountancy practice, consultancy or payments firm — its adverts are other companies' work"],
+  not_looked_up: ["Weak", "Nothing FX-specific in its adverts"] };
 const JOB_KINDS = { currency: "Currency work", treasury: "Treasury / FX role", trade: "Import / export role", fd: "Finance director", abroad: "Teams abroad" };
 function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
   const [data, setData] = useState(null);
@@ -1794,6 +1796,7 @@ function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
                 <span className={`chip${st === "new_lead" ? " good" : st === "not_found" ? " warn" : ""}`} title={JOB_STATUS[st]?.[1]}>{JOB_STATUS[st]?.[0] || st}</span>
                 {(e.kinds || []).map((k) => <span key={k} className="chip">{JOB_KINDS[k] || k}</span>)}
                 {e.first_seen && e.first_seen === data.made_at?.slice(0, 10) && <span className="new">New today</span>}
+                {e.excluded && <span className="muted">{e.excluded}</span>}
               </div>
               <div className="loss-fig" title="Advert score: currency wording 30, each currency 8, each country beside trade words 4, trade terms 6, an FD role 20, treasury 15, an import / export role 8, more adverts naming FX 5 each">
                 <b>{e.score}</b><span className="muted"> advert score{r?.lead_score !== undefined ? ` · lead score ${r.lead_score}` : ""}</span>

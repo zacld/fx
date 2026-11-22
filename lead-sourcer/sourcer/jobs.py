@@ -113,6 +113,16 @@ TERMS = {"letters of credit": r"letters? of credit", "Incoterms": r"incoterms?",
 _TERM_RE = {k: re.compile(p, re.I) for k, p in TERMS.items()}
 ADVERT_POINTS = {"wording": 30, "currency": 8, "currency_max": 24, "country": 4, "country_max": 16, "term": 6, "term_max": 18,
                  "fd": 20, "treasury": 15, "trade": 8, "repeat": 5, "repeat_max": 15}
+# Employers whose adverts describe other companies' work, not their own currency flows (the first live run, 22 Nov 2026:
+# most "new leads" were recruitment agencies — Morgan McKinley, Robertson Bell, Office Angels — plus a job board, an FX
+# payments firm and an actuarial consultancy): by the register's sector codes (all of them in these), else the name, else
+# an advert spread no single employer has.
+EXCLUDED_SIC = (("78", "a recruitment agency"), ("692", "an accountancy practice — its adverts are client work"),
+                ("7022", "a consultancy — its adverts are client work"), ("6312", "a job board or web portal"))
+PAYMENTS_NAME = re.compile(r"\b(?:payments?|pay|fx|forex|currency|currencies|exchange|money|remit\w*|transfers?)\b", re.I)
+AGENCY_NAME = re.compile(r"\b(?:people|personnel|careers?|jobs|talent|recruit\w*|resourcing|staffing|appointments|search|"
+                         r"selection|headhunt\w*|angels)\b", re.I)
+AGENCY_SPREAD = {"kinds": 4, "adverts": 8}   # this many kinds of role, or adverts, in DAYS days: an agency, not an employer
 LOOKUP_MIN = 30             # an employer not on the lists is looked up when its best advert scores this
 LEAD_MIN = 40               # … and becomes a new lead when it scores this, or names currency work, or advertises an FD
 
@@ -325,6 +335,30 @@ def pick_company(name: str, items: list[dict]) -> Optional[dict]:
     if len(same) == 1:
         return {"company_number": same[0]["company_number"], "company_name": same[0].get("title", ""), "match": "core"}
     return None
+
+
+def excluded(employer: dict, name: str = "", sic: Optional[list] = None, status: str = "", kind: str = "") -> str:
+    """Why an employer's adverts don't make it a lead, or "": a recruitment agency, job board, accountancy practice,
+    consultancy, payments / FX firm (sector codes, then name), anything sourcer/absurd.py rules out (a bank, insurer,
+    fund, public body, not-for-profit, not trading), or an agency's spread of adverts (AGENCY_SPREAD)."""
+    from sourcer import absurd
+    name = name or employer.get("employer", "")
+    codes = [str(c) for c in sic or [] if c]
+    if codes:
+        hits = [next((why for prefix, why in EXCLUDED_SIC if c.startswith(prefix)), "") for c in codes]
+        if all(hits):
+            return f"{hits[0][0].upper()}{hits[0][1:]} (sector {codes[0]})"
+        if all(c[:2] in ("64", "66") for c in codes) and PAYMENTS_NAME.search(name):
+            return f"A payments / FX firm (sector {codes[0]}) — a competitor"
+    if RECRUITERS.search(name) or AGENCY_NAME.search(name) or RECRUITERS.search(employer.get("employer", "")):
+        return "A recruitment agency or job board, by its name"
+    if sic is not None or status:
+        why = absurd.reason(name, {"status": status or "active", "type": kind, "sic_codes": codes, "name": name})
+        if why:
+            return why
+    if len(employer.get("kinds") or []) >= AGENCY_SPREAD["kinds"] or len(employer.get("adverts") or []) >= AGENCY_SPREAD["adverts"]:
+        return f"{len(employer.get('adverts') or [])} different finance roles in {DAYS} days — probably an agency"
+    return ""
 
 
 def lookup_due(cache: dict, key: str, today: date) -> bool:

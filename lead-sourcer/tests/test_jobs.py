@@ -103,6 +103,29 @@ class TestJobSignals(unittest.TestCase):
         ch_alerts.job_signals({}, "", ads, lookup=lookup, cache=cache, today=date(2026, 12, 30))
         self.assertEqual(looked, ["Nowhere Ltd"])
 
+    def test_agencies_consultancies_and_payment_firms_left_out(self):
+        # the first live run (22 Nov 2026): recruiters, a job board, an FX payments firm and a consultancy came through
+        ad = lambda emp, title="Accounts Assistant": {"employer": emp, "title": title, "date": "2026-11-20", "link": emp,
+                                                      "text": "Process multi-currency payments in EUR and USD."}
+        ads = [ad("Morgan McKinley"), ad("IFX Payments"), ad("Lane Clark & Peacock LLP"), ad("Acme Foods Ltd"),
+               ad("Smith Personnel Ltd")]
+        companies = {"Morgan McKinley": ("01111111", ["78109"]), "IFX Payments": ("02222222", ["64999"]),
+                     "Lane Clark & Peacock LLP": ("03333333", ["70229"]), "Acme Foods Ltd": ("04444444", ["46390"])}
+        lookup = lambda name: {"company_number": companies[name][0], "company_name": name.upper()} if name in companies else None
+        sic = {v[0]: v[1] for v in companies.values()}
+        out = {}
+        _, found = ch_alerts.job_signals({}, "", ads, lookup=lookup, employers_out=out, today=date(2026, 11, 22),
+                                         profile=lambda n: {"sic_codes": sic[n], "company_status": "active"})
+        self.assertEqual([r["company_number"] for r in found], ["04444444"])
+        why = {k: v.get("excluded", "") for k, v in out.items()}
+        self.assertIn("recruitment agency", why["MORGAN MCKINLEY"])
+        self.assertIn("payments / FX firm", why["IFX PAYMENTS"])
+        self.assertIn("consultancy", why["LANE CLARK AND PEACOCK"])
+        self.assertIn("by its name", why["SMITH PERSONNEL"])               # no search spent on it
+        # an employer advertising many kinds of finance role at once is an agency whatever its name
+        spread = {"employer": "Quiet Co", "kinds": ["fd", "currency", "trade", "treasury"], "adverts": [{}] * 4}
+        self.assertIn("probably an agency", jobs.excluded(spread))
+
     def test_fetch_paces_and_counts(self):
         calls, slept = [], []
         payload = {"results": [{"employerName": "Acme Ltd", "jobTitle": "Export Clerk", "date": "18/11/2026", "jobId": 5,

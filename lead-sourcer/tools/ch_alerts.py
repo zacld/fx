@@ -584,21 +584,27 @@ def _fetch_json(url: str, basic_user: Optional[str]):
 fx_wording = jobs.fx_wording
 
 
+JOB_PROFILES_MAX = 300      # company profiles read a run (sector codes: agencies, consultancies … left out), cached
+
+
 def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], lookup=None, discover: bool = False,
                 cache: Optional[dict] = None, employers_out: Optional[dict] = None,
-                today: Optional[date] = None) -> tuple[list[dict], list[dict]]:
+                today: Optional[date] = None, profile=None) -> tuple[list[dict], list[dict]]:
     """(alerts, discovery rows) from the adverts, one employer at a time (sourcer/jobs.py `employers`, best first): one
     on the lists hiring is an alert, a finance director / CFO advert a hot one (hiring_fd). One not on the lists is looked
     up on Companies House when its adverts score jobs.LOOKUP_MIN+ (or name currency work, or advertise an FD) — the
     search cached in `cache` between runs, JOB_LOOKUPS_MAX new searches a run — and becomes a new lead when it names
     currency work, advertises an FD or scores jobs.LEAD_MIN+ (any match with `discover`). `employers_out` gets every
-    employer with its status (on_list / new_lead / matched / not_found / waiting / not_looked_up) for the Job adverts tab."""
+    employer with its status (on_list / new_lead / matched / not_found / waiting / not_looked_up / excluded) for the Job
+    adverts tab. A matched employer's sector codes (its Companies House profile, `profile`, cached) leave out agencies,
+    job boards, accountancy practices, consultancies and payments firms (sourcer/jobs.py `excluded`)."""
     today = today or date.today()
     index = tracked_index(tracked)
     lookup = lookup or (lambda name: find_company(name, api_key) if api_key else None)
     cache = cache if cache is not None else {}
+    profile = profile or (lambda number: companies_house.get_company_profile(number, api_key) if api_key else None)
     by = jobs.employers(adverts)
-    alerts, found, lookups = [], [], 0
+    alerts, found, lookups, profiles = [], [], 0, 0
     for e in sorted(by.values(), key=lambda e: (-e["score"], e["employer"])):
         number = match_tracked(e["employer"], index)
         company = None
@@ -609,6 +615,10 @@ def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], look
             worth = discover or e["fd"] or bool(e["quote"]) or e["score"] >= jobs.LOOKUP_MIN
             if not worth:
                 e["status"] = "not_looked_up"
+                continue
+            early = jobs.excluded(e)                      # an agency by its name or spread: no search spent on it
+            if early:
+                e.update(status="excluded", excluded=early)
                 continue
             if not jobs.lookup_due(cache, e["key"], today):
                 hit = cache[e["key"]]
@@ -626,6 +636,17 @@ def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], look
                 continue
             if not company or not company.get("company_number"):
                 e["status"] = "not_found"
+                continue
+            entry = cache.setdefault(e["key"], {"company_number": company["company_number"], "at": today.isoformat()})
+            if "sic" not in entry and profiles < JOB_PROFILES_MAX:
+                profiles += 1
+                prof = profile(company["company_number"])
+                if prof:                                  # a profile that didn't load is tried again next run
+                    entry.update(sic=prof.get("sic_codes") or [], status=prof.get("company_status") or "", type=prof.get("type") or "")
+            why = jobs.excluded(e, company.get("company_name", ""), entry.get("sic"), entry.get("status", ""), entry.get("type", ""))
+            if why:
+                e.update(company_number=company["company_number"], company_name=company.get("company_name", ""),
+                         status="excluded", excluded=why)
                 continue
             lead = discover or e["fd"] or bool(e["quote"]) or e["score"] >= jobs.LEAD_MIN
             e.update(company_number=company["company_number"], company_name=company.get("company_name", ""),
@@ -657,7 +678,8 @@ def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], look
     if employers_out is not None:
         employers_out.update(by)
     STATS.update({"job adverts": len(adverts), "adverts naming currency work": sum(1 for a in adverts if fx_wording(a)),
-                  "advert name lookups": lookups, "new leads from adverts": len(found), "advert employers": len(by)})
+                  "advert name lookups": lookups, "new leads from adverts": len(found), "advert employers": len(by),
+                  "advert profiles read": profiles})
     return alerts, found
 
 
