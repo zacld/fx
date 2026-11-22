@@ -39,6 +39,7 @@ Accounts page's Alerts tab and its hot-alerts banner — Zac, 14 Nov 2026: "just
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import base64
 import json
 import os
@@ -643,6 +644,10 @@ def job_signals(tracked: dict[str, str], api_key: str, adverts: list[dict], look
                 prof = profile(company["company_number"])
                 if prof:                                  # a profile that didn't load is tried again next run
                     entry.update(sic=prof.get("sic_codes") or [], status=prof.get("company_status") or "", type=prof.get("type") or "")
+                    STATS["advert profiles with sector codes"] = STATS.get("advert profiles with sector codes", 0) + bool(entry["sic"])
+                else:
+                    STATS["advert profiles not loaded"] = STATS.get("advert profiles not loaded", 0) + 1
+            e["sic"] = entry.get("sic") or []
             why = jobs.excluded(e, company.get("company_name", ""), entry.get("sic"), entry.get("status", ""), entry.get("type", ""))
             if why:
                 e.update(company_number=company["company_number"], company_name=company.get("company_name", ""),
@@ -837,8 +842,13 @@ def run_signals(args, store: dict, alerts: list[dict], now: datetime) -> None:
           f"full adverts read {query_counts.get('_full_reads', 0)}; board calls {query_counts.get('_calls', {})}")
     for q in sorted(jobs.query_stats(query_counts, by_employer), key=lambda q: (-q["leads"], -q["worded"]))[:15]:
         print(f"  {q['kind']:<9} {q['query'][:40]:<40} adverts {q['adverts']:>4} kept {q['kept']:>4} naming FX {q['worded']:>3} leads {q['leads']:>3}")
-    for e in [e for e in by_employer.values() if e.get("status") == "new_lead"][:15]:
-        print(f"  new lead  {e['score']:>3}  {e.get('company_name') or e['employer']}  [{', '.join(e['kinds'])}] {', '.join(e['currencies'])}")
+    print(f"  company profiles read {STATS.get('advert profiles read', 0)} (with sector codes {STATS.get('advert profiles with sector codes', 0)}, "
+          f"not loaded {STATS.get('advert profiles not loaded', 0)}); left out: "
+          + ", ".join(f"{k} {n}" for k, n in Counter(e.get("excluded", "").split(" (")[0].split(",")[0] for e in by_employer.values()
+                                                     if e.get("status") == "excluded").most_common()))
+    for e in [e for e in by_employer.values() if e.get("status") == "new_lead"][:25]:
+        print(f"  new lead  {e['score']:>3}  {e.get('company_name') or e['employer']}  [{', '.join(e['kinds'])}] {', '.join(e['currencies'])}"
+              f"  sector {', '.join(e.get('sic') or []) or '?'}")
 
 
 def main() -> None:
