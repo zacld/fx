@@ -95,6 +95,9 @@ describe("second recalibration (22 Nov 2026)", () => {
     const { matched, unmatched } = matchCompanies("VOLANTEUS LIMITED £67.2m\n13582451, Limbs and Things Ltd\nPROJECT TWENTY TOPCO LIMIT…\nNOBODY LTD", rows);
     expect(matched.map((m) => m.row.company_number)).toEqual(["10303149", "13582451", "02532281", "1"]);
     expect(unmatched).toEqual(["NOBODY LTD"]);
+    // a name starting with digits is a name, not a list number; a numbered list still works
+    const rows2 = [{ company_number: "2", company_name: "360 BRAND GROUP LTD" }, { company_number: "3", company_name: "ACME LIMITED" }];
+    expect(matchCompanies("360 BRAND GROUP LTD\n12. Acme Ltd", rows2).matched.map((m) => m.row.company_number)).toEqual(["2", "3"]);
   });
 });
 
