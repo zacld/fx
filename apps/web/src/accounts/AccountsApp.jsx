@@ -1,5 +1,5 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { FILINGS_SECTION } from "./ranking.js";
+import { FILINGS_SECTION, learningRows } from "./ranking.js";
 import { score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
@@ -111,13 +111,11 @@ function Accounts({ data, password }) {
     return () => { live = false; };
   }, [password]);
   const baseRows = useMemo(() => {
-    const out = ranked.ruled_out || {};
-    const onList = new Set((data.rows || []).map((r) => r.company_number));
-    const relabel = ranked.niche_of || {};
-    const listed = [...(data.rows || []).map((r) => (relabel[r.company_number] !== undefined ? { ...r, fx_niche: relabel[r.company_number] } : r))
-      .map((r) => (out[r.company_number] && r.qualified !== "Out" ? { ...r, qualified: "Out", qualify_reason: out[r.company_number] } : r)),
-      ...(ranked.rows || []).filter((r) => !onList.has(r.company_number))
-        .map((r, i) => ({ ...filingRow(r), rank: 100000 + i, companies_house_url: chCompanyUrl(r.company_number) }))];
+    // each company once (ranking.js learningRows — the nightly ranking learns from the same rows): the list's own rows,
+    // their niche corrected and the absurd ones Out, then the FX filings companies not on it
+    const list = data.rows || [];
+    const listed = learningRows(list, ranked)
+      .map((r, i) => (i < list.length ? r : { ...r, rank: 100000 + i - list.length, companies_house_url: chCompanyUrl(r.company_number) }));
     const known = new Set(listed.map((r) => r.company_number));
     const dropped = Object.entries(contacted).filter(([n]) => !known.has(n)).map(([n, mark]) => ({
       company_number: n, company_name: mark.name || `Company ${n}`, rank: 99999, dropped: true,

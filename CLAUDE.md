@@ -1035,7 +1035,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   new prospects (5 judged; your usual 45%)") — relative to his usual rate since 23 Nov 2026 (the fixed 60% / 25% were set
   when Open counted as good), so the score steers to where new prospects come from and away from where companies are
   already open. The page and the daily ranking (`rank-leads.mjs` reads `checks` + `verdicts` + `lists`;
-  `leads/ranked.reviews`, printed) both apply it; the
+  `leads/ranked.reviews`, printed) both apply it, learning from the same rows — each company once, with the niche the page shows (`ranking.js` `leadRows` →
+  `learningRows`, the lookalikes by profile too; until 24 Nov 2026 the daily ranking counted a company on both lists twice: "694 judged,
+  15% new" with 54 new prospects); the
   Simplified dash shows "What your checks are teaching the score". Only his clicks — nothing from the CRM.
 - **Hard to broker** (Zac, 13 Nov 2026: "a separate section where we go after sectors brokers can't — mining,
   recyclables etc — no firearms, no gambling"): niches carrying `broker_shy` (the reason payment firms — non-bank FX

@@ -24,9 +24,11 @@ const slim = (r) => Object.fromEntries(RANKED_FIELDS.filter((k) => r[k] !== unde
 // Niches that only say how we found a company, not what it trades: a holding company's group activity (its trading
 // subsidiaries' sector — groupActivity) names a real one instead.
 export const GENERIC_NICHES = new Set(["", "FX in their filed accounts", "Broad wholesale / trade sector"]);
-export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, moves = {}, today = new Date(), reviews = null, groups = null, likes = null } = {}) {
+// One row per company, as the page shows them: the Accounts list's own rows (their niche corrected — `niche_of`) and the
+// FX filings companies not on it (`rows`, slim, tagged with their niche), with the absurd ones (`ruled_out`) and the hard
+// to broker (`shy_of`). What the score ranks (rankLeads) and what Zac's marks are learnt from (learningRows).
+export function leadRows(listRows = [], filingRows = [], { enrich = {}, niches = {}, groups = null } = {}) {
   if (groups) setKnownGroups(groups);
-  const tiers = nicheTiers(niches);
   const viaGroup = (r, niche) => (GENERIC_NICHES.has(niche || "") && groupActivity(r)?.niche) || niche || "";
   const onList = new Set(listRows.map((r) => r.company_number));
   // A list company's niche: the corrected one (customs goods, else a sector code that really names a niche) wins over
@@ -59,6 +61,27 @@ export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches 
              ...(e.absurd ? { qualified: "Out", qualify_reason: e.absurd } : {}) };
   });
   listRows.forEach(tag);
+  return { rows, ruled_out: ruledOut, niche_of: nicheOf, shy_of: shyOf };
+}
+
+// The rows Zac's marks are learnt from — the feedback loop (reviewLearnings) and the lookalikes by profile
+// (likeGoodLeads) — on the page (AccountsApp baseRows, from the saved ranking) and in the nightly ranking alike: each
+// company once, a list company with its corrected niche (Out when ruled out), then the filings companies not on the list.
+// (Until 24 Nov 2026 the nightly ranking learnt from every list row and every filings row, so a company on both lists
+// counted twice — "694 judged, 15% new" when Zac had 54 new prospects — and could lean the score apart from the page.)
+export function learningRows(listRows = [], ranked = {}) {
+  const relabel = ranked?.niche_of || {}, out = ranked?.ruled_out || {};
+  const onList = new Set(listRows.map((r) => r.company_number));
+  return [
+    ...listRows.map((r) => (relabel[r.company_number] !== undefined ? { ...r, fx_niche: relabel[r.company_number] } : r))
+      .map((r) => (out[r.company_number] && r.qualified !== "Out" ? { ...r, qualified: "Out", qualify_reason: out[r.company_number] } : r)),
+    ...(ranked?.rows || []).filter((r) => !onList.has(r.company_number)).map((r) => filingRow(r)),
+  ];
+}
+
+export function rankLeads(listRows = [], filingRows = [], { enrich = {}, niches = {}, signals = {}, moves = {}, today = new Date(), reviews = null, groups = null, likes = null } = {}) {
+  const { rows, ruled_out: ruledOut, niche_of: nicheOf, shy_of: shyOf } = leadRows(listRows, filingRows, { enrich, niches, groups });
+  const tiers = nicheTiers(niches);
   const ctx = { niches: tiers, signals, moves, today, reviews, likes };
   const scored = [...listRows.map((r) => ({ ...r, onList: true, fx_niche: nicheOf[r.company_number] ?? r.fx_niche })),
     ...rows.map((r) => ({ ...filingRow(r), onList: false }))]

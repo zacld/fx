@@ -7,7 +7,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, FEED_KEY, FILINGS_KEY, KEY, LISTS_KEY, MOMENTS_KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
 import { likeGoodLeads, markClass, movesByCurrency, reviewLearnings, score100, setKnownGroups, setScoreScale } from "../src/accounts/format.js";
-import { feedRows, filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
+import { feedRows, filedMonth, leadRows, learningRows, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
 // orderPath: company numbers, best lead first (find_domains.py); groupsPath: each company's top UK parent (psc_deals.py);
@@ -38,7 +38,9 @@ const verdicts = (await store.get(VERDICTS_KEY, "json")) || {};
 const checks = (await store.get(CHECKS_KEY, "json")) || {};
 const lists = (await store.get(LISTS_KEY, "json")) || {};
 setKnownGroups(groupOf);   // PE up the chain, a holding company's group activity: read by the score as on the page
-const marked = [...listRows, ...filingRows.map((r) => ({ ...r, from_filings: true, fx_niche: enrich[r.company_number]?.niche || "", sic: enrich[r.company_number]?.sic || [] }))];
+// each company once, with the niche the page shows — the rows the page learns from too (ranking.js learningRows; until
+// 24 Nov 2026 every list row plus every filings row, so a company on both lists counted twice)
+const marked = learningRows(listRows, leadRows(listRows, filingRows, { enrich, niches: niches?.niches || {}, groups: groupOf }));
 const reviews = reviewLearnings(marked, checks, verdicts, undefined, lists);
 // lookalikes by profile: the unmarked leads most like the ones Zac marked good (format.js likeGoodLeads)
 const likes = likeGoodLeads(marked, checks, verdicts, lists);
