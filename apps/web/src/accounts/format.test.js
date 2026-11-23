@@ -719,7 +719,8 @@ describe("lead source", () => {
 });
 
 describe("feedback loop", () => {
-  // Zac, 23 Nov 2026: Open lead = already open (not new); Skip = no FD found (no judgement); a list = a new prospect
+  // Zac, 23 Nov 2026: Open lead = already open (not new); Skip = no FD found (no judgement); a list alone = mostly already
+  // open, not new ("the only good ones are the ones I put in good")
   const rows = Array.from({ length: 12 }, (_, i) => ({ company_number: String(i).padStart(2, "0"), company_name: `C${i}`,
     fx_niche: i < 6 ? "Cut flowers" : "Fasteners", found_via: i < 6 ? "job advert: Clerk" : "" }));
   const checks = { "01": { review: "mine" }, "02": { review: "research" }, "03": { review: "skip" }, "04": { review: "open" },
@@ -729,17 +730,19 @@ describe("feedback loop", () => {
   it("says what each mark means", () => {
     const m = { checks, verdicts, lists };
     expect(["00", "01", "02", "03", "04", "05", "07", "09", "99"].map((n) => markClass(n, m)))
-      .toEqual(["good", "good", "good", "neutral", "taken", "good", "bad", "bad", null]);
-    expect(markClass("04", { checks, verdicts, lists: { "04": { list: "call" } } })).toBe("good");   // a list beats Open
+      .toEqual(["taken", "good", "good", "neutral", "taken", "good", "bad", "bad", null]);
+    expect(markClass("04", { checks, verdicts, lists: { "04": { list: "call" } } })).toBe("taken");   // Open, and on the call list
+    expect(markClass("05", { checks, verdicts, lists: { "05": { list: "call" } } })).toBe("good");   // a Good lead to call
+    expect(markClass("02", { checks, verdicts, lists: { "02": { list: "call" } } })).toBe("good");   // researched, contact found
   });
   it("learns which niches give new prospects from Zac's own marks", () => {
     const l = reviewLearnings(rows, checks, verdicts, undefined, lists);
-    expect([l.reviewed, l.usual]).toEqual([11, 45]);   // the skip isn't a judgement
+    expect([l.reviewed, l.usual]).toEqual([11, 36]);   // the skip isn't a judgement
     const flowers = l.niche.find((g) => g.key === "Cut flowers"), fasteners = l.niche.find((g) => g.key === "Fasteners");
-    expect([flowers.good, flowers.taken, flowers.not, flowers.good_share, flowers.points]).toEqual([4, 1, 0, 80, 8]);
+    expect([flowers.good, flowers.taken, flowers.not, flowers.good_share, flowers.points]).toEqual([3, 2, 0, 60, 8]);
     expect([fasteners.good, fasteners.taken, fasteners.not, fasteners.good_share, fasteners.points]).toEqual([1, 3, 2, 17, -8]);
     const leaned = leadScore({ ...rows[7], fx_niche: "Cut flowers" }, { reviews: l });
-    expect(leaned.parts.some(([w, p]) => /Your checks: 80% of Cut flowers leads were new prospects \(5 judged; your usual 45%\)/.test(w) && p === 8)).toBe(true);
+    expect(leaned.parts.some(([w, p]) => /Your checks: 60% of Cut flowers leads were new prospects \(5 judged; your usual 36%\)/.test(w) && p === 8)).toBe(true);
   });
   it("open leads no longer count as good, and the old way's numbers would have", () => {
     const opens = { "00": { review: "open" }, "01": { review: "open" }, "02": { review: "open" }, "03": { review: "open" }, "04": { review: "open" } };
@@ -791,7 +794,8 @@ describe("good leads: rating and the written brief", () => {
       verdicts: { 1: { verdict: "good", at: "2026-11-23T09:00:00Z", rating: 3 }, 2: { rating: 1 }, 4: { verdict: "good", at: "2026-11-22T09:00:00Z" } },
       lists: { 3: { list: "call", at: "2026-11-23T12:00:00Z" } },
     };
-    expect(goodLeadsList(rows, marks).map((x) => [x.r.company_number, x.mark.label, x.rating])).toEqual([["1", "Good lead", 3], ["2", "Research harder", 1], ["3", "Call list", 0]]);
+    // a call list alone isn't a new prospect (mostly already open), so 3 isn't listed
+    expect(goodLeadsList(rows, marks).map((x) => [x.r.company_number, x.mark.label, x.rating])).toEqual([["1", "Good lead", 3], ["2", "Research harder", 1]]);
     expect([ratingOf(marks.verdicts, "1"), ratingOf(marks.verdicts, "3"), stars(2)]).toEqual([3, 0, "★★☆"]);
     expect(markClass("2", marks)).toBe("good");
     const lead = { company_number: "9", company_name: "X LTD", lead_fit: 50, lead_score: 60, filed_fx_score: 60, turnover_gbp: 40e6 };

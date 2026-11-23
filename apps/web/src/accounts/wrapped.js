@@ -7,13 +7,14 @@ import { chCompanyUrl, growthPct, hedgingNamed, hiddenFromFilters, inCoreBand, i
 import { SEQUENCE } from "./sequence.js";
 import { touchesOf } from "./followups.js";
 
-// [key, label, group] (what each mark means — Zac, 23 Nov 2026 — as markClass in format.js): keep — a new prospect;
-// taken — Open lead, already open, not new; drop — not for us; skip — no finance director found (no judgement of the
-// company, left out of the rates). The first seven are Today's list's buttons; the rest are marks made on other tabs.
+// [key, label, group] (what each mark means — Zac, 23 Nov 2026 — as markClass in format.js): keep — a new prospect
+// ("the only good ones are the ones I put in good"); taken — already ongoing, not new: Open lead, and a call / email /
+// mail list ("the call ones were majority open leads from Investec"); drop — not for us; skip — no finance director found
+// (no judgement of the company, left out of the rates). Today's list has buttons for most; the rest are marked elsewhere.
 export const OUTCOMES = [
-  ["good", "Good lead", "keep"], ["research", "Research harder", "keep"], ["call", "Call list", "keep"],
-  ["mine", "Added to mine", "keep"], ["email", "Email list", "keep"], ["post", "Mail list", "keep"],
-  ["open", "Open lead (already open)", "taken"],
+  ["good", "Good lead", "keep"], ["research", "Research harder", "keep"], ["mine", "Added to mine", "keep"],
+  ["open", "Open lead (already open)", "taken"], ["call", "Call list (mostly already open)", "taken"],
+  ["email", "Email list", "taken"], ["post", "Mail list", "taken"],
   ["small", "Not enough revenue", "drop"], ["abroad", "Owned abroad", "drop"], ["notfit", "Not a fit (other reason)", "drop"],
   ["skip", "Skipped (no FD found)", "skip"],
 ];
@@ -228,8 +229,8 @@ export function wrapText(w) {
   if (!w.looked) return `${dayLabel(w.day)}: no leads marked.`;
   const part = (keys) => keys.filter((k) => w.counts[k]).map((k) => `${w.counts[k]} ${outcomeLabel(k).toLowerCase()}`).join(", ");
   const lines = [`${dayLabel(w.day)} — ${w.looked} leads looked through.`];
-  if (w.keep) lines.push(`New prospects: ${w.keep} (${part(["good", "research", "call", "mine", "email", "post"])}).`);
-  if (w.taken) lines.push(`Already open: ${w.taken}.`);
+  if (w.keep) lines.push(`New prospects: ${w.keep} (${part(["good", "research", "mine"])}).`);
+  if (w.taken) lines.push(`Already open or on a list: ${w.taken} (${part(["open", "call", "email", "post"])}).`);
   if (w.drop) lines.push(`Not for us: ${w.drop} (${part(["small", "abroad", "notfit"])}).`);
   if (w.skip) lines.push(`Skipped, no FD found: ${w.skip}.`);
   const s = w.worked.sector[0];
@@ -246,11 +247,12 @@ export function wrapText(w) {
 // Finish day (Zac, 23 Nov 2026: "a button … finish day, then it will compile the report and a document with the good lead
 // names I can put on Notion"): the day's report as one document — the summary, then every new prospect by its mark (best
 // lead score first) with its Companies House link, website, industry, size, score and his note, then what was ruled out
-// and the skips (no FD found — worth another go). Open leads are counted, never named: already open.
+// and the skips (no FD found — worth another go). Open leads and the lists (mostly already open) are counted, never named.
 export const REPORT_SECTIONS = [
-  ["good", "Good leads"], ["research", "Good leads to research harder (no contact found yet)"],
-  ["call", "Added to the call list"], ["mine", "Added to mine"], ["email", "Added to the email list"], ["post", "Added to the mail list"],
+  ["good", "Good leads"], ["research", "Good leads to research harder (no contact found yet)"], ["mine", "Added to mine"],
 ];
+const TAKEN = [["open", (n) => `${n} open lead${n === 1 ? "" : "s"}`], ["call", (n) => `${n} on your call list`],
+  ["email", (n) => `${n} on your email list`], ["post", (n) => `${n} on your mail list`]];
 const DROPS = [["small", "Not enough revenue"], ["abroad", "Owned abroad"], ["notfit", "Not a fit (other reason)"]];
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 const clockOf = (at) => (hasTime(at) ? new Date(at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "");
@@ -276,7 +278,7 @@ export function dayReport(w, notes = {}, { verdicts = {} } = {}) {
   const dp = w.depth;
   if (!w.looked) summary.push("No leads marked.");
   else {
-    summary.push(`${plural(w.looked, "lead")} looked through: ${plural(w.keep, "new prospect")}${share(w.keep)}, ${w.taken} already open${share(w.taken)}, `
+    summary.push(`${plural(w.looked, "lead")} looked through: ${plural(w.keep, "new prospect")}${share(w.keep)}, ${w.taken} already open or on a list${share(w.taken)}, `
       + `${w.drop} not for us${share(w.drop)}, ${w.skip} skipped — no FD found${share(w.skip)}`
       + `${w.keepRate != null ? `. ${w.keepRate}% of those judged were new prospects` : ""}.`);
     const most = dp.sector[0];
@@ -304,7 +306,8 @@ export function dayReport(w, notes = {}, { verdicts = {} } = {}) {
   const named = (k) => w.marked.filter((a) => a.kind === k).map((a) => a.r?.company_name || a.n);
   const notFor = [...DROPS, ["skip", "Skipped — no finance director found (worth another go)"]].filter(([k]) => w.counts[k])
     .map(([k, label]) => ({ label, count: w.counts[k], names: named(k) }));
-  return { title: `Day report — ${dayLabel(w.day)}`, day: w.day, summary, tables: depthTables(w), sections, notFor, open: w.taken,
+  const openParts = TAKEN.filter(([k]) => w.counts[k]).map(([k, label]) => label(w.counts[k])).join(", ");
+  return { title: `Day report — ${dayLabel(w.day)}`, day: w.day, summary, tables: depthTables(w), sections, notFor, open: w.taken, openParts,
     keepers: sections.flatMap((sec) => sec.items) };
 }
 
@@ -367,7 +370,7 @@ export function reportMarkdown(rep) {
   if (rep.notFor.length || rep.open) {
     out.push("", "## Not new prospects", "");
     for (const x of rep.notFor) out.push(`- ${x.label} (${x.count}): ${x.names.map(mdEscape).join(", ")}`);
-    if (rep.open) out.push(`- Already open: ${rep.open}`);
+    if (rep.open) out.push(`- Already open or on a list: ${rep.open}${rep.openParts ? ` (${rep.openParts})` : ""}`);
   }
   out.push("", `_From the FX accounts dashboard, ${rep.day}._`);
   return out.join("\n");
@@ -397,7 +400,7 @@ export function reportHtml(rep) {
   }
   if (rep.notFor.length || rep.open) {
     out.push("<h2>Not new prospects</h2><ul>", ...rep.notFor.map((x) => `<li>${htmlEscape(x.label)} (${x.count}): ${x.names.map(htmlEscape).join(", ")}</li>`),
-      rep.open ? `<li>Already open: ${rep.open}</li>` : "", "</ul>");
+      rep.open ? `<li>Already open or on a list: ${rep.open}${rep.openParts ? ` (${htmlEscape(rep.openParts)})` : ""}</li>` : "", "</ul>");
   }
   out.push(`<p><em>From the FX accounts dashboard, ${htmlEscape(rep.day)}.</em></p>`);
   return out.join("");

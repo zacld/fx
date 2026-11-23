@@ -787,11 +787,14 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   moves up; Undo for the last one; "N marked today". **What the marks mean** (Zac, 23 Nov 2026: "if a bank had an open
   lead or they were using, I just put them as open" — the bank being Investec: "we had something ongoing with them" —
   "the skips were either could not find the finance director at all";
-  `markClass` in `format.js`, mirrored by `discover.good_leads`): a **new prospect** — Good lead, Research harder, Added to
-  mine, or put on the call / email / mail list (a list beats any other mark); **Open lead** — Investec already has
-  something ongoing with them (his CRM check), not a new prospect; **not for us** — Not a fit (Not enough revenue …), Owned abroad; **Skip** — no finance director found, no
+  `markClass` in `format.js`, mirrored by `discover.good_leads`): a **new prospect** — Good lead, Research harder (a good lead
+  with no contact yet) or Added to mine, and nothing else ("the call ones were majority open leads from Investec, not new
+  ones — the only good ones are the ones I put in good"); **Open lead** — Investec already has something ongoing with them
+  (his CRM check), not a new prospect; **on a list** with no other mark (call / email / mail) — counted with the already
+  open, not new; **not for us** — Not a fit (Not enough revenue …), Owned abroad; **Skip** — no finance director found, no
   judgement of the company. Until that day Open lead counted as good and Call list not at all, so the feedback loop and
-  both lookalike searches learned from the 199 open leads of his first big day; now they learn from the new prospects. **Open
+  both lookalike searches learned from the 199 open leads of his first big day; then for a few hours the call list counted
+  as new (his day read 92 new; it was 27); now they learn from his Good leads, Research harder and Added to mine only. **Open
   marks are kept** (Zac, 23 Nov 2026, asked whether a per-company record of what Investec already works on belongs here:
   "keep as is"): his own click after his CRM check, nothing copied from the CRM; the site only ever says "Open lead" (never
   why), the day report counts them and never names them, and the learning uses them only in totals by niche, source and
@@ -808,8 +811,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Today's list): worked out in the browser from his marks' own times — `checks.review_at`, `verdicts.at`, `lists.at`, a
   contact's touches, a sequence step's date, a note's `at` — so nothing new is stored and nothing from the bank's records
   is used; a company counts once, on the day of its latest mark (one marked again later moves to that day; an undone mark
-  isn't counted). Shows: leads looked through (the hero figure) with new prospects (good / research harder / call list /
-  added to mine / email or mail list) · already open · not for us (not enough revenue / owned abroad / other not-a-fit) ·
+  isn't counted). Shows: leads looked through (the hero figure) with new prospects (good / research harder /
+  added to mine) · already open or on a list (open leads, call / email / mail list) · not for us (not enough revenue / owned abroad / other not-a-fit) ·
   skipped (no FD found: left out of the rates); the new-prospect rate (new ÷ new + open + not for us); how he marked them;
   what worked and what didn't land by sector, niche or source (worked: most new; didn't land: 3+ judged and half the day's
   usual rate or less, with the commonest reason); the best find (highest lead score among the new); his new prospects'
@@ -823,10 +826,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   can put on Notion"; a blue button on Today's list — it opens Your day on the report — and on Your day, "Day report" for
   an earlier day; `dayReport` / `reportMarkdown` / `reportHtml` in `wrapped.js`): one document — the day's summary
   (looked through, keepers, keeper rate, best and worst sector, best find, hours worked and pace, what else got done,
-  against other days), then every new prospect under its mark (Good leads, Research harder, Call list, Added to mine,
-  Email / Mail list), best lead score first, each with its Companies House link, website, industry, size, score and his
+  against other days), then every new prospect under its mark (Good leads, Research harder, Added to mine), best rated
+  then best lead score first, each with its Companies House link, website, industry, size, score and his
   note; then "Not new prospects": not for us by reason and the skips (no FD found — worth another go) with names, and the
-  open leads counted, never named. **Copy for Notion** puts it on the clipboard as formatted HTML with the Markdown as plain text
+  open leads and the lists counted, never named ("Already open or on a list: 264 (199 open leads, 65 on your call list)"). **Copy for Notion** puts it on the clipboard as formatted HTML with the Markdown as plain text
   (Notion, email and Teams paste it with headings, bullets and links); **Download (.md)** saves `fx-day-<date>.md` (Notion
   imports it); **Good leads in Excel** the keepers with mark, company, number, industry, turnover, score, website, note, time
   marked and Companies House link. Built from the marks like the rest of the page — nothing saved, so any day's report can
@@ -839,7 +842,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   subsidiaries abroad, PE-backed, hidden from the usual filters, sized by its group — new % with and without, and the
   difference in points), niches (top 15), where they came from (`leadSource`), hour by hour, and running totals (this
   week from Monday, this month, all time: days worked, looked at, new, open, new %). The summary leads with the shares
-  ("92 new prospects (26%), 199 already open (57%) …"), the type of company most looked at, the strongest sign of a new
+  ("27 new prospects (8%), 264 already open or on a list (75%) …"), the type of company most looked at, the strongest sign of a new
   prospect (3+ judged each side) and the best size band. Shown on
   Your day ("The day in numbers") and in the report as tables (Markdown tables / HTML tables, which Notion pastes as
   tables); on a phone each table drops its minor columns (`minor`) and the meters so kept % stays in view.
@@ -905,7 +908,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   search waits) lists every company whose HMRC records carry them in 2+ months (`search`: sized first, months, share of
   its declared trade, the codes, on the lists, FX proof), store key `search_results` (written only there). **Lookalikes**
   (daily "Niche hits", `discover.lookalikes`, store key `lookalikes`): Zac's new prospects (`good_leads`: Good lead,
-  Research harder, Added to mine, a list — `--lists`; not Open lead, Skip, Owned abroad or Not a fit) give their goods at the 6-digit heading, weighted by
+  Research harder, Added to mine — not a list alone, Open lead, Skip, Owned abroad or Not a fit) give their goods at the 6-digit heading, weighted by
   rarity among sized traders (a heading `LOOKALIKE_COMMON_DF`+ carry isn't searched); sized companies covering
   `LOOKALIKE_MIN_SCORE` (0.4) of that with 2+ goods in common (+0.1 same sector) are listed, 15 a lead. Both feed the
   finder (`NICHE_SEARCH_FILE`, `LOOKALIKES_FILE`: sized, not on the lists, 55, niche "Niche search: …" / "Like …" when no

@@ -3673,11 +3673,13 @@ class TestNiches(unittest.TestCase):
         self.assertNotIn("G1", [r["company_number"] for r in rows])
         self.assertEqual(discover.good_leads({"A": {"review": "open"}, "B": {"review": "abroad"}, "C": {"crm": "x"}},
                                              {"D": {"verdict": "good"}, "A": {"verdict": "not_fit"}}), {"D"})
-        # Zac, 23 Nov 2026: Open lead = already open (not new), Skip = no FD found; a list (call / email / mail) is new
+        # Zac, 23 Nov 2026: Open lead = already open (not new), Skip = no FD found, and a list alone isn't new either
+        # ("the call ones were majority open leads"): only Good lead, Research harder and Added to mine are
         self.assertEqual(discover.good_leads({"O": {"review": "open"}, "M": {"review": "mine"}, "R": {"review": "research"},
                                               "S": {"review": "skip"}, "X": {"review": "abroad"}},
-                                             {"O": {"verdict": "good"}, "S": {"verdict": "good"}, "G": {"verdict": "good"}},
-                                             {"L": {"list": "call"}, "X": {"list": "email"}}), {"M", "R", "G", "L", "X"})
+                                             {"O": {"verdict": "good"}, "S": {"verdict": "good"}, "G": {"verdict": "good"},
+                                              "GL": {"verdict": "good"}},
+                                             {"L": {"list": "call"}, "X": {"list": "email"}, "GL": {"list": "call"}}), {"M", "R", "G", "GL"})
 
     """sourcer/niches.py: goods niches from customs codes, measured scores, the finder's order."""
 
