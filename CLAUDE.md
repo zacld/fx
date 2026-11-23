@@ -820,7 +820,18 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   (Notion, email and Teams paste it with headings, bullets and links); **Download (.md)** saves `fx-day-<date>.md` (Notion
   imports it); **Good leads in Excel** the keepers with mark, company, number, industry, turnover, score, website, note, time
   marked and Companies House link. Built from the marks like the rest of the page — nothing saved, so any day's report can
-  be made again.
+  be made again. **The day in numbers** (Zac, 23 Nov 2026: "really in depth — what type of companies, how many I did,
+  percentages"; `dayWrap(…).depth` → `depthTables` in `wrapped.js`, `DepthTable` in `AccountsApp.jsx`): the same day cut
+  every way, each row with looked at, % of the day, kept, not for us, skipped and kept % (keepers ÷ keepers + not for us;
+  skips left out) — how he marked them (with % of the day), type of company (`industryOf`), size (`SIZE_BANDS`: under £20m,
+  £20m–£50m, £50m–£100m, £100m–£300m, £300m+, none filed), lead score (`SCORE_BANDS`: does the ranking agree with him),
+  signs of a keeper (`SIGNALS`: strong FX proof, FX loss £50k+, no hedging named, growing 20%+, £20m–£300m, subsidiaries
+  abroad, PE-backed, hidden from the usual filters, sized by its group — kept % with and without, and the difference in
+  points), niches (top 15), where they came from (`leadSource`), hour by hour, and running totals (this week from Monday,
+  this month, all time: days worked, looked at, kept, kept %). The summary leads with the shares ("4 keepers (57%) …"), the
+  type of company most looked at, the strongest sign of a keeper (3+ judged each side) and the best size band. Shown on
+  Your day ("The day in numbers") and in the report as tables (Markdown tables / HTML tables, which Notion pastes as
+  tables); on a phone each table drops its minor columns (`minor`) and the meters so kept % stays in view.
   **Notes and Research harder** (Zac, 23 Nov 2026: "a button to add notes. And another button which is good lead but no
   contact info and add it to a research harder section"): every line has "✎ Add note" / "Edit note" (`LineNote`: the
   company's note, store key `notes`, the same one cards and the company page show; shown under the links once saved), and

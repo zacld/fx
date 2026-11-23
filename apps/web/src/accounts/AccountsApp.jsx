@@ -9,7 +9,7 @@ import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
-import { OUTCOMES, dayReport, dayWrap, localDay, outcomeLabel, reportHtml, reportMarkdown, shiftDay, siteHref, wrapText } from "./wrapped.js";
+import { OUTCOMES, dayReport, dayWrap, depthTables, localDay, outcomeLabel, reportHtml, reportMarkdown, shiftDay, siteHref, wrapText } from "./wrapped.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -2452,6 +2452,33 @@ function WrapIcon({ kind }) {
   return <span className={`dot-btn dot-${cls} dot-key`} aria-hidden="true">{sym}</span>;
 }
 const clock = (d) => (d ? d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "");
+// One of the day's tables (depthTables in wrapped.js): counts, share of the day and kept %, with a small meter on kept %.
+const WIDE_TABLES = new Set(["sector", "signals", "niche"]);
+function DepthTable({ t }) {
+  const last = t.head.length - 1;
+  const cls = (i) => [i ? "num" : "", t.minor?.includes(i) ? "minor" : ""].filter(Boolean).join(" ") || undefined;
+  return (
+    <div className={`depth${WIDE_TABLES.has(t.key) ? " depth-wide" : ""}`}>
+      <h4>{t.title}</h4>
+      {t.note && <p className="depth-note">{t.note}</p>}
+      <div className="depth-scroll">
+        <table className="depth-table">
+          <thead><tr>{t.head.map((h, i) => <th key={i} className={cls(i)}>{h}</th>)}</tr></thead>
+          <tbody>{t.rows.map((r, i) => (
+            <tr key={i}>{r.cells.map((c, j) => (
+              <td key={j} className={cls(j)}>
+                {j === last && t.meter && r.rate != null
+                  ? <span className="depth-rate"><span className="depth-meter" aria-hidden="true"><span style={{ width: `${Math.round(100 * r.rate)}%` }} /></span>{c}</span>
+                  : c}
+              </td>))}
+            </tr>))}
+          </tbody>
+          {t.foot && <tfoot><tr>{t.foot.map((c, i) => <th key={i} className={cls(i)}>{c}</th>)}</tr></tfoot>}
+        </table>
+      </div>
+    </div>
+  );
+}
 const span = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`);
 function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen, onBack, startReport = false, onReportClosed }) {
   const today = localDay(new Date().toISOString());
@@ -2466,6 +2493,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
   const [docNote, setDocNote] = useState("");
   const reportRef = useRef(null);
   const rep = useMemo(() => (report ? dayReport(w, notes) : null), [report, w, notes]);
+  const tables = useMemo(() => depthTables(w).filter((t) => t.key !== "marks"), [w]);
   useEffect(() => () => onReportClosed?.(), []);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (report) reportRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }); }, [report]);
   const closeReport = () => { setReport(false); onReportClosed?.(); };
@@ -2538,6 +2566,11 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
         <article className="wrap-doc">
           <h1>{rep.title}</h1>
           <ul>{rep.summary.map((x) => <li key={x}>{x}</li>)}</ul>
+          {rep.tables.length > 0 && <>
+            <h2>The day in numbers</h2>
+            <div className="depth-grid">{rep.tables.map((t) => <DepthTable key={t.key} t={t} />)}</div>
+            <h2>The companies</h2>
+          </>}
           {!rep.sections.length && <p className="muted">No keepers {isToday ? "yet today" : "that day"}.</p>}
           {rep.sections.map((sec) => (
             <Fragment key={sec.key}>
@@ -2587,7 +2620,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
             <div className="wrap-bar" key={k} title={`${label}: ${w.counts[k]} (${Math.round((100 * w.counts[k]) / w.looked)}%)`}>
               <span className="wrap-bar-l"><WrapIcon kind={k} />{label}</span>
               <span className="wrap-bar-t"><span className="wrap-bar-f" style={{ width: `${(70 * w.counts[k]) / barMax}%` }} />
-                <span className="wrap-bar-n">{w.counts[k]}</span></span>
+                <span className="wrap-bar-n">{w.counts[k]}</span><span className="wrap-bar-p">{Math.round((100 * w.counts[k]) / w.looked)}%</span></span>
             </div>
           ))}
         </div>
@@ -2623,6 +2656,12 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
           </div>
         </div>
         {flop && <p className="wrap-foot">{flop.key} didn't land: {flop.keep} of {flop.keep + flop.drop} kept{flop.mainDrop ? `, mostly ${outcomeLabel(flop.mainDrop).toLowerCase()}` : ""}.</p>}
+      </section>}
+
+      {tables.length > 0 && <section className="wrap-card" aria-label="The day in numbers">
+        <h3>The day in numbers</h3>
+        <p className="wrap-head">{w.looked} looked through · {w.keep} kept ({w.looked ? Math.round((100 * w.keep) / w.looked) : 0}%) · {w.drop} not for us ({w.looked ? Math.round((100 * w.drop) / w.looked) : 0}%) · {w.skip} skipped ({w.looked ? Math.round((100 * w.skip) / w.looked) : 0}%)</p>
+        <div className="depth-grid">{tables.map((t) => <DepthTable key={t.key} t={t} />)}</div>
       </section>}
 
       {w.looked > 0 && <div className="wrap-grid">
@@ -4119,6 +4158,24 @@ body.daily-view .co{color:var(--text)}body.daily-view a.co:hover{color:var(--acc
 .wrap-all ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .wrap-all li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px}
 .wrap-all li a{color:var(--text);font-weight:600}
+.wrap-bar-p{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.depth-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:22px 26px}
+.depth{min-width:0}.depth-wide{grid-column:1/-1}
+.depth h4{margin:0 0 6px;font:600 13px 'Inter',sans-serif;color:var(--text)}
+.depth-note{margin:0 0 6px;font-size:12px;color:var(--muted)}
+.depth-scroll{overflow-x:auto}
+.depth-table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.depth-table th{font-weight:600;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.depth-table td{padding:5px 8px;border-bottom:1px solid var(--line-soft);color:var(--text)}
+.depth-table .num{text-align:right;white-space:nowrap}
+.depth-table tfoot th{color:var(--text);border-bottom:0}
+.depth-rate{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.depth-meter{display:inline-block;width:38px;height:6px;border-radius:3px;background:#cde2fb;overflow:hidden}
+.depth-meter span{display:block;height:100%;background:#2a78d6;border-radius:3px}
+.wrap-doc .depth-grid{margin:6px 0 4px}
+.depth-table td:first-child{min-width:7.5em}
+@media(max-width:700px){.depth-table .minor,.depth-meter{display:none}.depth-table{font-size:12px}.depth-table th{font-size:11px}.depth-table th,.depth-table td{padding:5px 4px}
+  .depth-table td:first-child{min-width:6.5em}}
 body.daily-view .wrap-primary{background:#1a73e8;border-color:#1a73e8;color:#fff}
 body.daily-view .wrap-primary:hover{background:#1765cc;border-color:#1765cc;color:#fff}
 .wrap-report{border-color:#aecbfa;scroll-margin-top:12px}
