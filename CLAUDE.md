@@ -762,11 +762,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   stamps `first_seen`; an FX filings row counts from its filing date — not contacted, not out, UK-in-name and foreign-owned
   left in their own tabs; highest lead score first, industry filter, Excel export with `added_on`.
 - **Sections and Fresh finds** (Zac, 22 Nov 2026, from the architecture review: ~30 tabs were too many on a phone;
-  `TAB_SECTIONS` in `AccountsApp.jsx`): a bar over the tabs — **Today** (Today's list, Today, Call today, Outreach, Alerts,
-  Contacted, Email generator), **Fresh finds** (Fresh finds, New leads, Hidden from filters, New money, Niche search, Emerging
-  leads, Job adverts), **My lists** (Call / Email / Mail list, Research harder, Simplified dash), **Learn** (Scoreboard, Niches) and **All
-  tabs** (every tab, as before) — remembered in the browser; a phone with none remembered opens on Today; a tab opened
-  from elsewhere brings its section. On a phone the bar sticks under the top bar and the tabs scroll sideways. **Fresh
+  `TAB_SECTIONS` in `AccountsApp.jsx`; **reorganised 24 Nov 2026** — "we need to clear up the top of the dash's names,
+  reorganise the leads" — into the five sections he picked, nothing removed): a bar over the tabs — **Daily** (Today's
+  list, Good leads, Research harder, Call list, Your day), **Find more** (Fresh finds, New leads, Emerging leads, Job
+  adverts, Niche search, New money, Alerts, Hidden from filters), **Follow up** (Follow-ups due — the sequence steps, the
+  old "Today" tab — Contacted, Email list, Mail list, Email drafts, Outreach), **Learn** (Scoreboard, Niches) and **More**
+  (the Accounts list and its sections, P&L sheet, Best fit, Call now, Call today, Hit list, FX filings, FX losses, Hard to
+  broker, Foreign-owned, UK in name). Renamed for clarity: Today → Follow-ups due, Simplified dash → P&L sheet, Recent FX
+  filings → FX filings, Email generator → Email drafts, the Accounts list's "All" → Accounts list. Tabs show in the
+  order `TAB_SECTIONS` lists them (CSS `order`, `tabOrder`); the section is remembered in the browser (the old ones map
+  across, `OLD_SECTIONS`), and with none remembered the page opens on Daily; a tab opened from elsewhere brings its
+  section. On a phone the bar sticks under the top bar and the tabs scroll sideways. **Fresh
   finds** (`freshFind` / `FRESH_KINDS` / `QUIET_SOURCES` in `format.js`; FitTiming mode "fresh"): the leads few bankers
   have seen, not contacted and not marked yet — new on the lists in the last `FRESH_DAYS` (14; a fresh FX filing doesn't
   count: every bank reads those), found by a job advert / his Niche search / a lookalike / an emerging niche, in a quiet
@@ -775,11 +781,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Today's list** (Zac, 22 Nov 2026: "a button … today's list … just the best ranked companies — company name, next to
   it the Companies House, Google it, check for FD, then small buttons: a tick to add to good leads, an X for not enough
   revenue, an orange in the middle which is open and a blue which is call list"; `todaysList` / `TODAYS_MARKS` /
-  `markedToday` / `googleCompany` in `format.js`, `TodaysList` in `AccountsApp.jsx`): the first tab of the Today section
+  `markedToday` / `googleCompany` in `format.js`, `TodaysList` in `AccountsApp.jsx`): the first tab of the Daily section
   (so a phone opens on it) — the best leads by lead score he hasn't marked, `TODAYS_LIST` (25) at a time with "Show 25
   more": not contacted, no review / verdict / list on it or on any company in its group, not out, no serious reason not
   to progress, Fit 30+, one per group. Each line: name (company page), industry · turnover · score, the Companies House
-  number (plain text, one tap selects it — Zac, 22 Nov 2026: not a link), "Google it" (the registered name) and "Check for FD" (`googleFd`), then four round buttons —
+  number (plain text, one tap selects it — Zac, 22 Nov 2026: not a link), "Google it" (the registered name) and "Check for FD" (`googleFd`),
+  **why it's here** instead of the score (Zac, 24 Nov 2026: "why is it giving me the ones rated 54" — the score isn't out
+  of 100: a perfect fit with no news scores about 50, a fresh reason to call takes it past 60; `whyHere` in `format.js`:
+  the two strongest reasons that say something about this company, not the ones nearly every lead shares — "£859k FX loss
+  (filed 29 Sept), no hedging · Like your good lead Basis Research"; the score on hover and on the company page; Research
+  harder lines too), then four round buttons —
   ✓ green Good lead (verdict good), ✕ red Not enough revenue (Not a fit: Too small), ● orange Open lead (review open),
   ☎ blue Call list (list call), and (Zac, 23 Nov 2026: "add the buttons current client and owned abroad") ✈ purple Owned
   abroad (review abroad: to the Foreign-owned tab) and » grey **Skip** (review `skip`; "Skipped" in the Power Automate
@@ -803,11 +814,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   top bar — logo, Market moves, Event leads, Power Automate feed, Lock ("remove the bar at the top which says fx disco and
   market events"; a `daily-view` class on the page body, so the sections bar sits at the very top on a phone). The page
   is **white** (Zac, 23 Nov 2026: "make the page white … the leads today page"): the theme's tokens re-stepped for a light
-  surface under `body.daily-view` (Today's list and Your day only; every other tab stays dark), the mark buttons' hues
+  surface under `body.daily-view` (Today's list, Good leads, Research harder and Your day; every other tab stays dark), the mark buttons' hues
   darkened to 3:1+ on white (dataviz `validate_palette.js --mode light`; each button keeps its own symbol and label).
   **Your day** (Zac, 23 Nov 2026: "a tracker of what I do each day — the total of leads I've looked through, the good
   leads, the open ones … like a Spotify Wrapped of the day; the sectors that worked, didn't work"; `src/accounts/wrapped.js`
-  `dayWrap` / `wrapText`, `YourDay` in `AccountsApp.jsx`; the Today section's second tab, and "Your day so far →" on
+  `dayWrap` / `wrapText`, `YourDay` in `AccountsApp.jsx`; the Daily section's last tab, and "Your day so far →" on
   Today's list): worked out in the browser from his marks' own times — `checks.review_at`, `verdicts.at`, `lists.at`, a
   contact's touches, a sequence step's date, a note's `at` — so nothing new is stored and nothing from the bank's records
   is used; a company counts once, on the day of its latest mark (one marked again later moves to that day; an undone mark
@@ -851,7 +862,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   company's note, store key `notes`, the same one cards and the company page show; shown under the links once saved), and
   a yellow **?** button — review `research` (a good lead in the feedback loop, the lookalikes and `discover.good_leads`;
   "Research harder" in the feed and the Simplified dash; `Research harder:` paste heading). The **Research harder** tab (My
-  lists section; `researchList` in `format.js`, `ResearchHarder` in `AccountsApp.jsx`): those companies newest mark first,
+  Daily section; `researchList` in `format.js`, `ResearchHarder` in `AccountsApp.jsx`): those companies newest mark first,
   not on a list, not contacted, not out — the same line plus a Google search for finance people on LinkedIn (a search
   link, never fetched), the note, and ☎ Call list (found a contact), ✕ Not enough revenue, » Skip, ↺ back to Today's list;
   Excel export with the notes.
@@ -863,7 +874,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   and saves Good lead with its `rating` (POST `{company_number, verdict: "good", rating}`; the bulk paste takes `rating` too);
   a lead put on a list, Research harder or Added to mine is rated on its own (POST `{company_number, rating: 1–3 | null}`:
   kept on its `verdicts` entry with no verdict, so it isn't a new mark), and re-rating keeps the time it was judged (Your day
-  doesn't move it). Stars beside "Good lead" on cards and the company page. The **Good leads** tab (first in My lists, white
+  doesn't move it). Stars beside "Good lead" on cards and the company page. The **Good leads** tab (Daily section, after Today's list, white
   like Today's list; `goodLeadsList` / `goodMarkOf` / `GOOD_MARKS` in `format.js`, `GoodLeads` in `AccountsApp.jsx`): every
   new prospect (`markClass` good), best rated then newest, filters by mark and rating, each **written up** (`leadBrief`:
   rule-based, no AI — a few sentences, "Global Charter Services is a transport, logistics & freight business with £48.0m

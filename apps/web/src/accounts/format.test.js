@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -817,5 +817,27 @@ describe("good leads: rating and the written brief", () => {
     const bare = leadBrief({ company_name: "ACME LTD", company_number: "00000001" });
     expect(bare.text).toBe("Acme is a company.");
     expect(bare.facts).toEqual([{ label: "Owner", text: "Not known yet — the daily owner search checks every good lead", url: "" }]);
+  });
+});
+
+describe("Today's list: why it's here", () => {
+  const year = new Date().getFullYear();
+  it("gives the strongest reasons that say something about this company, not the ones every lead shares", () => {
+    const r = { lead_parts: [["Strong FX proof in its filings (60)", 20, "fit"], ["FX loss of £859k", 30, "fit"], [`… in accounts filed 29 Sept ${year}`, 10, "timing"],
+      ["FX loss with no hedging named — the clearest need", 10, "fit"], ["Turnover £20m–£300m", 10, "fit"],
+      ["Like your good lead BASIS RESEARCH GROUP HOLDINGS LIMITED (industry, size band)", 8, "fit"], ["Your checks: 33% of X leads were new prospects", 8, "fit"]] };
+    expect(whyHere(r)).toEqual(["£859k FX loss (filed 29 Sept), no hedging", "Like your good lead Basis Research"]);
+  });
+  it("puts a new finance director first and shortens what it can", () => {
+    const r = { lead_parts: [["Niche: Clothing importers (12% of its companies prove FX)", 15, "fit"], ["New finance director: Jane Smith appointed 3 Sep 2026", 20, "timing"],
+      ["PE-backed: Bridgepoint — buyout lenders usually require a hedging policy", 10, "fit"]] };
+    expect(whyHere(r)).toEqual(["New FD: Jane Smith appointed 3 Sep 2026", "Clothing importers"]);
+    expect(whyHere({ lead_parts: [["Hidden from the usual filters: sized by its group, filed as head office", 10, "fit"], ["Growing fast: turnover +54% on last year", 15, "fit"]] }))
+      .toEqual(["Growing 54%", "Hidden from filters: sized by its group"]);
+  });
+  it("falls back to the top reason when every reason is a shared one", () => {
+    expect(whyHere({ lead_parts: [["Turnover £20m–£300m", 10, "fit"], ["Strong FX proof in its filings (55)", 20, "fit"], ["Owned abroad: ask where FX is decided", -10, "fit"]] }))
+      .toEqual(["Strong FX proof in its filings (55)", "Turnover £20m–£300m"]);
+    expect(whyHere({})).toEqual([]);
   });
 });

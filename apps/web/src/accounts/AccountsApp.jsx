@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -163,15 +163,18 @@ function Accounts({ data, password }) {
   const markedAbroad = (r) => checks[r.company_number]?.review === "abroad";   // Zac's own "Owned abroad" button
   const foreignRows = useMemo(() => allRows.filter((r) => !ukNamed(r) && (foreignOwned(r) || markedAbroad(r))), [allRows, signals, checks]);   // eslint-disable-line react-hooks/exhaustive-deps
   const rows = useMemo(() => allRows.filter((r) => (!elsewhere(r) && !markedAbroad(r)) || contacted[r.company_number]), [allRows, contacted, signals, checks]);   // eslint-disable-line react-hooks/exhaustive-deps
-  // The section of tabs shown (TAB_SECTIONS): remembered; a phone with none remembered opens on Today
+  // The section of tabs shown (TAB_SECTIONS): remembered; opens on Daily (Today's list) when none is
   const [tabSection, setTabSection] = useState(() => {
-    try { const v = localStorage.getItem("fx-tab-section"); if (TAB_SECTIONS.some(([k]) => k === v)) return v; } catch { /* storage off */ }
-    return typeof window !== "undefined" && window.innerWidth < 700 ? "today" : "all";
+    try {
+      const saved = localStorage.getItem("fx-tab-section"), v = OLD_SECTIONS[saved] || saved;
+      if (TAB_SECTIONS.some(([k]) => k === v)) return v;
+    } catch { /* storage off */ }
+    return "daily";
   });
   // Fresh finds: the leads he hasn't marked yet (contacted, a review button or a verdict take a lead out of it)
   const freshRows = useMemo(() => rows.filter((r) => !contacted[r.company_number] && !checks[r.company_number]?.review && !verdicts[r.company_number]?.verdict),
                             [rows, contacted, checks, verdicts]);
-  const [filters, setFilters] = useState({ section: "", view: tabSection === "all" ? "" : TAB_SECTIONS.find(([k]) => k === tabSection)[2][0], query: "", contact: "", role: "", fdOnly: false, pair: "",
+  const [filters, setFilters] = useState({ section: "", view: TAB_SECTIONS.find(([k]) => k === tabSection)[2][0], query: "", contact: "", role: "", fdOnly: false, pair: "",
                                             triggersOnly: false, showOut: false, newOnly: false, fxLossOnly: false, oneGroup: true,
                                             peOnly: false, opsOnly: false, newFdOnly: false, industry: "", ownership: "", lookalikeOnly: false });
   const [sort, setSort] = useState("lead");
@@ -187,14 +190,14 @@ function Accounts({ data, password }) {
     setTabSection(k);
     try { localStorage.setItem("fx-tab-section", k); } catch { /* storage off */ }
     const views = TAB_SECTIONS.find(([x]) => x === k)[2];
-    if (views && !views.includes(filters.view)) set({ section: "", view: views[0] });
+    if (!views.includes(filters.view)) set({ section: "", view: views[0] });
   };
   // a tab in another section (a stat, the alert banner, a link) brings its section along
   useEffect(() => {
-    if (tabSection !== "all" && sectionOf(filters.view) !== tabSection) setTabSection(sectionOf(filters.view));
+    if (sectionOf(filters.view) !== tabSection) setTabSection(sectionOf(filters.view));
   }, [filters.view]);   // eslint-disable-line react-hooks/exhaustive-deps
   const goodCount = useMemo(() => goodLeadsList(allRows, { checks, verdicts, lists }).length, [allRows, checks, verdicts, lists]);
-  const inTabs = (view) => tabSection === "all" || TAB_SECTIONS.find(([k]) => k === tabSection)[2].includes(view);
+  const inTabs = (view) => TAB_SECTIONS.find(([k]) => k === tabSection)[2].includes(view);
   // When the Alerts tab was last opened (this browser): the banner counts hot alerts newer than that.
   const [alertsSeen, setAlertsSeen] = useState(() => { try { return localStorage.getItem("fx-alerts-seen") || ""; } catch { return ""; } });
   useEffect(() => {
@@ -226,7 +229,7 @@ function Accounts({ data, password }) {
   // Today's list and Your day are the whole screen, on white: no top bar (logo, Market moves, Event leads, feed, Lock) —
   // Zac, 23 Nov 2026: "remove the bar at the top", "make the page white"
   useEffect(() => {
-    document.body.classList.toggle("daily-view", ["daily", "wrapped", "goodleads"].includes(filters.view) && !pageNo);
+    document.body.classList.toggle("daily-view", ["daily", "wrapped", "goodleads", "research"].includes(filters.view) && !pageNo);
     return () => document.body.classList.remove("daily-view");
   }, [filters.view, pageNo]);
   const openCompany = useCallback((number) => {
@@ -496,7 +499,7 @@ function Accounts({ data, password }) {
     <VerdictContext.Provider value={verdictCtx}>
     <main>
       {/* Today's list starts straight at the sections (Zac, 23 Nov 2026: "when on this page remove the banner at top") */}
-      {!["daily", "wrapped", "goodleads"].includes(filters.view) && <>
+      {!["daily", "wrapped", "goodleads", "research"].includes(filters.view) && <>
       <StatusStrip status={data.status} />
       <AlertBanner summary={signals.alerts_summary} seen={alertsSeen} onOpen={() => set({ section: "", view: "alerts" })} />
       <div className="stats">
@@ -517,103 +520,103 @@ function Accounts({ data, password }) {
           ))}
         </nav>
         <div className="tabs" role="tablist">
-          <button role="tab" hidden={!inTabs("daily")} aria-selected={filters.view === "daily"} className={`tab daily-tab${filters.view === "daily" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("daily")} style={{ order: tabOrder(tabSection, "daily") }} aria-selected={filters.view === "daily"} className={`tab daily-tab${filters.view === "daily" ? " on" : ""}`}
                   title="The best-ranked leads you haven't marked: Google it, check for the FD, then ✓ good lead / ✕ not enough revenue / ● open lead / ☎ call list"
                   onClick={() => set({ section: "", view: "daily" })}>
             Today's list
           </button>
-          <button role="tab" hidden={!inTabs("wrapped")} aria-selected={filters.view === "wrapped"} className={`tab${filters.view === "wrapped" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("wrapped")} style={{ order: tabOrder(tabSection, "wrapped") }} aria-selected={filters.view === "wrapped"} className={`tab${filters.view === "wrapped" ? " on" : ""}`}
                   title="Your day, Wrapped-style: how many leads you looked through, how you marked them, the sectors that worked and didn't, your pace"
                   onClick={() => set({ section: "", view: "wrapped" })}>
             Your day
           </button>
-          <button role="tab" hidden={!inTabs("outreach")} aria-selected={filters.view === "outreach"} className={`tab outreach-tab${filters.view === "outreach" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("outreach")} style={{ order: tabOrder(tabSection, "outreach") }} aria-selected={filters.view === "outreach"} className={`tab outreach-tab${filters.view === "outreach" ? " on" : ""}`}
                   title={`The top ${OUTREACH.letters} for the Investec letter, then the rest: cold call (something timely to say) or email sequence`}
                   onClick={() => set({ section: "", view: "outreach" })}>
             Outreach <span className="tab-n">{OUTREACH.letters}</span>
           </button>
-          <button role="tab" hidden={!inTabs("alerts")} aria-selected={filters.view === "alerts"} className={`tab alerts-tab${filters.view === "alerts" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("alerts")} style={{ order: tabOrder(tabSection, "alerts") }} aria-selected={filters.view === "alerts"} className={`tab alerts-tab${filters.view === "alerts" ? " on" : ""}`}
                   title="New finance directors, refinancing, new owners, charges to FX providers — from Companies House, every 3 hours"
                   onClick={() => set({ section: "", view: "alerts" })}>
             Alerts
           </button>
-          <button role="tab" hidden={!inTabs("hits")} aria-selected={filters.view === "hits"} className={`tab hits-tab${filters.view === "hits" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("hits")} style={{ order: tabOrder(tabSection, "hits") }} aria-selected={filters.view === "hits"} className={`tab hits-tab${filters.view === "hits" ? " on" : ""}`}
                   title="Filed lately with an FX loss — and a new finance director, buying companies or a private-equity deal"
                   onClick={() => set({ section: "", view: "hits" })}>
             Hit list <span className="tab-n">{open.filter((r) => r.lead_flags?.hit && !isOut(r)).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("today")} aria-selected={filters.view === "today"} className={`tab${filters.view === "today" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("today")} style={{ order: tabOrder(tabSection, "today") }} aria-selected={filters.view === "today"} className={`tab${filters.view === "today" ? " on" : ""}`}
                   title="The day's sequence work across your lists: calls, emails, LinkedIn, and the companies to start today"
                   onClick={() => set({ section: "", view: "today" })}>
-            Today <span className="tab-n">{todayDue}</span>
+            Follow-ups due <span className="tab-n">{todayDue}</span>
           </button>
-          <button role="tab" hidden={!inTabs("goodleads")} aria-selected={filters.view === "goodleads"} className={`tab${filters.view === "goodleads" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("goodleads")} style={{ order: tabOrder(tabSection, "goodleads") }} aria-selected={filters.view === "goodleads"} className={`tab${filters.view === "goodleads" ? " on" : ""}`}
                   title="Every new prospect you marked, rated 1–3, each written up from its own records"
                   onClick={() => set({ section: "", view: "goodleads" })}>
             Good leads <span className="tab-n">{goodCount}</span>
           </button>
           {Object.entries(LIST_NAMES).map(([key, name]) => (
-            <button key={key} role="tab" hidden={!inTabs(`list-${key}`)} aria-selected={filters.view === `list-${key}`} className={`tab${filters.view === `list-${key}` ? " on" : ""}`}
+            <button key={key} role="tab" hidden={!inTabs(`list-${key}`)} style={{ order: tabOrder(tabSection, `list-${key}`) }} aria-selected={filters.view === `list-${key}`} className={`tab${filters.view === `list-${key}` ? " on" : ""}`}
                     title={`Your ${name.toLowerCase()} — sent here from any card's “+ ${name}” button`}
                     onClick={() => set({ section: "", view: `list-${key}` })}>
               {name} <span className="tab-n">{Object.values(lists).filter((v) => v.list === key).length}</span>
             </button>
           ))}
-          <button role="tab" hidden={!inTabs("research")} aria-selected={filters.view === "research"} className={`tab${filters.view === "research" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("research")} style={{ order: tabOrder(tabSection, "research") }} aria-selected={filters.view === "research"} className={`tab${filters.view === "research" ? " on" : ""}`}
                   title="Good leads with no contact info yet — marked ? on Today's list"
                   onClick={() => set({ section: "", view: "research" })}>
             Research harder <span className="tab-n">{researchList(allRows, { checks, lists, contacted }).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("simple")} aria-selected={filters.view === "simple"} className={`tab${filters.view === "simple" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("simple")} style={{ order: tabOrder(tabSection, "simple") }} aria-selected={filters.view === "simple"} className={`tab${filters.view === "simple" ? " on" : ""}`}
                   title="The same leads as a plain P&L-style sheet: company, Companies House number, type of company and the filed figures"
                   onClick={() => set({ section: "", view: "simple" })}>
-            Simplified dash
+            P&amp;L sheet
           </button>
-          <button role="tab" hidden={!inTabs("fresh")} aria-selected={filters.view === "fresh"} className={`tab${filters.view === "fresh" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("fresh")} style={{ order: tabOrder(tabSection, "fresh") }} aria-selected={filters.view === "fresh"} className={`tab${filters.view === "fresh" ? " on" : ""}`}
                   title="Leads few bankers have seen, in one list: new on the lists, found by a job advert / your niche search / a lookalike / an emerging niche, or hidden from the usual filters — not marked yet"
                   onClick={() => set({ section: "", view: "fresh" })}>
             Fresh finds <span className="tab-n">{freshRows.filter((r) => !isOut(r) && !r.dropped && freshFind(r).length).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("new")} aria-selected={filters.view === "new"} className={`tab${filters.view === "new" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("new")} style={{ order: tabOrder(tabSection, "new") }} aria-selected={filters.view === "new"} className={`tab${filters.view === "new" ? " on" : ""}`}
                   title="Companies that joined the lists in the last 7 days (the finder's new finds and fresh FX filings), best lead score first"
                   onClick={() => set({ section: "", view: "new" })}>
             New leads <span className="tab-n">{rows.filter((r) => !contacted[r.company_number] && !isOut(r) && newLead(r, 7)).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("hidden")} aria-selected={filters.view === "hidden"} className={`tab${filters.view === "hidden" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("hidden")} style={{ order: tabOrder(tabSection, "hidden") }} aria-selected={filters.view === "hidden"} className={`tab${filters.view === "hidden" ? " on" : ""}`}
                   title="Companies a standard Zint / Market IQ search can't see — and why" onClick={() => set({ section: "", view: "hidden" })}>
             Hidden from filters <span className="tab-n">{rows.filter((r) => !contacted[r.company_number] && !isOut(r) && hiddenFromFilters(r).length).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("foreign")} aria-selected={filters.view === "foreign"} className={`tab${filters.view === "foreign" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("foreign")} style={{ order: tabOrder(tabSection, "foreign") }} aria-selected={filters.view === "foreign"} className={`tab${filters.view === "foreign" ? " on" : ""}`}
                   title="Owned by a company or person abroad (the accounts, the LEI register, Companies House or the owner search say so) — kept here, out of every other list"
                   onClick={() => set({ section: "", view: "foreign" })}>
             Foreign-owned <span className="tab-n">{foreignRows.filter((r) => !contacted[r.company_number] && !isOut(r)).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("uk")} aria-selected={filters.view === "uk"} className={`tab${filters.view === "uk" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("uk")} style={{ order: tabOrder(tabSection, "uk") }} aria-selected={filters.view === "uk"} className={`tab${filters.view === "uk" ? " on" : ""}`}
                   title="Companies with “UK” in their name — usually a foreign group's UK arm; kept here, out of every other list"
                   onClick={() => set({ section: "", view: "uk" })}>
             UK in name <span className="tab-n">{ukRows.filter((r) => !contacted[r.company_number] && !isOut(r)).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("fit")} aria-selected={filters.view === "fit"} className={`tab${filters.view === "fit" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("fit")} style={{ order: tabOrder(tabSection, "fit") }} aria-selected={filters.view === "fit"} className={`tab${filters.view === "fit" ? " on" : ""}`}
                   title={`The right companies, whatever the news: FX proof and FX pain, £20m–£300m, a good niche, ownership — Fit ${FIT.min}+, best first`}
                   onClick={() => set({ section: "", view: "fit" })}>
             Best fit <span className="tab-n">{open.filter((r) => (r.lead_fit || 0) >= FIT.min && !isOut(r)).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("now")} aria-selected={filters.view === "now"} className={`tab${filters.view === "now" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("now")} style={{ order: tabOrder(tabSection, "now") }} aria-selected={filters.view === "now"} className={`tab${filters.view === "now" ? " on" : ""}`}
                   title={`Companies that fit (Fit ${FIT.min}+) with a reason to call now — a new FD, a deal, funding, a fresh filing, a customs or bank change — most timely first`}
                   onClick={() => set({ section: "", view: "now" })}>
             Call now <span className="tab-n">{open.filter((r) => (r.lead_fit || 0) >= FIT.min && (r.lead_timing || 0) > 0 && !isOut(r)).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("shy")} aria-selected={filters.view === "shy"} className={`tab${filters.view === "shy" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("shy")} style={{ order: tabOrder(tabSection, "shy") }} aria-selected={filters.view === "shy"} className={`tab${filters.view === "shy" ? " on" : ""}`}
                   title="Sectors payment firms often won't take — scrap, bullion, mining, waste, fuel, vehicles, tobacco… where a bank can win"
                   onClick={() => set({ section: "", view: "shy" })}>
             Hard to broker <span className="tab-n">{open.filter((r) => ranked.shy_of?.[r.company_number] && !isOut(r)).length}</span>
           </button>
-          <button role="tab" hidden={!inTabs("money")} aria-selected={filters.view === "money"} className={`tab money-tab${filters.view === "money" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("money")} style={{ order: tabOrder(tabSection, "money") }} aria-selected={filters.view === "money"} className={`tab money-tab${filters.view === "money" ? " on" : ""}`}
                   title="Just bought by private equity, buying companies, just funded, a new overseas owner"
                   onClick={() => set({ section: "", view: "money" })}>
             New money
           </button>
-          <button role="tab" hidden={!inTabs("calls")} aria-selected={filters.view === "calls"} className={`tab calls-tab${filters.view === "calls" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("calls")} style={{ order: tabOrder(tabSection, "calls") }} aria-selected={filters.view === "calls"} className={`tab calls-tab${filters.view === "calls" ? " on" : ""}`}
                   title={`Today's ${CALL_TODAY_MAX}: £20m–£300m, strong FX proof, a recent FX loss or a trigger — confirmed contacts first`}
                   onClick={() => set({ section: "", view: "calls" })}>
             Call today
@@ -621,48 +624,48 @@ function Accounts({ data, password }) {
           {["", ...(data.sections || []), ...(ranked.rows?.length ? [FILINGS_SECTION] : [])].map((s) => {
             const on = !filters.view && filters.section === s;
             return (
-              <button key={s || "all"} role="tab" hidden={tabSection !== "all"} aria-selected={on} className={`tab${on ? " on" : ""}`}
+              <button key={s || "all"} role="tab" hidden={tabSection !== "more"} aria-selected={on} className={`tab${on ? " on" : ""}`}
                       onClick={() => set({ section: s, view: "" })}>
-                {s || "All"} <span className="tab-n">{s ? open.filter((r) => r.section === s).length : open.length}</span>
+                {s || "Accounts list"} <span className="tab-n">{s ? open.filter((r) => r.section === s).length : open.length}</span>
               </button>
             );
           })}
-          <button role="tab" hidden={!inTabs("contacted")} aria-selected={filters.view === "contacted"} className={`tab contacted-tab${filters.view === "contacted" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("contacted")} style={{ order: tabOrder(tabSection, "contacted") }} aria-selected={filters.view === "contacted"} className={`tab contacted-tab${filters.view === "contacted" ? " on" : ""}`}
                   onClick={() => set({ section: "", view: "contacted" })}>
             Contacted <span className="tab-n">{contactedCount}</span>
             {followUpsDue > 0 && <span className="due-n" title="Follow-ups due today or overdue">{followUpsDue} due</span>}
           </button>
-          <button role="tab" hidden={!inTabs("filings")} aria-selected={filters.view === "filings"} className={`tab filings-tab${filters.view === "filings" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("filings")} style={{ order: tabOrder(tabSection, "filings") }} aria-selected={filters.view === "filings"} className={`tab filings-tab${filters.view === "filings" ? " on" : ""}`}
                   title="Companies of £20m+ whose newly filed accounts show FX" onClick={() => set({ section: "", view: "filings" })}>
-            Recent FX filings
+            FX filings
           </button>
-          <button role="tab" hidden={!inTabs("losses")} aria-selected={filters.view === "losses"} className={`tab losses-tab${filters.view === "losses" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("losses")} style={{ order: tabOrder(tabSection, "losses") }} aria-selected={filters.view === "losses"} className={`tab losses-tab${filters.view === "losses" ? " on" : ""}`}
                   title="Companies whose latest accounts show a loss on currency" onClick={() => set({ section: "", view: "losses" })}>
             FX losses
           </button>
-          <button role="tab" hidden={!inTabs("niches")} aria-selected={filters.view === "niches"} className={`tab niches-tab${filters.view === "niches" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("niches")} style={{ order: tabOrder(tabSection, "niches") }} aria-selected={filters.view === "niches"} className={`tab niches-tab${filters.view === "niches" ? " on" : ""}`}
                   title="Which niches prove FX most often, and how their leads score" onClick={() => set({ section: "", view: "niches" })}>
             Niches
           </button>
-          <button role="tab" hidden={!inTabs("search")} aria-selected={filters.view === "search"} className={`tab niches-tab${filters.view === "search" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("search")} style={{ order: tabOrder(tabSection, "search") }} aria-selected={filters.view === "search"} className={`tab niches-tab${filters.view === "search" ? " on" : ""}`}
                   title="Type a product or trade — every UK company whose customs records show it trading those goods" onClick={() => set({ section: "", view: "search" })}>
             Niche search
           </button>
-          <button role="tab" hidden={!inTabs("emerging")} aria-selected={filters.view === "emerging"} className={`tab niches-tab${filters.view === "emerging" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("emerging")} style={{ order: tabOrder(tabSection, "emerging") }} aria-selected={filters.view === "emerging"} className={`tab niches-tab${filters.view === "emerging" ? " on" : ""}`}
                   title="Every full / medium / group-accounts company in this week's emerging niches — check them off" onClick={() => set({ section: "", view: "emerging" })}>
             Emerging leads
           </button>
-          <button role="tab" hidden={!inTabs("scoreboard")} aria-selected={filters.view === "scoreboard"} className={`tab niches-tab${filters.view === "scoreboard" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("scoreboard")} style={{ order: tabOrder(tabSection, "scoreboard") }} aria-selected={filters.view === "scoreboard"} className={`tab niches-tab${filters.view === "scoreboard" ? " on" : ""}`}
                   title="Where your good leads come from — by source, niche and industry — and the leads like them" onClick={() => set({ section: "", view: "scoreboard" })}>
             Scoreboard
           </button>
-          <button role="tab" hidden={!inTabs("jobs")} aria-selected={filters.view === "jobs"} className={`tab niches-tab${filters.view === "jobs" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("jobs")} style={{ order: tabOrder(tabSection, "jobs") }} aria-selected={filters.view === "jobs"} className={`tab niches-tab${filters.view === "jobs" ? " on" : ""}`}
                   title="Employers whose job adverts name currency work, trade roles, treasury or a new finance director — most not on anyone's list" onClick={() => set({ section: "", view: "jobs" })}>
             Job adverts
           </button>
-          <button role="tab" hidden={!inTabs("email")} aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
+          <button role="tab" hidden={!inTabs("email")} style={{ order: tabOrder(tabSection, "email") }} aria-selected={filters.view === "email"} className={`tab email-tab${filters.view === "email" ? " on" : ""}`}
                   title="The Investec email for each company you send here" onClick={() => set({ section: "", view: "email" })}>
-            Email generator <span className="tab-n">{emailItems.length}</span>
+            Email drafts <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
         {!["daily", "wrapped", "goodleads", "research", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
@@ -1179,7 +1182,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
   if (filingLosses === null) return <div className="list"><div className="empty">Loading FX losses…</div></div>;
   return (
     <div className="list">
-      {error && <div className="save-error" role="alert">Recent FX filings' losses couldn't load ({error}); showing your Accounts list's only.</div>}
+      {error && <div className="save-error" role="alert">FX filings' losses couldn't load ({error}); showing your Accounts list's only.</div>}
       <div className="filters filings-bar">
         <input className="input search" placeholder="Search company, contact, currency, bank…" value={query}
                onChange={(e) => reset(setQuery)(e.target.value)} aria-label="Search FX losses" />
@@ -1201,7 +1204,7 @@ function FxLosses({ password, listRows, contacted, onContact, onOpen, onEmail })
         <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "fx-losses")} disabled={!cognismCompanyRows(rows).length}>Cognism company list ({cognismCompanyRows(rows).length})</button>
       </div>
       <p className="filings-note">Companies whose latest filed accounts show a loss on currency (exchange differences), from your Accounts list and the
-        Recent FX filings scan. Each figure links to the accounts it came from; figures that failed the sense checks are left out. Companies you've
+        FX filings scan. Each figure links to the accounts it came from; figures that failed the sense checks are left out. Companies you've
         marked contacted are in the Contacted tab.</p>
       {rows.slice(0, shown).map((r) => <LossCard key={r.company_number} r={r} onOpen={onOpen} onEmail={onEmail} onContact={onContact} />)}
       {!rows.length && <div className="empty">No FX losses match these filters.</div>}
@@ -1325,11 +1328,11 @@ function SimpleDash({ rows, onOpen, contacted, checks = {}, onReview, reviews })
     review: (REVIEW_BUTTONS.find(([k]) => k === reviewOf(r)) || [])[1] || "" })),
     [...SIMPLE_COLUMNS.map(([k, header, , , numeric]) => ({ key: k, header, number: Boolean(numeric) && !["growth", "margin"].includes(k) })),
      { key: "review", header: "Status" }],
-    `simplified-dash-${review === "none" ? "to-check" : review}-${new Date().toISOString().slice(0, 10)}.xlsx`, "Simplified dash");
+    `pl-sheet-${review === "none" ? "to-check" : review}-${new Date().toISOString().slice(0, 10)}.xlsx`, "P&L sheet");
   return (
     <div className="list">
       <ReviewLearnings reviews={reviews} />
-      <div className="filters filings-bar review-lists" role="tablist" aria-label="Simplified dash lists">
+      <div className="filters filings-bar review-lists" role="tablist" aria-label="P&L sheet lists">
         {[["none", "To check", base.length - reviewed("open") - reviewed("mine") - reviewed("abroad")],
           ...REVIEW_BUTTONS.map(([k, label]) => [k, label, reviewed(k)])].map(([k, label, n]) => (
           <button key={k} role="tab" aria-selected={review === k} className={`tab${review === k ? " on" : ""}`} onClick={() => setReview(k)}>
@@ -1529,7 +1532,7 @@ function CallToday({ password, listRows, lead, contacted, onContact, onOpen, onE
   if (filingRows === null) return <div className="list"><div className="empty">Picking today's calls…</div></div>;
   return (
     <div className="list">
-      {error && <div className="save-error" role="alert">The Recent FX filings list couldn't load ({error}); today's picks are from your Accounts list only.</div>}
+      {error && <div className="save-error" role="alert">The FX filings list couldn't load ({error}); today's picks are from your Accounts list only.</div>}
       <div className="filters filings-bar">
         <span className="muted">Today's {rows.length}: turnover £20m–£300m, filed FX proof {CALL_RULES.minScore}+, and an FX loss of
           £{CALL_RULES.minLoss / 1000}k+ filed in the last 6 months or a trigger. Highest lead score first. Mark one Contacted and the next moves up.</span>
@@ -1538,7 +1541,7 @@ function CallToday({ password, listRows, lead, contacted, onContact, onOpen, onE
         <button className="btn-sm" onClick={() => downloadCognismCompanies(rows, "call-today")} disabled={!cognismCompanyRows(rows).length}>Cognism company list ({cognismCompanyRows(rows).length})</button>
       </div>
       {rows.map((r, i) => <CallCard key={r.company_number} r={r} n={i + 1} onOpen={onOpen} onEmail={onEmail} onContact={onContact} checks={checks} onCrm={onCrm} />)}
-      {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or Recent FX filings tabs.</div>}
+      {!rows.length && <div className="empty">Nothing meets today's rules — try the FX losses or FX filings tabs.</div>}
     </div>
   );
 }
@@ -2112,7 +2115,7 @@ function NicheSearch({ password, listed, onOpen }) {
             </table>
           </div>
         </>
-      ) : <div className="empty">{data?.lookalikes?.made_at ? "None yet — mark leads Open lead / Added to mine (Simplified dash) or Good lead; the ones with customs records find their lookalikes in the next daily run." : "Arrives with the next daily Niche hits run."}</div>}
+      ) : <div className="empty">{data?.lookalikes?.made_at ? "None yet — mark leads Good lead, Research harder or Added to mine (P&L sheet); the ones with customs records find their lookalikes in the next daily run." : "Arrives with the next daily Niche hits run."}</div>}
     </div>
   );
 }
@@ -2455,8 +2458,8 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
             <span className="daily-n">{i + 1}</span>
             <div className="daily-main">
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => open(e, r.company_number)}>{r.company_name}</a>
-              <span className="daily-sub">{[industryOf(r), r.turnover_gbp ? `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}` : "no turnover filed",
-                `score ${r.lead_score}`].join(" · ")}</span>
+              <span className="daily-sub" title={`Lead score ${r.lead_score}`}>{[industryOf(r), r.turnover_gbp ? `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}` : "no turnover filed"].join(" · ")}</span>
+              <span className="daily-why">{whyHere(r).join(" · ")}</span>
               <span className="daily-links">
                 <span className="daily-number" title="Companies House number">{r.company_number}</span>
                 <a href={googleCompany(r)} target="_blank" rel="noreferrer">Google it ↗</a>
@@ -2847,8 +2850,9 @@ function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, se
             <span className="daily-n">{i + 1}</span>
             <div className="daily-main">
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => open(e, r.company_number)}>{r.company_name}</a>
-              <span className="daily-sub">{[industryOf(r), r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed", `score ${r.lead_score}`,
+              <span className="daily-sub" title={`Lead score ${r.lead_score}`}>{[industryOf(r), r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed",
                 `marked ${String(checks[r.company_number]?.review_at || "").slice(0, 10)}`].join(" · ")}</span>
+              <span className="daily-why">{whyHere(r).join(" · ")}</span>
               <span className="daily-links">
                 <span className="daily-number" title="Companies House number">{r.company_number}</span>
                 <a href={googleCompany(r)} target="_blank" rel="noreferrer">Google it ↗</a>
@@ -3236,16 +3240,21 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
 
 // Zac's own lists: call list, chocolate / mailing list, email list — one each company; clicking the chosen one again
 // takes it off. Shown beside the verdict buttons wherever they are.
-// The phone layout (Zac, 22 Nov 2026: about 30 tabs were too many on a phone): five sections, each with its own tabs;
-// the section in use is remembered in this browser. "All tabs" shows every tab, as before.
+// The dashboard's sections (Zac, 24 Nov 2026: "we need to clear up the top of the dash's names, reorganise the leads" —
+// he picked these five): his day's work first, then more places to find leads, the follow-ups, what the scanner is
+// learning, and More — every other tab, nothing removed. Tabs show in the order listed; the section in use is
+// remembered in this browser. "" is the Accounts list itself (its own tabs: Accounts list, Core, Above, Below …).
 const TAB_SECTIONS = [
-  ["today", "Today", ["daily", "wrapped", "today", "calls", "outreach", "alerts", "contacted", "email"]],
-  ["fresh", "Fresh finds", ["fresh", "new", "hidden", "jobs", "emerging", "search", "money"]],
-  ["lists", "My lists", ["goodleads", "list-call", "list-email", "list-post", "research", "simple"]],
+  ["daily", "Daily", ["daily", "goodleads", "research", "list-call", "wrapped"]],
+  ["find", "Find more", ["fresh", "new", "emerging", "jobs", "search", "money", "alerts", "hidden"]],
+  ["follow", "Follow up", ["today", "contacted", "list-email", "list-post", "email", "outreach"]],
   ["learn", "Learn", ["scoreboard", "niches"]],
-  ["all", "All tabs", null],
+  ["more", "More", ["", "simple", "fit", "now", "calls", "hits", "filings", "losses", "shy", "foreign", "uk"]],
 ];
-const sectionOf = (view) => TAB_SECTIONS.find(([, , views]) => views?.includes(view))?.[0] || "all";
+const OLD_SECTIONS = { today: "daily", fresh: "find", lists: "daily", all: "more" };   // remembered from the old layout
+const sectionOf = (view) => TAB_SECTIONS.find(([, , views]) => views.includes(view || ""))?.[0] || "more";
+// a tab's place in its section (flex order): the order TAB_SECTIONS lists them
+const tabOrder = (section, view) => { const i = TAB_SECTIONS.find(([k]) => k === section)?.[2].indexOf(view); return i >= 0 ? i : 99; };
 const LIST_NAMES = { call: "Call list", email: "Email list", post: "Mail list" };   // post: the chocolate / letter mailing
 function ListButtons({ number }) {
   const { lists, setList } = useContext(VerdictContext);
@@ -3490,7 +3499,7 @@ function CallCard({ r, n, onOpen, onEmail, onContact, checks, onCrm }) {
           {r.onList
             ? <a className="co" href={companyPath(r.company_number)} onClick={open}>{r.company_name}</a>
             : <a className="co" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer" title="Open on Companies House">{r.company_name}</a>}
-          {r.onList ? <span className="chip own">On your Accounts list</span> : <span className="chip">From Recent FX filings</span>}
+          {r.onList ? <span className="chip own">On your Accounts list</span> : <span className="chip">From FX filings</span>}
         </div>
         <div className="loss-fig"><b className="call-turnover">{r.turnover_gbp ? money(r.turnover_gbp) : r.turnover_foreign_gbp ? `≈${money(r.turnover_foreign_gbp)}` : ""}</b><span className="muted">turnover{r.turnover_basis === "group" ? " (group)" : ""}</span></div>
       </div>
@@ -3585,7 +3594,7 @@ function LossCard({ r, onOpen, onEmail, onContact }) {
           {r.onList
             ? <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
             : <a className="co" href={chCompanyUrl(r.company_number)} target="_blank" rel="noreferrer" title="Open on Companies House">{r.company_name}</a>}
-          {r.onList ? <span className="chip own">On your Accounts list</span> : <span className="chip">From Recent FX filings</span>}
+          {r.onList ? <span className="chip own">On your Accounts list</span> : <span className="chip">From FX filings</span>}
           {lossGrew(r) && <span className="chip warn">Worse than last year</span>}
         </div>
         <div className="loss-fig">
@@ -3636,14 +3645,14 @@ function StatusStrip({ status }) {
 
 // A button at the foot of a card: takes the company to the Email generator tab.
 function EmailButton({ r, onEmail }) {
-  return <button className="more-btn email-go" onClick={() => onEmail(r)} title="Draft the Investec email for this company in the Email generator tab">Email generator →</button>;
+  return <button className="more-btn email-go" onClick={() => onEmail(r)} title="Draft the Investec email for this company in the Email drafts tab">Email drafts →</button>;
 }
 
 // The Email generator tab: each company taken there, newest first, with the Investec master cold email filled in from
 // its filings (email.js) in an editable box — copy it, fill the gaps, send it yourself. Nothing is sent from here.
 function EmailGenerator({ items, onChange, onRemove, onOpen }) {
   if (!items.length) {
-    return <div className="list"><div className="empty">No companies here yet — press “Email generator →” at the bottom of a company’s card.</div></div>;
+    return <div className="list"><div className="empty">No companies here yet — press “Email drafts →” at the bottom of a company’s card.</div></div>;
   }
   return <div className="list">{items.map((it) => <EmailItem key={it.number} it={it} onChange={onChange} onRemove={onRemove} onOpen={onOpen} />)}</div>;
 }
@@ -4213,6 +4222,7 @@ a{color:var(--accent)}
 .daily-note-btns{display:flex;gap:12px;align-items:center}
 .daily-key .dot-key,.daily-key .dot-key:hover{width:22px;height:22px;font-size:12px;border-width:1.5px;cursor:default;background:transparent;color:var(--c)}
 .daily-more{margin-top:12px}
+.daily-why{font-size:13px;color:var(--text);font-weight:500;line-height:1.35}
 .report-stars{color:#a87b00;letter-spacing:1px}
 .rate-ask{align-items:center;gap:6px}
 .rate-q{font-size:13px;color:var(--text-2);margin-right:2px}
