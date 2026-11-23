@@ -103,7 +103,8 @@ describe("Your day (a Wrapped of the day)", () => {
     expect(rep.keepers).toHaveLength(4);
     expect(rep.notFor).toEqual([{ label: "Not enough revenue", count: 1, names: ["FOXTROT GENERAL LTD"] },
       { label: "Owned abroad", count: 1, names: ["CARGO GENERAL LTD"] }]);
-    expect(rep.summary[0]).toBe("7 leads looked through: 4 keepers, 2 not for us, 1 skipped (67% kept).");
+    expect(rep.summary[0]).toBe("7 leads looked through: 4 keepers (57%), 2 not for us (29%), 1 skipped (14%) — 67% of those judged kept.");
+    expect(rep.summary[1]).toBe("Most looked at: Manufacturing: machinery — 3 (43% of the day), 3 kept.");
     const md = reportMarkdown(rep);
     expect(md).toMatch(/^# Day report — Mon 23 Nov/);
     expect(md).toMatch(/## Good leads \(1\)/);
@@ -121,5 +122,28 @@ describe("Your day (a Wrapped of the day)", () => {
     const rep = dayReport(dayWrap(ROWS, MARKS, "2026-11-22"));
     expect(rep.sections).toEqual([]);
     expect(reportMarkdown(rep)).toContain("No keepers.");
+  });
+
+  it("the day in depth: type of company, size, score, signals, hours and running totals, with percentages", () => {
+    const w = dayWrap(ROWS, MARKS, MON), d = w.depth;
+    expect(d.marks.map((m) => [m.label, m.count, Math.round(100 * m.share)])).toEqual([
+      ["Good lead", 1, 14], ["Research harder", 1, 14], ["Call list", 2, 29], ["Not enough revenue", 1, 14], ["Owned abroad", 1, 14], ["Skipped", 1, 14]]);
+    expect(d.sector.map((e) => [e.key, e.total, e.keep, e.drop, e.skip])).toEqual([
+      ["Manufacturing: machinery", 3, 3, 0, 0], ["Wholesale: general", 3, 0, 2, 1], ["Manufacturing: food, drink & tobacco", 1, 1, 0, 0]]);
+    expect(d.size.map((e) => [e.key, e.total, e.keep])).toEqual([["Under £20m", 3, 0], ["£20m–£50m", 3, 3], ["£50m–£100m", 1, 1]]);
+    expect(d.score.map((e) => [e.key, e.total, e.rate])).toEqual([["60+", 4, 1], ["50–59", 2, 0], ["40–49", 1, 0]]);
+    const band = d.signals.find((x) => x.label === "£20m–£300m turnover");
+    expect([band.with.looked, band.with.rate, band.without.looked, band.without.rate, band.lift]).toEqual([4, 1, 3, 0, 1]);
+    expect(d.hourly.reduce((n, h) => n + h.total, 0)).toBe(7);
+    expect([d.totals.week.looked, d.totals.week.days, d.totals.month.looked, d.totals.month.days, d.totals.all.looked]).toEqual([7, 1, 8, 2, 8]);
+    const md = reportMarkdown(dayReport(w));
+    expect(md).toContain("## The day in numbers");
+    expect(md).toContain("| Type of company | Looked at | % of day | Kept | Not for us | Skipped | Kept % |");
+    expect(md).toContain("| Manufacturing: machinery | 3 | 43% | 3 | 0 | 0 | 100% |");
+    expect(md).toContain("| £20m–£300m turnover | 4 | 100% | 3 | 0% | +100 pts |");
+    expect(md).toContain("| **Total** | **7** | **100%** |");
+    expect(md).toContain("| This month | 2 | 8 | 5 | 2 | 1 | 71% |");
+    expect(md).toContain("| This week | 1 | 7 | 4 | 2 | 1 | 67% |");
+    expect(reportHtml(dayReport(w))).toContain("<h3>Size (filed turnover)</h3>");
   });
 });
