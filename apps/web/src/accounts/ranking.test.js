@@ -64,7 +64,7 @@ describe("Verdict learnings", () => {
     const out = verdictLearnings(scored, { "1": { verdict: "good" }, "2": { verdict: "not_fit", reason: "Too small" } }, { shyOf: { "1": { niche: "Scrap" }, "2": { niche: "Scrap" } } });
     expect(out.reviewed).toBe(2);
     expect(out.niche).toEqual([{ key: "Scrap", good: 1, not_fit: 1, reviewed: 2, good_share: 50 }]);
-    expect(out.band.map((g) => g.key).sort()).toEqual(["40–59", "80+"]);
+    expect(out.band.map((g) => g.key).sort()).toEqual(["75–89", "under 75"]);   // out of 100 (no scale set here: the raw score)
     expect(out.reasons).toEqual({ "Too small": 1 });
   });
 });

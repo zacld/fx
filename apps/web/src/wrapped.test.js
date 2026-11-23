@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { dayReport, dayWrap, localDay, markActions, reportHtml, reportMarkdown, shiftDay, wrapText } from "./accounts/wrapped.js";
+import { setScoreScale } from "./accounts/format.js";
 
 // Monday 23 Nov 2026 and the Friday before, marked from Today's list and elsewhere. Times at midday-ish (UTC) so the
 // local day is the same in any UK time zone.
@@ -154,7 +155,11 @@ describe("Your day (a Wrapped of the day)", () => {
     expect(d.sector.map((e) => [e.key, e.total, e.keep, e.taken, e.drop, e.skip])).toEqual([
       ["Wholesale: general", 4, 0, 1, 2, 1], ["Manufacturing: machinery", 3, 1, 2, 0, 0], ["Manufacturing: food, drink & tobacco", 1, 1, 0, 0, 0]]);
     expect(d.size.map((e) => [e.key, e.total, e.keep])).toEqual([["Under £20m", 4, 0], ["£20m–£50m", 3, 1], ["£50m–£100m", 1, 1]]);
-    expect(d.score.map((e) => [e.key, e.total, e.rate])).toEqual([["60+", 4, 0.5], ["50–59", 2, 0], ["40–49", 2, 0]]);
+    try {   // the score out of 100: where each lead stands among these nine
+      setScoreScale(ROWS.map((r) => r.lead_score));
+      expect(dayWrap(ROWS, MARKS, MON).depth.score.map((e) => [e.key, e.total, e.rate]))
+        .toEqual([["95–100", 1, 1], ["75–89", 2, 0.5], ["50–74", 1, 0], ["Under 50", 4, 0]]);
+    } finally { setScoreScale([]); }
     const band = d.signals.find((x) => x.label === "£20m–£300m turnover");
     expect([band.with.looked, band.with.rate, band.without.looked, band.without.rate, band.lift]).toEqual([4, 0.5, 4, 0, 0.5]);
     expect(d.hourly.reduce((n, h) => n + h.total, 0)).toBe(8);

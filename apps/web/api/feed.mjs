@@ -9,7 +9,7 @@
 import { CHECKS_KEY, CONTACTED_KEY, EMERGING_KEY, FEED_KEY, FEED_SALT_KEY, VERDICTS_KEY, feedKey, samePassword } from "./accounts.mjs";
 import { industryOf } from "../src/accounts/format.js";
 
-export const FEED_COLUMNS = ["company_number", "company_name", "source", "status", "lead_score", "fit", "now", "niche", "industry",
+export const FEED_COLUMNS = ["company_number", "company_name", "source", "status", "lead_score", "score", "fit", "now", "niche", "industry",
   "sic", "turnover_gbp", "postcode", "website", "companies_house_url", "ruled_out"];
 const MAX_LIMIT = 20000;
 const WRONG_KEY_DELAY_MS = 1000;
@@ -52,7 +52,7 @@ export async function handle(req, { password = "", store, delay = WRONG_KEY_DELA
   for (const e of emerging?.rows || []) {
     if (seen.has(e.company_number)) continue;
     seen.add(e.company_number);
-    rows.push({ company_number: e.company_number, company_name: e.company_name, source: "Emerging niche", lead_score: "", fit: "", now: "",
+    rows.push({ company_number: e.company_number, company_name: e.company_name, source: "Emerging niche", lead_score: "", score: "", fit: "", now: "",
                 niche: (e.niches || []).join("; ").replace(/Emerging: /g, ""), industry: industryOf({ sic_codes: e.sic_codes }),
                 sic: (e.sic_codes || []).join(" "), turnover_gbp: "", postcode: e.postcode || "", website: "", ruled_out: "" });
   }

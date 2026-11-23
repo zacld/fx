@@ -3,7 +3,7 @@
 // marks only — each mark keeps the time it was made (checks.review_at, verdicts.at, lists.at, a touch's at, a sequence
 // step's date, a note's at) — so nothing new is stored and nothing comes from the bank's records. A company counts on the
 // day of its latest mark: one marked again later moves to that day, and an undone mark isn't counted.
-import { chCompanyUrl, growthPct, hedgingNamed, hiddenFromFilters, inCoreBand, industryOf, leadBrief, leadSource, money, peBackedOf, ratingOf, siteOf, stars } from "./format.js";
+import { chCompanyUrl, growthPct, hedgingNamed, hiddenFromFilters, inCoreBand, industryOf, leadBrief, leadSource, money, peBackedOf, ratingOf, score100, siteOf, stars } from "./format.js";
 import { SEQUENCE } from "./sequence.js";
 import { touchesOf } from "./followups.js";
 
@@ -85,9 +85,10 @@ const sizeOf = (r) => Number(r?.turnover_gbp) || Number(r?.turnover_foreign_gbp)
 export const SIZE_BANDS = ["Under £20m", "£20m–£50m", "£50m–£100m", "£100m–£300m", "£300m+", "No turnover filed"];
 const sizeBand = (r) => { const t = sizeOf(r); return !t ? SIZE_BANDS[5] : t < 20e6 ? SIZE_BANDS[0] : t < 50e6 ? SIZE_BANDS[1]
   : t < 100e6 ? SIZE_BANDS[2] : t <= 300e6 ? SIZE_BANDS[3] : SIZE_BANDS[4]; };
-export const SCORE_BANDS = ["60+", "50–59", "40–49", "30–39", "Under 30", "No score"];
-const scoreBand = (r) => { const v = Number(r?.lead_score); return !Number.isFinite(v) || r?.lead_score == null ? SCORE_BANDS[5] : v >= 60 ? SCORE_BANDS[0]
-  : v >= 50 ? SCORE_BANDS[1] : v >= 40 ? SCORE_BANDS[2] : v >= 30 ? SCORE_BANDS[3] : SCORE_BANDS[4]; };
+// the score out of 100 (format.js score100: where a lead stands among every lead ranked) in bands
+export const SCORE_BANDS = ["95–100", "90–94", "75–89", "50–74", "Under 50", "No score"];
+const scoreBand = (r) => { const v = score100(r?.lead_score); return v === "" ? SCORE_BANDS[5] : v >= 95 ? SCORE_BANDS[0]
+  : v >= 90 ? SCORE_BANDS[1] : v >= 75 ? SCORE_BANDS[2] : v >= 50 ? SCORE_BANDS[3] : SCORE_BANDS[4]; };
 // What the records said about each company, to see which signs went with a keeper (kept % with the sign v without it).
 export const SIGNALS = [
   ["Strong FX proof in its filings (50+)", (r) => Number(r.filed_fx_score) >= 50],
@@ -134,7 +135,7 @@ export function dayWrap(rows = [], { checks = {}, verdicts = {}, lists = {}, con
     source: tally(known, (a) => leadSource(a.r) || "Finder"),
   };
   const best = [...keepers].sort((a, b) => (b.r.lead_score || 0) - (a.r.lead_score || 0))[0] || null;
-  const score = (xs) => { const v = avg(xs.map((a) => a.r.lead_score).filter((x) => Number.isFinite(x))); return v == null ? null : Math.round(v); };
+  const score = (xs) => { const v = avg(xs.map((a) => score100(a.r.lead_score)).filter((x) => Number.isFinite(x))); return v == null ? null : Math.round(v); };
   const size = (xs) => median(xs.map((a) => sizeOf(a.r)).filter((x) => x > 0));
 
   // Pace: from the first mark to the last, and the busiest hour.
@@ -237,7 +238,7 @@ export function wrapText(w) {
   if (s) lines.push(`Best sector: ${s.key} (${s.keep} new of ${s.judged} judged).`);
   const d = w.didnt.sector[0];
   if (d) lines.push(`Didn't land: ${d.key} (${d.keep} new of ${d.judged} judged).`);
-  if (w.best) lines.push(`Best find: ${w.best.company_name} (score ${w.best.lead_score}).`);
+  if (w.best) lines.push(`Best find: ${w.best.company_name} (score ${score100(w.best.lead_score)}).`);
   const done = [w.done.call && `${w.done.call} calls`, w.done.email && `${w.done.email} emails`, w.done.linkedin && `${w.done.linkedin} LinkedIn`,
     w.done.contacted && `${w.done.contacted} contacted`].filter(Boolean);
   if (done.length) lines.push(`Done: ${done.join(", ")}.`);
@@ -266,7 +267,7 @@ export function dayReport(w, notes = {}, { verdicts = {} } = {}) {
       kind: a.kind, mark: outcomeLabel(a.kind), name: r?.company_name || a.n, number: a.n, url: chCompanyUrl(a.n),
       website: r ? siteOf(r) : "", industry: r ? industryOf(r) : "", turnover: size || null, lead_score: r?.lead_score ?? null,
       meta: r ? [industryOf(r), size ? `${money(size)}${r.turnover_basis === "group" ? " (group)" : ""}` : "",
-        Number.isFinite(r.lead_score) ? `score ${r.lead_score}` : ""].filter(Boolean).join(" · ") : "not on the lists",
+        Number.isFinite(r.lead_score) ? `score ${score100(r.lead_score)}` : ""].filter(Boolean).join(" · ") : "not on the lists",
       note: String(notes[a.n]?.text || "").trim(), at: clockOf(a.at),
     };
   };
@@ -291,7 +292,7 @@ export function dayReport(w, notes = {}, { verdicts = {} } = {}) {
     const s = w.worked.sector[0], d = w.didnt.sector[0];
     if (s) summary.push(`Best sector: ${s.key} — ${s.keep} new of ${s.judged} judged.`);
     if (d) summary.push(`Didn't land: ${d.key} — ${d.keep} new of ${d.judged} judged${d.mainDrop ? `, mostly ${outcomeLabel(d.mainDrop).toLowerCase()}` : ""}.`);
-    if (w.best) summary.push(`Best find: ${w.best.company_name} (score ${w.best.lead_score}).`);
+    if (w.best) summary.push(`Best find: ${w.best.company_name} (score ${score100(w.best.lead_score)}).`);
     if (w.pace.first) {
       summary.push(`Worked ${clockOf(w.pace.first.toISOString())}${w.pace.minutes ? `–${clockOf(w.pace.last.toISOString())}` : ""}${w.pace.perHour ? `, about ${w.pace.perHour} leads an hour` : ""}.`);
     }
@@ -327,7 +328,7 @@ export function depthTables(w) {
       rows: d.marks.map((m) => ({ cells: [m.label, String(m.count), pct(m.share)] })), foot: ["Total", String(w.looked), w.looked ? "100%" : "–"] },
     { key: "sector", title: "Type of company", head: ["Type of company", ...CUT_HEAD], rows: cutRows(d.sector), meter: true, minor: CUT_MINOR },
     { key: "size", title: "Size (filed turnover)", head: ["Turnover", ...CUT_HEAD], rows: cutRows(d.size), meter: true, minor: CUT_MINOR },
-    { key: "score", title: "Lead score", head: ["Score", ...CUT_HEAD], rows: cutRows(d.score), meter: true, minor: CUT_MINOR,
+    { key: "score", title: "Score (out of 100)", head: ["Score", ...CUT_HEAD], rows: cutRows(d.score), meter: true, minor: CUT_MINOR,
       note: "Does the ranking agree with you? A higher new % in the higher bands says it does." },
     { key: "signals", title: "Signs of a new prospect: new % with and without", head: ["Sign in the records", "With it", "New % with", "Without", "New % without", "Difference"],
       rows: d.signals.map((x) => ({ cells: [x.label, String(x.with.looked), pct(x.with.rate), String(x.without.looked), pct(x.without.rate),

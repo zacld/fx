@@ -440,6 +440,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   lately, just filed, new on the list, new FD, deals, funding, owner, moments, currency moved, triggers, news, hiring, the
   hit-list combo; 0–100, `lead_timing`); an insolvency hold-off stays a stop. `lead_score` = 20 + 0.3 × Fit + 0.3 × Timing
   (0.5 × Timing until 22 Nov 2026 — the second recalibration below) when Fit ≥ `FIT.min` (30), else Fit ÷ 2 — so good fits rank on timing and news never lifts a poor fit above them.
+  **The score shown is out of 100** (Zac, 24 Nov 2026: "so it's impossible for a lead to be 100?" — the sum above tops out
+  at 89, the best real lead was 68 and only 49 of 8,789 scored 60+; he chose this scale): `score100` in `format.js`, where a
+  lead stands among every lead ranked — the share of the others it scores at or above, so the best reads 100 and 95 is the
+  top 5% — set from every lead's `lead_score` (`setScoreScale`: the page once it has them all, `rank-leads.mjs` for the
+  feed's `score` column and the verdict bands); marks don't change the scale, so a lead's number stays put as he works the
+  list. The ranking underneath (`lead_score`, its sorting, thresholds, the database and the feed's `lead_score`) is
+  unchanged. Shown everywhere a score is (Sheet, P&L sheet, cards, key points, the company page's "Why it ranks: score N of
+  100", Good leads, Outreach, the exports, Your day's score bands 95–100 / 90–94 / 75–89 / 50–74 / under 50, the Niches tab's
+  average); with no scale (a test) the raw score shows.
   Tabs **Best fit** (Fit 30+, by Fit) and **Call now** (Fit 30+ with Timing > 0, by Timing), each with its half's
   reasons, an industry filter and Excel export; Sheet columns Fit / Now; exports `lead_fit` / `lead_timing`. The Niches
   tab's "Fit 60+" counts leads by Fit. The weights are logged here to be
@@ -786,8 +795,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   more": not contacted, no review / verdict / list on it or on any company in its group, not out, no serious reason not
   to progress, Fit 30+, one per group. Each line: name (company page), industry · turnover · score, the Companies House
   number (plain text, one tap selects it — Zac, 22 Nov 2026: not a link), "Google it" (the registered name) and "Check for FD" (`googleFd`),
-  **why it's here** instead of the score (Zac, 24 Nov 2026: "why is it giving me the ones rated 54" — the score isn't out
-  of 100: a perfect fit with no news scores about 50, a fresh reason to call takes it past 60; `whyHere` in `format.js`:
+  **why it's here** instead of the score (Zac, 24 Nov 2026: "why is it giving me the ones rated 54" — the raw score wasn't out
+  of 100: a perfect fit with no news scored about 50, a fresh reason to call took it past 60; now shown out of 100, see Lead score; `whyHere` in `format.js`:
   the two strongest reasons that say something about this company, not the ones nearly every lead shares — "£859k FX loss
   (filed 29 Sept), no hedging · Like your good lead Basis Research"; the score on hover and on the company page; Research
   harder lines too), then four round buttons —
