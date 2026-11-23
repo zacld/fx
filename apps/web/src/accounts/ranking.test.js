@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FILINGS_SECTION, nicheLearnings, rankLeads, verdictLearnings } from "./ranking.js";
+import { FILINGS_SECTION, leadRows, learningRows, nicheLearnings, rankLeads, verdictLearnings } from "./ranking.js";
+import { likeGoodLeads, reviewLearnings } from "./format.js";
 
 describe("rankLeads", () => {
   const today = new Date("2026-11-10T12:00:00Z");
@@ -31,6 +32,46 @@ describe("rankLeads", () => {
     expect(nuts).toMatchObject({ leads: 2, ruled_out: 0 });
     expect(nuts.strong).toBeGreaterThanOrEqual(1);
     expect(learn.find((n) => n.niche === "(no niche)")).toMatchObject({ leads: 1, ruled_out: 1, avg: 0 });
+  });
+});
+
+describe("learningRows: what Zac's marks are learnt from", () => {
+  // the nightly ranking learnt from every list row plus every filings row until 24 Nov 2026, so a company on both lists
+  // counted twice ("694 judged, 15% new" with 54 new prospects); the page learnt from each company once
+  const list = [{ company_number: "B1", company_name: "BOTH LTD", fx_niche: "FX in their filed accounts", sic_codes: ["46900"] },
+                { company_number: "L2", company_name: "LIST ONLY LTD", fx_niche: "Nuts" },
+                { company_number: "X1", company_name: "EBURY LTD", fx_niche: "Nuts" }];
+  const filings = [{ company_number: "B1", company_name: "BOTH LTD", filed_fx_score: 60 },
+                   { company_number: "F1", company_name: "FILINGS ONLY LTD", filed_fx_score: 70 }];
+  const enrich = { B1: { niche: "Aircraft parts & aviation suppliers" }, F1: { niche: "Nuts" }, X1: { absurd: "An FX provider itself" } };
+
+  it("lists each company once: the list's rows with their corrected niche (Out when ruled out), then the filings companies not on it", () => {
+    const rows = learningRows(list, leadRows(list, filings, { enrich }));
+    expect(rows.map((r) => r.company_number)).toEqual(["B1", "L2", "X1", "F1"]);
+    expect(rows[0].fx_niche).toBe("Aircraft parts & aviation suppliers");
+    expect(rows[2]).toMatchObject({ qualified: "Out", qualify_reason: "An FX provider itself" });
+    expect(rows[3]).toMatchObject({ from_filings: true, fx_niche: "Nuts", main_currency: "" });
+  });
+  it("is what the page builds from the saved ranking (rows, niche_of, ruled_out), and copes without one", () => {
+    const { rows, niche_of, ruled_out } = rankLeads(list, filings, { enrich });
+    expect(learningRows(list, { rows, niche_of, ruled_out })).toEqual(learningRows(list, leadRows(list, filings, { enrich })));
+    expect(learningRows(list, null).map((r) => r.company_number)).toEqual(["B1", "L2", "X1"]);
+    // a filings company the list has taken on since the ranking was saved is the list's row, not a second one
+    expect(learningRows([...list, { company_number: "F1", company_name: "FILINGS ONLY LTD" }], { rows }).map((r) => r.company_number))
+      .toEqual(["B1", "L2", "X1", "F1"]);
+  });
+  it("counts a company on both lists once in the feedback loop and the lookalikes", () => {
+    const verdicts = { B1: { verdict: "good" }, L2: { verdict: "not_fit", reason: "too_small" } };
+    const rows = learningRows(list, leadRows(list, filings, { enrich }));
+    const l = reviewLearnings(rows, {}, verdicts);
+    expect(l.reviewed).toBe(2);
+    expect(l.usual).toBe(50);
+    expect(l.niche.find((g) => g.key === "Aircraft parts & aviation suppliers")).toMatchObject({ good: 1, reviewed: 1 });
+    expect(l.niche.find((g) => g.key === "FX in their filed accounts")).toBeUndefined();
+    // the old way: both rows of B1 counted, one under each niche
+    const doubled = reviewLearnings([...list, ...filings.map((r) => ({ ...r, fx_niche: enrich[r.company_number]?.niche || "" }))], {}, verdicts);
+    expect(doubled.reviewed).toBe(3);
+    expect(Object.keys(likeGoodLeads(rows, {}, verdicts))).not.toContain("B1");
   });
 });
 
