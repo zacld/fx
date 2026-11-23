@@ -123,6 +123,23 @@ describe("Your day (a Wrapped of the day)", () => {
     expect(html).not.toContain("DELTA GENERAL");
   });
 
+  it("the report carries each good lead's rating and a written brief, best rated first", () => {
+    const rows = ROWS.map((r) => (r.company_number === "00000002" ? { ...r, fx_gain_loss_gbp: -96000, accounts_filed_on: "2026-10-12",
+      main_currency: "USD", currency_source: "currency named in accounts", turnover_growth: "+54%" } : r));
+    const verdicts = { ...MARKS.verdicts, "00000002": { rating: 3, rated_at: at(MON, "15:00") } };   // Research harder, rated on its own
+    const rep = dayReport(dayWrap(rows, { ...MARKS, verdicts }, MON), MARKS.notes, { verdicts });
+    const it2 = rep.keepers.find((i) => i.number === "00000002");
+    expect(it2.rating).toBe(3);
+    expect(it2.brief).toMatch(/^Bolt Machines is a machinery manufacturer with £30\.0m turnover \(up 54% on the year before\)\./);
+    expect(it2.brief).toMatch(/a £96k FX loss \(filed 12 Oct 2026\) and USD as its main currency — and no hedging named\./);
+    expect(it2.findings).toContain("Hedging: No hedging named in its accounts");
+    const md = reportMarkdown(rep);
+    expect(md).toContain("- **BOLT MACHINES LTD** ★★★ — [00000002]");
+    expect(md).toMatch(/    - Bolt Machines is a machinery manufacturer/);
+    expect(reportHtml(rep)).toContain("<strong>BOLT MACHINES LTD</strong> ★★★");
+    expect(dayWrap(rows, { ...MARKS, verdicts }, MON).looked).toBe(8);   // a rating alone isn't a mark
+  });
+
   it("a day with nothing kept still makes a report", () => {
     const rep = dayReport(dayWrap(ROWS, MARKS, "2026-11-22"));
     expect(rep.sections).toEqual([]);

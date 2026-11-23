@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -193,6 +193,7 @@ function Accounts({ data, password }) {
   useEffect(() => {
     if (tabSection !== "all" && sectionOf(filters.view) !== tabSection) setTabSection(sectionOf(filters.view));
   }, [filters.view]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const goodCount = useMemo(() => goodLeadsList(allRows, { checks, verdicts, lists }).length, [allRows, checks, verdicts, lists]);
   const inTabs = (view) => tabSection === "all" || TAB_SECTIONS.find(([k]) => k === tabSection)[2].includes(view);
   // When the Alerts tab was last opened (this browser): the banner counts hot alerts newer than that.
   const [alertsSeen, setAlertsSeen] = useState(() => { try { return localStorage.getItem("fx-alerts-seen") || ""; } catch { return ""; } });
@@ -225,7 +226,7 @@ function Accounts({ data, password }) {
   // Today's list and Your day are the whole screen, on white: no top bar (logo, Market moves, Event leads, feed, Lock) —
   // Zac, 23 Nov 2026: "remove the bar at the top", "make the page white"
   useEffect(() => {
-    document.body.classList.toggle("daily-view", ["daily", "wrapped"].includes(filters.view) && !pageNo);
+    document.body.classList.toggle("daily-view", ["daily", "wrapped", "goodleads"].includes(filters.view) && !pageNo);
     return () => document.body.classList.remove("daily-view");
   }, [filters.view, pageNo]);
   const openCompany = useCallback((number) => {
@@ -357,13 +358,38 @@ function Accounts({ data, password }) {
 
   // Zac's review of a lead (Good lead / Not a fit + reason): shown at once, undone if the save fails. Not a fit drops it
   // from every list like "qualified Out"; the daily ranking measures each source and niche against these.
-  const setVerdict = useCallback(async (number, verdict, reason = "") => {
+  // A Good lead can carry a rating, 1–3 (Zac, 23 Nov 2026: "a 1-3 button so I can rank how good it is"); the same verdict
+  // again keeps the time it was judged (as the API does), so Your day doesn't move it.
+  const setVerdict = useCallback(async (number, verdict, reason = "", rating = 0) => {
     setSaveError("");
     const before = verdicts;
-    setVerdicts((v) => { const next = { ...v }; if (verdict) next[number] = { verdict, ...(reason ? { reason } : {}), at: new Date().toISOString() }; else delete next[number]; return next; });
-    try { await save(number, { verdict: verdict || null, ...(reason ? { reason } : {}) }); } catch (e) {
+    setVerdicts((v) => {
+      const next = { ...v }, was = v[number] || {}, now = new Date().toISOString();
+      const same = was.verdict === verdict && (was.reason || "") === (reason || "");
+      const keep = verdict === "good" ? (rating || was.rating) : 0;
+      if (verdict) next[number] = { verdict, ...(reason ? { reason } : {}), ...(keep ? { rating: keep, rated_at: rating ? now : was.rated_at } : {}), at: same && was.at ? was.at : now };
+      else delete next[number];
+      return next;
+    });
+    try { await save(number, { verdict: verdict || null, ...(reason ? { reason } : {}), ...(rating ? { rating } : {}) }); } catch (e) {
       setVerdicts(before);
       setSaveError(`Couldn't save the verdict (${e.message}).`);
+    }
+  }, [save, verdicts]);
+  // a rating on its own: for a lead on a list, Research harder or Added to mine (no verdict, so no new mark is counted)
+  const setRating = useCallback(async (number, rating) => {
+    setSaveError("");
+    const before = verdicts;
+    setVerdicts((v) => {
+      const was = { ...(v[number] || {}) };
+      if (rating) Object.assign(was, { rating, rated_at: new Date().toISOString() }); else { delete was.rating; delete was.rated_at; }
+      const next = { ...v };
+      if (Object.keys(was).length) next[number] = was; else delete next[number];
+      return next;
+    });
+    try { await save(number, { rating: rating || null }); } catch (e) {
+      setVerdicts(before);
+      setSaveError(`Couldn't save the rating (${e.message}).`);
     }
   }, [save, verdicts]);
   const setList = useCallback(async (number, list, missing = false) => {
@@ -390,7 +416,7 @@ function Accounts({ data, password }) {
     }
   }, [save, lists]);
   const todayDue = useMemo(() => { const q = todayQueue(allRows, lists, { perDay: 0 }); return q.calls.length + q.emails.length + q.linkedin.length; }, [allRows, lists]);
-  const verdictCtx = useMemo(() => ({ verdicts, setVerdict, lists, setList, setSequence, moves }), [verdicts, setVerdict, lists, setList, setSequence, moves]);
+  const verdictCtx = useMemo(() => ({ verdicts, setVerdict, setRating, lists, setList, setSequence, moves }), [verdicts, setVerdict, setRating, lists, setList, setSequence, moves]);
 
   const saveNote = useCallback(async (number, text) => {
     setSaveError("");
@@ -470,7 +496,7 @@ function Accounts({ data, password }) {
     <VerdictContext.Provider value={verdictCtx}>
     <main>
       {/* Today's list starts straight at the sections (Zac, 23 Nov 2026: "when on this page remove the banner at top") */}
-      {!["daily", "wrapped"].includes(filters.view) && <>
+      {!["daily", "wrapped", "goodleads"].includes(filters.view) && <>
       <StatusStrip status={data.status} />
       <AlertBanner summary={signals.alerts_summary} seen={alertsSeen} onOpen={() => set({ section: "", view: "alerts" })} />
       <div className="stats">
@@ -520,6 +546,11 @@ function Accounts({ data, password }) {
                   title="The day's sequence work across your lists: calls, emails, LinkedIn, and the companies to start today"
                   onClick={() => set({ section: "", view: "today" })}>
             Today <span className="tab-n">{todayDue}</span>
+          </button>
+          <button role="tab" hidden={!inTabs("goodleads")} aria-selected={filters.view === "goodleads"} className={`tab${filters.view === "goodleads" ? " on" : ""}`}
+                  title="Every new prospect you marked, rated 1–3, each written up from its own records"
+                  onClick={() => set({ section: "", view: "goodleads" })}>
+            Good leads <span className="tab-n">{goodCount}</span>
           </button>
           {Object.entries(LIST_NAMES).map(([key, name]) => (
             <button key={key} role="tab" hidden={!inTabs(`list-${key}`)} aria-selected={filters.view === `list-${key}`} className={`tab${filters.view === `list-${key}` ? " on" : ""}`}
@@ -634,7 +665,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["daily", "wrapped", "research", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["daily", "wrapped", "goodleads", "research", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -700,6 +731,8 @@ function Accounts({ data, password }) {
        : filters.view === "wrapped" ? <YourDay rows={allRows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} notes={notes}
                                               onOpen={openCompany} onBack={() => set({ section: "", view: "daily" })}
                                               startReport={finishing} onReportClosed={() => setFinishing(false)} />
+       : filters.view === "goodleads" ? <GoodLeads rows={allRows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} notes={notes}
+                                              saveNote={saveNote} setRating={setRating} onOpen={openCompany} />
        : filters.view === "research" ? <ResearchHarder rows={allRows} contacted={contacted} checks={checks} lists={lists} onOpen={openCompany}
                                               setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote} />
        : filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -2383,17 +2416,20 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail, links }) {
 // for it and for its finance director — and four buttons (TODAYS_MARKS); a mark takes it off and the next moves up.
 function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdict, setReview, setList, notes = {}, saveNote, onWrap, onFinish }) {
   const [shown, setShown] = useState(TODAYS_LIST);
-  const [last, setLast] = useState(null);   // the last mark, to undo: {number, name, key}
+  const [last, setLast] = useState(null);   // the last mark, to undo: {number, name, key, rating?}
+  const [rating, setRatingFor] = useState("");   // the company whose ✓ asked "how good?" (1–3)
   const all = useMemo(() => todaysList(rows, { contacted, checks, verdicts, lists }), [rows, contacted, checks, verdicts, lists]);
   const done = markedToday({ checks, verdicts, lists });
-  const labelOf = (key) => TODAYS_MARKS.find(([k]) => k === key)[2];
-  const mark = (r, key) => {
+  const labelOf = (key, k = 0) => `${TODAYS_MARKS.find(([x]) => x === key)[2]}${k ? ` ${stars(k)}` : ""}`;
+  const mark = (r, key, k = 0) => {
     const n = r.company_number;
-    if (key === "good") setVerdict(n, "good");
+    if (key === "good" && !k) { setRatingFor(n); return; }   // ✓ first asks how good it is
+    setRatingFor("");
+    if (key === "good") setVerdict(n, "good", "", k);
     else if (key === "small") setVerdict(n, "not_fit", "Too small");
     else if (key === "call") setList(n, "call");
     else setReview(n, key);   // research / open / abroad / skip
-    setLast({ number: n, name: r.company_name, key });
+    setLast({ number: n, name: r.company_name, key, rating: k });
   };
   const undo = () => {
     if (!last) return;
@@ -2412,7 +2448,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
           <span key={k}><span className={`dot-btn dot-${k} dot-key`} aria-hidden="true">{sym}</span>{label}</span>))}</span>
         {onFinish && <button className="btn-sm wrap-primary" onClick={onFinish} title="Compile today's report and a document of the good leads to paste into Notion">Finish day</button>}
       </div>
-      {last && <div className="daily-undo" role="status">{last.name}: {labelOf(last.key)}. <button className="linkish" onClick={undo}>Undo</button></div>}
+      {last && <div className="daily-undo" role="status">{last.name}: {labelOf(last.key, last.rating)}. <button className="linkish" onClick={undo}>Undo</button></div>}
       <ol className="daily-rows">
         {all.slice(0, shown).map((r, i) => (
           <li className="daily-row" key={r.company_number}>
@@ -2428,10 +2464,18 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
               </span>
               <LineNote note={notes[r.company_number]} onSave={(text) => saveNote(r.company_number, text)} />
             </div>
-            <span className="daily-btns" role="group" aria-label={`Mark ${r.company_name}`}>
-              {TODAYS_MARKS.map(([k, sym, label]) => (
-                <button key={k} className={`dot-btn dot-${k}`} title={label} aria-label={`${label}: ${r.company_name}`} onClick={() => mark(r, k)}>{sym}</button>))}
-            </span>
+            {rating === r.company_number
+              ? <span className="daily-btns rate-ask" role="group" aria-label={`How good is ${r.company_name}?`}>
+                  <span className="rate-q">How good?</span>
+                  {RATINGS.map(([k, st, label]) => (
+                    <button key={k} className="rate-btn" title={`${k} — ${label}`} aria-label={`${k} of 3, ${label}: ${r.company_name}`} onClick={() => mark(r, "good", k)}>
+                      <b>{k}</b><span aria-hidden="true">{st}</span></button>))}
+                  <button className="linkish" onClick={() => setRatingFor("")}>cancel</button>
+                </span>
+              : <span className="daily-btns" role="group" aria-label={`Mark ${r.company_name}`}>
+                  {TODAYS_MARKS.map(([k, sym, label]) => (
+                    <button key={k} className={`dot-btn dot-${k}`} title={k === "good" ? `${label} — then rate it 1–3` : label} aria-label={`${label}: ${r.company_name}`} onClick={() => mark(r, k)}>{sym}</button>))}
+                </span>}
           </li>
         ))}
       </ol>
@@ -2493,7 +2537,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
   const [report, setReport] = useState(!!startReport);
   const [docNote, setDocNote] = useState("");
   const reportRef = useRef(null);
-  const rep = useMemo(() => (report ? dayReport(w, notes) : null), [report, w, notes]);
+  const rep = useMemo(() => (report ? dayReport(w, notes, { verdicts }) : null), [report, w, notes, verdicts]);
   const tables = useMemo(() => depthTables(w).filter((t) => t.key !== "marks"), [w]);
   useEffect(() => () => onReportClosed?.(), []);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (report) reportRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }); }, [report]);
@@ -2515,11 +2559,12 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
     a.click();
     URL.revokeObjectURL(a.href);
   };
-  const REPORT_COLUMNS = ["mark", "company_name", "company_number", "industry", "turnover_gbp", "lead_score", "website", "note", "marked_at", "companies_house"];
-  const excelDoc = () => downloadSheet(rep.keepers.map((it) => ({ mark: it.mark, company_name: it.name, company_number: it.number, industry: it.industry,
-    turnover_gbp: it.turnover, lead_score: it.lead_score, website: it.website, note: it.note, marked_at: it.at, companies_house: it.url })),
-  columnsFor(REPORT_COLUMNS, { company_name: "Company", company_number: "Companies House number", turnover_gbp: "Turnover (£)", lead_score: "Score",
-    marked_at: "Marked at", companies_house: "Companies House" }, ["turnover_gbp", "lead_score"]), `fx-good-leads-${day}.xlsx`, "Good leads");
+  const REPORT_COLUMNS = ["mark", "rating", "company_name", "company_number", "industry", "turnover_gbp", "lead_score", "website", "brief", "key_findings", "note", "marked_at", "companies_house"];
+  const excelDoc = () => downloadSheet(rep.keepers.map((it) => ({ mark: it.mark, rating: it.rating || "", company_name: it.name, company_number: it.number, industry: it.industry,
+    turnover_gbp: it.turnover, lead_score: it.lead_score, website: it.website, brief: it.brief, key_findings: it.findings.join(" | "), note: it.note, marked_at: it.at,
+    companies_house: it.url })),
+  columnsFor(REPORT_COLUMNS, { rating: "Rating (1–3)", company_name: "Company", company_number: "Companies House number", turnover_gbp: "Turnover (£)", lead_score: "Score",
+    key_findings: "Key findings", marked_at: "Marked at", companies_house: "Companies House" }, ["rating", "turnover_gbp", "lead_score"]), `fx-good-leads-${day}.xlsx`, "Good leads");
   const isToday = day === today;
   const PCT = (x) => `${w.looked ? Math.round((100 * x) / w.looked) : 0}%`;
   const bars = OUTCOMES.filter(([k]) => w.counts[k]);
@@ -2578,12 +2623,12 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
             <Fragment key={sec.key}>
               <h2>{sec.title} ({sec.items.length})</h2>
               <ul>{sec.items.map((it) => (
-                <li key={it.number}><strong>{it.name}</strong> — <a href={it.url} target="_blank" rel="noreferrer">{it.number}</a>
+                <li key={it.number}><strong>{it.name}</strong>{it.rating ? <span className="report-stars" aria-label={`rated ${it.rating} of 3`}> {stars(it.rating)}</span> : null} — <a href={it.url} target="_blank" rel="noreferrer">{it.number}</a>
                   {it.website && <> · <a href={siteHref(it.website)} target="_blank" rel="noreferrer">website</a></>}{it.meta && ` · ${it.meta}`}
-                  {it.note && <ul><li>Note: {it.note}</li></ul>}</li>))}</ul>
+                  {(it.brief || it.note) && <ul>{it.brief && <li>{it.brief}</li>}{it.note && <li>Note: {it.note}</li>}</ul>}</li>))}</ul>
             </Fragment>))}
           {(rep.notFor.length > 0 || rep.open > 0) && <>
-            <h2>Not for us</h2>
+            <h2>Not new prospects</h2>
             <ul>{rep.notFor.map((x) => <li key={x.label}>{x.label} ({x.count}): {x.names.join(", ")}</li>)}
               {rep.open > 0 && <li>Already open: {rep.open}</li>}</ul>
           </>}
@@ -2820,6 +2865,96 @@ function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, se
         ))}
       </ol>
       {!list.length && <div className="empty">Nothing to research — mark a good lead with no contact info ? on Today's list.</div>}
+    </div>
+  );
+}
+
+// How good a good lead is, 1–3 (3 the best): three stars, the one clicked sets it, the lit one clicked again clears it.
+function RatingStars({ value = 0, onChange, name = "" }) {
+  return (
+    <span className="stars" role="group" aria-label={`How good is ${name || "it"}? ${value ? `${value} of 3` : "not rated"}`}>
+      {RATINGS.map(([k, , label]) => (
+        <button key={k} className={`star${k <= value ? " on" : ""}`} title={`${k} — ${label}${k === value ? " (click to clear)" : ""}`}
+                aria-label={`${k} of 3, ${label}`} aria-pressed={k === value} onClick={() => onChange(k === value ? null : k)}>★</button>))}
+    </span>
+  );
+}
+
+// Good leads (Zac, 23 Nov 2026: "on the good lead section we will take the lead and write a description, use key findings
+// that we found in the company"): every new prospect he marked — Good lead, Research harder, Added to mine, a list — best
+// rated first, then newest. Each written up from its own records (leadBrief: a few sentences, then the key findings with
+// where each came from), who owns it (the accounts, the LEI register, Companies House and the daily owner search, which
+// checks every good lead first), its rating, his note and the links. Copy brief puts it on the clipboard; Excel exports all.
+function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveNote, setRating, onOpen }) {
+  const [only, setOnly] = useState("");   // a mark kind, or "rated3" / "unrated"
+  const [copied, setCopied] = useState("");
+  const all = useMemo(() => goodLeadsList(rows, { checks, verdicts, lists }), [rows, checks, verdicts, lists]);
+  const counts = useMemo(() => all.reduce((c, x) => ({ ...c, [x.mark.kind]: (c[x.mark.kind] || 0) + 1 }), {}), [all]);
+  const list = all.filter((x) => !only || (only === "unrated" ? !x.rating : only.startsWith("rated") ? x.rating >= Number(only.slice(5)) : x.mark.kind === only));
+  const open = (e, n) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
+  const briefText = (x, b) => [`${x.r.company_name} (${x.r.company_number})${x.rating ? ` ${stars(x.rating)}` : ""}`, b.text, "",
+    ...b.facts.map((f) => `• ${f.label}: ${f.text}`), notes[x.r.company_number]?.text ? `• Note: ${notes[x.r.company_number].text}` : ""].filter((l) => l !== null).join("\n").trim();
+  const copy = async (x, b) => {
+    try { await navigator.clipboard.writeText(briefText(x, b)); setCopied(x.r.company_number); setTimeout(() => setCopied(""), 1500); } catch { /* no clipboard */ }
+  };
+  const exportList = () => downloadSheet(list.map((x) => {
+    const b = leadBrief(x.r), own = ownership(x.r);
+    return { rating: x.rating || "", mark: x.mark.label, marked_on: String(x.mark.at).slice(0, 10), company_name: x.r.company_name, company_number: x.r.company_number,
+      industry: industryOf(x.r), turnover_gbp: x.r.turnover_gbp || "", lead_score: x.r.lead_score, website: siteOf(x.r) || "",
+      owner: own.owner || "", owner_status: OWNERSHIP_LABEL[own.status], owner_country: own.country || "", brief: b.text,
+      key_findings: b.facts.map((f) => `${f.label}: ${f.text}`).join(" | "), note: notes[x.r.company_number]?.text || "",
+      contacted: contacted[x.r.company_number] ? "Yes" : "", companies_house_url: chCompanyUrl(x.r.company_number) };
+  }), columnsFor(["rating", "mark", "marked_on", "company_name", "company_number", "industry", "turnover_gbp", "lead_score", "website", "owner", "owner_status",
+    "owner_country", "brief", "key_findings", "note", "contacted", "companies_house_url"],
+  { rating: "Rating (1–3)", marked_on: "Marked on", turnover_gbp: "Turnover (£)", lead_score: "Score", owner_status: "Owned", owner_country: "Owner's country",
+    key_findings: "Key findings" }, ["rating", "turnover_gbp", "lead_score"]), `good-leads-${new Date().toISOString().slice(0, 10)}.xlsx`, "Good leads");
+  const filters = [["", "All", all.length], ...Object.entries(GOOD_MARKS).filter(([k]) => counts[k]).map(([k, label]) => [k, label, counts[k]]),
+    ["rated3", "★★★ only", all.filter((x) => x.rating === 3).length], ["rated2", "★★ and up", all.filter((x) => x.rating >= 2).length],
+    ["unrated", "Not rated yet", all.filter((x) => !x.rating).length]];
+  return (
+    <div className="list daily goodleads">
+      <div className="daily-head">
+        <span className="muted">{all.length} new prospects you marked, best rated first, each written up from its own records. Rate them 1–3 with the stars;
+          the owner check searches every good lead first each morning.</span>
+        <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
+      </div>
+      <div className="seg good-filter" role="group" aria-label="Show">
+        {filters.filter(([, , n]) => n || !only).map(([k, label, n]) => (
+          <button key={k || "all"} className={only === k ? "on" : ""} aria-pressed={only === k} onClick={() => setOnly(k)}>{label} <span className="tab-n">{n}</span></button>))}
+      </div>
+      <ol className="daily-rows">
+        {list.map((x, i) => {
+          const r = x.r, n = r.company_number, b = leadBrief(r), site = siteOf(r);
+          return (
+            <li className="daily-row good-row" key={n}>
+              <span className="daily-n">{i + 1}</span>
+              <div className="daily-main">
+                <span className="good-top">
+                  <a className="co" href={companyPath(n)} onClick={(e) => open(e, n)}>{r.company_name}</a>
+                  <RatingStars value={x.rating} onChange={(k) => setRating(n, k)} name={r.company_name} />
+                </span>
+                <span className="daily-sub">{[x.mark.label, x.mark.at ? `marked ${String(x.mark.at).slice(0, 10)}` : "", industryOf(r),
+                  r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed", `score ${r.lead_score}`, contacted[n] ? "contacted" : ""].filter(Boolean).join(" · ")}</span>
+                <p className="good-brief">{b.text}</p>
+                <ul className="good-facts">
+                  {b.facts.map((f) => (
+                    <li key={f.label}><span className="good-label">{f.label}</span> {f.url ? <a href={f.url} target="_blank" rel="noreferrer">{f.text} ↗</a> : f.text}</li>))}
+                </ul>
+                <span className="daily-links">
+                  <span className="daily-number" title="Companies House number">{n}</span>
+                  {site && <a href={siteHref(site)} target="_blank" rel="noreferrer">Website ↗</a>}
+                  <a href={googleCompany(r)} target="_blank" rel="noreferrer">Google it ↗</a>
+                  <a href={googleFd(r)} target="_blank" rel="noreferrer">Check for FD ↗</a>
+                  <a href={ownership(r).searches[0][1]} target="_blank" rel="noreferrer">Who owns it? ↗</a>
+                  <button className="linkish" onClick={() => copy(x, b)}>{copied === n ? "Copied" : "Copy brief"}</button>
+                </span>
+                <LineNote note={notes[n]} onSave={(text) => saveNote(n, text)} />
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+      {!list.length && <div className="empty">{all.length ? "None with that filter." : "No good leads yet — mark one ✓ on Today's list and rate it 1–3."}</div>}
     </div>
   );
 }
@@ -3105,7 +3240,7 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
 const TAB_SECTIONS = [
   ["today", "Today", ["daily", "wrapped", "today", "calls", "outreach", "alerts", "contacted", "email"]],
   ["fresh", "Fresh finds", ["fresh", "new", "hidden", "jobs", "emerging", "search", "money"]],
-  ["lists", "My lists", ["list-call", "list-email", "list-post", "research", "simple"]],
+  ["lists", "My lists", ["goodleads", "list-call", "list-email", "list-post", "research", "simple"]],
   ["learn", "Learn", ["scoreboard", "niches"]],
   ["all", "All tabs", null],
 ];
@@ -3129,13 +3264,14 @@ function VerdictButtons({ number }) {
   return <><ListButtons number={number} /><VerdictOnly number={number} /></>;
 }
 function VerdictOnly({ number }) {
-  const { verdicts, setVerdict } = useContext(VerdictContext);
+  const { verdicts, setVerdict, setRating } = useContext(VerdictContext);
   const [asking, setAsking] = useState(false);
   const v = verdicts[number];
-  if (v) {
+  if (v?.verdict) {
     return (
       <span className={`verdict verdict-${v.verdict}`}>
         {v.verdict === "good" ? "Good lead" : `Not a fit${v.reason ? `: ${v.reason}` : ""}`}
+        {v.verdict === "good" && <RatingStars value={ratingOf(verdicts, number)} onChange={(k) => setRating(number, k)} name="this lead" />}
         <button className="btn-link" onClick={() => setVerdict(number, null)} title="Clear your verdict">undo</button>
       </span>
     );
@@ -4076,6 +4212,22 @@ a{color:var(--accent)}
 .daily-note-btns{display:flex;gap:12px;align-items:center}
 .daily-key .dot-key,.daily-key .dot-key:hover{width:22px;height:22px;font-size:12px;border-width:1.5px;cursor:default;background:transparent;color:var(--c)}
 .daily-more{margin-top:12px}
+.report-stars{color:#a87b00;letter-spacing:1px}
+.rate-ask{align-items:center;gap:6px}
+.rate-q{font-size:13px;color:var(--text-2);margin-right:2px}
+.rate-btn{--c:#81c995;min-width:44px;height:36px;padding:0 8px;border-radius:18px;border:2px solid var(--c);background:transparent;color:var(--c);cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;gap:1px}
+.rate-btn b{font:700 14px/1 'Inter',sans-serif}.rate-btn span{font-size:9px;letter-spacing:-1px}
+.rate-btn:hover,.rate-btn:focus-visible{background:var(--c);color:var(--bg);outline:none}
+.stars{display:inline-flex;gap:0;margin-left:6px;vertical-align:middle}
+.star{background:none;border:0;padding:2px 3px;font-size:17px;line-height:1;color:var(--muted);cursor:pointer;min-width:26px;min-height:28px}
+.star.on{color:#fdd663}.star:hover,.star:focus-visible{color:#fdd663;outline:none}
+.good-filter{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.good-top{display:flex;align-items:center;flex-wrap:wrap;gap:2px 4px}
+.good-brief{margin:6px 0 4px;font-size:14px;line-height:1.5;color:var(--text);max-width:78ch}
+.good-facts{margin:0 0 6px;padding:0;list-style:none;font-size:13px;line-height:1.45;color:var(--text-2);max-width:90ch}
+.good-facts li{padding:1px 0}.good-facts a{color:var(--accent);text-decoration:none}.good-facts a:hover{text-decoration:underline}
+.good-label{display:inline-block;min-width:150px;color:var(--muted);font-size:12px}
+@media(max-width:700px){.good-label{display:block;min-width:0}.rate-ask{width:100%;justify-content:flex-end}}
 @media(max-width:700px){.daily-row{flex-wrap:wrap;gap:8px 10px}.daily-btns{width:100%;justify-content:flex-end;gap:7px}.dot-btn{width:38px;height:38px}}
 .sections{display:flex;gap:0;margin-bottom:10px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
 .section-btn{flex:1 1 0;min-width:0;padding:9px 6px;border:0;border-right:1px solid var(--line);background:none;color:var(--text-2);font:600 13px 'Inter',sans-serif;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4094,6 +4246,7 @@ body.daily-view .controls{border-bottom:1px solid var(--line)}
 body.daily-view .tab.on,body.daily-view .section-btn.on,body.daily-view .seg button.on{background:#e8f0fe;border-color:#aecbfa;color:#174ea6}
 body.daily-view .btn-sm:hover,body.daily-view .section-btn:hover{background:#e9e9e6;color:var(--text)}
 body.daily-view .empty{color:var(--muted)}
+body.daily-view .rate-btn{--c:#188038}body.daily-view .star{color:#80868b}body.daily-view .star.on,body.daily-view .star:hover,body.daily-view .star:focus-visible{color:#a87b00}
 body.daily-view .dot-good{--c:#188038}body.daily-view .dot-research{--c:#a87b00}body.daily-view .dot-small{--c:#c5221f}
 body.daily-view .dot-open{--c:#e8710a}body.daily-view .dot-call{--c:#1a73e8}body.daily-view .dot-abroad{--c:#9334e6}
 body.daily-view .dot-skip,body.daily-view .dot-back{--c:#5f6368}

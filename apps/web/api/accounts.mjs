@@ -24,6 +24,7 @@ export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
 export const VERDICTS_KEY = "verdicts";     // {company_number: {verdict: "good" | "not_fit", reason, at}} — Zac's review
 export const VERDICT_REASONS = ["Too small", "Too big", "No real FX", "Wrong sector", "FX run abroad", "Other"];
+export const RATING = [1, 2, 3];   // how good a good lead is (3 the best): `rating` on its verdict
 export const LISTS_KEY = "lists";           // {company_number: {list: "call" | "post" | "email", at, missing?}} — Zac's own lists
 export const LISTS = ["call", "post", "email"];   // call list, chocolate / mailing list, email list
 export const CHECKS_KEY = "checks";         // {company_number: {crm: iso, review, review_at}} — the "CRM checked" tick and
@@ -314,7 +315,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       // item, so rapid saves can't overwrite each other (KV serves a key's last value for up to a minute elsewhere)
       const marks = body.marks;
       const bad = marks.length > MARKS_MAX || marks.some((m) => !COMPANY_NUMBER.test(m?.company_number || "")
-        || !(("review" in m && REVIEWS.includes(m.review)) || ("verdict" in m && (m.verdict === "good"
+        || !(("review" in m && REVIEWS.includes(m.review)) || ("verdict" in m && ((m.verdict === "good" && (m.rating == null || RATING.includes(m.rating)))
           || (m.verdict === "not_fit" && (!m.reason || VERDICT_REASONS.includes(m.reason)))))));
       if (!marks.length || bad) {
         return reply({ error: `send {marks: [{company_number, review: ${REVIEWS.join(" | ")}} | {company_number, verdict: "good" | "not_fit", reason?}]} (at most ${MARKS_MAX})` }, 400);
@@ -330,7 +331,7 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       });
       const verdicts = await io.change("verdict", (verdicts) => {
         for (const m of marks.filter((x) => !("review" in x))) {
-          verdicts[m.company_number.toUpperCase()] = { verdict: m.verdict, ...(m.reason ? { reason: m.reason } : {}), at };
+          verdicts[m.company_number.toUpperCase()] = { verdict: m.verdict, ...(m.reason ? { reason: m.reason } : {}), ...(m.rating ? { rating: m.rating } : {}), at };
         }
         return verdicts;
       });
@@ -395,15 +396,36 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       });
       return reply({ lists }, 200);
     }
-    if ("verdict" in body) {   // Zac's review of a lead: good / not a fit (with a reason) / cleared — never a bank record
-      const ok = body.verdict === null || body.verdict === "good" ||
+    if ("verdict" in body) {   // Zac's review of a lead: good (rated 1–3) / not a fit (with a reason) / cleared — never a bank record
+      const ok = body.verdict === null || (body.verdict === "good" && (body.rating == null || RATING.includes(body.rating))) ||
         (body.verdict === "not_fit" && (!body.reason || VERDICT_REASONS.includes(body.reason)));
       if (!COMPANY_NUMBER.test(number || "") || !ok) {
-        return reply({ error: `send {company_number, verdict: "good" | "not_fit" | null, reason?: ${VERDICT_REASONS.join(" | ")}}` }, 400);
+        return reply({ error: `send {company_number, verdict: "good" | "not_fit" | null, rating?: 1 | 2 | 3, reason?: ${VERDICT_REASONS.join(" | ")}}` }, 400);
       }
       const verdicts = await (await openMarks(blobs, db)).change("verdict", (verdicts) => {
-        if (body.verdict) verdicts[number] = { verdict: body.verdict, ...(body.reason ? { reason: body.reason } : {}), at: new Date().toISOString() };
-        else delete verdicts[number];
+        const was = verdicts[number] || {};
+        const now = new Date().toISOString();
+        if (body.verdict) {
+          // the same verdict again (a rating added or changed) keeps the time it was judged, so Your day doesn't move it
+          const same = was.verdict === body.verdict && (was.reason || "") === (body.reason || "");
+          const rating = body.verdict === "good" ? (body.rating ?? was.rating) : undefined;
+          verdicts[number] = { verdict: body.verdict, ...(body.reason ? { reason: body.reason } : {}), ...(rating ? { rating, rated_at: body.rating ? now : was.rated_at } : {}),
+            at: same && was.at ? was.at : now };
+        } else delete verdicts[number];
+        return verdicts;
+      });
+      return reply({ verdicts }, 200);
+    }
+    if ("rating" in body) {   // how good a good lead is, 1–3 (3 the best), or null to clear — on a lead put on a list or marked
+      // Research harder / Added to mine too: kept beside its verdict (none for those), so it isn't counted as a new mark
+      if (!COMPANY_NUMBER.test(number || "") || !(body.rating === null || RATING.includes(body.rating))) {
+        return reply({ error: "send {company_number, rating: 1 | 2 | 3 | null}" }, 400);
+      }
+      const verdicts = await (await openMarks(blobs, db)).change("verdict", (verdicts) => {
+        const was = { ...(verdicts[number] || {}) };
+        if (body.rating) Object.assign(was, { rating: body.rating, rated_at: new Date().toISOString() });
+        else { delete was.rating; delete was.rated_at; }
+        if (Object.keys(was).length) verdicts[number] = was; else delete verdicts[number];
         return verdicts;
       });
       return reply({ verdicts }, 200);
