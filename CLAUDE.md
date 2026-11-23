@@ -448,11 +448,11 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   so Fit adds growth 20%+ 10 / 40%+ 15 (`growth`, `fastGrowth`) and an FX loss with no hedging named 10 (`lossNoHedge`),
   and a new charge (new borrowing / a new lender) counts 15 in Timing (`newLender`, a plain change stays 10); a **"Like
   Global Charter"** filter (`lookalike`: UK-owned, £20m–£100m, FX loss £50k+, no hedging named, still growing). The same
-  review: 22 of 43 were already with the bank (the CRM check — not detectable from public records, and never stored
-  here), 7 were owned abroad though marked UK-owned (what the owner search fixes), and holding companies (Topco, Holdings)
+  review: 22 of 43 were already with the bank (the CRM check — not detectable from public records; recorded here only as
+  his own Open lead mark, see What the marks mean), 7 were owned abroad though marked UK-owned (what the owner search fixes), and holding companies (Topco, Holdings)
   were labelled "Finance & insurance" from their holding-company sector code. **Second recalibration — Zac's review of
-  22 Nov 2026** (the leads he took into his book, against the top 300 by lead score; aggregates only — which companies
-  the bank already knows is never kept here): he took 9 of the top 300 (the rest already known to the bank) and 21 in
+  22 Nov 2026** (the leads he took into his book, against the top 300 by lead score; aggregates only — his Open lead
+  marks are the one per-company record of it, see What the marks mean): he took 9 of the top 300 (the rest already known to the bank) and 21 in
   all. Same Fit (median 91 both) but a lower Now (median 20 v 30 — a freshly filed FX loss draws every bank), sector
   codes that hide them 38% v 23% (other business support 19% v 6%), emerging / customs-trader niches 20% v 7%, from the
   FX filings scan 0% v 11%. So: `FIT.timingWeight` 0.5 → 0.3 (simulated on the day's ranking: his picks' median rank
@@ -785,12 +785,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   abroad (review abroad: to the Foreign-owned tab) and » grey **Skip** (review `skip`; "Skipped" in the Power Automate
   feed and the Simplified dash, `Skip:` / `Skipped:` heading in the bulk paste). A mark takes the company off and the next
   moves up; Undo for the last one; "N marked today". **What the marks mean** (Zac, 23 Nov 2026: "if a bank had an open
-  lead or they were using, I just put them as open; the skips were either could not find the finance director at all";
+  lead or they were using, I just put them as open" — the bank being Investec: "we had something ongoing with them" —
+  "the skips were either could not find the finance director at all";
   `markClass` in `format.js`, mirrored by `discover.good_leads`): a **new prospect** — Good lead, Research harder, Added to
-  mine, or put on the call / email / mail list (a list beats any other mark); **Open lead** — already open, not a new
-  prospect; **not for us** — Not a fit (Not enough revenue …), Owned abroad; **Skip** — no finance director found, no
+  mine, or put on the call / email / mail list (a list beats any other mark); **Open lead** — Investec already has
+  something ongoing with them (his CRM check), not a new prospect; **not for us** — Not a fit (Not enough revenue …), Owned abroad; **Skip** — no finance director found, no
   judgement of the company. Until that day Open lead counted as good and Call list not at all, so the feedback loop and
-  both lookalike searches learned from the 199 open leads of his first big day; now they learn from the new prospects. On this tab the freshness strip,
+  both lookalike searches learned from the 199 open leads of his first big day; now they learn from the new prospects. **Open
+  marks are kept** (Zac, 23 Nov 2026, asked whether a per-company record of what Investec already works on belongs here:
+  "keep as is"): his own click after his CRM check, nothing copied from the CRM; the site only ever says "Open lead" (never
+  why), the day report counts them and never names them, and the learning uses them only in totals by niche, source and
+  industry. On this tab the freshness strip,
   alert banner and figures row are left off (Zac, 23 Nov 2026: "when on this page remove the banner at top"), and so is the
   top bar — logo, Market moves, Event leads, Power Automate feed, Lock ("remove the bar at the top which says fx disco and
   market events"; a `daily-view` class on the page body, so the sections bar sits at the very top on a phone). The page
@@ -875,8 +880,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   borrowing, Net assets, Staff, Score; blanks where the accounts don't say; search, type-of-company filter, sortable
   headers, Excel export of what's shown. **Status buttons** on each row (Zac, 20 Nov 2026: "add a button, open lead, added
   to mine and owned abroad"; `REVIEW_BUTTONS`, POST `{company_number, review: "open" | "mine" | "abroad" | null}`, kept
-  in the `checks` store item beside the CRM tick as `review` + `review_at` — his own read, no reason and nothing from
-  the CRM): one at a time, beside the CH number (Zac, 20 Nov 2026: "put the buttons next to the ch number and when i click
+  in the `checks` store item beside the CRM tick as `review` + `review_at` — his own click, no reason kept): one at a time, beside the CH number (Zac, 20 Nov 2026: "put the buttons next to the ch number and when i click
   the button take it off the main sheet and put it on its own list"; `SheetView`'s `actions.after`). The dash opens on **To
   check** (nothing marked); a button moves the company to its own list — **Open lead / Added to mine / Owned abroad** tabs
   with counts, each exported on its own; clicking the lit button sends it back to To check. **Owned abroad** also puts the

@@ -217,7 +217,7 @@ def lookalikes(good: dict, trade: dict, tracked: Optional[dict] = None, skip: It
 def good_leads(checks: dict, verdicts: dict, lists: dict | None = None) -> set[str]:
     """Company numbers Zac marked as new prospects: Good lead, Research harder (a good lead with no contact info yet),
     Added to mine, or put on his call / email / mail list — and not since marked Not a fit, Owned abroad or Open lead.
-    Open lead means already open, not a new prospect, and Skip means no finance director found (Zac, 23 Nov 2026):
+    Open lead means something is already ongoing with them on our side, not a new prospect, and Skip means no finance director found (Zac, 23 Nov 2026):
     neither is one to find more like. Mirrors markClass in apps/web/src/accounts/format.js."""
     checks, verdicts, lists = checks or {}, verdicts or {}, lists or {}
     good = {n for n, l in lists.items() if (l or {}).get("list")}
