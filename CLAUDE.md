@@ -786,7 +786,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   for a company the bank already has; which companies bank with Investec never comes onto the site, so it isn't a
   "current client" mark; neutral in the feedback loop, "Skipped" in the Power Automate feed and the Simplified dash,
   `Skip:` / `Skipped:` heading in the bulk paste). A mark takes the company off and the next moves up; Undo for the last
-  one; "N marked today". The marks feed the feedback loop and lookalikes like any other.
+  one; "N marked today". The marks feed the feedback loop and lookalikes like any other. On this tab the freshness strip,
+  alert banner and figures row are left off (Zac, 23 Nov 2026: "when on this page remove the banner at top").
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead
