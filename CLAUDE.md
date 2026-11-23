@@ -787,7 +787,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   "current client" mark; neutral in the feedback loop, "Skipped" in the Power Automate feed and the Simplified dash,
   `Skip:` / `Skipped:` heading in the bulk paste). A mark takes the company off and the next moves up; Undo for the last
   one; "N marked today". The marks feed the feedback loop and lookalikes like any other. On this tab the freshness strip,
-  alert banner and figures row are left off (Zac, 23 Nov 2026: "when on this page remove the banner at top").
+  alert banner and figures row are left off (Zac, 23 Nov 2026: "when on this page remove the banner at top"), and so is the
+  top bar — logo, Market moves, Event leads, Power Automate feed, Lock ("remove the bar at the top which says fx disco and
+  market events"; a `daily-view` class on the page body, so the sections bar sits at the very top on a phone).
   **Notes and Research harder** (Zac, 23 Nov 2026: "a button to add notes. And another button which is good lead but no
   contact info and add it to a research harder section"): every line has "✎ Add note" / "Edit note" (`LineNote`: the
   company's note, store key `notes`, the same one cards and the company page show; shown under the links once saved), and

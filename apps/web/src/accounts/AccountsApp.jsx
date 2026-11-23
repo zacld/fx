@@ -220,6 +220,11 @@ function Accounts({ data, password }) {
     return () => { live = false; };
   }, [pageNo, password]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { window.scrollTo(0, pageNo ? 0 : listScroll); }, [pageNo]);   // eslint-disable-line react-hooks/exhaustive-deps
+  // Today's list is the whole screen: no top bar (logo, Market moves, Event leads, feed, Lock) — Zac, 23 Nov 2026
+  useEffect(() => {
+    document.body.classList.toggle("daily-view", filters.view === "daily" && !pageNo);
+    return () => document.body.classList.remove("daily-view");
+  }, [filters.view, pageNo]);
   const openCompany = useCallback((number) => {
     setListScroll(window.scrollY);
     window.history.pushState({ fromList: true }, "", companyPath(number));
@@ -3770,6 +3775,8 @@ a{color:var(--accent)}
 .section-btn:hover{background:var(--surface-2);color:var(--text)}
 .section-btn.on{background:#2d3a4d;color:#d2e3fc}
 .fresh-kinds{flex-wrap:wrap}
+.daily-view .tb{display:none}
+@media(max-width:700px){.daily-view .sections{top:0}}
 @media(max-width:700px){.sections{position:sticky;top:52px;z-index:5}.section-btn{font-size:12px;padding:10px 2px}
   .tabs,.fresh-kinds{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}.tab,.fresh-kinds .grp{flex:0 0 auto}
   .tb-l{flex:0 0 auto}.tb-r{min-width:0;overflow-x:auto;flex-wrap:nowrap}.tb-r>*{flex:0 0 auto}}
