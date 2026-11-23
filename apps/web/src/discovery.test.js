@@ -149,6 +149,8 @@ describe("Today's list", () => {
     const got = todaysList(rows, { verdicts: { 6: { verdict: "not_fit", reason: "Too small" } } });
     expect(got.map((r) => r.company_number)).toEqual(["2", "3", "1"]);
     expect(todaysList(rows, { lists: { 2: { list: "call" } }, checks: { 1: { review: "open" } } }).map((r) => r.company_number)).toEqual(["5", "3"]);
+    // Owned abroad and Skip take a company off like the others
+    expect(todaysList(rows, { checks: { 5: { review: "skip" }, 2: { review: "abroad" } } }).map((r) => r.company_number)).toEqual(["3", "1"]);
   });
   it("counts the marks made today", () => {
     expect(markedToday({ checks: { 1: { review: "open", review_at: "2026-11-22T09:00:00Z" } }, verdicts: { 2: { verdict: "good", at: "2026-11-21T09:00:00Z" } },

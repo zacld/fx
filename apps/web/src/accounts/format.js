@@ -596,7 +596,8 @@ export function matchCompanies(text = "", rows = []) {
 // "Owned abroad:", "Not a fit:" or "Not a fit (No real FX):" (the reason one of VERDICT_REASONS' words); names before
 // any heading take `fallback`. [{mark: {review} | {verdict: "not_fit", reason}, label, text}] in the order given.
 export const MARK_HEADINGS = [[/^added to mine$/i, { review: "mine" }, "Added to mine"], [/^open lead$/i, { review: "open" }, "Open lead"],
-  [/^owned abroad$/i, { review: "abroad" }, "Owned abroad"], [/^good lead$/i, { verdict: "good" }, "Good lead"]];
+  [/^owned abroad$/i, { review: "abroad" }, "Owned abroad"], [/^good lead$/i, { verdict: "good" }, "Good lead"],
+  [/^skip(?:ped)?$/i, { review: "skip" }, "Skipped"]];
 export function markSections(text = "", fallback = { review: "mine" }) {
   const out = [];
   let cur = { mark: fallback, label: MARK_HEADINGS.find(([, m]) => JSON.stringify(m) === JSON.stringify(fallback))?.[2] || "Added to mine", text: "" };
@@ -728,8 +729,11 @@ export function freshFind(r, today = new Date()) {
 // judged the group), not out, no serious reason not to progress, Fit FIT.min+, one per group. A mark takes a lead off
 // and the next one moves up.
 export const TODAYS_LIST = 25;
+// Owned abroad and Skip (Zac, 23 Nov 2026: "add the buttons current client and owned abroad"): Skip takes a company off
+// with no reason kept — use it for one the bank already has; which companies those are never comes onto the site.
 export const TODAYS_MARKS = [
   ["good", "✓", "Good lead"], ["small", "✕", "Not enough revenue"], ["open", "●", "Open lead"], ["call", "☎", "Call list"],
+  ["abroad", "✈\uFE0E", "Owned abroad"], ["skip", "»", "Skip (no reason kept)"],
 ];
 export function todaysList(rows, { contacted = {}, checks = {}, verdicts = {}, lists = {} } = {}) {
   const marked = (n) => contacted[n] || checks[n]?.review || verdicts[n] || lists[n];
