@@ -214,11 +214,17 @@ def lookalikes(good: dict, trade: dict, tracked: Optional[dict] = None, skip: It
     return rows, {"leads": with_trade, "without": len(good) - with_trade}
 
 
-def good_leads(checks: dict, verdicts: dict) -> set[str]:
-    """Company numbers Zac marked good: Open lead / Added to mine (Simplified dash), Research harder (a good lead with no
-    contact info yet) or Good lead — and not since marked Not a fit or Owned abroad."""
-    good = {n for n, c in (checks or {}).items() if (c or {}).get("review") in ("open", "mine", "research")}
-    good |= {n for n, v in (verdicts or {}).items() if (v or {}).get("verdict") == "good"}
-    bad = {n for n, c in (checks or {}).items() if (c or {}).get("review") == "abroad"}
-    bad |= {n for n, v in (verdicts or {}).items() if (v or {}).get("verdict") == "not_fit"}
-    return good - bad
+def good_leads(checks: dict, verdicts: dict, lists: dict | None = None) -> set[str]:
+    """Company numbers Zac marked as new prospects: Good lead, Research harder (a good lead with no contact info yet),
+    Added to mine, or put on his call / email / mail list — and not since marked Not a fit, Owned abroad or Open lead.
+    Open lead means already open, not a new prospect, and Skip means no finance director found (Zac, 23 Nov 2026):
+    neither is one to find more like. Mirrors markClass in apps/web/src/accounts/format.js."""
+    checks, verdicts, lists = checks or {}, verdicts or {}, lists or {}
+    good = {n for n, l in lists.items() if (l or {}).get("list")}
+    for n in set(checks) | set(verdicts):
+        if n in good:
+            continue
+        review = (checks.get(n) or {}).get("review")
+        if review in ("research", "mine") or (review not in ("abroad", "open", "skip") and (verdicts.get(n) or {}).get("verdict") == "good"):
+            good.add(n)
+    return good

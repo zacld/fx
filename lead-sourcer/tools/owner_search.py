@@ -58,6 +58,9 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--max", type=int, default=150)
     ap.add_argument("--parents", default="", help="parents.json (tools/parents_from_accounts.py): companies whose accounts name the owner aren't searched")
+    ap.add_argument("--first", default="", help="good_leads.json (apps/web/scripts/rank-leads.mjs): Zac's new prospects — searched "
+                    "first, even when their accounts already name an owner (Zac, 23 Nov 2026: a Gemini search dedicated to each "
+                    "good lead — is it the ultimate parent, is it owned in the UK)")
     ap.add_argument("--check", action="store_true", help="one search with each provider's key first: which work")
     ap.add_argument("--numbers", default="", help="comma-separated company numbers: search just these")
     args = ap.parse_args()
@@ -88,10 +91,16 @@ def main() -> None:
     else:
         order = _load(args.order, [])
         order = order.get("order", order) if isinstance(order, dict) else order
+        first = _load(args.first, [])
+        first = [str(n) for n in (first.get("companies", []) if isinstance(first, dict) else first)]
         seen = set()
-        queue = [n for n in list(order) + list(names) if not (n in seen or seen.add(n))]
+        queue = [n for n in first + list(order) + list(names) if not (n in seen or seen.add(n))]
         answered = {n for n, p in ((_load(args.parents, {}) or {}).get("companies", {}) or {}).items() if p.get("ultimate_parent")}
+        answered -= set(first)
         queue = [n for n in queue if names.get(n) and due(found.get(n), today) and n not in answered]
+        if first:
+            waiting = sum(1 for n in first if names.get(n) and due(found.get(n), today))
+            print(f"Owner search: {len(first)} good leads first ({waiting} due a search now; the rest searched lately)")
         if answered:
             print(f"Owner search: {len(answered)} companies' own accounts already name the owner — not searched")
 

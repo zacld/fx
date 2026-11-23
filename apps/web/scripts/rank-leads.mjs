@@ -4,14 +4,15 @@
 // Reads the Accounts list, the Recent FX filings list, the measured niches and the alerts from the site's private store.
 // Prints counts, company names, scores and niche learnings — no people's names (the repo is public).
 import { readFile, writeFile } from "node:fs/promises";
-import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, FEED_KEY, FILINGS_KEY, KEY, MOMENTS_KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
+import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, FEED_KEY, FILINGS_KEY, KEY, LISTS_KEY, MOMENTS_KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
-import { likeGoodLeads, movesByCurrency, reviewLearnings, setKnownGroups } from "../src/accounts/format.js";
+import { likeGoodLeads, markClass, movesByCurrency, reviewLearnings, setKnownGroups } from "../src/accounts/format.js";
 import { feedRows, filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
-// orderPath: company numbers, best lead first (find_domains.py); groupsPath: each company's top UK parent (psc_deals.py)
-const [enrichPath, orderPath, groupsPath, gleifPath] = process.argv.slice(2);
+// orderPath: company numbers, best lead first (find_domains.py); groupsPath: each company's top UK parent (psc_deals.py);
+// goodPath: Zac's new prospects, best rated and newest first (owner_search.py --first)
+const [enrichPath, orderPath, groupsPath, gleifPath, goodPath] = process.argv.slice(2);
 // each tracked company's owner from the Global LEI register (tools/gleif_owners.py), slimmed for the page
 let gleifOf = {};
 try {
@@ -32,14 +33,15 @@ let filingRows = index?.rows || [];
 for (const { month } of index?.months || []) filingRows = filingRows.concat((await store.get(filingsMonthKey(month), "json"))?.rows || []);
 const listRows = list?.rows || [];
 
-// the feedback loop: Zac's own marks (Simplified dash review buttons, verdicts) lean the score by niche and source
+// the feedback loop: Zac's own marks (review buttons, verdicts, his lists) lean the score by niche and source
 const verdicts = (await store.get(VERDICTS_KEY, "json")) || {};
 const checks = (await store.get(CHECKS_KEY, "json")) || {};
+const lists = (await store.get(LISTS_KEY, "json")) || {};
 setKnownGroups(groupOf);   // PE up the chain, a holding company's group activity: read by the score as on the page
 const marked = [...listRows, ...filingRows.map((r) => ({ ...r, from_filings: true, fx_niche: enrich[r.company_number]?.niche || "", sic: enrich[r.company_number]?.sic || [] }))];
-const reviews = reviewLearnings(marked, checks, verdicts);
+const reviews = reviewLearnings(marked, checks, verdicts, undefined, lists);
 // lookalikes by profile: the unmarked leads most like the ones Zac marked good (format.js likeGoodLeads)
-const likes = likeGoodLeads(marked, checks, verdicts);
+const likes = likeGoodLeads(marked, checks, verdicts, lists);
 const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, moves, reviews, likes, groups: groupOf,
   signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) });
 const learn = nicheLearnings(scored);
@@ -51,12 +53,21 @@ await store.set(FEED_KEY, { made_at, count: feed.length, rows: feed });
 console.log(`Power Automate feed: ${feed.length.toLocaleString()} companies saved (feed/all)`);
 
 const live = scored.filter((s) => !s.absurd);
-// the order the website, parents and owner lookups work through: Fit 90+ first (the best-fitting companies, which
-// Cognism needs a website to match), best fit first, then everyone else by lead score
-const topFit = live.filter((s) => (s.fit || 0) >= 90).sort((a, b) => (b.fit || 0) - (a.fit || 0) || b.score - a.score);
-const topSet = new Set(topFit.map((s) => s.company_number));
-if (orderPath) await writeFile(orderPath, JSON.stringify([...topFit, ...live.filter((s) => !topSet.has(s.company_number))].map((s) => s.company_number)));
-console.log(`Lookup order: ${topFit.length.toLocaleString()} leads with Fit 90+ first, then ${(live.length - topFit.length).toLocaleString()} by lead score`);
+// the order the website, parents and owner lookups work through: Zac's new prospects first (Good lead, Research harder,
+// Added to mine, a list — best rated, then newest: Zac, 23 Nov 2026, "a Gemini search dedicated to each lead"), then
+// Fit 90+ (the best-fitting companies, which Cognism needs a website to match), best fit first, then everyone else by
+// lead score
+const markedAt = (n) => String(lists[n]?.at || checks[n]?.review_at || verdicts[n]?.at || "");
+const good = scored.filter((s) => markClass(s.company_number, { checks, verdicts, lists }) === "good")
+  .sort((a, b) => (Number(verdicts[b.company_number]?.rating) || 0) - (Number(verdicts[a.company_number]?.rating) || 0)
+    || markedAt(b.company_number).localeCompare(markedAt(a.company_number)));
+const goodSet = new Set(good.map((s) => s.company_number));
+const topFit = live.filter((s) => (s.fit || 0) >= 90 && !goodSet.has(s.company_number)).sort((a, b) => (b.fit || 0) - (a.fit || 0) || b.score - a.score);
+const topSet = new Set([...goodSet, ...topFit.map((s) => s.company_number)]);
+if (orderPath) await writeFile(orderPath, JSON.stringify([...good, ...topFit, ...live.filter((s) => !topSet.has(s.company_number))].map((s) => s.company_number)));
+if (goodPath) await writeFile(goodPath, JSON.stringify({ companies: good.map((s) => s.company_number) }));
+console.log(`Lookup order: ${good.length.toLocaleString()} of your new prospects first, then ${topFit.length.toLocaleString()} leads with Fit 90+, then `
+  + `${(live.length - topFit.length - good.filter((s) => !s.absurd).length).toLocaleString()} by lead score`);
 const likeCount = {};
 for (const l of Object.values(likes)) likeCount[l.like_name] = (likeCount[l.like_name] || 0) + 1;
 console.log(`Lookalikes by profile: ${Object.keys(likes).length.toLocaleString()} leads like your good ones — `
@@ -96,8 +107,8 @@ console.log(`\nHard to broker: ${Object.values(shyBy).flat().length} leads`);
 for (const [niche, list] of Object.entries(shyBy).sort((a, b) => b[1].length - a[1].length)) {
   console.log(`  ${String(list.length).padStart(4)}  ${niche}: ${list.slice(0, 4).map((s) => `${s.company_name} (${s.score})`).join("; ")}`);
 }
-console.log(`\nYour checks (feedback loop): ${reviews.reviewed} leads marked; leaning the score — `
-  + (Object.values({ ...reviews.lean.niche, ...reviews.lean.source }).map((l) => `${l.key} ${l.points > 0 ? "+" : ""}${l.points} (${l.share}% good of ${l.reviewed})`).join("; ") || "nothing yet (5+ marks a niche or source)"));
+console.log(`\nYour checks (feedback loop): ${reviews.reviewed} leads judged, ${reviews.usual}% new prospects; leaning the score — `
+  + (Object.values({ ...reviews.lean.niche, ...reviews.lean.source }).map((l) => `${l.key} ${l.points > 0 ? "+" : ""}${l.points} (${l.share}% new of ${l.reviewed})`).join("; ") || "nothing yet (5+ judged a niche or source)"));
 console.log(`\nYour verdicts: ${reviewed.reviewed} leads reviewed` + (reviewed.reviewed ? ` — not a fit because: ${Object.entries(reviewed.reasons).map(([k, n]) => `${k} ${n}`).join(", ") || "none"}` : ""));
 for (const kind of ["source", "band", "niche", "sector"]) {
   for (const g of reviewed[kind].slice(0, kind === "niche" ? 15 : 10)) console.log(`  ${kind.padEnd(6)} ${String(g.good_share).padStart(3)}% good (${g.good}/${g.reviewed})  ${g.key}`);

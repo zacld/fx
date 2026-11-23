@@ -86,9 +86,10 @@ jobs:
           npm ci --workspace apps/web --no-audit --no-fund > /dev/null
           cd apps/web && node scripts/filings-store.mjs get ../../lead-sourcer/fx-filings.json
           node scripts/alerts-store.mjs tracked ../../lead-sourcer/tracked.json
-          # Zac's marks (Simplified dash, Good lead / Not a fit): the leads whose goods the lookalikes match
+          # Zac's marks (review buttons, Good lead / Not a fit, his lists): the new prospects whose goods the lookalikes match
           node scripts/alerts-store.mjs get checks ../../lead-sourcer/checks.json
           node scripts/alerts-store.mjs get verdicts ../../lead-sourcer/verdicts.json
+          node scripts/alerts-store.mjs get lists ../../lead-sourcer/lists.json || echo '{}' > ../../lead-sourcer/lists.json
       - name: Measure the niches
         working-directory: lead-sourcer
         env:
@@ -97,7 +98,7 @@ jobs:
           zip=$(ls -t ~/.cache/fx-lead-sourcer/BasicCompanyData*.zip 2>/dev/null | head -1 || true)
           python3 tools/niche_hits.py --filings fx-filings.json --out niche_stats.json --tracked tracked.json \
             --enrich-out enrich.json --traders-out traders.json --moments-out moments.json ${zip:+--bulk "$zip"} \
-            --checks checks.json --verdicts verdicts.json --lookalikes-out lookalikes.json --emerging-out emerging.json
+            --checks checks.json --verdicts verdicts.json --lists lists.json --lookalikes-out lookalikes.json --emerging-out emerging.json
       # 24 months of HMRC trader files (the customs moments: new importers / exporters, trade growing), once a month
       - name: Keep the HMRC trader files
         uses: actions/cache/save@v4
@@ -132,7 +133,7 @@ jobs:
         run: |
           python3 tools/gleif_owners.py --tracked tracked.json --out gleif.json
       - name: Rank every lead
-        run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json ../../lead-sourcer/gleif.json
+        run: cd apps/web && node scripts/rank-leads.mjs ../../lead-sourcer/enrich.json ../../lead-sourcer/lead_order.json ../../lead-sourcer/groups.json ../../lead-sourcer/gleif.json ../../lead-sourcer/good_leads.json
       # The Accounts database (D1, stage 1: a mirror of the store, only what changed written): skipped with a note
       # until the Cloudflare token may use D1; never fails the run.
       # Only from main: a branch run's copy would spend the database's daily writes
@@ -158,9 +159,10 @@ jobs:
           cd apps/web && (node scripts/alerts-store.mjs get parents ../../lead-sourcer/parents_cache.json || echo '{}' > ../../lead-sourcer/parents_cache.json)
           cd ../../lead-sourcer && python3 tools/parents_from_accounts.py --tracked tracked.json --order lead_order.json --cache parents_cache.json --out parents.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 10 || echo 400)
           cd ../apps/web && node scripts/alerts-store.mjs put parents ../../lead-sourcer/parents.json
-      # Who really owns each lead (a PE house, a founder, the group abroad) by web search, best leads first — the registers
-      # stop at the UK holding company. "Who owns X", asked again up the chain; 200 companies a day (Zac, 16 Nov 2026);
-      # found owners kept 180 days. Rule-based reading of titles and snippets, no AI.
+      # Who really owns each lead (a PE house, a founder, the group abroad) by web search — Zac's good leads first, every
+      # one of them even when its accounts name a parent (23 Nov 2026), then the best leads — the registers stop at the UK
+      # holding company. "Who owns X", asked again up the chain; 100 companies a day (Zac, 16 Nov 2026); found owners kept
+      # 180 days. Gemini with Google Search first, then the search APIs read by Groq / by rules (the Priority 1 exception).
       - name: Owners by web search
         continue-on-error: true
         env:
@@ -174,5 +176,5 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || secrets.GROQ_API }}   # the AI reader: one call a company, capped by --max
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
-          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 2 || echo 100) --parents parents.json
+          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 2 || echo 100) --parents parents.json --first good_leads.json
           cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json

@@ -143,16 +143,16 @@ function Accounts({ data, password }) {
       .then((body) => { if (live && body) setMoves(movesByCurrency(body)); }).catch(() => {});
     return () => { live = false; };
   }, []);
-  // Zac's own marks (verdicts, the Simplified dash's review buttons): read by the lead score's feedback loop
+  // Zac's own marks (verdicts, the review buttons, his lists): read by the lead score's feedback loop
   const [verdicts, setVerdicts] = useState(data.verdicts || {});
   const [checks, setChecks] = useState(data.checks || {});
-  const reviews = useMemo(() => reviewLearnings(baseRows, checks, verdicts), [baseRows, checks, verdicts]);
-  // lookalikes by profile: the unmarked leads most like the ones Zac marked good
-  const likes = useMemo(() => likeGoodLeads(baseRows, checks, verdicts), [baseRows, checks, verdicts]);
+  const [lists, setLists] = useState(data.lists || {});   // Zac's call / chocolate-mailing / email lists
+  const reviews = useMemo(() => reviewLearnings(baseRows, checks, verdicts, undefined, lists), [baseRows, checks, verdicts, lists]);
+  // lookalikes by profile: the unmarked leads most like the ones Zac marked good (new prospects)
+  const likes = useMemo(() => likeGoodLeads(baseRows, checks, verdicts, lists), [baseRows, checks, verdicts, lists]);
   const leadCtx = useMemo(() => ({ niches: nicheTiers(signals.niches), signals: signals.signals || {}, moves, madeAt: data.made_at, reviews, likes }),
                           [signals, moves, data.made_at, reviews, likes]);
   // Zac's Good lead / Not a fit verdicts: declared before the rows that read them
-  const [lists, setLists] = useState(data.lists || {});   // Zac's call / chocolate-mailing / email lists
   const allRows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
     ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
   [baseRows, leadCtx, verdicts]);
@@ -722,7 +722,7 @@ function Accounts({ data, password }) {
        : filters.view === "losses" ? <FxLosses password={password} listRows={rows} contacted={contacted} onContact={contact} onOpen={openCompany} onEmail={toEmail} />
        : filters.view === "niches" ? <Niches measured={signals.niches || {}} madeAt={signals.niches_made_at} learned={ranked.niches || []} verdicts={ranked.verdicts}
                                              headings={signals.headings || []} codes={signals.codes || []} onPick={(name) => set({ section: "", view: "", query: name })} />
-       : filters.view === "scoreboard" ? <Scoreboard rows={allRows} checks={checks} verdicts={verdicts} likes={likes} onOpen={openCompany} onMarkMany={markMany}
+       : filters.view === "scoreboard" ? <Scoreboard rows={allRows} checks={checks} verdicts={verdicts} lists={lists} likes={likes} onOpen={openCompany} onMarkMany={markMany}
                                                      onPick={(name) => set({ section: "", view: "", query: name })} />
        : filters.view === "jobs" ? <JobAdverts password={password} rowsByNumber={rowsByNumber} onOpen={openCompany} checks={checks} onReview={setReview} />
        : filters.view === "emerging" ? <EmergingLeads password={password} listed={listedNumbers} onOpen={openCompany} checks={checks} onReview={setReview} />
@@ -1250,24 +1250,25 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS, actions =
 
 // The Simplified dash: the Accounts list's own leads (not contacted, not out — the same filtering, nothing re-scored)
 // as a P&L-style sheet with a search, an industry filter and an Excel export of exactly what's shown.
-const REVIEW_BUTTONS = [["open", "Open lead", "Checked: nobody has it — a lead to work"], ["mine", "Added to mine", "Added to your own book"],
+// What each means (Zac, 23 Nov 2026): Open lead — already open, not a new prospect; Skip — no finance director found.
+const REVIEW_BUTTONS = [["open", "Open lead", "Already open — not a new prospect"], ["mine", "Added to mine", "Added to your own book"],
   ["abroad", "Owned abroad", "Owned from abroad — moves it to the Foreign-owned tab"],
-  ["skip", "Skipped", "Taken off with no reason kept (for one the bank already has: which ones never comes onto the site)"],
+  ["skip", "Skipped", "No finance director found — taken off, no judgement of the company"],
   ["research", "Research harder", "A good lead with no contact info yet — on the Research harder list"]];
-// What Zac's own checks are teaching the lead score (the feedback loop, `reviewLearnings`): good-lead rate by source,
-// niche and industry, and the lean each gets once 5+ are marked.
+// What Zac's own checks are teaching the lead score (the feedback loop, `reviewLearnings`): new-prospect rate by source,
+// niche and industry, and the lean each gets once 5+ are judged.
 function ReviewLearnings({ reviews }) {
-  if (!reviews?.reviewed) return <p className="filings-note">As you mark companies Open lead, Added to mine or Owned abroad, this shows which sources and niches give genuinely open leads — and the lead score leans towards them once 5+ in a group are marked.</p>;
+  if (!reviews?.reviewed) return <p className="filings-note">As you mark companies, this shows which sources and niches give new prospects (Good lead, Research harder, Added to mine, a list) rather than ones already open — and the lead score leans towards them once 5+ in a group are judged.</p>;
   const table = (title, list) => list.length > 0 && (
     <div className="verdict-table"><b>{title}</b>
       {list.slice(0, 6).map((g) => (
-        <div key={g.key}><span className="num">{g.good_share}%</span> good ({g.good}/{g.reviewed}) · {g.key}
+        <div key={g.key}><span className="num">{g.good_share}%</span> new ({g.good}/{g.reviewed}) · {g.key}
           {g.points ? <span className={`chip${g.points < 0 ? " warn" : ""}`}>{g.points > 0 ? "+" : ""}{g.points} to its leads</span> : null}</div>))}
     </div>);
   return (
     <div className="panel verdict-panel">
-      <b>What your checks are teaching the score: {reviews.reviewed} marked</b>
-      <span className="muted"> — good = Open lead, Added to mine or Good lead; not = Owned abroad or Not a fit. Only your clicks here, nothing from the CRM.</span>
+      <b>What your checks are teaching the score: {reviews.reviewed} judged, {reviews.usual}% new prospects</b>
+      <span className="muted"> — new = Good lead, Research harder, Added to mine or on a list; not = Open lead, Owned abroad or Not a fit; skips (no FD found) left out. A group at 1½× your usual rate lifts its leads, at half or less lowers them. Only your clicks here.</span>
       <div className="verdict-tables">{table("By source", reviews.source)}{table("By niche", reviews.niche)}{table("By industry", reviews.industry)}</div>
     </div>
   );
@@ -1711,7 +1712,7 @@ function EmergingLeads({ password, listed, onOpen, checks, onReview }) {
 // The Scoreboard tab (Zac, 22 Nov 2026: put the finding effort where the good leads come from): his marks (Open lead /
 // Added to mine / Good lead count good; Owned abroad / Not a fit count not) against each source, niche and industry,
 // the well-fitting leads still waiting there, and each good lead's lookalikes by profile (format.js likeGoodLeads).
-function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick, onMarkMany }) {
+function Scoreboard({ rows, checks, verdicts, lists = {}, likes, onOpen, onPick, onMarkMany }) {
   const [kind, setKind] = useState("source");
   const [open, setOpen] = useState("");
   const [paste, setPaste] = useState("");
@@ -1734,8 +1735,8 @@ function Scoreboard({ rows, checks, verdicts, likes, onOpen, onPick, onMarkMany 
     setDone(`Saved ${res.saved} mark${res.saved === 1 ? "" : "s"}${res.already ? ` (${res.already} already marked)` : ""}: ${sections.filter((s) => s.matched.length).map((s) => `${s.label} ${s.matched.length}`).join(" · ")}.`);
     setPaste("");
   };
-  const board = useMemo(() => scoreboard(rows, checks, verdicts), [rows, checks, verdicts]);
-  const good = useMemo(() => goodLeads(rows, checks, verdicts), [rows, checks, verdicts]);
+  const board = useMemo(() => scoreboard(rows, checks, verdicts, lists), [rows, checks, verdicts, lists]);
+  const good = useMemo(() => goodLeads(rows, checks, verdicts, lists), [rows, checks, verdicts, lists]);
   const byNumber = useMemo(() => new Map(rows.map((r) => [r.company_number, r])), [rows]);
   const likesOf = {};
   for (const [n, l] of Object.entries(likes || {})) (likesOf[l.like] ||= []).push(n);
@@ -2520,6 +2521,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
   columnsFor(REPORT_COLUMNS, { company_name: "Company", company_number: "Companies House number", turnover_gbp: "Turnover (£)", lead_score: "Score",
     marked_at: "Marked at", companies_house: "Companies House" }, ["turnover_gbp", "lead_score"]), `fx-good-leads-${day}.xlsx`, "Good leads");
   const isToday = day === today;
+  const PCT = (x) => `${w.looked ? Math.round((100 * x) / w.looked) : 0}%`;
   const bars = OUTCOMES.filter(([k]) => w.counts[k]);
   const barMax = Math.max(1, ...bars.map(([k]) => w.counts[k]));
   const colMax = Math.max(1, ...w.history.map((h) => h.count));
@@ -2571,7 +2573,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
             <div className="depth-grid">{rep.tables.map((t) => <DepthTable key={t.key} t={t} />)}</div>
             <h2>The companies</h2>
           </>}
-          {!rep.sections.length && <p className="muted">No keepers {isToday ? "yet today" : "that day"}.</p>}
+          {!rep.sections.length && <p className="muted">No new prospects {isToday ? "yet today" : "that day"}.</p>}
           {rep.sections.map((sec) => (
             <Fragment key={sec.key}>
               <h2>{sec.title} ({sec.items.length})</h2>
@@ -2580,10 +2582,10 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
                   {it.website && <> · <a href={siteHref(it.website)} target="_blank" rel="noreferrer">website</a></>}{it.meta && ` · ${it.meta}`}
                   {it.note && <ul><li>Note: {it.note}</li></ul>}</li>))}</ul>
             </Fragment>))}
-          {(rep.notFor.length > 0 || rep.skipped > 0) && <>
+          {(rep.notFor.length > 0 || rep.open > 0) && <>
             <h2>Not for us</h2>
             <ul>{rep.notFor.map((x) => <li key={x.label}>{x.label} ({x.count}): {x.names.join(", ")}</li>)}
-              {rep.skipped > 0 && <li>Skipped: {rep.skipped}</li>}</ul>
+              {rep.open > 0 && <li>Already open: {rep.open}</li>}</ul>
           </>}
         </article>
       </section>}
@@ -2593,18 +2595,18 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
         <div className="wrap-big">{w.looked.toLocaleString()}</div>
         <div className="wrap-hero-l">{w.looked === 1 ? "lead looked through" : "leads looked through"}</div>
         {w.looked > 0
-          ? <div className="wrap-hero-s">{w.keep} keepers · {w.drop} not for us · {w.skip} skipped</div>
+          ? <div className="wrap-hero-s">{w.keep} new prospects · {w.taken} already open · {w.drop} not for us · {w.skip} skipped (no FD found)</div>
           : <div className="wrap-hero-s">{isToday ? "Nothing marked yet — " : "Nothing marked that day. "}{isToday && <button className="wrap-hero-btn" onClick={onBack}>start on Today's list</button>}</div>}
         {vs != null && w.looked > 0 && <div className="wrap-hero-s">{vs > 0 ? `${vs} more than` : vs < 0 ? `${-vs} fewer than` : "The same as"} {dayLabel(w.before.day)} ({w.before.count})</div>}
       </section>
 
       <div className="wrap-tiles">
-        <div className="wrap-tile"><div className="wrap-tile-l">Keepers</div><div className="wrap-tile-v">{w.keepRate == null ? "–" : `${w.keepRate}%`}</div>
-          <div className="wrap-tile-s">{w.keep} of {w.keep + w.drop} judged</div></div>
+        <div className="wrap-tile"><div className="wrap-tile-l">New prospects</div><div className="wrap-tile-v">{w.keep}</div>
+          <div className="wrap-tile-s">{w.keepRate == null ? "none judged yet" : `${w.keepRate}% of ${w.keep + w.taken + w.drop} judged`}</div></div>
         <div className="wrap-tile"><div className="wrap-tile-l">Good leads</div><div className="wrap-tile-v">{w.counts.good + w.counts.research}</div>
           <div className="wrap-tile-s">{w.counts.research ? `${w.counts.research} to research harder` : "✓ and ?"}</div></div>
-        <div className="wrap-tile"><div className="wrap-tile-l">Open leads</div><div className="wrap-tile-v">{w.counts.open}</div>
-          <div className="wrap-tile-s">{w.counts.mine ? `+ ${w.counts.mine} added to mine` : "●"}</div></div>
+        <div className="wrap-tile"><div className="wrap-tile-l">Already open</div><div className="wrap-tile-v">{w.taken}</div>
+          <div className="wrap-tile-s">{w.looked ? `${Math.round((100 * w.taken) / w.looked)}% of the day — not new` : "●"}</div></div>
         <div className="wrap-tile"><div className="wrap-tile-l">To the call list</div><div className="wrap-tile-v">{w.counts.call}</div>
           <div className="wrap-tile-s">{w.counts.email + w.counts.post ? `+ ${w.counts.email + w.counts.post} email / mail` : "☎"}</div></div>
         <div className="wrap-tile"><div className="wrap-tile-l">Pace</div><div className="wrap-tile-v">{w.pace.perHour ?? "–"}</div>
@@ -2633,15 +2635,15 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
             {WRAP_BY.map(([k, label]) => <button key={k} className={by === k ? "on" : ""} aria-pressed={by === k} onClick={() => setBy(k)}>{label}</button>)}
           </span>
         </div>
-        {top && <p className="wrap-head">{top.key} was your {thing} — {top.keep} of {top.keep + top.drop} kept.</p>}
-        {!top && <p className="wrap-head">Nothing kept {isToday ? "yet today" : "that day"}.</p>}
+        {top && <p className="wrap-head">{top.key} was your {thing} — {top.keep} new prospects of {top.judged} judged.</p>}
+        {!top && <p className="wrap-head">No new prospects {isToday ? "yet today" : "that day"}.</p>}
         <div className="wrap-cols2">
           <div>
             <div className="wrap-sub">Worked</div>
             {w.worked[by].map((e) => (
               <div className="wrap-item" key={e.key}>
-                <div className="wrap-item-t"><span>{e.key}</span><span className="wrap-item-n">{e.keep} of {e.keep + e.drop} kept{e.skip ? ` · ${e.skip} skipped` : ""}</span></div>
-                <div className="wrap-meter" title={`${Math.round(100 * (e.rate ?? 1))}% kept`}><span style={{ width: `${Math.round(100 * (e.rate ?? 1))}%` }} /></div>
+                <div className="wrap-item-t"><span>{e.key}</span><span className="wrap-item-n">{e.keep} new of {e.judged}{e.skip ? ` · ${e.skip} skipped` : ""}</span></div>
+                <div className="wrap-meter" title={`${Math.round(100 * (e.rate ?? 1))}% new`}><span style={{ width: `${Math.round(100 * (e.rate ?? 1))}%` }} /></div>
               </div>))}
             {!w.worked[by].length && <div className="muted">—</div>}
           </div>
@@ -2649,18 +2651,18 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
             <div className="wrap-sub">Didn't land</div>
             {w.didnt[by].map((e) => (
               <div className="wrap-item" key={e.key}>
-                <div className="wrap-item-t"><span>{e.key}</span><span className="wrap-item-n">{e.keep} of {e.keep + e.drop} kept{e.mainDrop ? ` · mostly ${outcomeLabel(e.mainDrop).toLowerCase()}` : ""}</span></div>
-                <div className="wrap-meter" title={`${Math.round(100 * e.rate)}% kept`}><span style={{ width: `${Math.round(100 * e.rate)}%` }} /></div>
+                <div className="wrap-item-t"><span>{e.key}</span><span className="wrap-item-n">{e.keep} new of {e.judged}{e.mainDrop ? ` · mostly ${outcomeLabel(e.mainDrop).toLowerCase()}` : ""}</span></div>
+                <div className="wrap-meter" title={`${Math.round(100 * e.rate)}% new`}><span style={{ width: `${Math.round(100 * e.rate)}%` }} /></div>
               </div>))}
-            {!w.didnt[by].length && <div className="muted">Nothing fell flat (two or more judged, a third or fewer kept).</div>}
+            {!w.didnt[by].length && <div className="muted">Nothing fell flat (three or more judged, half your usual new-prospect rate or less).</div>}
           </div>
         </div>
-        {flop && <p className="wrap-foot">{flop.key} didn't land: {flop.keep} of {flop.keep + flop.drop} kept{flop.mainDrop ? `, mostly ${outcomeLabel(flop.mainDrop).toLowerCase()}` : ""}.</p>}
+        {flop && <p className="wrap-foot">{flop.key} didn't land: {flop.keep} new of {flop.judged} judged{flop.mainDrop ? `, mostly ${outcomeLabel(flop.mainDrop).toLowerCase()}` : ""}.</p>}
       </section>}
 
       {tables.length > 0 && <section className="wrap-card" aria-label="The day in numbers">
         <h3>The day in numbers</h3>
-        <p className="wrap-head">{w.looked} looked through · {w.keep} kept ({w.looked ? Math.round((100 * w.keep) / w.looked) : 0}%) · {w.drop} not for us ({w.looked ? Math.round((100 * w.drop) / w.looked) : 0}%) · {w.skip} skipped ({w.looked ? Math.round((100 * w.skip) / w.looked) : 0}%)</p>
+        <p className="wrap-head">{w.looked} looked through · {w.keep} new ({PCT(w.keep)}) · {w.taken} already open ({PCT(w.taken)}) · {w.drop} not for us ({PCT(w.drop)}) · {w.skip} skipped, no FD ({PCT(w.skip)})</p>
         <div className="depth-grid">{tables.map((t) => <DepthTable key={t.key} t={t} />)}</div>
       </section>}
 
@@ -2674,9 +2676,9 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
         </section>}
         {(w.scores.keep != null || w.sizes.keep) && <section className="wrap-card">
           <h3>The score and you</h3>
-          {w.scores.keep != null && <p className="wrap-line">Your keepers scored <strong>{w.scores.keep}</strong> on average{w.scores.drop != null ? <>, the ones you ruled out <strong>{w.scores.drop}</strong></> : ""}.</p>}
+          {w.scores.keep != null && <p className="wrap-line">Your new prospects scored <strong>{w.scores.keep}</strong> on average{w.scores.drop != null ? <>, the rest you judged (open, not for us) <strong>{w.scores.drop}</strong></> : ""}.</p>}
           {scoreLine && <p className="wrap-line">{scoreLine}</p>}
-          {w.sizes.keep && <p className="wrap-line muted">Median size: keepers {money(w.sizes.keep)}{w.sizes.drop ? `, ruled out ${money(w.sizes.drop)}` : ""}.</p>}
+          {w.sizes.keep && <p className="wrap-line muted">Median size: new prospects {money(w.sizes.keep)}{w.sizes.drop ? `, the rest ${money(w.sizes.drop)}` : ""}.</p>}
         </section>}
         {w.pace.first && <section className="wrap-card">
           <h3>Your pace</h3>
@@ -2779,7 +2781,7 @@ function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, se
   })), columnsFor(["company_name", "company_number", "industry", "turnover_gbp", "lead_score", "marked_on", "note", "google", "check_for_fd", "companies_house_url"],
     { turnover_gbp: "Turnover (£)", marked_on: "Marked on", check_for_fd: "Check for FD" }, ["turnover_gbp", "lead_score"]),
     `research-harder-${new Date().toISOString().slice(0, 10)}.xlsx`, "Research harder");
-  const moves = [["call", "☎", "Found a contact: Call list"], ["small", "✕", "Not enough revenue"], ["skip", "»", "Skip (no reason kept)"],
+  const moves = [["call", "☎", "Found a contact: Call list"], ["small", "✕", "Not enough revenue"], ["skip", "»", "Skip (no FD found)"],
     ["back", "↺", "Back to Today's list"]];
   const move = (r, key) => {
     const n = r.company_number;

@@ -38,7 +38,7 @@ describe("lookalikes by profile", () => {
   const like = { company_number: "2", company_name: "SIMILAR LOGISTICS LIMITED", sic_codes: ["52290"], turnover_gbp: 45e6, filed_fx_score: 55,
     fx_gain_loss_gbp: -60000, fx_niche: "Freight forwarders" };
   const other = { company_number: "3", company_name: "SOFTWARE CO LIMITED", sic_codes: ["62012"], turnover_gbp: 30e6, filed_fx_score: 60 };
-  const checks = { 1: { review: "open", review_at: "2026-11-20" } };
+  const checks = { 1: { review: "mine", review_at: "2026-11-20" } };   // Added to mine: a new prospect (Open is already open)
 
   it("finds the lead sharing most of a good lead's profile", () => {
     const likes = likeGoodLeads([good, like, other], checks, {});

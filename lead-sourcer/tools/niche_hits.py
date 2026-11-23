@@ -225,6 +225,7 @@ def main() -> None:
     parser.add_argument("--moments-out", default="", help="customs moments: the lists' companies, and new traders to check")
     parser.add_argument("--checks", default="", help="the store's checks (Simplified dash marks) — for the lookalikes")
     parser.add_argument("--verdicts", default="", help="the store's verdicts (Good lead / Not a fit) — for the lookalikes")
+    parser.add_argument("--lists", default="", help="the store's lists (call / email / mail) — new prospects, for the lookalikes")
     parser.add_argument("--emerging-out", default="", help="every sized company in an emerging niche, for the page's Emerging leads tab")
     parser.add_argument("--lookalikes-out", default="", help="sized companies trading what Zac's good leads trade")
     args = parser.parse_args()
@@ -291,7 +292,7 @@ def main() -> None:
     for n in emerging:
         result["niches"][n["id"]] = {"name": n["name"], "kind": f"emerging {n['emerging']}", **n["stats"]}
     if args.lookalikes_out:
-        good = discover.good_leads(_json(args.checks), _json(args.verdicts))
+        good = discover.good_leads(_json(args.checks), _json(args.verdicts), _json(args.lists))
         rows, info = discover.lookalikes({n: tracked.get(n, "") for n in good}, trade_by_company, tracked)
         with open(args.lookalikes_out, "w", encoding="utf-8") as f:
             json.dump({"made_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "good": len(good), **info,
