@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -782,3 +782,36 @@ describe("hidden from the usual filters", () => {
   });
 });
 
+
+describe("good leads: rating and the written brief", () => {
+  it("lists every new prospect, best rated then newest, with what put it there", () => {
+    const rows = ["1", "2", "3", "4", "5"].map((n) => ({ company_number: n, company_name: `CO ${n} LTD` }));
+    const marks = {
+      checks: { 2: { review: "research", review_at: "2026-11-23T10:00:00Z" }, 4: { review: "open", review_at: "2026-11-23T11:00:00Z" }, 5: { review: "skip", review_at: "2026-11-23T11:30:00Z" } },
+      verdicts: { 1: { verdict: "good", at: "2026-11-23T09:00:00Z", rating: 3 }, 2: { rating: 1 }, 4: { verdict: "good", at: "2026-11-22T09:00:00Z" } },
+      lists: { 3: { list: "call", at: "2026-11-23T12:00:00Z" } },
+    };
+    expect(goodLeadsList(rows, marks).map((x) => [x.r.company_number, x.mark.label, x.rating])).toEqual([["1", "Good lead", 3], ["2", "Research harder", 1], ["3", "Call list", 0]]);
+    expect([ratingOf(marks.verdicts, "1"), ratingOf(marks.verdicts, "3"), stars(2)]).toEqual([3, 0, "★★☆"]);
+    expect(markClass("2", marks)).toBe("good");
+    const lead = { company_number: "9", company_name: "X LTD", lead_fit: 50, lead_score: 60, filed_fx_score: 60, turnover_gbp: 40e6 };
+    expect(todaysList([lead], { verdicts: { 9: { rating: 2 } } })).toHaveLength(1);   // a rating alone isn't a mark
+    expect(todaysList([lead], { verdicts: { 9: { verdict: "good", rating: 2 } } })).toHaveLength(0);
+  });
+
+  it("writes the brief from the company's own records — a new finance director first — and leaves out what they don't say", () => {
+    const r = { company_name: "GLOBAL CHARTER SERVICES LIMITED", company_number: "01234567", sic_codes: ["51102"], turnover_gbp: 48e6, turnover_growth: "+54%",
+      fx_gain_loss_gbp: -96000, fx_gain_loss_prior_gbp: 12000, accounts_filed_on: "2026-10-12", main_currency: "USD", currency_source: "currency named in accounts",
+      overseas_turnover_share: "62%", subsidiaries_abroad: "Poland (sales), India", ultimate_parent: "GLOBAL CHARTER HOLDINGS LIMITED", ultimate_parent_country: "England",
+      lead_flags: { newFd: true, fdWhy: "New finance director: Jane Smith appointed 3 Sep 2026" }, accounts_url: "https://example.org/accounts" };
+    const b = leadBrief(r);
+    expect(b.text).toBe("Global Charter Services is a transport, logistics & freight business with £48.0m turnover (up 54% on the year before), UK-owned. "
+      + "New finance director: Jane Smith appointed 3 Sep 2026. Its accounts show a £96k FX loss (filed 12 Oct 2026), USD as its main currency and 62% of sales abroad"
+      + " — and no hedging named. Also: subsidiaries in Poland, India.");
+    expect(b.facts.map((f) => f.label)).toEqual(["Size", "New finance director", "FX loss", "Main currency", "Hedging", "Sales abroad", "Subsidiaries abroad", "Owner"]);
+    expect(b.facts.find((f) => f.label === "FX loss")).toEqual({ label: "FX loss", text: "£96k FX loss in accounts filed 12 Oct 2026 — a £12k gain the year before", url: "https://example.org/accounts" });
+    const bare = leadBrief({ company_name: "ACME LTD", company_number: "00000001" });
+    expect(bare.text).toBe("Acme is a company.");
+    expect(bare.facts).toEqual([{ label: "Owner", text: "Not known yet — the daily owner search checks every good lead", url: "" }]);
+  });
+});

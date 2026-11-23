@@ -847,6 +847,26 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   not on a list, not contacted, not out — the same line plus a Google search for finance people on LinkedIn (a search
   link, never fetched), the note, and ☎ Call list (found a contact), ✕ Not enough revenue, » Skip, ↺ back to Today's list;
   Excel export with the notes.
+  **Rated good leads and the Good leads tab** (Zac, 23 Nov 2026, after his first big day — 5 good leads a day to 30, "straight
+  off the scanner as opposed to a G Sheet": "when you click the green add to lead button, it will offer me a 1-3 button so I
+  can rank how good it is … on the good lead section we will take the lead and write a description, use key findings that we
+  found in the company, ie the facts say new finance director … a Gemini search dedicated to each lead finding if it's the
+  ultimate parent"). ✓ on Today's list asks "How good?" — 1 ★ worth a call, 2 ★★ good, 3 ★★★ one of the best (`RATINGS`) —
+  and saves Good lead with its `rating` (POST `{company_number, verdict: "good", rating}`; the bulk paste takes `rating` too);
+  a lead put on a list, Research harder or Added to mine is rated on its own (POST `{company_number, rating: 1–3 | null}`:
+  kept on its `verdicts` entry with no verdict, so it isn't a new mark), and re-rating keeps the time it was judged (Your day
+  doesn't move it). Stars beside "Good lead" on cards and the company page. The **Good leads** tab (first in My lists, white
+  like Today's list; `goodLeadsList` / `goodMarkOf` / `GOOD_MARKS` in `format.js`, `GoodLeads` in `AccountsApp.jsx`): every
+  new prospect (`markClass` good), best rated then newest, filters by mark and rating, each **written up** (`leadBrief`:
+  rule-based, no AI — a few sentences, "Global Charter Services is a transport, logistics & freight business with £48.0m
+  turnover (up 54% on the year before), UK-owned. New finance director: … Its accounts show a £96k FX loss …, USD as its main
+  currency and 62% of sales abroad — and no hedging named.", then the key findings each linked to its filing: size, new
+  finance director, finance contact, FX loss / gain, main currency, hedging, sales abroad, subsidiaries abroad, borrowing in
+  another currency, customs, buying companies, private equity, why now, bank, owner and the chain up to it, where FX is
+  decided, few bankers see it, niche — what the records don't say is left out); the stars, website, Google / FD / "Who owns
+  it?" links, Copy brief, the note, Excel export (rating, brief, key findings, owner). The owner is `ownership(r)`, so the
+  daily owner search's answer shows once it has run — it searches every good lead first (`--first good_leads.json`, Gemini
+  with Google Search). The Finish day report and its Excel carry each new prospect's rating and brief, best rated first.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead

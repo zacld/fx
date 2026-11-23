@@ -174,6 +174,29 @@ describe("/api/accounts", () => {
     expect((await (await post({ company_number: "01234567", verdict: null })).json()).verdicts).toEqual({});
   });
 
+  it("rates a good lead 1–3: with the verdict, or on its own for a listed lead, without moving when it was judged", async () => {
+    const s = memory();
+    s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }, { company_number: "07654321", company_name: "B LTD" }] };
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const post = (body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer s3cret" }, body: JSON.stringify(body) }), opts);
+    expect((await post({ company_number: "01234567", verdict: "good", rating: 4 })).status).toBe(400);
+    expect((await post({ company_number: "01234567", verdict: "good", rating: "3" })).status).toBe(400);
+    const first = (await (await post({ company_number: "01234567", verdict: "good", rating: 2 })).json()).verdicts["01234567"];
+    expect(first).toMatchObject({ verdict: "good", rating: 2 });
+    const again = (await (await post({ company_number: "01234567", rating: 3 })).json()).verdicts["01234567"];
+    expect(again).toMatchObject({ verdict: "good", rating: 3, at: first.at });   // re-rated: still judged when it was
+    const kept = (await (await post({ company_number: "01234567", verdict: "good" })).json()).verdicts["01234567"];
+    expect([kept.rating, kept.at]).toEqual([3, first.at]);   // Good lead again keeps its rating and its time
+    // a lead on a list has no verdict: the rating sits on its own, and isn't a verdict
+    const solo = (await (await post({ company_number: "07654321", rating: 1 })).json()).verdicts["07654321"];
+    expect(solo.verdict).toBeUndefined();
+    expect(solo.rating).toBe(1);
+    expect((await (await post({ company_number: "07654321", rating: null })).json()).verdicts["07654321"]).toBeUndefined();
+    expect((await post({ company_number: "07654321", rating: 0 })).status).toBe(400);
+    expect((await post({ marks: [{ company_number: "07654321", verdict: "good", rating: 3 }] })).status).toBe(200);
+    expect(s.blobs.verdicts["07654321"]).toMatchObject({ verdict: "good", rating: 3 });
+  });
+
   it("keeps Zac's call / chocolate-mailing / email lists, one list a company", async () => {
     const s = memory();
     s.blobs.latest = { rows: [{ company_number: "01234567", company_name: "A LTD" }] };

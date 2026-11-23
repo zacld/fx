@@ -1,4 +1,5 @@
 import { financeSeat, SEAT_LABEL, ownershipOf, OWNERSHIP_LABEL } from "./control.js";
+import { naturalCompany } from "./email.js";
 // Helpers for the Accounts page: money, filters and CSV export over the
 // finder's rows (lead-sourcer/tools/to_accounts_json.py).
 
@@ -765,8 +766,23 @@ export function researchList(rows, { checks = {}, lists = {}, contacted = {} } =
   return rows.filter((r) => checks[r.company_number]?.review === "research" && !lists[r.company_number] && !contacted[r.company_number] && !isOut(r))
     .sort((a, b) => String(checks[b.company_number].review_at || "").localeCompare(String(checks[a.company_number].review_at || "")));
 }
+// The Good leads tab (Zac, 23 Nov 2026): every new prospect he marked — Good lead, Research harder, Added to mine, or on a
+// call / email / mail list (markClass "good") — best rated first, then newest mark; each with what put it there.
+export const GOOD_MARKS = { call: "Call list", email: "Email list", post: "Mail list", research: "Research harder", mine: "Added to mine", good: "Good lead" };
+export function goodMarkOf(n, { checks = {}, verdicts = {}, lists = {} } = {}) {
+  const l = lists[n]?.list, m = checks[n]?.review;
+  if (l) return { kind: l, label: GOOD_MARKS[l] || "On a list", at: lists[n].at || "" };
+  if (m === "research" || m === "mine") return { kind: m, label: GOOD_MARKS[m], at: checks[n].review_at || "" };
+  return { kind: "good", label: GOOD_MARKS.good, at: verdicts[n]?.at || "" };
+}
+export function goodLeadsList(rows = [], marks = {}) {
+  const seen = new Set();
+  return rows.filter((r) => r.company_number && !seen.has(r.company_number) && seen.add(r.company_number) && markClass(r.company_number, marks) === "good")
+    .map((r) => ({ r, mark: goodMarkOf(r.company_number, marks), rating: ratingOf(marks.verdicts, r.company_number) }))
+    .sort((a, b) => b.rating - a.rating || String(b.mark.at).localeCompare(String(a.mark.at)) || (b.r.lead_score || 0) - (a.r.lead_score || 0));
+}
 export function todaysList(rows, { contacted = {}, checks = {}, verdicts = {}, lists = {} } = {}) {
-  const marked = (n) => contacted[n] || checks[n]?.review || verdicts[n] || lists[n];
+  const marked = (n) => contacted[n] || checks[n]?.review || verdicts[n]?.verdict || lists[n];
   const judged = new Set(rows.filter((r) => marked(r.company_number)).map(groupKey));
   const seen = new Set();
   return rows
@@ -1490,6 +1506,88 @@ export function keyPoints(r, pitch = "") {
   out.push(["Owner", who + extra, own.searches[0][1]]);
   if (pitch) out.push(["Pitch", cut(pitch)]);
   return out;
+}
+
+// How good a good lead is (Zac, 23 Nov 2026: "when you click the green add to lead button, it will offer me a 1-3 button
+// so I can rank how good it is"): saved on his verdict as `rating`; 3 is the best. [rating, stars, label]
+export const RATINGS = [[1, "★", "Worth a call"], [2, "★★", "Good"], [3, "★★★", "One of the best"]];
+export const ratingOf = (verdicts, n) => { const x = Number(verdicts?.[n]?.rating); return x >= 1 && x <= 3 ? x : 0; };
+export const stars = (rating) => (rating ? "★".repeat(rating) + "☆".repeat(3 - rating) : "");
+
+// A good lead written up (Zac, 23 Nov 2026: "on the good lead section we will take the lead and write a description, use
+// key findings that we found in the company, ie the facts say new finance director"): the key findings from its own
+// records, each with where it came from, and a few plain sentences built only from them. Rule-based, no AI; what the
+// records don't say is left out, never guessed. → {text, facts: [{label, text, url}]}
+const priorFx = (r) => (r.fx_gain_loss_prior_gbp === undefined || r.fx_gain_loss_prior_gbp === null || r.fx_gain_loss_prior_gbp === ""
+  || !Number.isFinite(Number(r.fx_gain_loss_prior_gbp)) ? null : Number(r.fx_gain_loss_prior_gbp));
+export function leadBrief(r = {}) {
+  const facts = [];
+  const add = (label, text, url = "") => { if (text) facts.push({ label, text: String(text).trim(), url: url || "" }); };
+  const f = r.lead_flags || {};
+  const short = naturalCompany(r.company_name || "") || r.company_name || "It";
+  const cut = (t, n = 140) => (String(t).length > n ? `${String(t).slice(0, n - 1).trimEnd()}…` : String(t));
+  // what it is and how big
+  const t = Number(r.turnover_gbp) || 0, tf = Number(r.turnover_foreign_gbp) || 0, g = growthPct(r);
+  const grew = Number.isFinite(g) && Math.round(g) ? `${g > 0 ? "up" : "down"} ${Math.abs(Math.round(g))}% on the year before` : "";
+  const size = t ? `${money(t)}${r.turnover_basis === "group" ? " (the group's)" : ""}` : tf ? `about ${money(tf)} (accounts in ${String(r.reporting_currency || "another currency").slice(0, 3)})` : "";
+  add("Size", size ? `Turnover ${size}${grew ? `, ${grew}` : ""}` : r.size_estimate || "", r.turnover_url || r.accounts_url);
+  const industry = industryOf(r);
+  // why now: a new finance director first (his example), then the rest of the timely reasons
+  if (f.newFd) add("New finance director", String(f.fdWhy || "").replace(/^New finance director:?\s*/i, "") || "Named in the last few months");
+  else if (r.new_fd_in_accounts) add("Finance director", `Appointed per its accounts: ${r.new_fd_in_accounts}`, r.accounts_url);
+  if (presentedContact(r)) add("Finance contact", `${r.finance_contact}${r.finance_contact_role ? `, ${r.finance_contact_role}` : ""}${r.finance_contact_confidence ? ` (${r.finance_contact_confidence})` : ""}`);
+  const loss = -Number(r.fx_gain_loss_gbp) || 0;
+  const filed = filedIso(r);
+  if (loss >= 10000) add("FX loss", `${money(loss)} FX loss${filed ? ` in accounts filed ${filedWhen(filed)}` : ""}${priorFx(r) > 0 ? ` — a ${money(priorFx(r))} gain the year before` : priorFx(r) !== null && -priorFx(r) < loss ? " — worse than the year before" : ""}`, r.fx_gain_loss_url || r.accounts_url);
+  else if (-loss >= 10000) add("FX gain", `${money(-loss)} FX gain${filed ? ` in accounts filed ${filedWhen(filed)}` : ""} — currency moves are big enough to show`, r.fx_gain_loss_url || r.accounts_url);
+  const cur = r.main_currency && !/niche default/.test(r.currency_source || "") ? r.main_currency : "";
+  if (cur) add("Main currency", `${cur}${r.currency_direction ? ` (${r.currency_direction})` : ""}${r.currency_source ? ` — from ${r.currency_source}` : ""}`, r.fx_notes_url || r.accounts_url);
+  else if (r.currencies_in_accounts) add("Currencies", cut(r.currencies_in_accounts), r.fx_notes_url || r.accounts_url);
+  const hedged = r.fx_forwards ? `Forward contracts: ${cut(r.fx_forwards, 100)}` : /^Uses/.test(r.fx_today || "") ? cut(r.fx_today, 100) : "";
+  if (hedged) add("Hedging", hedged, r.fx_notes_url || r.accounts_url);
+  else if (loss >= 10000 || cur || r.currencies_in_accounts || r.overseas_turnover_share) add("Hedging", "No hedging named in its accounts");
+  if (r.overseas_turnover_share) add("Sales abroad", `${r.overseas_turnover_share} of sales abroad${r.turnover_regions ? ` (${cut(r.turnover_regions, 90)})` : ""}`, r.turnover_regions_url || r.accounts_url);
+  else if (r.turnover_regions) add("Sales by region", cut(r.turnover_regions, 120), r.turnover_regions_url || r.accounts_url);
+  if (r.subsidiaries_abroad) add("Subsidiaries abroad", cut(r.subsidiaries_abroad, 120), r.accounts_url);
+  if (r.fx_borrowings) add("Borrowing in another currency", cut(r.fx_borrowings, 120), r.accounts_url);
+  if (!cur && !r.currencies_in_accounts && r.hmrc_trade) add("Customs", cut(r.hmrc_trade, 120));
+  if (f.buying || r.acquisitions) add("Buying companies", cut(r.acquisitions || "in the ownership register", 120), r.accounts_url);
+  const pe = peBackedOf(r);
+  if (pe) add("Private equity", `Backed by ${pe.name}`);
+  const why = timelyReason(r);
+  if (why && !facts.some((x) => why.includes(x.text) || x.text.includes(why))
+      && !(f.newFd && why === (f.fdWhy || "New finance director")) && !/^FX loss of/.test(why)) add("Why now", cut(why));
+  const bank = (r.incumbent_bank || r.main_bank || "").split(":")[0].trim();
+  if (bank) add("Bank", `${bank}${r.bank_type ? ` (${r.bank_type})` : ""}`, r.incumbent_bank_url || bankUrl(r));
+  // who owns it (the accounts, the LEI register, Companies House and the daily owner search — Gemini first)
+  const own = ownership(r);
+  const ownerText = own.status === "unknown" ? (own.owner ? `${own.owner} — where it's based not known yet` : "Not known yet — the daily owner search checks every good lead")
+    : `${OWNERSHIP_LABEL[own.status]}${own.owner && own.owner !== r.company_name ? `: ${own.owner}${own.country ? ` (${own.country})` : ""}` : ""}${own.source ? ` — ${own.source}` : ""}`;
+  add("Owner", ownerText, own.evidence?.url || "");
+  if (own.chain.length > 2) add("Ownership chain", own.chain.join(" → "));
+  if (own.status === "foreign") add("Where FX is decided", financeSeat(r).verdict);
+  const hidden = hiddenFromFilters(r);
+  if (hidden.length) add("Few bankers see it", hidden.map((h) => h.label.toLowerCase()).join("; "));
+  if (r.fx_niche) add("Niche", r.fx_niche);
+  // the description: who it is, why now, the FX, what else stands out
+  const ownerLine = own.status === "uk" ? (pe ? `, UK-owned and backed by ${pe.name}` : ", UK-owned")
+    : own.status === "foreign" ? `, owned by ${own.owner || "a parent"}${own.country ? ` (${own.country})` : ""}` : pe ? `, backed by ${pe.name}` : "";
+  const lower = (t) => t.replace(/\b[A-Z][a-z]\w*/g, (w) => w.toLowerCase());   // keeps IT, UK, PE as they are
+  const kind = !industry || /^other|not known/i.test(industry) ? "" : /^manufacturing: /i.test(industry) ? `${lower(industry.slice(15))} manufacturer`
+    : /^wholesale: /i.test(industry) ? `${lower(industry.slice(11))} wholesaler` : `${lower(industry)} business`;
+  const what = kind ? `${/^[aeiou]/.test(kind) ? "an" : "a"} ${kind}` : "a company";
+  const sentences = [`${short} is ${size ? `${what} with ${size} turnover${grew ? ` (${grew})` : ""}` : what}${ownerLine}.`];
+  const timely = facts.find((x) => /^(New finance director|Why now)$/.test(x.label));
+  if (timely) sentences.push(timely.label === "New finance director" ? `${/^(Hiring|New)/.test(timely.text) ? timely.text : `New finance director: ${timely.text}`}.` : `Why now: ${timely.text}.`);
+  const fxBits = [loss >= 10000 ? `a ${money(loss)} FX loss${filed ? ` (filed ${filedWhen(filed)})` : ""}` : "",
+    cur ? `${cur} as its main currency` : r.currencies_in_accounts ? `exposure to ${cut(r.currencies_in_accounts, 60).toLowerCase()}` : "",
+    r.overseas_turnover_share ? `${r.overseas_turnover_share} of sales abroad` : ""].filter(Boolean);
+  if (fxBits.length) sentences.push(`Its accounts show ${fxBits.join(", ").replace(/, ([^,]*)$/, " and $1")}${hedged ? `; it hedges (${hedged.toLowerCase().startsWith("forward") ? "forward contracts" : cut(r.fx_today, 50).toLowerCase()})` : " — and no hedging named"}.`);
+  else if (r.hmrc_trade) sentences.push(`Its customs records show trade abroad (${cut(r.hmrc_trade, 80)}).`);
+  const extra = [r.subsidiaries_abroad ? `subsidiaries in ${cut(r.subsidiaries_abroad.replace(/\s*\([^)]*\)/g, ""), 60)}` : "",
+    (f.buying || r.acquisitions) ? "buying companies" : "", hidden.length ? "it's hidden from the usual database filters" : ""].filter(Boolean);
+  if (extra.length) sentences.push(`Also: ${extra.join("; ")}.`);
+  return { text: sentences.join(" "), facts };
 }
 
 export { financeSeat, SEAT_LABEL, ownershipOf, OWNERSHIP_LABEL };
