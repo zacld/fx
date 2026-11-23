@@ -468,19 +468,20 @@ export function leadSource(r) {
 
 // What a mark says about a lead (Zac, 23 Nov 2026: "if a bank had an open lead or they were using, I just put them as
 // open" — the bank being ours, "we had something ongoing with them" — "the skips were either could not find the finance
-// director at all"): "good" — a new prospect (Good lead, Research harder, Added to mine, or put on the call / email /
-// mail list); "taken" — Open lead: something already ongoing with them, not a new prospect;
-// "bad" — Not a fit, Owned abroad; "neutral" — Skip (no finance director found); null — unmarked. A review mark (the
-// buttons) outranks a verdict, and a list beats both: he means to work it.
+// director at all"; and later that day: "the call ones were majority open leads from Investec, not new ones — the only
+// good ones are the ones I put in good"): "good" — a new prospect (Good lead, Research harder — a good lead with no
+// contact yet — or Added to mine); "taken" — Open lead, or put on a call / email / mail list with no other mark: already
+// ongoing, not a new prospect; "bad" — Not a fit, Owned abroad; "neutral" — Skip (no finance director found); null —
+// unmarked. A review mark (the buttons) outranks a verdict, and a list counts only when nothing else says what it is.
 export function markClass(n, { checks = {}, verdicts = {}, lists = {} } = {}) {
   const m = checks[n]?.review, v = verdicts[n]?.verdict;
-  if (lists[n]?.list) return "good";
   if (m === "abroad") return "bad";
   if (m === "research" || m === "mine") return "good";
   if (m === "open") return "taken";
   if (m === "skip") return "neutral";
   if (v === "good") return "good";
   if (v === "not_fit") return "bad";
+  if (lists[n]?.list) return "taken";
   return null;
 }
 // What Zac's own checks say (the feedback loop): for each source, niche and industry, how many of the leads he judged
@@ -767,12 +768,12 @@ export function researchList(rows, { checks = {}, lists = {}, contacted = {} } =
   return rows.filter((r) => checks[r.company_number]?.review === "research" && !lists[r.company_number] && !contacted[r.company_number] && !isOut(r))
     .sort((a, b) => String(checks[b.company_number].review_at || "").localeCompare(String(checks[a.company_number].review_at || "")));
 }
-// The Good leads tab (Zac, 23 Nov 2026): every new prospect he marked — Good lead, Research harder, Added to mine, or on a
-// call / email / mail list (markClass "good") — best rated first, then newest mark; each with what put it there.
-export const GOOD_MARKS = { call: "Call list", email: "Email list", post: "Mail list", research: "Research harder", mine: "Added to mine", good: "Good lead" };
-export function goodMarkOf(n, { checks = {}, verdicts = {}, lists = {} } = {}) {
-  const l = lists[n]?.list, m = checks[n]?.review;
-  if (l) return { kind: l, label: GOOD_MARKS[l] || "On a list", at: lists[n].at || "" };
+// The Good leads tab (Zac, 23 Nov 2026): every new prospect he marked — Good lead, Research harder, Added to mine
+// (markClass "good"; a list alone isn't one — mostly already open) — best rated first, then newest mark; each with what
+// put it there.
+export const GOOD_MARKS = { good: "Good lead", research: "Research harder", mine: "Added to mine" };
+export function goodMarkOf(n, { checks = {}, verdicts = {} } = {}) {
+  const m = checks[n]?.review;
   if (m === "research" || m === "mine") return { kind: m, label: GOOD_MARKS[m], at: checks[n].review_at || "" };
   return { kind: "good", label: GOOD_MARKS.good, at: verdicts[n]?.at || "" };
 }

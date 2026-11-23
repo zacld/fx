@@ -1291,7 +1291,7 @@ const REVIEW_BUTTONS = [["open", "Open lead", "Already open — not a new prospe
 // What Zac's own checks are teaching the lead score (the feedback loop, `reviewLearnings`): new-prospect rate by source,
 // niche and industry, and the lean each gets once 5+ are judged.
 function ReviewLearnings({ reviews }) {
-  if (!reviews?.reviewed) return <p className="filings-note">As you mark companies, this shows which sources and niches give new prospects (Good lead, Research harder, Added to mine, a list) rather than ones already open — and the lead score leans towards them once 5+ in a group are judged.</p>;
+  if (!reviews?.reviewed) return <p className="filings-note">As you mark companies, this shows which sources and niches give new prospects (Good lead, Research harder, Added to mine) rather than ones already open or put on a list — and the lead score leans towards them once 5+ in a group are judged.</p>;
   const table = (title, list) => list.length > 0 && (
     <div className="verdict-table"><b>{title}</b>
       {list.slice(0, 6).map((g) => (
@@ -2630,7 +2630,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
           {(rep.notFor.length > 0 || rep.open > 0) && <>
             <h2>Not new prospects</h2>
             <ul>{rep.notFor.map((x) => <li key={x.label}>{x.label} ({x.count}): {x.names.join(", ")}</li>)}
-              {rep.open > 0 && <li>Already open: {rep.open}</li>}</ul>
+              {rep.open > 0 && <li>Already open or on a list: {rep.open}{rep.openParts ? ` (${rep.openParts})` : ""}</li>}</ul>
           </>}
         </article>
       </section>}
@@ -2640,7 +2640,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
         <div className="wrap-big">{w.looked.toLocaleString()}</div>
         <div className="wrap-hero-l">{w.looked === 1 ? "lead looked through" : "leads looked through"}</div>
         {w.looked > 0
-          ? <div className="wrap-hero-s">{w.keep} new prospects · {w.taken} already open · {w.drop} not for us · {w.skip} skipped (no FD found)</div>
+          ? <div className="wrap-hero-s">{w.keep} new prospects · {w.taken} already open or on a list · {w.drop} not for us · {w.skip} skipped (no FD found)</div>
           : <div className="wrap-hero-s">{isToday ? "Nothing marked yet — " : "Nothing marked that day. "}{isToday && <button className="wrap-hero-btn" onClick={onBack}>start on Today's list</button>}</div>}
         {vs != null && w.looked > 0 && <div className="wrap-hero-s">{vs > 0 ? `${vs} more than` : vs < 0 ? `${-vs} fewer than` : "The same as"} {dayLabel(w.before.day)} ({w.before.count})</div>}
       </section>
@@ -2650,10 +2650,10 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
           <div className="wrap-tile-s">{w.keepRate == null ? "none judged yet" : `${w.keepRate}% of ${w.keep + w.taken + w.drop} judged`}</div></div>
         <div className="wrap-tile"><div className="wrap-tile-l">Good leads</div><div className="wrap-tile-v">{w.counts.good + w.counts.research}</div>
           <div className="wrap-tile-s">{w.counts.research ? `${w.counts.research} to research harder` : "✓ and ?"}</div></div>
-        <div className="wrap-tile"><div className="wrap-tile-l">Already open</div><div className="wrap-tile-v">{w.taken}</div>
+        <div className="wrap-tile"><div className="wrap-tile-l">Already open or on a list</div><div className="wrap-tile-v">{w.taken}</div>
           <div className="wrap-tile-s">{w.looked ? `${Math.round((100 * w.taken) / w.looked)}% of the day — not new` : "●"}</div></div>
         <div className="wrap-tile"><div className="wrap-tile-l">To the call list</div><div className="wrap-tile-v">{w.counts.call}</div>
-          <div className="wrap-tile-s">{w.counts.email + w.counts.post ? `+ ${w.counts.email + w.counts.post} email / mail` : "☎"}</div></div>
+          <div className="wrap-tile-s">{w.counts.email + w.counts.post ? `+ ${w.counts.email + w.counts.post} email / mail` : "mostly already open"}</div></div>
         <div className="wrap-tile"><div className="wrap-tile-l">Pace</div><div className="wrap-tile-v">{w.pace.perHour ?? "–"}</div>
           <div className="wrap-tile-s">{w.pace.perHour ? "leads an hour" : "a few marks needed"}</div></div>
         <div className="wrap-tile"><div className="wrap-tile-l">Streak</div><div className="wrap-tile-v">{w.streak}</div>
@@ -2707,7 +2707,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
 
       {tables.length > 0 && <section className="wrap-card" aria-label="The day in numbers">
         <h3>The day in numbers</h3>
-        <p className="wrap-head">{w.looked} looked through · {w.keep} new ({PCT(w.keep)}) · {w.taken} already open ({PCT(w.taken)}) · {w.drop} not for us ({PCT(w.drop)}) · {w.skip} skipped, no FD ({PCT(w.skip)})</p>
+        <p className="wrap-head">{w.looked} looked through · {w.keep} new ({PCT(w.keep)}) · {w.taken} already open or on a list ({PCT(w.taken)}) · {w.drop} not for us ({PCT(w.drop)}) · {w.skip} skipped, no FD ({PCT(w.skip)})</p>
         <div className="depth-grid">{tables.map((t) => <DepthTable key={t.key} t={t} />)}</div>
       </section>}
 
@@ -2881,7 +2881,8 @@ function RatingStars({ value = 0, onChange, name = "" }) {
 }
 
 // Good leads (Zac, 23 Nov 2026: "on the good lead section we will take the lead and write a description, use key findings
-// that we found in the company"): every new prospect he marked — Good lead, Research harder, Added to mine, a list — best
+// that we found in the company"): every new prospect he marked — Good lead, Research harder, Added to mine (a list alone
+// isn't: "the call ones were majority open leads", 23 Nov 2026) — best
 // rated first, then newest. Each written up from its own records (leadBrief: a few sentences, then the key findings with
 // where each came from), who owns it (the accounts, the LEI register, Companies House and the daily owner search, which
 // checks every good lead first), its rating, his note and the links. Copy brief puts it on the clipboard; Excel exports all.

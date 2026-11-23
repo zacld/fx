@@ -36,23 +36,23 @@ const MARKS = {
 };
 
 describe("Your day (a Wrapped of the day)", () => {
-  it("counts each company once, by its latest mark of the day — Open is already open, Skip is no FD found", () => {
+  it("counts each company once, by its latest mark of the day — Open and a list alone are already open, Skip is no FD found", () => {
     const w = dayWrap(ROWS, MARKS, MON);
     expect(w.looked).toBe(8);
     expect(w.counts).toMatchObject({ call: 2, research: 1, good: 1, abroad: 1, small: 1, skip: 1, open: 1 });
-    expect([w.keep, w.taken, w.drop, w.skip]).toEqual([4, 1, 2, 1]);
-    expect(w.keepRate).toBe(57);   // 4 new of the 7 judged (the skip left out)
+    expect([w.keep, w.taken, w.drop, w.skip]).toEqual([2, 3, 2, 1]);   // the call list: mostly already open, not new
+    expect(w.keepRate).toBe(29);   // 2 new of the 7 judged (the skip left out)
     expect(w.marked.find((a) => a.n === "00000001").kind).toBe("call");   // marked open, then put on the call list
     expect(markActions(MARKS).some((a) => a.n === "00000009")).toBe(false);
   });
 
   it("finds the sector that worked and the one that didn't land", () => {
     const w = dayWrap(ROWS, MARKS, MON);
-    expect(w.worked.sector[0]).toMatchObject({ key: "Manufacturing: machinery", keep: 3, judged: 3 });
+    expect(w.worked.sector[0]).toMatchObject({ key: "Manufacturing: food, drink & tobacco", keep: 1, judged: 1 });
     expect(w.didnt.sector[0]).toMatchObject({ key: "Wholesale: general", keep: 0, taken: 1, drop: 2, skip: 1, judged: 3 });
     expect(w.best).toMatchObject({ company_name: "ECHO FOODS LTD", lead_score: 75 });
-    expect([w.scores.keep, w.scores.drop]).toEqual([69, 50]);
-    expect(w.sizes).toEqual({ keep: 37.5e6, drop: 12e6 });
+    expect([w.scores.keep, w.scores.drop]).toEqual([71, 57]);
+    expect(w.sizes).toEqual({ keep: 45e6, drop: 15e6 });
   });
 
   it("measures the pace, the streak and the day against the others", () => {
@@ -84,9 +84,9 @@ describe("Your day (a Wrapped of the day)", () => {
     expect(wrapText(sun)).toMatch(/no leads marked/);
     const text = wrapText(dayWrap(ROWS, MARKS, MON));
     expect(text).toMatch(/8 leads looked through/);
-    expect(text).toMatch(/New prospects: 4 \(1 good lead, 1 research harder, 2 call list\)/);
-    expect(text).toMatch(/Already open: 1\./);
-    expect(text).toMatch(/Best sector: Manufacturing: machinery \(3 new of 3 judged\)/);
+    expect(text).toMatch(/New prospects: 2 \(1 good lead, 1 research harder\)/);
+    expect(text).toMatch(/Already open or on a list: 3 \(1 open lead \(already open\), 2 call list \(mostly already open\)\)\./);
+    expect(text).toMatch(/Best sector: Manufacturing: food, drink & tobacco \(1 new of 1 judged\)/);
     expect(text).not.toMatch(/FD back/);   // notes stay out of the summary
   });
 
@@ -101,22 +101,22 @@ describe("Your day (a Wrapped of the day)", () => {
     const w = dayWrap(ROWS, MARKS, MON);
     const rep = dayReport(w, { ...MARKS.notes, "00000005": { text: "R&D team <Leeds>", at: at(MON, "09:31") } });
     expect(rep.title).toBe("Day report — Mon 23 Nov");
-    expect(rep.sections.map((x) => x.key)).toEqual(["good", "research", "call"]);
-    expect(rep.sections.find((x) => x.key === "call").items.map((i) => i.name)).toEqual(["ACME MACHINES LTD", "HOTEL MACHINES LTD"]);   // best score first
-    expect(rep.keepers).toHaveLength(4);
+    expect(rep.sections.map((x) => x.key)).toEqual(["good", "research"]);   // the call list isn't new: counted, not named
+    expect(rep.keepers).toHaveLength(2);
     expect(rep.notFor).toEqual([{ label: "Not enough revenue", count: 1, names: ["FOXTROT GENERAL LTD"] },
       { label: "Owned abroad", count: 1, names: ["CARGO GENERAL LTD"] },
       { label: "Skipped — no finance director found (worth another go)", count: 1, names: ["INDIA GENERAL LTD"] }]);
-    expect(rep.open).toBe(1);
-    expect(rep.summary[0]).toBe("8 leads looked through: 4 new prospects (50%), 1 already open (13%), 2 not for us (25%), 1 skipped — no FD found (13%). 57% of those judged were new prospects.");
+    expect([rep.open, rep.openParts]).toEqual([3, "1 open lead, 2 on your call list"]);
+    expect(rep.summary[0]).toBe("8 leads looked through: 2 new prospects (25%), 3 already open or on a list (38%), 2 not for us (25%), 1 skipped — no FD found (13%). 29% of those judged were new prospects.");
     expect(rep.summary[1]).toBe("Most looked at: Wholesale: general — 4 (50% of the day), 0 new.");
     const md = reportMarkdown(rep);
     expect(md).toMatch(/^# Day report — Mon 23 Nov/);
     expect(md).toMatch(/## Good leads \(1\)/);
     expect(md).toContain("- **ECHO FOODS LTD** — [00000005](https://find-and-update.company-information.service.gov.uk/company/00000005)");
     expect(md).toContain("    - Note: FD back Thursday");
-    expect(md).toContain("- Already open: 1");
+    expect(md).toContain("- Already open or on a list: 3 (1 open lead, 2 on your call list)");
     expect(md).not.toContain("DELTA GENERAL");   // already-open companies are counted, never named
+    expect(md).not.toContain("HOTEL MACHINES");   // nor the call list's
     const html = reportHtml(rep);
     expect(html).toContain("<li>Note: R&amp;D team &lt;Leeds&gt;</li>");
     expect(html).not.toContain("<Leeds>");
@@ -149,24 +149,24 @@ describe("Your day (a Wrapped of the day)", () => {
   it("the day in depth: type of company, size, score, signals, hours and running totals, with percentages", () => {
     const w = dayWrap(ROWS, MARKS, MON), d = w.depth;
     expect(d.marks.map((m) => [m.label, m.count, Math.round(100 * m.share)])).toEqual([
-      ["Good lead", 1, 13], ["Research harder", 1, 13], ["Call list", 2, 25], ["Open lead (already open)", 1, 13],
+      ["Good lead", 1, 13], ["Research harder", 1, 13], ["Open lead (already open)", 1, 13], ["Call list (mostly already open)", 2, 25],
       ["Not enough revenue", 1, 13], ["Owned abroad", 1, 13], ["Skipped (no FD found)", 1, 13]]);
     expect(d.sector.map((e) => [e.key, e.total, e.keep, e.taken, e.drop, e.skip])).toEqual([
-      ["Wholesale: general", 4, 0, 1, 2, 1], ["Manufacturing: machinery", 3, 3, 0, 0, 0], ["Manufacturing: food, drink & tobacco", 1, 1, 0, 0, 0]]);
-    expect(d.size.map((e) => [e.key, e.total, e.keep])).toEqual([["Under £20m", 4, 0], ["£20m–£50m", 3, 3], ["£50m–£100m", 1, 1]]);
-    expect(d.score.map((e) => [e.key, e.total, e.rate])).toEqual([["60+", 4, 1], ["50–59", 2, 0], ["40–49", 2, 0]]);
+      ["Wholesale: general", 4, 0, 1, 2, 1], ["Manufacturing: machinery", 3, 1, 2, 0, 0], ["Manufacturing: food, drink & tobacco", 1, 1, 0, 0, 0]]);
+    expect(d.size.map((e) => [e.key, e.total, e.keep])).toEqual([["Under £20m", 4, 0], ["£20m–£50m", 3, 1], ["£50m–£100m", 1, 1]]);
+    expect(d.score.map((e) => [e.key, e.total, e.rate])).toEqual([["60+", 4, 0.5], ["50–59", 2, 0], ["40–49", 2, 0]]);
     const band = d.signals.find((x) => x.label === "£20m–£300m turnover");
-    expect([band.with.looked, band.with.rate, band.without.looked, band.without.rate, band.lift]).toEqual([4, 1, 4, 0, 1]);
+    expect([band.with.looked, band.with.rate, band.without.looked, band.without.rate, band.lift]).toEqual([4, 0.5, 4, 0, 0.5]);
     expect(d.hourly.reduce((n, h) => n + h.total, 0)).toBe(8);
     expect([d.totals.week.looked, d.totals.week.days, d.totals.month.looked, d.totals.month.days, d.totals.all.looked]).toEqual([8, 1, 9, 2, 9]);
     const md = reportMarkdown(dayReport(w));
     expect(md).toContain("## The day in numbers");
     expect(md).toContain("| Type of company | Looked at | % of day | New | Open | Not for us | Skipped | New % |");
-    expect(md).toContain("| Manufacturing: machinery | 3 | 38% | 3 | 0 | 0 | 0 | 100% |");
-    expect(md).toContain("| £20m–£300m turnover | 4 | 100% | 4 | 0% | +100 pts |");
+    expect(md).toContain("| Manufacturing: machinery | 3 | 38% | 1 | 2 | 0 | 0 | 33% |");
+    expect(md).toContain("| £20m–£300m turnover | 4 | 50% | 4 | 0% | +50 pts |");
     expect(md).toContain("| **Total** | **8** | **100%** |");
-    expect(md).toContain("| This month | 2 | 9 | 5 | 1 | 2 | 1 | 63% |");
-    expect(md).toContain("| This week | 1 | 8 | 4 | 1 | 2 | 1 | 57% |");
+    expect(md).toContain("| This month | 2 | 9 | 3 | 3 | 2 | 1 | 38% |");
+    expect(md).toContain("| This week | 1 | 8 | 2 | 3 | 2 | 1 | 29% |");
     expect(reportHtml(dayReport(w))).toContain("<h3>Size (filed turnover)</h3>");
   });
 });
