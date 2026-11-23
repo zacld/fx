@@ -781,8 +781,12 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   to progress, Fit 30+, one per group. Each line: name (company page), industry · turnover · score, the Companies House
   number (plain text, one tap selects it — Zac, 22 Nov 2026: not a link), "Google it" (the registered name) and "Check for FD" (`googleFd`), then four round buttons —
   ✓ green Good lead (verdict good), ✕ red Not enough revenue (Not a fit: Too small), ● orange Open lead (review open),
-  ☎ blue Call list (list call). A mark takes the company off and the next moves up; Undo for the last one; "N marked
-  today". The marks feed the feedback loop and lookalikes like any other.
+  ☎ blue Call list (list call), and (Zac, 23 Nov 2026: "add the buttons current client and owned abroad") ✈ purple Owned
+  abroad (review abroad: to the Foreign-owned tab) and » grey **Skip** (review `skip`: off every list with no reason kept —
+  for a company the bank already has; which companies bank with Investec never comes onto the site, so it isn't a
+  "current client" mark; neutral in the feedback loop, "Skipped" in the Power Automate feed and the Simplified dash,
+  `Skip:` / `Skipped:` heading in the bulk paste). A mark takes the company off and the next moves up; Undo for the last
+  one; "N marked today". The marks feed the feedback loop and lookalikes like any other.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead

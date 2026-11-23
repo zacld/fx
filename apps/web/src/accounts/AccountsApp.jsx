@@ -1223,7 +1223,8 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS, actions =
 // The Simplified dash: the Accounts list's own leads (not contacted, not out — the same filtering, nothing re-scored)
 // as a P&L-style sheet with a search, an industry filter and an Excel export of exactly what's shown.
 const REVIEW_BUTTONS = [["open", "Open lead", "Checked: nobody has it — a lead to work"], ["mine", "Added to mine", "Added to your own book"],
-  ["abroad", "Owned abroad", "Owned from abroad — moves it to the Foreign-owned tab"]];
+  ["abroad", "Owned abroad", "Owned from abroad — moves it to the Foreign-owned tab"],
+  ["skip", "Skipped", "Taken off with no reason kept (for one the bank already has: which ones never comes onto the site)"]];
 // What Zac's own checks are teaching the lead score (the feedback loop, `reviewLearnings`): good-lead rate by source,
 // niche and industry, and the lean each gets once 5+ are marked.
 function ReviewLearnings({ reviews }) {
@@ -2360,15 +2361,15 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
     const n = r.company_number;
     if (key === "good") setVerdict(n, "good");
     else if (key === "small") setVerdict(n, "not_fit", "Too small");
-    else if (key === "open") setReview(n, "open");
-    else setList(n, "call");
+    else if (key === "call") setList(n, "call");
+    else setReview(n, key);   // open / abroad / skip
     setLast({ number: n, name: r.company_name, key });
   };
   const undo = () => {
     if (!last) return;
     if (last.key === "good" || last.key === "small") setVerdict(last.number, null);
-    else if (last.key === "open") setReview(last.number, "open");   // the same button again clears it
-    else setList(last.number, null);
+    else if (last.key === "call") setList(last.number, null);
+    else setReview(last.number, last.key);   // the same review again clears it
     setLast(null);
   };
   const open = (e, n) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
@@ -3652,10 +3653,10 @@ a{color:var(--accent)}
 .daily-btns{flex:0 0 auto;display:flex;gap:8px}
 .dot-btn{--c:#9aa0a6;width:36px;height:36px;border-radius:50%;border:2px solid var(--c);background:transparent;color:var(--c);font:700 16px/1 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
 .dot-btn:hover,.dot-btn:focus-visible{background:var(--c);color:var(--bg);outline:none}
-.dot-good{--c:#81c995}.dot-small{--c:#f28b82}.dot-open{--c:#fcad70}.dot-call{--c:#8ab4f8}
+.dot-good{--c:#81c995}.dot-small{--c:#f28b82}.dot-open{--c:#fcad70}.dot-call{--c:#8ab4f8}.dot-abroad{--c:#c58af9}.dot-skip{--c:#9aa0a6}
 .daily-key .dot-key,.daily-key .dot-key:hover{width:22px;height:22px;font-size:12px;border-width:1.5px;cursor:default;background:transparent;color:var(--c)}
 .daily-more{margin-top:12px}
-@media(max-width:700px){.daily-row{flex-wrap:wrap;gap:8px 10px}.daily-btns{width:100%;justify-content:flex-end;gap:12px}.dot-btn{width:40px;height:40px}}
+@media(max-width:700px){.daily-row{flex-wrap:wrap;gap:8px 10px}.daily-btns{width:100%;justify-content:flex-end;gap:10px}.dot-btn{width:40px;height:40px}}
 .sections{display:flex;gap:0;margin-bottom:10px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
 .section-btn{flex:1 1 0;min-width:0;padding:9px 6px;border:0;border-right:1px solid var(--line);background:none;color:var(--text-2);font:600 13px 'Inter',sans-serif;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .section-btn:last-child{border-right:0}
