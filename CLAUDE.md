@@ -789,7 +789,26 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   one; "N marked today". The marks feed the feedback loop and lookalikes like any other. On this tab the freshness strip,
   alert banner and figures row are left off (Zac, 23 Nov 2026: "when on this page remove the banner at top"), and so is the
   top bar — logo, Market moves, Event leads, Power Automate feed, Lock ("remove the bar at the top which says fx disco and
-  market events"; a `daily-view` class on the page body, so the sections bar sits at the very top on a phone).
+  market events"; a `daily-view` class on the page body, so the sections bar sits at the very top on a phone). The page
+  is **white** (Zac, 23 Nov 2026: "make the page white … the leads today page"): the theme's tokens re-stepped for a light
+  surface under `body.daily-view` (Today's list and Your day only; every other tab stays dark), the mark buttons' hues
+  darkened to 3:1+ on white (dataviz `validate_palette.js --mode light`; each button keeps its own symbol and label).
+  **Your day** (Zac, 23 Nov 2026: "a tracker of what I do each day — the total of leads I've looked through, the good
+  leads, the open ones … like a Spotify Wrapped of the day; the sectors that worked, didn't work"; `src/accounts/wrapped.js`
+  `dayWrap` / `wrapText`, `YourDay` in `AccountsApp.jsx`; the Today section's second tab, and "Your day so far →" on
+  Today's list): worked out in the browser from his marks' own times — `checks.review_at`, `verdicts.at`, `lists.at`, a
+  contact's touches, a sequence step's date, a note's `at` — so nothing new is stored and nothing from the bank's records
+  is used; a company counts once, on the day of its latest mark (one marked again later moves to that day; an undone mark
+  isn't counted). Shows: leads looked through (the hero figure) with keepers (good / research harder / open / call list /
+  added to mine / email or mail list) · not for us (not enough revenue / owned abroad / other not-a-fit) · skipped
+  (neutral, as in the feedback loop); keeper rate; how he marked them; what worked and what didn't land by sector, niche
+  or source (worked: most kept; didn't land: 2+ judged, a third or fewer kept, with the commonest reason); the best find
+  (highest lead score kept); his keepers' and ruled-outs' average score and median size (is the score pointing the right
+  way); pace (first and last mark, leads an hour, busiest hour); calls / emails / LinkedIn ticked in the sequence,
+  companies contacted, notes written; the last 14 days as columns (click one to see that day; a table under it), the
+  working day before, his average day (days marked in the 4 weeks before), best day and streak (days in a row; an empty
+  weekend doesn't break it). Any earlier day by the arrows; "Copy summary" puts the day in a few lines on the clipboard
+  (company names only, no notes or people); "Every company you marked" lists them with their mark and time.
   **Notes and Research harder** (Zac, 23 Nov 2026: "a button to add notes. And another button which is good lead but no
   contact info and add it to a research harder section"): every line has "✎ Add note" / "Edit note" (`LineNote`: the
   company's note, store key `notes`, the same one cards and the company page show; shown under the links once saved), and

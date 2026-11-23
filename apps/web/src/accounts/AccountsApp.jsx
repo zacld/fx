@@ -9,6 +9,7 @@ import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
+import { OUTCOMES, dayWrap, localDay, outcomeLabel, shiftDay, wrapText } from "./wrapped.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -220,9 +221,10 @@ function Accounts({ data, password }) {
     return () => { live = false; };
   }, [pageNo, password]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { window.scrollTo(0, pageNo ? 0 : listScroll); }, [pageNo]);   // eslint-disable-line react-hooks/exhaustive-deps
-  // Today's list is the whole screen: no top bar (logo, Market moves, Event leads, feed, Lock) — Zac, 23 Nov 2026
+  // Today's list and Your day are the whole screen, on white: no top bar (logo, Market moves, Event leads, feed, Lock) —
+  // Zac, 23 Nov 2026: "remove the bar at the top", "make the page white"
   useEffect(() => {
-    document.body.classList.toggle("daily-view", filters.view === "daily" && !pageNo);
+    document.body.classList.toggle("daily-view", ["daily", "wrapped"].includes(filters.view) && !pageNo);
     return () => document.body.classList.remove("daily-view");
   }, [filters.view, pageNo]);
   const openCompany = useCallback((number) => {
@@ -467,7 +469,7 @@ function Accounts({ data, password }) {
     <VerdictContext.Provider value={verdictCtx}>
     <main>
       {/* Today's list starts straight at the sections (Zac, 23 Nov 2026: "when on this page remove the banner at top") */}
-      {filters.view !== "daily" && <>
+      {!["daily", "wrapped"].includes(filters.view) && <>
       <StatusStrip status={data.status} />
       <AlertBanner summary={signals.alerts_summary} seen={alertsSeen} onOpen={() => set({ section: "", view: "alerts" })} />
       <div className="stats">
@@ -492,6 +494,11 @@ function Accounts({ data, password }) {
                   title="The best-ranked leads you haven't marked: Google it, check for the FD, then ✓ good lead / ✕ not enough revenue / ● open lead / ☎ call list"
                   onClick={() => set({ section: "", view: "daily" })}>
             Today's list
+          </button>
+          <button role="tab" hidden={!inTabs("wrapped")} aria-selected={filters.view === "wrapped"} className={`tab${filters.view === "wrapped" ? " on" : ""}`}
+                  title="Your day, Wrapped-style: how many leads you looked through, how you marked them, the sectors that worked and didn't, your pace"
+                  onClick={() => set({ section: "", view: "wrapped" })}>
+            Your day
           </button>
           <button role="tab" hidden={!inTabs("outreach")} aria-selected={filters.view === "outreach"} className={`tab outreach-tab${filters.view === "outreach" ? " on" : ""}`}
                   title={`The top ${OUTREACH.letters} for the Investec letter, then the rest: cold call (something timely to say) or email sequence`}
@@ -626,7 +633,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["daily", "research", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["daily", "wrapped", "research", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -686,7 +693,10 @@ function Accounts({ data, password }) {
       </div>
 
       {filters.view === "daily" ? <TodaysList rows={rows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} onOpen={openCompany}
-                                              setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote} />
+                                              setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote}
+                                              onWrap={() => set({ section: "", view: "wrapped" })} />
+       : filters.view === "wrapped" ? <YourDay rows={allRows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} notes={notes}
+                                              onOpen={openCompany} onBack={() => set({ section: "", view: "daily" })} />
        : filters.view === "research" ? <ResearchHarder rows={allRows} contacted={contacted} checks={checks} lists={lists} onOpen={openCompany}
                                               setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote} />
        : filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -2367,7 +2377,7 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail, links }) {
 
 // Today's list: the best leads not marked yet, one line each — the company, its Companies House page, a Google search
 // for it and for its finance director — and four buttons (TODAYS_MARKS); a mark takes it off and the next moves up.
-function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdict, setReview, setList, notes = {}, saveNote }) {
+function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdict, setReview, setList, notes = {}, saveNote, onWrap }) {
   const [shown, setShown] = useState(TODAYS_LIST);
   const [last, setLast] = useState(null);   // the last mark, to undo: {number, name, key}
   const all = useMemo(() => todaysList(rows, { contacted, checks, verdicts, lists }), [rows, contacted, checks, verdicts, lists]);
@@ -2393,7 +2403,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
     <div className="list daily">
       <div className="daily-head">
         <span className="muted">The best-ranked leads you haven't marked yet — {all.length.toLocaleString()} waiting{done ? `, ${done} marked today` : ""}.
-          A mark takes the company off and the next one moves up.</span>
+          A mark takes the company off and the next one moves up. {onWrap && <button className="linkish" onClick={onWrap}>Your day so far →</button>}</span>
         <span className="daily-key">{TODAYS_MARKS.map(([k, sym, label]) => (
           <span key={k}><span className={`dot-btn dot-${k} dot-key`} aria-hidden="true">{sym}</span>{label}</span>))}</span>
       </div>
@@ -2422,6 +2432,196 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
       </ol>
       {all.length > shown && <button className="btn-sm daily-more" onClick={() => setShown(shown + TODAYS_LIST)}>Show {TODAYS_LIST} more</button>}
       {!all.length && <div className="empty">Nothing left to mark — every ranked lead has a mark.</div>}
+    </div>
+  );
+}
+
+// Your day (Zac, 23 Nov 2026: "a tracker of what I do each day … like a Spotify Wrapped of the day"): the day's marks
+// told as a few big facts — how many leads, how he marked them, the sectors that worked and didn't, the best find, his
+// pace, the day against the others, and what else got done. Worked out in the browser from his marks' own times
+// (`dayWrap`, src/accounts/wrapped.js); any earlier day by the arrows or by clicking its column.
+const WRAP_ICON = { good: ["✓", "good"], research: ["?", "research"], open: ["●", "open"], call: ["☎", "call"], mine: ["★", "open"],
+  email: ["✉", "call"], post: ["✉", "call"], small: ["✕", "small"], abroad: ["✈︎", "abroad"], notfit: ["✕", "small"], skip: ["»", "skip"] };
+const WRAP_BY = [["sector", "Sectors"], ["niche", "Niches"], ["source", "Where they came from"]];
+function WrapIcon({ kind }) {
+  const [sym, cls] = WRAP_ICON[kind] || ["•", "skip"];
+  return <span className={`dot-btn dot-${cls} dot-key`} aria-hidden="true">{sym}</span>;
+}
+const clock = (d) => (d ? d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "");
+const span = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`);
+function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen, onBack }) {
+  const today = localDay(new Date().toISOString());
+  const [day, setDay] = useState(today);
+  const [by, setBy] = useState("sector");
+  const [tip, setTip] = useState(null);   // the hovered / focused day column
+  const [copied, setCopied] = useState(false);
+  const w = useMemo(() => dayWrap(rows, { checks, verdicts, lists, contacted, notes }, day), [rows, checks, verdicts, lists, contacted, notes, day]);
+  const isToday = day === today;
+  const bars = OUTCOMES.filter(([k]) => w.counts[k]);
+  const barMax = Math.max(1, ...bars.map(([k]) => w.counts[k]));
+  const colMax = Math.max(1, ...w.history.map((h) => h.count));
+  const vs = w.before.count ? w.looked - w.before.count : null;
+  const top = w.worked[by][0], flop = w.didnt[by][0];
+  const thing = { sector: "sector", niche: "niche", source: "best source" }[by];
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(wrapText(w)); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard: nothing to do */ }
+  };
+  const open = (e, n) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
+  const scoreLine = w.scores.keep != null && w.scores.drop != null
+    ? (w.scores.keep > w.scores.drop + 2 ? "The score is pointing the right way."
+      : w.scores.drop > w.scores.keep + 2 ? "The score liked some you didn't — your marks are teaching it."
+        : "The score couldn't tell them apart today — your marks are teaching it.")
+    : "";
+  const done = [["call", "calls"], ["email", "emails"], ["linkedin", "LinkedIn touches"]].filter(([k]) => w.done[k]);
+  return (
+    <div className="wrap">
+      <div className="wrap-top">
+        <div className="wrap-nav">
+          <button className="btn-sm" aria-label="The day before" onClick={() => setDay(shiftDay(day, -1))}>‹</button>
+          <strong>{isToday ? "Today" : dayLabel(day)}</strong>{isToday && <span className="muted">{dayLabel(day)}</span>}
+          <button className="btn-sm" aria-label="The day after" disabled={isToday} onClick={() => setDay(shiftDay(day, 1))}>›</button>
+          {!isToday && <button className="linkish" onClick={() => setDay(today)}>Back to today</button>}
+        </div>
+        <div className="wrap-actions">
+          <button className="btn-sm" onClick={copy} disabled={!w.looked}>{copied ? "Copied" : "Copy summary"}</button>
+          <button className="btn-sm" onClick={onBack}>Today's list →</button>
+        </div>
+      </div>
+
+      <section className="wrap-hero" aria-label="Leads looked through">
+        <div className="wrap-kicker">{isToday ? "Your day so far" : `Your ${dayLabel(day)}`}</div>
+        <div className="wrap-big">{w.looked.toLocaleString()}</div>
+        <div className="wrap-hero-l">{w.looked === 1 ? "lead looked through" : "leads looked through"}</div>
+        {w.looked > 0
+          ? <div className="wrap-hero-s">{w.keep} keepers · {w.drop} not for us · {w.skip} skipped</div>
+          : <div className="wrap-hero-s">{isToday ? "Nothing marked yet — " : "Nothing marked that day. "}{isToday && <button className="wrap-hero-btn" onClick={onBack}>start on Today's list</button>}</div>}
+        {vs != null && w.looked > 0 && <div className="wrap-hero-s">{vs > 0 ? `${vs} more than` : vs < 0 ? `${-vs} fewer than` : "The same as"} {dayLabel(w.before.day)} ({w.before.count})</div>}
+      </section>
+
+      <div className="wrap-tiles">
+        <div className="wrap-tile"><div className="wrap-tile-l">Keepers</div><div className="wrap-tile-v">{w.keepRate == null ? "–" : `${w.keepRate}%`}</div>
+          <div className="wrap-tile-s">{w.keep} of {w.keep + w.drop} judged</div></div>
+        <div className="wrap-tile"><div className="wrap-tile-l">Good leads</div><div className="wrap-tile-v">{w.counts.good + w.counts.research}</div>
+          <div className="wrap-tile-s">{w.counts.research ? `${w.counts.research} to research harder` : "✓ and ?"}</div></div>
+        <div className="wrap-tile"><div className="wrap-tile-l">Open leads</div><div className="wrap-tile-v">{w.counts.open}</div>
+          <div className="wrap-tile-s">{w.counts.mine ? `+ ${w.counts.mine} added to mine` : "●"}</div></div>
+        <div className="wrap-tile"><div className="wrap-tile-l">To the call list</div><div className="wrap-tile-v">{w.counts.call}</div>
+          <div className="wrap-tile-s">{w.counts.email + w.counts.post ? `+ ${w.counts.email + w.counts.post} email / mail` : "☎"}</div></div>
+        <div className="wrap-tile"><div className="wrap-tile-l">Pace</div><div className="wrap-tile-v">{w.pace.perHour ?? "–"}</div>
+          <div className="wrap-tile-s">{w.pace.perHour ? "leads an hour" : "a few marks needed"}</div></div>
+        <div className="wrap-tile"><div className="wrap-tile-l">Streak</div><div className="wrap-tile-v">{w.streak}</div>
+          <div className="wrap-tile-s">{w.streak === 1 ? "day" : "days in a row"}</div></div>
+      </div>
+
+      {w.looked > 0 && <section className="wrap-card">
+        <h3>How you marked them</h3>
+        <div className="wrap-bars">
+          {bars.map(([k, label]) => (
+            <div className="wrap-bar" key={k} title={`${label}: ${w.counts[k]} (${Math.round((100 * w.counts[k]) / w.looked)}%)`}>
+              <span className="wrap-bar-l"><WrapIcon kind={k} />{label}</span>
+              <span className="wrap-bar-t"><span className="wrap-bar-f" style={{ width: `${(70 * w.counts[k]) / barMax}%` }} />
+                <span className="wrap-bar-n">{w.counts[k]}</span></span>
+            </div>
+          ))}
+        </div>
+      </section>}
+
+      {w.looked > 0 && <section className="wrap-card">
+        <div className="wrap-card-top">
+          <h3>What worked</h3>
+          <span className="seg" role="group" aria-label="Group by">
+            {WRAP_BY.map(([k, label]) => <button key={k} className={by === k ? "on" : ""} aria-pressed={by === k} onClick={() => setBy(k)}>{label}</button>)}
+          </span>
+        </div>
+        {top && <p className="wrap-head">{top.key} was your {thing} — {top.keep} of {top.keep + top.drop} kept.</p>}
+        {!top && <p className="wrap-head">Nothing kept {isToday ? "yet today" : "that day"}.</p>}
+        <div className="wrap-cols2">
+          <div>
+            <div className="wrap-sub">Worked</div>
+            {w.worked[by].map((e) => (
+              <div className="wrap-item" key={e.key}>
+                <div className="wrap-item-t"><span>{e.key}</span><span className="wrap-item-n">{e.keep} of {e.keep + e.drop} kept{e.skip ? ` · ${e.skip} skipped` : ""}</span></div>
+                <div className="wrap-meter" title={`${Math.round(100 * (e.rate ?? 1))}% kept`}><span style={{ width: `${Math.round(100 * (e.rate ?? 1))}%` }} /></div>
+              </div>))}
+            {!w.worked[by].length && <div className="muted">—</div>}
+          </div>
+          <div>
+            <div className="wrap-sub">Didn't land</div>
+            {w.didnt[by].map((e) => (
+              <div className="wrap-item" key={e.key}>
+                <div className="wrap-item-t"><span>{e.key}</span><span className="wrap-item-n">{e.keep} of {e.keep + e.drop} kept{e.mainDrop ? ` · mostly ${outcomeLabel(e.mainDrop).toLowerCase()}` : ""}</span></div>
+                <div className="wrap-meter" title={`${Math.round(100 * e.rate)}% kept`}><span style={{ width: `${Math.round(100 * e.rate)}%` }} /></div>
+              </div>))}
+            {!w.didnt[by].length && <div className="muted">Nothing fell flat (two or more judged, a third or fewer kept).</div>}
+          </div>
+        </div>
+        {flop && <p className="wrap-foot">{flop.key} didn't land: {flop.keep} of {flop.keep + flop.drop} kept{flop.mainDrop ? `, mostly ${outcomeLabel(flop.mainDrop).toLowerCase()}` : ""}.</p>}
+      </section>}
+
+      {w.looked > 0 && <div className="wrap-grid">
+        {w.best && <section className="wrap-card">
+          <h3>Best find</h3>
+          <a className="wrap-find" href={companyPath(w.best.company_number)} onClick={(e) => open(e, w.best.company_number)}>{w.best.company_name}</a>
+          <div className="wrap-tile-s">{[w.best.industry, w.best.turnover ? `${money(w.best.turnover)}${w.best.turnover_basis === "group" ? " (group)" : ""}` : "",
+            `score ${w.best.lead_score}`].filter(Boolean).join(" · ")}</div>
+          <div className="wrap-tile-s"><WrapIcon kind={w.best.kind} /> {outcomeLabel(w.best.kind)}</div>
+        </section>}
+        {(w.scores.keep != null || w.sizes.keep) && <section className="wrap-card">
+          <h3>The score and you</h3>
+          {w.scores.keep != null && <p className="wrap-line">Your keepers scored <strong>{w.scores.keep}</strong> on average{w.scores.drop != null ? <>, the ones you ruled out <strong>{w.scores.drop}</strong></> : ""}.</p>}
+          {scoreLine && <p className="wrap-line">{scoreLine}</p>}
+          {w.sizes.keep && <p className="wrap-line muted">Median size: keepers {money(w.sizes.keep)}{w.sizes.drop ? `, ruled out ${money(w.sizes.drop)}` : ""}.</p>}
+        </section>}
+        {w.pace.first && <section className="wrap-card">
+          <h3>Your pace</h3>
+          <p className="wrap-line">First mark <strong>{clock(w.pace.first)}</strong>{w.pace.minutes ? <>, last <strong>{clock(w.pace.last)}</strong> ({span(w.pace.minutes)})</> : ""}.</p>
+          {w.pace.perHour && <p className="wrap-line">About <strong>{w.pace.perHour}</strong> leads an hour.</p>}
+          {w.pace.busyHour != null && w.pace.busyCount > 1 && <p className="wrap-line muted">Busiest hour: {String(w.pace.busyHour).padStart(2, "0")}:00–{String(w.pace.busyHour + 1).padStart(2, "0")}:00, {w.pace.busyCount} marked.</p>}
+        </section>}
+        <section className="wrap-card">
+          <h3>Also done</h3>
+          {done.length || w.done.contacted || w.done.notes ? <>
+            {done.length > 0 && <p className="wrap-line">Ticked off: {done.map(([k, label]) => `${w.done[k]} ${label}`).join(", ")}.</p>}
+            {w.done.contacted > 0 && <p className="wrap-line">Contacted <strong>{w.done.contacted}</strong> {w.done.contacted === 1 ? "company" : "companies"}{w.done.touches > w.done.contacted ? ` (${w.done.touches} touches)` : ""}{Object.keys(w.done.channels).length ? ` — ${Object.entries(w.done.channels).map(([c, n]) => `${n} ${c === "in_person" ? "in person" : c}`).join(", ")}` : ""}.</p>}
+            {w.done.notes > 0 && <p className="wrap-line muted">{w.done.notes} {w.done.notes === 1 ? "note" : "notes"} written.</p>}
+          </> : <p className="wrap-line muted">No calls, emails or contacts ticked off {isToday ? "yet" : "that day"}.</p>}
+        </section>
+      </div>}
+
+      <section className="wrap-card">
+        <div className="wrap-card-top">
+          <h3>Leads looked through, last 14 days</h3>
+          <span className="wrap-tile-s">{w.average != null ? `Your average day ${w.average}` : ""}{w.bestDay ? ` · best ${w.bestDay.count} on ${dayLabel(w.bestDay.day)}` : ""}</span>
+        </div>
+        <div className="wrap-chart" onMouseLeave={() => setTip(null)}>
+          {tip != null && <div className="wrap-tip" style={{ left: `${((tip + 0.5) / w.history.length) * 100}%` }}>
+            <strong>{w.history[tip].count}</strong><span>{dayLabel(w.history[tip].day)}</span></div>}
+          <div className="wrap-colset">
+            {w.history.map((h, i) => (
+              <button key={h.day} className={`wrap-col${h.day === day ? " on" : ""}`} aria-label={`${dayLabel(h.day)}: ${h.count} looked through`}
+                      onMouseEnter={() => setTip(i)} onFocus={() => setTip(i)} onBlur={() => setTip(null)} onClick={() => setDay(h.day)}>
+                {(h.day === day || (w.bestDay && h.day === w.bestDay.day)) && h.count > 0 && <span className="wrap-col-v">{h.count}</span>}
+                <span className="wrap-col-f" style={{ height: `${(100 * h.count) / colMax}%` }} />
+              </button>))}
+          </div>
+          <div className="wrap-x" aria-hidden="true">{w.history.map((h) => <span key={h.day}>{dayLabel(h.day).split(" ")[1]}</span>)}</div>
+        </div>
+        <details className="wrap-table"><summary>As a table</summary>
+          <table><tbody>{w.history.filter((h) => h.count).map((h) => <tr key={h.day}><td>{dayLabel(h.day)}</td><td>{h.count}</td></tr>)}</tbody></table>
+        </details>
+      </section>
+
+      {w.looked > 0 && <details className="wrap-card wrap-all">
+        <summary>Every company you marked {isToday ? "today" : "that day"} ({w.looked})</summary>
+        <ol>
+          {[...w.marked].reverse().map((a) => (
+            <li key={a.n}>
+              <WrapIcon kind={a.kind} />
+              {a.r ? <a href={companyPath(a.n)} onClick={(e) => open(e, a.n)}>{a.r.company_name}</a> : <span>{a.n}</span>}
+              <span className="muted">{[outcomeLabel(a.kind), a.r ? industryOf(a.r) : "", /T\d/.test(String(a.at)) ? clock(new Date(a.at)) : ""].filter(Boolean).join(" · ")}</span>
+            </li>))}
+        </ol>
+      </details>}
     </div>
   );
 }
@@ -2795,7 +2995,7 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
 // The phone layout (Zac, 22 Nov 2026: about 30 tabs were too many on a phone): five sections, each with its own tabs;
 // the section in use is remembered in this browser. "All tabs" shows every tab, as before.
 const TAB_SECTIONS = [
-  ["today", "Today", ["daily", "today", "calls", "outreach", "alerts", "contacted", "email"]],
+  ["today", "Today", ["daily", "wrapped", "today", "calls", "outreach", "alerts", "contacted", "email"]],
   ["fresh", "Fresh finds", ["fresh", "new", "hidden", "jobs", "emerging", "search", "money"]],
   ["lists", "My lists", ["list-call", "list-email", "list-post", "research", "simple"]],
   ["learn", "Learn", ["scoreboard", "niches"]],
@@ -3777,6 +3977,84 @@ a{color:var(--accent)}
 .fresh-kinds{flex-wrap:wrap}
 .daily-view .tb{display:none}
 @media(max-width:700px){.daily-view .sections{top:0}}
+/* Today's list and Your day on white (Zac, 23 Nov 2026: "make the page white … the leads today page"): the theme's
+   tokens stepped for a light surface; the mark buttons' hues darkened to 3:1+ on white (validated as a set, dataviz
+   validate_palette.js --mode light; each button also has its own symbol and label, so no colour stands alone) */
+body.daily-view{color-scheme:light;--bg:#ffffff;--surface:#ffffff;--surface-2:#f3f3f1;--head:#f6f6f4;--line:#dddcd7;--line-soft:#ecebe7;
+  --text:#0b0b0b;--text-2:#3d3c39;--muted:#6f6e69;--accent:#1a5fb4;--series:#2a78d6;--good:#188038;--warn:#a87b00}
+body.daily-view .controls{border-bottom:1px solid var(--line)}
+body.daily-view .tab.on,body.daily-view .section-btn.on,body.daily-view .seg button.on{background:#e8f0fe;border-color:#aecbfa;color:#174ea6}
+body.daily-view .btn-sm:hover,body.daily-view .section-btn:hover{background:#e9e9e6;color:var(--text)}
+body.daily-view .empty{color:var(--muted)}
+body.daily-view .dot-good{--c:#188038}body.daily-view .dot-research{--c:#a87b00}body.daily-view .dot-small{--c:#c5221f}
+body.daily-view .dot-open{--c:#e8710a}body.daily-view .dot-call{--c:#1a73e8}body.daily-view .dot-abroad{--c:#9334e6}
+body.daily-view .dot-skip,body.daily-view .dot-back{--c:#5f6368}
+body.daily-view .daily-row:hover{background:#fafaf8}
+body.daily-view .co{color:var(--text)}body.daily-view a.co:hover{color:var(--accent)}
+/* Your day: a Wrapped-style page — one hero figure, stat tiles, then cards; the history columns and keep meters on the
+   reference blue ramp (selected day #2a78d6, the rest #86b6ef; meter #2a78d6 on its #cde2fb track) */
+.wrap{max-width:980px;margin:0 auto;padding:16px 40px 80px;display:flex;flex-direction:column;gap:14px}
+.wrap-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.wrap-nav{display:flex;align-items:center;gap:10px;font-size:15px}
+.wrap-nav .btn-sm{font-size:16px;line-height:1;padding:6px 11px}
+.wrap-actions{display:flex;gap:8px}
+.wrap-hero{border-radius:16px;padding:26px 28px 24px;background:#0d366b;color:#fff}
+.wrap-kicker{font:600 12px 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#cde2fb}
+.wrap-big{font:700 76px/1 'Inter',sans-serif;margin:10px 0 4px;letter-spacing:-.02em}
+.wrap-hero-l{font:600 20px 'Inter',sans-serif}
+.wrap-hero-s{margin-top:8px;font-size:14px;color:#cde2fb}
+.wrap-hero-btn{background:none;border:0;padding:0;color:#fff;text-decoration:underline;font:inherit;cursor:pointer}
+.wrap-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.wrap-tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.wrap-tile-l{font-size:12px;color:var(--muted)}
+.wrap-tile-v{font:700 30px/1.2 'Inter',sans-serif;color:var(--text)}
+.wrap-tile-s{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.wrap-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.wrap-card h3{margin:0 0 10px;font:600 13px 'Inter',sans-serif;color:var(--muted)}
+.wrap-card-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.wrap-card-top h3{margin:0}
+.wrap-head{font:700 20px/1.3 'Inter',sans-serif;color:var(--text);margin:6px 0 14px}
+.wrap-bars{display:flex;flex-direction:column;gap:8px}
+.wrap-bar{display:grid;grid-template-columns:minmax(140px,210px) 1fr;align-items:center;gap:10px;font-size:13px}
+.wrap-bar-l{display:flex;align-items:center;gap:8px;color:var(--text-2)}
+.wrap-bar-t{display:flex;align-items:center;gap:8px;min-width:0}
+.wrap-bar-f{height:16px;min-width:3px;background:var(--series);border-radius:0 4px 4px 0}
+.wrap-bar-n{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.wrap .dot-key{width:22px;height:22px;font-size:12px;border-width:1.5px;flex:0 0 auto}
+.wrap .dot-key:hover{background:transparent;color:var(--c)}
+.wrap-cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.wrap-sub{font:600 12px 'Inter',sans-serif;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.wrap-item{margin-bottom:10px}
+.wrap-item-t{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--text)}
+.wrap-item-n{color:var(--text-2);white-space:nowrap}
+.wrap-meter{height:8px;border-radius:4px;background:#cde2fb;margin-top:4px;overflow:hidden}
+.wrap-meter span{display:block;height:100%;background:#2a78d6;border-radius:4px}
+.wrap-foot{margin:6px 0 0;font-size:13px;color:var(--text-2)}
+.wrap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+.wrap-find{display:block;font:700 18px/1.3 'Inter',sans-serif;color:var(--text);text-decoration:none;margin-bottom:4px}
+.wrap-find:hover{text-decoration:underline}
+.wrap-line{margin:0 0 6px;font-size:14px;color:var(--text)}
+.wrap-chart{position:relative;padding-top:26px}
+.wrap-colset{display:flex;align-items:flex-end;gap:2px;height:140px;border-bottom:1px solid var(--line)}
+.wrap-col{flex:1 1 0;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;background:none;border:0;padding:0;cursor:pointer}
+.wrap-col-f{display:block;width:70%;max-width:24px;background:#86b6ef;border-radius:4px 4px 0 0}
+.wrap-col.on .wrap-col-f{background:#2a78d6}
+.wrap-col:hover .wrap-col-f,.wrap-col:focus-visible .wrap-col-f{background:#256abf}
+.wrap-col:focus-visible{outline:2px solid #aecbfa;outline-offset:2px}
+.wrap-col-v{font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:3px}
+.wrap-x{display:flex;gap:2px;margin-top:4px}
+.wrap-x span{flex:1 1 0;text-align:center;font-size:10px;color:var(--muted)}
+.wrap-tip{position:absolute;top:0;transform:translateX(-50%);background:#0b0b0b;color:#fff;border-radius:6px;padding:3px 8px;font-size:12px;white-space:nowrap;pointer-events:none;display:flex;gap:6px;z-index:2}
+.wrap-table{margin-top:10px;font-size:12px;color:var(--text-2)}
+.wrap-table summary,.wrap-all summary{cursor:pointer;color:var(--accent)}
+.wrap-table table{margin-top:6px;border-collapse:collapse}
+.wrap-table td{padding:2px 14px 2px 0;font-variant-numeric:tabular-nums}
+.wrap-all ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.wrap-all li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px}
+.wrap-all li a{color:var(--text);font-weight:600}
+@media(max-width:700px){.wrap{padding:12px 16px 60px}.wrap-big{font-size:60px}.wrap-hero{padding:22px 20px}
+  .wrap-tiles{grid-template-columns:1fr 1fr}.wrap-cols2,.wrap-grid{grid-template-columns:1fr}.wrap-item-t{flex-direction:column;gap:0}.wrap-item-n{white-space:normal}.wrap-bar{grid-template-columns:150px 1fr}
+  .wrap-actions{width:100%}.wrap-actions .btn-sm{flex:1 1 0}}
 @media(max-width:700px){.sections{position:sticky;top:52px;z-index:5}.section-btn{font-size:12px;padding:10px 2px}
   .tabs,.fresh-kinds{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}.tab,.fresh-kinds .grp{flex:0 0 auto}
   .tb-l{flex:0 0 auto}.tb-r{min-width:0;overflow-x:auto;flex-wrap:nowrap}.tb-r>*{flex:0 0 auto}}
