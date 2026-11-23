@@ -473,7 +473,7 @@ export function reviewLearnings(rows = [], checks = {}, verdicts = {}, rules = L
   let reviewed = 0;
   for (const r of rows) {
     const mark = checks[r.company_number]?.review, v = verdicts[r.company_number]?.verdict;
-    const good = mark === "open" || mark === "mine" || (!mark && v === "good");
+    const good = mark === "open" || mark === "mine" || mark === "research" || (!mark && v === "good");
     const bad = mark === "abroad" || (!mark && v === "not_fit");
     if (!good && !bad) continue;
     reviewed += 1;
@@ -532,7 +532,7 @@ export function profileMatch(good, cand) {
   const core = (good.industry && cand.industry === good.industry) || (good.niche && cand.niche === good.niche);
   return { score: max >= LIKE.minTraits && core ? got / max : 0, same };
 }
-const isGoodMark = (checks, verdicts, n) => { const m = checks[n]?.review, v = verdicts[n]?.verdict; return m === "open" || m === "mine" || (!m && v === "good"); };
+const isGoodMark = (checks, verdicts, n) => { const m = checks[n]?.review, v = verdicts[n]?.verdict; return m === "open" || m === "mine" || m === "research" || (!m && v === "good"); };
 const isBadMark = (checks, verdicts, n) => { const m = checks[n]?.review, v = verdicts[n]?.verdict; return m === "abroad" || (!m && v === "not_fit"); };
 // The good leads among the rows (Zac's marks), newest mark first: [{company_number, company_name, profile}].
 export function goodLeads(rows = [], checks = {}, verdicts = {}) {
@@ -597,7 +597,7 @@ export function matchCompanies(text = "", rows = []) {
 // any heading take `fallback`. [{mark: {review} | {verdict: "not_fit", reason}, label, text}] in the order given.
 export const MARK_HEADINGS = [[/^added to mine$/i, { review: "mine" }, "Added to mine"], [/^open lead$/i, { review: "open" }, "Open lead"],
   [/^owned abroad$/i, { review: "abroad" }, "Owned abroad"], [/^good lead$/i, { verdict: "good" }, "Good lead"],
-  [/^skip(?:ped)?$/i, { review: "skip" }, "Skipped"]];
+  [/^skip(?:ped)?$/i, { review: "skip" }, "Skipped"], [/^research(?: harder)?$/i, { review: "research" }, "Research harder"]];
 export function markSections(text = "", fallback = { review: "mine" }) {
   const out = [];
   let cur = { mark: fallback, label: MARK_HEADINGS.find(([, m]) => JSON.stringify(m) === JSON.stringify(fallback))?.[2] || "Added to mine", text: "" };
@@ -732,9 +732,15 @@ export const TODAYS_LIST = 25;
 // Owned abroad and Skip (Zac, 23 Nov 2026: "add the buttons current client and owned abroad"): Skip takes a company off
 // with no reason kept — use it for one the bank already has; which companies those are never comes onto the site.
 export const TODAYS_MARKS = [
-  ["good", "✓", "Good lead"], ["small", "✕", "Not enough revenue"], ["open", "●", "Open lead"], ["call", "☎", "Call list"],
-  ["abroad", "✈\uFE0E", "Owned abroad"], ["skip", "»", "Skip (no reason kept)"],
+  ["good", "✓", "Good lead"], ["research", "?", "Good lead, no contact info: research harder"], ["small", "✕", "Not enough revenue"],
+  ["open", "●", "Open lead"], ["call", "☎", "Call list"], ["abroad", "✈\uFE0E", "Owned abroad"], ["skip", "»", "Skip (no reason kept)"],
 ];
+// The Research harder list (Zac, 23 Nov 2026: "good lead but no contact info and add it to a research harder section"):
+// marked "research" (a good lead in the feedback loop), not put on a list since, not out; newest mark first.
+export function researchList(rows, { checks = {}, lists = {}, contacted = {} } = {}) {
+  return rows.filter((r) => checks[r.company_number]?.review === "research" && !lists[r.company_number] && !contacted[r.company_number] && !isOut(r))
+    .sort((a, b) => String(checks[b.company_number].review_at || "").localeCompare(String(checks[a.company_number].review_at || "")));
+}
 export function todaysList(rows, { contacted = {}, checks = {}, verdicts = {}, lists = {} } = {}) {
   const marked = (n) => contacted[n] || checks[n]?.review || verdicts[n] || lists[n];
   const judged = new Set(rows.filter((r) => marked(r.company_number)).map(groupKey));
