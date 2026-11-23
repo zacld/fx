@@ -465,31 +465,51 @@ export function leadSource(r) {
   return "Niche search";
 }
 
-// What Zac's own checks say (the feedback loop): for each source, niche and industry, how many leads he marked good
-// (Open lead / Added to mine on the Simplified dash, or Good lead) against not (Owned abroad, or Not a fit), and the
-// lean the lead score takes from it (LEAD_POINTS review*). `checks` / `verdicts` are the page's own store items.
-export function reviewLearnings(rows = [], checks = {}, verdicts = {}, rules = LEAD_POINTS) {
+// What a mark says about a lead (Zac, 23 Nov 2026: "if a bank had an open lead or they were using, I just put them as
+// open; the skips were either could not find the finance director at all"): "good" — a new prospect (Good lead,
+// Research harder, Added to mine, or put on the call / email / mail list); "taken" — Open lead: not a new prospect;
+// "bad" — Not a fit, Owned abroad; "neutral" — Skip (no finance director found); null — unmarked. A review mark (the
+// buttons) outranks a verdict, and a list beats both: he means to work it.
+export function markClass(n, { checks = {}, verdicts = {}, lists = {} } = {}) {
+  const m = checks[n]?.review, v = verdicts[n]?.verdict;
+  if (lists[n]?.list) return "good";
+  if (m === "abroad") return "bad";
+  if (m === "research" || m === "mine") return "good";
+  if (m === "open") return "taken";
+  if (m === "skip") return "neutral";
+  if (v === "good") return "good";
+  if (v === "not_fit") return "bad";
+  return null;
+}
+// What Zac's own checks say (the feedback loop): for each source, niche and industry, how many of the leads he judged
+// were new prospects (markClass "good") against already open ("taken") or not a fit / owned abroad ("bad") — skips
+// (no FD found) aren't a judgement of the company — and the lean the lead score takes from it (LEAD_POINTS review*):
+// with reviewMin+ judged, a niche or source at reviewLift × his usual rate or better lifts its leads, one at
+// reviewSink × or under lowers them — so the score steers to where new prospects come from, away from where the
+// companies are already open. `checks` / `verdicts` / `lists` are the page's own store items.
+export function reviewLearnings(rows = [], checks = {}, verdicts = {}, rules = LEAD_POINTS, lists = {}) {
   const groups = { source: {}, niche: {}, industry: {} };
-  let reviewed = 0;
+  let reviewed = 0, goods = 0;
   for (const r of rows) {
-    const mark = checks[r.company_number]?.review, v = verdicts[r.company_number]?.verdict;
-    const good = mark === "open" || mark === "mine" || mark === "research" || (!mark && v === "good");
-    const bad = mark === "abroad" || (!mark && v === "not_fit");
-    if (!good && !bad) continue;
+    const cls = markClass(r.company_number, { checks, verdicts, lists });
+    if (!cls || cls === "neutral") continue;
     reviewed += 1;
+    if (cls === "good") goods += 1;
     for (const [kind, key] of [["source", leadSource(r)], ["niche", r.fx_niche || "(no niche)"], ["industry", industryOf(r)]]) {
-      const g = (groups[kind][key] ||= { key, good: 0, not: 0 });
-      g[good ? "good" : "not"] += 1;
+      const g = (groups[kind][key] ||= { key, good: 0, not: 0, taken: 0 });
+      g[cls === "good" ? "good" : cls === "taken" ? "taken" : "not"] += 1;
     }
   }
+  const usual = reviewed ? Math.round((100 * goods) / reviewed) : 0;
   const lean = { source: {}, niche: {} };
   const done = (kind) => Object.values(groups[kind]).map((g) => {
-    const n = g.good + g.not, share = Math.round((100 * g.good) / n);
-    const points = n < rules.reviewMin ? 0 : share >= rules.reviewGoodShare ? rules.reviewGood : share <= rules.reviewPoorShare ? rules.reviewPoor : 0;
-    if (points && lean[kind] && g.key !== "(no niche)") lean[kind][g.key] = { key: g.key, share, reviewed: n, points };
+    const n = g.good + g.not + g.taken, share = Math.round((100 * g.good) / n);
+    const points = n < rules.reviewMin || !usual ? 0 : share >= usual * rules.reviewLift ? rules.reviewGood
+      : share <= usual * rules.reviewSink ? rules.reviewPoor : 0;
+    if (points && lean[kind] && g.key !== "(no niche)") lean[kind][g.key] = { key: g.key, share, reviewed: n, points, usual };
     return { ...g, reviewed: n, good_share: share, points };
   }).sort((a, b) => b.reviewed - a.reviewed);
-  return { reviewed, source: done("source"), niche: done("niche"), industry: done("industry"), lean };
+  return { reviewed, usual, source: done("source"), niche: done("niche"), industry: done("industry"), lean };
 }
 
 // Lookalikes by profile (Zac, 22 Nov 2026: "make it incredible" — the customs lookalikes can't help holding companies,
@@ -532,23 +552,25 @@ export function profileMatch(good, cand) {
   const core = (good.industry && cand.industry === good.industry) || (good.niche && cand.niche === good.niche);
   return { score: max >= LIKE.minTraits && core ? got / max : 0, same };
 }
-const isGoodMark = (checks, verdicts, n) => { const m = checks[n]?.review, v = verdicts[n]?.verdict; return m === "open" || m === "mine" || m === "research" || (!m && v === "good"); };
-const isBadMark = (checks, verdicts, n) => { const m = checks[n]?.review, v = verdicts[n]?.verdict; return m === "abroad" || (!m && v === "not_fit"); };
-// The good leads among the rows (Zac's marks), newest mark first: [{company_number, company_name, profile}].
-export function goodLeads(rows = [], checks = {}, verdicts = {}) {
-  const at = (n) => String(checks[n]?.review_at || verdicts[n]?.at || "");
-  return rows.filter((r) => r.company_number && isGoodMark(checks, verdicts, r.company_number))
-    .sort((a, b) => at(b.company_number).localeCompare(at(a.company_number))).slice(0, LIKE.maxGood)
+const isGoodMark = (checks, verdicts, n, lists = {}) => markClass(n, { checks, verdicts, lists }) === "good";
+const isBadMark = (checks, verdicts, n, lists = {}) => markClass(n, { checks, verdicts, lists }) === "bad";
+// The good leads among the rows (Zac's marks: new prospects), best rated then newest first: [{company_number,
+// company_name, profile}].
+export function goodLeads(rows = [], checks = {}, verdicts = {}, lists = {}) {
+  const at = (n) => String(lists[n]?.at || checks[n]?.review_at || verdicts[n]?.at || "");
+  const rate = (n) => Number(verdicts[n]?.rating) || 0;
+  return rows.filter((r) => r.company_number && isGoodMark(checks, verdicts, r.company_number, lists))
+    .sort((a, b) => rate(b.company_number) - rate(a.company_number) || at(b.company_number).localeCompare(at(a.company_number))).slice(0, LIKE.maxGood)
     .map((r) => ({ company_number: r.company_number, company_name: r.company_name, profile: leadProfile(r) }));
 }
 // {company number: {like, like_name, score, same}} — each unmarked lead's closest good lead, when it shares LIKE.min.
-export function likeGoodLeads(rows = [], checks = {}, verdicts = {}) {
-  const good = goodLeads(rows, checks, verdicts);
+export function likeGoodLeads(rows = [], checks = {}, verdicts = {}, lists = {}) {
+  const good = goodLeads(rows, checks, verdicts, lists);
   const out = {};
   if (!good.length) return out;
   for (const r of rows) {
     const n = r.company_number;
-    if (!n || isGoodMark(checks, verdicts, n) || isBadMark(checks, verdicts, n)) continue;
+    if (!n || markClass(n, { checks, verdicts, lists })) continue;
     const p = leadProfile(r);
     let best = null;
     for (const g of good) {
@@ -621,7 +643,7 @@ export function markSections(text = "", fallback = { review: "mine" }) {
 // (Fit 60+), how many he has checked and how many of those were good — so the finding effort goes where his good leads
 // come from — and the well-fitting leads still waiting for a look. [{key, leads, fit60, checked, good, not, good_share,
 // waiting}] per kind, most good first.
-export function scoreboard(rows = [], checks = {}, verdicts = {}) {
+export function scoreboard(rows = [], checks = {}, verdicts = {}, lists = {}) {
   const kinds = { source: (r) => leadSource(r), niche: (r) => r.fx_niche || "(no niche)", industry: (r) => industryOf(r) };
   const out = {};
   for (const [kind, keyOf] of Object.entries(kinds)) {
@@ -629,7 +651,8 @@ export function scoreboard(rows = [], checks = {}, verdicts = {}) {
     for (const r of rows) {
       if (!r.company_number || r.dropped) continue;
       const g = (by[keyOf(r)] ||= { key: keyOf(r), leads: 0, fit60: 0, checked: 0, good: 0, not: 0, waiting: 0 });
-      const good = isGoodMark(checks, verdicts, r.company_number), bad = isBadMark(checks, verdicts, r.company_number);
+      const cls = markClass(r.company_number, { checks, verdicts, lists });
+      const good = cls === "good", bad = cls === "bad" || cls === "taken";
       if (good) g.good += 1;
       if (bad) g.not += 1;
       if (good || bad) g.checked += 1;
@@ -729,11 +752,12 @@ export function freshFind(r, today = new Date()) {
 // judged the group), not out, no serious reason not to progress, Fit FIT.min+, one per group. A mark takes a lead off
 // and the next one moves up.
 export const TODAYS_LIST = 25;
-// Owned abroad and Skip (Zac, 23 Nov 2026: "add the buttons current client and owned abroad"): Skip takes a company off
-// with no reason kept — use it for one the bank already has; which companies those are never comes onto the site.
+// Owned abroad and Skip (Zac, 23 Nov 2026: "add the buttons current client and owned abroad"). What he means by them
+// (Zac, 23 Nov 2026): Open lead — already open, not a new prospect; Skip — no finance director found (no judgement of the
+// company). The scanner learns from them that way (markClass).
 export const TODAYS_MARKS = [
   ["good", "✓", "Good lead"], ["research", "?", "Good lead, no contact info: research harder"], ["small", "✕", "Not enough revenue"],
-  ["open", "●", "Open lead"], ["call", "☎", "Call list"], ["abroad", "✈\uFE0E", "Owned abroad"], ["skip", "»", "Skip (no reason kept)"],
+  ["open", "●", "Open lead (already open)"], ["call", "☎", "Call list"], ["abroad", "✈\uFE0E", "Owned abroad"], ["skip", "»", "Skip (no FD found)"],
 ];
 // The Research harder list (Zac, 23 Nov 2026: "good lead but no contact info and add it to a research harder section"):
 // marked "research" (a good lead in the feedback loop), not put on a list since, not out; newest mark first.
@@ -1130,9 +1154,11 @@ export const LEAD_POINTS = {
   // Zac, 13 Nov 2026: "if a company is NAME then UK, score it lower — it's obviously got an overseas owner"
   ukArmName: -10,
   // The feedback loop (Zac's origination ideas, 21 Nov 2026: "use previously identified successful prospects to teach
-  // the scanner"): his own marks — Open lead / Added to mine / Good lead count good, Owned abroad / Not a fit count not —
-  // give each niche and source a good-lead rate (`reviewLearnings`); with reviewMin+ checked, one mostly good lifts its
-  // leads, one mostly not lowers them. Nothing from the CRM: only his clicks on this page.
+  // the scanner"): his own marks (markClass) — Good lead / Research harder / Added to mine / a list count as new
+  // prospects; Open lead, Not a fit and Owned abroad as not; Skip (no FD found) not at all — give each niche and source
+  // a new-prospect rate (`reviewLearnings`); with reviewMin+ judged, one at reviewLift × his usual rate lifts its leads,
+  // one at reviewSink × or under lowers them (23 Nov 2026: Open means already open, so it stopped counting as good).
+  // Nothing from the CRM: only his clicks on this page.
   // Overseas operations (Zac's origination ideas, 21 Nov 2026: "UK software companies paying developers in Poland,
   // call centres in South Africa, outsourcing to the Philippines or Eastern Europe"): teams in an offshore hub mean
   // payroll and supplier payments abroad every month — FX found through what a company does, not its sector code.
@@ -1141,7 +1167,7 @@ export const LEAD_POINTS = {
                        // 22 Nov 2026: 38% of the leads Zac took had a sector code that hides them, v 23% of the top 300)
   quietNiche: 6,       // an emerging niche or a customs-goods trader niche: few bankers search them (his picks 20% v 7%)
   likeGood: 8,         // shares most of a good lead's profile (likeGoodLeads): industry / niche, size, FX proof, structure
-  reviewGood: 8, reviewPoor: -8, reviewMin: 5, reviewGoodShare: 60, reviewPoorShare: 25,
+  reviewGood: 8, reviewPoor: -8, reviewMin: 5, reviewLift: 1.5, reviewSink: 0.5,
   // Deals (Zac, 12 Nov 2026: "filed recently with an FX loss and a new FD, or purchasing subsidiaries … just funded or
   // just bought by PE"): buying companies 15, bought by private equity 15, just funded 10, a new overseas owner or an
   // employee ownership trust 10, and the hit-list combo — a recent FX loss with a new FD / a purchase / a PE deal — 15.
@@ -1272,7 +1298,7 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   const niche = niches[r.fx_niche];
   if (niche) add(rules.nicheByTier[niche.tier] || 0, `Niche: ${r.fx_niche} (${niche.hit_rate}% of its companies prove FX)`);
   const lean = reviews?.lean?.niche?.[r.fx_niche] || reviews?.lean?.source?.[leadSource(r)];
-  if (lean) addQuiet(lean.points, `Your checks: ${lean.share}% of ${lean.key} leads were good (${lean.reviewed} checked)`);
+  if (lean) addQuiet(lean.points, `Your checks: ${lean.share}% of ${lean.key} leads were new prospects (${lean.reviewed} judged; your usual ${lean.usual ?? "–"}%)`);
   const like = likes?.[r.company_number];
   if (like) addQuiet(rules.likeGood, `Like your good lead ${like.like_name} (${like.same.slice(0, 4).join(", ")})`);
   const recent = (signals[r.company_number] || []).filter((s) => String(s.at || "").slice(0, 10) >= day(rules.signalDays));

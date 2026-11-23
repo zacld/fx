@@ -7,13 +7,15 @@ import { chCompanyUrl, growthPct, hedgingNamed, hiddenFromFilters, inCoreBand, i
 import { SEQUENCE } from "./sequence.js";
 import { touchesOf } from "./followups.js";
 
-// [key, label, group]: keep — worth going after; drop — not for us; skip — off the list with no reason kept (neutral,
-// as in the feedback loop). The first seven are Today's list's buttons; the rest are marks made on other tabs.
+// [key, label, group] (what each mark means — Zac, 23 Nov 2026 — as markClass in format.js): keep — a new prospect;
+// taken — Open lead, already open, not new; drop — not for us; skip — no finance director found (no judgement of the
+// company, left out of the rates). The first seven are Today's list's buttons; the rest are marks made on other tabs.
 export const OUTCOMES = [
-  ["good", "Good lead", "keep"], ["research", "Research harder", "keep"], ["open", "Open lead", "keep"],
-  ["call", "Call list", "keep"], ["mine", "Added to mine", "keep"], ["email", "Email list", "keep"], ["post", "Mail list", "keep"],
+  ["good", "Good lead", "keep"], ["research", "Research harder", "keep"], ["call", "Call list", "keep"],
+  ["mine", "Added to mine", "keep"], ["email", "Email list", "keep"], ["post", "Mail list", "keep"],
+  ["open", "Open lead (already open)", "taken"],
   ["small", "Not enough revenue", "drop"], ["abroad", "Owned abroad", "drop"], ["notfit", "Not a fit (other reason)", "drop"],
-  ["skip", "Skipped", "skip"],
+  ["skip", "Skipped (no FD found)", "skip"],
 ];
 const GROUP = Object.fromEntries(OUTCOMES.map(([k, , g]) => [k, g]));
 export const outcomeLabel = (k) => OUTCOMES.find(([x]) => x === k)?.[1] || k;
@@ -52,23 +54,26 @@ function perDay(actions) {
   return new Map([...days].map(([d, s]) => [d, s.size]));
 }
 
-// Each key's keep / drop / skip counts; rate = kept ÷ (kept + dropped), skips aside.
+// Each key's new / open / not-for-us / skipped counts; rate = new ÷ (new + open + not for us), skips aside.
+const rateOf = (e) => (e.keep + e.taken + e.drop ? e.keep / (e.keep + e.taken + e.drop) : null);
 function tally(items, keyOf) {
   const t = new Map();
   for (const it of items) {
     const key = keyOf(it) || "(none)";
-    const e = t.get(key) || { key, keep: 0, drop: 0, skip: 0, total: 0, drops: {} };
+    const e = t.get(key) || { key, keep: 0, taken: 0, drop: 0, skip: 0, total: 0, drops: {} };
     e[GROUP[it.kind]] += 1;
     e.total += 1;
-    if (GROUP[it.kind] === "drop") e.drops[it.kind] = (e.drops[it.kind] || 0) + 1;
+    if (GROUP[it.kind] === "drop" || GROUP[it.kind] === "taken") e.drops[it.kind] = (e.drops[it.kind] || 0) + 1;
     t.set(key, e);
   }
-  return [...t.values()].map((e) => ({ ...e, rate: e.keep + e.drop ? e.keep / (e.keep + e.drop) : null,
+  return [...t.values()].map((e) => ({ ...e, judged: e.keep + e.taken + e.drop, rate: rateOf(e),
     mainDrop: Object.entries(e.drops).sort((a, b) => b[1] - a[1])[0]?.[0] || "" }));
 }
-// What worked: the most kept, then the best rate. What didn't: two or more judged, a third or fewer kept, most dropped first.
+// What worked: the most new prospects, then the best rate. What didn't land: three or more judged and half the day's
+// usual new-prospect rate or less (a third or less when there's no usual yet), the most not-new first.
 const worked = (t) => t.filter((e) => e.keep > 0).sort((a, b) => b.keep - a.keep || b.rate - a.rate || b.total - a.total).slice(0, 4);
-const didnt = (t) => t.filter((e) => e.keep + e.drop >= 2 && e.rate <= 1 / 3).sort((a, b) => b.drop - a.drop || a.rate - b.rate).slice(0, 4);
+const didnt = (t, usual) => t.filter((e) => e.judged >= 3 && e.rate <= (usual ? usual / 2 : 1 / 3))
+  .sort((a, b) => (b.judged - b.keep) - (a.judged - a.keep) || a.rate - b.rate).slice(0, 4);
 
 const avg = (xs) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
 const median = (xs) => { if (!xs.length) return null; const s = [...xs].sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
@@ -96,8 +101,9 @@ export const SIGNALS = [
 ];
 const safely = (test, r) => { try { return Boolean(test(r)); } catch { return false; } };
 const judged = (xs) => {
-  const keep = xs.filter((a) => GROUP[a.kind] === "keep").length, drop = xs.filter((a) => GROUP[a.kind] === "drop").length;
-  return { looked: xs.length, keep, drop, skip: xs.length - keep - drop, rate: keep + drop ? keep / (keep + drop) : null };
+  const n = (g) => xs.filter((a) => GROUP[a.kind] === g).length;
+  const e = { looked: xs.length, keep: n("keep"), taken: n("taken"), drop: n("drop"), skip: n("skip") };
+  return { ...e, rate: rateOf(e) };
 };
 
 /**
@@ -115,10 +121,12 @@ export function dayWrap(rows = [], { checks = {}, verdicts = {}, lists = {}, con
   const counts = Object.fromEntries(OUTCOMES.map(([k]) => [k, 0]));
   for (const a of marked) counts[a.kind] += 1;
   const groupCount = (g) => marked.filter((a) => GROUP[a.kind] === g).length;
-  const keep = groupCount("keep"), drop = groupCount("drop"), skip = groupCount("skip");
+  const keep = groupCount("keep"), taken = groupCount("taken"), drop = groupCount("drop"), skip = groupCount("skip");
+  const usual = keep + taken + drop ? keep / (keep + taken + drop) : null;
 
   const known = marked.filter((a) => a.r);
-  const keepers = known.filter((a) => GROUP[a.kind] === "keep"), drops = known.filter((a) => GROUP[a.kind] === "drop");
+  // the new prospects against the rest he judged (already open, not for us) — skips (no FD found) aside
+  const keepers = known.filter((a) => GROUP[a.kind] === "keep"), drops = known.filter((a) => GROUP[a.kind] === "drop" || GROUP[a.kind] === "taken");
   const tallies = {
     sector: tally(marked, (a) => (a.r ? industryOf(a.r) : "Not on the lists")),
     niche: tally(known, (a) => a.r.fx_niche || "(no niche)"),
@@ -188,7 +196,7 @@ export function dayWrap(rows = [], { checks = {}, verdicts = {}, lists = {}, con
   };
   const depth = {
     marks: OUTCOMES.filter(([k]) => counts[k]).map(([k, label]) => ({ key: k, label, count: counts[k], share: marked.length ? counts[k] / marked.length : 0 })),
-    sector: tallies.sector.map((e) => ({ ...e, share: marked.length ? e.total / marked.length : 0 })).sort((a, b) => b.total - a.total || b.keep - a.keep),
+    sector: [...tallies.sector].map((e) => ({ ...e, share: marked.length ? e.total / marked.length : 0 })).sort((a, b) => b.total - a.total || b.keep - a.keep),
     size: table(known, (a) => sizeBand(a.r), SIZE_BANDS),
     score: table(known, (a) => scoreBand(a.r), SCORE_BANDS),
     niche: table(known, (a) => a.r.fx_niche || "(no niche)"),
@@ -198,10 +206,10 @@ export function dayWrap(rows = [], { checks = {}, verdicts = {}, lists = {}, con
   };
 
   return {
-    day, looked: marked.length, keep, drop, skip, counts, marked,
-    keepRate: keep + drop ? Math.round((100 * keep) / (keep + drop)) : null,
+    day, looked: marked.length, keep, taken, drop, skip, counts, marked,
+    keepRate: usual == null ? null : Math.round(100 * usual),
     worked: { sector: worked(tallies.sector), niche: worked(tallies.niche), source: worked(tallies.source) },
-    didnt: { sector: didnt(tallies.sector), niche: didnt(tallies.niche), source: didnt(tallies.source) },
+    didnt: { sector: didnt(tallies.sector, usual), niche: didnt(tallies.niche, usual), source: didnt(tallies.source, usual) },
     best: best && { company_number: best.n, company_name: best.r.company_name, kind: best.kind, lead_score: best.r.lead_score,
       industry: industryOf(best.r), turnover: sizeOf(best.r), turnover_basis: best.r.turnover_basis || "" },
     scores: { keep: score(keepers), drop: score(drops) }, sizes: { keep: size(keepers), drop: size(drops) },
@@ -220,13 +228,14 @@ export function wrapText(w) {
   if (!w.looked) return `${dayLabel(w.day)}: no leads marked.`;
   const part = (keys) => keys.filter((k) => w.counts[k]).map((k) => `${w.counts[k]} ${outcomeLabel(k).toLowerCase()}`).join(", ");
   const lines = [`${dayLabel(w.day)} — ${w.looked} leads looked through.`];
-  if (w.keep) lines.push(`Keepers: ${w.keep} (${part(["good", "research", "open", "call", "mine", "email", "post"])}).`);
+  if (w.keep) lines.push(`New prospects: ${w.keep} (${part(["good", "research", "call", "mine", "email", "post"])}).`);
+  if (w.taken) lines.push(`Already open: ${w.taken}.`);
   if (w.drop) lines.push(`Not for us: ${w.drop} (${part(["small", "abroad", "notfit"])}).`);
-  if (w.skip) lines.push(`Skipped: ${w.skip}.`);
+  if (w.skip) lines.push(`Skipped, no FD found: ${w.skip}.`);
   const s = w.worked.sector[0];
-  if (s) lines.push(`Best sector: ${s.key} (${s.keep} of ${s.keep + s.drop} kept).`);
+  if (s) lines.push(`Best sector: ${s.key} (${s.keep} new of ${s.judged} judged).`);
   const d = w.didnt.sector[0];
-  if (d) lines.push(`Didn't land: ${d.key} (${d.keep} of ${d.keep + d.drop} kept).`);
+  if (d) lines.push(`Didn't land: ${d.key} (${d.keep} new of ${d.judged} judged).`);
   if (w.best) lines.push(`Best find: ${w.best.company_name} (score ${w.best.lead_score}).`);
   const done = [w.done.call && `${w.done.call} calls`, w.done.email && `${w.done.email} emails`, w.done.linkedin && `${w.done.linkedin} LinkedIn`,
     w.done.contacted && `${w.done.contacted} contacted`].filter(Boolean);
@@ -235,11 +244,11 @@ export function wrapText(w) {
 }
 
 // Finish day (Zac, 23 Nov 2026: "a button … finish day, then it will compile the report and a document with the good lead
-// names I can put on Notion"): the day's report as one document — the summary, then every keeper by its mark (best lead
-// score first) with its Companies House link, website, industry, size, score and his note, then what was ruled out.
-// Skipped companies are counted, never named (Skip is how he takes off a company the bank already has).
+// names I can put on Notion"): the day's report as one document — the summary, then every new prospect by its mark (best
+// lead score first) with its Companies House link, website, industry, size, score and his note, then what was ruled out
+// and the skips (no FD found — worth another go). Open leads are counted, never named: already open.
 export const REPORT_SECTIONS = [
-  ["good", "Good leads"], ["research", "Good leads to research harder (no contact found yet)"], ["open", "Open leads"],
+  ["good", "Good leads"], ["research", "Good leads to research harder (no contact found yet)"],
   ["call", "Added to the call list"], ["mine", "Added to mine"], ["email", "Added to the email list"], ["post", "Added to the mail list"],
 ];
 const DROPS = [["small", "Not enough revenue"], ["abroad", "Owned abroad"], ["notfit", "Not a fit (other reason)"]];
@@ -264,18 +273,19 @@ export function dayReport(w, notes = {}) {
   const dp = w.depth;
   if (!w.looked) summary.push("No leads marked.");
   else {
-    summary.push(`${plural(w.looked, "lead")} looked through: ${plural(w.keep, "keeper")}${share(w.keep)}, ${w.drop} not for us${share(w.drop)}, ${w.skip} skipped${share(w.skip)}`
-      + `${w.keepRate != null ? ` — ${w.keepRate}% of those judged kept` : ""}.`);
+    summary.push(`${plural(w.looked, "lead")} looked through: ${plural(w.keep, "new prospect")}${share(w.keep)}, ${w.taken} already open${share(w.taken)}, `
+      + `${w.drop} not for us${share(w.drop)}, ${w.skip} skipped — no FD found${share(w.skip)}`
+      + `${w.keepRate != null ? `. ${w.keepRate}% of those judged were new prospects` : ""}.`);
     const most = dp.sector[0];
-    if (most) summary.push(`Most looked at: ${most.key} — ${most.total} (${pct(most.share)} of the day), ${most.keep} kept.`);
-    const sign = dp.signals.filter((x) => x.lift != null && x.with.keep + x.with.drop >= 3 && x.without.keep + x.without.drop >= 3)
+    if (most) summary.push(`Most looked at: ${most.key} — ${most.total} (${pct(most.share)} of the day), ${most.keep} new.`);
+    const sign = dp.signals.filter((x) => x.lift != null && x.with.keep + x.with.taken + x.with.drop >= 3 && x.without.keep + x.without.taken + x.without.drop >= 3)
       .sort((a, b) => b.lift - a.lift)[0];
-    if (sign && sign.lift > 0) summary.push(`Strongest sign of a keeper: ${sign.label.toLowerCase()} — ${pct(sign.with.rate)} kept with it, ${pct(sign.without.rate)} without.`);
-    const sd = w.depth.size.filter((e) => e.keep + e.drop >= 2).sort((a, b) => b.rate - a.rate || b.keep - a.keep)[0];
-    if (sd) summary.push(`Best size band: ${sd.key} — ${sd.keep} of ${sd.keep + sd.drop} kept.`);
+    if (sign && sign.lift > 0) summary.push(`Strongest sign of a new prospect: ${sign.label.toLowerCase()} — ${pct(sign.with.rate)} new with it, ${pct(sign.without.rate)} without.`);
+    const sd = w.depth.size.filter((e) => e.judged >= 3).sort((a, b) => b.rate - a.rate || b.keep - a.keep)[0];
+    if (sd) summary.push(`Best size band: ${sd.key} — ${sd.keep} new of ${sd.judged} judged.`);
     const s = w.worked.sector[0], d = w.didnt.sector[0];
-    if (s) summary.push(`Best sector: ${s.key} — ${s.keep} of ${s.keep + s.drop} kept.`);
-    if (d) summary.push(`Didn't land: ${d.key} — ${d.keep} of ${d.keep + d.drop} kept${d.mainDrop ? `, mostly ${outcomeLabel(d.mainDrop).toLowerCase()}` : ""}.`);
+    if (s) summary.push(`Best sector: ${s.key} — ${s.keep} new of ${s.judged} judged.`);
+    if (d) summary.push(`Didn't land: ${d.key} — ${d.keep} new of ${d.judged} judged${d.mainDrop ? `, mostly ${outcomeLabel(d.mainDrop).toLowerCase()}` : ""}.`);
     if (w.best) summary.push(`Best find: ${w.best.company_name} (score ${w.best.lead_score}).`);
     if (w.pace.first) {
       summary.push(`Worked ${clockOf(w.pace.first.toISOString())}${w.pace.minutes ? `–${clockOf(w.pace.last.toISOString())}` : ""}${w.pace.perHour ? `, about ${w.pace.perHour} leads an hour` : ""}.`);
@@ -288,40 +298,41 @@ export function dayReport(w, notes = {}) {
   const vs = [w.before.count ? `${w.before.count} on ${dayLabel(w.before.day)}` : "", w.average != null ? `average day ${w.average}` : "",
     w.streak > 1 ? `${w.streak} days in a row` : ""].filter(Boolean);
   if (w.looked && vs.length) summary.push(`Against other days: ${vs.join(" · ")}.`);
-  const notFor = DROPS.filter(([k]) => w.counts[k]).map(([k, label]) => ({
-    label, count: w.counts[k], names: w.marked.filter((a) => a.kind === k).map((a) => a.r?.company_name || a.n),
-  }));
-  return { title: `Day report — ${dayLabel(w.day)}`, day: w.day, summary, tables: depthTables(w), sections, notFor, skipped: w.skip,
+  const named = (k) => w.marked.filter((a) => a.kind === k).map((a) => a.r?.company_name || a.n);
+  const notFor = [...DROPS, ["skip", "Skipped — no finance director found (worth another go)"]].filter(([k]) => w.counts[k])
+    .map(([k, label]) => ({ label, count: w.counts[k], names: named(k) }));
+  return { title: `Day report — ${dayLabel(w.day)}`, day: w.day, summary, tables: depthTables(w), sections, notFor, open: w.taken,
     keepers: sections.flatMap((sec) => sec.items) };
 }
 
 const pct = (x) => (x == null ? "–" : `${Math.round(100 * x)}%`);
-const CUT_HEAD = ["Looked at", "% of day", "Kept", "Not for us", "Skipped", "Kept %"];
+const CUT_HEAD = ["Looked at", "% of day", "New", "Open", "Not for us", "Skipped", "New %"];
+const CUT_MINOR = [4, 5, 6];
 const cutRows = (rows, limit = rows.length) => rows.slice(0, limit).map((e) => ({
-  cells: [e.key, String(e.total), pct(e.share), String(e.keep), String(e.drop), String(e.skip), pct(e.rate)], rate: e.rate }));
+  cells: [e.key, String(e.total), pct(e.share), String(e.keep), String(e.taken), String(e.drop), String(e.skip), pct(e.rate)], rate: e.rate }));
 // The day's numbers as tables — {key, title, head, rows: [{cells, rate}], foot?, note?, meter?, minor?: the columns a
 // phone leaves out (the report and downloads keep them)} — shared by the page,
 // the Markdown and the HTML, so all three say the same.
 export function depthTables(w) {
   const d = w.depth, t = d.totals;
-  const totalRow = (label, x) => ({ cells: [label, String(x.days), String(x.looked), String(x.keep), String(x.drop), String(x.skip), pct(x.rate)], rate: x.rate });
+  const totalRow = (label, x) => ({ cells: [label, String(x.days), String(x.looked), String(x.keep), String(x.taken), String(x.drop), String(x.skip), pct(x.rate)], rate: x.rate });
   return [
     { key: "marks", title: "How you marked them", head: ["Mark", "Companies", "% of day"],
       rows: d.marks.map((m) => ({ cells: [m.label, String(m.count), pct(m.share)] })), foot: ["Total", String(w.looked), w.looked ? "100%" : "–"] },
-    { key: "sector", title: "Type of company", head: ["Type of company", ...CUT_HEAD], rows: cutRows(d.sector), meter: true, minor: [4, 5] },
-    { key: "size", title: "Size (filed turnover)", head: ["Turnover", ...CUT_HEAD], rows: cutRows(d.size), meter: true, minor: [4, 5] },
-    { key: "score", title: "Lead score", head: ["Score", ...CUT_HEAD], rows: cutRows(d.score), meter: true, minor: [4, 5],
-      note: "Does the ranking agree with you? A higher kept % in the higher bands says it does." },
-    { key: "signals", title: "Signs of a keeper: kept % with and without", head: ["Sign in the records", "With it", "Kept % with", "Without", "Kept % without", "Difference"],
+    { key: "sector", title: "Type of company", head: ["Type of company", ...CUT_HEAD], rows: cutRows(d.sector), meter: true, minor: CUT_MINOR },
+    { key: "size", title: "Size (filed turnover)", head: ["Turnover", ...CUT_HEAD], rows: cutRows(d.size), meter: true, minor: CUT_MINOR },
+    { key: "score", title: "Lead score", head: ["Score", ...CUT_HEAD], rows: cutRows(d.score), meter: true, minor: CUT_MINOR,
+      note: "Does the ranking agree with you? A higher new % in the higher bands says it does." },
+    { key: "signals", title: "Signs of a new prospect: new % with and without", head: ["Sign in the records", "With it", "New % with", "Without", "New % without", "Difference"],
       rows: d.signals.map((x) => ({ cells: [x.label, String(x.with.looked), pct(x.with.rate), String(x.without.looked), pct(x.without.rate),
         x.lift == null ? "–" : `${x.lift >= 0 ? "+" : "−"}${Math.round(Math.abs(100 * x.lift))} pts`] })), minor: [1, 3, 4],
-      note: "Kept % = keepers ÷ (keepers + not for us); skipped companies are left out." },
-    { key: "niche", title: "Niches", head: ["Niche", ...CUT_HEAD], rows: cutRows(d.niche, 15), meter: true, minor: [4, 5],
+      note: "New % = new prospects ÷ (new prospects + already open + not for us); skips (no FD found) are left out." },
+    { key: "niche", title: "Niches", head: ["Niche", ...CUT_HEAD], rows: cutRows(d.niche, 15), meter: true, minor: CUT_MINOR,
       note: d.niche.length > 15 ? `The 15 most looked at of ${d.niche.length}.` : "" },
-    { key: "source", title: "Where they came from", head: ["Source", ...CUT_HEAD], rows: cutRows(d.source), meter: true, minor: [4, 5] },
-    { key: "hourly", title: "Hour by hour", head: ["Hour", ...CUT_HEAD], rows: cutRows(d.hourly), meter: true, minor: [4, 5] },
-    { key: "totals", title: "Running totals", head: ["Period", "Days worked", "Looked at", "Kept", "Not for us", "Skipped", "Kept %"],
-      rows: [totalRow("This week", t.week), totalRow("This month", t.month), totalRow("All time", t.all)], meter: true, minor: [4, 5],
+    { key: "source", title: "Where they came from", head: ["Source", ...CUT_HEAD], rows: cutRows(d.source), meter: true, minor: CUT_MINOR },
+    { key: "hourly", title: "Hour by hour", head: ["Hour", ...CUT_HEAD], rows: cutRows(d.hourly), meter: true, minor: CUT_MINOR },
+    { key: "totals", title: "Running totals", head: ["Period", "Days worked", "Looked at", "New", "Open", "Not for us", "Skipped", "New %"],
+      rows: [totalRow("This week", t.week), totalRow("This month", t.month), totalRow("All time", t.all)], meter: true, minor: [4, 5, 6],
       note: `The week from ${dayLabel(t.week.from)}; a company counts once in each period, by its latest mark.` },
   ].filter((tb) => tb.rows.length && (tb.key === "totals" ? t.all.looked > 0 : w.looked > 0));
 }
@@ -349,10 +360,10 @@ export function reportMarkdown(rep) {
       if (it.note) out.push(`    - Note: ${mdEscape(it.note.replace(/\s*\n+\s*/g, " "))}`);
     }
   }
-  if (rep.notFor.length || rep.skipped) {
-    out.push("", "## Not for us", "");
+  if (rep.notFor.length || rep.open) {
+    out.push("", "## Not new prospects", "");
     for (const x of rep.notFor) out.push(`- ${x.label} (${x.count}): ${x.names.map(mdEscape).join(", ")}`);
-    if (rep.skipped) out.push(`- Skipped: ${rep.skipped}`);
+    if (rep.open) out.push(`- Already open: ${rep.open}`);
   }
   out.push("", `_From the FX accounts dashboard, ${rep.day}._`);
   return out.join("\n");
@@ -379,9 +390,9 @@ export function reportHtml(rep) {
     }
     out.push("</ul>");
   }
-  if (rep.notFor.length || rep.skipped) {
-    out.push("<h2>Not for us</h2><ul>", ...rep.notFor.map((x) => `<li>${htmlEscape(x.label)} (${x.count}): ${x.names.map(htmlEscape).join(", ")}</li>`),
-      rep.skipped ? `<li>Skipped: ${rep.skipped}</li>` : "", "</ul>");
+  if (rep.notFor.length || rep.open) {
+    out.push("<h2>Not new prospects</h2><ul>", ...rep.notFor.map((x) => `<li>${htmlEscape(x.label)} (${x.count}): ${x.names.map(htmlEscape).join(", ")}</li>`),
+      rep.open ? `<li>Already open: ${rep.open}</li>` : "", "</ul>");
   }
   out.push(`<p><em>From the FX accounts dashboard, ${htmlEscape(rep.day)}.</em></p>`);
   return out.join("");

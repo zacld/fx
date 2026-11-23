@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -719,22 +719,31 @@ describe("lead source", () => {
 });
 
 describe("feedback loop", () => {
-  const rows = Array.from({ length: 8 }, (_, i) => ({ company_number: `0${i}`, company_name: `C${i}`, fx_niche: i < 6 ? "Cut flowers" : "Fasteners",
-    found_via: i < 6 ? "job advert: Clerk" : "" }));
-  it("learns which niches give open leads from Zac's own marks", () => {
-    const checks = { "00": { review: "open" }, "01": { review: "mine" }, "02": { review: "open" }, "03": { review: "open" },
-                     "04": { review: "abroad" }, "06": { review: "abroad" } };
-    const verdicts = { "05": { verdict: "good" }, "07": { verdict: "not_fit" } };
-    const l = reviewLearnings(rows, checks, verdicts);
-    expect(l.reviewed).toBe(8);
-    const flowers = l.niche.find((g) => g.key === "Cut flowers");
-    expect([flowers.good, flowers.not, flowers.good_share, flowers.points]).toEqual([5, 1, 83, 8]);
-    expect(l.lean.niche["Cut flowers"].points).toBe(8);
-    expect(l.lean.niche.Fasteners).toBeUndefined();            // only 2 marked: too few to lean
-    const base = leadScore(rows[7], {}).score;
+  // Zac, 23 Nov 2026: Open lead = already open (not new); Skip = no FD found (no judgement); a list = a new prospect
+  const rows = Array.from({ length: 12 }, (_, i) => ({ company_number: String(i).padStart(2, "0"), company_name: `C${i}`,
+    fx_niche: i < 6 ? "Cut flowers" : "Fasteners", found_via: i < 6 ? "job advert: Clerk" : "" }));
+  const checks = { "01": { review: "mine" }, "02": { review: "research" }, "03": { review: "skip" }, "04": { review: "open" },
+                   "06": { review: "open" }, "08": { review: "open" }, "09": { review: "abroad" }, 10: { review: "open" } };
+  const verdicts = { "05": { verdict: "good" }, "07": { verdict: "not_fit" }, 11: { verdict: "good" } };
+  const lists = { "00": { list: "call" } };
+  it("says what each mark means", () => {
+    const m = { checks, verdicts, lists };
+    expect(["00", "01", "02", "03", "04", "05", "07", "09", "99"].map((n) => markClass(n, m)))
+      .toEqual(["good", "good", "good", "neutral", "taken", "good", "bad", "bad", null]);
+    expect(markClass("04", { checks, verdicts, lists: { "04": { list: "call" } } })).toBe("good");   // a list beats Open
+  });
+  it("learns which niches give new prospects from Zac's own marks", () => {
+    const l = reviewLearnings(rows, checks, verdicts, undefined, lists);
+    expect([l.reviewed, l.usual]).toEqual([11, 45]);   // the skip isn't a judgement
+    const flowers = l.niche.find((g) => g.key === "Cut flowers"), fasteners = l.niche.find((g) => g.key === "Fasteners");
+    expect([flowers.good, flowers.taken, flowers.not, flowers.good_share, flowers.points]).toEqual([4, 1, 0, 80, 8]);
+    expect([fasteners.good, fasteners.taken, fasteners.not, fasteners.good_share, fasteners.points]).toEqual([1, 3, 2, 17, -8]);
     const leaned = leadScore({ ...rows[7], fx_niche: "Cut flowers" }, { reviews: l });
-    expect(leaned.parts.some(([w, p]) => /Your checks: 83% of Cut flowers/.test(w) && p === 8)).toBe(true);
-    expect(base).toBeGreaterThanOrEqual(0);
+    expect(leaned.parts.some(([w, p]) => /Your checks: 80% of Cut flowers leads were new prospects \(5 judged; your usual 45%\)/.test(w) && p === 8)).toBe(true);
+  });
+  it("open leads no longer count as good, and the old way's numbers would have", () => {
+    const opens = { "00": { review: "open" }, "01": { review: "open" }, "02": { review: "open" }, "03": { review: "open" }, "04": { review: "open" } };
+    expect(reviewLearnings(rows, opens, {}).niche.find((g) => g.key === "Cut flowers").good).toBe(0);
   });
   it("leaves the score alone with no marks", () => {
     expect(reviewLearnings(rows, {}, {}).reviewed).toBe(0);
