@@ -350,7 +350,7 @@ export function cognismCompanyRows(rows) {
     const groupSite = g?.hops ? knownSites[g.top] || "" : "";
     const site = groupSite || siteOf(r);
     return site && {
-      ...cognismRow(r), lead_score: r.lead_score ?? "",
+      ...cognismRow(r), lead_score: score100(r.lead_score),
       company_name: (g?.hops && g.top_name) || r.company_name || "", domain: domainOf(site),
       registered_company: r.company_name || "", group_companies: (r.group_members || []).map((m) => m.company_name).join("; "),
       role_to_find: r.no_fd_likely ? "Managing Director; Finance Director" : "Finance Director; CFO; Financial Controller; Head of Finance",
@@ -1138,7 +1138,7 @@ export const INDUSTRIES = [...new Set([...DIVISIONS.flatMap(([, , l]) => (l === 
 export const SHEET_COLUMNS = [
   ["company", "Company", (r) => r.company_name, (r) => r.company_name || ""],
   ["industry", "Industry", (r) => industryOf(r), (r) => industryOf(r)],
-  ["lead", "Score", (r) => (r.lead_score !== undefined ? String(r.lead_score) : ""), (r) => -(r.lead_score || 0), true],
+  ["lead", "Score", (r) => (r.lead_score !== undefined ? String(score100(r.lead_score)) : ""), (r) => -(r.lead_score || 0), true],
   ["fit", "Fit", (r) => (r.lead_fit !== undefined ? String(r.lead_fit) : ""), (r) => -(r.lead_fit || 0), true],
   ["owner", "Owner", (r) => { const o = ownership(r); return o.status === "unknown" ? "?" : `${OWNERSHIP_LABEL[o.status]}${o.status === "foreign" ? ` (${o.country})` : ""}`; },
    (r) => ({ uk: 0, unknown: 1, foreign: 2 }[ownership(r).status]), false],
@@ -1185,7 +1185,7 @@ export const SIMPLE_COLUMNS = [
   figure("debt", "Bank borrowing", (r) => num(r.bank_borrowings_gbp)),
   figure("assets", "Net assets", (r) => num(r.net_assets_gbp)),
   figure("staff", "Staff", (r) => num(r.employees), (v) => v.toLocaleString("en-GB")),
-  figure("score", "Score", (r) => num(r.lead_score), String),
+  figure("score", "Score", (r) => num(score100(r.lead_score)), String),
 ];
 
 // --- Lead score: which companies rank first (Zac's steer, 10 Nov 2026) ------------------------------------------------
@@ -1453,7 +1453,26 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
 }
 
 // "Lead score 85: FX loss of £320k +30 · … " — the breakdown in one line.
-export const leadLine = (s) => `Lead score ${s.score}${s.fit !== undefined ? ` (Fit ${s.fit} · Now ${s.timing})` : ""}: ${s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ")}`;
+// The score out of 100 (Zac, 24 Nov 2026: "so it's impossible for a lead to be 100?" — he chose this scale): where a
+// lead stands among every company the scanner has ranked, the share of the others it scores at or above, so the best
+// lead reads 100 and 95 means the top 5%. Only the number shown changes: the ranking underneath (lead_score, 20 + 0.3 ×
+// Fit + 0.3 × Now, at most 89) and so the order stay exactly as they were. The scale is every lead's lead_score, set
+// once the page (or the daily ranking) has them all — marks don't change it, so a lead's number stays put as he works
+// through the list. With no scale (a test, a lone row) the raw score shows.
+let scoreScale = [];
+export function setScoreScale(scores = []) {
+  scoreScale = scores.map(Number).filter((v, i) => scores[i] !== null && scores[i] !== undefined && scores[i] !== "" && Number.isFinite(v)).sort((a, b) => a - b);
+}
+export function score100(raw) {
+  if (raw === null || raw === undefined || raw === "") return "";
+  const v = Number(raw), n = scoreScale.length;
+  if (!Number.isFinite(v)) return "";
+  if (n < 2) return v;
+  let lo = 0, hi = n;   // how many score at or below it
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (scoreScale[mid] <= v) lo = mid + 1; else hi = mid; }
+  return Math.max(0, Math.min(100, Math.floor((100 * (lo - 1)) / (n - 1))));
+}
+export const leadLine = (s) => `Score ${score100(s.score)}${s.fit !== undefined ? ` (Fit ${s.fit} · Now ${s.timing})` : ""}: ${s.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ")}`;
 
 // Rows with lead_score / lead_parts / lead_reasons attached (sorted by SORTS.lead; lead_reasons for the exports).
 export const withLeadScores = (rows, ctx) => rows.map((r) => {
@@ -1502,7 +1521,7 @@ export function outreachPlan(rows = [], { contacted = {}, letters = OUTREACH.let
 export function outreachWhy(r, list, { letters = OUTREACH.letters, total = 0 } = {}) {
   const reasons = (r.lead_parts || []).filter(([, p]) => p > 0).slice(0, 4).map(([w, p]) => `${w} (+${p})`);
   const minus = (r.lead_parts || []).filter(([, p]) => p < 0).map(([w, p]) => `${w} (${p})`);
-  const place = `#${r.outreach_rank}${total ? ` of ${total}` : ""} by lead score (${r.lead_score || 0})`;
+  const place = `#${r.outreach_rank}${total ? ` of ${total}` : ""} by lead score (${score100(r.lead_score) || 0} out of 100)`;
   const out = [];
   if (list === "letter") {
     out.push({ label: "Why the letter", text: `In the top ${letters}: ${place}, one per group, nothing serious against it.` });

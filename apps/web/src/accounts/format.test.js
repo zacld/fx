@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -419,7 +419,7 @@ describe("Lead score", () => {
       "Hit list": 15 });
     expect([s.fit, s.timing, s.score]).toEqual([100, 45, 64]);   // fit 20+30+15+10+10+5+10 (capped 100), now 10+20+15; 20 + 0.3×100 + 0.3×45 (0.5 until 22 Nov 2026)
     expect(s.flags).toMatchObject({ recentLoss: true, newFd: true, hit: true });
-    expect(leadLine(s)).toMatch(/^Lead score 64 \(Fit 100 · Now 45\): Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
+    expect(leadLine(s)).toMatch(/^Score 64 \(Fit 100 · Now 45\): Strong FX proof in its filings \(60\) \+20 · FX loss of £320k \+30/);
   });
   it("counts a new FD from the triggers, other changes once, and owned abroad lower", () => {
     const r = { company_number: "N2", filed_fx_score: 20, triggers: "New finance director appointed 2026-10-12 | new charge to HSBC (2026-09)",
@@ -639,9 +639,9 @@ describe("Outreach plan", () => {
     expect(plan.email.map((r) => r.company_number)).toEqual(["C"]);
     expect(plan.held.map((r) => r.company_number)).toEqual(["G"]);          // below £20m: a serious reason not to progress
     const why = (r) => Object.fromEntries(r.outreach_why.map((w) => [w.label, w.text]));
-    expect(why(plan.letter[0])["Why the letter"]).toBe("In the top 2: #1 of 4 by lead score (90), one per group, nothing serious against it.");
+    expect(why(plan.letter[0])["Why the letter"]).toBe("In the top 2: #1 of 4 by lead score (90 out of 100), one per group, nothing serious against it.");
     expect(why(plan.call[0])["Why a cold call"]).toMatch(/^Something timely to raise: new charge to HSBC \(2026-10\)\. #4 of 4/);
-    expect(why(plan.email[0])["Why the email sequence"]).toMatch(/^A good fit \(#3 of 4 by lead score \(70\), outside the letter's top 2\) but nothing timely/);
+    expect(why(plan.email[0])["Why the email sequence"]).toMatch(/^A good fit \(#3 of 4 by lead score \(70 out of 100\), outside the letter's top 2\) but nothing timely/);
     expect(why(plan.letter[1])["Timely too"]).toBe("Changed bank: Barclays → HSBC");
   });
   it("keeps one per group and leaves out a group already contacted", () => {
@@ -839,5 +839,19 @@ describe("Today's list: why it's here", () => {
     expect(whyHere({ lead_parts: [["Turnover £20m–£300m", 10, "fit"], ["Strong FX proof in its filings (55)", 20, "fit"], ["Owned abroad: ask where FX is decided", -10, "fit"]] }))
       .toEqual(["Strong FX proof in its filings (55)", "Turnover £20m–£300m"]);
     expect(whyHere({})).toEqual([]);
+  });
+});
+
+describe("the score out of 100: where a lead stands among every lead ranked", () => {
+  it("reads 100 for the best, 0 for the lowest, ties alike, and the raw score with no scale", () => {
+    try {
+      setScoreScale([45, 48, 50, 52, 60, 64, 66, 70, 75, null, ""]);   // blanks aren't leads
+      expect([75, 70, 66, 64, 60, 52, 50, 48, 45].map(score100)).toEqual([100, 87, 75, 62, 50, 37, 25, 12, 0]);
+      expect(score100(54)).toBe(37);   // a score between two leads reads as the one below it
+      expect([score100(""), score100(undefined), score100("x")]).toEqual(["", "", ""]);
+      setScoreScale([20, 20, 30, 30]);
+      expect([score100(30), score100(20)]).toEqual([100, 33]);   // ties at the top all read 100
+    } finally { setScoreScale([]); }
+    expect(score100(54)).toBe(54);   // no scale: the raw score
   });
 });

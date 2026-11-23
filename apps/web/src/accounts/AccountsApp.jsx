@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -156,6 +156,8 @@ function Accounts({ data, password }) {
   const allRows = useMemo(() => withLeadScores(baseRows.map((r) => (verdicts[r.company_number]?.verdict === "not_fit"
     ? { ...r, qualified: "Out", qualify_reason: `Not a fit: ${verdicts[r.company_number].reason || "your review"}` } : r)), leadCtx),
   [baseRows, leadCtx, verdicts]);
+  // the score out of 100 is where a lead stands among all of them (format.js score100): set before anything shows one
+  useMemo(() => setScoreScale(allRows.filter((r) => !r.dropped).map((r) => r.lead_score)), [allRows]);
   // Companies with "UK" in the name live in their own tab only (contacted ones stay in Contacted).
   const ukRows = useMemo(() => allRows.filter(ukNamed), [allRows]);
   // Owned from abroad (an American parent, a German group …): their own tab too (Zac, 16 Nov 2026: "if it's owned by an
@@ -478,7 +480,7 @@ function Accounts({ data, password }) {
     : sort === "role" && !filters.role ? roleGroup : null;
 
   const exportCsv = () => {
-    const out = visible.map((r) => ({ ...r, company_and_fd: companyAndFd(r), industry: industryOf(r), hidden_from_filters: hiddenFromFilters(r).map((h) => h.text).join("; "), finance_decided: financeSeat(r).verdict, ...(() => { const o = ownership(r); return { ownership: OWNERSHIP_LABEL[o.status], ultimate_owner: o.owner, owner_country: o.country }; })(), what_to_pitch: pitchLine(r), my_list: LIST_NAMES[lists[r.company_number]?.list] || "",
+    const out = visible.map((r) => ({ ...r, lead_score: score100(r.lead_score), company_and_fd: companyAndFd(r), industry: industryOf(r), hidden_from_filters: hiddenFromFilters(r).map((h) => h.text).join("; "), finance_decided: financeSeat(r).verdict, ...(() => { const o = ownership(r); return { ownership: OWNERSHIP_LABEL[o.status], ultimate_owner: o.owner, owner_country: o.country }; })(), what_to_pitch: pitchLine(r), my_list: LIST_NAMES[lists[r.company_number]?.list] || "",
       lead_checklist: checklistLine(leadChecklist(r, checks)), reasons_not_to_progress: reasonsNotToProgress(r).map((x) => x.text).join(" | "), notes: notes[r.company_number]?.text || "", email_draft: emailDraft(r).text }));
     downloadSheet(out, columnsFor(EXPORT_FIELDS, { company_and_fd: "Company – Finance Director" }, NUMBER_FIELDS), `fx-accounts-${new Date().toISOString().slice(0, 10)}.xlsx`, "Accounts");
   };
@@ -940,7 +942,7 @@ function KeyPoints({ r }) {
     <ul className="key-points">
       {points.map(([label, text, href]) => <li key={label}><span className="kp-l">{label}</span>
         <span>{text}{href && <> <a href={href} target="_blank" rel="noreferrer" title="Google: who owns it?">Who owns it? ↗</a></>}</span></li>)}
-      {r.lead_score !== undefined && <li><span className="kp-l">Score</span>{r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</li>}
+      {r.lead_score !== undefined && <li><span className="kp-l">Score</span>{score100(r.lead_score)}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</li>}
     </ul>
   );
 }
@@ -1559,7 +1561,7 @@ function VerdictLearnings({ v }) {
     <div className="panel verdict-panel">
       <b>Your verdicts: {v.reviewed} leads reviewed</b>
       {Object.keys(v.reasons).length > 0 && <span className="muted"> — not a fit: {Object.entries(v.reasons).map(([k, n]) => `${k} ${n}`).join(", ")}</span>}
-      <div className="verdict-tables">{table("By source", v.source)}{table("By lead score", v.band)}{table("By niche", v.niche)}{table("Hard to broker", v.sector)}</div>
+      <div className="verdict-tables">{table("By source", v.source)}{table("By score (out of 100)", v.band)}{table("By niche", v.niche)}{table("Hard to broker", v.sector)}</div>
     </div>
   );
 }
@@ -1595,14 +1597,14 @@ function Niches({ measured, madeAt, learned, headings, codes = [], onPick, verdi
       <div className="sheet-wrap">
         <table className="sheet">
           <thead><tr><th>Niche</th><th>Kind</th><th className="num">FX hit rate</th><th className="num">Open</th><th className="num">Score</th>
-            <th>Verdict</th><th className="num">Leads</th><th className="num">Avg lead score</th><th className="num" title="Leads with a Fit of 60+">Fit 60+</th><th className="num">£20–300m</th><th className="num">FX loss</th><th className="num">Ruled out</th></tr></thead>
+            <th>Verdict</th><th className="num">Leads</th><th className="num" title="Where the niche's average lead stands among all the leads ranked, out of 100">Avg score</th><th className="num" title="Leads with a Fit of 60+">Fit 60+</th><th className="num">£20–300m</th><th className="num">FX loss</th><th className="num">Ruled out</th></tr></thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.name} className={r.verdict === "drop" ? "muted-row" : ""}>
                 <td><button className="linkish" onClick={() => onPick(r.name)} title="Show its companies">{r.name}</button></td>
                 <td>{isEmerging(r) ? <span className="chip warn" title="A trial niche found by this week's measuring">{r.kind}</span> : r.kind}</td><td className="num">{r.hit_rate}%</td><td className="num">{pct(r.open_share)}</td><td className="num">{r.score}</td>
                 <td>{r.verdict === "drop" ? "Skipped by the finder" : r.verdict === "few" ? "Too few to tell" : ""}</td>
-                <td className="num">{r.leads ?? ""}</td><td className="num">{r.avg ?? ""}</td><td className="num">{r.strong ?? ""}</td>
+                <td className="num">{r.leads ?? ""}</td><td className="num">{r.avg != null && r.avg !== "" ? score100(r.avg) : ""}</td><td className="num">{r.strong ?? ""}</td>
                 <td className="num">{r.band ?? ""}</td><td className="num">{r.loss ?? ""}</td><td className="num">{r.ruled_out || ""}</td>
               </tr>
             ))}
@@ -1817,7 +1819,7 @@ function Scoreboard({ rows, checks, verdicts, lists = {}, likes, onOpen, onPick,
                   <tr key={r.company_number} className="sub-row">
                     <td>↳ <button className="linkish" onClick={() => onOpen(r.company_number)}>{r.company_name}</button></td>
                     <td>{leadSource(r)}</td><td>{likes[r.company_number].same.join(" · ")}</td>
-                    <td className="num">Fit {r.lead_fit ?? "?"} · {r.lead_score ?? ""}</td>
+                    <td className="num">Fit {r.lead_fit ?? "?"} · {score100(r.lead_score)}</td>
                   </tr>
                 ))}
               </Fragment>
@@ -1893,7 +1895,7 @@ function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
       status: JOB_STATUS[statusOf(e)]?.[0] || "", job_score: e.score, what: (e.kinds || []).map((k) => JOB_KINDS[k] || k).join("; "),
       currencies: (e.currencies || []).join(", "), countries: (e.countries || []).join(", "), terms: (e.terms || []).join(", "),
       quote: e.quote || "", adverts: (e.adverts || []).map((a) => `${a.title} (${a.date}, ${a.source})`).join("; "),
-      latest_advert: e.adverts?.[0]?.link || "", last_seen: e.last_seen || "", lead_score: r?.lead_score ?? "", industry: r ? industryOf(r) : "",
+      latest_advert: e.adverts?.[0]?.link || "", last_seen: e.last_seen || "", lead_score: score100(r?.lead_score), industry: r ? industryOf(r) : "",
       my_status: (REVIEW_BUTTONS.find(([k]) => k === reviewOf(e)) || [])[1] || "",
       companies_house_url: e.company_number ? chCompanyUrl(e.company_number) : "" };
   }), columnsFor(["rank", "employer", "company_name", "company_number", "status", "my_status", "job_score", "what", "currencies", "countries", "terms", "quote", "adverts", "latest_advert", "last_seen", "lead_score", "industry", "companies_house_url"],
@@ -1955,7 +1957,7 @@ function JobAdverts({ password, rowsByNumber, onOpen, checks, onReview }) {
                 {(e.excluded || e.note) && <span className="muted">{e.excluded || e.note}</span>}
               </div>
               <div className="loss-fig" title="Advert score: currency wording 30, each currency 8, each country beside trade words 4, trade terms 6, an FD role 20, treasury 15, an import / export role 8, more adverts naming FX 5 each">
-                <b>{e.score}</b><span className="muted"> advert score{r?.lead_score !== undefined ? ` · lead score ${r.lead_score}` : ""}</span>
+                <b>{e.score}</b><span className="muted"> advert score{r?.lead_score !== undefined ? ` · score ${score100(r.lead_score)}` : ""}</span>
               </div>
             </div>
             {e.quote && <p className="quote">“{e.quote}”</p>}
@@ -2178,7 +2180,7 @@ function Outreach({ rows, contacted, password, onOpen, onContact, onEmail }) {
   const exportList = async () => {
     const out = (await fullList()).map((r, i) => ({
       rank: i + 1, company_name: r.company_name, addressee: letterAddressee(r), address: r.registered_address || "",
-      postcode: r.postcode || "", company_number: r.company_number, website: siteOf(r), lead_score: r.lead_score,
+      postcode: r.postcode || "", company_number: r.company_number, website: siteOf(r), lead_score: score100(r.lead_score),
       why_now: r.why_now || "", why: top(r), justification: outreachWhyLine(r), group_companies: (r.group_members || []).map((m) => m.company_name).join("; "),
       turnover_gbp: r.turnover_gbp || "", companies_house_url: chCompanyUrl(r.company_number),
     }));
@@ -2215,7 +2217,7 @@ function Outreach({ rows, contacted, password, onOpen, onContact, onEmail }) {
               {r.group_members?.length > 0 && <span className="chip" title={r.group_members.map((m) => m.company_name).join("; ")}>+{r.group_members.length} group companies</span>}
               {r.section && <span className="chip">{r.section}</span>}
             </div>
-            <div className="loss-fig"><b className="call-turnover">{r.lead_score}</b><span className="muted">lead score</span></div>
+            <div className="loss-fig"><b className="call-turnover">{score100(r.lead_score)}</b><span className="muted">score</span></div>
           </div>
           {list === "letter"
             ? <p className="panel-p"><b>{letterAddressee(r)}</b>{r.registered_address ? ` · ${r.registered_address}${r.postcode ? `, ${r.postcode}` : ""}` : " · address: see Companies House"}</p>
@@ -2245,7 +2247,7 @@ function HitList({ rows, onOpen, onContact, onEmail }) {
   const change = (r) => [r.lead_flags?.newFd && (r.new_fd_in_accounts || "New finance director"),
     r.lead_flags?.buying && `Buying: ${r.acquisitions || "see the ownership register"}`, r.lead_flags?.pe && "Private-equity deal"].filter(Boolean);
   const exportHits = () => downloadSheet(list.map((r, i) => ({
-    rank: i + 1, company_name: r.company_name, company_number: r.company_number, lead_score: r.lead_score,
+    rank: i + 1, company_name: r.company_name, company_number: r.company_number, lead_score: score100(r.lead_score),
     fx_loss_gbp: Number(r.fx_gain_loss_gbp) < 0 ? -Number(r.fx_gain_loss_gbp) : "", accounts_filed: filedIso(r),
     change: change(r).join(" | "), acquisitions: r.acquisitions || "", new_fd: r.new_fd_in_accounts || "",
     turnover_gbp: r.turnover_gbp || "", lead_reasons: r.lead_reasons || "", accounts_url: r.accounts_url || "",
@@ -2318,7 +2320,7 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail, links }) {
   const line = (parts) => parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join("; ");
   const exportList = () => downloadSheet(list.map((r, i) => ({
     rank: i + 1, company_name: r.company_name, company_number: r.company_number, fresh_because: finds ? freshFind(r).map((k) => FRESH_KINDS.find(([x]) => x === k)[1]).join("; ") : "", hidden_because: hidden ? hiddenFromFilters(r).map((h) => h.text).join("; ") : "", added_on: addedOn(r), found_via: fresh || finds ? `${leadSource(r)}${r.found_via ? ` — ${r.found_via}` : ""}` : "", industry: industryOf(r), lead_fit: r.lead_fit,
-    lead_timing: r.lead_timing, lead_score: r.lead_score, fit_reasons: line(half(r, "fit")), timing_reasons: line(half(r, "timing")),
+    lead_timing: r.lead_timing, lead_score: score100(r.lead_score), fit_reasons: line(half(r, "fit")), timing_reasons: line(half(r, "timing")),
     turnover_gbp: r.turnover_gbp || "", companies_house_url: chCompanyUrl(r.company_number),
   })), columnsFor(["rank", "company_name", "company_number", ...(finds ? ["fresh_because", "found_via"] : []), ...(hidden || finds ? ["hidden_because"] : []), ...(fresh ? ["added_on", "found_via"] : []), "industry", "lead_fit", "lead_timing", "lead_score", "fit_reasons", "timing_reasons",
     "turnover_gbp", "companies_house_url"], { lead_fit: "Fit", lead_timing: "Now", turnover_gbp: "Turnover (£)", hidden_because: "Hidden from the usual filters because", fresh_because: "Fresh because" },
@@ -2393,8 +2395,8 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail, links }) {
               {foreign && <span className={`chip${financeSeat(r).lean === "abroad" ? " warn" : ""}`}>{financeSeat(r).verdict}</span>}
             </div>
             <div className="loss-fig">
-              <b className="call-turnover">{uk ? `Score ${r.lead_score}` : fitOnly ? `Fit ${r.lead_fit}` : `Now ${r.lead_timing}`}</b>
-              <span className="muted">{fitOnly ? `Now ${r.lead_timing || 0}` : `Fit ${r.lead_fit}`} · score {r.lead_score}</span>
+              <b className="call-turnover">{uk ? `Score ${score100(r.lead_score)}` : fitOnly ? `Fit ${r.lead_fit}` : `Now ${r.lead_timing}`}</b>
+              <span className="muted">{fitOnly ? `Now ${r.lead_timing || 0}` : `Fit ${r.lead_fit}`} · score {score100(r.lead_score)}</span>
             </div>
           </div>
           {(hidden || finds) && <ul className="call-why">{hiddenFromFilters(r).map((h) => <li key={h.key}><b>{h.label}:</b> {h.text}</li>)}</ul>}
@@ -2458,7 +2460,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
             <span className="daily-n">{i + 1}</span>
             <div className="daily-main">
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => open(e, r.company_number)}>{r.company_name}</a>
-              <span className="daily-sub" title={`Lead score ${r.lead_score}`}>{[industryOf(r), r.turnover_gbp ? `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}` : "no turnover filed"].join(" · ")}</span>
+              <span className="daily-sub" title={`Score ${score100(r.lead_score)} out of 100: better than ${score100(r.lead_score)}% of all the leads ranked`}>{[industryOf(r), r.turnover_gbp ? `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}` : "no turnover filed"].join(" · ")}</span>
               <span className="daily-why">{whyHere(r).join(" · ")}</span>
               <span className="daily-links">
                 <span className="daily-number" title="Companies House number">{r.company_number}</span>
@@ -2564,7 +2566,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
   };
   const REPORT_COLUMNS = ["mark", "rating", "company_name", "company_number", "industry", "turnover_gbp", "lead_score", "website", "brief", "key_findings", "note", "marked_at", "companies_house"];
   const excelDoc = () => downloadSheet(rep.keepers.map((it) => ({ mark: it.mark, rating: it.rating || "", company_name: it.name, company_number: it.number, industry: it.industry,
-    turnover_gbp: it.turnover, lead_score: it.lead_score, website: it.website, brief: it.brief, key_findings: it.findings.join(" | "), note: it.note, marked_at: it.at,
+    turnover_gbp: it.turnover, lead_score: score100(it.lead_score), website: it.website, brief: it.brief, key_findings: it.findings.join(" | "), note: it.note, marked_at: it.at,
     companies_house: it.url })),
   columnsFor(REPORT_COLUMNS, { rating: "Rating (1–3)", company_name: "Company", company_number: "Companies House number", turnover_gbp: "Turnover (£)", lead_score: "Score",
     key_findings: "Key findings", marked_at: "Marked at", companies_house: "Companies House" }, ["rating", "turnover_gbp", "lead_score"]), `fx-good-leads-${day}.xlsx`, "Good leads");
@@ -2719,7 +2721,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
           <h3>Best find</h3>
           <a className="wrap-find" href={companyPath(w.best.company_number)} onClick={(e) => open(e, w.best.company_number)}>{w.best.company_name}</a>
           <div className="wrap-tile-s">{[w.best.industry, w.best.turnover ? `${money(w.best.turnover)}${w.best.turnover_basis === "group" ? " (group)" : ""}` : "",
-            `score ${w.best.lead_score}`].filter(Boolean).join(" · ")}</div>
+            `score ${score100(w.best.lead_score)}`].filter(Boolean).join(" · ")}</div>
           <div className="wrap-tile-s"><WrapIcon kind={w.best.kind} /> {outcomeLabel(w.best.kind)}</div>
         </section>}
         {(w.scores.keep != null || w.sizes.keep) && <section className="wrap-card">
@@ -2824,7 +2826,7 @@ function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, se
   const linkedin = (r) => "https://www.google.com/search?" + new URLSearchParams({ q: `site:linkedin.com/in "${r.company_name}" (finance director OR CFO OR financial controller)` });
   const exportList = () => downloadSheet(list.map((r) => ({
     company_name: r.company_name, company_number: r.company_number, industry: industryOf(r), turnover_gbp: r.turnover_gbp || "",
-    lead_score: r.lead_score, marked_on: String(checks[r.company_number]?.review_at || "").slice(0, 10), note: notes[r.company_number]?.text || "",
+    lead_score: score100(r.lead_score), marked_on: String(checks[r.company_number]?.review_at || "").slice(0, 10), note: notes[r.company_number]?.text || "",
     google: googleCompany(r), check_for_fd: googleFd(r), companies_house_url: chCompanyUrl(r.company_number),
   })), columnsFor(["company_name", "company_number", "industry", "turnover_gbp", "lead_score", "marked_on", "note", "google", "check_for_fd", "companies_house_url"],
     { turnover_gbp: "Turnover (£)", marked_on: "Marked on", check_for_fd: "Check for FD" }, ["turnover_gbp", "lead_score"]),
@@ -2850,7 +2852,7 @@ function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, se
             <span className="daily-n">{i + 1}</span>
             <div className="daily-main">
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => open(e, r.company_number)}>{r.company_name}</a>
-              <span className="daily-sub" title={`Lead score ${r.lead_score}`}>{[industryOf(r), r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed",
+              <span className="daily-sub" title={`Score ${score100(r.lead_score)} out of 100: better than ${score100(r.lead_score)}% of all the leads ranked`}>{[industryOf(r), r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed",
                 `marked ${String(checks[r.company_number]?.review_at || "").slice(0, 10)}`].join(" · ")}</span>
               <span className="daily-why">{whyHere(r).join(" · ")}</span>
               <span className="daily-links">
@@ -2905,7 +2907,7 @@ function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveN
   const exportList = () => downloadSheet(list.map((x) => {
     const b = leadBrief(x.r), own = ownership(x.r);
     return { rating: x.rating || "", mark: x.mark.label, marked_on: String(x.mark.at).slice(0, 10), company_name: x.r.company_name, company_number: x.r.company_number,
-      industry: industryOf(x.r), turnover_gbp: x.r.turnover_gbp || "", lead_score: x.r.lead_score, website: siteOf(x.r) || "",
+      industry: industryOf(x.r), turnover_gbp: x.r.turnover_gbp || "", lead_score: score100(x.r.lead_score), website: siteOf(x.r) || "",
       owner: own.owner || "", owner_status: OWNERSHIP_LABEL[own.status], owner_country: own.country || "", brief: b.text,
       key_findings: b.facts.map((f) => `${f.label}: ${f.text}`).join(" | "), note: notes[x.r.company_number]?.text || "",
       contacted: contacted[x.r.company_number] ? "Yes" : "", companies_house_url: chCompanyUrl(x.r.company_number) };
@@ -2939,7 +2941,7 @@ function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveN
                   <RatingStars value={x.rating} onChange={(k) => setRating(n, k)} name={r.company_name} />
                 </span>
                 <span className="daily-sub">{[x.mark.label, x.mark.at ? `marked ${String(x.mark.at).slice(0, 10)}` : "", industryOf(r),
-                  r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed", `score ${r.lead_score}`, contacted[n] ? "contacted" : ""].filter(Boolean).join(" · ")}</span>
+                  r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed", `score ${score100(r.lead_score)}`, contacted[n] ? "contacted" : ""].filter(Boolean).join(" · ")}</span>
                 <p className="good-brief">{b.text}</p>
                 <ul className="good-facts">
                   {b.facts.map((f) => (
@@ -3110,7 +3112,7 @@ function Today({ rows, lists, onOpen }) {
   const Item = ({ x, children }) => (
     <article className="card loss-card">
       <div className="card-top"><div className="card-name">{link(x.r)} <span className="chip">{LIST_NAMES[x.list] || "Not on a list"}</span>
-        {x.r.lead_score !== undefined && <span className="chip lead-chip">Score {x.r.lead_score}</span>}</div>
+        {x.r.lead_score !== undefined && <span className="chip lead-chip">Score {score100(x.r.lead_score)}</span>}</div>
         {x.step && <div className="loss-fig"><b className={`seq-when ${x.step.when}`}>{x.step.when === "overdue" ? `Overdue (${filedWhen(x.step.due)})` : "Today"}</b>
           <span className="muted">Step {x.step.step}: {x.step.label}</span></div>}</div>
       {children}
@@ -3331,7 +3333,7 @@ function HardToBroker({ rows, shyOf, onOpen, onContact, onEmail }) {
   for (const r of all) counts[shyOf[r.company_number].niche] = (counts[shyOf[r.company_number].niche] || 0) + 1;
   const list = sector ? all.filter((r) => shyOf[r.company_number].niche === sector) : all;
   const exportShy = () => downloadSheet(list.map((r, i) => ({
-    rank: i + 1, company_name: r.company_name, company_number: r.company_number, website: siteOf(r), lead_score: r.lead_score,
+    rank: i + 1, company_name: r.company_name, company_number: r.company_number, website: siteOf(r), lead_score: score100(r.lead_score),
     sector: shyOf[r.company_number].niche, why_brokers_shy: shyOf[r.company_number].why, turnover_gbp: r.turnover_gbp || "",
     fx_loss_gbp: Number(r.fx_gain_loss_gbp) < 0 ? -Number(r.fx_gain_loss_gbp) : "", lead_reasons: r.lead_reasons || "",
     companies_house_url: chCompanyUrl(r.company_number),
@@ -3482,7 +3484,7 @@ function LeadScore({ r }) {
   const line = leadLine({ score: r.lead_score, fit: r.lead_fit, timing: r.lead_timing, parts: r.lead_parts || [] });
   return (
     <details className="lead-line" title={line}>
-      <summary><span className="chip lead-chip">Score {r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</span>
+      <summary><span className="chip lead-chip">Score {score100(r.lead_score)}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</span>
         <span className="muted">Why this score</span></summary>
       <ScoreBreakdown r={r} />
     </details>
@@ -3841,7 +3843,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
       <section className="panel"><h2 className="panel-h">Key points</h2><KeyPoints r={r} /></section>
       {r.lead_parts?.length > 0 && (
         <section className="panel">
-          <h2 className="panel-h">Why it ranks: lead score {r.lead_score}{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</h2>
+          <h2 className="panel-h">Why it ranks: score {score100(r.lead_score)} of 100{r.lead_fit !== undefined ? ` · Fit ${r.lead_fit} · Now ${r.lead_timing}` : ""}</h2>
           <ScoreBreakdown r={r} open />
         </section>
       )}

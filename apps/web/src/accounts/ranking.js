@@ -3,7 +3,7 @@
 // sector — tools/niche_hits.py) and an absurd check (banks, insurers, funds, FX providers themselves, public bodies,
 // not-for-profits, dissolved companies: sourcer/absurd.py) that qualifies it Out. Shared by scripts/rank-leads.mjs
 // (which saves the result as leads/ranked and prints what it learns per niche) and the Accounts page.
-import { filingRow, filedIso, groupActivity, industryOf, leadScore, nicheTiers, setKnownGroups, sicCodes } from "./format.js";
+import { filingRow, filedIso, groupActivity, industryOf, leadScore, nicheTiers, score100, setKnownGroups, sicCodes } from "./format.js";
 
 export const FILINGS_SECTION = "From FX filings";
 // What a filings row keeps on the Accounts page (the full row stays in the Recent FX filings tab).
@@ -94,7 +94,8 @@ export function nicheLearnings(scored = [], minLeads = 8) {
 // How Zac's verdicts (Good lead / Not a fit, api VERDICTS_KEY) split by where the lead came from, its niche, its lead
 // score band and its hard-to-broker sector — what to recalibrate the score and the niches against. Each group:
 // {key, good, not_fit, reviewed, good_share}; reasons: {reason: count}.
-export const scoreBand = (score) => (score >= 80 ? "80+" : score >= 60 ? "60–79" : score >= 40 ? "40–59" : "under 40");
+// in the score out of 100 (format.js score100: where a lead stands among every lead ranked; set the scale first)
+export const scoreBand = (score) => { const v = score100(score); return v >= 95 ? "95–100" : v >= 90 ? "90–94" : v >= 75 ? "75–89" : "under 75"; };
 export function verdictLearnings(scored = [], verdicts = {}, { shyOf = {} } = {}) {
   const groups = { source: {}, niche: {}, band: {}, sector: {} };
   const reasons = {};
@@ -127,7 +128,7 @@ export function feedRows(scored = [], listRows = [], filingRows = []) {
     const r = by.get(s.company_number) || {};
     const sic = sicCodes(r);
     return { company_number: s.company_number, company_name: s.company_name, source: s.onList ? "Accounts list" : "FX filings",
-             lead_score: s.score, fit: s.fit, now: s.timing, niche: s.niche || "", industry: industryOf(r), sic: sic.join(" "),
+             lead_score: s.score, score: score100(s.score), fit: s.fit, now: s.timing, niche: s.niche || "", industry: industryOf(r), sic: sic.join(" "),
              turnover_gbp: Number(r.turnover_gbp) || "", postcode: r.postcode || r.registered_postcode || "",
              website: r.website || "", ruled_out: s.absurd || "" };
   });

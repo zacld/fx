@@ -6,7 +6,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, FEED_KEY, FILINGS_KEY, KEY, LISTS_KEY, MOMENTS_KEY, NICHES_KEY, RANKED_KEY, STORE, VERDICTS_KEY, dealSignals, filingsMonthKey, signalsByCompany } from "../api/accounts.mjs";
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
-import { likeGoodLeads, markClass, movesByCurrency, reviewLearnings, setKnownGroups } from "../src/accounts/format.js";
+import { likeGoodLeads, markClass, movesByCurrency, reviewLearnings, score100, setKnownGroups, setScoreScale } from "../src/accounts/format.js";
 import { feedRows, filedMonth, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
@@ -44,6 +44,8 @@ const reviews = reviewLearnings(marked, checks, verdicts, undefined, lists);
 const likes = likeGoodLeads(marked, checks, verdicts, lists);
 const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filingRows, { enrich, niches: niches?.niches || {}, moves, reviews, likes, groups: groupOf,
   signals: signalsByCompany([...(alerts?.items || []), ...dealSignals(deals?.items || []), ...(moments?.items || [])]) });
+// the score out of 100 (format.js score100) is where a lead stands among all of them: the feed and the verdict bands use it
+setScoreScale(scored.filter((s) => !s.absurd).map((s) => s.score));
 const learn = nicheLearnings(scored);
 const reviewed = verdictLearnings(scored, verdicts, { shyOf: shy_of });
 const made_at = new Date().toISOString();
@@ -92,7 +94,7 @@ for (const r of filingRows) filedMonths[filedMonth(r)] = (filedMonths[filedMonth
 console.log("FX filings by month filed: " + Object.entries(filedMonths).sort().map(([m, n]) => `${m} ${n}`).join(", "));
 const short = (parts) => parts.slice(0, 4).map(([w, p]) => `${w.split(" (")[0].slice(0, 40)} ${p > 0 ? "+" : ""}${p}`).join(" · ");
 console.log("\nTop 30 leads:");
-live.slice(0, 30).forEach((s, i) => console.log(`${String(i + 1).padStart(3)}. ${s.score}  ${s.company_name}${s.onList ? "" : "  [FX filings]"}  — ${s.niche || "no niche"} — ${short(s.parts)}`));
+live.slice(0, 30).forEach((s, i) => console.log(`${String(i + 1).padStart(3)}. ${s.score} (${score100(s.score)}/100)  ${s.company_name}${s.onList ? "" : "  [FX filings]"}  — ${s.niche || "no niche"} — ${short(s.parts)}`));
 console.log("\nNiches by average lead score (8+ leads):");
 console.log("  avg  leads  60+  band  FX loss  ruled out  niche");
 for (const n of learn) console.log(`${String(n.avg).padStart(5)} ${String(n.leads).padStart(6)} ${String(n.strong).padStart(4)} ${String(n.band).padStart(5)} ${String(n.loss).padStart(8)} ${String(n.ruled_out).padStart(10)}  ${n.niche}`);
