@@ -467,8 +467,9 @@ export function leadSource(r) {
 }
 
 // What a mark says about a lead (Zac, 23 Nov 2026: "if a bank had an open lead or they were using, I just put them as
-// open; the skips were either could not find the finance director at all"): "good" — a new prospect (Good lead,
-// Research harder, Added to mine, or put on the call / email / mail list); "taken" — Open lead: not a new prospect;
+// open" — the bank being ours, "we had something ongoing with them" — "the skips were either could not find the finance
+// director at all"): "good" — a new prospect (Good lead, Research harder, Added to mine, or put on the call / email /
+// mail list); "taken" — Open lead: something already ongoing with them, not a new prospect;
 // "bad" — Not a fit, Owned abroad; "neutral" — Skip (no finance director found); null — unmarked. A review mark (the
 // buttons) outranks a verdict, and a list beats both: he means to work it.
 export function markClass(n, { checks = {}, verdicts = {}, lists = {} } = {}) {
