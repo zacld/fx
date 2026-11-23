@@ -461,6 +461,8 @@ function Accounts({ data, password }) {
   return (
     <VerdictContext.Provider value={verdictCtx}>
     <main>
+      {/* Today's list starts straight at the sections (Zac, 23 Nov 2026: "when on this page remove the banner at top") */}
+      {filters.view !== "daily" && <>
       <StatusStrip status={data.status} />
       <AlertBanner summary={signals.alerts_summary} seen={alertsSeen} onOpen={() => set({ section: "", view: "alerts" })} />
       <div className="stats">
@@ -472,6 +474,7 @@ function Accounts({ data, password }) {
             : <div className="stat" key={l}>{inner}</div>;
         })}
       </div>
+      </>}
 
       <div className="controls">
         <nav className="sections" aria-label="Sections">
