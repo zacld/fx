@@ -30,7 +30,8 @@ export const CHECKS_KEY = "checks";         // {company_number: {crm: iso, revie
                                              // the Simplified dash's review: open lead / added to mine / owned abroad
 // "skip": taken off the lists with no reason kept (Zac, 23 Nov 2026, for companies the bank already has — which ones never
 // stays here, so only "skipped" is recorded)
-export const REVIEWS = ["open", "mine", "abroad", "skip"];
+// "research": a good lead with no contact info yet — the Research harder list (Zac, 23 Nov 2026)
+export const REVIEWS = ["open", "mine", "abroad", "skip", "research"];
 export const MARKS_MAX = 500;   // marks in one bulk save (POST {marks})
 export const NOTES_KEY = "notes";           // {company_number: {text, at}} — Zac's notes, likewise
 export const FILINGS_KEY = "filings";       // {made_at, files_done, months: [{month, count}]} — the Recent FX filings tab's index

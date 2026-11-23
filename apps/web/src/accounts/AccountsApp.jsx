@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION } from "./ranking.js";
-import { markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -515,6 +515,11 @@ function Accounts({ data, password }) {
               {name} <span className="tab-n">{Object.values(lists).filter((v) => v.list === key).length}</span>
             </button>
           ))}
+          <button role="tab" hidden={!inTabs("research")} aria-selected={filters.view === "research"} className={`tab${filters.view === "research" ? " on" : ""}`}
+                  title="Good leads with no contact info yet — marked ? on Today's list"
+                  onClick={() => set({ section: "", view: "research" })}>
+            Research harder <span className="tab-n">{researchList(allRows, { checks, lists, contacted }).length}</span>
+          </button>
           <button role="tab" hidden={!inTabs("simple")} aria-selected={filters.view === "simple"} className={`tab${filters.view === "simple" ? " on" : ""}`}
                   title="The same leads as a plain P&L-style sheet: company, Companies House number, type of company and the filed figures"
                   onClick={() => set({ section: "", view: "simple" })}>
@@ -616,7 +621,7 @@ function Accounts({ data, password }) {
             Email generator <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["daily", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["daily", "research", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -676,7 +681,9 @@ function Accounts({ data, password }) {
       </div>
 
       {filters.view === "daily" ? <TodaysList rows={rows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} onOpen={openCompany}
-                                              setVerdict={setVerdict} setReview={setReview} setList={setList} />
+                                              setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote} />
+       : filters.view === "research" ? <ResearchHarder rows={allRows} contacted={contacted} checks={checks} lists={lists} onOpen={openCompany}
+                                              setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote} />
        : filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view === "hits" ? <HitList rows={open} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
        : filters.view?.startsWith("list-") ? <MyLists which={filters.view.slice(5)} rows={allRows} lists={lists} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -1227,7 +1234,8 @@ function SheetView({ rows, onOpen, contacted, columns = SHEET_COLUMNS, actions =
 // as a P&L-style sheet with a search, an industry filter and an Excel export of exactly what's shown.
 const REVIEW_BUTTONS = [["open", "Open lead", "Checked: nobody has it — a lead to work"], ["mine", "Added to mine", "Added to your own book"],
   ["abroad", "Owned abroad", "Owned from abroad — moves it to the Foreign-owned tab"],
-  ["skip", "Skipped", "Taken off with no reason kept (for one the bank already has: which ones never comes onto the site)"]];
+  ["skip", "Skipped", "Taken off with no reason kept (for one the bank already has: which ones never comes onto the site)"],
+  ["research", "Research harder", "A good lead with no contact info yet — on the Research harder list"]];
 // What Zac's own checks are teaching the lead score (the feedback loop, `reviewLearnings`): good-lead rate by source,
 // niche and industry, and the lean each gets once 5+ are marked.
 function ReviewLearnings({ reviews }) {
@@ -2354,7 +2362,7 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail, links }) {
 
 // Today's list: the best leads not marked yet, one line each — the company, its Companies House page, a Google search
 // for it and for its finance director — and four buttons (TODAYS_MARKS); a mark takes it off and the next moves up.
-function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdict, setReview, setList }) {
+function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdict, setReview, setList, notes = {}, saveNote }) {
   const [shown, setShown] = useState(TODAYS_LIST);
   const [last, setLast] = useState(null);   // the last mark, to undo: {number, name, key}
   const all = useMemo(() => todaysList(rows, { contacted, checks, verdicts, lists }), [rows, contacted, checks, verdicts, lists]);
@@ -2365,7 +2373,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
     if (key === "good") setVerdict(n, "good");
     else if (key === "small") setVerdict(n, "not_fit", "Too small");
     else if (key === "call") setList(n, "call");
-    else setReview(n, key);   // open / abroad / skip
+    else setReview(n, key);   // research / open / abroad / skip
     setLast({ number: n, name: r.company_name, key });
   };
   const undo = () => {
@@ -2398,6 +2406,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
                 <a href={googleCompany(r)} target="_blank" rel="noreferrer">Google it ↗</a>
                 <a href={googleFd(r)} target="_blank" rel="noreferrer">Check for FD ↗</a>
               </span>
+              <LineNote note={notes[r.company_number]} onSave={(text) => saveNote(r.company_number, text)} />
             </div>
             <span className="daily-btns" role="group" aria-label={`Mark ${r.company_name}`}>
               {TODAYS_MARKS.map(([k, sym, label]) => (
@@ -2408,6 +2417,96 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
       </ol>
       {all.length > shown && <button className="btn-sm daily-more" onClick={() => setShown(shown + TODAYS_LIST)}>Show {TODAYS_LIST} more</button>}
       {!all.length && <div className="empty">Nothing left to mark — every ranked lead has a mark.</div>}
+    </div>
+  );
+}
+
+// A company's note on a Today's list / Research harder line: shown when there is one, "✎ Add note" opens a box (saved to
+// the store key `notes`, the same note the cards and the company page show).
+function LineNote({ note, onSave }) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState(note?.text || "");
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { if (!open) setText(note?.text || ""); }, [note, open]);
+  const save = async () => {
+    setSaving(true);
+    const ok = await onSave(text);
+    setSaving(false);
+    if (ok) setOpen(false);
+  };
+  if (open) {
+    return (
+      <div className="daily-note">
+        <textarea className="input" rows={3} value={text} autoFocus maxLength={4000} placeholder="Who you spoke to, what to check, when to try again…"
+                  onChange={(e) => setText(e.target.value)} aria-label="Note" />
+        <span className="daily-note-btns">
+          <button className="btn-sm" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save note"}</button>
+          <button className="linkish" onClick={() => setOpen(false)}>Cancel</button>
+        </span>
+      </div>
+    );
+  }
+  return (
+    <div className="daily-note">
+      {note?.text && <span className="daily-note-text">{note.text}</span>}
+      <button className="linkish" onClick={() => setOpen(true)}>✎ {note?.text ? "Edit note" : "Add note"}</button>
+    </div>
+  );
+}
+
+// Research harder (Zac, 23 Nov 2026): the good leads he marked ? on Today's list because nobody to call was found yet.
+// The same line as Today's list, with a LinkedIn people search, and buttons to move it on: ☎ Call list once a contact
+// turns up, ✕ Not enough revenue, » Skip, or back to Today's list.
+function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, setReview, setList, notes = {}, saveNote }) {
+  const list = researchList(rows, { contacted, checks, lists });
+  const open = (e, n) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
+  const linkedin = (r) => "https://www.google.com/search?" + new URLSearchParams({ q: `site:linkedin.com/in "${r.company_name}" (finance director OR CFO OR financial controller)` });
+  const exportList = () => downloadSheet(list.map((r) => ({
+    company_name: r.company_name, company_number: r.company_number, industry: industryOf(r), turnover_gbp: r.turnover_gbp || "",
+    lead_score: r.lead_score, marked_on: String(checks[r.company_number]?.review_at || "").slice(0, 10), note: notes[r.company_number]?.text || "",
+    google: googleCompany(r), check_for_fd: googleFd(r), companies_house_url: chCompanyUrl(r.company_number),
+  })), columnsFor(["company_name", "company_number", "industry", "turnover_gbp", "lead_score", "marked_on", "note", "google", "check_for_fd", "companies_house_url"],
+    { turnover_gbp: "Turnover (£)", marked_on: "Marked on", check_for_fd: "Check for FD" }, ["turnover_gbp", "lead_score"]),
+    `research-harder-${new Date().toISOString().slice(0, 10)}.xlsx`, "Research harder");
+  const moves = [["call", "☎", "Found a contact: Call list"], ["small", "✕", "Not enough revenue"], ["skip", "»", "Skip (no reason kept)"],
+    ["back", "↺", "Back to Today's list"]];
+  const move = (r, key) => {
+    const n = r.company_number;
+    if (key === "call") setList(n, "call");
+    else if (key === "small") setVerdict(n, "not_fit", "Too small");
+    else if (key === "skip") setReview(n, "skip");
+    else setReview(n, "research");   // the same review again clears it: back to Today's list
+  };
+  return (
+    <div className="list daily">
+      <div className="daily-head">
+        <span className="muted">{list.length} good leads with no contact info yet, newest first. Found someone? ☎ puts it on your Call list.</span>
+        <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
+      </div>
+      <ol className="daily-rows">
+        {list.map((r, i) => (
+          <li className="daily-row" key={r.company_number}>
+            <span className="daily-n">{i + 1}</span>
+            <div className="daily-main">
+              <a className="co" href={companyPath(r.company_number)} onClick={(e) => open(e, r.company_number)}>{r.company_name}</a>
+              <span className="daily-sub">{[industryOf(r), r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed", `score ${r.lead_score}`,
+                `marked ${String(checks[r.company_number]?.review_at || "").slice(0, 10)}`].join(" · ")}</span>
+              <span className="daily-links">
+                <span className="daily-number" title="Companies House number">{r.company_number}</span>
+                <a href={googleCompany(r)} target="_blank" rel="noreferrer">Google it ↗</a>
+                <a href={googleFd(r)} target="_blank" rel="noreferrer">Check for FD ↗</a>
+                <a href={linkedin(r)} target="_blank" rel="noreferrer">Finance people on LinkedIn ↗</a>
+              </span>
+              <LineNote note={notes[r.company_number]} onSave={(text) => saveNote(r.company_number, text)} />
+            </div>
+            <span className="daily-btns" role="group" aria-label={`Move ${r.company_name} on`}>
+              {moves.map(([k, sym, label]) => (
+                <button key={k} className={`dot-btn dot-${k}`} title={label} aria-label={`${label}: ${r.company_name}`} onClick={() => move(r, k)}>{sym}</button>))}
+            </span>
+          </li>
+        ))}
+      </ol>
+      {!list.length && <div className="empty">Nothing to research — mark a good lead with no contact info ? on Today's list.</div>}
     </div>
   );
 }
@@ -2693,7 +2792,7 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
 const TAB_SECTIONS = [
   ["today", "Today", ["daily", "today", "calls", "outreach", "alerts", "contacted", "email"]],
   ["fresh", "Fresh finds", ["fresh", "new", "hidden", "jobs", "emerging", "search", "money"]],
-  ["lists", "My lists", ["list-call", "list-email", "list-post", "simple"]],
+  ["lists", "My lists", ["list-call", "list-email", "list-post", "research", "simple"]],
   ["learn", "Learn", ["scoreboard", "niches"]],
   ["all", "All tabs", null],
 ];
@@ -3657,9 +3756,14 @@ a{color:var(--accent)}
 .dot-btn{--c:#9aa0a6;width:36px;height:36px;border-radius:50%;border:2px solid var(--c);background:transparent;color:var(--c);font:700 16px/1 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
 .dot-btn:hover,.dot-btn:focus-visible{background:var(--c);color:var(--bg);outline:none}
 .dot-good{--c:#81c995}.dot-small{--c:#f28b82}.dot-open{--c:#fcad70}.dot-call{--c:#8ab4f8}.dot-abroad{--c:#c58af9}.dot-skip{--c:#9aa0a6}
+.dot-research{--c:#fdd663}.dot-back{--c:#9aa0a6}
+.daily-note{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:13px;margin-top:2px}
+.daily-note-text{color:var(--text-2);white-space:pre-wrap;overflow-wrap:anywhere;border-left:2px solid var(--line);padding-left:8px}
+.daily-note textarea{width:100%;min-height:64px;resize:vertical;font:13px/1.4 'Inter',sans-serif}
+.daily-note-btns{display:flex;gap:12px;align-items:center}
 .daily-key .dot-key,.daily-key .dot-key:hover{width:22px;height:22px;font-size:12px;border-width:1.5px;cursor:default;background:transparent;color:var(--c)}
 .daily-more{margin-top:12px}
-@media(max-width:700px){.daily-row{flex-wrap:wrap;gap:8px 10px}.daily-btns{width:100%;justify-content:flex-end;gap:10px}.dot-btn{width:40px;height:40px}}
+@media(max-width:700px){.daily-row{flex-wrap:wrap;gap:8px 10px}.daily-btns{width:100%;justify-content:flex-end;gap:7px}.dot-btn{width:38px;height:38px}}
 .sections{display:flex;gap:0;margin-bottom:10px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
 .section-btn{flex:1 1 0;min-width:0;padding:9px 6px;border:0;border-right:1px solid var(--line);background:none;color:var(--text-2);font:600 13px 'Inter',sans-serif;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .section-btn:last-child{border-right:0}

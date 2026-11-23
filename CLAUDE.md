@@ -764,7 +764,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Sections and Fresh finds** (Zac, 22 Nov 2026, from the architecture review: ~30 tabs were too many on a phone;
   `TAB_SECTIONS` in `AccountsApp.jsx`): a bar over the tabs — **Today** (Today's list, Today, Call today, Outreach, Alerts,
   Contacted, Email generator), **Fresh finds** (Fresh finds, New leads, Hidden from filters, New money, Niche search, Emerging
-  leads, Job adverts), **My lists** (Call / Email / Mail list, Simplified dash), **Learn** (Scoreboard, Niches) and **All
+  leads, Job adverts), **My lists** (Call / Email / Mail list, Research harder, Simplified dash), **Learn** (Scoreboard, Niches) and **All
   tabs** (every tab, as before) — remembered in the browser; a phone with none remembered opens on Today; a tab opened
   from elsewhere brings its section. On a phone the bar sticks under the top bar and the tabs scroll sideways. **Fresh
   finds** (`freshFind` / `FRESH_KINDS` / `QUIET_SOURCES` in `format.js`; FitTiming mode "fresh"): the leads few bankers
@@ -788,6 +788,15 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `Skip:` / `Skipped:` heading in the bulk paste). A mark takes the company off and the next moves up; Undo for the last
   one; "N marked today". The marks feed the feedback loop and lookalikes like any other. On this tab the freshness strip,
   alert banner and figures row are left off (Zac, 23 Nov 2026: "when on this page remove the banner at top").
+  **Notes and Research harder** (Zac, 23 Nov 2026: "a button to add notes. And another button which is good lead but no
+  contact info and add it to a research harder section"): every line has "✎ Add note" / "Edit note" (`LineNote`: the
+  company's note, store key `notes`, the same one cards and the company page show; shown under the links once saved), and
+  a yellow **?** button — review `research` (a good lead in the feedback loop, the lookalikes and `discover.good_leads`;
+  "Research harder" in the feed and the Simplified dash; `Research harder:` paste heading). The **Research harder** tab (My
+  lists section; `researchList` in `format.js`, `ResearchHarder` in `AccountsApp.jsx`): those companies newest mark first,
+  not on a list, not contacted, not out — the same line plus a Google search for finance people on LinkedIn (a search
+  link, never fetched), the note, and ☎ Call list (found a contact), ✕ Not enough revenue, » Skip, ↺ back to Today's list;
+  Excel export with the notes.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead

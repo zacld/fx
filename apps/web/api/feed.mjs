@@ -25,6 +25,7 @@ export function statusOf(number, { contacted = {}, checks = {}, verdicts = {} } 
   if (review === "mine") return "Added to mine";
   if (review === "abroad") return "Owned abroad";
   if (review === "skip") return "Skipped";
+  if (review === "research") return "Research harder";
   const verdict = verdicts[number]?.verdict;
   if (verdict === "good") return "Good lead";
   if (verdict === "not_fit") return "Not a fit";

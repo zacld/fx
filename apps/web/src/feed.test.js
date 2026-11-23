@@ -53,6 +53,7 @@ describe("/api/feed (Power Automate)", () => {
     expect(statusOf("A", { verdicts: { A: { verdict: "not_fit" } } })).toBe("Not a fit");
     expect(statusOf("A", {})).toBe("To check");
     expect(statusOf("A", { checks: { A: { review: "skip" } } })).toBe("Skipped");   // no reason kept
+    expect(statusOf("A", { checks: { A: { review: "research" } } })).toBe("Research harder");
     const rows = feedRows([{ company_number: "01234567", company_name: "ACME LTD", onList: true, niche: "Coffee", score: 61, fit: 50, timing: 10, absurd: "" }],
       [{ company_number: "01234567", sic_codes: ["46370"], turnover_gbp: "45000000", postcode: "AB1 2CD" }]);
     expect(rows[0]).toMatchObject({ source: "Accounts list", lead_score: 61, now: 10, turnover_gbp: 45000000, sic: "46370", postcode: "AB1 2CD" });

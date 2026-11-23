@@ -215,9 +215,9 @@ def lookalikes(good: dict, trade: dict, tracked: Optional[dict] = None, skip: It
 
 
 def good_leads(checks: dict, verdicts: dict) -> set[str]:
-    """Company numbers Zac marked good: Open lead / Added to mine (Simplified dash) or Good lead — and not since marked
-    Not a fit or Owned abroad."""
-    good = {n for n, c in (checks or {}).items() if (c or {}).get("review") in ("open", "mine")}
+    """Company numbers Zac marked good: Open lead / Added to mine (Simplified dash), Research harder (a good lead with no
+    contact info yet) or Good lead — and not since marked Not a fit or Owned abroad."""
+    good = {n for n, c in (checks or {}).items() if (c or {}).get("review") in ("open", "mine", "research")}
     good |= {n for n, v in (verdicts or {}).items() if (v or {}).get("verdict") == "good"}
     bad = {n for n, c in (checks or {}).items() if (c or {}).get("review") == "abroad"}
     bad |= {n for n, v in (verdicts or {}).items() if (v or {}).get("verdict") == "not_fit"}

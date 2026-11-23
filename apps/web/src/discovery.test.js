@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { SORTS, freshFind, markedToday, todaysList, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
+import { SORTS, freshFind, markedToday, researchList, reviewLearnings, todaysList, markSections, matchCompanies, groupActivity, hiddenFromFilters, industryOf, leadProfile, leadScore, leadSource, likeGoodLeads, profileMatch, scoreboard,
   setKnownGroups, sortRows } from "./accounts/format.js";
 import { rankLeads } from "./accounts/ranking.js";
 
@@ -155,5 +155,20 @@ describe("Today's list", () => {
   it("counts the marks made today", () => {
     expect(markedToday({ checks: { 1: { review: "open", review_at: "2026-11-22T09:00:00Z" } }, verdicts: { 2: { verdict: "good", at: "2026-11-21T09:00:00Z" } },
       lists: { 1: { list: "call", at: "2026-11-22T10:00:00Z" }, 3: { list: "call", at: "2026-11-22T11:00:00Z" } } }, "2026-11-22")).toBe(2);
+  });
+});
+
+describe("Research harder", () => {
+  const rows = [{ company_number: "1", company_name: "A LTD" }, { company_number: "2", company_name: "B LTD" }, { company_number: "3", company_name: "C LTD" },
+    { company_number: "4", company_name: "D LTD", qualified: "Out" }];
+  const checks = { 1: { review: "research", review_at: "2026-11-22T09:00:00Z" }, 2: { review: "research", review_at: "2026-11-23T09:00:00Z" },
+    3: { review: "research", review_at: "2026-11-23T10:00:00Z" }, 4: { review: "research", review_at: "2026-11-23T11:00:00Z" } };
+  it("lists the good leads with no contact info, newest first; a list or Not a fit moves them on", () => {
+    expect(researchList(rows, { checks }).map((r) => r.company_number)).toEqual(["3", "2", "1"]);
+    expect(researchList(rows, { checks, lists: { 3: { list: "call" } } }).map((r) => r.company_number)).toEqual(["2", "1"]);
+  });
+  it("counts as a good lead in the feedback loop", () => {
+    const learned = reviewLearnings(rows.slice(0, 3).map((r) => ({ ...r, fx_niche: "Cut flowers" })), checks, {});
+    expect(learned.reviewed).toBe(3);
   });
 });
