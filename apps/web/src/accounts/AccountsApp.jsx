@@ -9,7 +9,7 @@ import { columnsFor, downloadSheet } from "./xlsx.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
-import { OUTCOMES, dayWrap, localDay, outcomeLabel, shiftDay, wrapText } from "./wrapped.js";
+import { OUTCOMES, dayReport, dayWrap, localDay, outcomeLabel, reportHtml, reportMarkdown, shiftDay, siteHref, wrapText } from "./wrapped.js";
 
 // The standing account list from the company finder (lead-sourcer), behind a
 // password: the list is fetched from /api/accounts, which checks it.
@@ -182,6 +182,7 @@ function Accounts({ data, password }) {
   const [notes, setNotes] = useState(data.notes || {});
   const [saveError, setSaveError] = useState("");
   const set = (patch) => { setFilters((f) => ({ ...f, ...patch })); setShown(PAGE); };
+  const [finishing, setFinishing] = useState(false);   // "Finish day" pressed on Today's list: Your day opens on its report
   const pickSection = (k) => {
     setTabSection(k);
     try { localStorage.setItem("fx-tab-section", k); } catch { /* storage off */ }
@@ -694,9 +695,11 @@ function Accounts({ data, password }) {
 
       {filters.view === "daily" ? <TodaysList rows={rows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} onOpen={openCompany}
                                               setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote}
-                                              onWrap={() => set({ section: "", view: "wrapped" })} />
+                                              onWrap={() => set({ section: "", view: "wrapped" })}
+                                              onFinish={() => { setFinishing(true); set({ section: "", view: "wrapped" }); }} />
        : filters.view === "wrapped" ? <YourDay rows={allRows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} notes={notes}
-                                              onOpen={openCompany} onBack={() => set({ section: "", view: "daily" })} />
+                                              onOpen={openCompany} onBack={() => set({ section: "", view: "daily" })}
+                                              startReport={finishing} onReportClosed={() => setFinishing(false)} />
        : filters.view === "research" ? <ResearchHarder rows={allRows} contacted={contacted} checks={checks} lists={lists} onOpen={openCompany}
                                               setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote} />
        : filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -2377,7 +2380,7 @@ function FitTiming({ mode, rows, onOpen, onContact, onEmail, links }) {
 
 // Today's list: the best leads not marked yet, one line each — the company, its Companies House page, a Google search
 // for it and for its finance director — and four buttons (TODAYS_MARKS); a mark takes it off and the next moves up.
-function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdict, setReview, setList, notes = {}, saveNote, onWrap }) {
+function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdict, setReview, setList, notes = {}, saveNote, onWrap, onFinish }) {
   const [shown, setShown] = useState(TODAYS_LIST);
   const [last, setLast] = useState(null);   // the last mark, to undo: {number, name, key}
   const all = useMemo(() => todaysList(rows, { contacted, checks, verdicts, lists }), [rows, contacted, checks, verdicts, lists]);
@@ -2406,6 +2409,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
           A mark takes the company off and the next one moves up. {onWrap && <button className="linkish" onClick={onWrap}>Your day so far →</button>}</span>
         <span className="daily-key">{TODAYS_MARKS.map(([k, sym, label]) => (
           <span key={k}><span className={`dot-btn dot-${k} dot-key`} aria-hidden="true">{sym}</span>{label}</span>))}</span>
+        {onFinish && <button className="btn-sm wrap-primary" onClick={onFinish} title="Compile today's report and a document of the good leads to paste into Notion">Finish day</button>}
       </div>
       {last && <div className="daily-undo" role="status">{last.name}: {labelOf(last.key)}. <button className="linkish" onClick={undo}>Undo</button></div>}
       <ol className="daily-rows">
@@ -2449,13 +2453,44 @@ function WrapIcon({ kind }) {
 }
 const clock = (d) => (d ? d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "");
 const span = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`);
-function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen, onBack }) {
+function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen, onBack, startReport = false, onReportClosed }) {
   const today = localDay(new Date().toISOString());
   const [day, setDay] = useState(today);
   const [by, setBy] = useState("sector");
   const [tip, setTip] = useState(null);   // the hovered / focused day column
   const [copied, setCopied] = useState(false);
   const w = useMemo(() => dayWrap(rows, { checks, verdicts, lists, contacted, notes }, day), [rows, checks, verdicts, lists, contacted, notes, day]);
+  // Finish day: the day's report and its good leads as one document — copied for Notion (formatted, with the Markdown
+  // underneath), downloaded as a .md file, or the good leads in Excel. Worked out from the marks; nothing is saved.
+  const [report, setReport] = useState(!!startReport);
+  const [docNote, setDocNote] = useState("");
+  const reportRef = useRef(null);
+  const rep = useMemo(() => (report ? dayReport(w, notes) : null), [report, w, notes]);
+  useEffect(() => () => onReportClosed?.(), []);   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (report) reportRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }); }, [report]);
+  const closeReport = () => { setReport(false); onReportClosed?.(); };
+  const flash = (text) => { setDocNote(text); setTimeout(() => setDocNote(""), 3000); };
+  const copyDoc = async () => {
+    const md = reportMarkdown(rep);
+    try {
+      if (window.ClipboardItem && navigator.clipboard?.write) {
+        await navigator.clipboard.write([new window.ClipboardItem({ "text/html": new Blob([reportHtml(rep)], { type: "text/html" }), "text/plain": new Blob([md], { type: "text/plain" }) })]);
+      } else await navigator.clipboard.writeText(md);
+      flash("Copied — paste it into Notion");
+    } catch {
+      try { await navigator.clipboard.writeText(md); flash("Copied — paste it into Notion"); } catch { flash("Couldn't copy here — use Download"); }
+    }
+  };
+  const downloadDoc = () => {
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([reportMarkdown(rep)], { type: "text/markdown" })), download: `fx-day-${day}.md` });
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  const REPORT_COLUMNS = ["mark", "company_name", "company_number", "industry", "turnover_gbp", "lead_score", "website", "note", "marked_at", "companies_house"];
+  const excelDoc = () => downloadSheet(rep.keepers.map((it) => ({ mark: it.mark, company_name: it.name, company_number: it.number, industry: it.industry,
+    turnover_gbp: it.turnover, lead_score: it.lead_score, website: it.website, note: it.note, marked_at: it.at, companies_house: it.url })),
+  columnsFor(REPORT_COLUMNS, { company_name: "Company", company_number: "Companies House number", turnover_gbp: "Turnover (£)", lead_score: "Score",
+    marked_at: "Marked at", companies_house: "Companies House" }, ["turnover_gbp", "lead_score"]), `fx-good-leads-${day}.xlsx`, "Good leads");
   const isToday = day === today;
   const bars = OUTCOMES.filter(([k]) => w.counts[k]);
   const barMax = Math.max(1, ...bars.map(([k]) => w.counts[k]));
@@ -2483,10 +2518,42 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
           {!isToday && <button className="linkish" onClick={() => setDay(today)}>Back to today</button>}
         </div>
         <div className="wrap-actions">
+          <button className="btn-sm wrap-primary" onClick={() => setReport(true)}>{isToday ? "Finish day" : "Day report"}</button>
           <button className="btn-sm" onClick={copy} disabled={!w.looked}>{copied ? "Copied" : "Copy summary"}</button>
           <button className="btn-sm" onClick={onBack}>Today's list →</button>
         </div>
       </div>
+
+      {rep && <section className="wrap-card wrap-report" ref={reportRef} aria-label="Day report">
+        <div className="wrap-card-top">
+          <h3>{isToday ? "Day finished — your report" : "Day report"}</h3>
+          <button className="linkish" onClick={closeReport}>Close</button>
+        </div>
+        <div className="wrap-report-btns">
+          <button className="btn-sm wrap-primary" onClick={copyDoc}>Copy for Notion</button>
+          <button className="btn-sm" onClick={downloadDoc}>Download (.md)</button>
+          <button className="btn-sm" onClick={excelDoc} disabled={!rep.keepers.length}>Good leads in Excel ({rep.keepers.length})</button>
+          {docNote && <span className="wrap-tile-s" role="status">{docNote}</span>}
+        </div>
+        <article className="wrap-doc">
+          <h1>{rep.title}</h1>
+          <ul>{rep.summary.map((x) => <li key={x}>{x}</li>)}</ul>
+          {!rep.sections.length && <p className="muted">No keepers {isToday ? "yet today" : "that day"}.</p>}
+          {rep.sections.map((sec) => (
+            <Fragment key={sec.key}>
+              <h2>{sec.title} ({sec.items.length})</h2>
+              <ul>{sec.items.map((it) => (
+                <li key={it.number}><strong>{it.name}</strong> — <a href={it.url} target="_blank" rel="noreferrer">{it.number}</a>
+                  {it.website && <> · <a href={siteHref(it.website)} target="_blank" rel="noreferrer">website</a></>}{it.meta && ` · ${it.meta}`}
+                  {it.note && <ul><li>Note: {it.note}</li></ul>}</li>))}</ul>
+            </Fragment>))}
+          {(rep.notFor.length > 0 || rep.skipped > 0) && <>
+            <h2>Not for us</h2>
+            <ul>{rep.notFor.map((x) => <li key={x.label}>{x.label} ({x.count}): {x.names.join(", ")}</li>)}
+              {rep.skipped > 0 && <li>Skipped: {rep.skipped}</li>}</ul>
+          </>}
+        </article>
+      </section>}
 
       <section className="wrap-hero" aria-label="Leads looked through">
         <div className="wrap-kicker">{isToday ? "Your day so far" : `Your ${dayLabel(day)}`}</div>
@@ -4052,9 +4119,19 @@ body.daily-view .co{color:var(--text)}body.daily-view a.co:hover{color:var(--acc
 .wrap-all ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .wrap-all li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px}
 .wrap-all li a{color:var(--text);font-weight:600}
+body.daily-view .wrap-primary{background:#1a73e8;border-color:#1a73e8;color:#fff}
+body.daily-view .wrap-primary:hover{background:#1765cc;border-color:#1765cc;color:#fff}
+.wrap-report{border-color:#aecbfa;scroll-margin-top:12px}
+.wrap-report-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px}
+.wrap-doc{border:1px solid var(--line-soft);border-radius:8px;padding:18px 22px;background:#fcfcfb;font-size:14px;line-height:1.55;color:var(--text);overflow-wrap:anywhere}
+.wrap-doc h1{font:700 22px/1.3 'Inter',sans-serif;margin:0 0 10px}
+.wrap-doc h2{font:700 16px/1.3 'Inter',sans-serif;margin:18px 0 6px}
+.wrap-doc ul{margin:0 0 4px;padding-left:20px}
+.wrap-doc li{margin:3px 0}
+.wrap-doc a{color:var(--accent)}
 @media(max-width:700px){.wrap{padding:12px 16px 60px}.wrap-big{font-size:60px}.wrap-hero{padding:22px 20px}
   .wrap-tiles{grid-template-columns:1fr 1fr}.wrap-cols2,.wrap-grid{grid-template-columns:1fr}.wrap-item-t{flex-direction:column;gap:0}.wrap-item-n{white-space:normal}.wrap-bar{grid-template-columns:150px 1fr}
-  .wrap-actions{width:100%}.wrap-actions .btn-sm{flex:1 1 0}}
+  .wrap-actions{width:100%}.wrap-actions .btn-sm{flex:1 1 0}.wrap-doc{padding:14px}}
 @media(max-width:700px){.sections{position:sticky;top:52px;z-index:5}.section-btn{font-size:12px;padding:10px 2px}
   .tabs,.fresh-kinds{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}.tab,.fresh-kinds .grp{flex:0 0 auto}
   .tb-l{flex:0 0 auto}.tb-r{min-width:0;overflow-x:auto;flex-wrap:nowrap}.tb-r>*{flex:0 0 auto}}

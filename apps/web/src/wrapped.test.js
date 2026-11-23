@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dayWrap, localDay, markActions, shiftDay, wrapText } from "./accounts/wrapped.js";
+import { dayReport, dayWrap, localDay, markActions, reportHtml, reportMarkdown, shiftDay, wrapText } from "./accounts/wrapped.js";
 
 // Monday 23 Nov 2026 and the Friday before, marked from Today's list and elsewhere. Times at midday-ish (UTC) so the
 // local day is the same in any UK time zone.
@@ -92,5 +92,34 @@ describe("Your day (a Wrapped of the day)", () => {
     expect(localDay("")).toBe("");
     expect(shiftDay("2026-11-30", 1)).toBe("2026-12-01");
     expect(shiftDay("2026-03-01", -1)).toBe("2026-02-28");
+  });
+
+  it("Finish day: the report and its good leads as a document for Notion", () => {
+    const w = dayWrap(ROWS, MARKS, MON);
+    const rep = dayReport(w, { ...MARKS.notes, "00000005": { text: "R&D team <Leeds>", at: at(MON, "09:31") } });
+    expect(rep.title).toBe("Day report — Mon 23 Nov");
+    expect(rep.sections.map((x) => x.key)).toEqual(["good", "research", "call"]);
+    expect(rep.sections.find((x) => x.key === "call").items.map((i) => i.name)).toEqual(["ACME MACHINES LTD", "HOTEL MACHINES LTD"]);   // best score first
+    expect(rep.keepers).toHaveLength(4);
+    expect(rep.notFor).toEqual([{ label: "Not enough revenue", count: 1, names: ["FOXTROT GENERAL LTD"] },
+      { label: "Owned abroad", count: 1, names: ["CARGO GENERAL LTD"] }]);
+    expect(rep.summary[0]).toBe("7 leads looked through: 4 keepers, 2 not for us, 1 skipped (67% kept).");
+    const md = reportMarkdown(rep);
+    expect(md).toMatch(/^# Day report — Mon 23 Nov/);
+    expect(md).toMatch(/## Good leads \(1\)/);
+    expect(md).toContain("- **ECHO FOODS LTD** — [00000005](https://find-and-update.company-information.service.gov.uk/company/00000005)");
+    expect(md).toContain("    - Note: FD back Thursday");
+    expect(md).toContain("- Skipped: 1");
+    expect(md).not.toContain("DELTA GENERAL");   // skipped companies are counted, never named
+    const html = reportHtml(rep);
+    expect(html).toContain("<li>Note: R&amp;D team &lt;Leeds&gt;</li>");
+    expect(html).not.toContain("<Leeds>");
+    expect(html).not.toContain("DELTA GENERAL");
+  });
+
+  it("a day with nothing kept still makes a report", () => {
+    const rep = dayReport(dayWrap(ROWS, MARKS, "2026-11-22"));
+    expect(rep.sections).toEqual([]);
+    expect(reportMarkdown(rep)).toContain("No keepers.");
   });
 });

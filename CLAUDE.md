@@ -808,7 +808,19 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   companies contacted, notes written; the last 14 days as columns (click one to see that day; a table under it), the
   working day before, his average day (days marked in the 4 weeks before), best day and streak (days in a row; an empty
   weekend doesn't break it). Any earlier day by the arrows; "Copy summary" puts the day in a few lines on the clipboard
-  (company names only, no notes or people); "Every company you marked" lists them with their mark and time.
+  (company names only, no notes or people); "Every company you marked" lists them with their mark and time. **Finish day**
+  (Zac, 23 Nov 2026: "a button … finish day, then it will compile the report and a document with the good lead names I
+  can put on Notion"; a blue button on Today's list — it opens Your day on the report — and on Your day, "Day report" for
+  an earlier day; `dayReport` / `reportMarkdown` / `reportHtml` in `wrapped.js`): one document — the day's summary
+  (looked through, keepers, keeper rate, best and worst sector, best find, hours worked and pace, what else got done,
+  against other days), then every keeper under its mark (Good leads, Research harder, Open leads, Call list, Added to mine,
+  Email / Mail list), best lead score first, each with its Companies House link, website, industry, size, score and his
+  note; then Not for us by reason with names — skipped companies are counted, never named (Skip is how he takes off one
+  the bank already has). **Copy for Notion** puts it on the clipboard as formatted HTML with the Markdown as plain text
+  (Notion, email and Teams paste it with headings, bullets and links); **Download (.md)** saves `fx-day-<date>.md` (Notion
+  imports it); **Good leads in Excel** the keepers with mark, company, number, industry, turnover, score, website, note, time
+  marked and Companies House link. Built from the marks like the rest of the page — nothing saved, so any day's report can
+  be made again.
   **Notes and Research harder** (Zac, 23 Nov 2026: "a button to add notes. And another button which is good lead but no
   contact info and add it to a research harder section"): every line has "✎ Add note" / "Edit note" (`LineNote`: the
   company's note, store key `notes`, the same one cards and the company page show; shown under the links once saved), and
