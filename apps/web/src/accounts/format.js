@@ -783,6 +783,39 @@ export function goodLeadsList(rows = [], marks = {}) {
     .map((r) => ({ r, mark: goodMarkOf(r.company_number, marks), rating: ratingOf(marks.verdicts, r.company_number) }))
     .sort((a, b) => b.rating - a.rating || String(b.mark.at).localeCompare(String(a.mark.at)) || (b.r.lead_score || 0) - (a.r.lead_score || 0));
 }
+// Why a lead is on Today's list, in a few words (Zac, 24 Nov 2026, instead of "score 54": "why it's here"): its
+// strongest reasons that say something about this company — not the ones nearly every lead on the list shares (FX proof
+// in its filings, the £20m–£300m band, his checks' lean) — each cut short; an FX loss carries when it was filed and
+// whether any hedging is named. Biggest first, the timely one first on a tie. Never empty: falls back to the top reason.
+const WHY_SHARED = /^(Strong FX proof|Some FX proof|Turnover £20m|No hedging named|… in accounts filed|FX loss with no hedging|Your checks:)/;
+export function whyHere(r, max = 2) {
+  const parts = (r?.lead_parts || []).filter(([, p]) => p > 0);
+  const filed = parts.find(([w]) => /^… in accounts filed/.test(w));
+  const noHedge = parts.find(([w]) => /^FX loss with no hedging/.test(w));
+  const cut = (t, n = 46) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
+  const said = (w) => {
+    let m;
+    if ((m = /^FX loss of (\S+)/.exec(w))) {
+      const when = filed ? filed[0].replace(/^… in accounts filed /, "").replace(new RegExp(` ${new Date().getFullYear()}$`), "") : "";
+      return `${m[1]} FX loss${when ? ` (filed ${when})` : ""}${noHedge ? ", no hedging" : ""}`;
+    }
+    if ((m = /^Like your good lead (.+?)(?: \(|$)/.exec(w))) return `Like your good lead ${naturalCompany(m[1])}`;
+    if ((m = /^Hidden from the usual filters: (.+)$/.exec(w))) return `Hidden from filters: ${m[1].split(", ")[0]}`;
+    if ((m = /^A niche few bankers search: (?:Emerging: )?(.+?)(?: \(SIC \d+\))?$/.exec(w))) return `Quiet niche: ${m[1]}`;
+    if ((m = /^Niche: (.+?) \(\d+% of its companies prove FX\)$/.exec(w))) return m[1];
+    if ((m = /^Growing fast: turnover \+?(\S+?) on last year$/.exec(w))) return `Growing ${m[1]}`;
+    if ((m = /^Subsidiaries abroad: (.+)$/.exec(w))) return `Subsidiaries in ${m[1].replace(/\s*\([^)]*\)/g, "")}`;
+    if ((m = /^PE-backed: (.+?) —/.exec(w))) return `PE-backed: ${m[1]}`;
+    if ((m = /^New finance director:? *(.*)$/.exec(w))) return m[1] ? `New FD: ${m[1].replace(/^\(|\)$/g, "")}` : "New FD";
+    if (/^Hiring a finance director/.test(w)) return w.replace(/^Hiring a finance director/, "Hiring an FD");
+    if ((m = /^Overseas operations: (.+)$/.exec(w))) return m[1].charAt(0).toUpperCase() + m[1].slice(1);
+    return w.replace(/ — .*$/, "");
+  };
+  const weight = ([w, p, cat]) => p + (w.startsWith("FX loss of") ? (filed?.[1] || 0) + (noHedge?.[1] || 0) : 0) + (cat === "timing" ? 0.5 : 0);
+  const own = parts.filter(([w]) => !WHY_SHARED.test(w)).sort((a, b) => weight(b) - weight(a));
+  const picked = (own.length ? own : parts.slice().sort((a, b) => b[1] - a[1])).slice(0, max);
+  return picked.map((part) => cut(said(part[0])));
+}
 export function todaysList(rows, { contacted = {}, checks = {}, verdicts = {}, lists = {} } = {}) {
   const marked = (n) => contacted[n] || checks[n]?.review || verdicts[n]?.verdict || lists[n];
   const judged = new Set(rows.filter((r) => marked(r.company_number)).map(groupKey));
