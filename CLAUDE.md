@@ -893,8 +893,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   currency and 62% of sales abroad — and no hedging named.", then the key findings each linked to its filing: size, new
   finance director, finance contact, FX loss / gain, main currency, hedging, sales abroad, subsidiaries abroad, borrowing in
   another currency, customs, buying companies, private equity, why now, bank, owner and the chain up to it, where FX is
-  decided, few bankers see it, niche — what the records don't say is left out); the stars, website, Google / FD / "Who owns
-  it?" links, Copy brief, the note, Excel export (rating, brief, key findings, owner). The owner is `ownership(r)`, so the
+  decided, few bankers see it, niche — what the records don't say is left out); **why it's a good lead** on top (Zac, 24
+  Nov 2026: "add a description like why they're a good — ie FX loss things which makes them a good lead"; `whyGood` in
+  `format.js`, rule-based): the FX first — the loss, the year before, hedged or not ("It lost £96k on currency in the accounts
+  it filed on 28 Sept 2026, with no hedging named — the clearest need for forwards."), sales abroad and the currency, the
+  risk figure the accounts give, accounts kept in another currency (else what the filings show) — then why now (new FD,
+  buying companies, private equity, a moment), size and growth, subsidiaries / borrowing abroad, UK-owned or deciding here,
+  hidden from the usual filters and the good lead it's like; nothing the records don't show, so a lead with none shows the
+  brief as before. The card shows it with the brief's first sentence (`about`: who it is) and the key findings; Copy brief, the
+  Excel (`why_good`) and the Finish day report (on screen, Notion copy, .md, its Excel) carry it too; the stars, website,
+  Google / FD / "Who owns it?" links, Copy brief, the note, Excel export (rating, why it's good, brief, key findings, owner). The owner is `ownership(r)`, so the
   daily owner search's answer shows once it has run — it searches every good lead first (`--first good_leads.json`, Gemini
   with Google Search). The Finish day report and its Excel carry each new prospect's rating and brief, best rated first.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
