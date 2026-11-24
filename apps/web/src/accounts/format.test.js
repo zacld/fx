@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -853,5 +853,30 @@ describe("the score out of 100: where a lead stands among every lead ranked", ()
       expect([score100(30), score100(20)]).toEqual([100, 33]);   // ties at the top all read 100
     } finally { setScoreScale([]); }
     expect(score100(54)).toBe(54);   // no scale: the raw score
+  });
+});
+
+describe("Call list: recent FX loss first (Zac, 24 Nov 2026)", () => {
+  const today = new Date("2026-11-24T09:00:00Z");
+  const big = { company_number: "1", company_name: "BIG LOSS LTD", fx_gain_loss_gbp: "-2900000", accounts_filed_on: "2026-10-02", lead_score: 40 };
+  const small = { company_number: "2", company_name: "SMALL LOSS LTD", fx_gain_loss_gbp: "-60000", filed: "2026-11-10", lead_score: 66 };
+  const old = { company_number: "3", company_name: "OLD LOSS LTD", fx_gain_loss_gbp: "-900000", accounts_filed_on: "2026-03-01", lead_score: 64 };
+  const tiny = { company_number: "4", company_name: "TINY LOSS LTD", fx_gain_loss_gbp: "-20000", accounts_filed_on: "2026-11-01", lead_score: 61 };
+  const gain = { company_number: "5", company_name: "GAIN LTD", fx_gain_loss_gbp: "300000", accounts_filed_on: "2026-11-01", lead_score: 70 };
+
+  it("is the loss when £50k+ in accounts filed in the last 6 months, else 0", () => {
+    expect(recentFxLoss(big, today)).toBe(2900000);
+    expect(recentFxLoss(small, today)).toBe(60000);   // a filings row's own filed date
+    expect(recentFxLoss(old, today)).toBe(0);          // filed over 6 months ago
+    expect(recentFxLoss(tiny, today)).toBe(0);         // under £50k
+    expect(recentFxLoss(gain, today)).toBe(0);
+    expect(recentFxLoss(undefined, today)).toBe(0);
+  });
+  it("orders the biggest recent loss first, then the rest by lead score", () => {
+    const order = [gain, tiny, old, small, big].sort(byRecentLoss(today)).map((r) => r.company_number);
+    expect(order).toEqual(["1", "2", "5", "3", "4"]);
+    // a company on the list that's no longer on either list (no row): after any with a recent loss
+    expect(byRecentLoss(today)(undefined, small)).toBeGreaterThan(0);
+    expect(byRecentLoss(today)(undefined, undefined)).toBe(0);
   });
 });

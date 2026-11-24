@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION, learningRows } from "./ranking.js";
-import { score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { byRecentLoss, recentFxLoss, score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
@@ -3171,8 +3171,9 @@ function StepEmail({ r, which, step }) {
   );
 }
 
-// My lists: the companies Zac put on his call, chocolate / mailing and email lists, newest first, each with an export
-// (the mailing list's carries the addressee and registered office).
+// My lists: the companies Zac put on his call, chocolate / mailing and email lists, the next sequence step due first, each
+// with an export (the mailing list's carries the addressee and registered office). The Call list leads with a recent FX
+// loss, biggest first, then by lead score (Zac, 24 Nov 2026: "rank the call list by recent FX loss as the main one").
 function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
   const byNumber = useMemo(() => Object.fromEntries(rows.map((r) => [r.company_number, r])), [rows]);
   const { setList } = useContext(VerdictContext);
@@ -3180,8 +3181,10 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
   const mine = Object.entries(lists).filter(([, v]) => v.list === which);
   const missingCount = mine.filter(([, v]) => v.missing).length;
   const today = new Date();
+  const lossFirst = which === "call" ? byRecentLoss(today) : () => 0;
   const list = mine.filter(([, v]) => Boolean(v.missing) === missingOnly)
-    .sort((a, b) => sequenceRank(a[1].seq, today).localeCompare(sequenceRank(b[1].seq, today)) || String(b[1].at).localeCompare(String(a[1].at)))
+    .sort((a, b) => lossFirst(byNumber[a[0]], byNumber[b[0]])
+      || sequenceRank(a[1].seq, today).localeCompare(sequenceRank(b[1].seq, today)) || String(b[1].at).localeCompare(String(a[1].at)))
     .map(([n, v]) => ({ ...(byNumber[n] || { company_number: n, company_name: n }), added_at: v.at, missing: v.missing, seq: v.seq }));
   const due = mine.filter(([, v]) => !v.missing && ["overdue", "today"].includes(nextStep(v.seq, today)?.when)).length;
   const need = { call: "a number or the finance director's name", email: "an email address", post: "a name or address" }[which] || "the details";
@@ -3214,7 +3217,12 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.company_number); } }}>{r.company_name}</a>
               <span className="chip">{industryOf(r)}</span>
             </div>
-            <div className="loss-fig"><span className="muted">added {filedWhen(String(r.added_at || "").slice(0, 10))}</span></div>
+            <div className="loss-fig">
+              {which === "call" && recentFxLoss(r, today) > 0 && (
+                <a href={r.fx_gain_loss_url || r.accounts_url || companyPath(r.company_number)} target="_blank" rel="noreferrer"
+                   title="A recent FX loss: £50k+ in accounts filed in the last 6 months">
+                  <b>{money(recentFxLoss(r, today))} FX loss</b> · filed {filedWhen(filedIso(r))}</a>)}
+              <span className="muted">added {filedWhen(String(r.added_at || "").slice(0, 10))}</span></div>
           </div>
           {which === "post" && <p className="panel-p"><b>{letterAddressee(r)}</b>{r.registered_address ? ` · ${r.registered_address}${r.postcode ? `, ${r.postcode}` : ""}` : " · address: see Companies House"}</p>}
           {pitchLine(r) && <p className="panel-p"><b>Pitch:</b> {pitchLine(r)}</p>}
