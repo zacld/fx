@@ -134,10 +134,16 @@ describe("Your day (a Wrapped of the day)", () => {
     expect(it2.brief).toMatch(/^Bolt Machines is a machinery manufacturer with £30\.0m turnover \(up 54% on the year before\)\./);
     expect(it2.brief).toMatch(/a £96k FX loss \(filed 12 Oct 2026\) and USD as its main currency — and no hedging named\./);
     expect(it2.findings).toContain("Hedging: No hedging named in its accounts");
+    // why it's a good lead, FX first (Zac, 24 Nov 2026), then who it is — the brief's first sentence
+    expect(it2.why).toMatch(/^It lost £96k on currency in the accounts it filed on 12 Oct 2026, with no hedging named — the clearest need for forwards\. Its main currency is USD\./);
+    expect(it2.why).toContain("Turnover £30.0m, up 54% on the year before — its currency needs grow with it.");
+    expect(it2.about).toBe("Bolt Machines is a machinery manufacturer with £30.0m turnover (up 54% on the year before).");
     const md = reportMarkdown(rep);
     expect(md).toContain("- **BOLT MACHINES LTD** ★★★ — [00000002]");
-    expect(md).toMatch(/    - Bolt Machines is a machinery manufacturer/);
+    expect(md).toContain("    - **Why it's a good lead:** It lost £96k on currency");
+    expect(md).toContain("    - Bolt Machines is a machinery manufacturer with £30.0m turnover (up 54% on the year before).\n");
     expect(reportHtml(rep)).toContain("<strong>BOLT MACHINES LTD</strong> ★★★");
+    expect(reportHtml(rep)).toContain("<li><strong>Why it's a good lead:</strong> It lost £96k on currency");
     expect(dayWrap(rows, { ...MARKS, verdicts }, MON).looked).toBe(8);   // a rating alone isn't a mark
   });
 

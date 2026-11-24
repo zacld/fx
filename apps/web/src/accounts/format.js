@@ -1653,7 +1653,76 @@ export function leadBrief(r = {}) {
   const extra = [r.subsidiaries_abroad ? `subsidiaries in ${cut(r.subsidiaries_abroad.replace(/\s*\([^)]*\)/g, ""), 60)}` : "",
     (f.buying || r.acquisitions) ? "buying companies" : "", hidden.length ? "it's hidden from the usual database filters" : ""].filter(Boolean);
   if (extra.length) sentences.push(`Also: ${extra.join("; ")}.`);
-  return { text: sentences.join(" "), facts };
+  return { text: sentences.join(" "), about: sentences[0], facts };
+}
+
+// Why it's a good lead (Zac, 24 Nov 2026: "add a description like why they're a good — ie FX loss things which makes them
+// a good lead"): the reasons it's worth a call, FX first — the loss and whether anything hedges it, how much of its
+// money is in another currency — then why now (a new finance director, buying companies, private equity, a moment),
+// size and growth, money moving between its companies abroad, who decides, how few bankers will have seen it and the
+// good lead it's like. Plain sentences from its own records (the facts leadBrief lists), never a guess; "" when its
+// records show none of them. → {text, reasons: [sentence]}
+export function whyGood(r = {}) {
+  const f = r.lead_flags || {};
+  const reasons = [];
+  const say = (t) => { if (t) reasons.push(t.charAt(0).toUpperCase() + t.slice(1)); };
+  const cut = (t, n) => (String(t).length > n ? `${String(t).slice(0, n - 1).trimEnd()}…` : String(t));
+  const loss = -Number(r.fx_gain_loss_gbp) || 0;
+  const filed = filedIso(r);
+  const prior = priorFx(r);
+  const hedged = hedgingNamed(r);
+  const hedge = r.fx_forwards ? "forward contracts" : cut(String(r.fx_today || "").replace(/^Uses\s+/i, ""), 50);
+  // the FX: the loss (or a gain big enough to show), and whether anything hedges it
+  if (loss >= 10000) {
+    const before = prior === null ? "" : prior > 0 ? `, after a ${money(prior)} gain the year before`
+      : -prior > 0 && -prior < loss ? `, worse than the ${money(-prior)} loss the year before` : "";
+    say(`it lost ${money(loss)} on currency in ${filed ? `the accounts it filed on ${filedWhen(filed)}` : "its latest accounts"}${before}`
+      + (hedged ? `, even with ${hedge} in place — worth a competing quote.` : ", with no hedging named — the clearest need for forwards."));
+  } else if (-loss >= 10000) {
+    say(`currency moved its results by ${money(-loss)} (an FX gain${filed ? ` in the accounts filed on ${filedWhen(filed)}` : ""}) — the exposure is big enough to show.`);
+  }
+  // how much of its money is in another currency
+  const cur = r.main_currency && !/niche default/.test(r.currency_source || "") ? r.main_currency : "";
+  const dir = String(r.currency_direction || "");
+  const inCur = cur ? (/^Buys/.test(dir) ? `it pays suppliers in ${cur}` : /^Sells/.test(dir) ? `it sells in ${cur}` : /^Both/.test(dir) ? `it buys and sells in ${cur}`
+    : `its main currency is ${cur}`) : r.currencies_in_accounts ? `its accounts show exposure to ${cut(r.currencies_in_accounts, 60).toLowerCase()}` : "";
+  const exposure = [r.overseas_turnover_share ? `${r.overseas_turnover_share} of its sales are abroad` : "", inCur].filter(Boolean).join(" and ");
+  const unhedged = !hedged && loss < 10000 ? ", with no hedging named" : "";
+  if (exposure) say(`${exposure}${unhedged}.`);
+  else if (r.hmrc_trade) say(`its customs records show trade abroad (${cut(r.hmrc_trade, 80)})${unhedged}.`);
+  if (hedged && loss < 10000) say(`it already hedges (${hedge}), so it buys FX and can take a competing quote.`);
+  if (r.fx_sensitivity) say(`its accounts put a figure on the risk: ${cut(r.fx_sensitivity, 110).replace(/\.$/, "")}.`);
+  if (r.reporting_currency) say(`it keeps its accounts in ${String(r.reporting_currency).slice(0, 3)}, so its UK wages, rent and tax are paid in pounds out of foreign income.`);
+  // nothing above, but its filings prove FX all the same: what they show (filed_fx, without the points)
+  if (!reasons.length && r.filed_fx) {
+    const shown = String(r.filed_fx).split("; ").map((x) => x.replace(/\s*\(\+\d+\)$/, "").trim()).filter(Boolean).slice(0, 3);
+    if (shown.length) say(`its filings show FX: ${cut(shown.join("; "), 160)}.`);
+  }
+  // why now
+  if (f.newFd) say(`${String(f.fdWhy || "a new finance director").replace(/\.$/, "")} — the moment to review how it handles FX.`);
+  else if (r.new_fd_in_accounts) say(`its accounts name a new finance director (${cut(r.new_fd_in_accounts, 70)}) — the moment to review how it handles FX.`);
+  const pe = peBackedOf(r);
+  const deals = [(f.buying || r.acquisitions) ? `it's buying companies${r.acquisitions ? ` (${cut(r.acquisitions, 70)})` : ""}${r.acquired_abroad ? ", including abroad" : ""}` : "",
+    pe ? `backed by private equity (${pe.name})` : ""].filter(Boolean);
+  if (deals.length) say(`${deals.join(" and it's ")}.`);
+  if (f.moment && !/finance director|FX loss/i.test(f.moment)) say(`why now: ${cut(f.moment, 100)}.`);
+  // size and growth
+  const t = Number(r.turnover_gbp) || 0, g = growthPct(r), group = r.turnover_basis === "group" ? " (the group's)" : "";
+  if (t && g >= 20) say(`turnover ${money(t)}${group}, up ${Math.round(g)}% on the year before — its currency needs grow with it.`);
+  else if (t && inCoreBand(r)) say(`turnover ${money(t)}${group} — in the desk's £20m–£300m range.`);
+  // money moving between its companies abroad
+  const structure = [r.subsidiaries_abroad ? `subsidiaries in ${cut(r.subsidiaries_abroad.replace(/\s*\([^)]*\)/g, ""), 70)}` : "",
+    r.fx_borrowings ? `borrowing in another currency (${cut(r.fx_borrowings, 60)})` : ""].filter(Boolean);
+  if (structure.length) say(`${structure.join(" and ")} — money moving across borders.`);
+  // who decides, and how few bankers will have found it
+  const own = ownership(r);
+  if (own.status === "uk") say("UK-owned, so FX is decided here.");
+  else if (own.status === "foreign" && financeSeat(r).lean === "uk") say(`owned from ${own.country || "abroad"}, but its own records show finance run in the UK.`);
+  const hidden = hiddenFromFilters(r);
+  if (hidden.length) say(`hidden from the usual database filters (${hidden.map((h) => h.label.toLowerCase()).join("; ")}), so fewer banks will have found it.`);
+  const like = (r.lead_parts || []).map(([w]) => /^Like your good lead (.+?)(?: \(|$)/.exec(String(w))).find(Boolean);
+  if (like) say(`like your good lead ${naturalCompany(like[1]) || like[1]}.`);
+  return { text: reasons.join(" "), reasons };
 }
 
 export { financeSeat, SEAT_LABEL, ownershipOf, OWNERSHIP_LABEL };

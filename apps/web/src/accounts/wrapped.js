@@ -3,7 +3,7 @@
 // marks only — each mark keeps the time it was made (checks.review_at, verdicts.at, lists.at, a touch's at, a sequence
 // step's date, a note's at) — so nothing new is stored and nothing comes from the bank's records. A company counts on the
 // day of its latest mark: one marked again later moves to that day, and an undone mark isn't counted.
-import { chCompanyUrl, growthPct, hedgingNamed, hiddenFromFilters, inCoreBand, industryOf, leadBrief, leadSource, money, peBackedOf, ratingOf, score100, siteOf, stars } from "./format.js";
+import { chCompanyUrl, growthPct, hedgingNamed, hiddenFromFilters, inCoreBand, industryOf, leadBrief, leadSource, money, peBackedOf, ratingOf, score100, siteOf, stars, whyGood } from "./format.js";
 import { SEQUENCE } from "./sequence.js";
 import { touchesOf } from "./followups.js";
 
@@ -257,13 +257,14 @@ const TAKEN = [["open", (n) => `${n} open lead${n === 1 ? "" : "s"}`], ["call", 
 const DROPS = [["small", "Not enough revenue"], ["abroad", "Owned abroad"], ["notfit", "Not a fit (other reason)"]];
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 const clockOf = (at) => (hasTime(at) ? new Date(at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "");
-// verdicts: his ratings (1–3) on good leads — each new prospect carries its rating and a written brief (leadBrief: a few
-// sentences and the key findings from its own records), best rated first within its mark
+// verdicts: his ratings (1–3) on good leads — each new prospect carries its rating, why it's a good lead (whyGood: the FX
+// first) and a written brief (leadBrief: a few sentences and the key findings from its own records), best rated first
+// within its mark
 export function dayReport(w, notes = {}, { verdicts = {} } = {}) {
   const item = (a) => {
     const r = a.r, size = sizeOf(r), b = r ? leadBrief(r) : null;
     return {
-      rating: ratingOf(verdicts, a.n), brief: b?.text || "", findings: b ? b.facts.map((f) => `${f.label}: ${f.text}`) : [],
+      rating: ratingOf(verdicts, a.n), why: r ? whyGood(r).text : "", about: b?.about || "", brief: b?.text || "", findings: b ? b.facts.map((f) => `${f.label}: ${f.text}`) : [],
       kind: a.kind, mark: outcomeLabel(a.kind), name: r?.company_name || a.n, number: a.n, url: chCompanyUrl(a.n),
       website: r ? siteOf(r) : "", industry: r ? industryOf(r) : "", turnover: size || null, lead_score: r?.lead_score ?? null,
       meta: r ? [industryOf(r), size ? `${money(size)}${r.turnover_basis === "group" ? " (group)" : ""}` : "",
@@ -364,7 +365,8 @@ export function reportMarkdown(rep) {
     out.push("", `## ${sec.title} (${sec.items.length})`, "");
     for (const it of sec.items) {
       out.push(`- **${mdEscape(it.name)}**${it.rating ? ` ${stars(it.rating)}` : ""} — [${it.number}](${it.url})${it.website ? ` · [website](${href(it.website)})` : ""}${it.meta ? ` · ${mdEscape(it.meta)}` : ""}`);
-      if (it.brief) out.push(`    - ${mdEscape(it.brief)}`);
+      if (it.why) out.push(`    - **Why it's a good lead:** ${mdEscape(it.why)}`);
+      if (it.why ? it.about : it.brief) out.push(`    - ${mdEscape(it.why ? it.about : it.brief)}`);
       if (it.note) out.push(`    - Note: ${mdEscape(it.note.replace(/\s*\n+\s*/g, " "))}`);
     }
   }
@@ -393,7 +395,8 @@ export function reportHtml(rep) {
   for (const sec of rep.sections) {
     out.push(`<h2>${htmlEscape(sec.title)} (${sec.items.length})</h2><ul>`);
     for (const it of sec.items) {
-      const sub = [it.brief ? `<li>${htmlEscape(it.brief)}</li>` : "", it.note ? `<li>Note: ${htmlEscape(it.note)}</li>` : ""].join("");
+      const sub = [it.why ? `<li><strong>Why it's a good lead:</strong> ${htmlEscape(it.why)}</li>` : "", (it.why ? it.about : it.brief) ? `<li>${htmlEscape(it.why ? it.about : it.brief)}</li>` : "",
+        it.note ? `<li>Note: ${htmlEscape(it.note)}</li>` : ""].join("");
       out.push(`<li><strong>${htmlEscape(it.name)}</strong>${it.rating ? ` ${stars(it.rating)}` : ""} — ${a(it.url, it.number)}${it.website ? ` · ${a(href(it.website), "website")}` : ""}${it.meta ? ` · ${htmlEscape(it.meta)}` : ""}`
         + `${sub ? `<ul>${sub}</ul>` : ""}</li>`);
     }

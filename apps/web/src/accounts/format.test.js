@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss, whyGood, leadBrief } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -878,5 +878,41 @@ describe("Call list: recent FX loss first (Zac, 24 Nov 2026)", () => {
     // a company on the list that's no longer on either list (no row): after any with a recent loss
     expect(byRecentLoss(today)(undefined, small)).toBeGreaterThan(0);
     expect(byRecentLoss(today)(undefined, undefined)).toBe(0);
+  });
+});
+
+describe("Why it's a good lead (Zac, 24 Nov 2026)", () => {
+  const base = { company_number: "09000001", company_name: "GLOBAL CHARTER SERVICES LIMITED", sic_codes: ["51102"] };
+  it("leads with the FX loss and whether anything hedges it, then the rest of its reasons", () => {
+    const r = { ...base, fx_gain_loss_gbp: "-96000", fx_gain_loss_prior_gbp: "12000", accounts_filed_on: "2026-09-28", overseas_turnover_share: "62%",
+      main_currency: "USD", currency_direction: "Sells (exporter)", currency_source: "currency named in accounts", turnover_gbp: "48000000", turnover_growth: "+54%",
+      subsidiaries_abroad: "Poland (sales), India", lead_flags: { newFd: true, fdWhy: "New finance director (Jane Smith appointed 3 Nov 2026)" },
+      lead_parts: [["Like your good lead BASIS RESEARCH GROUP HOLDINGS LIMITED (Professional services)", 8, "fit"]] };
+    const w = whyGood(r);
+    expect(w.reasons[0]).toBe("It lost £96k on currency in the accounts it filed on 28 Sept 2026, after a £12k gain the year before, with no hedging named — the clearest need for forwards.");
+    expect(w.reasons[1]).toBe("62% of its sales are abroad and it sells in USD.");
+    expect(w.reasons[2]).toBe("New finance director (Jane Smith appointed 3 Nov 2026) — the moment to review how it handles FX.");
+    expect(w.text).toContain("Turnover £48.0m, up 54% on the year before — its currency needs grow with it.");
+    expect(w.text).toContain("Subsidiaries in Poland, India — money moving across borders.");
+    expect(w.reasons.at(-1)).toBe("Like your good lead Basis Research.");
+    expect(leadBrief(r).about).toMatch(/^Global Charter Services is /);
+  });
+  it("a hedged company: a competing quote; a worse loss than last year says so", () => {
+    expect(whyGood({ ...base, fx_forwards: "to purchase US$5.2m", main_currency: "USD", currency_source: "forward contracts", turnover_gbp: "80000000" }).reasons)
+      .toEqual(["Its main currency is USD.", "It already hedges (forward contracts), so it buys FX and can take a competing quote.", "Turnover £80.0m — in the desk's £20m–£300m range."]);
+    expect(whyGood({ ...base, fx_gain_loss_gbp: "-400000", fx_gain_loss_prior_gbp: "-150000", fx_today: "Uses forward contracts with Barclays" }).reasons[0])
+      .toBe("It lost £400k on currency in its latest accounts, worse than the £150k loss the year before, even with forward contracts with Barclays in place — worth a competing quote.");
+  });
+  it("the risk figure the accounts give, accounts kept in another currency, else what the filings show", () => {
+    const w = whyGood({ ...base, fx_sensitivity: "a 10% weakening of sterling would reduce profit by £450,000.", reporting_currency: "USD (tagged figures)" });
+    expect(w.reasons).toEqual(["Its accounts put a figure on the risk: a 10% weakening of sterling would reduce profit by £450,000.",
+      "It keeps its accounts in USD, so its UK wages, rent and tax are paid in pounds out of foreign income.",
+      "Hidden from the usual database filters (accounts in another currency), so fewer banks will have found it."]);
+    expect(whyGood({ ...base, filed_fx: "foreign-currency balances (+15); HMRC customs: imports in 12 of the last 12 months (+20)" }).reasons)
+      .toEqual(["Its filings show FX: foreign-currency balances; HMRC customs: imports in 12 of the last 12 months."]);
+  });
+  it("says nothing it can't show: no reasons, no text", () => {
+    expect(whyGood(base)).toEqual({ text: "", reasons: [] });
+    expect(whyGood({ ...base, main_currency: "EUR", currency_source: "niche default" }).text).toBe("");   // a niche default isn't its own currency
   });
 });
