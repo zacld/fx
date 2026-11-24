@@ -1137,8 +1137,16 @@ export function groupActivity(r) {
   return !own.length || own.every(nonTradingCode) ? a : null;
 }
 export const activityLine = (a) => (a ? `its ${a.subs} trading subsidiar${a.subs === 1 ? "y" : "ies"}${a.names?.length ? ` (${a.names.slice(0, 2).join(", ")}${a.subs > 2 ? " …" : ""})` : ""}` : "");
+// Codes that say little about what a company does — head office, holding company, dormant / non-trading, the "other …"
+// catch-alls, an agent for a variety of goods, non-specialised wholesale, management consultancy, property letting: a
+// company's other codes come first when it has any (Zac, 24 Nov 2026: the industry was "wrong" when the first code filed
+// was one of these). bestSicCodes: the codes, the telling ones first, in their filed order.
+const GENERIC_SIC = new Set([...Object.keys(HIDING_SIC), "46190", "46900", "70229", "74990", "82110", "82990", "96090", "98000"]);
+const isGenericSic = (c) => GENERIC_SIC.has(String(c).padStart(5, "0"));
+export const bestSicCodes = (codes = []) => [...codes.filter((c) => !isGenericSic(c)), ...codes.filter(isGenericSic)];
+export const tellingSicCodes = (codes = []) => { const t = codes.filter((c) => !isGenericSic(c)); return t.length ? t : codes.slice(0, 1); };
 export function industryOf(r) {
-  const code = (groupActivity(r)?.sic || sicCodes(r))[0];
+  const code = bestSicCodes(groupActivity(r)?.sic || sicCodes(r))[0];
   if (!code) return INDUSTRY_OTHER;
   const n = code.padStart(5, "0");
   const div = Number(n.slice(0, 2));

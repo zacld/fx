@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { crmNote, plain } from "./crm.js";
+import { crmNote, plain, registeredActivity } from "./crm.js";
+import { industryOf, setKnownGroups } from "./format.js";
 
 describe("For CRM note (Zac, 24 Nov 2026)", () => {
   const today = new Date("2026-11-24T12:00:00Z");
@@ -17,6 +18,7 @@ describe("For CRM note (Zac, 24 Nov 2026)", () => {
     const text = crmNote(r, { today });
     const lines = text.split("\n");
     expect(lines[0]).toBe("GLOBAL CHARTER SERVICES LIMITED (Companies House 09000001)");
+    expect(lines[1]).toBe("Industry: Non-scheduled passenger air transport (SIC 51102)");   // the register's own words
     expect(lines).toContain("Bank: HSBC UK BANK PLC (clearing) - all-assets debenture since 12 Mar 2021");
     expect(lines).toContain("Other lenders: CLOSE BROTHERS LIMITED: asset finance, registered 3 Oct 2026");   // the bank itself isn't repeated
     expect(lines).toContain("FX loss: £96k in the accounts filed 28 Sept 2026 (a £12k gain the year before)");
@@ -39,5 +41,22 @@ describe("For CRM note (Zac, 24 Nov 2026)", () => {
     expect(text.split("\n")[0]).toBe("BARE LTD (Companies House 1)");
     const named = crmNote({ company_number: "2", company_name: "NAMED LTD", main_bank: "Barclays Bank plc" }, { today });
     expect(named).toContain("Bank: Barclays Bank plc - named in its accounts");
+  });
+});
+
+describe("Industry in the register's own words (Zac, 24 Nov 2026: the industry groups were wrong)", () => {
+  it("skips a generic first code for the telling one, at most two", () => {
+    expect(registeredActivity({ company_number: "1", sic_codes: "46190|10512" })).toBe("Butter and cheese production (SIC 10512)");
+    expect(industryOf({ company_number: "1", sic_codes: "46190|10512" })).toBe("Manufacturing: food, drink & tobacco");
+    expect(registeredActivity({ company_number: "2", sic: ["46330", "10512", "46390"] }))
+      .toBe("Wholesale of dairy products, eggs and edible oils and fats (SIC 46330); Butter and cheese production (SIC 10512)");
+    expect(registeredActivity({ company_number: "3", sic_codes: "1110" })).toBe("Growing of cereals (except rice), leguminous crops and oil seeds (SIC 01110)");
+  });
+  it("keeps a generic code when it's all there is, and says a holding company's group trades in its subsidiaries' line", () => {
+    expect(registeredActivity({ company_number: "4", sic_codes: "70100" })).toBe("Activities of head offices (SIC 70100)");
+    setKnownGroups({ "5": { top: "5", activity: { sic: ["52290"], subs: 3 } } });
+    expect(registeredActivity({ company_number: "5", sic_codes: "64209" })).toBe("holding company - its group trades in Other transportation support activities (SIC 52290)");
+    setKnownGroups({});
+    expect(registeredActivity({ company_number: "6" })).toBe("");
   });
 });
