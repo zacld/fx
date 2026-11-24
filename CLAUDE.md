@@ -764,7 +764,19 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   American company or something like that put it in a different section"): `foreignOwned` / `elsewhere` in
   `format.js` — every company any source says is owned from abroad lives only in that tab (like UK in name: out of the
   Accounts list, Best fit / Call now, FX filings, FX losses, Today; a serious reason not to progress, so Outreach and
-  Call today drop it too), highest lead score first, industry filter, Excel export. The
+  Call today drop it too), highest lead score first, industry filter, Excel export.
+- **For CRM** (Zac, 24 Nov 2026: "in the notes section of each company have a separate one which says for CRM and our
+  notes but no hyperlinks etc, who they bank with, all useful info"; `src/accounts/crm.js` `crmNote`, `CrmNote` in
+  `AccountsApp.jsx`): beside his own notes (now headed "Our notes") a plain-text block to paste into the bank's CRM — the
+  company and its Companies House number, industry, turnover and growth, staff, latest accounts filed, **who it banks with**
+  (the all-assets debenture holder with its type and date, else the bankers its accounts name), other lenders, facility end,
+  bank borrowing and cash, the FX (loss or gain with the year before, main currency and direction, currencies, sales abroad,
+  hedging or none named, sensitivity, balances, accounts kept in another currency, borrowing abroad, subsidiaries abroad,
+  customs), the owner and chain, private equity, where FX is decided when owned abroad, the finance contact, a new FD,
+  auditor, buying companies, why now, what to pitch, the source and date, then his own note — "Label: value" lines, no links
+  or web addresses anywhere (stripped from his note too), a fact the records don't give left out; built from the page's own
+  facts, nothing from the CRM comes back. Open on the company page (Notes panel), under More detail on cards, and a "For CRM"
+  button beside "✎ Add note" on Today's list, Research harder and Good leads; Copy puts it on the clipboard. The
   Ownership sample workflow searches its 30 too; logs print "a person" for a person. **Ownership sample** workflow
   (`scripts/ownership-sample.mjs`, read-only, on a push of its files or by hand): the best 30 leads with each source's
   answer side by side, for checking by hand.

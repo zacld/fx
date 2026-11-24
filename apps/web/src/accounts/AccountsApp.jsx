@@ -2,6 +2,7 @@ import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, u
 import { FILINGS_SECTION, learningRows } from "./ranking.js";
 import { byRecentLoss, recentFxLoss, whyGood, score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
+import { crmNote } from "./crm.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
 import { firstName } from "./email.js";
@@ -952,6 +953,30 @@ function Src({ href, children, className, title }) {
     : <span className={className} title={title}>{children}</span>;
 }
 
+// For CRM (Zac, 24 Nov 2026): the company in plain text to paste into the bank's CRM — who it banks with, its FX, owner,
+// who to speak to, why now, what to pitch, then his own note — no links (crm.js crmNote). A button opens it, or open.
+function CrmNote({ r, note, startOpen = false }) {
+  const [open, setOpen] = useState(startOpen);
+  const [copied, setCopied] = useState(false);
+  const text = useMemo(() => (open ? crmNote(r, { note: note?.text || "" }) : ""), [open, r, note]);
+  if (!open) return <button className="linkish crm-open" onClick={() => setOpen(true)} title="Plain text for the CRM: bank, FX, owner, contacts — no links">For CRM</button>;
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
+  };
+  return (
+    <div className="crm-note">
+      <div className="crm-h">
+        <span><b>For CRM</b> <span className="muted">plain text, no links — paste it into the CRM</span></span>
+        <span className="crm-btns">
+          <button className="btn-sm" onClick={copy}>{copied ? "Copied" : "Copy"}</button>
+          {!startOpen && <button className="linkish" onClick={() => setOpen(false)}>Hide</button>}
+        </span>
+      </div>
+      <pre className="crm-text">{text}</pre>
+    </div>
+  );
+}
+
 // Zac's notes on a company: shown on the card, edited in place, kept on the site (any device).
 function Notes({ note, onSave }) {
   const [editing, setEditing] = useState(false);
@@ -979,7 +1004,7 @@ function Notes({ note, onSave }) {
   }
   return note?.text ? (
     <div className="notes has">
-      <div className="notes-h"><span>Notes · {day(note.at)}</span><button className="more-btn" onClick={() => setEditing(true)}>Edit</button></div>
+      <div className="notes-h"><span>Our notes · {day(note.at)}</span><button className="more-btn" onClick={() => setEditing(true)}>Edit</button></div>
       <p>{note.text}</p>
     </div>
   ) : <button className="more-btn add-note" onClick={() => setEditing(true)}>+ Add note</button>;
@@ -2465,7 +2490,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
                 <a href={googleCompany(r)} target="_blank" rel="noreferrer">Google it ↗</a>
                 <a href={googleFd(r)} target="_blank" rel="noreferrer">Check for FD ↗</a>
               </span>
-              <LineNote note={notes[r.company_number]} onSave={(text) => saveNote(r.company_number, text)} />
+              <LineNote note={notes[r.company_number]} onSave={(text) => saveNote(r.company_number, text)} r={r} />
             </div>
             {rating === r.company_number
               ? <span className="daily-btns rate-ask" role="group" aria-label={`How good is ${r.company_name}?`}>
@@ -2784,7 +2809,7 @@ function YourDay({ rows, contacted, checks, verdicts, lists, notes = {}, onOpen,
 
 // A company's note on a Today's list / Research harder line: shown when there is one, "✎ Add note" opens a box (saved to
 // the store key `notes`, the same note the cards and the company page show).
-function LineNote({ note, onSave }) {
+function LineNote({ note, onSave, r = null }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(note?.text || "");
   const [saving, setSaving] = useState(false);
@@ -2810,7 +2835,10 @@ function LineNote({ note, onSave }) {
   return (
     <div className="daily-note">
       {note?.text && <span className="daily-note-text">{note.text}</span>}
-      <button className="linkish" onClick={() => setOpen(true)}>✎ {note?.text ? "Edit note" : "Add note"}</button>
+      <span className="daily-note-acts">
+        <button className="linkish" onClick={() => setOpen(true)}>✎ {note?.text ? "Edit note" : "Add note"}</button>
+        {r && <CrmNote r={r} note={note} />}
+      </span>
     </div>
   );
 }
@@ -2859,7 +2887,7 @@ function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, se
                 <a href={googleFd(r)} target="_blank" rel="noreferrer">Check for FD ↗</a>
                 <a href={linkedin(r)} target="_blank" rel="noreferrer">Finance people on LinkedIn ↗</a>
               </span>
-              <LineNote note={notes[r.company_number]} onSave={(text) => saveNote(r.company_number, text)} />
+              <LineNote note={notes[r.company_number]} onSave={(text) => saveNote(r.company_number, text)} r={r} />
             </div>
             <span className="daily-btns" role="group" aria-label={`Move ${r.company_name} on`}>
               {moves.map(([k, sym, label]) => (
@@ -2956,7 +2984,7 @@ function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveN
                   <a href={ownership(r).searches[0][1]} target="_blank" rel="noreferrer">Who owns it? ↗</a>
                   <button className="linkish" onClick={() => copy(x, b)}>{copied === n ? "Copied" : "Copy brief"}</button>
                 </span>
-                <LineNote note={notes[n]} onSave={(text) => saveNote(n, text)} />
+                <LineNote note={notes[n]} onSave={(text) => saveNote(n, text)} r={r} />
               </div>
             </li>
           );
@@ -3760,6 +3788,7 @@ function Account({ r, isNew: fresh, mark, onContact, note, onSaveNote, onOpen, o
       <KeyPoints r={r} />
       <ContactLine r={r} />
       {mark && <FollowUpPanel r={r} mark={mark} onContact={onContact} />}
+      {open && <CrmNote r={r} note={note} />}
       {(open || note?.text) && <Notes note={note} onSave={onSaveNote} />}
       {open && <>
         <FxStrip r={r} />
@@ -3876,6 +3905,7 @@ function CompanyPage({ r, number, madeAt, mark, onContact, note, onSaveNote, onB
         </section>
         <section className="panel">
           <h2 className="panel-h">Notes</h2>
+          <CrmNote r={r} note={note} startOpen />
           <Notes note={note} onSave={onSaveNote} />
         </section>
       </div>
@@ -4033,6 +4063,12 @@ select.input option{background:#0F141F}
 .notes-h .more-btn{margin-top:0;text-transform:none;letter-spacing:0}
 .notes p{font-size:13px;color:rgba(255,255,255,.8);white-space:pre-wrap;overflow-wrap:anywhere}
 .notes-in{width:100%;resize:vertical;min-height:70px;line-height:1.45}
+.crm-note{margin:8px 0;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;gap:6px;flex-basis:100%;max-width:90ch}
+.crm-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--text)}
+.crm-btns{display:flex;gap:8px;align-items:center}
+.crm-text{margin:0;font:inherit;font-size:13px;line-height:1.5;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;user-select:all}
+.crm-open{margin-left:10px}
+.daily-note-acts{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;width:100%}.daily-note-acts .crm-open{margin-left:0}
 .notes-btns{display:flex;gap:8px}
 .add-note{display:block}
 .card-foot{display:flex;gap:16px;align-items:center}
