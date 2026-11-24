@@ -4,8 +4,21 @@
 // to pitch, then his own note — built only from its public records (the facts the page shows): no links, no web
 // addresses, nothing from the CRM. "Label: value" lines; a fact the records don't give is left out.
 import { pitchLine } from "./pitch.js";
-import { filedIso, filedWhen, financeSeat, growthPct, industryOf, INDUSTRY_OTHER, money, ownership, peBackedOf, presentedContact,
-  timelyReason } from "./format.js";
+import { filedIso, filedWhen, financeSeat, groupActivity, growthPct, industryOf, INDUSTRY_OTHER, money, ownership, peBackedOf, presentedContact,
+  sicCodes, tellingSicCodes, timelyReason } from "./format.js";
+import { SIC_NAMES } from "./sic.js";
+
+// What the register says it does, in its own words (UK SIC 2007): its telling sector codes, at most two — not head office,
+// holding company, dormant or a catch-all when it has another — and a holding company's from its trading subsidiaries
+// (Zac, 24 Nov 2026: the industry groups were wrong here; the register's words leave nothing to map).
+export function registeredActivity(r = {}) {
+  const group = groupActivity(r);
+  const named = tellingSicCodes(group?.sic || sicCodes(r)).slice(0, 2).map((c) => {
+    const k = String(c).padStart(5, "0");
+    return SIC_NAMES[k] ? `${SIC_NAMES[k]} (SIC ${k})` : `SIC ${k}`;
+  });
+  return !named.length ? "" : group ? `holding company - its group trades in ${named.join("; ")}` : named.join("; ");
+}
 
 const LINK = /\b(?:https?:\/\/|www\.)\S+/gi;
 // one line of plain text: no links, no "(Companies House charges register)" source tags, no line breaks
@@ -19,7 +32,7 @@ export function crmNote(r = {}, { note = "", today = new Date() } = {}) {
   const f = r.lead_flags || {};
   // who it is
   const industry = industryOf(r);
-  add("Industry", industry === INDUSTRY_OTHER ? "" : industry);
+  add("Industry", registeredActivity(r) || (industry === INDUSTRY_OTHER ? "" : industry));
   const t = Number(r.turnover_gbp) || 0, tf = Number(r.turnover_foreign_gbp) || 0, g = growthPct(r);
   const grew = Number.isFinite(g) && Math.round(g) ? `, ${g > 0 ? "up" : "down"} ${Math.abs(Math.round(g))}% on the year before` : "";
   if (t) add("Turnover", `${money(t)}${r.turnover_basis === "group" ? " (the group's)" : ""}${grew}`);

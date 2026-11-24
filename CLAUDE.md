@@ -535,7 +535,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   shown as appointed with no title counts when the accounts name them with a finance title elsewhere (the signature
   block, "Jane Smith, Chief Financial Officer"). A "New FD" filter and chip on the Accounts list.
 - **Industry** (Zac, 15 Nov 2026: "a type of company section, ie what industry"): `industryOf` in `format.js` from the
-  company's first sector code (`sic_codes` on list rows, `sic` on filings rows) — the register's divisions in ~25 plain
+  company's most telling sector code (`sic_codes` on list rows, `sic` on filings rows; `bestSicCodes`: head office, holding
+  company, dormant / non-trading, the "other …" catch-alls, agents for a variety of goods, non-specialised wholesale,
+  management consultancy and property letting go last when it has another code — 24 Nov 2026, Zac: the industry groups
+  were wrong on the For CRM note when the first code filed was one of these) — the register's divisions in ~25 plain
   groups, wholesale split by what it sells (food & drink, machinery, fuel & metals …) — an "Any industry" filter with
   counts on the Accounts list and the New money tab (deals carry their own sector codes from the ownership pass; news
   items take the list row's), an Industry column in the Sheet and New money, a chip on cards, and an `industry` export
@@ -768,7 +771,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **For CRM** (Zac, 24 Nov 2026: "in the notes section of each company have a separate one which says for CRM and our
   notes but no hyperlinks etc, who they bank with, all useful info"; `src/accounts/crm.js` `crmNote`, `CrmNote` in
   `AccountsApp.jsx`): beside his own notes (now headed "Our notes") a plain-text block to paste into the bank's CRM — the
-  company and its Companies House number, industry, turnover and growth, staff, latest accounts filed, **who it banks with**
+  company and its Companies House number, its industry in the register's own words (`registeredActivity`: its telling
+  sector codes, at most two, named from `src/accounts/sic.js` — UK SIC 2007, 731 codes — "Butter and cheese production
+  (SIC 10512)"; a holding company's from its trading subsidiaries), turnover and growth, staff, latest accounts filed, **who it banks with**
   (the all-assets debenture holder with its type and date, else the bankers its accounts name), other lenders, facility end,
   bank borrowing and cash, the FX (loss or gain with the year before, main currency and direction, currencies, sales abroad,
   hedging or none named, sensitivity, balances, accounts kept in another currency, borrowing abroad, subsidiaries abroad,
