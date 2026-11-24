@@ -834,6 +834,18 @@ export function markedToday({ checks = {}, verdicts = {}, lists = {} } = {}, tod
   for (const [k, v] of Object.entries(lists)) if (String(v?.at || "").startsWith(today)) n.add(k);
   return n.size;
 }
+// A recent FX loss (the lead score's: £50k+ in accounts filed in the last 6 months — LEAD_POINTS lossMin / recentDays):
+// the loss in pounds, else 0.
+export function recentFxLoss(r, today = new Date(), rules = LEAD_POINTS) {
+  const loss = -Number(r?.fx_gain_loss_gbp) || 0;
+  const filedOn = filedIso(r || {});
+  const since = new Date(today.getTime() - rules.recentDays * 864e5).toISOString().slice(0, 10);
+  return loss >= rules.lossMin && filedOn && filedOn >= since ? loss : 0;
+}
+// The Call list's order (Zac, 24 Nov 2026: "rank the call list by recent FX loss as the main one" — he chose biggest loss
+// first): the companies with a recent FX loss first, biggest first, then the rest; equal losses by lead score.
+export const byRecentLoss = (today = new Date()) => (a, b) =>
+  recentFxLoss(b, today) - recentFxLoss(a, today) || (Number(b?.lead_score) || 0) - (Number(a?.lead_score) || 0);
 export const googleCompany = (r) => "https://www.google.com/search?" + new URLSearchParams({ q: r.company_name || "" });
 
 export function filedIso(r) {

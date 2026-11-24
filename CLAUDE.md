@@ -656,14 +656,16 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **My lists, score bullets, What we can pitch them** (Zac, 15 Nov 2026): every card and company page has **+ Call list
   / + Chocolate / mailing list / + Email list** (`ListButtons`, beside the verdicts; one list a company, store key `lists`,
   POST `{company_number, list: "call" | "post" | "email" | null}`, mirrored to the database as mark `list`); the **My lists**
-  tab became three tabs, **Call list / Email list / Mail list** (`list-call` / `list-email` / `list-post`), each with **Ready** and **Can't find info** sections (`missing: true` on the mark, POST `{…, missing: true}`; the card's "Can't find info" / "Found it" button moves it) and an Excel export laid out like Zac's follow-up grid (Account Name, Companies House Number, Name, Job Title, CRM,
+  tab became three tabs, **Call list / Email list / Mail list** (`list-call` / `list-email` / `list-post`), each with **Ready** and **Can't find info** sections (`missing: true` on the mark, POST `{…, missing: true}`; the card's "Can't find info" / "Found it" button moves it) — the **Call list** leads with a recent FX loss (Zac, 24 Nov 2026: "rank the call list by recent FX loss as the main
+  one", biggest first: £50k+ in accounts filed in the last 6 months, shown on the card with its filing date, linked; then by lead
+  score, then the sequence order; `recentFxLoss` / `byRecentLoss` in `format.js`) and an Excel export laid out like Zac's follow-up grid (Account Name, Companies House Number, Name, Job Title, CRM,
   blank LinkedIn / Email Address / Mobile Number for him to fill bank-side — never stored here — Send Out or Cold, Gift
   Send Out Date, address, then Step 1 … Step 18 with each date done ✓ or due). **Outreach sequence** (`src/accounts/
   sequence.js`, Zac's grid, 15 Nov 2026): 18 steps over 20 working days from Day 0 (the cold email, or the gift — Mail
   list): calls 1–6 + final call, emails 1–8 (follow-up, intro, treasury, case study, market insight, money, Investec,
   break-up), two LinkedIn touches (`SEQUENCE`; days counted Mon–Fri, `addWorkingDays`); started per card ("Start
   sequence today" or a Day 0 date), each step ticked off, the next due shown first (overdue / today), list cards sorted
-  by it, "N due" on the Ready button. Saved on the list mark as `seq: {start, gift?, done: {step: date}}` (POST
+  by it (the Call list after its recent FX losses), "N due" on the Ready button. Saved on the list mark as `seq: {start, gift?, done: {step: date}}` (POST
   `{company_number, sequence}`, `validSequence`; kept when the company changes list). Each email step has an
   "email" link opening its draft (`StepEmail`; `src/accounts/templates.js`): the desk's emails that worked (Zac, 15 Nov
   2026) — Chocolates 1 (they've landed), Chocolates 2 (why I reached out), Generic first email (what we do: treasury /
