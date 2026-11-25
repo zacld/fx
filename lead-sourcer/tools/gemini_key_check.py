@@ -55,9 +55,10 @@ def check(name: str, key: str) -> None:
     models = [m["name"].split("/")[-1] for m in data.get("models") or []
               if "generateContent" in (m.get("supportedGenerationMethods") or [])]
     flash = sorted((m for m in models if re.fullmatch(r"gemini-[\d.]+-flash(-preview)?(-\d\d-\d{4})?", m)), key=_version, reverse=True)
+    aliases = [m for m in models if m.endswith("-latest")]
     pro = sorted((m for m in models if re.fullmatch(r"gemini-[\d.]+-pro(-preview)?(-\d\d-\d{4})?", m)), key=_version, reverse=True)
     print(f"  models: HTTP 200, {len(models)} usable; newest Flash: {', '.join(flash[:3]) or 'none'}; "
-          f"newest Pro: {', '.join(pro[:2]) or 'none'}")
+          f"newest Pro: {', '.join(pro[:2]) or 'none'}; aliases: {', '.join(aliases) or 'none'}")
     for model in list(dict.fromkeys(flash[:1] + ["gemini-2.5-flash"])):
         body = {"contents": [{"parts": [{"text": PROMPT}]}], "tools": [{"google_search": {}}]}
         status, out, err = _call(f"{BASE}/models/{model}:generateContent", key, body)
@@ -72,12 +73,32 @@ def check(name: str, key: str) -> None:
               f"({len(chunks)} sources), {tokens} tokens, answer: {text[:60]!r}")
 
 
+def owner_lookup(name: str, key: str, model: str) -> None:
+    """One real owner-check call (sourcer/owner_search.gemini_read) on a public company, in a fresh process so its
+    model choice and the key stay local: does the newest Flash model search Google and pass the grounding rule?"""
+    import subprocess
+    import sys
+    code = ("import json,sys; sys.path.insert(0, '.'); from sourcer import owner_search as o; "
+            "r = o.gemini_read(sys.argv[1]); print(json.dumps({'result': 'none' if not r or r.get('none') else 'owner found', "
+            "'owner': (r or {}).get('owner', ''), 'sources': (r or {}).get('sites', 0), 'usage': o.GEMINI_USAGE}))")
+    env = {**os.environ, "GEMINI_API_KEY": key, "GEMINI_MODEL": model}
+    out = subprocess.run([sys.executable, "-c", code, name], capture_output=True, text=True, env=env, timeout=180)
+    lines = [l for l in (out.stdout + out.stderr).splitlines() if l.strip()]
+    print(f"  owner check ({model}) on {name}: " + (lines[-1][:300] if lines else "no output"))
+
+
 def main() -> None:
     found = [(n, os.environ.get(n, "").strip()) for n in NAMES]
     found = [(n, k) for n, k in found if k]
     print("Gemini key secrets set: " + (", ".join(n for n, _ in found) or "none of " + ", ".join(NAMES)))
     for name, key in found:
         check(name, key)
+    # the new key, end to end: the owner check's own call on two public companies (their owners are on record)
+    new = next(((n, k) for n, k in found if n != "GEMINI_API_KEY"), None)
+    if new:
+        print(f"\nOwner check with {new[0]}:")
+        for company in ("CLOETTA UK LIMITED", "WARBURTONS LIMITED"):
+            owner_lookup(company, new[1], "gemini-3.8-flash")
 
 
 if __name__ == "__main__":
