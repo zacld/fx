@@ -1,0 +1,37 @@
+name: Top 20 good leads report
+
+# Read-only: the Good leads tab's Top 20 worked out from the site's private store exactly as the page does it
+# (apps/web/scripts/top-good-report.mjs), for a report to the coding session. The repo is public, so the report is
+# printed only encrypted to the public key in apps/web/scripts/report-key.pem — the log shows counts and ciphertext,
+# never a company or a person. On a push of these files, or by hand.
+
+on:
+  push:
+    paths:
+      - .github/workflows/top-good-report.yml
+      - apps/web/scripts/top-good-report.mjs
+      - apps/web/scripts/report-key.pem
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      STORE_READ_ONLY: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install
+        run: npm ci --workspace apps/web --no-audit --no-fund > /dev/null
+      - name: The Top 20, encrypted
+        working-directory: apps/web
+        run: node scripts/top-good-report.mjs scripts/report-key.pem
