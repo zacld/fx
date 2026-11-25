@@ -769,9 +769,20 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Accounts list, Best fit / Call now, FX filings, FX losses, Today; a serious reason not to progress, so Outreach and
   Call today drop it too), highest lead score first, industry filter, Excel export.
 - **For CRM** (Zac, 24 Nov 2026: "in the notes section of each company have a separate one which says for CRM and our
-  notes but no hyperlinks etc, who they bank with, all useful info"; `src/accounts/crm.js` `crmNote`, `CrmNote` in
-  `AccountsApp.jsx`): beside his own notes (now headed "Our notes") a plain-text block to paste into the bank's CRM — the
-  company and its Companies House number, its industry in the register's own words (`registeredActivity`: its telling
+  notes but no hyperlinks etc, who they bank with, all useful info"; `src/accounts/crm.js`, `CrmNote` in
+  `AccountsApp.jsx`): beside his own notes (now headed "Our notes") a plain-text block to paste into the bank's CRM.
+  **A summary first** (Zac, 25 Nov 2026: "way more summarised, because that's what I'm gonna be reading"; `crmNote`,
+  ~7 short lines): the name and CH number; what it does (its first telling sector code in the register's words), size
+  (turnover and growth, else the size estimate), staff, owner (UK-owned / part of …, owned from <country> with where FX
+  is likely decided, PE-backed); Bank (the debenture holder and since when, the bankers its accounts name when different,
+  up to two other lenders — its own other names on the register, NatWest's National Westminster / RBS / Lombard etc., not
+  repeated, `sameBank` — facility end, borrowing, cash); FX (the loss or gain with the filing month and the year before,
+  the currency and which way, sales abroad, hedging or none named, accounts kept in another currency, subsidiaries'
+  countries, borrowing abroad; customs records when nothing else shows FX); Why now (two at most: a moment, a new FD,
+  buying companies, a PE deal, funding, else the first trigger — the FX loss is already above); Contact (a presented
+  finance contact only); Pitch (the first three products); then his note. **Full detail** (`crmDetail`, the button
+  beside Copy) is the long version: the company
+  and its Companies House number, its industry in the register's own words (`registeredActivity`: its telling
   sector codes, at most two, named from `src/accounts/sic.js` — UK SIC 2007, 731 codes — "Butter and cheese production
   (SIC 10512)"; a holding company's from its trading subsidiaries), turnover and growth, staff, latest accounts filed, **who it banks with**
   (the all-assets debenture holder with its type and date, else the bankers its accounts name), other lenders, facility end,

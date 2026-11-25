@@ -2,7 +2,7 @@ import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, u
 import { FILINGS_SECTION, learningRows } from "./ranking.js";
 import { byRecentLoss, recentFxLoss, whyGood, score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
-import { crmNote } from "./crm.js";
+import { crmDetail, crmNote } from "./crm.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
 import { firstName } from "./email.js";
@@ -953,22 +953,25 @@ function Src({ href, children, className, title }) {
     : <span className={className} title={title}>{children}</span>;
 }
 
-// For CRM (Zac, 24 Nov 2026): the company in plain text to paste into the bank's CRM — who it banks with, its FX, owner,
-// who to speak to, why now, what to pitch, then his own note — no links (crm.js crmNote). A button opens it, or open.
+// For CRM (Zac, 24 Nov 2026): the company in plain text to paste into the bank's CRM — a short summary (25 Nov 2026: what
+// it does, size, owner, bank, FX, why now, contact, pitch, then his own note; crm.js crmNote), "Full detail" for every
+// fact (crmDetail) — no links. A button opens it, or open.
 function CrmNote({ r, note, startOpen = false }) {
   const [open, setOpen] = useState(startOpen);
+  const [full, setFull] = useState(false);   // the summary first (Zac, 25 Nov 2026: "way more summarised"); every fact one click away
   const [copied, setCopied] = useState(false);
-  const text = useMemo(() => (open ? crmNote(r, { note: note?.text || "" }) : ""), [open, r, note]);
-  if (!open) return <button className="linkish crm-open" onClick={() => setOpen(true)} title="Plain text for the CRM: bank, FX, owner, contacts — no links">For CRM</button>;
+  const text = useMemo(() => (!open ? "" : (full ? crmDetail : crmNote)(r, { note: note?.text || "" })), [open, full, r, note]);
+  if (!open) return <button className="linkish crm-open" onClick={() => setOpen(true)} title="A short plain-text summary for the CRM: what it does, bank, FX, why now, pitch — no links">For CRM</button>;
   const copy = async () => {
     try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
   };
   return (
     <div className="crm-note">
       <div className="crm-h">
-        <span><b>For CRM</b> <span className="muted">plain text, no links — paste it into the CRM</span></span>
+        <span><b>For CRM</b> <span className="muted">{full ? "every fact" : "summary"}, plain text, no links — paste it into the CRM</span></span>
         <span className="crm-btns">
           <button className="btn-sm" onClick={copy}>{copied ? "Copied" : "Copy"}</button>
+          <button className="linkish" onClick={() => setFull(!full)}>{full ? "Summary" : "Full detail"}</button>
           {!startOpen && <button className="linkish" onClick={() => setOpen(false)}>Hide</button>}
         </span>
       </div>
