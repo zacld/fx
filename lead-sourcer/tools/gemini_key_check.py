@@ -28,7 +28,7 @@ def _call(url: str, key: str, body: dict | None = None) -> tuple[int, dict, str]
     req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None,
                                  headers={"Content-Type": "application/json", "x-goog-api-key": key})
     try:
-        with urllib.request.urlopen(req, timeout=90) as res:
+        with urllib.request.urlopen(req, timeout=60) as res:
             return res.status, json.load(res), ""
     except urllib.error.HTTPError as e:
         text = e.read(2000).decode("utf-8", "replace") if e.fp else ""
