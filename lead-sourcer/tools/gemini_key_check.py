@@ -97,20 +97,26 @@ def main() -> None:
     new = next(((n, k) for n, k in found if n != "GEMINI_API_KEY"), None)
     if new:
         print(f"\nOwner check with {new[0]}:")
-        for company in ("CLOETTA UK LIMITED", "WARBURTONS LIMITED"):
-            owner_lookup(company, new[1], "gemini-3.8-flash")
-            shape(company, new[1], "gemini-3.8-flash")
+        for company in ("CLOETTA UK LIMITED", "WARBURTONS LIMITED", "GLOBAL CHARTER SERVICES LIMITED"):
+            shape(company, new[1], "gemini-3.8-flash", SEARCH_FIRST)
 
 
-def shape(name: str, key: str, model: str) -> None:
+# Gemini 3.x answers well-known questions from memory even with Google Search on (25 Nov 2026: no search ran for
+# Cloetta UK or Warburtons): told to search first, does it?
+SEARCH_FIRST = ("Search Google before you answer - do not answer from memory, because ownership changes often. "
+                "Base the answer only on what the search results say.\n\n")
+
+
+def shape(name: str, key: str, model: str, lead: str = "") -> None:
     """What the grounded answer looks like on this model: the response's fields and the grounding metadata's shape
     (counts and field names, the answer's first words) — to fit the owner check's grounding rule to it."""
     import sys
     sys.path.insert(0, ".")
     from sourcer import owner_search as o
-    body = {"contents": [{"parts": [{"text": o._GEMINI_PROMPT.format(name=name, number="unknown")}]}],
+    body = {"contents": [{"parts": [{"text": lead + o._GEMINI_PROMPT.format(name=name, number="unknown")}]}],
             "tools": [{"google_search": {}}], "generationConfig": {"temperature": 0}}
     status, out, err = _call(f"{BASE}/models/{model}:generateContent", key, body)
+    print(f"  {name} ({model}{', told to search first' if lead else ''}):")
     if status != 200:
         print(f"    shape: HTTP {status} {err}")
         return
