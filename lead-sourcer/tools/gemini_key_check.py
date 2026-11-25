@@ -94,11 +94,12 @@ def main() -> None:
     for name, key in found:
         check(name, key)
     # the new key, end to end: the owner check's own call on two public companies (their owners are on record)
-    new = next(((n, k) for n, k in found if n != "GEMINI_API_KEY"), None)
-    if new:
-        print(f"\nOwner check with {new[0]}:")
-        for company in ("CLOETTA UK LIMITED", "WARBURTONS LIMITED", "GLOBAL CHARTER SERVICES LIMITED"):
-            shape(company, new[1], "gemini-3.8-flash", SEARCH_FIRST)
+    # does Google Search run at all on each key? A company the model can't know, three ways of asking
+    for name, key in found:
+        print(f"\nSearch test with {name}:")
+        for model, tool in (("gemini-3.8-flash", "google_search"), ("gemini-3.8-flash", "googleSearch"),
+                            ("gemini-3.1-pro-preview", "google_search"), ("gemini-flash-latest", "google_search")):
+            shape("GLOBAL CHARTER SERVICES LIMITED", key, model, SEARCH_FIRST, tool)
 
 
 # Gemini 3.x answers well-known questions from memory even with Google Search on (25 Nov 2026: no search ran for
@@ -107,16 +108,16 @@ SEARCH_FIRST = ("Search Google before you answer - do not answer from memory, be
                 "Base the answer only on what the search results say.\n\n")
 
 
-def shape(name: str, key: str, model: str, lead: str = "") -> None:
+def shape(name: str, key: str, model: str, lead: str = "", tool: str = "google_search") -> None:
     """What the grounded answer looks like on this model: the response's fields and the grounding metadata's shape
     (counts and field names, the answer's first words) — to fit the owner check's grounding rule to it."""
     import sys
     sys.path.insert(0, ".")
     from sourcer import owner_search as o
     body = {"contents": [{"parts": [{"text": lead + o._GEMINI_PROMPT.format(name=name, number="unknown")}]}],
-            "tools": [{"google_search": {}}], "generationConfig": {"temperature": 0}}
+            "tools": [{tool: {}}], "generationConfig": {"temperature": 0}}
     status, out, err = _call(f"{BASE}/models/{model}:generateContent", key, body)
-    print(f"  {name} ({model}{', told to search first' if lead else ''}):")
+    print(f"  {name} ({model}, tool {tool}{', told to search first' if lead else ''}):")
     if status != 200:
         print(f"    shape: HTTP {status} {err}")
         return
