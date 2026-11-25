@@ -3,9 +3,10 @@
 // 2026: "rank it now and tell me results"). Read-only. The repo is public, so the report is printed only encrypted to the
 // public key given (RSA-OAEP + AES-256-GCM, gzipped JSON between REPORT-BEGIN / REPORT-END): the log shows counts and
 // ciphertext, never a company or a person.
-//   node scripts/top-good-report.mjs scripts/report-key.pem
+//   node scripts/top-good-report.mjs scripts/report-key.pem [out.enc]   — out.enc: the same ciphertext as a file (the workflow
+//   commits it to the working branch for the session to pull: the session's network can't reach the log download host)
 import { constants, createCipheriv, publicEncrypt, randomBytes } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { gzipSync } from "node:zlib";
 import { ALERTS_KEY, CHECKS_KEY, CONTACTED_KEY, DEALS_KEY, DOMAINS_KEY, KEY, LISTS_KEY, MOMENTS_KEY, NICHES_KEY, OWNERS_KEY, PARENTS_KEY, RANKED_KEY, STORE,
   VERDICTS_KEY, dealSignals, signalsByCompany } from "../api/accounts.mjs";
@@ -16,7 +17,7 @@ import { OWNERSHIP_LABEL, TOP_GOOD, fxSizeLine, fxSizeOf, goodLeadsList, industr
 import { learningRows } from "../src/accounts/ranking.js";
 import { openStore } from "./store.mjs";
 
-const [keyPath] = process.argv.slice(2);
+const [keyPath, outPath] = process.argv.slice(2);
 const publicKey = await readFile(keyPath, "utf8");
 const store = await openStore(STORE);
 const [list, ranked, verdicts, checks, lists, contacted, niches, alerts, deals, moments, domains, owners, parents] = await Promise.all(
@@ -76,3 +77,4 @@ console.log(`Good leads: ${good.length}; ranked (not contacted, not out): ${ever
 console.log("REPORT-BEGIN");
 for (let i = 0; i < blob.length; i += 160) console.log(blob.slice(i, i + 160));
 console.log("REPORT-END");
+if (outPath) await writeFile(outPath, blob + "\n");
