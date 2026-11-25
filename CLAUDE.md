@@ -759,7 +759,28 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   `SEARCH1API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `BRAVE_API_KEY` — Brave's free plan, added 16 Nov 2026 when Zac chose
   free allowances over paid credit ("$50 is a waste for a simple Google search"), `BRAVE_MONTHLY` 1,000 — `SERPER_API_KEY`, the month's usage carried in the store item so the
   caps hold), best leads first, `--max` 100 companies a day (Zac, 16 Nov 2026: "we want 100 per day"; first route Gemini + Google Search, `gemini_read` — more than
-  the free search allowances cover, so a provider with paid credit takes the rest; a run that runs out stops cleanly);
+  the free search allowances cover, so a provider with paid credit takes the rest; a run that runs out stops cleanly) —
+  **Zac's good leads only since 25 Nov 2026** ("only run on good leads": `--first good_leads.json --only-first` in "Niche
+  hits"; the other leads' owners come from their accounts, the LEI register and Companies House). **Gemini 3** (25 Nov
+  2026: 2.5 Flash closed to new keys, and on 3.x the old generateContent call answered from memory, searching in ~1 of 10
+  tests): `gemini-3.8-flash` through the **Interactions API** (POST `/v1beta/interactions`, tool `google_search` — it
+  searched every time), told to use at most `GEMINI_MAX_SEARCHES` (3) searches (it used 5–8 a company in the live checks);
+  it returns no source links, so its answer names the page and the words, and that page is opened (`_page_check`:
+  `website.fetch`, robots.txt respected, never a social site, up to 3 pages) — but what it cites is mostly Google's own
+  redirect link (vertexaisearch.cloud.google.com, robots.txt says no: never opened), so the owner is then confirmed by
+  one search through the search APIs for the company and that owner (`_search_check`: titles and snippets only, never a
+  page). Either way the owner's every telling word — its whole name when it shares the company's ("Cloetta AB") — a word
+  of the company's and an ownership word must be there; an owner nothing backs is asked the older way (the search APIs +
+  Groq), and the run's log counts why (`GEMINI_DROPS`). Gemini 3 bills each Google search (5,000 free a month, then about
+  $14 per 1,000), so the month's count is carried in the store item (`usage.<month>.gemini_searches`) and Gemini stops at
+  `GEMINI_SEARCHES_MONTHLY` (4,500); 3 failed calls in a row stop it for the run (`GEMINI_FAILS_MAX`). A good lead Gemini
+  hasn't answered for yet (`gemini_at` on its entry — the 61 good leads of 25 Nov had all been searched the older way
+  while Gemini's model was closed to the key) is asked once, whatever the older way found; then the usual 180 / 60 days.
+  About a minute a company, so the step has `--budget` 3600 seconds and leaves the rest for the next night. Live check
+  (25 Nov 2026): Cloetta UK → Cloetta Sverige AB → Cloetta AB (Sweden), British Bakels → Emu AG (Switzerland), each
+  confirmed by the search. Key `GEMINI_API_KEY2`, else `GEMINI_API_KEY`; `tools/gemini_key_check.py` (workflow "Gemini key check")
+  lists a key's models and runs this check on two public companies. The Ownership sample's web search runs by hand only
+  (a push doesn't spend searches on its 30 leads) and saves nothing off main;
   an owner found before is kept when a later search finds nothing;
   the results read by one checked AI call (Groq — the Priority 1 exception; `ai_read`, the owner and quote must be in
   the result it names) or, with no key or a failed call, by rules ("owned by X", "subsidiary of X", "acquired by X", "part of the X
@@ -944,8 +965,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   brief as before. The card shows it with the brief's first sentence (`about`: who it is) and the key findings; Copy brief, the
   Excel (`why_good`) and the Finish day report (on screen, Notion copy, .md, its Excel) carry it too; the stars, website,
   Google / FD / "Who owns it?" links, Copy brief, the note, Excel export (rating, why it's good, brief, key findings, owner). The owner is `ownership(r)`, so the
-  daily owner search's answer shows once it has run — it searches every good lead first (`--first good_leads.json`, Gemini
-  with Google Search). The Finish day report and its Excel carry each new prospect's rating and brief, best rated first.
+  daily owner search's answer shows once it has run — it searches the good leads and only them (`--first good_leads.json
+  --only-first`, Gemini with Google Search, the owner confirmed on the page it cites or by a search of our own). The Finish day report and its Excel carry each new prospect's rating and brief, best rated first.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead
@@ -1043,7 +1064,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   and UK in name), and an Accounts list sort. The daily website / parents / owner lookups work through Zac's new prospects
   first (best rated, newest first — 23 Nov 2026), then Fit 90+ leads (`lead_order.json`), so his good leads get a website
   for Cognism and their owner checked soonest; the owner search takes `good_leads.json` (`--first`) and searches every
-  good lead, even one whose accounts already name a parent (his own check of the ultimate owner).
+  good lead, even one whose accounts already name a parent (his own check of the ultimate owner) — and, since 25 Nov
+  2026 (`--only-first`), no other lead.
 - **Hidden from the usual filters** (Zac, 21 Nov 2026: "everyone uses Market IQ or Zint — we want companies that aren't
   on there"): those tools are built on the same register, so nobody is missing from them, but a standard search (turnover
   £20m+, a manufacturing / wholesale sector code, an importer flag) can't see some companies. `hiddenFromFilters` /
@@ -1286,8 +1308,12 @@ Any feature that would require per-company or per-lead AI calls must be redesign
 tokens logged. The answer must name the result it read and quote it; an owner or country the results don't contain is
 dropped. **Gemini with Grounding with Google Search** (Zac, 16 Nov 2026: "the most reliable way is through Google";
 `GEMINI_API_KEY`, AI Studio's free tier) is now the first route: one call a company runs the Google searches itself —
-"who owns X", then who owns that owner — and counts only when Google's grounding backs the owner's name; `--max` 100 a
-day; Groq + the search APIs only when Gemini's daily allowance is used. No other per-company AI.
+"who owns X", then who owns that owner — and counts only when a source backs the owner's name; Groq + the search APIs
+when Gemini's allowance is used or no source backs its answer. **Since 25 Nov 2026 it runs on Zac's good leads only**
+(his words: "only run on good leads"): Gemini 3 Flash through the Interactions API, asked to keep to 3 Google searches
+a company, its owner confirmed on the page it cites or by one search of our own (titles and snippets), and Gemini
+stopped at 4,500 searches a month (5,000 are free; key `GEMINI_API_KEY2`, else `GEMINI_API_KEY`). No other per-company
+AI.
 
 ---
 

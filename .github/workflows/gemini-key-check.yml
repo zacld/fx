@@ -1,0 +1,45 @@
+name: Gemini key check
+
+# Read-only: for each Gemini key secret that is set, its model list, then the owner check's own Gemini call on two
+# public companies (lead-sourcer/tools/gemini_key_check.py). Prints whether each key works — HTTP status, the models it
+# can use, the owner found, the searches and tokens it took, why a source didn't back it — never the key itself (the
+# repo is public). On a push of this file or its script, or by hand.
+
+on:
+  push:
+    paths:
+      - .github/workflows/gemini-key-check.yml
+      - lead-sourcer/tools/gemini_key_check.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check the Gemini keys
+        working-directory: lead-sourcer
+        env:
+          GEMINI_KEY_2: ${{ secrets.GEMINI_KEY_2 }}
+          GEMINI_KEY2: ${{ secrets.GEMINI_KEY2 }}
+          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+          GEMINI_API_KEY2: ${{ secrets.GEMINI_API_KEY2 }}
+          GEMINI_2: ${{ secrets.GEMINI_2 }}
+          GEMINIKEY2: ${{ secrets.GEMINIKEY2 }}
+          GEMINI_API_2: ${{ secrets.GEMINI_API_2 }}
+          GEMINI_NEW: ${{ secrets.GEMINI_NEW }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # the owner check confirms Gemini's owner with one search through these, as the nightly run does
+          SEARCH1API_KEY: ${{ secrets.SEARCH1API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+        run: python3 -u tools/gemini_key_check.py
