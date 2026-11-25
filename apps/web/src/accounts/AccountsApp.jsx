@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION, learningRows } from "./ranking.js";
-import { fxSizeOf, fxSizeLine, byRecentLoss, recentFxLoss, whyGood, score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { fxSizeOf, fxSizeLine, byRecentLoss, recentFxLoss, whyGood, score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, topGoodLeads, topGoodLine, TOP_GOOD, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { crmDetail, crmNote } from "./crm.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
@@ -2927,11 +2927,13 @@ function RatingStars({ value = 0, onChange, name = "" }) {
 // where each came from), who owns it (the accounts, the LEI register, Companies House and the daily owner search, which
 // checks every good lead first), its rating, his note and the links. Copy brief puts it on the clipboard; Excel exports all.
 function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveNote, setRating, onOpen }) {
-  const [only, setOnly] = useState("");   // a mark kind, or "rated3" / "unrated"
+  const [only, setOnly] = useState("top");   // "top" (the best 20, ranked), "" (all), a mark kind, or "rated3" / "unrated"
   const [copied, setCopied] = useState("");
   const all = useMemo(() => goodLeadsList(rows, { checks, verdicts, lists }), [rows, checks, verdicts, lists]);
+  const top = useMemo(() => topGoodLeads(all, { contacted }), [all, contacted]);
   const counts = useMemo(() => all.reduce((c, x) => ({ ...c, [x.mark.kind]: (c[x.mark.kind] || 0) + 1 }), {}), [all]);
-  const list = all.filter((x) => !only || (only === "unrated" ? !x.rating : only.startsWith("rated") ? x.rating >= Number(only.slice(5)) : x.mark.kind === only));
+  const list = only === "top" ? top
+    : all.filter((x) => !only || (only === "unrated" ? !x.rating : only.startsWith("rated") ? x.rating >= Number(only.slice(5)) : x.mark.kind === only));
   const open = (e, n) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
   const briefText = (x, b) => [`${x.r.company_name} (${x.r.company_number})${x.rating ? ` ${stars(x.rating)}` : ""}`,
     whyGood(x.r).text ? `Why it's a good lead: ${whyGood(x.r).text}` : null, whyGood(x.r).text ? b.about : b.text, "",
@@ -2939,25 +2941,31 @@ function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveN
   const copy = async (x, b) => {
     try { await navigator.clipboard.writeText(briefText(x, b)); setCopied(x.r.company_number); setTimeout(() => setCopied(""), 1500); } catch { /* no clipboard */ }
   };
-  const exportList = () => downloadSheet(list.map((x) => {
+  const exportList = () => downloadSheet(list.map((x, i) => {
     const b = leadBrief(x.r), own = ownership(x.r);
-    return { rating: x.rating || "", mark: x.mark.label, marked_on: String(x.mark.at).slice(0, 10), company_name: x.r.company_name, company_number: x.r.company_number,
+    return { ...(x.top ? { rank: i + 1, rank_points: x.top.score, why_ranked: topGoodLine(x.top) } : {}),
+      rating: x.rating || "", mark: x.mark.label, marked_on: String(x.mark.at).slice(0, 10), company_name: x.r.company_name, company_number: x.r.company_number,
       industry: industryOf(x.r), turnover_gbp: x.r.turnover_gbp || "", lead_score: score100(x.r.lead_score), website: siteOf(x.r) || "",
       owner: own.owner || "", owner_status: OWNERSHIP_LABEL[own.status], owner_country: own.country || "", why_good: whyGood(x.r).text, brief: b.text,
       key_findings: b.facts.map((f) => `${f.label}: ${f.text}`).join(" | "), note: notes[x.r.company_number]?.text || "",
       contacted: contacted[x.r.company_number] ? "Yes" : "", companies_house_url: chCompanyUrl(x.r.company_number) };
-  }), columnsFor(["rating", "mark", "marked_on", "company_name", "company_number", "industry", "turnover_gbp", "lead_score", "website", "owner", "owner_status",
-    "owner_country", "why_good", "brief", "key_findings", "note", "contacted", "companies_house_url"],
-  { rating: "Rating (1–3)", marked_on: "Marked on", turnover_gbp: "Turnover (£)", lead_score: "Score", owner_status: "Owned", owner_country: "Owner's country",
-    why_good: "Why it's a good lead", key_findings: "Key findings" }, ["rating", "turnover_gbp", "lead_score"]), `good-leads-${new Date().toISOString().slice(0, 10)}.xlsx`, "Good leads");
-  const filters = [["", "All", all.length], ...Object.entries(GOOD_MARKS).filter(([k]) => counts[k]).map(([k, label]) => [k, label, counts[k]]),
+  }), columnsFor([...(only === "top" ? ["rank", "rank_points", "why_ranked"] : []), "rating", "mark", "marked_on", "company_name", "company_number", "industry",
+    "turnover_gbp", "lead_score", "website", "owner", "owner_status", "owner_country", "why_good", "brief", "key_findings", "note", "contacted", "companies_house_url"],
+  { rank: "Rank", rank_points: "Rank points", why_ranked: "Why it ranks there", rating: "Rating (1–3)", marked_on: "Marked on", turnover_gbp: "Turnover (£)",
+    lead_score: "Score", owner_status: "Owned", owner_country: "Owner's country", why_good: "Why it's a good lead", key_findings: "Key findings" },
+  ["rank", "rank_points", "rating", "turnover_gbp", "lead_score"]),
+  `${only === "top" ? `top-${TOP_GOOD.n}-good-leads` : "good-leads"}-${new Date().toISOString().slice(0, 10)}.xlsx`, only === "top" ? `Top ${TOP_GOOD.n}` : "Good leads");
+  const filters = [["top", `Top ${TOP_GOOD.n}`, top.length], ["", "All", all.length], ...Object.entries(GOOD_MARKS).filter(([k]) => counts[k]).map(([k, label]) => [k, label, counts[k]]),
     ["rated3", "★★★ only", all.filter((x) => x.rating === 3).length], ["rated2", "★★ and up", all.filter((x) => x.rating >= 2).length],
     ["unrated", "Not rated yet", all.filter((x) => !x.rating).length]];
   return (
     <div className="list daily goodleads">
       <div className="daily-head">
-        <span className="muted">{all.length} new prospects you marked, best rated first, each with why it's a good lead and a write-up from its own records. Rate them 1–3 with the stars;
-          the owner check searches every good lead first each morning.</span>
+        {only === "top"
+          ? <span className="muted">Your {top.length} best good leads to work now, ranked: your stars, the score, who owns it and where FX is decided (the owner check searches every
+            good lead), its size for the desk and why now. Contacted ones drop off and the next moves up; each says why it ranks there.</span>
+          : <span className="muted">{all.length} new prospects you marked, best rated first, each with why it's a good lead and a write-up from its own records. Rate them 1–3 with the stars;
+            the owner check searches every good lead first each morning.</span>}
         <button className="btn-sm export" onClick={exportList} disabled={!list.length}>Export Excel ({list.length})</button>
       </div>
       <div className="seg good-filter" role="group" aria-label="Show">
@@ -2977,6 +2985,8 @@ function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveN
                 </span>
                 <span className="daily-sub">{[x.mark.label, x.mark.at ? `marked ${String(x.mark.at).slice(0, 10)}` : "", industryOf(r),
                   r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed", fxSizeLabel(r), `score ${score100(r.lead_score)}`, contacted[n] ? "contacted" : ""].filter(Boolean).join(" · ")}</span>
+                {x.top && <p className="good-rank"><b>Why it's #{i + 1}:</b> {x.top.parts.map(([w, p], k) => (
+                  <span key={w}>{k ? " · " : ""}{w}{"\u00a0"}<span className={p > 0 ? "rank-p" : "rank-p neg"}>{p > 0 ? "+" : "−"}{Math.abs(p)}</span></span>))}</p>}
                 {why.text && <p className="good-why"><b>Why it's a good lead:</b> {why.text}</p>}
                 <p className={why.text ? "good-brief good-about" : "good-brief"}>{why.text ? b.about : b.text}</p>
                 <ul className="good-facts">
@@ -2997,7 +3007,8 @@ function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveN
           );
         })}
       </ol>
-      {!list.length && <div className="empty">{all.length ? "None with that filter." : "No good leads yet — mark one ✓ on Today's list and rate it 1–3."}</div>}
+      {!list.length && <div className="empty">{all.length ? (only === "top" ? "Every good lead has been contacted — see Contacted, or All." : "None with that filter.")
+        : "No good leads yet — mark one ✓ on Today's list and rate it 1–3."}</div>}
     </div>
   );
 }
@@ -4290,6 +4301,8 @@ a{color:var(--accent)}
 .good-top{display:flex;align-items:center;flex-wrap:wrap;gap:2px 4px}
 .good-brief{margin:6px 0 4px;font-size:14px;line-height:1.5;color:var(--text);max-width:78ch}
 .good-why{margin:6px 0 4px;font-size:14px;line-height:1.5;color:var(--text);max-width:78ch}.good-why b{font-weight:650}
+.good-rank{margin:6px 0 2px;font-size:13px;line-height:1.6;color:var(--text-2);max-width:110ch}
+.good-rank b{color:var(--text);font-weight:650}.rank-p{font-weight:650;color:var(--gain);white-space:nowrap;font-variant-numeric:tabular-nums}.rank-p.neg{color:var(--loss)}
 .good-brief.good-about{color:var(--text-2);font-size:13px}
 .good-facts{margin:0 0 6px;padding:0;list-style:none;font-size:13px;line-height:1.45;color:var(--text-2);max-width:90ch}
 .good-facts li{padding:1px 0}.good-facts a{color:var(--accent);text-decoration:none}.good-facts a:hover{text-decoration:underline}
@@ -4308,7 +4321,7 @@ a{color:var(--accent)}
    tokens stepped for a light surface; the mark buttons' hues darkened to 3:1+ on white (validated as a set, dataviz
    validate_palette.js --mode light; each button also has its own symbol and label, so no colour stands alone) */
 body.daily-view{color-scheme:light;--bg:#ffffff;--surface:#ffffff;--surface-2:#f3f3f1;--head:#f6f6f4;--line:#dddcd7;--line-soft:#ecebe7;
-  --text:#0b0b0b;--text-2:#3d3c39;--muted:#6f6e69;--accent:#1a5fb4;--series:#2a78d6;--good:#188038;--warn:#a87b00}
+  --text:#0b0b0b;--text-2:#3d3c39;--muted:#6f6e69;--accent:#1a5fb4;--series:#2a78d6;--good:#188038;--warn:#a87b00;--gain:#1a5fb4;--loss:#c5221f}
 body.daily-view .controls{border-bottom:1px solid var(--line)}
 body.daily-view .tab.on,body.daily-view .section-btn.on,body.daily-view .seg button.on{background:#e8f0fe;border-color:#aecbfa;color:#174ea6}
 body.daily-view .btn-sm:hover,body.daily-view .section-btn:hover{background:#e9e9e6;color:var(--text)}

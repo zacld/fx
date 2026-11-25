@@ -783,6 +783,57 @@ export function goodLeadsList(rows = [], marks = {}) {
     .map((r) => ({ r, mark: goodMarkOf(r.company_number, marks), rating: ratingOf(marks.verdicts, r.company_number) }))
     .sort((a, b) => b.rating - a.rating || String(b.mark.at).localeCompare(String(a.mark.at)) || (b.r.lead_score || 0) - (a.r.lead_score || 0));
 }
+// The top 20 good leads (Zac, 25 Nov 2026: "we also want it to rank top 20 best leads"): his new prospects not contacted
+// and not out, ranked by points, each with its reason — his own stars first, then the lead score, who owns it and where
+// FX is decided (the accounts, the registers and the morning's owner check, `ownership`; the records' lean,
+// `financeSeat`), its size for the desk (£20m–£300m or £5m+ FX a year), why now (a recently filed FX loss, a new FD,
+// another timely reason) and a named finance contact. Rule-based, no AI; the weights are logged here to be recalibrated
+// against what he calls.
+export const TOP_GOOD = {
+  n: 20, rating: { 3: 30, 2: 20, 1: 10 }, unrated: { good: 10, mine: 10, research: 5 }, scoreWeight: 0.4,
+  ukOwned: 15, groupRuns: -10, decidesHere: 5, ownedAbroad: -10, runAbroad: -25,
+  sized: 10, small: -10, loss: 10, newFd: 10, timely: 5, nowMax: 20, contact: 5,
+};
+export function topGoodScore(x, rules = TOP_GOOD) {
+  const r = x.r || {}, parts = [];
+  const add = (why, points) => { if (points) parts.push([why, Math.round(points)]); };
+  if (x.rating) add(`Your rating ${stars(x.rating)}`, rules.rating[x.rating] || 0);
+  else add(x.mark?.kind === "research" ? "Good lead, no contact found yet (not rated)" : `${x.mark?.label || "Good lead"} (not rated)`,
+    rules.unrated[x.mark?.kind] ?? rules.unrated.good);
+  const s100 = Number(score100(r.lead_score)) || 0;
+  add(`Score ${s100} of 100`, s100 * rules.scoreWeight);
+  const own = ownership(r), seat = financeSeat(r);
+  const from = own.country ? ` (${own.country})` : "";
+  const named = own.owner && own.owner !== r.company_name ? `: ${own.owner}` : "";
+  if (own.status === "uk") {
+    if (seat.lean === "abroad") add("UK-owned, but its accounts say the group runs treasury", rules.groupRuns);
+    else add(`UK-owned${named}`, rules.ukOwned);
+  } else if (own.status === "foreign") {
+    if (seat.lean === "uk") add(`Owned abroad${from}, but decides in the UK`, rules.decidesHere);
+    else if (seat.lean === "abroad") add(`Likely run from abroad${from}`, rules.runAbroad);
+    else add(`Owned abroad${from}${named} — ask where FX is decided`, rules.ownedAbroad);
+  }
+  const t = Number(r.turnover_gbp) || 0, fx = fxSizeOf(r);
+  if (deskSized(r)) add(inCoreBand(r) ? `Sized for the desk: ${money(t || r.turnover_foreign_gbp)} turnover`
+    : `Sized for the desk: FX ~${fxSizeLine(fx)} a year`, rules.sized);
+  else if (t && t < CORE_BAND[0] && !fxBigEnough(r)) add(`Small: ${money(t)} turnover${fx ? `, FX ~${fxSizeLine(fx)} a year` : ""}`, rules.small);
+  let now = 0;
+  const nowAdd = (why, points) => { const p = Math.min(points, rules.nowMax - now); if (p > 0) { now += p; add(why, p); } };
+  const loss = recentFxLoss(r);
+  if (loss) nowAdd(`FX loss of ${money(loss)} in accounts filed ${filedWhen(filedIso(r))}`, rules.loss);
+  if (r.lead_flags?.newFd) nowAdd(r.lead_flags.fdWhy || "New finance director", rules.newFd);
+  const timely = timelyReason(r);
+  if (timely && !loss && !r.lead_flags?.newFd) nowAdd(timely, rules.timely);
+  if (presentedContact(r)) add(`Finance contact: ${r.finance_contact}`, rules.contact);
+  return { score: parts.reduce((n, [, p]) => n + p, 0), parts };
+}
+export function topGoodLeads(list = [], { contacted = {} } = {}, rules = TOP_GOOD) {
+  return list.filter((x) => x.r?.company_number && !contacted[x.r.company_number] && !isOut(x.r))
+    .map((x) => ({ ...x, top: topGoodScore(x, rules) }))
+    .sort((a, b) => b.top.score - a.top.score || b.rating - a.rating || (b.r.lead_score || 0) - (a.r.lead_score || 0))
+    .slice(0, rules.n);
+}
+export const topGoodLine = (top) => top.parts.map(([why, p]) => `${why} ${p > 0 ? "+" : "−"}${Math.abs(p)}`).join(" · ");
 // Why a lead is on Today's list, in a few words (Zac, 24 Nov 2026, instead of "score 54": "why it's here"): its
 // strongest reasons that say something about this company — not the ones nearly every lead on the list shares (FX proof
 // in its filings, the £20m–£300m band, his checks' lean) — each cut short; an FX loss carries when it was filed and

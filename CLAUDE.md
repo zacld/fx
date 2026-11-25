@@ -967,6 +967,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   Google / FD / "Who owns it?" links, Copy brief, the note, Excel export (rating, why it's good, brief, key findings, owner). The owner is `ownership(r)`, so the
   daily owner search's answer shows once it has run — it searches the good leads and only them (`--first good_leads.json
   --only-first`, Gemini with Google Search, the owner confirmed on the page it cites or by a search of our own). The Finish day report and its Excel carry each new prospect's rating and brief, best rated first.
+  **Top 20** (Zac, 25 Nov 2026: "we also want it to rank top 20 best leads"; `topGoodLeads` / `topGoodScore` / `TOP_GOOD` /
+  `topGoodLine` in `format.js`): the Good leads tab opens on **Top 20** — his good leads not contacted and not out, ranked
+  by points, each with its reason ("Why it's #1: Your rating ★★★ +30 · Score 100 of 100 +40 · UK-owned: … +15 · …"): his
+  stars (★★★ 30 / ★★ 20 / ★ 10; not rated 10, Research harder 5), the lead score out of 100 × 0.4, who owns it and where FX
+  is decided (`ownership` — the accounts, the registers and the morning's owner check — with `financeSeat`'s lean:
+  UK-owned +15, or −10 when its accounts say the group runs treasury; owned abroad but decides in the UK +5; owned abroad,
+  unclear −10; likely run from abroad −25), size for the desk (+10 £20m–£300m or £5m+ FX a year; −10 under £20m with FX
+  under £5m), why now (a recently filed FX loss +10, a new FD +10, else another timely reason +5; at most 20) and a named
+  finance contact +5. A contacted one drops off and the next moves up; Excel with rank, points and why. Rule-based; the
+  weights are logged here to be recalibrated against what he calls. The white Daily pages' gain / loss colours are darker
+  steps of the same blue / red (6.3:1 / 5.8:1 on white).
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss, whyGood, leadBrief, fxSizeOf, fxSizeLine, deskSized, fxBigEnough, fxLikelyBig, TODAYS_MARKS } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss, whyGood, leadBrief, fxSizeOf, fxSizeLine, deskSized, fxBigEnough, fxLikelyBig, TODAYS_MARKS, topGoodLeads, topGoodScore, topGoodLine, TOP_GOOD } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -953,5 +953,56 @@ describe("Sized by £5m+ FX a year, not turnover (Zac, 25 Nov 2026: \"it doesn't
   });
   it("renames the red ✕ on Today's list: not enough FX", () => {
     expect(TODAYS_MARKS.find(([k]) => k === "small")).toEqual(["small", "✕", "Not enough FX (under £5m a year)"]);
+  });
+});
+
+
+describe("the top 20 good leads (Zac, 25 Nov 2026: \"rank top 20 best leads\")", () => {
+  const filed = new Date(Date.now() - 20 * 864e5).toISOString().slice(0, 10);
+  const rows = [
+    { company_number: "01", company_name: "ACME LTD", lead_score: 60, turnover_gbp: 45e6, fx_gain_loss_gbp: -120000, accounts_filed_on: filed,
+      ultimate_parent: "Acme Holdings Ltd", ultimate_parent_country: "England", finance_contact: "Jane Smith", finance_contact_confidence: "Confirmed" },
+    { company_number: "02", company_name: "BETA LTD", lead_score: 40, turnover_gbp: 8e6 },
+    { company_number: "03", company_name: "GAMMA UK LTD", lead_score: 50, turnover_gbp: 60e6, ultimate_parent: "Gamma GmbH", ultimate_parent_country: "Germany" },
+    { company_number: "04", company_name: "DELTA LTD", lead_score: 30, turnover_gbp: 30e6 },
+    { company_number: "05", company_name: "EPSILON LTD", lead_score: 60, turnover_gbp: 50e6, qualified: "Out" },
+  ];
+  const marks = {
+    verdicts: { "01": { verdict: "good", rating: 3, at: "2026-11-25" }, "02": { verdict: "good", at: "2026-11-24" }, "03": { verdict: "good", rating: 2, at: "2026-11-23" },
+      "05": { verdict: "good", rating: 3, at: "2026-11-25" } },
+    checks: { "04": { review: "research", review_at: "2026-11-22" } },
+  };
+  const list = () => { setScoreScale([10, 20, 30, 40, 50, 60]); return goodLeadsList(rows, marks); };
+  it("ranks by points, each with its reason: stars, score, owner, size, why now, contact", () => {
+    const top = topGoodLeads(list());
+    expect(top.map((x) => x.r.company_number)).toEqual(["01", "03", "04", "02"]);
+    expect(top[0].top.parts.map(([w]) => w)).toEqual(["Your rating ★★★", "Score 100 of 100", "UK-owned: Acme Holdings Ltd",
+      "Sized for the desk: £45.0m turnover", expect.stringMatching(/^FX loss of £120k in accounts filed /), "Finance contact: Jane Smith"]);
+    expect(top[0].top.score).toBe(30 + 40 + 15 + 10 + 10 + 5);
+    expect(topGoodLine(top[1].top)).toContain("Owned abroad (Germany): Gamma GmbH — ask where FX is decided −10");
+    expect(topGoodLine(top[3].top)).toContain("Small: £8.0m turnover −10");
+    expect(topGoodLine(top[2].top)).toContain("Good lead, no contact found yet (not rated) +5");
+  });
+  it("leaves out contacted and qualified-out leads, so the next one moves up", () => {
+    expect(topGoodLeads(list(), { contacted: { "01": { at: "2026-11-25" } } }).map((x) => x.r.company_number)).toEqual(["03", "04", "02"]);
+    expect(topGoodLeads(list()).some((x) => x.r.company_number === "05")).toBe(false);
+  });
+  it("keeps to 20, and why now is capped", () => {
+    const many = Array.from({ length: 30 }, (_, i) => ({ r: { company_number: String(i), company_name: `CO ${i}`, lead_score: i }, mark: { kind: "good", label: "Good lead" }, rating: 1 }));
+    expect(topGoodLeads(many)).toHaveLength(TOP_GOOD.n);
+    const busy = { r: { company_number: "9", company_name: "BUSY LTD", lead_score: 10, fx_gain_loss_gbp: -90000, accounts_filed_on: filed, lead_flags: { newFd: true, fdWhy: "New FD: Jo Bloggs" }, triggers: "New charge" },
+      mark: { kind: "good", label: "Good lead" }, rating: 0 };
+    const now = topGoodScore(busy).parts.filter(([w]) => /FX loss|New FD|New charge/.test(w));
+    expect(now.reduce((n, [, p]) => n + p, 0)).toBeLessThanOrEqual(TOP_GOOD.nowMax);
+  });
+  it("a foreign owner whose records show the UK deciding counts a little; one run from abroad counts against", () => {
+    const decides = { r: { company_number: "7", company_name: "SEVEN LTD", ultimate_parent: "Seven AB", ultimate_parent_country: "Sweden",
+      fx_forwards: "to purchase US$5m", incumbent_bank: "Barclays Bank PLC" }, mark: { kind: "good" }, rating: 1 };
+    expect(topGoodLine(topGoodScore(decides))).toContain("Owned abroad (Sweden), but decides in the UK +5");
+    const abroad = { r: { company_number: "8", company_name: "EIGHT LTD", ultimate_parent: "Eight Inc", ultimate_parent_country: "United States",
+      control_clues: "accounts|fx_by_group|Foreign exchange risk is managed by the parent" }, mark: { kind: "good" }, rating: 1 };
+    expect(topGoodLine(topGoodScore(abroad))).toContain("Likely run from abroad (United States) −25");
+    const unclear = { r: { company_number: "6", company_name: "SIX LTD", ultimate_parent: "Six Inc", ultimate_parent_country: "United States" }, mark: { kind: "good" }, rating: 1 };
+    expect(topGoodLine(topGoodScore(unclear))).toContain("Owned abroad (United States): Six Inc — ask where FX is decided −10");
   });
 });
