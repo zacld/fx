@@ -820,7 +820,7 @@ export function topGoodScore(x, rules = TOP_GOOD) {
   let now = 0;
   const nowAdd = (why, points) => { const p = Math.min(points, rules.nowMax - now); if (p > 0) { now += p; add(why, p); } };
   const loss = recentFxLoss(r);
-  if (loss) nowAdd(`FX loss of ${money(loss)} in accounts filed ${filedWhen(filedIso(r))}`, rules.loss);
+  if (loss) nowAdd(`FX loss of ${money(loss)} in accounts filed ${filedLabel(r)}`, rules.loss);
   if (r.lead_flags?.newFd) nowAdd(r.lead_flags.fdWhy || "New finance director", rules.newFd);
   const timely = timelyReason(r);
   if (timely && !loss && !r.lead_flags?.newFd) nowAdd(timely, rules.timely);
@@ -905,6 +905,17 @@ export function filedIso(r) {
   const m = /^([A-Z][a-z]+) (\d{4})$/.exec(f);
   return m && MONTH_NAMES.includes(m[1]) ? `${m[2]}-${String(MONTH_NAMES.indexOf(m[1]) + 1).padStart(2, "0")}-01` : "";
 }
+// When the accounts were filed, as shown: the day ("29 Sept 2026"), or the month alone when only the month is known — an
+// FX filings row read from Companies House's monthly archive ("September 2026" → "Sept 2026", not the "1 Sept 2026" the
+// date maths above counts it as); "on 29 Sept 2026" / "in Sept 2026" for a sentence
+export function filedLabel(r) {
+  const m = /^([A-Z][a-z]+) (\d{4})$/.exec((r && (r.accounts_filed_on || r.filed)) || "");
+  if (m && MONTH_NAMES.includes(m[1])) {
+    return new Date(Date.UTC(Number(m[2]), MONTH_NAMES.indexOf(m[1]), 15)).toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+  }
+  return filedWhen(filedIso(r || {}));
+}
+export const filedOnIn = (r) => { const when = filedLabel(r); return `${/^\d/.test(when) ? "on" : "in"} ${when}`; };
 
 // Hedging named in the company's own accounts: its forward contracts, or "Uses …" (forwards, options, a provider).
 // turnover growth on last year in % ("+54%" → 54), NaN when not known
@@ -1001,7 +1012,7 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
     if (!recentLoss && !trigger) return null;
     const fx = r.fx_forwards || r.fx_today || r.currencies_in_accounts || r.turnover_regions || "";
     const why = [
-      recentLoss && `FX loss of ${money(loss)} in accounts filed ${filedWhen(filedOn)}`,
+      recentLoss && `FX loss of ${money(loss)} in accounts filed ${filedLabel(r)}`,
       trigger,
       `Filed FX proof ${fxScore(r)}${fx ? `: ${fx}` : ""}`,
       r.run_from_abroad && "Owned abroad: pitch the UK team",
@@ -1086,7 +1097,7 @@ export function reasonsNotToProgress(r, { today = new Date(), signals = knownSig
   if (r.turnover_check) add(`Turnover sent to check: ${r.turnover_check}`);
   if (r.fx_gain_loss_check) add(`FX figure sent to check: ${r.fx_gain_loss_check}`);
   const filed = filedIso(r);
-  if (filed && (today - new Date(filed)) / 864e5 > 400) add(`Latest accounts filed ${filedWhen(filed)} — look for newer ones`);
+  if (filed && (today - new Date(filed)) / 864e5 > 400) add(`Latest accounts filed ${filedLabel(r)} — look for newer ones`);
   if (Number(r.group_companies_in_list) > 1) add(`${r.group_companies_in_list} group companies on your list — one call for the group`);
   return out;
 }
@@ -1436,11 +1447,11 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   if (loss >= rules.lossMin) {
     add(loss >= rules.bigLossMin ? rules.bigLoss : rules.loss, `FX loss of ${money(loss)}`);
     cat = "timing";
-    if (filedOn && filedOn >= day(rules.recentDays)) add(rules.recentLoss, `… in accounts filed ${filedWhen(filedOn)}`);
+    if (filedOn && filedOn >= day(rules.recentDays)) add(rules.recentLoss, `… in accounts filed ${filedLabel(r)}`);
     cat = "fit";
   }
   cat = "timing";
-  if (filedOn && filedOn >= day(rules.justFiledDays) && !(loss >= rules.lossMin)) add(rules.justFiled, `Accounts just filed (${filedWhen(filedOn)})`);
+  if (filedOn && filedOn >= day(rules.justFiledDays) && !(loss >= rules.lossMin)) add(rules.justFiled, `Accounts just filed (${filedLabel(r)})`);
   if (madeAt && r.first_seen === madeAt) add(rules.newOnList, "New on the list");
   cat = "fit";
   const niche = niches[r.fx_niche];
@@ -1589,7 +1600,7 @@ export const OUTREACH = { letters: 40 };
 export function timelyReason(r) {
   const f = r.lead_flags || {};
   const loss = -Number(r.fx_gain_loss_gbp) || 0;
-  return f.moment || (f.recentLoss && `FX loss of ${money(loss)} in accounts filed ${filedWhen(filedIso(r))}`)
+  return f.moment || (f.recentLoss && `FX loss of ${money(loss)} in accounts filed ${filedLabel(r)}`)
     || (f.newFd && (f.fdWhy || "New finance director")) || (f.buying && `Buying companies${r.acquisitions ? `: ${r.acquisitions}` : ""}`)
     || (f.pe && "Private-equity deal") || (f.funded && "Just raised funding") || parts(r.triggers)[0] || "";
 }
@@ -1690,8 +1701,8 @@ export function leadBrief(r = {}) {
   if (presentedContact(r)) add("Finance contact", `${r.finance_contact}${r.finance_contact_role ? `, ${r.finance_contact_role}` : ""}${r.finance_contact_confidence ? ` (${r.finance_contact_confidence})` : ""}`);
   const loss = -Number(r.fx_gain_loss_gbp) || 0;
   const filed = filedIso(r);
-  if (loss >= 10000) add("FX loss", `${money(loss)} FX loss${filed ? ` in accounts filed ${filedWhen(filed)}` : ""}${priorFx(r) > 0 ? ` — a ${money(priorFx(r))} gain the year before` : priorFx(r) !== null && -priorFx(r) < loss ? " — worse than the year before" : ""}`, r.fx_gain_loss_url || r.accounts_url);
-  else if (-loss >= 10000) add("FX gain", `${money(-loss)} FX gain${filed ? ` in accounts filed ${filedWhen(filed)}` : ""} — currency moves are big enough to show`, r.fx_gain_loss_url || r.accounts_url);
+  if (loss >= 10000) add("FX loss", `${money(loss)} FX loss${filed ? ` in accounts filed ${filedLabel(r)}` : ""}${priorFx(r) > 0 ? ` — a ${money(priorFx(r))} gain the year before` : priorFx(r) !== null && -priorFx(r) < loss ? " — worse than the year before" : ""}`, r.fx_gain_loss_url || r.accounts_url);
+  else if (-loss >= 10000) add("FX gain", `${money(-loss)} FX gain${filed ? ` in accounts filed ${filedLabel(r)}` : ""} — currency moves are big enough to show`, r.fx_gain_loss_url || r.accounts_url);
   const cur = r.main_currency && !/niche default/.test(r.currency_source || "") ? r.main_currency : "";
   if (cur) add("Main currency", `${cur}${r.currency_direction ? ` (${r.currency_direction})` : ""}${r.currency_source ? ` — from ${r.currency_source}` : ""}`, r.fx_notes_url || r.accounts_url);
   else if (r.currencies_in_accounts) add("Currencies", cut(r.currencies_in_accounts), r.fx_notes_url || r.accounts_url);
@@ -1731,7 +1742,7 @@ export function leadBrief(r = {}) {
   const sentences = [`${short} is ${size ? `${what} with ${size} turnover${grew ? ` (${grew})` : ""}` : what}${ownerLine}.`];
   const timely = facts.find((x) => /^(New finance director|Why now)$/.test(x.label));
   if (timely) sentences.push(timely.label === "New finance director" ? `${/^(Hiring|New)/.test(timely.text) ? timely.text : `New finance director: ${timely.text}`}.` : `Why now: ${timely.text}.`);
-  const fxBits = [loss >= 10000 ? `a ${money(loss)} FX loss${filed ? ` (filed ${filedWhen(filed)})` : ""}` : "",
+  const fxBits = [loss >= 10000 ? `a ${money(loss)} FX loss${filed ? ` (filed ${filedLabel(r)})` : ""}` : "",
     cur ? `${cur} as its main currency` : r.currencies_in_accounts ? `exposure to ${cut(r.currencies_in_accounts, 60).toLowerCase()}` : "",
     r.overseas_turnover_share ? `${r.overseas_turnover_share} of sales abroad` : ""].filter(Boolean);
   if (fxBits.length) sentences.push(`Its accounts show ${fxBits.join(", ").replace(/, ([^,]*)$/, " and $1")}${hedged ? `; it hedges (${hedged.toLowerCase().startsWith("forward") ? "forward contracts" : cut(r.fx_today, 50).toLowerCase()})` : " — and no hedging named"}.`);
@@ -1762,10 +1773,10 @@ export function whyGood(r = {}) {
   if (loss >= 10000) {
     const before = prior === null ? "" : prior > 0 ? `, after a ${money(prior)} gain the year before`
       : -prior > 0 && -prior < loss ? `, worse than the ${money(-prior)} loss the year before` : "";
-    say(`it lost ${money(loss)} on currency in ${filed ? `the accounts it filed on ${filedWhen(filed)}` : "its latest accounts"}${before}`
+    say(`it lost ${money(loss)} on currency in ${filed ? `the accounts it filed ${filedOnIn(r)}` : "its latest accounts"}${before}`
       + (hedged ? `, even with ${hedge} in place — worth a competing quote.` : ", with no hedging named — the clearest need for forwards."));
   } else if (-loss >= 10000) {
-    say(`currency moved its results by ${money(-loss)} (an FX gain${filed ? ` in the accounts filed on ${filedWhen(filed)}` : ""}) — the exposure is big enough to show.`);
+    say(`currency moved its results by ${money(-loss)} (an FX gain${filed ? ` in the accounts filed ${filedOnIn(r)}` : ""}) — the exposure is big enough to show.`);
   }
   // how much of its money is in another currency
   const cur = r.main_currency && !/niche default/.test(r.currency_source || "") ? r.main_currency : "";

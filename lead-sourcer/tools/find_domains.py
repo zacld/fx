@@ -117,8 +117,7 @@ def main() -> None:
           f"({high:,} showing the company number, {len(found) - high:,} its full name); "
           f"{len(sites):,} of {len(tracked):,} tracked companies now have a website "
           f"({round(100 * len(sites) / max(1, len(tracked)))}%)")
-    for name, site, conf in found[:15]:
-        print(f"  {name} — {site} ({conf})")
+    # no company named: the lookups go through Zac's good leads first (lead_order.json), and this log is public
 
 
 if __name__ == "__main__":

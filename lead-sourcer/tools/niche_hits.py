@@ -301,7 +301,8 @@ def main() -> None:
               f"({info['without']} without — nothing to compare); {len(rows)} companies trade the same goods, "
               f"{sum(1 for r in rows if not r['tracked'])} not on the lists")
         for r in rows[:15]:
-            print(f"  {r['score']:.2f}  {r['company_name'][:45]:<45} like {r['like_name'][:40]} ({r['shared_n']} goods in common)")
+            # like one of Zac's good leads — never which one: this log is public and his marks stay off it
+            print(f"  {r['score']:.2f}  {r['company_name'][:45]:<45} {r['shared_n']} goods in common with one of your good leads")
     if args.traders_out:
         with open(args.traders_out, "w", encoding="utf-8") as f:
             json.dump({n: len(e["import_months"] | e["export_months"]) for n, e in trade_by_company.items()

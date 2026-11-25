@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss, whyGood, leadBrief, fxSizeOf, fxSizeLine, deskSized, fxBigEnough, fxLikelyBig, TODAYS_MARKS, topGoodLeads, topGoodScore, topGoodLine, TOP_GOOD } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss, whyGood, leadBrief, fxSizeOf, fxSizeLine, deskSized, fxBigEnough, fxLikelyBig, TODAYS_MARKS, topGoodLeads, topGoodScore, topGoodLine, TOP_GOOD, filedLabel, filedOnIn } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -1004,5 +1004,22 @@ describe("the top 20 good leads (Zac, 25 Nov 2026: \"rank top 20 best leads\")",
     expect(topGoodLine(topGoodScore(abroad))).toContain("Likely run from abroad (United States) −25");
     const unclear = { r: { company_number: "6", company_name: "SIX LTD", ultimate_parent: "Six Inc", ultimate_parent_country: "United States" }, mark: { kind: "good" }, rating: 1 };
     expect(topGoodLine(topGoodScore(unclear))).toContain("Owned abroad (United States): Six Inc — ask where FX is decided −10");
+  });
+});
+
+describe("When the accounts were filed, as shown (a monthly-archive filing knows only its month)", () => {
+  const today = new Date("2026-11-25T12:00:00Z");
+  const month = { company_number: "06331190", company_name: "COBALT LTD", filed: "September 2026", fx_gain_loss_gbp: "-370000", filed_fx_score: 40 };
+  it("says the month, never the 1st of it; a known day stays a day", () => {
+    expect(filedLabel(month)).toBe("Sept 2026");
+    expect(filedOnIn(month)).toBe("in Sept 2026");
+    expect(filedLabel({ accounts_filed_on: "2026-09-29" })).toBe("29 Sept 2026");
+    expect(filedOnIn({ filed: "2026-11-04" })).toBe("on 4 Nov 2026");
+    expect(filedLabel({})).toBe("");
+  });
+  it("the lead score's reasons and the good-lead write-up use it", () => {
+    const parts = leadScore(month, { today }).parts.map(([w]) => w);
+    expect(parts).toContain("… in accounts filed Sept 2026");
+    expect(whyGood(month).reasons[0]).toMatch(/^It lost £370k on currency in the accounts it filed in Sept 2026/);
   });
 });
