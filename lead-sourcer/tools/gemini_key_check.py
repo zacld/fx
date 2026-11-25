@@ -99,6 +99,30 @@ def main() -> None:
         print(f"\nOwner check with {new[0]}:")
         for company in ("CLOETTA UK LIMITED", "WARBURTONS LIMITED"):
             owner_lookup(company, new[1], "gemini-3.8-flash")
+            shape(company, new[1], "gemini-3.8-flash")
+
+
+def shape(name: str, key: str, model: str) -> None:
+    """What the grounded answer looks like on this model: the response's fields and the grounding metadata's shape
+    (counts and field names, the answer's first words) — to fit the owner check's grounding rule to it."""
+    import sys
+    sys.path.insert(0, ".")
+    from sourcer import owner_search as o
+    body = {"contents": [{"parts": [{"text": o._GEMINI_PROMPT.format(name=name, number="unknown")}]}],
+            "tools": [{"google_search": {}}], "generationConfig": {"temperature": 0}}
+    status, out, err = _call(f"{BASE}/models/{model}:generateContent", key, body)
+    if status != 200:
+        print(f"    shape: HTTP {status} {err}")
+        return
+    cand = (out.get("candidates") or [{}])[0]
+    meta = cand.get("groundingMetadata") or {}
+    parts = (cand.get("content") or {}).get("parts") or []
+    text = " ".join("".join(p.get("text", "") for p in parts).split())
+    supports = meta.get("groundingSupports") or []
+    print(f"    shape: candidate fields {sorted(cand)}; part fields {sorted({k for p in parts for k in p})}; "
+          f"grounding fields {sorted(meta)}; chunks {len(meta.get('groundingChunks') or [])}, supports {len(supports)}, "
+          f"queries {meta.get('webSearchQueries')}; support segment fields {sorted({k for s_ in supports for k in (s_.get('segment') or {})})}")
+    print(f"    answer: {text[:260]!r}")
 
 
 if __name__ == "__main__":
