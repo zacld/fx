@@ -308,6 +308,8 @@ GEMINI_MAX_SEARCHES = int(os.environ.get("GEMINI_MAX_SEARCHES", "3"))
 GEMINI_PAGE_CHECKS = 3          # cited pages opened to find the owner's name, a company
 GEMINI_USAGE = {"calls": 0, "tokens": 0, "searches": 0, "verified": 0, "dropped": 0, "failed": 0}
 GEMINI_SPENT: list = []
+GEMINI_DROPS: dict = {}         # why cited pages didn't back an owner: counts for the run's log
+GEMINI_LAST: dict = {}          # the last answer's chain and page checks (tools/gemini_key_check.py prints them)
 GEMINI_FAILS_MAX = 3            # calls in a row that fail (timeouts, errors) before the rest of the run skips Gemini
 _GEMINI_FAILS = [0]
 _gemini_model: list = []
@@ -337,33 +339,39 @@ def _words(name: str) -> list[str]:
     return [w for w in _norm_text(name).split() if w not in _STOP_WORDS and len(w) > 1]
 
 
-def _page_backs(url: str, owner: str, company_name: str, page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> bool:
-    """Does the cited page name the owner (every telling word of it — its whole name when the company shares them), the
-    company (a telling word) and say something about ownership? Opened with the finder's own fetcher: robots.txt
-    respected, never LinkedIn or another social site (Priority 12)."""
+def _page_check(url: str, owner: str, company_name: str, page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> str:
+    """"ok" when the cited page names the owner (every telling word of it — its whole name when the company shares
+    them), the company (a telling word) and says something about ownership; else why not. Opened with the finder's own
+    fetcher: robots.txt respected, never LinkedIn or another social site (Priority 12)."""
     import urllib.parse
     from . import website
-    if not re.match(r"https?://", url or "") or any(s in url.lower() for s in website._SOCIAL):
-        return False
+    if not re.match(r"https?://", url or ""):
+        return "no page cited"
+    if any(s in url.lower() for s in website._SOCIAL):
+        return "social site (never opened)"
     fetch = page or website.fetch
     parts = urllib.parse.urlsplit(url)
     robots = website._robots(f"{parts.scheme}://{parts.netloc}/", fetch)
     if not robots.can_fetch(website.USER_AGENT, url):
-        return False
+        return "robots.txt says no"
     got = fetch(url)
     if not got:
-        return False
+        return "page didn't open"
     text = " " + _norm_text(website.page_text(got[1])) + " "
     owner_words, company_words = _words(owner), _words(company_name)
     if not owner_words or not all(f" {w} " in text for w in owner_words):
-        return False
+        return "owner not on the page"
     if company_words and not any(f" {w} " in text for w in company_words):
-        return False
+        return "company not on the page"
     # an owner sharing the company's name (Cloetta UK → Cloetta AB): any page about the company has that word, so the
     # owner's whole name must be there ("cloetta ab")
     if set(owner_words) <= set(company_words) and f" {_norm_text(owner)} " not in text:
-        return False
-    return bool(_OWNERSHIP_WORDS.search(text))
+        return "owner's whole name not on the page"
+    return "ok" if _OWNERSHIP_WORDS.search(text) else "nothing about ownership on the page"
+
+
+def _page_backs(url: str, owner: str, company_name: str, page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> bool:
+    return _page_check(url, owner, company_name, page) == "ok"
 
 
 _UNCHECKED = {"none": True, "unchecked": True}   # Gemini named an owner nothing backs: asked the older way instead
@@ -427,10 +435,21 @@ def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[st
         return dict(_UNCHECKED)
     if steps is not None:
         # the owner must be on a page it cites: the top owner's own page first, then the chain's others
-        urls = list(dict.fromkeys(str(c.get("source_url") or "").strip() for c in [top] + steps_[::-1]))
-        backing = next((u for u in urls[:GEMINI_PAGE_CHECKS] if u and _page_backs(u, owner, company_name, page)), "")
+        urls = [u for u in dict.fromkeys(str(c.get("source_url") or "").strip() for c in [top] + steps_[::-1]) if u]
+        GEMINI_LAST.clear()
+        GEMINI_LAST.update(chain=[(str(c.get("owner")), c.get("type")) for c in steps_], checks=[])
+        backing = ""
+        for u in urls[:GEMINI_PAGE_CHECKS] or [""]:
+            why = _page_check(u, owner, company_name, page)
+            GEMINI_LAST["checks"].append((u, why, str(next((c.get("quote") for c in steps_
+                                                             if str(c.get("source_url") or "").strip() == u), "") or "")))
+            if why == "ok":
+                backing = u
+                break
         if not backing:
             GEMINI_USAGE["dropped"] += 1
+            for _, why, _ in GEMINI_LAST["checks"]:
+                GEMINI_DROPS[why] = GEMINI_DROPS.get(why, 0) + 1
             return dict(_UNCHECKED)
         GEMINI_USAGE["verified"] += 1
         quote = str(next((c.get("quote") for c in steps_ if str(c.get("source_url") or "").strip() == backing and c.get("quote")),

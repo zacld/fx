@@ -82,6 +82,14 @@ def spy(prompt, key):
 o._gemini = spy
 r = o.gemini_read(sys.argv[1]) or {}
 person = r.get('kind') == 'person'
+import re, urllib.parse
+for owner, kind in o.GEMINI_LAST.get('chain') or []:
+    print('chain step:', 'a person' if kind == 'person' else owner, f'({kind})')
+for url, why, quote in o.GEMINI_LAST.get('checks') or []:
+    host = urllib.parse.urlsplit(url).netloc if url else 'none'
+    social = any(x in url.lower() for x in ('linkedin.', 'facebook.', 'twitter.', 'x.com', 'instagram.'))
+    path = '' if social else urllib.parse.urlsplit(url).path[:70]
+    print(f'cited page: {host}{path} -> {why}; quote {len(quote)} chars' + ('' if social else f': {quote[:140]!r}'))
 print(json.dumps({'result': 'owner found' if r.get('owner') else ('nothing backed it' if r.get('unchecked') else 'none'),
                   'owner': 'a person' if person else r.get('owner', ''), 'kind': r.get('kind', ''),
                   'country': r.get('country', ''), 'source': r.get('source', ''),

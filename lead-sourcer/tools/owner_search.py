@@ -159,6 +159,9 @@ def main() -> None:
           f"{g['tokens']:,} tokens, {g['verified']} owners found on the page cited, {g['dropped']} answers dropped "
           f"(no source backs the owner: asked through the search APIs instead), {g['failed']} failed"
           + ("" if os.environ.get("GEMINI_API_KEY") else " — no GEMINI_API_KEY"))
+    if owner_search.GEMINI_DROPS:
+        print("  why the cited pages didn't back them: " + ", ".join(f"{k} {v}" for k, v in sorted(
+            owner_search.GEMINI_DROPS.items(), key=lambda kv: -kv[1])))
     u = owner_search.AI_USAGE
     print(f"AI reader (Groq {owner_search.GROQ_MODEL}): {u['calls']} calls, {u['tokens']:,} tokens, "
           f"{u['dropped']} answers dropped (not in the results), {u['failed']} failed"
