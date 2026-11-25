@@ -1,9 +1,9 @@
 name: Gemini key check
 
-# Read-only: for each Gemini key secret that is set, one model list and one Google-grounded test call
-# (lead-sourcer/tools/gemini_key_check.py). Prints only whether each key works — HTTP status, the models it can
-# use, whether Google Search ran — never the key itself (the repo is public). On a push of this file or its
-# script, or by hand.
+# Read-only: for each Gemini key secret that is set, its model list, then the owner check's own Gemini call on two
+# public companies (lead-sourcer/tools/gemini_key_check.py). Prints whether each key works — HTTP status, the models it
+# can use, the owner found, the searches and tokens it took, why a source didn't back it — never the key itself (the
+# repo is public). On a push of this file or its script, or by hand.
 
 on:
   push:
@@ -36,4 +36,10 @@ jobs:
           GEMINI_API_2: ${{ secrets.GEMINI_API_2 }}
           GEMINI_NEW: ${{ secrets.GEMINI_NEW }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # the owner check confirms Gemini's owner with one search through these, as the nightly run does
+          SEARCH1API_KEY: ${{ secrets.SEARCH1API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
         run: python3 -u tools/gemini_key_check.py

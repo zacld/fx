@@ -296,8 +296,11 @@ def _groq_once(body: dict, key: str):
 # generateContent call mostly answered from memory without searching (1 search in ~10 tests, even when told to). So a
 # 3.x model is asked through the Interactions API (POST /v1beta/interactions), where Google Search ran every time. It
 # doesn't hand back the pages it read, so the answer names its source page and the words on it, and that page is opened
-# to check the owner's name is really there (website.fetch, robots.txt respected, never a social site) — an owner no
-# page backs is dropped. Searches are billed one by one on 3.x (5,000 free a month, then about $14 per 1,000), so the
+# to check the owner's name is really there (website.fetch, robots.txt respected, never a social site). What it cites is
+# mostly Google's own redirect link (vertexaisearch.cloud.google.com — robots.txt says no, never opened; first live run,
+# 25 Nov 2026), so the owner is then confirmed by one search through the finder's search APIs for the company and that
+# owner, its results' titles and snippets held to the same rules (`_search_check`); an owner nothing backs is asked the
+# older way (search APIs + Groq). Searches are billed one by one on 3.x (5,000 free a month, then about $14 per 1,000), so the
 # prompt keeps it to GEMINI_MAX_SEARCHES and the nightly run asks only about Zac's good leads (tools/owner_search.py
 # --only-first, 25 Nov 2026: "only run on good leads").
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -306,7 +309,7 @@ GEMINI_MODELS = [m for m in [os.environ.get("GEMINI_MODEL", "")] if m] + ["gemin
                                                                       "gemini-2.5-flash-lite", "gemini-flash-lite-latest", "gemini-2.0-flash"]
 GEMINI_MAX_SEARCHES = int(os.environ.get("GEMINI_MAX_SEARCHES", "3"))
 GEMINI_PAGE_CHECKS = 3          # cited pages opened to find the owner's name, a company
-GEMINI_USAGE = {"calls": 0, "tokens": 0, "searches": 0, "verified": 0, "dropped": 0, "failed": 0}
+GEMINI_USAGE = {"calls": 0, "tokens": 0, "searches": 0, "verified": 0, "confirmed_by_search": 0, "dropped": 0, "failed": 0}
 GEMINI_SPENT: list = []
 GEMINI_DROPS: dict = {}         # why cited pages didn't back an owner: counts for the run's log
 GEMINI_LAST: dict = {}          # the last answer's chain and page checks (tools/gemini_key_check.py prints them)
@@ -349,6 +352,8 @@ def _page_check(url: str, owner: str, company_name: str, page: Optional[Callable
         return "no page cited"
     if any(s in url.lower() for s in website._SOCIAL):
         return "social site (never opened)"
+    if re.match(r"https?://[^/]*vertexaisearch\.cloud\.google\.com/", url):
+        return "Google's redirect link (its robots.txt says no)"    # what Gemini 3 cites: the search below instead
     fetch = page or website.fetch
     parts = urllib.parse.urlsplit(url)
     robots = website._robots(f"{parts.scheme}://{parts.netloc}/", fetch)
@@ -357,17 +362,42 @@ def _page_check(url: str, owner: str, company_name: str, page: Optional[Callable
     got = fetch(url)
     if not got:
         return "page didn't open"
-    text = " " + _norm_text(website.page_text(got[1])) + " "
+    return _text_check(website.page_text(got[1]), owner, company_name, "page")
+
+
+def _text_check(raw: str, owner: str, company_name: str, where: str = "page") -> str:
+    """"ok" when the text names the owner (every telling word — its whole name when the company shares them), the
+    company (a telling word) and says something about ownership; else why not."""
+    text = " " + _norm_text(raw) + " "
     owner_words, company_words = _words(owner), _words(company_name)
     if not owner_words or not all(f" {w} " in text for w in owner_words):
-        return "owner not on the page"
+        return f"owner not on the {where}"
     if company_words and not any(f" {w} " in text for w in company_words):
-        return "company not on the page"
+        return f"company not on the {where}"
     # an owner sharing the company's name (Cloetta UK → Cloetta AB): any page about the company has that word, so the
     # owner's whole name must be there ("cloetta ab")
     if set(owner_words) <= set(company_words) and f" {_norm_text(owner)} " not in text:
-        return "owner's whole name not on the page"
-    return "ok" if _OWNERSHIP_WORDS.search(text) else "nothing about ownership on the page"
+        return f"owner's whole name not on the {where}"
+    return "ok" if _OWNERSHIP_WORDS.search(text) else f"nothing about ownership on the {where}"
+
+
+def _search_check(owner: str, company_name: str, fetch: Optional[Callable[[str], Optional[str]]] = None) -> tuple[str, str, int]:
+    """When no cited page backs Gemini's owner: one search through the finder's search APIs for the company and that
+    owner, its results' titles and snippets held to the same rules (never a page fetched). (reason, link, results that
+    back it) — reason "ok" when one does."""
+    query = f'"{profiles.plain_name(company_name)}" {owner}'
+    raw = profiles._cached(query) if fetch is None else None      # a stand-in fetcher (tests) never touches the cache
+    if raw is None:
+        if fetch is None and not profiles.api_key():
+            return "no search API to confirm it", "", 0
+        raw = (fetch or profiles.fetch_any)(query)
+        if raw is None:
+            return "no search API to confirm it", "", 0
+        if fetch is None:
+            profiles._store(query, raw)
+    backing = [link for link, title, snippet in profiles.parse(raw) or []
+               if _text_check(f"{title} {snippet}", owner, company_name, "result") == "ok"]
+    return ("ok", backing[0], len(backing)) if backing else ("no search result backs it either", "", 0)
 
 
 def _page_backs(url: str, owner: str, company_name: str, page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> bool:
@@ -378,10 +408,11 @@ _UNCHECKED = {"none": True, "unchecked": True}   # Gemini named an owner nothing
 
 
 def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[str], Optional[dict]]] = None,
-                page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> Optional[dict]:
+                page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None,
+                confirm: Optional[Callable[[str], Optional[str]]] = None) -> Optional[dict]:
     """{owner, kind, country, quote, url, chain, read_by: "gemini"} | {none: True} (with `unchecked` when it named an
-    owner no source backs), or None when no call could be made. `post(prompt)` and `page(url)` stand in for the API and
-    the page fetcher in tests."""
+    owner no source backs), or None when no call could be made. `post(prompt)`, `page(url)` and `confirm(query)` stand in
+    for the API, the page fetcher and the search APIs in tests."""
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if (not key and post is None) or (GEMINI_SPENT and post is None):
         return None
@@ -446,6 +477,14 @@ def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[st
             if why == "ok":
                 backing = u
                 break
+        sites = 1
+        if not backing:
+            # no page it cites opened and named the owner: one search for the company and that owner instead
+            why, link, sites = _search_check(owner, company_name, confirm)
+            GEMINI_LAST["checks"].append(("search", why, ""))
+            if why == "ok":
+                backing = link
+                GEMINI_USAGE["confirmed_by_search"] += 1
         if not backing:
             GEMINI_USAGE["dropped"] += 1
             for _, why, _ in GEMINI_LAST["checks"]:
@@ -454,7 +493,7 @@ def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[st
         GEMINI_USAGE["verified"] += 1
         quote = str(next((c.get("quote") for c in steps_ if str(c.get("source_url") or "").strip() == backing and c.get("quote")),
                          "") or ans.get("answer") or "")
-        url, source, sites = backing, re.sub(r"^https?://(www\.)?", "", backing).split("/")[0], 1
+        url, source = backing, re.sub(r"^https?://(www\.)?", "", backing).split("/")[0]
     else:
         words = [w for w in _norm_text(owner).split() if w not in ("the", "of", "and", "limited", "ltd", "plc", "inc", "group")]
         # backed by Google: the owner named in the grounded text (else it may be the model's memory)

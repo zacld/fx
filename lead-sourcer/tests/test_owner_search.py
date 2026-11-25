@@ -61,8 +61,13 @@ class GeminiInteractions(unittest.TestCase):
         o.GEMINI_SPENT.clear()
         o._gemini_model.clear()
         o._GEMINI_FAILS[0] = 0
+        o.GEMINI_DROPS.clear()
         for k in o.GEMINI_USAGE:
             o.GEMINI_USAGE[k] = 0
+
+    @staticmethod
+    def nothing(query):
+        return '{"results": []}'
 
     tearDown = setUp
 
@@ -100,18 +105,19 @@ class GeminiInteractions(unittest.TestCase):
         self.assertEqual((o.GEMINI_USAGE["searches"], o.GEMINI_USAGE["verified"], o.GEMINI_USAGE["tokens"]), (2, 1, 900))
 
     def test_page_without_the_owner_is_unchecked(self):
-        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=self.pages(html="<p>Cloetta sweets, made in Sweden.</p>"))
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=self.pages(html="<p>Cloetta sweets, made in Sweden.</p>"),
+                          confirm=self.nothing)
         self.assertEqual(a, {"none": True, "unchecked": True})
         self.assertEqual(o.GEMINI_USAGE["dropped"], 1)
 
     def test_owner_sharing_the_company_name_needs_its_whole_name(self):
         html = "<p>Cloetta UK Ltd is a subsidiary of the Cloetta group, the Swedish confectioner.</p>"
-        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=self.pages(html=html))
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=self.pages(html=html), confirm=self.nothing)
         self.assertTrue(a.get("unchecked"))
 
     def test_page_must_say_something_about_ownership(self):
         html = "<p>Cloetta UK Ltd and Cloetta AB sponsor the Leeds sweets fair.</p>"
-        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=self.pages(html=html))
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=self.pages(html=html), confirm=self.nothing)
         self.assertTrue(a.get("unchecked"))
 
     def test_a_differently_named_owner(self):
@@ -121,21 +127,50 @@ class GeminiInteractions(unittest.TestCase):
         a = o.gemini_read("TXO SYSTEMS LIMITED", post=self.reply(chain), page=self.pages(html=html))
         self.assertEqual((a["owner"], a["kind"], a["country"]), ("TowerBrook Capital Partners", "pe", "United States"))
 
+    def test_a_search_can_back_it_when_the_page_doesnt_open(self):
+        import json
+        hits = {"results": [{"title": "Cloetta UK", "link": "https://news.example.com/cloetta-uk",
+                             "snippet": "Cloetta UK Ltd, a subsidiary of Cloetta AB, makes Chewits."}]}
+        asked = []
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=lambda url: None,
+                          confirm=lambda q: asked.append(q) or json.dumps(hits))
+        self.assertEqual((a["owner"], a["url"], a["source"]), ("Cloetta AB", "https://news.example.com/cloetta-uk", "news.example.com"))
+        self.assertEqual(o.GEMINI_USAGE["confirmed_by_search"], 1)
+        self.assertIn("Cloetta AB", asked[0])
+
+    def test_a_search_that_doesnt_back_it(self):
+        import json
+        hits = {"results": [{"title": "Cloetta sweets", "link": "https://shop.example.com", "snippet": "Buy Cloetta sweets online."}]}
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=lambda url: None,
+                          confirm=lambda q: json.dumps(hits))
+        self.assertTrue(a.get("unchecked"))
+        self.assertIn("no search result backs it either", o.GEMINI_DROPS)
+
+    def test_google_redirect_link_never_opened_search_confirms(self):
+        import json
+        chain = [{**self.CHAIN[0], "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH"}]
+        page = self.pages()
+        hits = {"results": [{"title": "CLOETTA UK LIMITED", "link": "https://www.dnb.com/cloetta-uk",
+                             "snippet": "Ultimate HQ Cloetta AB Sweden. CLOETTA UK LIMITED. United Kingdom."}]}
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(chain), page=page, confirm=lambda q: json.dumps(hits))
+        self.assertEqual(page.seen, [])
+        self.assertEqual((a["owner"], a["source"]), ("Cloetta AB", "dnb.com"))
+
     def test_social_site_never_opened(self):
         chain = [{**self.CHAIN[0], "source_url": "https://www.linkedin.com/company/cloetta"}]
         page = self.pages()
-        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(chain), page=page)
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(chain), page=page, confirm=self.nothing)
         self.assertTrue(a.get("unchecked"))
         self.assertEqual(page.seen, [])
 
     def test_robots_txt_respected(self):
         page = self.pages(robots="User-agent: *\nDisallow: /")
-        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=page)
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=page, confirm=self.nothing)
         self.assertTrue(a.get("unchecked"))
         self.assertNotIn(self.PAGE, page.seen)
 
     def test_no_search_is_memory_not_a_source(self):
-        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN, searched=False), page=self.pages())
+        a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN, searched=False), page=self.pages(), confirm=self.nothing)
         self.assertTrue(a.get("unchecked"))
 
     def test_none_found(self):

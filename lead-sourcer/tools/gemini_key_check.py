@@ -6,7 +6,8 @@ For each Gemini key secret that is set (the workflow passes every likely name), 
   1. lists the models the key can use (the newest Flash / Pro names, the -latest aliases);
   2. with the newer key (else the first), runs the owner check's own call (sourcer/owner_search.gemini_read: Gemini 3
      through the Interactions API, Google Search, the owner found on the page it cites) on two public companies whose
-     owners are on record — the owner, its source site, the searches and tokens it took.
+     owners are on record — the owner, its source site, the searches and tokens it took (the search API keys are
+     passed too, so the confirming search runs as it does at night).
 Errors print their status and a short message with digits masked (no project numbers in a public log); an owner who is
 a person prints as "a person". Standard library only. Workflow "Gemini key check" (on a push of this file or its
 workflow, or by hand; a re-run isn't open to the coding agent, so a check is re-run by pushing a change here).
@@ -86,6 +87,9 @@ import re, urllib.parse
 for owner, kind in o.GEMINI_LAST.get('chain') or []:
     print('chain step:', 'a person' if kind == 'person' else owner, f'({kind})')
 for url, why, quote in o.GEMINI_LAST.get('checks') or []:
+    if url == 'search':
+        print('confirming search (titles and snippets):', why)
+        continue
     host = urllib.parse.urlsplit(url).netloc if url else 'none'
     social = any(x in url.lower() for x in ('linkedin.', 'facebook.', 'twitter.', 'x.com', 'instagram.'))
     path = '' if social else urllib.parse.urlsplit(url).path[:70]
