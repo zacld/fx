@@ -1,0 +1,39 @@
+name: Gemini key check
+
+# Read-only: for each Gemini key secret that is set, one model list and one Google-grounded test call
+# (lead-sourcer/tools/gemini_key_check.py). Prints only whether each key works — HTTP status, the models it can
+# use, whether Google Search ran — never the key itself (the repo is public). On a push of this file or its
+# script, or by hand.
+
+on:
+  push:
+    paths:
+      - .github/workflows/gemini-key-check.yml
+      - lead-sourcer/tools/gemini_key_check.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check the Gemini keys
+        working-directory: lead-sourcer
+        env:
+          GEMINI_KEY_2: ${{ secrets.GEMINI_KEY_2 }}
+          GEMINI_KEY2: ${{ secrets.GEMINI_KEY2 }}
+          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+          GEMINI_API_KEY2: ${{ secrets.GEMINI_API_KEY2 }}
+          GEMINI_2: ${{ secrets.GEMINI_2 }}
+          GEMINIKEY2: ${{ secrets.GEMINIKEY2 }}
+          GEMINI_API_2: ${{ secrets.GEMINI_API_2 }}
+          GEMINI_NEW: ${{ secrets.GEMINI_NEW }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python3 tools/gemini_key_check.py
