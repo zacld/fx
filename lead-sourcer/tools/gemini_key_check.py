@@ -98,7 +98,7 @@ def main() -> None:
     new = next(((n, k) for n, k in found if n != "GEMINI_API_KEY"), found[0] if found else None)
     if new:
         print(f"\nInteractions API with {new[0]}:")
-        for company in ("GLOBAL CHARTER SERVICES LIMITED", "CLOETTA UK LIMITED"):
+        for company in ("CLOETTA UK LIMITED",):
             interactions(company, new[1], "gemini-3.8-flash")
 
 
@@ -137,6 +137,20 @@ def interactions(name: str, key: str, model: str) -> None:
     print(f"    HTTP 200; top fields {sorted(out)}; step/part types {types}; links {len(urls)} "
           f"(e.g. {urls[0][:80] if urls else 'none'})")
     print(f"    answer: {' '.join(' '.join(seen.get('texts') or []).split())[:260]!r}")
+    # where the sources sit: each step's type and field names, nested field names two levels down (no values but
+    # strings that look like links or titles, cut short)
+    for step in out.get("steps") or []:
+        def fields(obj, depth=0):
+            if depth > 3:
+                return "…"
+            if isinstance(obj, dict):
+                return "{" + ", ".join(f"{k}: {fields(v, depth + 1)}" for k, v in list(obj.items())[:8]) + "}"
+            if isinstance(obj, list):
+                return f"[{len(obj)} × {fields(obj[0], depth + 1) if obj else ''}]"
+            if isinstance(obj, str):
+                return repr(obj[:60]) if re.match(r"https?://|[A-Z][\w ]{2,40}$", obj) else f"str({len(obj)})"
+            return type(obj).__name__
+        print(f"    step {step.get('type')}: {fields(step)[:700]}")
 
 
 # Gemini 3.x answers well-known questions from memory even with Google Search on (25 Nov 2026: no search ran for
