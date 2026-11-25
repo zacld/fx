@@ -72,10 +72,13 @@ if (orderPath) await writeFile(orderPath, JSON.stringify([...good, ...topFit, ..
 if (goodPath) await writeFile(goodPath, JSON.stringify({ companies: good.map((s) => s.company_number) }));
 console.log(`Lookup order: ${good.length.toLocaleString()} of your new prospects first, then ${topFit.length.toLocaleString()} leads with Fit 90+, then `
   + `${(live.length - topFit.length - good.filter((s) => !s.absurd).length).toLocaleString()} by lead score`);
+// this log is public (the repo's Actions logs), so Zac's marks never name a company in it: a reason naming one of his good
+// leads prints as "one of your good leads", and the lookalikes are counted, not listed by the good lead they're like
+const unnamed = (w) => String(w).replace(/^Like your good lead .+?( \(|$)/, "Like one of your good leads$1");
 const likeCount = {};
-for (const l of Object.values(likes)) likeCount[l.like_name] = (likeCount[l.like_name] || 0) + 1;
-console.log(`Lookalikes by profile: ${Object.keys(likes).length.toLocaleString()} leads like your good ones — `
-  + (Object.entries(likeCount).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k, n]) => `${k} ${n}`).join("; ") || "mark some leads good first"));
+for (const l of Object.values(likes)) likeCount[l.like] = (likeCount[l.like] || 0) + 1;
+console.log(`Lookalikes by profile: ${Object.keys(likes).length.toLocaleString()} leads like your good ones`
+  + (Object.keys(likeCount).length ? ` — ${Object.keys(likeCount).length} of your good leads have lookalikes, the most for one ${Math.max(...Object.values(likeCount))}` : " — mark some leads good first"));
 const groupNiches = Object.entries(groupOf).filter(([, g]) => g.activity).length;
 console.log(`Holding companies labelled by their group's trading subsidiaries: ${groupNiches.toLocaleString()}`);
 const bucket = (lo, hi) => live.filter((s) => s.score >= lo && s.score < hi).length;
@@ -89,12 +92,12 @@ for (const s of scored) for (const [w] of s.parts) {
 console.log(`Moments in the lead score: ${Object.entries(momentCount).map(([k, n]) => `${k} ${n}`).join(", ") || "none yet"}`);
 const hits = scored.filter((x) => !x.absurd && x.parts.some(([w]) => w.startsWith("Hit list")));
 console.log(`Hit list (a recent FX loss and a new FD / buying companies / a PE deal): ${hits.length}`);
-hits.slice(0, 20).forEach((x) => console.log(`  ${x.score}  ${x.company_name} — ${x.parts.filter(([w]) => /FX loss|finance director|Buying|Private-equity/.test(w)).map(([w]) => w.slice(0, 60)).join(" · ")}`));
+hits.slice(0, 20).forEach((x) => console.log(`  ${x.score}  ${x.company_name} — ${x.parts.filter(([w]) => /FX loss|finance director|Buying|Private-equity/.test(w)).map(([w]) => unnamed(w).slice(0, 60)).join(" · ")}`));
 console.log(`Scores: 80+ ${bucket(80, 1e9)} · 60–79 ${bucket(60, 80)} · 40–59 ${bucket(40, 60)} · under 40 ${bucket(-1e9, 40)}`);
 const filedMonths = {};
 for (const r of filingRows) filedMonths[filedMonth(r)] = (filedMonths[filedMonth(r)] || 0) + 1;
 console.log("FX filings by month filed: " + Object.entries(filedMonths).sort().map(([m, n]) => `${m} ${n}`).join(", "));
-const short = (parts) => parts.slice(0, 4).map(([w, p]) => `${w.split(" (")[0].slice(0, 40)} ${p > 0 ? "+" : ""}${p}`).join(" · ");
+const short = (parts) => parts.slice(0, 4).map(([w, p]) => `${unnamed(w).split(" (")[0].slice(0, 40)} ${p > 0 ? "+" : ""}${p}`).join(" · ");
 console.log("\nTop 30 leads:");
 live.slice(0, 30).forEach((s, i) => console.log(`${String(i + 1).padStart(3)}. ${s.score} (${score100(s.score)}/100)  ${s.company_name}${s.onList ? "" : "  [FX filings]"}  — ${s.niche || "no niche"} — ${short(s.parts)}`));
 console.log("\nNiches by average lead score (8+ leads):");

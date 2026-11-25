@@ -7,7 +7,7 @@
 //               to pitch, then his own note.
 //   crmDetail — everything, a "Label: value" line a fact (the "Full detail" button).
 import { pitchFor, pitchLine } from "./pitch.js";
-import { filedIso, filedWhen, financeSeat, fxSizeLine, fxSizeOf, groupActivity, growthPct, industryOf, INDUSTRY_OTHER, money, ownership,
+import { filedIso, filedLabel, filedWhen, financeSeat, fxSizeLine, fxSizeOf, groupActivity, growthPct, industryOf, INDUSTRY_OTHER, money, ownership,
   parts, peBackedOf, presentedContact, sicCodes, tellingSicCodes, timelyReason } from "./format.js";
 import { SIC_NAMES } from "./sic.js";
 
@@ -164,7 +164,7 @@ export function crmDetail(r = {}, { note = "", today = new Date() } = {}) {
   else add("Size", r.size_estimate);
   add("Employees", Number(r.employees) ? Number(r.employees).toLocaleString("en-GB") : "");
   const filed = filedIso(r);
-  add("Latest accounts filed", filed ? filedWhen(filed) : "");
+  add("Latest accounts filed", filed ? filedLabel(r) : "");
   // who it banks with
   const bank = plain(r.incumbent_bank);
   const bankName = bank.split(":")[0].trim();
@@ -184,7 +184,7 @@ export function crmDetail(r = {}, { note = "", today = new Date() } = {}) {
   const loss = -Number(r.fx_gain_loss_gbp) || 0;
   const prior = r.fx_gain_loss_prior_gbp === undefined || r.fx_gain_loss_prior_gbp === null || r.fx_gain_loss_prior_gbp === "" ? NaN : Number(r.fx_gain_loss_prior_gbp);
   const before = !Number.isFinite(prior) || !prior ? "" : prior > 0 ? ` (a ${money(prior)} gain the year before)` : ` (a ${money(-prior)} loss the year before)`;
-  const inAccounts = filed ? ` in the accounts filed ${filedWhen(filed)}` : "";
+  const inAccounts = filed ? ` in the accounts filed ${filedLabel(r)}` : "";
   if (loss >= 1000) add("FX loss", `${money(loss)}${inAccounts}${before}`);
   else if (-loss >= 1000) add("FX gain", `${money(-loss)}${inAccounts}${before}`);
   const cur = r.main_currency && !/niche default/.test(r.currency_source || "") ? r.main_currency : "";

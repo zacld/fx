@@ -71,12 +71,15 @@ def main() -> None:
         queue = [n.strip() for n in args.numbers.split(",") if n.strip() and names.get(n.strip())]
 
     read = named = abroad = failed = 0
+    errors: dict = {}
     for n in queue[:args.max]:
         try:
             facts = accounts.facts_from_latest_accounts(n, key)
         except Exception as e:  # noqa: BLE001 — one bad filing never stops the run
             facts, failed = None, failed + 1
-            print(f"  {names[n]} ({n}): not read ({type(e).__name__})")
+            errors[type(e).__name__] = errors.get(type(e).__name__, 0) + 1   # counted, never named: the queue starts
+            if args.numbers:                                                    # with Zac's good leads and this log is public
+                print(f"  {names[n]} ({n}): not read ({type(e).__name__})")
         read += 1
         parent = (facts or {}).get("ultimate_parent") or ""
         if parent:
@@ -92,7 +95,8 @@ def main() -> None:
             found[n] = {"none": True, "read": today.isoformat()}
     json.dump({"made_at": today.isoformat(), "companies": found}, open(args.out, "w"))
     total = sum(1 for e in found.values() if e.get("ultimate_parent"))
-    print(f"Parents from accounts: {read} read this run, {named} name an ultimate parent ({abroad} abroad), {failed} failed; "
+    print(f"Parents from accounts: {read} read this run, {named} name an ultimate parent ({abroad} abroad), {failed} failed"
+          f"{(' (' + ', '.join(f'{k} {v}' for k, v in sorted(errors.items())) + ')') if errors else ''}; "
           f"{total} companies with a parent from their accounts on file; {max(0, len(queue) - args.max)} still to read")
 
 

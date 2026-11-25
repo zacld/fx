@@ -267,7 +267,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the survivors read like the finder's accounts (`accounts.extract_facts`) and
   kept when their filed FX proof scores. Daily Tue–Sat (the day files not yet
   done); a monthly archive by hand (`next` = newest not done: the year's
-  backfill). The newest filing per company, filed within 400 days. Paper
+  backfill). The newest filing per company, filed within 400 days. A filing from a monthly archive knows only its
+  month: shown as "Sept 2026" (`filedLabel` / `filedOnIn` in `format.js`, 25 Nov 2026 — it read "1 Sept 2026"), counted
+  as the 1st for recency. Paper
   filings aren't in the files (the main list's OCR covers them). No API calls.
   Filleted accounts (no profit and loss account: legal for "small" companies,
   two of turnover ≤ £15m / balance sheet ≤ £7.5m / ≤ 50 staff, so some £25m
@@ -1069,6 +1071,10 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   FX proof, holding company, PE-backed, FX loss, growth 20%+, subsidiaries abroad, source; `PROFILE_WEIGHTS`) against every
   unmarked lead; one sharing `LIKE.min` (70%) of it, industry or niche among it, gets `LEAD_POINTS.likeGood` +8 Fit ("Like
   your good lead X (…)"). Page and daily ranking both (`leads/ranked.likes`; the database sync uses it and `reviews` too).
+  **The run logs are public** (25 Nov 2026): they count Zac's good leads and their lookalikes but never name one — a reason
+  naming a good lead prints as "Like one of your good leads (…)" (`unnamed` in `rank-leads.mjs`), `niche_hits`' customs
+  lookalikes print without the good lead, and the website and parents lookups (which start with his good leads) print no
+  company names in the nightly run.
   **Scoreboard tab** (`scoreboard`): by source / niche / industry — leads, Fit 60+, checked, good, good %, Fit 60+ still
   waiting — and each good lead with its profile and its lookalikes. "Emerging niche" is now a lead source. **Fit first,
   then Now** (`SORTS.fitFirst`): the default order on New leads and Hidden from filters (a choice on those, Foreign-owned
