@@ -185,8 +185,9 @@ def main() -> None:
     g = owner_search.GEMINI_USAGE
     print(f"Gemini + Google Search ({(owner_search._gemini_model or ['no model'])[0]}): {g['calls']} calls, "
           f"{g['searches']} Google searches ({gemini_before + g['searches']:,} of {GEMINI_SEARCHES_MONTHLY:,} this month), "
-          f"{g['tokens']:,} tokens, {g['verified']} owners found on the page cited, {g['dropped']} answers dropped "
-          f"(no source backs the owner: asked through the search APIs instead), {g['failed']} failed"
+          f"{g['tokens']:,} tokens, {g['verified']} owners confirmed ({g['confirmed_by_search']} by a search of our own, "
+          f"the rest on the page cited), {g['dropped']} answers dropped (nothing backs the owner: asked through the "
+          f"search APIs instead), {g['failed']} failed"
           + ("" if os.environ.get("GEMINI_API_KEY") else " — no GEMINI_API_KEY"))
     if owner_search.GEMINI_DROPS:
         print("  why the cited pages didn't back them: " + ", ".join(f"{k} {v}" for k, v in sorted(
