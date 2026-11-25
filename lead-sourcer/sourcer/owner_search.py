@@ -289,87 +289,194 @@ def _groq_once(body: dict, key: str):
 
 
 # ── Gemini with Grounding with Google Search (Zac, 16 Nov 2026: "the most reliable way is through Google"; key
-# GEMINI_API_KEY from AI Studio, free tier). One call a company: Gemini runs the Google searches itself — "who owns X",
-# then who owns that owner — and answers from them; the answer counts only when Google's grounding backs the owner's
-# name (groundingSupports) and a source is returned. Its daily allowance used → the older route (search APIs + Groq).
+# GEMINI_API_KEY from AI Studio). One call a company: Gemini runs the Google searches itself — "who owns X", then who
+# owns that owner — and answers from them; an answer counts only when a source backs the owner's name. Its allowance
+# used → the older route (search APIs + Groq).
+# Gemini 3 (25 Nov 2026): 2.5 Flash is closed to new keys ("no longer available to new users"), and on 3.x the old
+# generateContent call mostly answered from memory without searching (1 search in ~10 tests, even when told to). So a
+# 3.x model is asked through the Interactions API (POST /v1beta/interactions), where Google Search ran every time. It
+# doesn't hand back the pages it read, so the answer names its source page and the words on it, and that page is opened
+# to check the owner's name is really there (website.fetch, robots.txt respected, never a social site) — an owner no
+# page backs is dropped. Searches are billed one by one on 3.x (5,000 free a month, then about $14 per 1,000), so the
+# prompt keeps it to GEMINI_MAX_SEARCHES and the nightly run asks only about Zac's good leads (tools/owner_search.py
+# --only-first, 25 Nov 2026: "only run on good leads").
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-GEMINI_MODELS = [m for m in [os.environ.get("GEMINI_MODEL", "")] if m] + ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest",
-                                                                      "gemini-flash-lite-latest", "gemini-2.0-flash"]
-GEMINI_USAGE = {"calls": 0, "tokens": 0, "dropped": 0, "failed": 0}
+GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
+GEMINI_MODELS = [m for m in [os.environ.get("GEMINI_MODEL", "")] if m] + ["gemini-3.8-flash", "gemini-flash-latest", "gemini-2.5-flash",
+                                                                      "gemini-2.5-flash-lite", "gemini-flash-lite-latest", "gemini-2.0-flash"]
+GEMINI_MAX_SEARCHES = int(os.environ.get("GEMINI_MAX_SEARCHES", "3"))
+GEMINI_PAGE_CHECKS = 3          # cited pages opened to find the owner's name, a company
+GEMINI_USAGE = {"calls": 0, "tokens": 0, "searches": 0, "verified": 0, "dropped": 0, "failed": 0}
 GEMINI_SPENT: list = []
+GEMINI_FAILS_MAX = 3            # calls in a row that fail (timeouts, errors) before the rest of the run skips Gemini
+_GEMINI_FAILS = [0]
 _gemini_model: list = []
-_GEMINI_PROMPT = """Use Google Search to find who owns the UK company {name} (Companies House number {number}).
-If it is owned by another company, search again to find who owns that company, and so on up the chain, until you reach
-a person or family, a private equity firm or fund, or a stock-market-listed company. Do not confuse it with a company
-it bought, a customer, a brand it sells, or a different company with a similar name. If you cannot find it, say none.
+_GEMINI_PROMPT = """Search Google to find who owns the UK company {name} (Companies House number {number}). Use at most
+{searches} searches. If it is owned by another company, find who owns that company, and so on up the chain, until you
+reach a person or family, a private equity firm or fund, or a stock-market-listed company. Do not confuse it with a
+company it bought, a customer, a brand it sells, or a different company with a similar name. Use only what the search
+results say; if they don't say who owns it, say none.
 Reply with JSON only, no other text:
-{{"chain": [{{"owner": "<name>", "type": "company|private_equity|person", "country": "<country where based, if known>"}}],
+{{"chain": [{{"owner": "<name>", "type": "company|private_equity|person", "country": "<country where based, if known>",
+"source_url": "<the address of the web page that says so>", "quote": "<the words on that page that say so>"}}],
 "answer": "<one sentence saying who owns {name}>"}}
 The chain lists the owners from the nearest parent up to the ultimate owner; an empty chain means none found."""
+_STOP_WORDS = ("the", "of", "and", "limited", "ltd", "plc", "inc", "group", "uk", "holdings", "holding", "company", "co",
+               "ab", "gmbh", "sa", "llc", "bv", "nv", "spa", "srl", "as", "oy")
 
 
-def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[str, dict], Optional[dict]]] = None) -> Optional[dict]:
-    """{owner, kind, country, quote, url, chain, read_by: "gemini"} | {none: True}, or None when no call could be made."""
+_OWNERSHIP_WORDS = re.compile(r"\b(?:own(?:s|ed|er|ers|ership)?|subsidiar\w*|parent|part of|acquir\w*|bought|portfolio|"
+                              r"backed|member of|division of|ultimate|controlling|holding company|sold to)\b")
+
+
+def _uses_interactions(model: str) -> bool:
+    return not re.match(r"gemini-[12]\.", model)
+
+
+def _words(name: str) -> list[str]:
+    return [w for w in _norm_text(name).split() if w not in _STOP_WORDS and len(w) > 1]
+
+
+def _page_backs(url: str, owner: str, company_name: str, page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> bool:
+    """Does the cited page name the owner (every telling word of it — its whole name when the company shares them), the
+    company (a telling word) and say something about ownership? Opened with the finder's own fetcher: robots.txt
+    respected, never LinkedIn or another social site (Priority 12)."""
+    import urllib.parse
+    from . import website
+    if not re.match(r"https?://", url or "") or any(s in url.lower() for s in website._SOCIAL):
+        return False
+    fetch = page or website.fetch
+    parts = urllib.parse.urlsplit(url)
+    robots = website._robots(f"{parts.scheme}://{parts.netloc}/", fetch)
+    if not robots.can_fetch(website.USER_AGENT, url):
+        return False
+    got = fetch(url)
+    if not got:
+        return False
+    text = " " + _norm_text(website.page_text(got[1])) + " "
+    owner_words, company_words = _words(owner), _words(company_name)
+    if not owner_words or not all(f" {w} " in text for w in owner_words):
+        return False
+    if company_words and not any(f" {w} " in text for w in company_words):
+        return False
+    # an owner sharing the company's name (Cloetta UK → Cloetta AB): any page about the company has that word, so the
+    # owner's whole name must be there ("cloetta ab")
+    if set(owner_words) <= set(company_words) and f" {_norm_text(owner)} " not in text:
+        return False
+    return bool(_OWNERSHIP_WORDS.search(text))
+
+
+_UNCHECKED = {"none": True, "unchecked": True}   # Gemini named an owner nothing backs: asked the older way instead
+
+
+def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[str], Optional[dict]]] = None,
+                page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> Optional[dict]:
+    """{owner, kind, country, quote, url, chain, read_by: "gemini"} | {none: True} (with `unchecked` when it named an
+    owner no source backs), or None when no call could be made. `post(prompt)` and `page(url)` stand in for the API and
+    the page fetcher in tests."""
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if (not key and post is None) or (GEMINI_SPENT and post is None):
         return None
-    body = {"contents": [{"parts": [{"text": _GEMINI_PROMPT.format(name=company_name, number=number or "unknown")}]}],
-            "tools": [{"google_search": {}}], "generationConfig": {"temperature": 0}}
-    data = post("", body) if post else _gemini(body, key)
+    prompt = _GEMINI_PROMPT.format(name=company_name, number=number or "unknown", searches=GEMINI_MAX_SEARCHES)
+    data = post(prompt) if post else _gemini(prompt, key)
     if not data:
         GEMINI_USAGE["failed"] += 1
+        _GEMINI_FAILS[0] += 1
+        if _GEMINI_FAILS[0] >= GEMINI_FAILS_MAX and not GEMINI_SPENT:
+            GEMINI_SPENT.append("failing")
+            print(f"  Gemini: {GEMINI_FAILS_MAX} calls in a row failed — the search APIs take the rest of this run")
         return None
+    _GEMINI_FAILS[0] = 0
     GEMINI_USAGE["calls"] += 1
-    GEMINI_USAGE["tokens"] += int((data.get("usageMetadata") or {}).get("totalTokenCount") or 0)
+    steps = data.get("steps")
+    if steps is not None:                                   # the Interactions API (Gemini 3)
+        use = data.get("usage") or {}
+        GEMINI_USAGE["tokens"] += int(use.get("total_tokens") or sum(v for k, v in use.items() if isinstance(v, (int, float))
+                                                                   and k.startswith("total_") and k.endswith("_tokens")))
+        GEMINI_USAGE["searches"] += sum(len((st.get("arguments") or {}).get("queries") or [])
+                                        for st in steps if st.get("type") == "google_search_call")
+        text = " ".join(c.get("text", "") for st in steps if st.get("type") == "model_output"
+                        for c in st.get("content") or [] if isinstance(c, dict))
+        searched = any(st.get("type") == "google_search_call" for st in steps)
+        chunks, supported = [], ""
+    else:                                                   # generateContent (Gemini 2.x): Google's grounding
+        GEMINI_USAGE["tokens"] += int((data.get("usageMetadata") or {}).get("totalTokenCount") or 0)
+        try:
+            cand = data["candidates"][0]
+            text = "".join(p.get("text", "") for p in cand["content"]["parts"])
+        except (KeyError, IndexError, TypeError):
+            GEMINI_USAGE["failed"] += 1
+            return None
+        meta = cand.get("groundingMetadata") or {}
+        chunks = meta.get("groundingChunks") or []
+        supported = " ".join(((s.get("segment") or {}).get("text") or "") for s in meta.get("groundingSupports") or [])
+        searched = bool(chunks)
     try:
-        cand = data["candidates"][0]
-        text = "".join(p.get("text", "") for p in cand["content"]["parts"])
         ans = json.loads(re.search(r"\{.*\}", text, re.S).group(0))
-    except (KeyError, IndexError, ValueError, TypeError, AttributeError):
+    except (ValueError, TypeError, AttributeError):
         GEMINI_USAGE["failed"] += 1
         return None
-    meta = cand.get("groundingMetadata") or {}
-    chunks = meta.get("groundingChunks") or []
-    supported = " ".join(((s.get("segment") or {}).get("text") or "") for s in meta.get("groundingSupports") or [])
-    steps = [c for c in ans.get("chain") or [] if str(c.get("owner") or "").strip() and str(c.get("owner")).lower() != "none"]
-    if not steps:
+    steps_ = [c for c in ans.get("chain") or [] if isinstance(c, dict) and str(c.get("owner") or "").strip()
+              and str(c.get("owner")).lower() != "none"]
+    if not steps_:
         return {"none": True}
-    top = steps[-1]
+    top = steps_[-1]
     owner = str(top["owner"]).strip()
-    words = [w for w in _norm_text(owner).split() if w not in ("the", "of", "and", "limited", "ltd", "plc", "inc", "group")]
-    # backed by Google: sources returned and the owner named in the grounded text (else it may be the model's memory)
-    grounded = chunks and words and all(w in _norm_text(supported + " " + text) for w in words) and supported
-    if not grounded or _key(owner) == _key(company_name):
-        GEMINI_USAGE["dropped"] += 1
-        return {"none": True}
+    if _key(owner) == _key(company_name) or not searched:
+        GEMINI_USAGE["dropped"] += 1                        # no search ran: the model's memory, not a source
+        return dict(_UNCHECKED)
+    if steps is not None:
+        # the owner must be on a page it cites: the top owner's own page first, then the chain's others
+        urls = list(dict.fromkeys(str(c.get("source_url") or "").strip() for c in [top] + steps_[::-1]))
+        backing = next((u for u in urls[:GEMINI_PAGE_CHECKS] if u and _page_backs(u, owner, company_name, page)), "")
+        if not backing:
+            GEMINI_USAGE["dropped"] += 1
+            return dict(_UNCHECKED)
+        GEMINI_USAGE["verified"] += 1
+        quote = str(next((c.get("quote") for c in steps_ if str(c.get("source_url") or "").strip() == backing and c.get("quote")),
+                         "") or ans.get("answer") or "")
+        url, source, sites = backing, re.sub(r"^https?://(www\.)?", "", backing).split("/")[0], 1
+    else:
+        words = [w for w in _norm_text(owner).split() if w not in ("the", "of", "and", "limited", "ltd", "plc", "inc", "group")]
+        # backed by Google: the owner named in the grounded text (else it may be the model's memory)
+        if not (words and supported and all(w in _norm_text(supported + " " + text) for w in words)):
+            GEMINI_USAGE["dropped"] += 1
+            return dict(_UNCHECKED)
+        web = [c.get("web") or {} for c in chunks]
+        quote = str(ans.get("answer") or supported)
+        url = next((w.get("uri") for w in web if w.get("uri")), "")
+        source, sites = ", ".join(w.get("title", "") for w in web[:3] if w.get("title")), len(chunks)
     kind = {"private_equity": "pe", "person": "person", "company": "company"}.get(top.get("type"), kind_of(owner))
-    web = [c.get("web") or {} for c in chunks]
     return {"owner": owner[:120], "kind": kind, "country": _ADJ.get(str(top.get("country") or "").strip(), str(top.get("country") or "").strip()),
-            "quote": " ".join(str(ans.get("answer") or supported).split())[:240],
-            "url": next((w.get("uri") for w in web if w.get("uri")), ""), "source": ", ".join(w.get("title", "") for w in web[:3] if w.get("title")),
-            "sites": len(chunks), "read_by": "gemini",
+            "quote": " ".join(quote.split())[:240], "url": url, "source": source, "sites": sites, "read_by": "gemini",
             "chain": [{"owner": str(c["owner"]).strip()[:120], "kind": {"private_equity": "pe", "person": "person", "company": "company"}.get(c.get("type"), "company"),
-                       "country": str(c.get("country") or "").strip()} for c in steps]}
+                       "country": str(c.get("country") or "").strip()} for c in steps_]}
 
 
-def _gemini(body: dict, key: str) -> Optional[dict]:
+def _gemini(prompt: str, key: str) -> Optional[dict]:
     import time
     import urllib.error
     import urllib.request
     for model in (_gemini_model[:1] or GEMINI_MODELS):
+        if _uses_interactions(model):
+            url = GEMINI_INTERACTIONS_URL
+            body = {"model": model, "input": prompt, "tools": [{"type": "google_search"}]}
+        else:
+            url = GEMINI_URL.format(model=model)
+            body = {"contents": [{"parts": [{"text": prompt}]}], "tools": [{"google_search": {}}], "generationConfig": {"temperature": 0}}
         for attempt in range(3):
-            req = urllib.request.Request(GEMINI_URL.format(model=model), data=json.dumps(body).encode(), headers={
+            req = urllib.request.Request(url, data=json.dumps(body).encode(), headers={
                 "Content-Type": "application/json", "x-goog-api-key": key, "User-Agent": profiles.USER_AGENT})
             try:
-                with urllib.request.urlopen(req, timeout=120) as res:
+                with urllib.request.urlopen(req, timeout=150) as res:
                     out = json.load(res)
                 if not _gemini_model:
                     _gemini_model.append(model)
-                    print(f"  Gemini: using {model}")
+                    print(f"  Gemini: using {model}" + (" (Interactions API)" if _uses_interactions(model) else ""))
                 return out
             except urllib.error.HTTPError as e:
                 text = e.read(400).decode("utf-8", "replace") if e.fp else ""
-                if e.code == 404 or (e.code == 400 and re.search(r"not found|not supported|unknown name", text, re.I)):
+                if e.code == 404 or (e.code == 400 and re.search(r"not found|not supported|unknown name|no longer available", text, re.I)):
                     break                                   # this model isn't available: the next one
                 if e.code == 429:
                     full = e.read(3000).decode("utf-8", "replace") if e.fp else ""
@@ -380,8 +487,7 @@ def _gemini(body: dict, key: str) -> Optional[dict]:
                         break
                     if re.search(r"per day|PerDay|daily|quota", text, re.I) or attempt == 2:
                         GEMINI_SPENT.append(text[:160])
-                        quota = re.findall(r'"quotaId":\s*"([^"]+)"|"quotaValue":\s*"([^"]+)"|limit:\s*\d+', text)
-                        print(f"  Gemini: today's free allowance used ({model}) — {re.sub(r'[^ -~]', '', ' '.join(text.split()))[:400]}")
+                        print(f"  Gemini: today's allowance used ({model}) — {re.sub(r'[^ -~]', '', ' '.join(text.split()))[:400]}")
                         return None
                     time.sleep(20)                         # requests a minute
                     continue
@@ -389,9 +495,11 @@ def _gemini(body: dict, key: str) -> Optional[dict]:
                 if e.code in (401, 402, 403):          # no credit / key refused: not again this run
                     GEMINI_SPENT.append(text[:160])
                 return None
-            except Exception:  # noqa: BLE001
-                if attempt < 2:
+            except Exception:  # noqa: BLE001 — a timeout or a dropped connection: once more, then not for this company
+                if attempt == 0:                       # (never the next model: this one exists, the call failed)
                     time.sleep(5)
+                    continue
+                return None
     return None
 
 
@@ -401,8 +509,15 @@ def search(number: str, company_name: str, fetch: Callable[[str], Optional[str]]
     quote, url, chain: [{owner, kind, country}]} (owner = the top), {none: True}, or {error: True} when no search could be
     made."""
     g = gemini_read(company_name, number)
-    if g is not None:
+    if g is not None and not g.get("unchecked"):
         return g
+    r = _chain(number, company_name, fetch)
+    # Gemini answered but nothing backed its owner, and the search APIs can't be asked: nothing found this time
+    return {"none": True} if g is not None and r.get("error") else r
+
+
+def _chain(number: str, company_name: str, fetch: Callable[[str], Optional[str]]) -> dict:
+    """The older route: the search APIs read by Groq (or the rules), asked again of each owner that is a company."""
     chain, seen, name, num = [], {_key(company_name)}, company_name, number
     for _ in range(MAX_HOPS):
         r = _one(num, name, fetch)

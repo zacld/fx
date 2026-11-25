@@ -172,9 +172,11 @@ jobs:
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # Gemini + Google Search: one call a company
+          # Gemini + Google Search: one call a company, Zac's good leads only (25 Nov 2026: "only run on good leads" —
+          # Gemini 3 bills each Google search; 5,000 free a month). The newer key first, the first key as a backup.
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY2 || secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || secrets.GROQ_API }}   # the AI reader: one call a company, capped by --max
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
-          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 2 || echo 100) --parents parents.json --first good_leads.json
+          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 2 || echo 100) --parents parents.json --first good_leads.json --only-first
           cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json

@@ -1,5 +1,7 @@
 # Who owns the best 30 leads: the accounts, the Global LEI register (free daily files) and Companies House side by side,
-# printed for checking by hand. Read-only: nothing saved. Runs on a push of these files, or by hand.
+# printed for checking by hand. Runs on a push of these files, or by hand. The web search (Gemini + Google Search, then
+# the search APIs) runs only by hand (25 Nov 2026: Gemini runs on Zac's good leads only — a push shouldn't spend
+# searches on 30 other leads), and a run off main saves nothing (STORE_READ_ONLY).
 name: Ownership sample
 on:
   workflow_dispatch:
@@ -26,6 +28,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      STORE_READ_ONLY: ${{ github.ref != 'refs/heads/main' && '1' || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -46,6 +49,7 @@ jobs:
         run: python3 tools/gleif_owners.py --tracked tracked.json --out gleif.json
       # the web search for the sample's companies (kept in the store's owner-search item, as the daily run does)
       - name: Who owns them — web search
+        if: github.event_name == 'workflow_dispatch'
         continue-on-error: true
         env:
           PYTHONUNBUFFERED: "1"
@@ -54,7 +58,7 @@ jobs:
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # Gemini + Google Search: one call a company
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY2 || secrets.GEMINI_API_KEY }}   # Gemini + Google Search: one call a company
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || secrets.GROQ_API }}   # the AI reader: one call a company, capped by --max
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
