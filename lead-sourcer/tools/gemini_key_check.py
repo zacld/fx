@@ -6,7 +6,8 @@ For each Gemini key secret that is set (the workflow passes every likely name), 
   2. makes one Google-grounded test call on the newest Flash model and on gemini-2.5-flash (the owner check's model):
      HTTP status, whether Google Search ran (sources returned), tokens used.
 Errors print their status and a short message with digits masked (no project numbers in a public log).
-Standard library only. Workflow "Gemini key check" (on a push of this file or its workflow, or by hand).
+Standard library only. Workflow "Gemini key check" (on a push of this file or its workflow, or by hand; a
+re-run isn't open to the coding agent, so a check is re-run by pushing a change here).
 """
 
 from __future__ import annotations
