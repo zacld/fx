@@ -759,7 +759,7 @@ export const TODAYS_LIST = 25;
 // (Zac, 23 Nov 2026): Open lead — already open, not a new prospect; Skip — no finance director found (no judgement of the
 // company). The scanner learns from them that way (markClass).
 export const TODAYS_MARKS = [
-  ["good", "✓", "Good lead"], ["research", "?", "Good lead, no contact info: research harder"], ["small", "✕", "Not enough revenue"],
+  ["good", "✓", "Good lead"], ["research", "?", "Good lead, no contact info: research harder"], ["small", "✕", "Not enough FX (under £5m a year)"],
   ["open", "●", "Open lead (already open)"], ["call", "☎", "Call list"], ["abroad", "✈\uFE0E", "Owned abroad"], ["skip", "»", "Skip (no FD found)"],
 ];
 // The Research harder list (Zac, 23 Nov 2026: "good lead but no contact info and add it to a research harder section"):
@@ -893,6 +893,27 @@ export const inCoreBand = (r) => {
   const t = Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0;
   return t >= CORE_BAND[0] && t <= CORE_BAND[1];
 };
+// The desk sizes a lead by its FX, not its turnover (Zac, 25 Nov 2026: "it doesn't have to be 25 mill turnover, it's 5 mil
+// FX … we can go after companies who have less than 25m turnover"): its estimated FX a year — the finder's wallet
+// (customs imports / exports × cost of sales, a filed split of sales abroad: lead-sourcer currency.wallet), else its
+// filed sales abroad. The finder keeps £10m–£20m companies whose estimate reaches £5m at the high end (main.fx_sized);
+// here they aren't held off for their turnover, and one likely to reach it (the middle of the range) counts like the band.
+export const FX_SIZE = { min: 5_000_000 };
+export function fxSizeOf(r = {}) {
+  const low = Number(r.fx_wallet_low_gbp) || 0, high = Number(r.fx_wallet_high_gbp) || 0;
+  if (high) return { low: low || high, high, basis: r.fx_wallet_basis || "", wallet: true };
+  const t = Number(r.turnover_gbp) || 0, share = parseFloat(String(r.overseas_turnover_share || "")) / 100;
+  if (t && share > 0 && share <= 1) {
+    return { low: t * share, high: t * share, basis: `sales abroad ${Math.round(share * 100)}% of turnover (filed split by region)`, wallet: false };
+  }
+  return null;
+}
+export const fxSizeLine = (s) => (!s ? "" : s.low >= s.high ? money(s.high) : `${money(s.low)}–${money(s.high)}`);
+export const fxBigEnough = (r, min = FX_SIZE.min) => (fxSizeOf(r)?.high || 0) >= min;
+export const fxLikelyBig = (r, min = FX_SIZE.min) => { const s = fxSizeOf(r); return Boolean(s) && (s.low + s.high) / 2 >= min; };
+// Big enough for the desk: turnover in the band, or under it with up to £5m+ FX a year (never over the band's top).
+export const deskSized = (r) => inCoreBand(r)
+  || (fxBigEnough(r) && (Number(r.turnover_gbp) || Number(r.turnover_foreign_gbp) || 0) < CORE_BAND[0]);
 
 export function filterLosses(rows, { min = 0, query = "", recentDays = 0, unhedged = false, grew = false, band = false, today = new Date() } = {}) {
   const q = query.trim().toLowerCase();
@@ -918,7 +939,7 @@ export function callToday(listRows = [], filingRows = [], { today = new Date(), 
   const since = new Date(today.getTime() - rules.recentDays * 864e5).toISOString().slice(0, 10);
   const numbers = new Set(listRows.map((r) => r.company_number));
   const pick = (r, onList) => {
-    if (!inCoreBand(r) || fxScore(r) < rules.minScore || r.qualified === "Out") return null;
+    if (!deskSized(r) || fxScore(r) < rules.minScore || r.qualified === "Out") return null;
     if (reasonsNotToProgress(r, { today, signals: lead.signals || knownSignals }).some((x) => x.serious)) return null;
     const loss = -Number(r.fx_gain_loss_gbp) || 0;
     const filedOn = filedIso(r);
@@ -967,8 +988,9 @@ export function leadChecklist(r, checks = {}) {
       ...(r.run_from_abroad ? { state: "warn", detail: r.run_from_abroad }
         : firstOwner(r) ? { state: "yes", detail: `${firstOwner(r)}${r.pe_backed ? " — private-equity backed" : ""}` }
         : { state: "check", detail: "Owners not read — check the PSC register on Companies House" }) },
-    { key: "band", label: "Turnover £20m–£300m",
+    { key: "band", label: "Turnover £20m–£300m or £5m+ FX",
       ...(inCoreBand(r) ? { state: "yes", detail: sizeLine(r) }
+        : deskSized(r) ? { state: "yes", detail: `${sizeLine(r)} — under £20m, but FX up to ${fxSizeLine(fxSizeOf(r))} a year (estimate)` }
         : t ? { state: "no", detail: `${sizeLine(r)} — ${t > CORE_BAND[1] ? "above" : "below"} the band` }
         : { state: "check", detail: r.size_estimate ? `${r.size_estimate} (estimate)` : "No turnover filed" }) },
     { key: "abroad", label: "International activity", ...(abroad.length ? { state: "yes", detail: abroad[0] } : { state: "check", detail: "None in the records — ask" }) },
@@ -998,7 +1020,11 @@ export function reasonsNotToProgress(r, { today = new Date(), signals = knownSig
   if (trouble) add(`${trouble.title}${trouble.at ? ` (${String(trouble.at).slice(0, 10)})` : ""} — hold off`, true);
   if (r.qualified === "Out") add(`Qualified out${r.qualify_reason ? `: ${r.qualify_reason}` : ""}`, true);
   if (t > CORE_BAND[1]) add(`Turnover ${money(t)} — above £300m (check the desk's upper limit)`, true);
-  else if (t && t < CORE_BAND[0]) add(`Turnover ${money(t)} — below £20m`, true);
+  else if (t && t < CORE_BAND[0]) {
+    const fxs = fxSizeOf(r);
+    if (fxBigEnough(r)) add(`Turnover ${money(t)} — under £20m, but its FX could be ${fxSizeLine(fxs)} a year (estimate): check it's £5m+`);
+    else add(`Turnover ${money(t)} — below £20m${fxs ? `, and its FX about ${fxSizeLine(fxs)} a year (estimate)` : ""}`, true);
+  }
   else if (!t && r.turnover_foreign_gbp) add("Turnover filed in another currency — the £ size is an estimate at a rough rate");
   else if (!t) add(r.size_estimate ? `No turnover filed — size is an estimate (${r.size_estimate})` : "No turnover filed — size unknown");
   else if (r.turnover_basis === "group") add(`Sized by its group${r.group_parent ? ` (${r.group_parent})` : ""} — its own size is unknown`);
@@ -1442,7 +1468,8 @@ export function leadScore(r, { today = new Date(), niches = {}, signals = {}, mo
   if (/^(?:Emerging|Proven trader)\b/i.test(r.fx_niche || "")) addQuiet(rules.quietNiche, `A niche few bankers search: ${r.fx_niche}`);
   const hid = hiddenFromFilters(r);
   if (hid.length) addQuiet(rules.hidden, `Hidden from the usual filters: ${hid.map((h) => h.label.toLowerCase()).join(", ")}`);
-  add(inCoreBand(r) ? rules.band : 0, "Turnover £20m–£300m");
+  if (inCoreBand(r)) add(rules.band, "Turnover £20m–£300m");
+  else if (deskSized(r) && fxLikelyBig(r)) add(rules.band, `Likely £5m+ FX a year (${fxSizeLine(fxSizeOf(r))}, estimate)`);
   add(fx > 0 && !hedgingNamed(r) ? rules.open : 0, "No hedging named — probably on the bank's rate");
   add(loss >= rules.lossMin && !hedgingNamed(r) ? rules.lossNoHedge : 0, "FX loss with no hedging named — the clearest need");
   const growth = growthPct(r);

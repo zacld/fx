@@ -181,3 +181,14 @@ describe("Your day (a Wrapped of the day)", () => {
     expect(reportHtml(dayReport(w))).toContain("<h3>Size (filed turnover)</h3>");
   });
 });
+
+describe("Not enough FX (Zac, 25 Nov 2026: the desk sizes a lead by £5m+ FX a year)", () => {
+  it("counts the red ✕'s new reason on its own, the old 'too small' marks as before", () => {
+    const acts = markActions({ verdicts: {
+      "00000001": { verdict: "not_fit", reason: "Not enough FX", at: at(MON, "10:00") },
+      "00000002": { verdict: "not_fit", reason: "Too small", at: at(MON, "10:05") } } });
+    expect(acts.map((a) => [a.n, a.kind])).toEqual([["00000001", "smallfx"], ["00000002", "small"]]);
+    const rep = dayReport(dayWrap(ROWS, { verdicts: { "00000001": { verdict: "not_fit", reason: "Not enough FX", at: at(MON, "10:00") } } }, MON));
+    expect(rep.notFor).toEqual([{ label: "Not enough FX (under £5m)", count: 1, names: ["ACME MACHINES LTD"] }]);
+  });
+});

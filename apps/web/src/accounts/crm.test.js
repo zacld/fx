@@ -68,6 +68,13 @@ describe("For CRM summary (Zac, 25 Nov 2026: \"way more summarised, because that
     expect(crmNote(r).length).toBeLessThan(crmDetail(r).length * 0.7);   // the auditor, source and the like stay in the full detail
     expect(crmDetail(r)).toContain("Auditor: BDO LLP");
   });
+  it("leads the FX line with its FX a year when the finder estimated it (the desk's £5m+ measure)", () => {
+    const fx = crmNote({ ...r, fx_wallet_low_gbp: "3600000", fx_wallet_high_gbp: "7200000", fx_wallet_basis: "imports 40–80% of cost of sales" })
+      .split("\n").find((l) => l.startsWith("FX:"));
+    expect(fx).toBe("FX: About £3.6m–£7.2m a year (estimate); £96k loss in accounts filed Sept 2026, after a £12k gain; sells in USD; 62% of sales abroad; no hedging named.");
+    expect(crmDetail({ ...r, fx_wallet_low_gbp: "3600000", fx_wallet_high_gbp: "7200000", fx_wallet_basis: "imports 40–80% of cost of sales" }))
+      .toContain("FX a year (estimate): £3.6m–£7.2m - imports 40–80% of cost of sales");
+  });
   it("has no links, and his own note comes last", () => {
     const text = crmNote(r, { note: "FD back Thursday, see https://example.com/page" });
     expect(text).not.toMatch(/https?:|www\./);

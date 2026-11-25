@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss, whyGood, leadBrief } from "./format.js";
+import { FIT, ukNamed, industryOf, peBackedOf, outreachPlan, letterAddressee, timelyReason, accountsMoments, fade, movesByCurrency, ownCurrency, setKnownSignals, appointedIso, leadLine, leadScore, nicheTiers, withLeadScores, parseMoney, regionBars, sizePosition, turnoverYears, cognismCsv, cognismRow, ukArmName, cognismCompanyRows, setKnownSites, setKnownGroups, collapseGroups, domainOf, splitName, checklistLine, leadChecklist, reasonsNotToProgress, callToday, companyAndFd, searchBlocked, inCoreBand, searchAllowance, statusLines, filterLosses, hedgingNamed, lossGrew, lossRows, sortLosses, askFor, monthLabel, chCompanyUrl, isGroupFiling, turnoverSearch, filedWhen, filingRow, filterFilings, sortFilings, bankUrl, companyPath, fxFacts, fxGroup, contactClues, contactGroup, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, factUrl, filterRows, fxLine, fxShare, googleFd, hasConfirmedFd, isFinanceDirector, isNew, money, sortRows, toCsv, wallet , lookalike, addedOn, newLead, SIMPLE_COLUMNS, leadSource, reviewLearnings, leadScore, overseasOps, markClass, goodLeadsList, ratingOf, stars, leadBrief, todaysList, whyHere, score100, setScoreScale, recentFxLoss, byRecentLoss, whyGood, leadBrief, fxSizeOf, fxSizeLine, deskSized, fxBigEnough, fxLikelyBig, TODAYS_MARKS } from "./format.js";
 
 const rows = [
   { rank: 1, section: "Core", company_name: "L.J. FAIRBURN AND SON LIMITED", finance_contact: "Alan Metcalfe",
@@ -352,7 +352,7 @@ describe("Call today", () => {
     const abroad = leadChecklist({ company_number: "X", run_from_abroad: "Owned from Sweden (CLOETTA AB) — pitch the UK team", turnover_gbp: "400000000",
       turnover_regions: "UK £5m · Europe £3m" });
     expect(abroad.map((i) => i.state)).toEqual(["warn", "no", "yes", "no", "no", "no", "check"]);
-    expect(checklistLine(abroad)).toBe("! Ownership · ✗ Turnover £20m–£300m · ✓ International activity · ✗ Business change / trigger · ✗ Likely FX need · ✗ Reason to contact · ? CRM checked");
+    expect(checklistLine(abroad)).toBe("! Ownership · ✗ Turnover £20m–£300m or £5m+ FX · ✓ International activity · ✗ Business change / trigger · ✗ Likely FX need · ✗ Reason to contact · ? CRM checked");
   });
   it("lists every reason not to progress; serious ones keep a company off Call today", () => {
     const r = { turnover_gbp: "40000000", filed_fx_score: 60, own_bank_client: "yes", fx_today: "Uses an FX provider: Ebury",
@@ -914,5 +914,44 @@ describe("Why it's a good lead (Zac, 24 Nov 2026)", () => {
   it("says nothing it can't show: no reasons, no text", () => {
     expect(whyGood(base)).toEqual({ text: "", reasons: [] });
     expect(whyGood({ ...base, main_currency: "EUR", currency_source: "niche default" }).text).toBe("");   // a niche default isn't its own currency
+  });
+});
+
+describe("Sized by £5m+ FX a year, not turnover (Zac, 25 Nov 2026: \"it doesn't have to be 25 mill turnover, it's 5 mil FX\")", () => {
+  const today = new Date("2026-11-25T12:00:00Z");
+  // a £12m importer the finder kept on its FX: customs imports year-round, 40–80% of £9m cost of sales
+  const importer = { company_number: "F1", company_name: "SMALL IMPORTER LIMITED", turnover_gbp: "12000000", filed_fx_score: 55,
+    fx_wallet_low_gbp: "3600000", fx_wallet_high_gbp: "7200000", fx_wallet_basis: "imports 40–80% of cost of sales (12 months in customs)" };
+  it("estimates FX a year from the finder's wallet, else filed sales abroad", () => {
+    expect(fxSizeOf(importer)).toMatchObject({ low: 3_600_000, high: 7_200_000, wallet: true });
+    expect(fxSizeLine(fxSizeOf(importer))).toBe("£3.6m–£7.2m");
+    const exporter = fxSizeOf({ turnover_gbp: "16000000", overseas_turnover_share: "40%" });
+    expect([exporter.low, exporter.high, exporter.wallet, fxSizeLine(exporter)]).toEqual([6_400_000, 6_400_000, false, "£6.4m"]);
+    expect(fxSizeOf({ turnover_gbp: "16000000" })).toBeNull();
+  });
+  it("counts a company under £20m with up to £5m+ FX as the desk's size, never one over £300m", () => {
+    expect([deskSized(importer), fxBigEnough(importer), fxLikelyBig(importer)]).toEqual([true, true, true]);   // middle £5.4m
+    const loose = { ...importer, fx_wallet_low_gbp: "1500000", fx_wallet_high_gbp: "5600000" };
+    expect([deskSized(loose), fxLikelyBig(loose)]).toEqual([true, false]);   // could reach £5m, middle £3.55m
+    expect(deskSized({ ...importer, fx_wallet_high_gbp: "4000000", fx_wallet_low_gbp: "1000000" })).toBe(false);
+    expect(deskSized({ turnover_gbp: "40000000" })).toBe(true);   // in the £20m–£300m band as before
+    expect(deskSized({ turnover_gbp: "400000000", fx_wallet_low_gbp: "90000000", fx_wallet_high_gbp: "150000000" })).toBe(false);
+  });
+  it("doesn't hold it off for its turnover, and gives it the band's points when its FX is likely £5m+", () => {
+    const why = reasonsNotToProgress(importer, { today, signals: {} });
+    expect(why.find((x) => x.text.startsWith("Turnover £12.0m"))).toEqual(
+      { text: "Turnover £12.0m — under £20m, but its FX could be £3.6m–£7.2m a year (estimate): check it's £5m+", serious: false });
+    const small = reasonsNotToProgress({ ...importer, fx_wallet_low_gbp: "500000", fx_wallet_high_gbp: "1400000" }, { today, signals: {} });
+    expect(small.find((x) => x.text.startsWith("Turnover £12.0m"))).toEqual(
+      { text: "Turnover £12.0m — below £20m, and its FX about £500k–£1.4m a year (estimate)", serious: true });
+    const parts = leadScore(importer, { today }).parts.map(([w, p]) => [w, p]);
+    expect(parts).toContainEqual(["Likely £5m+ FX a year (£3.6m–£7.2m, estimate)", 10]);
+    expect(leadScore({ ...importer, fx_wallet_low_gbp: "1500000", fx_wallet_high_gbp: "5600000" }, { today }).parts
+      .some(([w]) => /^Likely £5m\+ FX|^Turnover £20m/.test(w))).toBe(false);
+    const items = leadChecklist(importer, {});
+    expect(items.find((i) => i.key === "band")).toMatchObject({ label: "Turnover £20m–£300m or £5m+ FX", state: "yes" });
+  });
+  it("renames the red ✕ on Today's list: not enough FX", () => {
+    expect(TODAYS_MARKS.find(([k]) => k === "small")).toEqual(["small", "✕", "Not enough FX (under £5m a year)"]);
   });
 });

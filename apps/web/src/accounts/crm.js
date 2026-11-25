@@ -7,8 +7,8 @@
 //               to pitch, then his own note.
 //   crmDetail — everything, a "Label: value" line a fact (the "Full detail" button).
 import { pitchFor, pitchLine } from "./pitch.js";
-import { filedIso, filedWhen, financeSeat, groupActivity, growthPct, industryOf, INDUSTRY_OTHER, money, ownership, parts, peBackedOf,
-  presentedContact, sicCodes, tellingSicCodes, timelyReason } from "./format.js";
+import { filedIso, filedWhen, financeSeat, fxSizeLine, fxSizeOf, groupActivity, growthPct, industryOf, INDUSTRY_OTHER, money, ownership,
+  parts, peBackedOf, presentedContact, sicCodes, tellingSicCodes, timelyReason } from "./format.js";
 import { SIC_NAMES } from "./sic.js";
 
 // What the register says it does, in its own words (UK SIC 2007): its telling sector codes, at most two — not head office,
@@ -126,6 +126,9 @@ export function crmNote(r = {}, { note = "" } = {}) {
         Number(r.hmrc_export_months) && `exports in ${r.hmrc_export_months}`].filter(Boolean).join(", ");
     if (customs) fx.push(`customs records show ${customs}`);
   }
+  // its FX a year, the desk's measure (Zac, 25 Nov 2026: £5m+ FX, not turnover) — the finder's estimate, first
+  const perYear = fxSizeOf(r);
+  if (perYear?.wallet) fx.unshift(`about ${fxSizeLine(perYear)} a year (estimate)`);
   line("FX", fx);
   // 4. why now (the FX loss is already above), 5. who to speak to, 6. what to pitch
   const why = [];
@@ -199,6 +202,8 @@ export function crmDetail(r = {}, { note = "", today = new Date() } = {}) {
   add("Borrowing in another currency", cut(r.fx_borrowings, 120));
   add("Subsidiaries abroad", cut(r.subsidiaries_abroad, 140));
   add("Customs", cut(r.hmrc_trade, 120));
+  const perYear = fxSizeOf(r);
+  if (perYear?.wallet) add("FX a year (estimate)", `${fxSizeLine(perYear)}${perYear.basis ? ` - ${cut(perYear.basis, 120)}` : ""}`);
   // who owns it
   const own = ownership(r);
   add("Owner", own.status === "uk" ? `UK-owned${own.owner && own.owner !== r.company_name ? ` (top parent: ${own.owner})` : ""}`
