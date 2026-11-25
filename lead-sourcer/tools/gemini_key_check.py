@@ -24,11 +24,11 @@ BASE = "https://generativelanguage.googleapis.com/v1beta"
 PROMPT = "Use Google Search to find the postcode of Companies House's head office in Cardiff. Reply with the postcode only."
 
 
-def _call(url: str, key: str, body: dict | None = None) -> tuple[int, dict, str]:
+def _call(url: str, key: str, body: dict | None = None, timeout: int = 60) -> tuple[int, dict, str]:
     req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None,
                                  headers={"Content-Type": "application/json", "x-goog-api-key": key})
     try:
-        with urllib.request.urlopen(req, timeout=60) as res:
+        with urllib.request.urlopen(req, timeout=timeout) as res:
             return res.status, json.load(res), ""
     except urllib.error.HTTPError as e:
         text = e.read(2000).decode("utf-8", "replace") if e.fp else ""
@@ -94,12 +94,49 @@ def main() -> None:
     for name, key in found:
         check(name, key)
     # the new key, end to end: the owner check's own call on two public companies (their owners are on record)
-    # does Google Search run at all on each key? A company the model can't know, three ways of asking
-    for name, key in found:
-        print(f"\nSearch test with {name}:")
-        for model, tool in (("gemini-3.8-flash", "google_search"), ("gemini-3.8-flash", "googleSearch"),
-                            ("gemini-3.1-pro-preview", "google_search"), ("gemini-flash-latest", "google_search")):
-            shape("GLOBAL CHARTER SERVICES LIMITED", key, model, SEARCH_FIRST, tool)
+    # Google's newer Interactions API (its 404 for gemini-2.5-flash recommends it): does Google Search run there?
+    new = next(((n, k) for n, k in found if n != "GEMINI_API_KEY"), found[0] if found else None)
+    if new:
+        print(f"\nInteractions API with {new[0]}:")
+        for company in ("GLOBAL CHARTER SERVICES LIMITED", "CLOETTA UK LIMITED"):
+            interactions(company, new[1], "gemini-3.8-flash")
+
+
+def _walk(obj, seen: dict) -> None:
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k == "type" and isinstance(v, str):
+                seen.setdefault("types", []).append(v)
+            elif k == "text" and isinstance(v, str):
+                seen.setdefault("texts", []).append(v)
+            elif k in ("url", "uri") and isinstance(v, str):
+                seen.setdefault("urls", []).append(v)
+            _walk(v, seen)
+    elif isinstance(obj, list):
+        for v in obj:
+            _walk(v, seen)
+
+
+def interactions(name: str, key: str, model: str) -> None:
+    """One owner question through POST /v1beta/interactions with the google_search tool: did a search run (a
+    google_search step, cited links) and what came back — field names and counts only, the answer's first words."""
+    import sys
+    sys.path.insert(0, ".")
+    from sourcer import owner_search as o
+    body = {"model": model, "input": SEARCH_FIRST + o._GEMINI_PROMPT.format(name=name, number="unknown"),
+            "tools": [{"type": "google_search"}]}
+    status, out, err = _call(f"{BASE}/interactions", key, body, timeout=150)
+    print(f"  {name} ({model}):")
+    if status != 200:
+        print(f"    HTTP {status} {err}")
+        return
+    seen: dict = {}
+    _walk(out, seen)
+    types = list(dict.fromkeys(seen.get("types") or []))
+    urls = [u for u in seen.get("urls") or [] if u.startswith("http")]
+    print(f"    HTTP 200; top fields {sorted(out)}; step/part types {types}; links {len(urls)} "
+          f"(e.g. {urls[0][:80] if urls else 'none'})")
+    print(f"    answer: {' '.join(' '.join(seen.get('texts') or []).split())[:260]!r}")
 
 
 # Gemini 3.x answers well-known questions from memory even with Google Search on (25 Nov 2026: no search ran for
