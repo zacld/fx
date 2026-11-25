@@ -23,7 +23,9 @@ export const STORE = "fx-accounts";
 export const KEY = "latest";
 export const CONTACTED_KEY = "contacted";   // {company_number: {at, touches, response, follow_up_at}} — Zac's, never the finder's
 export const VERDICTS_KEY = "verdicts";     // {company_number: {verdict: "good" | "not_fit", reason, at}} — Zac's review
-export const VERDICT_REASONS = ["Too small", "Too big", "No real FX", "Wrong sector", "FX run abroad", "Other"];
+// "Not enough FX" (Zac, 25 Nov 2026: the desk sizes a lead by £5m+ FX a year, not turnover) for the red ✕ from then on;
+// "Too small" kept for the marks before ("not enough revenue").
+export const VERDICT_REASONS = ["Not enough FX", "Too small", "Too big", "No real FX", "Wrong sector", "FX run abroad", "Other"];
 export const RATING = [1, 2, 3];   // how good a good lead is (3 the best): `rating` on its verdict
 export const LISTS_KEY = "lists";           // {company_number: {list: "call" | "post" | "email", at, missing?}} — Zac's own lists
 export const LISTS = ["call", "post", "email"];   // call list, chocolate / mailing list, email list

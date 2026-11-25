@@ -1079,6 +1079,16 @@ class TestPipelineWithCustoms(PipelineTestCase):
         # At the default £25m floor, small-accounts firms are out of range and not brought in.
         at_default = self.run_bulk(hmrc_files=files, stats_files=[stats], min_turnover=main.DEFAULT_MIN_TURNOVER)
         self.assertNotIn("12", {r["company_number"] for r in at_default})
+        # Sized on FX, not turnover (Zac, 25 Nov 2026: "it doesn't have to be 25 mill turnover, it's 5 mil FX"): under a
+        # £25m floor the £23.4m wine importer stays in, its customs records putting its FX at up to £6.8m a year …
+        floor = {r["company_number"]: r for r in self.run_bulk(hmrc_files=files, stats_files=[stats], min_turnover=25_000_000)}
+        self.assertIn("01", floor)
+        self.assertEqual(floor["01"]["section"], main.SECTION_CORE)
+        # … but not when its FX can't reach £5m, or with the rule off
+        strict = self.run_bulk(hmrc_files=files, stats_files=[stats], min_turnover=25_000_000, fx_size_min=7_000_000)
+        self.assertNotIn("01", {r["company_number"] for r in strict})
+        off = self.run_bulk(hmrc_files=files, stats_files=[stats], min_turnover=25_000_000, fx_size_min=0)
+        self.assertNotIn("01", {r["company_number"] for r in off})
 
     def test_capped_run_checks_proven_traders_first(self):
         files = [write_hmrc_zip(self.tmp.name, "import", "202608",
@@ -1086,6 +1096,29 @@ class TestPipelineWithCustoms(PipelineTestCase):
         rows = {r["company_number"]: r for r in self.run_bulk(hmrc_files=files, max_enrich=1)}
         self.assertNotEqual(rows["04"]["untapped_reasons"], "not checked")  # the customs-proven one got the budget
         self.assertEqual(rows["01"]["untapped_reasons"], "not checked")
+
+
+class TestFxSized(unittest.TestCase):
+    """Kept under the turnover floor on its FX (Zac, 25 Nov 2026): £10m+ turnover and up to £5m+ FX a year."""
+
+    def trade(self, imports=0, exports=0):
+        return {"import_months": {f"2026{m:02d}" for m in range(1, imports + 1)},
+                "export_months": {f"2026{m:02d}" for m in range(1, exports + 1)}}
+
+    def test_year_round_importer_is_big_enough_on_fx(self):
+        wallet = main.fx_sized(12_000_000, {"cost_of_sales": 9_000_000}, self.trade(imports=12))
+        self.assertEqual((wallet["low"], wallet["high"]), (3_600_000, 7_200_000))   # 40–80% of £9m cost of sales
+        self.assertIn("imports 40–80% of cost of sales (12 months in customs)", wallet["basis"])
+
+    def test_sales_abroad_count_too(self):
+        self.assertEqual(main.fx_sized(12_000_000, {"overseas_share": 0.5}, None)["high"], 6_000_000)
+
+    def test_too_little_fx_too_small_or_switched_off(self):
+        self.assertIsNone(main.fx_sized(12_000_000, {"cost_of_sales": 9_000_000}, self.trade(imports=2)))   # up to £1.35m
+        self.assertIsNone(main.fx_sized(8_000_000, {"overseas_share": 0.9}, None))   # under the £10m floor
+        self.assertIsNone(main.fx_sized(12_000_000, {"overseas_share": 0.5}, None, fx_size_min=0))
+        self.assertIsNone(main.fx_sized(None, {"overseas_share": 0.5}, None))
+        self.assertIsNone(main.fx_sized(15_000_000, {}, None))   # nothing to estimate its FX from
 
 
 class TestCurrency(unittest.TestCase):

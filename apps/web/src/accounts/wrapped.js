@@ -15,8 +15,8 @@ export const OUTCOMES = [
   ["good", "Good lead", "keep"], ["research", "Research harder", "keep"], ["mine", "Added to mine", "keep"],
   ["open", "Open lead (already open)", "taken"], ["call", "Call list (mostly already open)", "taken"],
   ["email", "Email list", "taken"], ["post", "Mail list", "taken"],
-  ["small", "Not enough revenue", "drop"], ["abroad", "Owned abroad", "drop"], ["notfit", "Not a fit (other reason)", "drop"],
-  ["skip", "Skipped (no FD found)", "skip"],
+  ["smallfx", "Not enough FX (under £5m)", "drop"], ["small", "Not enough revenue", "drop"], ["abroad", "Owned abroad", "drop"],
+  ["notfit", "Not a fit (other reason)", "drop"], ["skip", "Skipped (no FD found)", "skip"],
 ];
 const GROUP = Object.fromEntries(OUTCOMES.map(([k, , g]) => [k, g]));
 export const outcomeLabel = (k) => OUTCOMES.find(([x]) => x === k)?.[1] || k;
@@ -42,7 +42,9 @@ export function markActions({ checks = {}, verdicts = {}, lists = {} } = {}) {
   const out = [];
   for (const [n, v] of Object.entries(checks)) if (GROUP[v?.review] && v.review_at) out.push({ n, kind: v.review, at: v.review_at });
   for (const [n, v] of Object.entries(verdicts)) {
-    if (v?.verdict && v.at) out.push({ n, kind: v.verdict === "good" ? "good" : v.reason === "Too small" ? "small" : "notfit", at: v.at });
+    if (v?.verdict && v.at) {
+      out.push({ n, kind: v.verdict === "good" ? "good" : v.reason === "Not enough FX" ? "smallfx" : v.reason === "Too small" ? "small" : "notfit", at: v.at });
+    }
   }
   for (const [n, v] of Object.entries(lists)) if (GROUP[v?.list] && v.at) out.push({ n, kind: v.list, at: v.at });
   return out.map((a) => ({ ...a, day: localDay(a.at) })).filter((a) => a.day);
@@ -232,7 +234,7 @@ export function wrapText(w) {
   const lines = [`${dayLabel(w.day)} — ${w.looked} leads looked through.`];
   if (w.keep) lines.push(`New prospects: ${w.keep} (${part(["good", "research", "mine"])}).`);
   if (w.taken) lines.push(`Already open or on a list: ${w.taken} (${part(["open", "call", "email", "post"])}).`);
-  if (w.drop) lines.push(`Not for us: ${w.drop} (${part(["small", "abroad", "notfit"])}).`);
+  if (w.drop) lines.push(`Not for us: ${w.drop} (${part(["smallfx", "small", "abroad", "notfit"])}).`);
   if (w.skip) lines.push(`Skipped, no FD found: ${w.skip}.`);
   const s = w.worked.sector[0];
   if (s) lines.push(`Best sector: ${s.key} (${s.keep} new of ${s.judged} judged).`);
@@ -254,7 +256,7 @@ export const REPORT_SECTIONS = [
 ];
 const TAKEN = [["open", (n) => `${n} open lead${n === 1 ? "" : "s"}`], ["call", (n) => `${n} on your call list`],
   ["email", (n) => `${n} on your email list`], ["post", (n) => `${n} on your mail list`]];
-const DROPS = [["small", "Not enough revenue"], ["abroad", "Owned abroad"], ["notfit", "Not a fit (other reason)"]];
+const DROPS = [["smallfx", "Not enough FX (under £5m)"], ["small", "Not enough revenue"], ["abroad", "Owned abroad"], ["notfit", "Not a fit (other reason)"]];
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 const clockOf = (at) => (hasTime(at) ? new Date(at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "");
 // verdicts: his ratings (1–3) on good leads — each new prospect carries its rating, why it's a good lead (whyGood: the FX

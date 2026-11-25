@@ -1,6 +1,6 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FILINGS_SECTION, learningRows } from "./ranking.js";
-import { byRecentLoss, recentFxLoss, whyGood, score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
+import { fxSizeOf, fxSizeLine, byRecentLoss, recentFxLoss, whyGood, score100, setScoreScale, whyHere, RATINGS, ratingOf, stars, leadBrief, goodLeadsList, GOOD_MARKS, markSections, matchCompanies, scoreboard, likeGoodLeads, goodLeads, leadProfile, groupActivity, activityLine, FIT, HIDDEN_KINDS, hiddenFromFilters, overseasOps, LEAD_SOURCES, leadSource, reviewLearnings, SIMPLE_COLUMNS, NEW_LEAD_DAYS, addedOn, newLead, TODAYS_LIST, TODAYS_MARKS, todaysList, researchList, markedToday, googleCompany, FRESH_DAYS, FRESH_KINDS, QUIET_SOURCES, freshFind, setKnownLei, setKnownOwnerSearch, setKnownParents, foreignOwned, elsewhere, keyPoints, ownership, OWNERSHIP_LABEL, financeSeat, ukNamed, timelyReason, filedIso, leadLine, setKnownSites, setKnownSignals, movesByCurrency, outreachPlan, outreachWhyLine, letterAddressee, OUTREACH, siteOf, setKnownGroups, groupOf, groupName, peBackedOf, industryOf, INDUSTRIES, collapseGroups, nicheTiers, withLeadScores, SHEET_COLUMNS, SIZE_SCALE, parseMoney, regionBars, sizePosition, turnoverYears, COGNISM_COLUMNS, COGNISM_COMPANY_COLUMNS, cognismCompanyRows, EXPORT_FIELDS, cognismRow, checklistLine, leadChecklist, reasonsNotToProgress, CALL_RULES, CALL_TODAY_MAX, callToday, companyAndFd, searchAllowance, statusLines, LOSS_SORTS, filterLosses, lossGrew, lossRows, sortLosses, CONTACT_GROUPS, ROLE_GROUPS, SORTS, askFor, chCompanyUrl, monthLabel, filedWhen, filingRow, filterFilings, sortFilings, isGroupFiling, turnoverSearch, fxFacts, fxGroup, fxScore, companyPath, contactClues, presentedContact, detailSections, numberFromPath, roleGroup, sourceDocuments, bankUrl, contactGroup, factUrl, filterRows, fxShare, googleFd, isNew, isOut, money, parts, sortRows, wallet } from "./format.js";
 import { pitchFor, pitchLine } from "./pitch.js";
 import { crmDetail, crmNote } from "./crm.js";
 import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
@@ -522,7 +522,7 @@ function Accounts({ data, password }) {
         </nav>
         <div className="tabs" role="tablist">
           <button role="tab" hidden={!inTabs("daily")} style={{ order: tabOrder(tabSection, "daily") }} aria-selected={filters.view === "daily"} className={`tab daily-tab${filters.view === "daily" ? " on" : ""}`}
-                  title="The best-ranked leads you haven't marked: Google it, check for the FD, then ✓ good lead / ✕ not enough revenue / ● open lead / ☎ call list"
+                  title="The best-ranked leads you haven't marked: Google it, check for the FD, then ✓ good lead / ✕ not enough FX / ● open lead / ☎ call list"
                   onClick={() => set({ section: "", view: "daily" })}>
             Today's list
           </button>
@@ -952,6 +952,10 @@ function Src({ href, children, className, title }) {
     ? <a className={`src ${className || ""}`} href={href} target="_blank" rel="noreferrer" title={title || "Open the source document"}>{children}</a>
     : <span className={className} title={title}>{children}</span>;
 }
+
+// "FX ~£3.6m–£7.2m a year" on a lead's line (Zac, 25 Nov 2026: the desk sizes a lead by £5m+ FX a year): its estimate,
+// from the finder's wallet or its filed sales abroad (format.js fxSizeOf); blank when nothing gives one.
+const fxSizeLabel = (r) => { const s = fxSizeOf(r); return s ? `FX ~${fxSizeLine(s)} a year` : ""; };
 
 // For CRM (Zac, 24 Nov 2026): the company in plain text to paste into the bank's CRM — a short summary (25 Nov 2026: what
 // it does, size, owner, bank, FX, why now, contact, pitch, then his own note; crm.js crmNote), "Full detail" for every
@@ -2457,7 +2461,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
     if (key === "good" && !k) { setRatingFor(n); return; }   // ✓ first asks how good it is
     setRatingFor("");
     if (key === "good") setVerdict(n, "good", "", k);
-    else if (key === "small") setVerdict(n, "not_fit", "Too small");
+    else if (key === "small") setVerdict(n, "not_fit", "Not enough FX");   // the desk's measure: £5m+ FX a year (25 Nov 2026)
     else if (key === "call") setList(n, "call");
     else setReview(n, key);   // research / open / abroad / skip
     setLast({ number: n, name: r.company_name, key, rating: k });
@@ -2486,7 +2490,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
             <span className="daily-n">{i + 1}</span>
             <div className="daily-main">
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => open(e, r.company_number)}>{r.company_name}</a>
-              <span className="daily-sub" title={`Score ${score100(r.lead_score)} out of 100: better than ${score100(r.lead_score)}% of all the leads ranked`}>{[industryOf(r), r.turnover_gbp ? `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}` : "no turnover filed"].join(" · ")}</span>
+              <span className="daily-sub" title={`Score ${score100(r.lead_score)} out of 100: better than ${score100(r.lead_score)}% of all the leads ranked`}>{[industryOf(r), r.turnover_gbp ? `${money(r.turnover_gbp)}${r.turnover_basis === "group" ? " (group)" : ""}` : "no turnover filed", fxSizeLabel(r)].filter(Boolean).join(" · ")}</span>
               <span className="daily-why">{whyHere(r).join(" · ")}</span>
               <span className="daily-links">
                 <span className="daily-number" title="Companies House number">{r.company_number}</span>
@@ -2521,7 +2525,7 @@ function TodaysList({ rows, contacted, checks, verdicts, lists, onOpen, setVerdi
 // pace, the day against the others, and what else got done. Worked out in the browser from his marks' own times
 // (`dayWrap`, src/accounts/wrapped.js); any earlier day by the arrows or by clicking its column.
 const WRAP_ICON = { good: ["✓", "good"], research: ["?", "research"], open: ["●", "open"], call: ["☎", "call"], mine: ["★", "open"],
-  email: ["✉", "call"], post: ["✉", "call"], small: ["✕", "small"], abroad: ["✈︎", "abroad"], notfit: ["✕", "small"], skip: ["»", "skip"] };
+  email: ["✉", "call"], post: ["✉", "call"], smallfx: ["✕", "small"], small: ["✕", "small"], abroad: ["✈︎", "abroad"], notfit: ["✕", "small"], skip: ["»", "skip"] };
 const WRAP_BY = [["sector", "Sectors"], ["niche", "Niches"], ["source", "Where they came from"]];
 function WrapIcon({ kind }) {
   const [sym, cls] = WRAP_ICON[kind] || ["•", "skip"];
@@ -2848,7 +2852,7 @@ function LineNote({ note, onSave, r = null }) {
 
 // Research harder (Zac, 23 Nov 2026): the good leads he marked ? on Today's list because nobody to call was found yet.
 // The same line as Today's list, with a LinkedIn people search, and buttons to move it on: ☎ Call list once a contact
-// turns up, ✕ Not enough revenue, » Skip, or back to Today's list.
+// turns up, ✕ Not enough FX, » Skip, or back to Today's list.
 function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, setReview, setList, notes = {}, saveNote }) {
   const list = researchList(rows, { contacted, checks, lists });
   const open = (e, n) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
@@ -2860,12 +2864,12 @@ function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, se
   })), columnsFor(["company_name", "company_number", "industry", "turnover_gbp", "lead_score", "marked_on", "note", "google", "check_for_fd", "companies_house_url"],
     { turnover_gbp: "Turnover (£)", marked_on: "Marked on", check_for_fd: "Check for FD" }, ["turnover_gbp", "lead_score"]),
     `research-harder-${new Date().toISOString().slice(0, 10)}.xlsx`, "Research harder");
-  const moves = [["call", "☎", "Found a contact: Call list"], ["small", "✕", "Not enough revenue"], ["skip", "»", "Skip (no FD found)"],
+  const moves = [["call", "☎", "Found a contact: Call list"], ["small", "✕", "Not enough FX (under £5m a year)"], ["skip", "»", "Skip (no FD found)"],
     ["back", "↺", "Back to Today's list"]];
   const move = (r, key) => {
     const n = r.company_number;
     if (key === "call") setList(n, "call");
-    else if (key === "small") setVerdict(n, "not_fit", "Too small");
+    else if (key === "small") setVerdict(n, "not_fit", "Not enough FX");
     else if (key === "skip") setReview(n, "skip");
     else setReview(n, "research");   // the same review again clears it: back to Today's list
   };
@@ -2882,7 +2886,7 @@ function ResearchHarder({ rows, contacted, checks, lists, onOpen, setVerdict, se
             <div className="daily-main">
               <a className="co" href={companyPath(r.company_number)} onClick={(e) => open(e, r.company_number)}>{r.company_name}</a>
               <span className="daily-sub" title={`Score ${score100(r.lead_score)} out of 100: better than ${score100(r.lead_score)}% of all the leads ranked`}>{[industryOf(r), r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed",
-                `marked ${String(checks[r.company_number]?.review_at || "").slice(0, 10)}`].join(" · ")}</span>
+                fxSizeLabel(r), `marked ${String(checks[r.company_number]?.review_at || "").slice(0, 10)}`].filter(Boolean).join(" · ")}</span>
               <span className="daily-why">{whyHere(r).join(" · ")}</span>
               <span className="daily-links">
                 <span className="daily-number" title="Companies House number">{r.company_number}</span>
@@ -2972,7 +2976,7 @@ function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveN
                   <RatingStars value={x.rating} onChange={(k) => setRating(n, k)} name={r.company_name} />
                 </span>
                 <span className="daily-sub">{[x.mark.label, x.mark.at ? `marked ${String(x.mark.at).slice(0, 10)}` : "", industryOf(r),
-                  r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed", `score ${score100(r.lead_score)}`, contacted[n] ? "contacted" : ""].filter(Boolean).join(" · ")}</span>
+                  r.turnover_gbp ? money(r.turnover_gbp) : "no turnover filed", fxSizeLabel(r), `score ${score100(r.lead_score)}`, contacted[n] ? "contacted" : ""].filter(Boolean).join(" · ")}</span>
                 {why.text && <p className="good-why"><b>Why it's a good lead:</b> {why.text}</p>}
                 <p className={why.text ? "good-brief good-about" : "good-brief"}>{why.text ? b.about : b.text}</p>
                 <ul className="good-facts">

@@ -213,7 +213,14 @@ DEFAULT_NICHES_FILE = os.path.join(_HERE, "config", "fx_niches.json")
 # The target band: mid-market and lower-corporate clients for a bank's FX desk.
 DEFAULT_BAND_MIN = 20_000_000   # the desk's sweet spot, Nov 2026: £20m–£300m
 DEFAULT_BAND_MAX = 300_000_000
-DEFAULT_MIN_TURNOVER = DEFAULT_BAND_MIN    # floor: filed turnover under this is dropped
+DEFAULT_MIN_TURNOVER = DEFAULT_BAND_MIN    # floor: filed turnover under this is dropped (unless big on FX, below)
+# The desk's measure is FX, not turnover (Zac, 25 Nov 2026: "it doesn't have to be 25 mill turnover, it's 5 mil FX …
+# we can go after companies who have less than 25m turnover"): a company under the floor is still kept when its
+# estimated FX a year — currency.wallet's high end, from its customs imports / exports and a filed split of its sales
+# abroad — reaches FX_SIZE_MIN, from FX_SIZE_FLOOR of filed turnover up (under that, £5m of FX would be most of what it
+# turns over). FX_SIZE_MIN=0 switches it off.
+FX_SIZE_MIN = int(os.environ.get("FX_SIZE_MIN", "5000000"))
+FX_SIZE_FLOOR = int(os.environ.get("FX_SIZE_FLOOR", "10000000"))
 SMALL_COMPANY_MAX_TURNOVER = 15_000_000    # small-company accounts limit (from April 2025)
 DEFAULT_HMRC_MONTHS = 12
 DEFAULT_MIN_TRADE_MONTHS = 3               # small-accounts companies need this many months of customs records
@@ -468,6 +475,20 @@ def section_for(company: dict, turnover: Optional[dict], band: tuple[int, int] =
         value = turnover["turnover"]
         return below if value < band[0] else above if value > band[1] else core
     return core if company["accounts_category"] in CANDIDATE_CATEGORIES else below
+
+
+def fx_sized(turnover: Optional[float], facts: Optional[dict], trade: Optional[dict], fx_size_min: int = FX_SIZE_MIN,
+             floor: int = FX_SIZE_FLOOR) -> Optional[dict]:
+    """
+    The FX wallet (currency.wallet: low, high, basis) of a company under the turnover floor that is big enough on its FX —
+    filed turnover of `floor` or more and an estimated FX a year reaching `fx_size_min` at the high end — else None.
+    """
+    if not fx_size_min or not turnover or turnover < floor:
+        return None
+    f = facts or {}
+    wallet = currency.wallet(turnover, f.get("cost_of_sales"), len(trade["import_months"]) if trade else 0,
+                             len(trade["export_months"]) if trade else 0, overseas_share=f.get("overseas_share"))
+    return wallet if wallet and wallet["high"] >= fx_size_min else None
 
 
 # Companies the FX filings scan found (sourcer/filings.py) that no niche or customs record brings in.
@@ -992,6 +1013,7 @@ def run_pipeline(
     registry_check: bool = True,
     contacts: bool = True,
     priority: Optional[dict[str, float]] = None,
+    fx_size_min: int = FX_SIZE_MIN,
 ) -> list[dict]:
     """
     Find the companies and return one row per company (does not write a
@@ -1142,7 +1164,7 @@ def run_pipeline(
             return ""
         value = (entry.get("facts") or {}).get("turnover")
         if value is not None:
-            return "under_min" if value < min_turnover else ""
+            return "under_min" if value < min_turnover and not fx_sized(value, entry.get("facts"), trade, fx_size_min) else ""
         if "group" not in entry:
             return ""   # cached before parents were read: check it once more
         group = entry["group"] or {}
@@ -1233,7 +1255,8 @@ def run_pipeline(
                     if facts and facts["turnover"] is not None else None)
         read_at = (cached or {}).get("facts_read_at") if cached else older.get("facts_read_at") if reuse else now
         version = {"facts_version": accounts.FACTS_VERSION, "facts_read_at": read_at or now}
-        if turnover is not None and turnover["turnover"] < min_turnover:
+        if turnover is not None and turnover["turnover"] < min_turnover \
+                and not fx_sized(turnover["turnover"], facts, trade, fx_size_min):
             if not cached:
                 register_cache.store(number, made_up, {"facts": facts, **version})
             return "under_min", None
@@ -1504,6 +1527,9 @@ def print_summary(rows: list[dict], stats: Counter, min_turnover: int,
           f"in a gender pay gap / modern slavery filing: {stats['in_registry']:,}")
     print(f"  Dropped — filed turnover under £{min_turnover / 1e6:,.0f}m: {stats['under_min']:,}; "
           f"subsidiaries with nothing to confirm them: {stats['unconfirmed']:,}")
+    small = [r for r in rows if r.get("turnover_gbp") and float(r["turnover_gbp"]) < min_turnover]
+    print(f"  Kept under £{min_turnover / 1e6:,.0f}m turnover on their FX (estimated £{FX_SIZE_MIN / 1e6:g}m+ a year, "
+          f"from £{FX_SIZE_FLOOR / 1e6:g}m turnover): {len(small):,}")
     print("=" * 60)
 
 

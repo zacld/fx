@@ -145,7 +145,17 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Target:** UK companies with proven foreign-currency flows, sized for a
   bank FX desk (Zac now works at Investec). Core band £20m–£300m turnover (the desk's
   sweet spot, Nov 2026); Above (£300m+) and Below are separate sections. Overseas-owned
-  companies are in scope — pitch the UK team (see Owned from abroad).
+  companies are in scope — pitch the UK team (see Owned from abroad). **Sized by FX, not turnover** (Zac, 25 Nov 2026:
+  "it doesn't have to be 25 mill turnover, it's 5 mil FX … we can go after companies who have less than 25m turnover"):
+  the finder keeps a company under its £20m floor when its estimated FX a year (`currency.wallet`'s high end — customs
+  imports / exports × cost of sales, a filed split of sales abroad) reaches `FX_SIZE_MIN` (£5m), from `FX_SIZE_FLOOR`
+  (£10m) of filed turnover up (`main.fx_sized`, in the cache pre-check and the main check; "Below" section; the run
+  prints how many). The page (`fxSizeOf` / `fxBigEnough` / `fxLikelyBig` / `deskSized` in `format.js`): such a company
+  isn't held off for its turnover (a note to check its FX is £5m+ instead), gets the band's 10 points when the middle of
+  its range is £5m+ ("Likely £5m+ FX a year"), counts for Call today and the checklist's "Turnover £20m–£300m or £5m+
+  FX"; Today's list, Research harder and Good leads lines show "FX ~£3.6m–£7.2m a year" (the wallet, else filed sales
+  abroad), and the For CRM summary leads its FX line with it. The FX filings scan stays at £20m (lowering it would mean
+  re-reading the year).
 - **Per company:** likely currencies (customs goods × HMRC trade statistics
   by country; dollar-priced goods — oil, metals, coffee, cocoa, soya, chips,
   aircraft: `currency.DOLLAR_PRICED` — count as USD whatever the country), an FX wallet range (cost of sales/turnover × customs-banded
@@ -429,7 +439,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   accounts filed in the last 90 days 10, new on the list 5, the company's niche by its measured tier (15 / 8 / 3,
   `nicheTiers` from `niches/stats`), a new finance director 20 (an Alerts `new_fd` / `news_fd` in the last 120 days or
   a trigger naming one), another change 10 (owner, charges), expanding abroad in the news 8, hiring for treasury / FX 5,
-  subsidiaries abroad 10, £20m–£300m 10, no hedging named 5, owned abroad −10, a name ending in UK / (UK) / U.K. /
+  subsidiaries abroad 10, £20m–£300m 10 (or likely £5m+ FX a year under £20m — see Target), no hedging named 5, owned abroad −10, a name ending in UK / (UK) / U.K. /
   (GB) −10 (Zac, 13 Nov 2026: "obviously got an overseas owner" — `ukArmName`; not on top of owned abroad, and not when
   the register shows only people as owners). GET `/api/accounts?view=signals` gives
   the page the niche tiers and each company's recent alerts. The Accounts list sorts by it by default ("Lead score"),
@@ -778,7 +788,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   up to two other lenders — its own other names on the register, NatWest's National Westminster / RBS / Lombard etc., not
   repeated, `sameBank` — facility end, borrowing, cash); FX (the loss or gain with the filing month and the year before,
   the currency and which way, sales abroad, hedging or none named, accounts kept in another currency, subsidiaries'
-  countries, borrowing abroad; customs records when nothing else shows FX); Why now (two at most: a moment, a new FD,
+  countries, borrowing abroad; customs records when nothing else shows FX; led by its FX a year when the finder estimated
+  it, "About £3.6m–£7.2m a year (estimate)" — the Full detail has it with its basis); Why now (two at most: a moment, a new FD,
   buying companies, a PE deal, funding, else the first trigger — the FX loss is already above); Contact (a presented
   finance contact only); Pitch (the first three products); then his note. **Full detail** (`crmDetail`, the button
   beside Copy) is the long version: the company
@@ -830,7 +841,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the two strongest reasons that say something about this company, not the ones nearly every lead shares — "£859k FX loss
   (filed 29 Sept), no hedging · Like your good lead Basis Research"; the score on hover and on the company page; Research
   harder lines too), then four round buttons —
-  ✓ green Good lead (verdict good), ✕ red Not enough revenue (Not a fit: Too small), ● orange Open lead (review open),
+  ✓ green Good lead (verdict good), ✕ red **Not enough FX (under £5m a year)** (Not a fit: reason "Not enough FX" from 25 Nov
+  2026, the desk's measure; "Not enough revenue" — reason "Too small" — before, those marks kept and counted as such in
+  Your day), ● orange Open lead (review open),
   ☎ blue Call list (list call), and (Zac, 23 Nov 2026: "add the buttons current client and owned abroad") ✈ purple Owned
   abroad (review abroad: to the Foreign-owned tab) and » grey **Skip** (review `skip`; "Skipped" in the Power Automate
   feed and the Simplified dash, `Skip:` / `Skipped:` heading in the bulk paste). A mark takes the company off and the next
@@ -1107,7 +1120,8 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   needs a person's name, email or LinkedIn URL on each row).
 - **Call today tab** (Accounts page, first tab; `callToday` / `CALL_RULES` in `format.js`): the day's 25 across the
   Accounts list and the Recent FX filings list (its candidates precomputed at save as `filings/calls`, `filingsCalls`
-  in `api/accounts.mjs`, GET `/api/accounts?view=calls`): turnover £20m–£300m (filed or group), filed FX proof 50+, not
+  in `api/accounts.mjs`, GET `/api/accounts?view=calls`): turnover £20m–£300m (filed or group) or £5m+ FX a year under
+  £20m (`deskSized`), filed FX proof 50+, not
   qualified Out, and an FX loss of £50k+ in accounts filed in the last 6 months or a trigger; confirmed finance
   contacts first, then likely, then "ask for the FD", each by FX proof (owned abroad lower) + 30 for the loss + 15 for
   a trigger. Every pick lists why; Contacted drops it and the next moves up; CSV export. Every CSV export (Accounts,
