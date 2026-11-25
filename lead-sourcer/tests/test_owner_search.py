@@ -135,6 +135,7 @@ class GeminiInteractions(unittest.TestCase):
         a = o.gemini_read("CLOETTA UK LIMITED", post=self.reply(self.CHAIN), page=lambda url: None,
                           confirm=lambda q: asked.append(q) or json.dumps(hits))
         self.assertEqual((a["owner"], a["url"], a["source"]), ("Cloetta AB", "https://news.example.com/cloetta-uk", "news.example.com"))
+        self.assertEqual(a["quote"], "Cloetta UK Ltd, a subsidiary of Cloetta AB, makes Chewits.")
         self.assertEqual(o.GEMINI_USAGE["confirmed_by_search"], 1)
         self.assertIn("Cloetta AB", asked[0])
 
@@ -230,34 +231,41 @@ class SearchFallsBack(unittest.TestCase):
 
 
 class GoodLeadsOnly(unittest.TestCase):
-    """tools/owner_search.py --only-first: only Zac's good leads are asked about; Gemini stops at its monthly cap."""
+    """tools/owner_search.py --only-first: only Zac's good leads are asked about; each once by Gemini; Gemini stops at
+    its monthly cap; --budget stops starting new companies."""
 
-    def run_tool(self, extra, usage=None):
+    def run_tool(self, extra, usage=None, companies=None, first=("01",), gemini=True, search=None, clock=None):
         import json
         import os
         import sys
         import tempfile
         from datetime import date
+        from unittest import mock
         sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
         import owner_search as tool
         d = tempfile.mkdtemp()
         files = {"tracked": {"companies": {"01": {"name": "GOOD LEAD LTD"}, "02": {"name": "OTHER LEAD LTD"},
                                            "03": {"name": "THIRD LEAD LTD"}}},
-                 "order": ["02", "03", "01"], "first": ["01"],
-                 "cache": {"companies": {}, "usage": {date.today().strftime("%Y-%m"): usage or {}}}}
+                 "order": ["02", "03", "01"], "first": list(first),
+                 "cache": {"companies": companies or {}, "usage": {date.today().strftime("%Y-%m"): usage or {}}}}
         for k, v in files.items():
             with open(os.path.join(d, k + ".json"), "w") as f:
                 json.dump(v, f)
         asked = []
-        saved = (tool.owner_search.search, sys.argv, os.environ.get("GEMINI_API_KEY"), list(tool.owner_search.GEMINI_SPENT))
-        tool.owner_search.search = lambda n, name: asked.append(n) or {"none": True}
-        os.environ["GEMINI_API_KEY"] = "test"
+        saved = (tool.owner_search.search, sys.argv, os.environ.get("GEMINI_API_KEY"), list(tool.owner_search.GEMINI_SPENT),
+                 dict(tool.owner_search.GEMINI_USAGE))
+        tool.owner_search.search = lambda n, name: asked.append(n) or (search(n) if search else {"none": True})
+        if gemini:
+            os.environ["GEMINI_API_KEY"] = "test"
+        else:
+            os.environ.pop("GEMINI_API_KEY", None)
         tool.owner_search.GEMINI_SPENT.clear()
-        tool.owner_search.GEMINI_USAGE["searches"] = 0
+        tool.owner_search.GEMINI_USAGE.update({k: 0 for k in tool.owner_search.GEMINI_USAGE})
         sys.argv = ["owner_search.py", "--tracked", f"{d}/tracked.json", "--order", f"{d}/order.json", "--first",
                     f"{d}/first.json", "--cache", f"{d}/cache.json", "--out", f"{d}/out.json"] + extra
         try:
-            tool.main()
+            with mock.patch("time.monotonic", side_effect=clock) if clock else mock.patch("os.getpid"):
+                tool.main()
             spent = list(tool.owner_search.GEMINI_SPENT)
         finally:
             tool.owner_search.search, sys.argv = saved[0], saved[1]
@@ -266,6 +274,7 @@ class GoodLeadsOnly(unittest.TestCase):
             else:
                 os.environ["GEMINI_API_KEY"] = saved[2]
             tool.owner_search.GEMINI_SPENT[:] = saved[3]
+            tool.owner_search.GEMINI_USAGE.update(saved[4])
         with open(f"{d}/out.json") as f:
             return asked, spent, json.load(f)
 
@@ -283,6 +292,35 @@ class GoodLeadsOnly(unittest.TestCase):
         self.assertEqual((asked, spent), (["01"], ["monthly search cap"]))
         self.assertEqual(out["usage"][date.today().strftime("%Y-%m")]["gemini_searches"], 4500)
 
+    def test_good_lead_searched_the_older_way_is_asked_once_by_gemini(self):
+        from datetime import date
+        today = date.today().isoformat()
+        old = {"01": {"owner": "Some Holdings Ltd", "kind": "company", "read_by": "ai", "searched": today}}
+
+        def gemini_answers(n):
+            import sys
+            sys.modules["sourcer.owner_search"].GEMINI_USAGE["calls"] += 1
+            return {"owner": "Cloetta AB", "kind": "company", "read_by": "gemini"}
+        asked, _, out = self.run_tool(["--only-first"], companies=old, search=gemini_answers)
+        self.assertEqual(asked, ["01"])
+        self.assertEqual((out["companies"]["01"]["owner"], out["companies"]["01"]["gemini_at"]), ("Cloetta AB", today))
+
+    def test_good_lead_gemini_already_answered_waits(self):
+        from datetime import date
+        today = date.today().isoformat()
+        done = {"01": {"owner": "Cloetta AB", "read_by": "gemini", "searched": today, "gemini_at": today}}
+        asked, _, _ = self.run_tool(["--only-first"], companies=done)
+        self.assertEqual(asked, [])
+
+    def test_no_gemini_key_keeps_the_usual_schedule(self):
+        from datetime import date
+        old = {"01": {"owner": "Some Holdings Ltd", "read_by": "ai", "searched": date.today().isoformat()}}
+        asked, _, _ = self.run_tool(["--only-first"], companies=old, gemini=False)
+        self.assertEqual(asked, [])
+
+    def test_budget_stops_starting_new_companies(self):
+        asked, _, _ = self.run_tool(["--only-first", "--budget", "60"], first=("01", "02"), clock=[0, 0, 10_000, 10_000])
+        self.assertEqual(asked, ["01"])
 
 if __name__ == "__main__":
     unittest.main()

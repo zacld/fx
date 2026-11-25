@@ -381,23 +381,23 @@ def _text_check(raw: str, owner: str, company_name: str, where: str = "page") ->
     return "ok" if _OWNERSHIP_WORDS.search(text) else f"nothing about ownership on the {where}"
 
 
-def _search_check(owner: str, company_name: str, fetch: Optional[Callable[[str], Optional[str]]] = None) -> tuple[str, str, int]:
+def _search_check(owner: str, company_name: str, fetch: Optional[Callable[[str], Optional[str]]] = None) -> tuple[str, str, int, str]:
     """When no cited page backs Gemini's owner: one search through the finder's search APIs for the company and that
     owner, its results' titles and snippets held to the same rules (never a page fetched). (reason, link, results that
-    back it) — reason "ok" when one does."""
+    back it, the first one's snippet) — reason "ok" when one does."""
     query = f'"{profiles.plain_name(company_name)}" {owner}'
     raw = profiles._cached(query) if fetch is None else None      # a stand-in fetcher (tests) never touches the cache
     if raw is None:
         if fetch is None and not profiles.api_key():
-            return "no search API to confirm it", "", 0
+            return "no search API to confirm it", "", 0, ""
         raw = (fetch or profiles.fetch_any)(query)
         if raw is None:
-            return "no search API to confirm it", "", 0
+            return "no search API to confirm it", "", 0, ""
         if fetch is None:
             profiles._store(query, raw)
-    backing = [link for link, title, snippet in profiles.parse(raw) or []
+    backing = [(link, snippet or title) for link, title, snippet in profiles.parse(raw) or []
                if _text_check(f"{title} {snippet}", owner, company_name, "result") == "ok"]
-    return ("ok", backing[0], len(backing)) if backing else ("no search result backs it either", "", 0)
+    return ("ok", backing[0][0], len(backing), backing[0][1]) if backing else ("no search result backs it either", "", 0, "")
 
 
 def _page_backs(url: str, owner: str, company_name: str, page: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> bool:
@@ -416,6 +416,7 @@ def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[st
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if (not key and post is None) or (GEMINI_SPENT and post is None):
         return None
+    GEMINI_LAST.clear()
     prompt = _GEMINI_PROMPT.format(name=company_name, number=number or "unknown", searches=GEMINI_MAX_SEARCHES)
     data = post(prompt) if post else _gemini(prompt, key)
     if not data:
@@ -467,7 +468,6 @@ def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[st
     if steps is not None:
         # the owner must be on a page it cites: the top owner's own page first, then the chain's others
         urls = [u for u in dict.fromkeys(str(c.get("source_url") or "").strip() for c in [top] + steps_[::-1]) if u]
-        GEMINI_LAST.clear()
         GEMINI_LAST.update(chain=[(str(c.get("owner")), c.get("type")) for c in steps_], checks=[])
         backing = ""
         for u in urls[:GEMINI_PAGE_CHECKS] or [""]:
@@ -477,10 +477,10 @@ def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[st
             if why == "ok":
                 backing = u
                 break
-        sites = 1
+        sites, snippet = 1, ""
         if not backing:
             # no page it cites opened and named the owner: one search for the company and that owner instead
-            why, link, sites = _search_check(owner, company_name, confirm)
+            why, link, sites, snippet = _search_check(owner, company_name, confirm)
             GEMINI_LAST["checks"].append(("search", why, ""))
             if why == "ok":
                 backing = link
@@ -491,8 +491,9 @@ def gemini_read(company_name: str, number: str = "", post: Optional[Callable[[st
                 GEMINI_DROPS[why] = GEMINI_DROPS.get(why, 0) + 1
             return dict(_UNCHECKED)
         GEMINI_USAGE["verified"] += 1
-        quote = str(next((c.get("quote") for c in steps_ if str(c.get("source_url") or "").strip() == backing and c.get("quote")),
-                         "") or ans.get("answer") or "")
+        # the words that back it: the search result's own, else what Gemini quoted from the page we opened
+        quote = snippet or str(next((c.get("quote") for c in steps_ if str(c.get("source_url") or "").strip() == backing
+                                     and c.get("quote")), "") or ans.get("answer") or "")
         url, source = backing, re.sub(r"^https?://(www\.)?", "", backing).split("/")[0]
     else:
         words = [w for w in _norm_text(owner).split() if w not in ("the", "of", "and", "limited", "ltd", "plc", "inc", "group")]

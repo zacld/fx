@@ -178,5 +178,5 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || secrets.GROQ_API }}   # the AI reader: one call a company, capped by --max
         run: |
           cd apps/web && (node scripts/alerts-store.mjs get owners ../../lead-sourcer/owners_cache.json || echo '{}' > ../../lead-sourcer/owners_cache.json)
-          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 2 || echo 100) --parents parents.json --first good_leads.json --only-first
+          cd ../../lead-sourcer && python3 tools/owner_search.py --tracked tracked.json --order lead_order.json --cache owners_cache.json --out owners.json --max $([ "$STORE_READ_ONLY" = 1 ] && echo 2 || echo 100) --parents parents.json --first good_leads.json --only-first --budget $([ "$STORE_READ_ONLY" = 1 ] && echo 300 || echo 3600)
           cd ../apps/web && node scripts/alerts-store.mjs put owners ../../lead-sourcer/owners.json
