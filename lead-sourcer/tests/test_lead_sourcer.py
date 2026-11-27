@@ -579,6 +579,14 @@ class TestBulkFile(PipelineTestCase):
             "postcode": "BS1 1AA", "registered_address": "1 Dock Road, BRISTOL",
         })
 
+    def test_registry_counts_companies_at_each_postcode(self):
+        # the weekly gift send-out flags a registered office shared by many companies (an accountant's or a service)
+        registry: dict = {}
+        bulk.scan(self.bulk_path, set(), set(), numbers={"01", "12"}, registry=registry)
+        self.assertEqual(registry["01"]["postcode_companies"], 11)   # every fixture company but two is at BS1 1AA
+        self.assertEqual(registry["12"]["postcode_companies"], 1)
+        self.assertEqual(registry["01"]["address"], "1 Dock Road, BRISTOL")
+
     def test_unexpected_format_fails_loudly(self):
         path = write_bulk_zip(self.tmp.name, rows=[], header=["CompanyName", "CompanyNumber"])
         with self.assertRaises(ValueError) as ctx:
@@ -3799,6 +3807,9 @@ class TestAbsurdLeads(unittest.TestCase):
         self.assertTrue(out["3"]["absurd"] and out["4"]["absurd"])
         self.assertEqual(out["1"]["absurd"], "")
         self.assertEqual((out["1"]["address"], out["1"]["postcode"], out["4"]["address"]), ("Unit 4, Dock Road, Bristol", "BS1 1AA", ""))
+        registry["1"]["postcode_companies"] = 124
+        self.assertEqual(m.enrich_tracked({"1": "A LTD", "4": "GONE LTD"}, registry, trades, niches)["1"]["postcode_companies"], 124)
+        self.assertEqual(out["4"]["postcode_companies"], 0)
 
 
 class TestCatchAllCodes(unittest.TestCase):

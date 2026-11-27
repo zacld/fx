@@ -837,7 +837,7 @@ LinkedIn/social scraping, no phone lookups, no outreach.
 - **Sections and Fresh finds** (Zac, 22 Nov 2026, from the architecture review: ~30 tabs were too many on a phone;
   `TAB_SECTIONS` in `AccountsApp.jsx`; **reorganised 24 Nov 2026** — "we need to clear up the top of the dash's names,
   reorganise the leads" — into the five sections he picked, nothing removed): a bar over the tabs — **Daily** (Today's
-  list, Good leads, Research harder, Call list, Your day), **Find more** (Fresh finds, New leads, Emerging leads, Job
+  list, Good leads, Send-out, Research harder, Call list, Your day), **Find more** (Fresh finds, New leads, Emerging leads, Job
   adverts, Niche search, New money, Alerts, Hidden from filters), **Follow up** (Follow-ups due — the sequence steps, the
   old "Today" tab — Contacted, Email list, Mail list, Email drafts, Outreach), **Learn** (Scoreboard, Niches) and **More**
   (the Accounts list and its sections, P&L sheet, Best fit, Call now, Call today, Hit list, FX filings, FX losses, Hard to
@@ -980,6 +980,27 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   finance contact +5. A contacted one drops off and the next moves up; Excel with rank, points and why. Rule-based; the
   weights are logged here to be recalibrated against what he calls. The white Daily pages' gain / loss colours are darker
   steps of the same blue / red (6.3:1 / 5.8:1 on white).
+- **Weekly gift send-out — the Send-out tab** (Zac, 27 Nov 2026: "pick on Wednesday evening 15 of my good leads and get their registered address; once I enrich, add
+  the contact name"; he chose a dashboard tab over a Notion page; `src/accounts/sendout.js`, `SendOut` in
+  `AccountsApp.jsx`, Daily section, white): from Wednesday 18:00 UK time (`sendoutWeek`, summer time included) the first
+  time the tab opens it freezes the week's batch — 15 of his good leads (`SENDOUT.n`) in the Top 20 order
+  (`topGoodLeads`), none contacted, out, already in a batch (picked or swapped out — `inBatches`), already gifted from
+  the Mail list, and one per group (`sendoutPick`) — saved in the store (key `sendout`, `{batches: [{week, picked_at,
+  companies, skipped?, sent_at?}]}`, company numbers only; GET `?view=sendout`; POST `{sendout: {week, companies}}` —
+  the first save of a week wins, so two devices can't pick two batches — `{sendout_swap: {week, out, in}}` and
+  `{sendout_sent: {week, sent}}`, `applySendout` in `api/accounts.mjs`; a year of weeks kept). Each row: the registered
+  office (`registered_address` + `postcode`) split into the Cedar sheet's Address 1 / Address 2 / City / Postcode
+  (`splitAddress`: county and country dropped, a short "Unit 3" joined to its street, CH's repeated premises once) with a
+  flag when it's probably not where the team works (`addressFlags`: care of someone, a PO box, no address, or a postcode
+  where `SENDOUT.sharedMin` (40)+ companies are registered — an accountant's or a registered-office service; 26 Nov 2026
+  two of fifteen hand-picked addresses were wrong). The count comes from the nightly pass over the register
+  (`bulk.scan(registry=…)` counts companies per postcode → `enrich_tracked`'s `postcode_companies` → `rank-leads.mjs`
+  saves those at 40+ as `leads/ranked.shared_of`). First / Last name boxes for the names he finds in Cognism — kept in
+  that browser tab only (sessionStorage), never sent to the site: what Cognism returns stays there. Swap takes a company
+  out (never picked again) and brings in the next best; Mark gifts sent dates the batch; the Cedar sheet exports the 12
+  columns (`CEDAR_COLUMNS`, `cedarRow`) with each card's message filled ({first_name}, {team} — `teamName`, the company
+  as people say it, Topco / Bidco dropped — {owner_first}; editable per row). His own name, email, phone, the gift and
+  the message template are kept on his device (localStorage), never in the repo or the store.
 - **Simplified dash tab** (Zac, 20 Nov 2026: "company name, CH number, type of company, P&L sheet style … change nothing
   in how it works, just how it looks"; `SIMPLE_COLUMNS` in `format.js`, `SimpleDash` in `AccountsApp.jsx`, the Sheet's
   own `SheetView` with other columns): the Accounts list's leads (not contacted, not out — nothing re-scored), best lead

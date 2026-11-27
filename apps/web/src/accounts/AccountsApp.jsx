@@ -7,6 +7,7 @@ import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
 import { firstName } from "./email.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
+import { CEDAR_COLUMNS, DEFAULT_MESSAGE, addressFlags, cedarRow, companyLabel, sendoutPick, sendoutWeek, splitAddress } from "./sendout.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
@@ -230,7 +231,7 @@ function Accounts({ data, password }) {
   // Today's list and Your day are the whole screen, on white: no top bar (logo, Market moves, Event leads, feed, Lock) —
   // Zac, 23 Nov 2026: "remove the bar at the top", "make the page white"
   useEffect(() => {
-    document.body.classList.toggle("daily-view", ["daily", "wrapped", "goodleads", "research"].includes(filters.view) && !pageNo);
+    document.body.classList.toggle("daily-view", ["daily", "wrapped", "goodleads", "sendout", "research"].includes(filters.view) && !pageNo);
     return () => document.body.classList.remove("daily-view");
   }, [filters.view, pageNo]);
   const openCompany = useCallback((number) => {
@@ -500,7 +501,7 @@ function Accounts({ data, password }) {
     <VerdictContext.Provider value={verdictCtx}>
     <main>
       {/* Today's list starts straight at the sections (Zac, 23 Nov 2026: "when on this page remove the banner at top") */}
-      {!["daily", "wrapped", "goodleads", "research"].includes(filters.view) && <>
+      {!["daily", "wrapped", "goodleads", "sendout", "research"].includes(filters.view) && <>
       <StatusStrip status={data.status} />
       <AlertBanner summary={signals.alerts_summary} seen={alertsSeen} onOpen={() => set({ section: "", view: "alerts" })} />
       <div className="stats">
@@ -555,6 +556,11 @@ function Accounts({ data, password }) {
                   title="Every new prospect you marked, rated 1–3, each written up from its own records"
                   onClick={() => set({ section: "", view: "goodleads" })}>
             Good leads <span className="tab-n">{goodCount}</span>
+          </button>
+          <button role="tab" hidden={!inTabs("sendout")} style={{ order: tabOrder(tabSection, "sendout") }} aria-selected={filters.view === "sendout"} className={`tab${filters.view === "sendout" ? " on" : ""}`}
+                  title="Every Wednesday from 6pm: 15 of your good leads for the gift send-out, with their registered office in the Cedar sheet's columns"
+                  onClick={() => set({ section: "", view: "sendout" })}>
+            Send-out
           </button>
           {Object.entries(LIST_NAMES).map(([key, name]) => (
             <button key={key} role="tab" hidden={!inTabs(`list-${key}`)} style={{ order: tabOrder(tabSection, `list-${key}`) }} aria-selected={filters.view === `list-${key}`} className={`tab${filters.view === `list-${key}` ? " on" : ""}`}
@@ -669,7 +675,7 @@ function Accounts({ data, password }) {
             Email drafts <span className="tab-n">{emailItems.length}</span>
           </button>
         </div>
-        {!["daily", "wrapped", "goodleads", "research", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
+        {!["daily", "wrapped", "goodleads", "sendout", "research", "fresh", "filings", "email", "losses", "calls", "alerts", "niches", "search", "emerging", "jobs", "scoreboard", "hits", "money", "shy", "outreach", "fit", "now", "uk", "foreign", "today", "new", "hidden", "simple"].includes(filters.view) && !filters.view?.startsWith("list-") && <>
         <div className="groups" role="group" aria-label="Finance contact">
           <span className="groups-l">Finance contact</span>
           {["", ...CONTACT_GROUPS].map((g) => (
@@ -737,6 +743,8 @@ function Accounts({ data, password }) {
                                               startReport={finishing} onReportClosed={() => setFinishing(false)} />
        : filters.view === "goodleads" ? <GoodLeads rows={allRows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} notes={notes}
                                               saveNote={saveNote} setRating={setRating} onOpen={openCompany} />
+       : filters.view === "sendout" ? <SendOut rows={allRows} contacted={contacted} checks={checks} verdicts={verdicts} lists={lists} password={password}
+                                              sharedOf={ranked.shared_of || {}} ready={Boolean(ranked.made_at) && Boolean(signals.alerts_summary)} onOpen={openCompany} />
        : filters.view === "research" ? <ResearchHarder rows={allRows} contacted={contacted} checks={checks} lists={lists} onOpen={openCompany}
                                               setVerdict={setVerdict} setReview={setReview} setList={setList} notes={notes} saveNote={saveNote} />
        : filters.view === "outreach" ? <Outreach rows={rows} contacted={contacted} password={password} onOpen={openCompany} onContact={contact} onEmail={toEmail} />
@@ -3016,6 +3024,128 @@ function GoodLeads({ rows, contacted, checks, verdicts, lists, notes = {}, saveN
 // Zac's review of a lead: Good lead, or Not a fit with a reason (stored as his own verdict — never a bank record).
 const VerdictContext = createContext({ verdicts: {}, setVerdict: () => {} });
 // Who owns it, up the chain, and where — with Google searches to check it (never fetched).
+// The weekly gift send-out (src/accounts/sendout.js): from Wednesday 18:00 UK time the first time this tab opens it
+// freezes 15 of his good leads (the Top 20 order; none already sent, contacted or out; one per group) as the week's
+// batch, saved so every device shows the same 15. Each row: the registered office in the Cedar sheet's columns, with a
+// flag when it's probably not where the team works, and First / Last name boxes for the names he finds in Cognism — kept
+// only in this browser tab (sessionStorage), never sent to the site. Swap brings in the next best; the Cedar sheet
+// exports the 12 columns with each greeting filled in. His own name, email, phone, the gift and the message are kept on
+// this device (localStorage).
+const SENDOUT_SETTINGS = "sendout-settings";
+// browser storage can be missing or throw (a private window, blocked site data): the page works without it
+const readStored = (kind, key, fallback) => { try { return JSON.parse(window[kind].getItem(key)) ?? fallback; } catch { return fallback; } };
+const writeStored = (kind, key, value) => { try { window[kind].setItem(key, JSON.stringify(value)); } catch { /* not kept */ } };
+const weekLabel = (week) => new Date(`${week}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+function SendOut({ rows, contacted, checks, verdicts, lists, password, sharedOf = {}, ready, onOpen }) {
+  const [batches, setBatches] = useState(null);   // null while loading
+  const [error, setError] = useState("");
+  const [shown, setShown] = useState("");
+  const [settings, setSettingsState] = useState(() => readStored("localStorage", SENDOUT_SETTINGS, {}));
+  const week = sendoutWeek();
+  const [names, setNamesState] = useState(() => readStored("sessionStorage", `sendout-names-${week}`, {}));
+  const auth = { authorization: `Bearer ${password}` };
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}?view=sendout`, { headers: auth, cache: "no-store" }).then((res) => (res.ok ? res.json() : null))
+      .then((body) => { if (live) setBatches(body?.batches || []); }).catch(() => { if (live) setError("Couldn't load the send-out — try again."); });
+    return () => { live = false; };
+  }, [password]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const post = async (body) => {
+    setError("");
+    const res = await fetch(API, { method: "POST", headers: { ...auth, "content-type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
+    const got = res && (await res.json().catch(() => null));
+    if (!res?.ok) { setError(got?.error || "Couldn't save — try again."); return null; }
+    setBatches(got.batches);
+    return got.batches;
+  };
+  const marks = useMemo(() => ({ checks, verdicts, lists }), [checks, verdicts, lists]);
+  const byNumber = useMemo(() => new Map(rows.map((r) => [r.company_number, r])), [rows]);
+  // freeze this week's batch the first time the tab opens after Wednesday 18:00 (once every lead has loaded)
+  const freezing = useRef(false);
+  useEffect(() => {
+    if (!batches || !ready || freezing.current || batches.some((b) => b.week === week)) return;
+    const companies = sendoutPick(rows, marks, { contacted, batches });
+    if (!companies.length) return;
+    freezing.current = true;
+    post({ sendout: { week, companies } }).finally(() => { freezing.current = false; });
+  }, [batches, ready, week, rows, marks, contacted]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const current = shown || week;
+  const batch = (batches || []).find((b) => b.week === current);
+  const setSetting = (k, v) => setSettingsState((s) => { const next = { ...s, [k]: v }; writeStored("localStorage", SENDOUT_SETTINGS, next); return next; });
+  const setName = (n, k, v) => setNamesState((s) => { const next = { ...s, [n]: { ...(s[n] || {}), [k]: v } }; writeStored("sessionStorage", `sendout-names-${week}`, next); return next; });
+  const opts = (n) => ({ owner: settings.owner || "", email: settings.email || "", phone: settings.phone || "", gift: settings.gift || "",
+    template: settings.message || DEFAULT_MESSAGE, first: names[n]?.first || "", last: names[n]?.last || "", message: names[n]?.message || "" });
+  const swap = async (out) => {
+    const keep = batch.companies.filter((n) => n !== out);
+    const withOut = batches.map((b) => (b.week === batch.week ? { ...b, skipped: [...(b.skipped || []), out] } : b));
+    const next = sendoutPick(rows, marks, { contacted, batches: withOut, keep, n: batch.companies.length });
+    await post({ sendout_swap: { week: batch.week, out, in: next.find((n) => !batch.companies.includes(n)) || null } });
+  };
+  const exportSheet = () => downloadSheet(batch.companies.map((n) => cedarRow(byNumber.get(n) || { company_name: `Company ${n}` }, opts(n))),
+    columnsFor(CEDAR_COLUMNS.map(([k]) => k), Object.fromEntries(CEDAR_COLUMNS)), `cedar-send-out-${batch.week}.xlsx`, "Send out");
+  const open = (e, n) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
+  const named = batch ? batch.companies.filter((n) => names[n]?.first).length : 0;
+  return (
+    <div className="list daily sendout">
+      <div className="daily-head">
+        <span className="muted">Every Wednesday from 6pm: 15 of your good leads for the gift send-out, best first, with their registered office in the Cedar sheet's
+          columns. Add each contact's name once you've found them in Cognism — the names stay in this browser tab only, never saved to the site.</span>
+        {batch && <button className="btn-sm export" onClick={exportSheet}>Cedar sheet (Excel){named ? ` · ${named} named` : ""}</button>}
+      </div>
+      {(batches || []).length > 1 && (
+        <label className="sendout-week">Week of <select className="input" value={current} onChange={(e) => setShown(e.target.value === week ? "" : e.target.value)}>
+          {batches.map((b) => <option key={b.week} value={b.week}>{weekLabel(b.week)}{b.week === week ? " (this week)" : ""}{b.sent_at ? " · sent" : ""}</option>)}
+        </select></label>)}
+      <details className="sendout-settings">
+        <summary>Your details on the sheet{settings.owner ? `: ${settings.owner}` : " — add them once"}</summary>
+        <div className="sendout-grid">
+          {[["owner", "Your name (Owner)"], ["email", "Your email"], ["phone", "Your phone"], ["gift", "Gift"]].map(([k, label]) => (
+            <label key={k}>{label}<input className="input" value={settings[k] || ""} onChange={(e) => setSetting(k, e.target.value)} /></label>))}
+          <label className="wide">Message — {"{first_name}"}, {"{team}"} and {"{owner_first}"} are filled in for each company
+            <textarea className="input" rows={7} value={settings.message || DEFAULT_MESSAGE} onChange={(e) => setSetting("message", e.target.value)} /></label>
+        </div>
+        <p className="muted">Kept on this device only.</p>
+      </details>
+      {error && <div className="save-error" role="alert">{error}</div>}
+      {!batches ? <p className="empty">Loading…</p>
+        : !batch ? <p className="empty">{ready ? "No good leads left to send — mark more leads good on Today's list." : "Picking this week's 15…"}</p> : <>
+          <p className="sendout-status">
+            <b>{batch.companies.length} companies</b> · picked {weekLabel(String(batch.picked_at).slice(0, 10))}
+            {batch.sent_at ? <> · gifts sent {weekLabel(String(batch.sent_at).slice(0, 10))}</> : null}
+            <button className="btn-sm" onClick={() => post({ sendout_sent: { week: batch.week, sent: !batch.sent_at } })}>{batch.sent_at ? "Not sent yet" : "Mark gifts sent"}</button>
+          </p>
+          <ol className="daily-rows">
+            {batch.companies.map((n, i) => {
+              const r = byNumber.get(n) || { company_number: n, company_name: `Company ${n}` };
+              const a = splitAddress(r), flags = addressFlags(r, { shared: Number(sharedOf[n]) || 0 }), o = opts(n);
+              const message = cedarRow(r, o).message;
+              return (
+                <li className="daily-row sendout-row" key={n}>
+                  <span className="daily-n">{i + 1}</span>
+                  <div className="daily-main">
+                    <span className="good-top"><a className="co" href={companyPath(n)} onClick={(e) => open(e, n)}>{companyLabel(r.company_name)}</a>
+                      <span className="muted sendout-num">{n}</span></span>
+                    <span className="daily-sub">{[a.care_of, a.line1, a.line2, a.city, a.postcode].filter(Boolean).join(", ") || "No registered office on file"}</span>
+                    {flags.map((f) => <p className="sendout-flag" key={f.kind}>⚠ {f.text}</p>)}
+                    <div className="sendout-names">
+                      <input className="input" placeholder="First name" aria-label={`Contact's first name at ${r.company_name}`} value={names[n]?.first || ""} onChange={(e) => setName(n, "first", e.target.value)} />
+                      <input className="input" placeholder="Last name" aria-label={`Contact's last name at ${r.company_name}`} value={names[n]?.last || ""} onChange={(e) => setName(n, "last", e.target.value)} />
+                    </div>
+                    <details className="sendout-message"><summary>Message{names[n]?.message ? " (edited)" : ""}</summary>
+                      <textarea className="input" rows={7} value={message} aria-label={`Message for ${r.company_name}`} onChange={(e) => setName(n, "message", e.target.value)} />
+                      {names[n]?.message && <button className="btn-sm" onClick={() => setName(n, "message", "")}>Back to the standard message</button>}
+                    </details>
+                  </div>
+                  {current === week && !batch.sent_at && <button className="btn-sm" title="Take this company out and bring in the next best good lead" onClick={() => swap(n)}>Swap</button>}
+                </li>
+              );
+            })}
+          </ol>
+        </>}
+    </div>
+  );
+}
+
 function OwnershipPanel({ r }) {
   const o = ownership(r);
   return (
@@ -3302,7 +3432,7 @@ function MyLists({ which, rows, lists, onOpen, onContact, onEmail }) {
 // learning, and More — every other tab, nothing removed. Tabs show in the order listed; the section in use is
 // remembered in this browser. "" is the Accounts list itself (its own tabs: Accounts list, Core, Above, Below …).
 const TAB_SECTIONS = [
-  ["daily", "Daily", ["daily", "goodleads", "research", "list-call", "wrapped"]],
+  ["daily", "Daily", ["daily", "goodleads", "sendout", "research", "list-call", "wrapped"]],
   ["find", "Find more", ["fresh", "new", "emerging", "jobs", "search", "money", "alerts", "hidden"]],
   ["follow", "Follow up", ["today", "contacted", "list-email", "list-post", "email", "outreach"]],
   ["learn", "Learn", ["scoreboard", "niches"]],
@@ -4309,6 +4439,18 @@ a{color:var(--accent)}
 .good-label{display:inline-block;min-width:150px;color:var(--muted);font-size:12px}
 @media(max-width:700px){.good-label{display:block;min-width:0}.rate-ask{width:100%;justify-content:flex-end}}
 @media(max-width:700px){.daily-row{flex-wrap:wrap;gap:8px 10px}.daily-btns{width:100%;justify-content:flex-end;gap:7px}.dot-btn{width:38px;height:38px}}
+.sendout-week{display:inline-flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;color:var(--text-2)}
+.sendout-settings{margin:0 0 12px;font-size:13px}.sendout-settings summary{cursor:pointer;color:var(--text-2)}
+.sendout-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 12px;margin:10px 0 4px}
+.sendout-grid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}.sendout-grid .wide{grid-column:1/-1}
+.sendout-grid textarea,.sendout-message textarea{width:100%;resize:vertical;font:13px/1.45 'Inter',sans-serif}
+.sendout-status{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 6px;font-size:13px;color:var(--text-2)}
+.sendout-status b{color:var(--text)}
+.sendout-row{align-items:flex-start}.sendout-num{font-size:12px;margin-left:6px;font-variant-numeric:tabular-nums}
+.sendout-flag{margin:4px 0 0;font-size:12px;line-height:1.4;color:#b06000;max-width:90ch}
+.sendout-names{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}.sendout-names .input{flex:1 1 140px;max-width:220px;padding:6px 10px}
+.sendout-message{margin:2px 0 0;font-size:12px}.sendout-message summary{cursor:pointer;color:var(--muted)}.sendout-message textarea{margin:6px 0 4px}
+@media(max-width:700px){.sendout-names .input{max-width:none}}
 .sections{display:flex;gap:0;margin-bottom:10px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
 .section-btn{flex:1 1 0;min-width:0;padding:9px 6px;border:0;border-right:1px solid var(--line);background:none;color:var(--text-2);font:600 13px 'Inter',sans-serif;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .section-btn:last-child{border-right:0}

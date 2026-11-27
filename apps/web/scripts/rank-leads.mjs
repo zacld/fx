@@ -8,6 +8,7 @@ import { ALERTS_KEY, CHECKS_KEY, DEALS_KEY, FEED_KEY, FILINGS_KEY, KEY, LISTS_KE
 import { KEY as MARKET_KEY, STORE as MARKET_STORE } from "../api/market.mjs";
 import { likeGoodLeads, markClass, movesByCurrency, reviewLearnings, score100, setKnownGroups, setScoreScale } from "../src/accounts/format.js";
 import { feedRows, filedMonth, leadRows, learningRows, nicheLearnings, rankLeads, verdictLearnings } from "../src/accounts/ranking.js";
+import { SENDOUT } from "../src/accounts/sendout.js";
 import { openStore } from "./store.mjs";
 
 // orderPath: company numbers, best lead first (find_domains.py); groupsPath: each company's top UK parent (psc_deals.py);
@@ -50,8 +51,13 @@ const { rows, ruled_out, niche_of, shy_of, scored } = rankLeads(listRows, filing
 setScoreScale(scored.filter((s) => !s.absurd).map((s) => s.score));
 const learn = nicheLearnings(scored);
 const reviewed = verdictLearnings(scored, verdicts, { shyOf: shy_of });
+// registered offices shared by many companies (an accountant's or a registered-office service): the weekly gift
+// send-out flags them (src/accounts/sendout.js) — only those, so the item stays small
+const shared_of = Object.fromEntries(Object.entries(enrich).filter(([, e]) => (Number(e.postcode_companies) || 0) >= SENDOUT.sharedMin)
+  .map(([n, e]) => [n, Number(e.postcode_companies)]));
+console.log(`Shared registered offices: ${Object.keys(shared_of).length.toLocaleString()} companies at a postcode with ${SENDOUT.sharedMin}+ companies registered`);
 const made_at = new Date().toISOString();
-await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, gleif_of: gleifOf, niches: learn, verdicts: reviewed, reviews, likes });
+await store.set(RANKED_KEY, { made_at, count: rows.length, rows, ruled_out, niche_of, shy_of, group_of: groupOf, gleif_of: gleifOf, niches: learn, verdicts: reviewed, reviews, likes, shared_of });
 const feed = feedRows(scored, listRows, filingRows);
 await store.set(FEED_KEY, { made_at, count: feed.length, rows: feed });
 console.log(`Power Automate feed: ${feed.length.toLocaleString()} companies saved (feed/all)`);
