@@ -155,6 +155,46 @@ export const SEARCHES_KEY = "searches";              // {searches: [{id, text, a
 export const SEARCH_RESULTS_KEY = "search_results";  // {made_at, results: {id: {text, codes, rows, counts, done_at}}}
 export const SEARCHES_MAX = 30;
 export const SEARCH_TEXT_MAX = 200;
+// The weekly gift send-out (src/accounts/sendout.js): {batches: [{week, picked_at, companies, skipped?, sent_at?}]}, newest
+// first — company numbers only; the contact names typed on the page never come here (they're from Cognism).
+export const SENDOUT_KEY = "sendout";
+export const SENDOUT_BATCHES_MAX = 52;
+export const SENDOUT_COMPANIES_MAX = 30;
+const WEEK = /^\d{4}-\d{2}-\d{2}$/;
+// One save to the send-out batches: {sendout: {week, companies}} freezes the week's batch (the first save of a week
+// wins, so two devices can't pick two batches); {sendout_swap: {week, out, in}} swaps one company for the next best
+// (the one swapped out is never picked again); {sendout_sent: {week, sent}} marks the week's gifts sent, or not.
+// Returns the new batches, or an error message.
+export function applySendout(batches = [], body = {}, at = new Date().toISOString()) {
+  const list = batches.map((b) => ({ ...b }));
+  const ok = (n) => typeof n === "string" && COMPANY_NUMBER.test(n);
+  if ("sendout" in body) {
+    const { week, companies } = body.sendout || {};
+    if (!WEEK.test(week || "") || !Array.isArray(companies) || !companies.length || companies.length > SENDOUT_COMPANIES_MAX || !companies.every(ok)) {
+      return { error: `send {sendout: {week: "YYYY-MM-DD", companies: [company numbers, at most ${SENDOUT_COMPANIES_MAX}]}}` };
+    }
+    if (list.some((b) => b.week === week)) return { batches: list };   // already frozen: keep the first
+    return { batches: [{ week, picked_at: at, companies: [...new Set(companies.map((n) => n.toUpperCase()))] }, ...list]
+      .sort((a, b) => b.week.localeCompare(a.week)).slice(0, SENDOUT_BATCHES_MAX) };
+  }
+  if ("sendout_swap" in body) {
+    const { week, out, in: incoming } = body.sendout_swap || {};
+    const b = list.find((x) => x.week === week);
+    if (!b || !ok(out) || !(incoming == null || ok(incoming))) return { error: "send {sendout_swap: {week, out: company number, in: company number | null}}" };
+    if (!b.companies.includes(out)) return { batches: list };
+    b.companies = b.companies.flatMap((n) => (n === out ? (incoming && !b.companies.includes(incoming) ? [incoming] : []) : [n]));
+    b.skipped = [...new Set([...(b.skipped || []), out])];
+    return { batches: list };
+  }
+  if ("sendout_sent" in body) {
+    const { week, sent } = body.sendout_sent || {};
+    const b = list.find((x) => x.week === week);
+    if (!b || typeof sent !== "boolean") return { error: "send {sendout_sent: {week, sent: true | false}}" };
+    if (sent) b.sent_at = at; else delete b.sent_at;
+    return { batches: list };
+  }
+  return { error: "unknown send-out change" };
+}
 export const JOBS_KEY = "jobs";   // {made_at, counts, queries, employers, lookups}: the job-advert finder (tools/ch_alerts.py --signals, sourcer/jobs.py)
 export const EMERGING_KEY = "emerging/companies";   // {made_at, niches, rows}: every sized company in an emerging niche (niche_hits)
 export const LOOKALIKES_KEY = "lookalikes";
@@ -364,6 +404,13 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
       await blobs.setJSON(SEARCHES_KEY, { searches });
       return reply({ searches }, 200);
     }
+    if ("sendout" in body || "sendout_swap" in body || "sendout_sent" in body) {
+      const stored = (await blobs.get(SENDOUT_KEY, { type: "json" })) || {};
+      const result = applySendout(stored.batches || [], body);
+      if (result.error) return reply({ error: result.error }, 400);
+      await blobs.setJSON(SENDOUT_KEY, { batches: result.batches });
+      return reply({ batches: result.batches }, 200);
+    }
     if ("email" in body) {
       const e = body.email;
       if (!COMPANY_NUMBER.test(number || "") || (e !== null && (typeof e !== "object" || (!e.row && !("text" in e))))) {
@@ -491,6 +538,9 @@ export async function handle(req, { password = "", store, db = null, delay = WRO
     const [asked, results, alike] = await Promise.all([SEARCHES_KEY, SEARCH_RESULTS_KEY, LOOKALIKES_KEY].map((k) => blobs.get(k, { type: "json" })));
     return reply({ searches: asked?.searches || [], results: results?.results || {}, results_made_at: results?.made_at || "",
                    lookalikes: alike || { items: [] } }, 200);
+  }
+  if (params.get("view") === "sendout") {
+    return reply({ batches: ((await blobs.get(SENDOUT_KEY, { type: "json" })) || {}).batches || [] }, 200);
   }
   if (params.get("view") === "losses") {
     return reply((await blobs.get(LOSSES_KEY, { type: "json" })) || { rows: [] }, 200);

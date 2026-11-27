@@ -149,7 +149,9 @@ def scan(
     `numbers`: companies taken as candidates whatever their SIC code or accounts
     category (the FX filings scan's strongest finds).
     `registry`: when given, filled with {number: {status, type, sic_codes, name}} for every company in `numbers`,
-    whatever its status or type (tools/niche_hits.py: dissolved and not-for-profit companies among the leads).
+    whatever its status or type (tools/niche_hits.py: dissolved and not-for-profit companies among the leads) — and each
+    record's `postcode_companies`: how many companies in the whole file are registered at its postcode (the weekly
+    gift send-out flags an accountant's or registered-office service's address).
     `sectors`: when given ({"strong": set, "open": set} of company numbers), filled with Counters "sized" / "strong_n" /
     "open_n" per SIC code over every active sized company, and "names" {code: description} — the whole register's
     sectors, for emerging-sector niches (tools/niche_hits.py).
@@ -166,10 +168,15 @@ def scan(
     by_postcode: dict[str, list[dict]] = {}
     by_name: dict[str, list[dict]] = {}
     scanned = 0
+    per_postcode: Optional[Counter] = Counter() if registry is not None else None
     for values in rows:
         scanned += 1
         if scanned % 1_000_000 == 0:
             print(f"  bulk file: {scanned:,} companies scanned, {len(candidates):,} candidates", flush=True)
+        if per_postcode is not None and len(values) >= width:
+            registered_at = values[col["RegAddress.PostCode"]].strip()
+            if registered_at:
+                per_postcode[normalise_postcode(registered_at)] += 1
         if registry is not None and numbers and len(values) >= width and values[col["CompanyNumber"]].strip() in numbers:
             registry[values[col["CompanyNumber"]].strip()] = {
                 "status": values[col["CompanyStatus"]].strip(), "type": values[col["CompanyCategory"]].strip(),
@@ -230,4 +237,8 @@ def scan(
 
     print(f"  bulk file: {scanned:,} companies scanned, {len(candidates):,} candidates"
           + (f", {sum(map(len, by_postcode.values())):,} at trader postcodes, {len(by_name):,} trader names" if postcodes or names else ""))
+    if registry is not None and per_postcode is not None:
+        for record in registry.values():
+            at = normalise_postcode(record.get("postcode", ""))
+            record["postcode_companies"] = per_postcode[at] if at else 0
     return candidates, by_postcode, by_name

@@ -106,8 +106,10 @@ def measure_all(niches: list[dict], companies: list[dict], trade_by_company: dic
 
 
 def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches: list[dict]) -> dict:
-    """{number: {niche, niche_kind, sic, absurd, shy, address, postcode}} for the Accounts + FX filings lists' companies
-    (shy: hard to broker; address: the registered office, for the Outreach tab's letters)."""
+    """{number: {niche, niche_kind, sic, absurd, shy, address, postcode, postcode_companies}} for the Accounts + FX filings
+    lists' companies (shy: hard to broker; address: the registered office, for the Outreach tab's letters and the weekly
+    gift send-out; postcode_companies: how many companies are registered at that postcode — many is an accountant's or a
+    registered-office service)."""
     out = {}
     catch_all = niche_rules.catch_all_codes(niches)
     for number, name in tracked.items():
@@ -117,7 +119,8 @@ def enrich_tracked(tracked: dict, registry: dict, trade_by_company: dict, niches
         out[number] = {"niche": niche["name"] if niche else "", "niche_kind": ("goods" if niche.get("hmrc_codes") else "sector") if niche else "",
                        "sic": sics, "absurd": absurd.reason(name, record),
                        "shy": niche_rules.broker_shy(trade_by_company.get(number), sics, name, niches) or "",
-                       "address": (record or {}).get("address", ""), "postcode": (record or {}).get("postcode", "")}
+                       "address": (record or {}).get("address", ""), "postcode": (record or {}).get("postcode", ""),
+                       "postcode_companies": (record or {}).get("postcode_companies", 0)}
     return out
 
 

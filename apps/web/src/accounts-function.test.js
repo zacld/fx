@@ -143,6 +143,35 @@ describe("/api/accounts", () => {
     expect(left.map((x) => x.text)).toEqual(["saffron"]);
   });
 
+  it("freezes the week's send-out batch once, swaps a company for the next and marks the gifts sent", async () => {
+    const s = memory();
+    const opts = { password: "s3cret", store: s, delay: 0 };
+    const post = (body) => handle(new Request("https://x/api/accounts", { method: "POST", headers: { authorization: "Bearer s3cret" }, body: JSON.stringify(body) }), opts);
+    const view = async () => (await (await handle(new Request("https://x/api/accounts?view=sendout", { headers: { authorization: "Bearer s3cret" } }), opts)).json()).batches;
+    expect(await view()).toEqual([]);
+    expect((await post({ sendout: { week: "26 Nov", companies: ["01234567"] } })).status).toBe(400);
+    expect((await post({ sendout: { week: "2026-11-25", companies: ["not a number"] } })).status).toBe(400);
+    expect((await post({ sendout: { week: "2026-11-25", companies: Array(31).fill("01234567") } })).status).toBe(400);
+    await post({ sendout: { week: "2026-11-25", companies: ["01234567", "07654321"] } });
+    await post({ sendout: { week: "2026-11-25", companies: ["99999999"] } });   // another device, same week: the first batch stays
+    await post({ sendout: { week: "2026-11-18", companies: ["11111111"] } });
+    let batches = await view();
+    expect(batches.map((b) => b.week)).toEqual(["2026-11-25", "2026-11-18"]);
+    expect(batches[0].companies).toEqual(["01234567", "07654321"]);
+    await post({ sendout_swap: { week: "2026-11-25", out: "01234567", in: "22222222" } });
+    batches = await view();
+    expect(batches[0].companies).toEqual(["22222222", "07654321"]);
+    expect(batches[0].skipped).toEqual(["01234567"]);
+    await post({ sendout_swap: { week: "2026-11-25", out: "07654321", in: null } });   // nothing left to bring in
+    expect((await view())[0].companies).toEqual(["22222222"]);
+    expect((await post({ sendout_swap: { week: "2026-01-01", out: "22222222" } })).status).toBe(400);
+    await post({ sendout_sent: { week: "2026-11-25", sent: true } });
+    expect((await view())[0].sent_at).toBeTruthy();
+    await post({ sendout_sent: { week: "2026-11-25", sent: false } });
+    expect((await view())[0].sent_at).toBeUndefined();
+    expect(JSON.stringify(s.blobs.sendout)).not.toMatch(/first_name|last_name/);   // names are typed on the page only
+  });
+
   it("saves many marks in one request without losing any", async () => {
     const s = memory();
     s.blobs.checks = { "00000001": { crm: "2026-11-01" } };
