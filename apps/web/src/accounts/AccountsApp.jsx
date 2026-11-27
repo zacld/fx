@@ -7,7 +7,7 @@ import { TEMPLATES, fillTemplate, stepTemplate } from "./templates.js";
 import { GRID_COLUMNS, ROLES, SEQUENCE, START_PER_DAY, callScript, gridCells, nextStep, plan, sequenceRank, todayQueue } from "./sequence.js";
 import { firstName } from "./email.js";
 import { columnsFor, downloadSheet } from "./xlsx.js";
-import { CEDAR_COLUMNS, DEFAULT_MESSAGE, addressFlags, cedarRow, companyLabel, sendoutPick, sendoutWeek, splitAddress } from "./sendout.js";
+import { CEDAR_COLUMNS, DEFAULT_MESSAGE, SENDOUT, addressFlags, cedarRow, companyLabel, sendoutLive, sendoutPick, sendoutWeek, splitAddress } from "./sendout.js";
 import { emailDraft } from "./email.js";
 import { VERDICT_REASONS, applyEmail } from "../../api/accounts.mjs";
 import { CHANNELS, RESPONSES, STATES, applyContact, followUp, sortFollowUps, touchesOf } from "./followups.js";
@@ -3042,6 +3042,7 @@ function SendOut({ rows, contacted, checks, verdicts, lists, password, sharedOf 
   const [shown, setShown] = useState("");
   const [settings, setSettingsState] = useState(() => readStored("localStorage", SENDOUT_SETTINGS, {}));
   const week = sendoutWeek();
+  const live = sendoutLive(week);   // before the first week: a preview, nothing saved
   const [names, setNamesState] = useState(() => readStored("sessionStorage", `sendout-names-${week}`, {}));
   const auth = { authorization: `Bearer ${password}` };
   useEffect(() => {
@@ -3060,15 +3061,17 @@ function SendOut({ rows, contacted, checks, verdicts, lists, password, sharedOf 
   };
   const marks = useMemo(() => ({ checks, verdicts, lists }), [checks, verdicts, lists]);
   const byNumber = useMemo(() => new Map(rows.map((r) => [r.company_number, r])), [rows]);
+  const preview = useMemo(() => (!live && ready && batches ? sendoutPick(rows, marks, { contacted, batches }) : []),
+    [live, ready, batches, rows, marks, contacted]);
   // freeze this week's batch the first time the tab opens after Wednesday 18:00 (once every lead has loaded)
   const freezing = useRef(false);
   useEffect(() => {
-    if (!batches || !ready || freezing.current || batches.some((b) => b.week === week)) return;
+    if (!live || !batches || !ready || freezing.current || batches.some((b) => b.week === week)) return;
     const companies = sendoutPick(rows, marks, { contacted, batches });
     if (!companies.length) return;
     freezing.current = true;
     post({ sendout: { week, companies } }).finally(() => { freezing.current = false; });
-  }, [batches, ready, week, rows, marks, contacted]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [live, batches, ready, week, rows, marks, contacted]);   // eslint-disable-line react-hooks/exhaustive-deps
   const current = shown || week;
   const batch = (batches || []).find((b) => b.week === current);
   const setSetting = (k, v) => setSettingsState((s) => { const next = { ...s, [k]: v }; writeStored("localStorage", SENDOUT_SETTINGS, next); return next; });
@@ -3083,7 +3086,6 @@ function SendOut({ rows, contacted, checks, verdicts, lists, password, sharedOf 
   };
   const exportSheet = () => downloadSheet(batch.companies.map((n) => cedarRow(byNumber.get(n) || { company_name: `Company ${n}` }, opts(n))),
     columnsFor(CEDAR_COLUMNS.map(([k]) => k), Object.fromEntries(CEDAR_COLUMNS)), `cedar-send-out-${batch.week}.xlsx`, "Send out");
-  const open = (e, n) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
   const named = batch ? batch.companies.filter((n) => names[n]?.first).length : 0;
   return (
     <div className="list daily sendout">
@@ -3108,6 +3110,17 @@ function SendOut({ rows, contacted, checks, verdicts, lists, password, sharedOf 
       </details>
       {error && <div className="save-error" role="alert">{error}</div>}
       {!batches ? <p className="empty">Loading…</p>
+        : !batch && !live ? <>
+          <p className="sendout-status"><b>First pick: Wednesday {weekLabel(SENDOUT.firstWeek)}, from 6pm.</b>
+            {ready ? ` A preview of the ${preview.length} it would pick now — nothing is saved until then.` : " Loading your good leads…"}</p>
+          <ol className="daily-rows">
+            {preview.map((n, i) => (
+              <li className="daily-row sendout-row" key={n}>
+                <span className="daily-n">{i + 1}</span>
+                <div className="daily-main"><SendOutPlace r={byNumber.get(n)} n={n} shared={Number(sharedOf[n]) || 0} onOpen={onOpen} /></div>
+              </li>))}
+          </ol>
+        </>
         : !batch ? <p className="empty">{ready ? "No good leads left to send — mark more leads good on Today's list." : "Picking this week's 15…"}</p> : <>
           <p className="sendout-status">
             <b>{batch.companies.length} companies</b> · picked {weekLabel(String(batch.picked_at).slice(0, 10))}
@@ -3117,16 +3130,12 @@ function SendOut({ rows, contacted, checks, verdicts, lists, password, sharedOf 
           <ol className="daily-rows">
             {batch.companies.map((n, i) => {
               const r = byNumber.get(n) || { company_number: n, company_name: `Company ${n}` };
-              const a = splitAddress(r), flags = addressFlags(r, { shared: Number(sharedOf[n]) || 0 }), o = opts(n);
-              const message = cedarRow(r, o).message;
+              const message = cedarRow(r, opts(n)).message;
               return (
                 <li className="daily-row sendout-row" key={n}>
                   <span className="daily-n">{i + 1}</span>
                   <div className="daily-main">
-                    <span className="good-top"><a className="co" href={companyPath(n)} onClick={(e) => open(e, n)}>{companyLabel(r.company_name)}</a>
-                      <span className="muted sendout-num">{n}</span></span>
-                    <span className="daily-sub">{[a.care_of, a.line1, a.line2, a.city, a.postcode].filter(Boolean).join(", ") || "No registered office on file"}</span>
-                    {flags.map((f) => <p className="sendout-flag" key={f.kind}>⚠ {f.text}</p>)}
+                    <SendOutPlace r={r} n={n} shared={Number(sharedOf[n]) || 0} onOpen={onOpen} />
                     <div className="sendout-names">
                       <input className="input" placeholder="First name" aria-label={`Contact's first name at ${r.company_name}`} value={names[n]?.first || ""} onChange={(e) => setName(n, "first", e.target.value)} />
                       <input className="input" placeholder="Last name" aria-label={`Contact's last name at ${r.company_name}`} value={names[n]?.last || ""} onChange={(e) => setName(n, "last", e.target.value)} />
@@ -3144,6 +3153,17 @@ function SendOut({ rows, contacted, checks, verdicts, lists, password, sharedOf 
         </>}
     </div>
   );
+}
+// A send-out row's company, its number and its registered office, with why the address may not reach the team.
+function SendOutPlace({ r = {}, n, shared = 0, onOpen }) {
+  const a = splitAddress(r), flags = addressFlags(r, { shared });
+  const open = (e) => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(n); } };
+  return <>
+    <span className="good-top"><a className="co" href={companyPath(n)} onClick={open}>{companyLabel(r.company_name || `Company ${n}`)}</a>
+      <span className="muted sendout-num">{n}</span></span>
+    <span className="daily-sub">{[a.care_of, a.line1, a.line2, a.city, a.postcode].filter(Boolean).join(", ") || "No registered office on file"}</span>
+    {flags.map((f) => <p className="sendout-flag" key={f.kind}>⚠ {f.text}</p>)}
+  </>;
 }
 
 function OwnershipPanel({ r }) {

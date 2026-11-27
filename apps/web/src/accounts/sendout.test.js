@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CEDAR_COLUMNS, DEFAULT_MESSAGE, SENDOUT, addressFlags, cedarRow, companyLabel, fillMessage, inBatches, sendoutPick, sendoutWeek, splitAddress, teamName } from "./sendout.js";
+import { CEDAR_COLUMNS, DEFAULT_MESSAGE, SENDOUT, addressFlags, cedarRow, companyLabel, fillMessage, inBatches, sendoutLive, sendoutPick, sendoutWeek, splitAddress, teamName } from "./sendout.js";
 import { setKnownGroups } from "./format.js";
 
 describe("The send-out week: from Wednesday 18:00 UK time", () => {
@@ -13,6 +13,14 @@ describe("The send-out week: from Wednesday 18:00 UK time", () => {
   it("counts 18:00 in British Summer Time (17:00 UTC) as the start", () => {
     expect(sendoutWeek(new Date("2026-07-01T16:59:00Z"))).toBe("2026-06-24");
     expect(sendoutWeek(new Date("2026-07-01T17:00:00Z"))).toBe("2026-07-01");
+  });
+  it("picks batches from the first week on, and before it only shows what it would pick", () => {
+    expect(SENDOUT.firstWeek).toBe("2026-12-02");
+    expect(sendoutLive(sendoutWeek(new Date("2026-11-27T19:00:00Z")))).toBe(false);   // a Friday before the first Wednesday
+    expect(sendoutLive(sendoutWeek(new Date("2026-12-02T17:59:00Z")))).toBe(false);   // the first Wednesday, before 6pm
+    expect(sendoutLive(sendoutWeek(new Date("2026-12-02T18:00:00Z")))).toBe(true);
+    expect(sendoutLive("2027-01-06")).toBe(true);
+    expect(sendoutLive("")).toBe(false);
   });
 });
 

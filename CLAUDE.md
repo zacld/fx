@@ -988,7 +988,9 @@ LinkedIn/social scraping, no phone lookups, no outreach.
   the Mail list, and one per group (`sendoutPick`) — saved in the store (key `sendout`, `{batches: [{week, picked_at,
   companies, skipped?, sent_at?}]}`, company numbers only; GET `?view=sendout`; POST `{sendout: {week, companies}}` —
   the first save of a week wins, so two devices can't pick two batches — `{sendout_swap: {week, out, in}}` and
-  `{sendout_sent: {week, sent}}`, `applySendout` in `api/accounts.mjs`; a year of weeks kept). Each row: the registered
+  `{sendout_sent: {week, sent}}`, `applySendout` in `api/accounts.mjs`; a year of weeks kept). The first batch is the
+  week of 2 Dec 2026 (`SENDOUT.firstWeek`, `sendoutLive`: the tab went live after the 25 Nov gifts had gone out by hand);
+  before it the tab shows what it would pick and saves nothing, so no good lead is used up. Each row: the registered
   office (`registered_address` + `postcode`) split into the Cedar sheet's Address 1 / Address 2 / City / Postcode
   (`splitAddress`: county and country dropped, a short "Unit 3" joined to its street, CH's repeated premises once) with a
   flag when it's probably not where the team works (`addressFlags`: care of someone, a PO box, no address, or a postcode

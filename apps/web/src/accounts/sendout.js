@@ -14,7 +14,11 @@ export const SENDOUT = {
   n: 15,             // companies a week
   day: 3, hour: 18,  // Wednesday, 18:00 UK time
   sharedMin: 40,     // companies registered at one postcode before it's flagged as a probable accountant's / service address
+  firstWeek: "2026-12-02",   // the first batch picked (the tab went live after the week of 25 Nov's gifts had gone out)
 };
+// Batches are picked from the first week on; before it the tab shows what it would pick and saves nothing, so no good
+// lead is used up on a week that was sent by hand.
+export const sendoutLive = (week, rules = SENDOUT) => String(week || "") >= rules.firstWeek;
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 // The batch's week: the UK date of the latest Wednesday whose 18:00 has passed ("2026-11-25" all through to the next
